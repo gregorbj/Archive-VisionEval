@@ -1,2 +1,2 @@
-# RSPM
-Regional Strategic Planning Model Framework
+# RSPM #
+RSPM stands for Regional Strategic Planning Model. 
