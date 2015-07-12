@@ -40,7 +40,7 @@ This project will create a new model framework for implementing disaggregate str
 4. **Accessible**: Data will be managed in a persistent store to mediate between modules and enable performance measures to be produced using simple commands.
 
 ###General Approach to Development
-Even though the GreenSTEP/RSPM models are innovative, they were developed on tight timelines and with a strong customer orientation. This was made possible by following agile modeling practices and by developing and implementing the models in the [R  language](www.r-project.org) and environment for statistical computing and graphics. The agile modeling practices included:
+Even though the GreenSTEP/RSPM models are innovative, they were developed on tight timelines and with a strong customer orientation. This was made possible by following agile modeling practices and by developing and implementing the models in the [R  language](http://www.r-project.org) and environment for statistical computing and graphics. The agile modeling practices included:
 
 - Lightweight design up front.
 
