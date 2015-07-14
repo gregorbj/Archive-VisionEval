@@ -67,8 +67,8 @@ Since the columns of data frames and data tables hold various types of data whic
 
 It should be noted that this object naming approach differs from the approach previously used by ODOT in the GreenSTEP and RSPM models. While the approach used previously also used two character abbreviations to denote dimensions, it also used periods in the naming system to distinguish between various data structures. The use of periods has been dropped and replaced with underscores and abbreviations to avoid conflicting with the use of the period to denote S3 methods.  
 
-###Line Length and Indentation###  
-  
+###Line Length and Indentation  
+
 Lines should not exceed 80 characters in length. Lines that are longer in length should be split. 
 
 Indentation should be used to group code that exists in a code block defined by curly braces (`{}`) such as code that is included in a function definition or in a program control block (e.g. if, else, for, while). Two spaces should be used for each level of indentation. For example:  
@@ -95,7 +95,7 @@ Only spaces (not tabs) should be used for indentation.
 
 Indentation will be taken care of automatically when RStudio is used to write code and when the global options are set appropriately.  
 
-###Spacing###  
+###Spacing  
 
 Spaces should be placed around all infix operators with the following exceptions:  
 - Don't put spaces around the `:` operator  
@@ -141,7 +141,7 @@ if (HousingType == "SingleFamily" & Tenure == "Owner") {
 }
 ```
 
-###Assignment###  
+###Assignment  
 
 Use the `<-` operator to assign values. The `=` operator should be reserved for associating values with function arguments in function calls. For example:  
 ```
@@ -149,7 +149,7 @@ kMegajoulesPerGallon <- 121
 rep(c("a", "b", "c"), each=3)
 ```
 
-###Comments and Function Documentation###  
+###Comments and Function Documentation  
 
 Comment lines should start with a `#` and a space:  
 ```
