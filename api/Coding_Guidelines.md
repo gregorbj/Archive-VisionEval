@@ -6,7 +6,7 @@ The RSPM framework is intended to become a large open collaborative project for 
 
 This open collaborative approach increases the importance of coding style guidelines. The purpose of this memo is to describe the coding style guidelines for packages built for the RSPM framework. For the most part, these guidelines follow [Google's R Style Guide](https://google-styleguide.googlecode.com/svn/trunk/Rguide.xml) fairly closely. They also draw from [Hadley Wickham's recommended style guidelines](http://r-pkgs.had.co.nz/r.html). While those guidelines are similar, they differ with respect to object naming and function documentation. Rather than duplicate all of Google's and Wickham's guidelines and examples, this memo summarizes the guidelines except where there are significant differences with the two. In addition, the following guidelines establish a system for naming objects so that it is possible to understand the basic structure of the objects from their names.
 
-###File Names###
+###File Names  
 Punctuation in names should be limited to underscores and hyphens. Avoid using capital letters because the Windows file system ignores letter case but other file systems do not. Don't use spaces in names.
 
 The names for R scripts should identify the purpose of the script. The file extension should be ".R". For example:
@@ -16,7 +16,7 @@ A binary R files should be named using the object name that will be created when
 `PopGrowth_UaYr.RData`  
 See the next section for an explanation of the object name in this example. 
 
-###Object Names###
+###Object Names  
 Google and Wickham recommend different styles for object names. Google recommends using periods (`.`) or camel case (e.g. `CamelCase`) to distinguish 'words' in a name, whereas Wickham recommends using underscores (`_`) or camel case. Wickham recommends against using periods because periods are often used to denote S3 methods (e.g. `print.lm`). Object naming for the RSPM framework should only use camel case to distinguish words in a name. Periods should only be used to denote S3 methods. Underscores should only be used to describe object structure as described below. 
 
 Names should be concise and descriptive. Nouns should be used in the names of objects that are not functions. The first letter of the name should be capitalized. For example:  
@@ -119,7 +119,7 @@ Trips.ZnZn <- sweep(TripProb.ZnZn, TripRates.Zn, 1, "*")
 Trips.ZnZn[, 5] <- 0
 ```
 
-###Statements, Code Blocks, and Curly Braces###
+###Statements, Code Blocks, and Curly Braces  
 
 Although it is possible to put more than one statement on a line by using a semicolon to separate the statements, don't do this. Statements should be separated using line breaks and semicolons should not be used.
 
