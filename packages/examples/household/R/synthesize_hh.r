@@ -126,39 +126,58 @@ calcAgeProbByHhType <- function(Prsn_df, Hh_df, Threshold=0.99) {
   sweep(NumPrsn_HtAp, 2, colSums(NumPrsn_HtAp), "/")
 }
 
-# DEFINE FUNCTION TO SYNTHESIZE HOUSEHOLDS FROM COUNT OF PERSONS BY AGE GROUP
-#============================================================================
-#' Synthesize a set of households from count of persons by age group.
+# DEFINE FUNCTION TO CREATE INVENTORY OF HOUSEHOLD AGE TYPES
+#===========================================================
+#' Create a tabulation of household age types by geographic division.
 #'
-#' \code{createHhByAge} Creates a set of households to accommodate a population
-#' of persons by age group and reflects the household composition of the region.
+#' \code{tabulateHhAgeType} Creates an tabulation of household age types to
+#' accommodate a population of persons by age group and reflects the household
+#' composition of the region.
 #'
-#' This function creates a set of households to accommodate a population of
-#' persons by age group, which also reflects the household composition of the
-#' region. The function works by creating an initial allocation of persons by age
-#' to household types using the matrix of probabilities created by the
-#' calcAgeProbByHhType function and then using an iterative proportional fitting
-#' (IPF) process to produce the final allocations. The IPF process is necessary
-#' because the household type probabilities by age group are calculated as though
-#' household type is a characteristic of individual persons, whereas household
-#' type is really a joint characteristic of multiple persons in the household.
-#' The number of persons allocated to each age group of a household type must be
-#' reconciled to be consistent with the definition of the household type. For
-#' example, consider the case of a household type defined as having 2 persons
-#' aged 0-14 and 2 persons aged 20-29. If 1000 persons ages 0-14 are allocated to
-#' that household type and 1200 persons aged 20-29 are also allocated, there
-#' would be an inconsistency in the number of households of that type (500 vs.
-#' 600 households). The algorithm uses the mean of the household estimates to
+#' This function creates an inventory of household age types to accommodate a
+#' population of persons by age group, which also reflects the household
+#' composition of the region. The function works by creating an initial
+#' allocation of persons by age to household age types using the matrix of
+#' probabilities created by the calcAgeProbByHhType function and then using an
+#' iterative proportional fitting (IPF) process to produce the final
+#' allocations. The IPF process is necessary because the household type
+#' probabilities by age group are calculated as though household type is a
+#' characteristic of individual persons, whereas household type is really a
+#' joint characteristic of multiple persons in the household. The number of
+#' persons allocated to each age group of a household type must be reconciled to
+#' be consistent with the definition of the household type. For example,
+#' consider the case of a household type defined as having 2 persons aged 0-14
+#' and 2 persons aged 20-29. If 1000 persons ages 0-14 are allocated to that
+#' household type and 1200 persons aged 20-29 are also allocated, there would be
+#' an inconsistency in the number of households of that type (500 vs. 600
+#' households). The algorithm uses the mean of the household estimates to
 #' determine the reconciled number of households of the type. It then calculates
 #' the corresponding reconciled population by age group. The difference in total
 #' population by age group between the input and the reconciled population is
-#' then reallocated to the households by type. These steps are repeated until the
-#' reconciled population of age group is within 0.1% of the input population for
-#' the corresponding age group (or until a maximum number of iterations
+#' then reallocated to the households by type. These steps are repeated until
+#' the reconciled population of age group is within 0.1% of the input population
+#' for the corresponding age group (or until a maximum number of iterations
 #' transpires.)
 #'
-#' @param Prsn_Ap A named vector of the number of persons by age group. The names
-#'   must correspond to the age group names.
+#' @param Age0to14_Dv An integer vector of the number of persons of age from 0
+#'   to 14 by division.
+#' @param Age15to19_Dv An integer vector of the number of persons of age from 15
+#'   to 19 by division.
+#' @param Age20to29_Dv An integer vector of the number of persons of age from 20
+#'   to 29 by division.
+#' @param Age30to54_Dv An integer vector of the number of persons of age from 30
+#'   to 54 by division.
+#' @param Age55to64_Dv An integer vector of the number of persons of age from 55
+#'   to 64 by division.
+#' @param Age65Plus_Dv An integer vector of the number of persons of age 65 or
+#'   older by division.
+#' @param HhSize_Dv A numeric vector of the average household size by division.
+#'   If provided, the household type proportions are adjusted to match the
+#'   average household size.
+#' @param Prop1PerHh_Dv A numeric vector of the one-person household size
+#'   proportions by division. If provided, the household type proportions are
+#'   adjusted to match this proportion.
+#' @param Dv A vector of division names.
 #' @param HtProb_HtAp A matrix where rows represent housing types and columns
 #'   represent age groups. The values are the proportions of persons in each age
 #'   group found in each household type. The sum of each column is 1. The matrix
@@ -166,78 +185,181 @@ calcAgeProbByHhType <- function(Prsn_df, Hh_df, Threshold=0.99) {
 #' @param MaxIter A scalar integer defining the maximum number of iterations of
 #'   the IPF to reconcile household composition and input population by age
 #'   group.
-#' @return A list of synthetic households having 7 components. Each component is
-#'   a vector where the each element is the value for a household. The first
-#'   component contains household ID numbers. The next 6 components contain the
-#'   numbers of persons in each of the 6 age groups ("Age0to14", "Age15to19",
-#'   "Age20to29", "Age30to54", "Age55to64","Age65Plus").
-createHhByAge <- function(Prsn_Ap = c(Age0to14, Age15to19, Age20to29,
-                                      Age30to54, Age55to64, Age65Plus),
-                          HtProb_HtAp, MaxIter = 100) {
+#' @return A named list having 3 components: Results_ls, Checks_ls, Messages_.
+#'   Results_ls is a list where each component is a vector identifying the
+#'   number of households of each household age type for a division. Checks_ls
+#'   is a list composed of two components. The first component is a vector
+#'   containing the average household size calculated for each division. The
+#'   second component is a vector containing the percentage of one person
+#'   households calculated for each division. Messages is a vector containing
+#'   messages identifying divisions where the balancing population inputs and
+#'   household types was terminated at the maximum number of iterations,
+#'   MaxIter.
+tabulateHhAgeType <- function(Age0to14_Dv = Age0to14,
+                              Age15to19_Dv = Age15to19,
+                              Age20to29_Dv = Age20to29,
+                              Age30to54_Dv = Age30to54,
+                              Age55to64_Dv = Age55to64,
+                              Age65Plus_Dv = Age65Plus,
+                              HhSize_Dv = HhSize,
+                              Prop1PerHh_Dv = Prop1PerHh,
+                              Dv = ArealUnit,
+                              HtProb_HtAp = HtProp_HtAp,
+                              MaxIter = 100) {
+
   # Initialize
   #-----------
+  # Naming vectors for ages and household types
   Ap <- colnames(HtProb_HtAp)
   Ht <- rownames(HtProb_HtAp)
-  # Place persons by age into household types by multiplying person vector
-  # by probabilities
-  Prsn_HtAp <- sweep(HtProb_HtAp, 2, Prsn_Ap, "*")
   # Make table of factors to convert persons into households and vise verse
   PrsnFactors_Ht_Ap <-
     lapply(strsplit(Ht, "-"), function(x)
       as.numeric(x))
   PrsnFactors_HtAp <- do.call(rbind, PrsnFactors_Ht_Ap)
-  dimnames(PrsnFactors_HtAp) <- dimnames(Prsn_HtAp)
+  dimnames(PrsnFactors_HtAp) <- list(Ht, Ap)
   rm(PrsnFactors_Ht_Ap)
+  # Calculate household size by household type
+  HhSize_Ht <- rowSums(PrsnFactors_HtAp)
+  # List to store results
+  HhType_ls <- list()
+  # Vectors to store checks
+  EstHhSize_Dv <- numeric(length(Dv))
+  names(EstHhSize_Dv) <- Dv
+  EstProp1PerHh_Dv <- numeric(length(Dv))
+  names(EstProp1PerHh_Dv) <- Dv
+  # Vector to store messages
+  Messages_ <- character(0)
+  # List to store messages for log
+  Messages_ls <- list()
 
-  # Iterate until "balanced" set of households is created
-  #------------------------------------------------------
-  # Create vector to store convergence indicator
-  MaxDiff_ <- numeric(MaxIter)
-  for (i in 1:MaxIter) {
-    # Convert population into households
+  # Iterate by division
+  #--------------------
+  for (dv in Dv) {
+    # Select populations for division
+    Idx <- which(dv == Dv)
+    Prsn_Ap <- c(Age0to14_Dv[Idx], Age15to19_Dv[Idx], Age20to29_Dv[Idx],
+                 Age30to54_Dv[Idx], Age55to64_Dv[Idx], Age65Plus_Dv[Idx])
+    names(Prsn_Ap) <- Ap
+    HhSize <- HhSize_Dv[Idx]
+    Prop1PerHh <- Prop1PerHh_Dv[Idx]
+    # Place persons by age into household types by multiplying person vector
+    # by probabilities
+    Prsn_HtAp <- sweep(HtProb_HtAp, 2, Prsn_Ap, "*")
+    # Calculate number of households by type on the basis of numbers of persons
+    # assigned by age
     Hh_HtAp <- Prsn_HtAp / PrsnFactors_HtAp
     Hh_HtAp[is.na(Hh_HtAp)] <- 0
-    # Resolve differences in household type estimates
-    # Do not include zero household estimates
-    ResolveHh_HtAp <- t(apply(Hh_HtAp, 1, function(x) {
-      if (sum(x > 0) > 1) {
-        x[x > 0] <- mean(x[x > 0])
-      }
-      x
-    }))
-    # Exit if the difference between the maximum estimate for each
-    # household type is not too different than the resolved estimate
-    # for each household type
+    # Calculate the maximum households by each type for convergence check
     MaxHh_Ht <- apply(Hh_HtAp, 1, max)
-    ResolveHh_Ht <- apply(ResolveHh_HtAp, 1, max)
-    Diff_Ht <- abs(MaxHh_Ht - ResolveHh_Ht)
-    PropDiff_Ht <- Diff_Ht / ResolveHh_Ht
-    if (all(PropDiff_Ht < 0.001))
-      break
-    MaxDiff_[i] <- max(PropDiff_Ht)
-    # Calculate the number of persons for mean households
-    ResolvePrsn_HtAp <- ResolveHh_HtAp * PrsnFactors_HtAp
-    # Convert the mean persons tabulation into probabilities
-    PrsnProb_HtAp <-
-      sweep(ResolvePrsn_HtAp, 2, colSums(ResolvePrsn_HtAp), "/")
-    # Calculate the difference in the number of persons by age category
-    PrsnDiff_Ap <- Prsn_Ap - colSums(ResolvePrsn_HtAp)
-    # Allocate extra persons to households based on probabilities
-    AddPrsn_HtAp <- sweep(PrsnProb_HtAp, 2, PrsnDiff_Ap, "*")
-    # Add to the persons in the mean households
-    Prsn_HtAp <- ResolvePrsn_HtAp + AddPrsn_HtAp
-    # Warn if exit loop because MaxIter reached
-    if (i == MaxIter) {
-      warning("No convergence of household synthesis after 100 iterations.")
-    }
-  }
 
-  # Convert to synthetic households
-  #--------------------------------
-  # Calculate number of households by household type
-  Hh_Ht <- round(apply(ResolveHh_HtAp, 1, max))
-  # Calculate persons by age group and household type
-  Prsn_HtAp <- sweep(PrsnFactors_HtAp, 1, Hh_Ht, "*")
+    # Iterate until "balanced" set of households is created
+    #------------------------------------------------------
+    # Create vector to store convergence indicator
+    MaxDiff_ <- numeric(MaxIter)
+    for (i in 1:MaxIter) {
+      # Resolve conflicting numbers of households by taking the mean value for
+      # each household type
+      ResolveHh_HtAp <- t(apply(Hh_HtAp, 1, function(x) {
+        if (sum(x > 0) > 1) {
+          x[x > 0] <- mean(x[x > 0])
+        }
+        x
+      }))
+      # Check whether to break out of loop
+      ResolveHh_Ht <- apply(ResolveHh_HtAp, 1, max)
+      Diff_Ht <- abs(MaxHh_Ht - ResolveHh_Ht)
+      PropDiff_Ht <- Diff_Ht / ResolveHh_Ht
+      if (all(PropDiff_Ht < 0.001)) break
+      MaxDiff_[i] <- max(PropDiff_Ht)
+      # Adjust household proportions to match household size target if not NA
+      if(!is.na(HhSize)){
+        # Calculate average household size and ratio with target household size
+        AveHhSize <- sum(ResolveHh_Ht * HhSize_Ht) / sum(ResolveHh_Ht)
+        HhSizeAdj <- HhSize / AveHhSize
+        # Calculate household adjustment factors and adjust households
+        HhAdjFactor_Ht <- HhSize_Ht * 0 + 1 # Start with a vector of ones
+        HhAdjFactor_Ht[HhSize_Ht > HhSize] <- HhSizeAdj # Apply HhSizeAdj
+        ResolveHh_HtAp <- sweep(ResolveHh_HtAp, 1, HhAdjFactor_Ht, "*")
+      }
+      # Adjust proportion of 1-person households to match target if not NA
+      if(!is.na(Prop1PerHh)) {
+        Hh_Ht <- round(apply(ResolveHh_HtAp, 1, max))
+        NumHh_Sz <- tapply(Hh_Ht, HhSize_Ht, sum)
+        NumHh <- sum(NumHh_Sz)
+        Add1PerHh <- (Prop1PerHh * NumHh) - NumHh_Sz[1]
+        Is1PerHh_Ht <- HhSize_Ht == 1
+        Add1PerHh_Ht <- Add1PerHh * Hh_Ht[Is1PerHh_Ht] / sum(Hh_Ht[Is1PerHh_Ht])
+        RmOthHh_Ht <- -Add1PerHh * Hh_Ht[!Is1PerHh_Ht] / sum(Hh_Ht[!Is1PerHh_Ht])
+        ResolveHh_HtAp[Is1PerHh_Ht] <- ResolveHh_HtAp[Is1PerHh_Ht] + Add1PerHh_Ht
+        ResolveHh_HtAp[!Is1PerHh_Ht] <- ResolveHh_HtAp[!Is1PerHh_Ht] + RmOthHh_Ht
+      }
+      # Calculate the number of persons by age based on the resolved households
+      ResolvePrsn_HtAp <- ResolveHh_HtAp * PrsnFactors_HtAp
+      # Calculate the probabilities of a person by age being in a household by
+      # type from the allocation of persons by household type and age
+      PrsnProb_HtAp <- sweep(ResolvePrsn_HtAp, 2, colSums(ResolvePrsn_HtAp), "/")
+      # Calculate the difference in the number of persons by age category
+      PrsnDiff_Ap <- Prsn_Ap - colSums(ResolvePrsn_HtAp)
+      # Allocate the person difference using the updated probabilities
+      AddPrsn_HtAp <- sweep(PrsnProb_HtAp, 2, PrsnDiff_Ap, "*")
+      # Add the allocated person difference to the resolved person distribution
+      Prsn_HtAp <- ResolvePrsn_HtAp + AddPrsn_HtAp
+      # Recalculate number of households by type
+      Hh_HtAp <- Prsn_HtAp / PrsnFactors_HtAp
+      Hh_HtAp[is.na(Hh_HtAp)] <- 0
+      # Calculate the maximum households by each type for convergence check
+      MaxHh_Ht <- apply(ResolveHh_HtAp, 1, max)
+      # Create message if exit loop because MaxIter reached
+      if (i == MaxIter) {
+        Message <- paste("Household synthesis for", dv, "stopped at",
+                         MaxIter, "iterations.")
+        Messages_ <- c(Messages_, Message)
+      }
+    } # End loop through balancing iterations
+
+    # Add division results to lists
+    #------------------------------
+    # Division results for number of households by household type
+    HhType_ls[[dv]] <- round(apply(ResolveHh_HtAp, 1, max))
+    # Division checks
+    if (is.na(HhSize)) {
+      EstHhSize_Dv[dv] <- NA
+    } else {
+      EstHhSize_Dv[dv] <- AveHhSize
+    }
+    if (is.na(Prop1PerHh)) {
+      EstProp1PerHh_Dv[dv] <- NA
+    } else {
+      EstProp1PerHh_Dv[dv] <- NumHh_Sz[1] / sum(NumHh_Sz)
+    }
+
+  } # End loop through divisions
+
+  # Return a list with results, checks, and messages
+  #-------------------------------------------------
+  list(Results_ls = HhType_ls,
+       Checks_ls = list(EstHhSize_Dv = EstHhSize_Dv,
+                        EstProp1PerHh_Dv = EstProp1PerHh_Dv),
+       Messages_ = Messages_)
+}
+
+
+
+
+# DEFINE FUNCTION TO
+# DEFINE FUNCTION TO CREATE SYNTHETIC HOUSEHOLDS
+#===============================================
+#' Create synthetic households
+#'
+#' \code{createSynthHh} Creates synthetic households from table of number of households by household type.
+#'
+
+Hh_Ht <- Test_$Results_ls[[1]]
+createSynthHh <- function(NumHh_Ht) {
+  # Define dimension names
+  Ap <- c("Age0to14", "Age15to19", "Age20to29", "Age30to54", "Age55to64",
+          "Age65Plus")
   # Convert into a synthetic population of households
   Hh_Hh <- rep(names(Hh_Ht), Hh_Ht)
   Hh_Hh_Ap <- strsplit(Hh_Hh, "-")
@@ -249,15 +371,58 @@ createHhByAge <- function(Prsn_Ap = c(Age0to14, Age15to19, Age20to29,
   Hh_HhAp <- Hh_HhAp[sample(1:nrow(Hh_HhAp), nrow(Hh_HhAp), replace = FALSE),]
   # Calculate household size
   HhSize_Hh <- rowSums(Hh_HhAp)
-  # Return a list with the household attributes
-  list(HhId = 1:nrow(Hh_HhAp), Age0to14 = Hh_HhAp[, "Age0to14"],
-       Age15to19 = Hh_HhAp[, "Age15to19"], Age20to29 = Hh_HhAp[, "Age20to29"],
-       Age30to54 = Hh_HhAp[, "Age30to54"], Age55to64 = Hh_HhAp[, "Age55to64"],
-       Age65Plus = Hh_HhAp[, "Age65Plus"], HhSize = HhSize_Hh)
+  # Add to list of household attributes
+  SynthHh_ls <- list(HhId = 1:nrow(Hh_HhAp),
+                     Age0to14 = Hh_HhAp[, "Age0to14"],
+                     Age15to19 = Hh_HhAp[, "Age15to19"],
+                     Age20to29 = Hh_HhAp[, "Age20to29"],
+                     Age30to54 = Hh_HhAp[, "Age30to54"],
+                     Age55to64 = Hh_HhAp[, "Age55to64"],
+                     Age65Plus = Hh_HhAp[, "Age65Plus"],
+                     HhSize = HhSize_Hh)
+list(Results_ls = HhType_ls,
+     Checks_ls = list(AveHhSize_Dv = AveHhSize_Dv,
+                      Prop1PerHh_Dv = Prop1PerHh_Dv),
+     Messages_ls = Messages_ls)
+
 }
 
-# DEFINE FUNCTION TO BUILD MODEL
-#===============================
+
+Model <- new.env()
+# Identify scenario input file and characteristics
+Model$Inp_ls <- list()
+Model$Inp_ls$InpFile <- "pop_age_inputs.csv"
+Model$Inp_ls$GeoLvl <- "Division"
+Model$Inp_ls$Field_ls <- list()
+Model$Inp_ls$Field_ls$Age0to14 <-
+  list(Type = "integer",
+       Prohibit = c("NA", "< 0"))
+Model$Inp_ls$Field_ls$Age15to19 <-
+  list(Type = "integer",
+       Prohibit = c("NA", "< 0"))
+Model$Inp_ls$Field_ls$Age20to29 <-
+  list(Type = "integer",
+       Prohibit = c("NA", "< 0"))
+Model$Inp_ls$Field_ls$Age35to54 <-
+  list(Type = "integer",
+       Prohibit = c("NA", "< 0"))
+Model$Inp_ls$Field_ls$Age55to64 <-
+  list(Type = "integer",
+       Prohibit = c("NA", "< 0"))
+Model$Inp_ls$Field_ls$Age65Plus <-
+  list(Type = "integer",
+       Prohibit = c("NA", "< 0"))
+Model$Inp_ls$Field_ls$HhSize <-
+  list(Type = "double",
+       Prohibit = c("< 1"))
+Model$Inp_ls$Field_ls$Prop1PerHh <-
+  list(Type = "double",
+       Prohibit = c("<= 0", "> 1"))
+
+
+
+# BUILD THE MODEL
+#================
 #' Build the model object
 #'
 #' \code{buildModel} Creates a RSPM model object to implement the household age model.
@@ -265,7 +430,36 @@ createHhByAge <- function(Prsn_Ap = c(Age0to14, Age15to19, Age20to29,
 #' The buildModel function creates a model object which can be applied in the RSPM framework. The calcAgeProbByHhType function is invoked to estimate a household probability table which represents the region. The user must put the required inputs in the "inst/extdata" directory. The table is added as a parameter to the model object. The createHhByAge function is
 buildModel <- function() {
   # Initialize list to store model components
-  Model_ls <- list()
+  Model <- new.env()
+  # Identify scenario input file and characteristics
+  Model$Inp_ls <- list()
+  Model$Inp_ls$InpFile <- "pop_age_inputs.csv"
+  Model$Inp_ls$GeoLvl <- "Division"
+  Model$Inp_ls$Field_ls <- list()
+  Model$Inp_ls$Field_ls$Age0to14 <-
+    list(Type = "integer",
+         Prohibit = c("NA", "< 0"))
+  Model$Inp_ls$Field_ls$Age15to19 <-
+    list(Type = "integer",
+         Prohibit = c("NA", "< 0"))
+  Model$Inp_ls$Field_ls$Age20to29 <-
+    list(Type = "integer",
+         Prohibit = c("NA", "< 0"))
+  Model$Inp_ls$Field_ls$Age35to54 <-
+    list(Type = "integer",
+         Prohibit = c("NA", "< 0"))
+  Model$Inp_ls$Field_ls$Age55to64 <-
+    list(Type = "integer",
+         Prohibit = c("NA", "< 0"))
+  Model$Inp_ls$Field_ls$Age65Plus <-
+    list(Type = "integer",
+         Prohibit = c("NA", "< 0"))
+  Model$Inp_ls$Field_ls$HhSize <-
+    list(Type = "double",
+         Prohibit = c("< 1"))
+  Model$Inp_ls$Field_ls$Prop1PerHh <-
+    list(Type = "double",
+         Prohibit = c("<= 0", "> 1"))
   # Estimate the matrix of age group probabilities
   PrsnInput_df <- read.csv("inst/extdata/pums_person.csv", as.is=TRUE)
   HhInput_df <- read.csv("inst/extdata/pums_housing.csv", as.is=TRUE)
@@ -286,4 +480,23 @@ buildModel <- function() {
   Model_ls
 }
 SynthesizeHh <- buildModel()
+
+
+
+PopInput_df <- read.csv("inst/extdata/pop_age_inputs.csv", as.is = TRUE)
+PopInput_df <- PopInput_df[PopInput_df$Year == 2010,]
+PopInput_ls <- as.list(PopInput_df)
+rm(PopInput_df)
+PrsnInput_df <- read.csv("inst/extdata/pums_person.csv", as.is=TRUE)
+HhInput_df <- read.csv("inst/extdata/pums_housing.csv", as.is=TRUE)
+PopInput_ls$HtProp_HtAp <- as.data.frame(calcAgeProbByHhType(PrsnInput_df, HhInput_df))
+e <- new.env()
+for (name in names(PopInput_ls)) {
+  e[[name]] <- PopInput_ls[[name]]
+}
+environment(tabulateHhAgeType) <- e
+rm(HhInput_df, PrsnInput_df, PopInput_ls, name)
+Test_ <- tabulateHhAgeType()
+
+rm(PopInput_ls, IsYear, PrsnInput_df, HhInput_df, HtProb_HtAp)
 
