@@ -1,10 +1,10 @@
-##A New Framework for the GreenSTEP Family of Models: Overview and Approach
+##VisionEval: A New Framework for the GreenSTEP Family of Models: Overview and Approach
 
 **Brian Gregor, Oregon Systems Analytics LLC**  
 **Tara Weidner, Oregon Department of Transportation**  
-**10/8/15**
+**10/9/15**
 
-This white paper outlines the vision, approach, and timeline for developing a new framework for the GreenSTEP family of models. It is intended to provide an understanding of key objectives and end products, as well as the path to get there.
+This white paper outlines the vision, approach, and timeline for developing a new framework for the GreenSTEP family of models, VisionEval. It is intended to provide an understanding of key objectives and end products, as well as the path to get there.
 
 ###Project Purpose and Vision
 ODOT developed the GreenSTEP model for statewide use, and a rebranded metropolitan version of the model as the Regional Strategic Planning Model (RSPM). The GreenSTEP/RSPM models have proven to be successful in providing modeling support for several high profile state and metropolitan area planning applications. These **successes** include:
@@ -71,9 +71,9 @@ The development of the new framework will follow these successful **practices**.
 - Organizational requirements will be kept as simple as possible for prospective module developers.
 
 ###Framework Overview
-The new framework is *tentatively named the Regional Strategic Planning Model (RSPM) framework (final name TBD)*. This framework will enable many types of strategic planning models to be assembled for regions of many different sizes, from small metropolitan areas to multi-state regions. The GreenSTEP model will be one type of model built within the RSPM framework. An overview of the envisioned framework is presented here to provide a context for understanding the work scope. Figure 1 illustrates the primary elements of the framework.
+The new framework is named *VisionEval*. This framework will enable many types of strategic planning models to be assembled for regions of many different sizes, from small metropolitan areas to multi-state regions. The GreenSTEP model will be one type of model built within the VisionEval framework. An overview of the envisioned framework is presented here to provide a context for understanding the work scope. Figure 1 illustrates the primary elements of the framework.
 
-**Figure 1. Overview of RSPM Framework**
+**Figure 1. Overview of VisionEval Framework**
 
 ![Framework Diagram](img/framework_diagram.png)
 
@@ -126,4 +126,4 @@ Phase I is intended to be accomplished over approximately 5 - 6 month period. Th
 
 ![Framework Diagram](img/framework_timeline.png)
 
-**Phase II** is anticipated to involve the conversion of the latest versions of ODOT's GreenSTEP and RSPM models to the new framework. The new framework-based versions will be tested with inputs that are the same as existing model runs to assure that they produce the same outputs as those model runs. Key tasks will be to convert the latest version of GreenSTEP and the metropolitan RSPM, and to package the new models into a set of R packages. Phase II could also include the conversion of the Federal tools (EERPAT and RPAT), or this could be implemented in a separate phase. The full benefits of this common framework are realized when all four tools are converted. A timeline and workscope for Phase II will be developed at a later date.
+**Phase II** is anticipated to involve the conversion of the latest versions of ODOT's GreenSTEP and RSPM models to the VisionEval framework. The new framework-based versions will be tested with inputs that are the same as existing model runs to assure that they produce the same outputs as those model runs. Key tasks will be to convert the latest version of GreenSTEP and the metropolitan RSPM, and to package the new models into a set of R packages. Conversion of the Federal EERPAT tool is intended to be implemented in a separate phase. The full benefits of this common framework are realized when all four tools are converted. A timeline and workscope for Phase II will be developed at a later date.
