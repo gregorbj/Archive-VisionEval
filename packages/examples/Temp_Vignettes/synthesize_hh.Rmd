@@ -1,0 +1,42 @@
+---
+title: "Using the SynthesizeHh Module"
+author: "Brian Gregor"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Using the SynthesizeHh Module}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+The **SynthesizeHh** module creates a set of households representative of a demographic forecast of the number of persons in each of six age groups (0-14, 15-19, 20-29, 30-34, 35-54, 55-64, 65+). The model is invoked with the following command:
+```
+runModel(SynthesizeHh, package = household, year = XXXX)
+```
+where the a four-digit year value is substituted for `XXXX`.
+
+In most model implementations, the *SynthesizeHh* module is run before all other household modules because it creates the synthetic households. The module runs at the *division* level. The only inputs it needs is the population projection for each age group for the year being modeled. This information is located in the *division* group of the data store. The model creates a record for each household in the *household* group of the data store. The fields that are created include:  
+- **HouseholdId**: A unique number for each household.  
+- **Age0to14**: The number of persons in the 0-14 age group in the household.  
+- **Age15to19**: The number of persons in the 15-19 age group in the household.  
+- **Age20to29**: The number of persons in the 20-29 age group in the household.  
+- **Age30to54**: The number of persons in the 30-54 age group in the household.  
+- **Age55to64**: The number of persons in the 55-64 age group in the household.  
+- **Age65Plus**: The number of persons in the 65 and older age group in the household.  
+- **HhSize**: The total number of persons in the household.  
+
+Before this module is used in a model, the `HtProb_HtAp` parameter needs to be estimated. To do this, several files need to be replaced in the source package and the binary package needs to be built. The build process will automatically calculate the `HtProb_HtAp` parameter provided that the files are correct. Following are the steps:  
+
+1. Download the source version of the *household* package if this has not already been done.  
+
+1. Locate the `pums_housing.csv` and `pums_person.csv` files in the `inst/extdata1` directory of the source package. These are the files that you will be replacing with data which represents the housing and population characteristics of the region you will be modeling. Open the files and look at their structure. You will need to use the same headings exactly as shown in these files. Note that the files you will be creating are text files in comma-separated values (csv) format.  
+
+1. Obtain copies of the Census Public Use Microsample housing and person files for the state(s) containing the region being modeled and for the year chosen as being representative. These can be downloaded from the [Census FTP](http://www.census.gov/programs-surveys/acs/data/data-via-ftp.html). The housing file will have a name `csv_hXX.zip` and the person file will have a name `csv_pXX.zip` where the `XX` is the 2-digit code for the state. Several state files might need to be downloaded if the region spans more than one state.    
+
+1. Create the *housing* file by opening the file in R or in some other software of your choice (such as Excel). Identify the records located in the model region. For a statewide model, this will be the entire file. For a metropolitan region, this would be the records having codes for areas located in the model region. The PUMS data includes codes for Super PUMAs (`PUMA1`), Metropolitan Area MSA/CMSA (`MSACMSA1`), and Metropolitan Area MSA/PMSA (`MSACMSA1`). With some digging, the codes for 5% PUMAs can also be located. Eliminate all records other than those in the model region. After the records have been selected, eliminate all fields except for the `SERIALNO` and `HWEIGHT` fields. If the model region includes more than one state, this will need to be done for each state and the files combined. Save the resulting data in a csv formatted text file. The first line of the file must contain the field names (`SERIALNO` and `HWEIGHT`). Save the file as `pums_housing.csv` in the `inst/extdata` directory.  
+
+1. Create the *person* file using the `SERIALNO` of the selected household records to select the corresponding person records. If all of the state data is being used for the housing and person files, then it is unnecessary to do this. Once the person records have been selected, eliminate all fields except for the `SERIALNO` and `AGE` fields. Save the resulting data in a csv formatted text file. The first line of the file must contain the field names (`SERIALNO` and `AGE`). Save the file as `pums_person.csv` in the `inst/extdata` directory.
+
+1. After the `pums_housing.csv` and `pums_person.csv` files have been created, open the package in RStudio and build a binary package. Open the package using the *File/New Project* menu item. A window will open giving you three choices: *New Project*, *Existing Project*, and *Version Control*. Select *Existing Project*. You will then be asked to identify the directory for the project. Click on the button labeled *Browse*. A file explorer window will open. Navigate to the source package directory and click on it (**don't double-click because you just want to identify this folder, not open it**). Then click on the *Select Folder* button. Then click on the *Create Project* button. After a couple of seconds, the project will be created and you will see the console window in the left hand pane of the RStudio window. The path to the source directory will be displayed in the window header. Then click on the *Build/Build Binary Package* menu item to build the package. This will execute a function which computes the `HtProb_HtAp` parameter and combines it with other components of the model into the model object. The binary package is created in the same directory where the source package is located. The binary package name will be the source package name along with the version number and *zip* extension.  
+
+1. Install the package as you would install any other binary R package that is on your local drive. In RStudio, click on the *Packages* tab in the bottom right-hand frame in the RStudio window. Then click on the *Install* button below the tab. This will open a window that asks for the location of the package file to install. Click on the *Browse* button to open a file explorer window to navigate to the file and click on it. Then click on the *Install* button.
