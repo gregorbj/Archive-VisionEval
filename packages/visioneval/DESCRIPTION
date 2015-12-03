@@ -1,10 +1,14 @@
 Package: visioneval
 Type: Package
-Title: What the Package Does (Title Case)
+Title: VisionEval Framework Functions
 Version: 0.1
-Date: 2015-11-10
-Author: Who wrote it
-Maintainer: Who to complain to <yourfault@somewhere.net>
-Description: More about what it does (maybe more than one line)
-License: What license is it under?
+Date: 2015-12-3
+Author: Brian Gregor <gregorb@or-analytics.com>["aut", "cre"]
+Maintainer: Brian Gregor <gregorb@or-analytics.com>
+Copyright: Oregon Department of Transportation
+URL: https://github.com/gregorbj/VisionEval
+Description: This package includes all of the functions used to implement'
+    the VisionEval framework.
+License: Apache 2
 LazyData: TRUE
+Suggests: testthat
