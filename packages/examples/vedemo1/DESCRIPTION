@@ -1,0 +1,24 @@
+Package: vedemo1
+Type: Package
+Title: Demonstration Package for VisionEval Model System
+Version: 0.1
+Date: 2015-11-29
+Author: Brian Gregor <gregorb@or-analytics.com>["aut", "cre"]
+Maintainer: Brian Gregor <gregorb@or-analytics.com>
+Copyright: Oregon Department of Transportation
+URL: https://github.com/gregorbj/VisionEval
+Description: This package demonstrates the structure of VisionEval modules
+    and how modules are combined in a package. Modules are one of the elements
+    of the VisionEval model system which is a system for developing strategic
+    planning models that simulate household behavior. VisionEval models are
+    implemented as R scripts that invoke modules in succession. A second
+    element is a set of standards for the definition of key model elements such
+    as geography and the structure and organization of model files. The third
+    element is the software framework that runs modules, manages model data,
+    and coordinates model execution.
+License: Apache 2
+LazyData: TRUE
+Suggests:
+    knitr
+VignetteBuilder: knitr
+RoxygenNote: 5.0.1

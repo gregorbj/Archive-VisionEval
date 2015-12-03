@@ -1,0 +1,22 @@
+=====================================
+Documentation for pop_by_distance.csv
+=====================================
+
+File Structure
+--------------
+Column Names: Distance, Population, PopProp
+Distance: Miles from urban center. Must have integer values 0 through 40 in ascending order.
+Population: Population in number of persons corresponding to distance. Must be numeric value. Must use decimal point, not decimal comma, to separate decimal component (if any). Do not use thousands separators.
+PopProp: Proportion of total population. Must be numeric value less than 1. Column must sum to 1.
+
+Source of Default Data:
+-----------------------
+U.S. Census Bureau
+Patterns of Metropolitan and Micropolitan Population Change: 2000 to 2010
+http://www.census.gov/population/metro/data/pop_pro.html
+Distance Profiles for U.S. Metropolitan Statistical Areas 2000 and 2010.xls
+
+Notes for Default Data:
+-----------------------
+Data comes from "Pop2010" worksheet, row 5 ("Average of all U.S. metro areas")
+Distance range truncated at 40 miles. Value for 40 mile entry is the sum of all values for distance of 40 miles or greater.

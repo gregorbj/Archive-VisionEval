@@ -1,0 +1,28 @@
+---
+title: "Using the CreateHouseholds Module"
+author: "Brian Gregor"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Using the CreateHouseholds Module}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+The **CreateHouseholds** module creates a set of households reflecting a household size distribution that is representable for the region. The model is run in the framework with the following command:
+```{r, eval=FALSE}
+runModule(ModuleName = "CreateHouseholds", PackageName = "vedemo1", 
+          Year = XXXX, IgnoreInp_ = NULL, IgnoreSet_ = NULL)
+```
+where the a four-digit year value is substituted for `XXXX`. Most often the Year argument will be input programmatically. The IgnoreInp_ and IgnoreSet_ arguments will ignore any specified 'input' and/or 'set' specifications identified by the specification names. This option is provided to allow knowledgeable users to substitute for specified inputs and/or outputs. It should only be used with extreme caution.
+
+The *CreateHouseholds* module must be run before the *CreateBzones* and *CreateBzoneDev* modules are run. The module is run for the entire model area at once (the RunBy component is assigned the value "All). This is done because the full set of households must be created in order to determine how many rows the *Households* table will have. This needs to be determined in order to initialize the table.
+
+The *CreateHouseholds* module depends on one scenario input that is provided at the Azone level. The input file must be named "azone_population.csv" and must be located in the "inputs" directory of the model run setup. An example is included in the "inst/extdata" directory of this package. The structure of the file is as follows:
+```{r, echo=FALSE, results='asis'}
+AzonePop_df <- read.csv("../inst/extdata/azone_population.csv", as.is = TRUE)
+pander::pandoc.table(AzonePop_df)
+```
+The column names for the file must be as shown. Rows need to exist for all Azones and all years for which the model will be run. The data in the *Population* column must be integer values and and thousands separators may not be used.
+
+This module uses one model parameter file (*household_sizes.csv*) that is located in the "inst/extdata" directory of this package. The accompanying *household_sizes.txt* files describes the source and structure of that file. A substitute for that file (with the same name and structure) may be used instead to modify the module so that it is more representative of the region and/or base year for the model deployment. If you wish to do this, you must obtain the source package. Then modify the *household_sizes.csv* file, making certain that the modifications are consistent with the specifications described in the *household_sizes.txt* file. Then build the package to create a binary version. The best way to do this is using the RStudio IDE for R development along with the *devtools* package. RStudio is free and it along with *devtools* has everything you need to easily create a binary package from a source package. The `devtools::build(binary = TRUE)` will take care of things. For more information about R packages, I recommend referring to Hadley Wickham's book, *R Packages*, and/or to his [website](http://r-pkgs.had.co.nz/).
