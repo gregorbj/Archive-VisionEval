@@ -1,0 +1,7 @@
+{
+  "DatastoreName": "datastore.h5",
+  "Scenario": "Test",
+  "Description": "Test scenario",
+  "BaseYear": "2010",
+  "Years": ["2010", "2050"]
+}
