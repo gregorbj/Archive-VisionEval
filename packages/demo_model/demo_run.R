@@ -27,7 +27,7 @@ for (Year in E$Years) {
 #--------------------------
 #Household size in Household table
 table(readFromTable("HhSize", "Household", "2010"))
-table(readFromTable("HhSize", "Household", "2010"))
+table(readFromTable("HhSize", "Household", "2050"))
 #Population density in Bzone table
 plot(density(readFromTable("PopDen", "Bzone", "2010"), bw=200))
 lines(density(readFromTable("PopDen", "Bzone", "2050"), bw=200), col="red")
