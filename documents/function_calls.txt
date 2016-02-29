@@ -1,0 +1,57 @@
+BUILDING BLOCKS
+
+A file (ModelState.Rda) is used to save the values of key parameters that control the model run and an inventory of datastore. The following functions are called frequently to retrieve the model run state and to update the state. 
+getModelState: used to query the state of one or more variables
+setModelState: used to set the state of one or more variables
+listDatastore: makes an inventory of the structure of the datastore and the attributes of tables and datasets. calls setModelState to update the model run state file with the information.
+
+A file (Log-DATE_TIME.txt) is a log file that stores all error messages and other messages.
+initLog: initializes the log file
+writeLog: writes to the log file
+
+
+
+initializeModel
+    initModelStateFile
+        jsonlite functions
+        setModelState
+    initLog
+        setModelState
+    initDatastore
+        rhdf5 functions
+        listDatastore
+            rhdf5 functions
+            setModelState
+    readGeography
+        checkGeography
+        writeLog
+            getModelState
+        setModelState
+    initDatastoreGeography
+        getModelState
+        initTable
+            checkYear
+            rhdf5 functions
+            listDatastore
+                rhdf5 functions
+                setModelState
+        initDataset
+            initTable (if not already initialized)
+            rhdf5 functions
+            listDatastore
+                rhdf5 functions
+                setModelState
+        writeToTable
+            checkTable
+            initTable (if not already initialized)
+            checkDataset
+            initDataset (if not already initialized)
+            getDatasetAttr
+            checkSpecConsistency
+            checkDataConsistency
+            rhdf5 functions
+            listDatastore
+                rhdf5 functions
+                setModelState
+        writeLog
+            getModelState
