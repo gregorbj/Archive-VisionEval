@@ -1,0 +1,17 @@
+=========================================
+Documentation for misc_dev_parameters.csv
+=========================================
+
+File Structure
+--------------
+Column Names: Parameter, Value
+Parameter: AveHhSize, AveTownDensity, AveRuralDensity
+Value: Values for respective parameters
+
+Source of Default Data:
+-----------------------
+Educated guess for demonstration purposes only
+
+Notes for Default Data:
+-----------------------
+Don't take seriously.

@@ -1,0 +1,21 @@
+=============================================
+Documentation for pop_density_by_distance.csv
+=============================================
+
+File Structure
+--------------
+Column Names: Distance, PopDensity
+Distance: Miles from urban center. Must have integer values 0 through 40 in ascending order.
+PopDensity: Population density in persons per square mile corresponding to distance. Must be numeric value. Must use decimal point, not decimal comma, to separate decimal component (if any). Do not use thousands separators.
+
+Source of Default Data:
+-----------------------
+U.S. Census Bureau
+Patterns of Metropolitan and Micropolitan Population Change: 2000 to 2010
+http://www.census.gov/population/metro/data/pop_pro.html
+Distance Profiles for U.S. Metropolitan Statistical Areas 2000 and 2010.xls
+
+Notes for Default Data:
+-----------------------
+Data comes from "Density2010" worksheet, row 5 ("Average of all U.S. metro areas")
+Distance range truncated at 40 miles. Value for 40 mile entry is the average of all values for distances of 40 miles or greater.
