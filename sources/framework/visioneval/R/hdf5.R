@@ -105,7 +105,8 @@ initDatastore <- function() {
 #'
 #' @param Spec_ls a list containing the standard module 'Set' specifications
 #'   described in the model system design documentation.
-#' @param Year a string representation of the model run year.
+#' @param Group a string representation of the name of the group the table is to
+#' be created in.
 #' @return The value TRUE is returned if the function is successful at creating
 #'   the table. In addition, the listDatastore function is run to update the
 #'   inventory in the model state file. The function stops if the group in which
@@ -113,18 +114,20 @@ initDatastore <- function() {
 #'   written to the log.
 #' @export
 #' @import rhdf5
-initTable <- function(Spec_ls, Year) {
+initTable <- function(Spec_ls, Group) {
   G <- getModelState()
-  Year <- checkYear(Year, G$Datastore)
+  Group <- checkGroup(Group, G$Datastore)
   if (!is.null(Spec_ls$LENGTH)) {
     Length <- Spec_ls$LENGTH
   } else {
-    Message <- paste0("LENGTH specification for table (", Spec_ls$TABLE,
-                      ") is not present.")
+    Message <-
+      paste0("Can't initialize table (",
+             Spec_ls$TABLE,
+             ") because specifications do not include a LENGTH specification.")
     writeLog(Message)
     stop(Message)
   }
-  NewGroup <- paste(Year, Spec_ls$TABLE, sep = "/")
+  NewGroup <- paste(Group, Spec_ls$TABLE, sep = "/")
   H5File <- H5Fopen(G$DatastoreName)
   h5createGroup(H5File, NewGroup)
   H5Group <- H5Gopen(H5File, NewGroup)
@@ -149,15 +152,16 @@ initTable <- function(Spec_ls, Year) {
 #'
 #' @param Spec_ls a list containing the standard module 'Set' specifications
 #'   described in the model system design documentation.
-#' @param Year a string representation of the model run year.
+#' @param Group a string representation of the name of the group the table is to
+#' be created in.
 #' @return TRUE if dataset is successfully initialized. If the dataset already
 #' exists the function throws an error and writes an error message to the log.
 #' Updates the model state file.
 #' @export
 #' @import rhdf5
-initDataset <- function(Spec_ls, Year) {
+initDataset <- function(Spec_ls, Group) {
   G <- getModelState()
-  Table <- paste(Year, Spec_ls$TABLE, sep = "/")
+  Table <- paste(Group, Spec_ls$TABLE, sep = "/")
   Name <- Spec_ls$NAME
   DatasetName <- paste(Table, Name, sep = "/")
   #Initialize table if it does not exist
@@ -166,7 +170,7 @@ initDataset <- function(Spec_ls, Year) {
       paste("Table", Table, "has not been created in the datastore.",
             "Attempting to create.")
     writeLog(Message)
-    initTable(Spec_ls, Year)
+    initTable(Spec_ls, Group)
     G <- getModelState()
   }
   #Check if the dataset already exists
@@ -204,8 +208,12 @@ initDataset <- function(Spec_ls, Year) {
   h5writeAttribute(Spec_ls$UNITS, H5Data, "UNITS")
   h5writeAttribute(Size, H5Data, "SIZE")
   h5writeAttribute(Spec_ls$TYPE, H5Data, "TYPE")
-  h5writeAttribute(Spec_ls$PROHIBIT, H5Data, "PROHIBIT")
-  h5writeAttribute(Spec_ls$ISELEMENTOF, H5Data, "ISELEMENTOF")
+  if (!is.null(Spec_ls$PROHIBIT)) {
+    h5writeAttribute(Spec_ls$PROHIBIT, H5Data, "PROHIBIT")
+  }
+  if (!is.null(Spec_ls$ISELEMENTOF)) {
+    h5writeAttribute(Spec_ls$ISELEMENTOF, H5Data, "ISELEMENTOF")
+  }
   H5Dclose(H5Data)
   H5Fclose(H5File)
   #Update datastore inventory
@@ -225,41 +233,39 @@ initDataset <- function(Spec_ls, Year) {
 #' location indexes in the dataset. The function makes several checks prior to
 #' attempting to write to the datastore including : the desired table exists in
 #' the datastore, the input data is a vector, the data and index conform to each
-#' other and to the table length, the type, size, and units of the data match
-#' the datastore specifications. On successful completion, the function calls
+#' other and to the table length. On successful completion, the function calls
 #' 'listDatastore' to update the datastore listing in the run environment.
 #'
 #' @param Data_ A vector of data to be written.
 #' @param Spec_ls a list containing the standard module 'Set' specifications
 #'   described in the model system design documentation.
-#' @param Year a string representation of the model run year.
+#' @param Group a string representation of the name of the datastore group the
+#' data is to be written to.
 #' @param Index A numeric vector identifying the positions the data is to be
 #'   written to.
 #' @return TRUE if data is sucessfully written. Updates model state file.
 #' @export
 #' @import rhdf5
-writeToTable <- function(Data_, Spec_ls, Year, Index = NULL) {
+writeToTable <- function(Data_, Spec_ls, Group, Index = NULL) {
   G <- getModelState()
   Name <- Spec_ls$NAME
   Table <- Spec_ls$TABLE
   #Check that table exists to write to and attempt to create if not
-  TableCheck <- checkTable(Table, Year, G$Datastore, ThrowError = FALSE)
+  TableCheck <- checkTable(Table, Group, G$Datastore, ThrowError = FALSE)
   if (!TableCheck[[1]]) {
     Message <-
-      paste("Table", Table, "has not been created in the datastore.",
-            "Attempting to create.")
+      paste("Creating table", Table)
     writeLog(Message)
-    initTable(Spec_ls, Year)
+    initTable(Spec_ls, Group)
     G <- getModelState()
   }
   #Check that dataset exists to write to and attempt to create if not
-  DatasetCheck <- checkDataset(Name, Table, Year, G$Datastore, ThrowError = FALSE)
+  DatasetCheck <- checkDataset(Name, Table, Group, G$Datastore, ThrowError = FALSE)
   if (!DatasetCheck[[1]]) {
     Message <-
-      paste("Dataset", Name, "has not been initialized in the datastore.",
-            "Attempting to initialize.")
+      paste("Initializing dataset", Name)
     writeLog(Message)
-    initDataset(Spec_ls, Year)
+    initDataset(Spec_ls, Group)
     G <- getModelState()
   }
   #Check that data is a vector
@@ -269,27 +275,9 @@ writeToTable <- function(Data_, Spec_ls, Year, Index = NULL) {
     writeLog(Message)
     stop(Message)
   }
-  #Check whether the data is consistent with datastore attributes
-  DstoreAttr_ls <- getDatasetAttr(Name, Table, Year, G$Datastore)
-  SpecCheck_ls <- checkSpecConsistency(Spec_ls, DstoreAttr_ls)
-  if (length(SpecCheck_ls$Errors) != 0) {
-    writeLog(SpecCheck_ls$Errors)
-    stop("Specifications of data to be written don't conform with datastore specifications.")
-  }
-  if (length(SpecCheck_ls$Warnings) != 0) {
-    writeLog(SpecCheck_ls$Warnings)
-  }
-  DataCheck_ls <- checkDataConsistency(Name, Data_, DstoreAttr_ls)
-  if (length(DataCheck_ls$Errors) != 0) {
-    writeLog(DataCheck_ls$Errors)
-    stop("Data to be written doesn't conform with datastore specifications.")
-  }
-  if (length(DataCheck_ls$Warnings) != 0) {
-    writeLog(DataCheck_ls$Warnings)
-  }
   #Check that the data conforms to the table if not indexed write
   TableAttr_ <-
-    unlist(G$Datastore$attributes[G$Datastore$groupname == file.path(Year, Table)])
+    unlist(G$Datastore$attributes[G$Datastore$groupname == file.path(Group, Table)])
   AllowedLength <- TableAttr_["LENGTH"]
   if (is.null(Index) & (length(Data_) != AllowedLength)) {
     Message <-
@@ -315,7 +303,7 @@ writeToTable <- function(Data_, Spec_ls, Year, Index = NULL) {
   }
   #Write the dataset
   Data_[is.na(Data_)] <- Spec_ls$NAVALUE
-  DatasetName <- file.path(Year, Table, Name)
+  DatasetName <- file.path(Group, Table, Name)
   if (is.null(Index)) {
     h5write(Data_, file = G$DatastoreName, name = DatasetName)
   } else {
@@ -341,22 +329,23 @@ writeToTable <- function(Data_, Spec_ls, Year, Index = NULL) {
 #' @param Name A string identifying the name of the dataset to be read from.
 #' @param Table A string identifying the complete name of the table where the
 #'   dataset is located.
-#' @param Year a string representation of the model run year.
+#' @param Group a string representation of the name of the datastore group the
+#' data is to be read from.
 #' @param Index A numeric vector identifying the positions the data is to be
 #'   written to. NULL if the entire dataset is to be read.
 #' @return A vector of the same type stored in the datastore and specified in
 #'   the TYPE attribute.
 #' @export
 #' @import rhdf5
-readFromTable <- function(Name, Table, Year, Index = NULL) {
+readFromTable <- function(Name, Table, Group, Index = NULL) {
   G <- getModelState()
   #Check that dataset exists to read from
-  DatasetCheck <- checkDataset(Name, Table, Year, G$Datastore, ThrowError = TRUE)
+  DatasetCheck <- checkDataset(Name, Table, Group, G$Datastore, ThrowError = TRUE)
   DatasetName <- DatasetCheck[[2]]
   #If there is an Index, check that it is in bounds
   if (!is.null(Index)) {
     TableAttr_ <-
-      unlist(G$Datastore$attributes[G$Datastore$groupname == file.path(Year, Table)])
+      unlist(G$Datastore$attributes[G$Datastore$groupname == file.path(Group, Table)])
     AllowedLength <- TableAttr_["LENGTH"]
     if (any(Index > AllowedLength)) {
       Message <-
@@ -402,13 +391,13 @@ readFromTable <- function(Name, Table, Year, Index = NULL) {
 #'   for.
 #' @param Table A string identifying the name of the table the index is
 #'   being created for.
-#' @param Year A string identifying the year group the table is located in.
+#' @param Group A string identifying the group the table is located in.
 #' @return A function that creates a vector of positions corresponding to the
 #'   location of the supplied value in the index field.
 #' @export
-createIndex <- function(Name, Table, Year) {
+createIndex <- function(Name, Table, Group) {
   ValsToIndexBy <-
-    readFromTable(Name, Table, Year)
+    readFromTable(Name, Table, Group)
   return(function(IndexVal) {
     which(ValsToIndexBy == IndexVal)
   })

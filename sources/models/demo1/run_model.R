@@ -10,15 +10,18 @@ library(visioneval)
 
 #Initialize model
 #----------------
-initializeModel(Dir = "defs", ParamFile = "parameters.json",
-                GeoFile = "geo.csv")
+initializeModel(ParamDir = "defs",
+                RunParamFile = "run_parameters.json",
+                GeoFile = "geo.csv",
+                ModelParamFile = "model_parameters.json",
+                DatastoreToLoad = NULL)
 
 #Run all demo modules for all years
 #----------------------------------
 for (Year in getYears()) {
-    runModule("CreateHouseholds", "vedemo1", Year = Year, IgnoreInp_ = NULL, IgnoreSet_ = NULL)
-    runModule("CreateBzones", "vedemo1", Year = Year, IgnoreInp_ = NULL, IgnoreSet_ = NULL)
-    runModule("CreateBzoneDev", "vedemo1", Year = Year, IgnoreInp_ = NULL, IgnoreSet_ = NULL)
+    runModule("CreateHouseholds", "vedemo1", Year = Year)
+    runModule("CreateBzones", "vedemo1", Year = Year)
+    runModule("CreateBzoneDev", "vedemo1", Year = Year)
 }
 
 #Check results in datastore

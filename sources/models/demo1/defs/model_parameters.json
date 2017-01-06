@@ -1,0 +1,62 @@
+[
+  {"NAME": "BaseTruckVmt", 
+   "VALUE": "2486083805", 
+   "TYPE": "double", 
+   "UNITS": "annual heavy truck vehicle miles traveled"
+  },
+  {"NAME": "TranAdjFactor", 
+   "VALUE": "1.15", 
+   "TYPE": "double",
+   "UNITS": "none"
+  },
+  {"NAME": "TruckVmtGrowthMultiplier", 
+   "VALUE": "1", 
+   "TYPE": "double", 
+   "UNITS": "none"
+  },
+  {"NAME": "MjPerGallon", 
+   "VALUE": "121", 
+   "TYPE": "double", 
+   "UNITS": "megajoules per gasoline-equivalent gallon"
+  },
+  {"NAME": "PoundToKilogram", 
+   "VALUE": "0.45", 
+   "TYPE": "double", 
+   "UNITS": "pounds per kilogram"
+  },
+  {"NAME": "AnnVmtInflator", 
+   "VALUE": "365", 
+   "TYPE": "double", 
+   "UNITS": "none"
+  },
+  {"NAME": "BaseCostPerMile", 
+   "VALUE": "0.04", 
+   "TYPE": "double", 
+   "UNITS": "base cost year dollars per mile"
+  },
+  {"NAME": "BaseCostYear", 
+   "VALUE": "2001", 
+   "TYPE": "character", 
+   "UNITS": "year"
+  },
+  {"NAME": "BudgetProp", 
+   "VALUE": "0.1", 
+   "TYPE": "double", 
+   "UNITS": "none"
+  },
+  {"NAME": "CommVmtFactor", 
+   "VALUE": "0.09", 
+   "TYPE": "double", 
+   "UNITS": "none"
+  },
+  {"NAME": "ValueOfTime", 
+   "VALUE": "16", 
+   "TYPE": "double", 
+   "UNITS": "base cost year dollars per hour"
+  },
+  {"NAME": "AreaUnits", 
+   "VALUE": "acres", 
+   "TYPE": "character", 
+   "UNITS": "none"
+  }
+]

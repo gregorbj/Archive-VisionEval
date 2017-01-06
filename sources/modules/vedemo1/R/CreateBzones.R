@@ -60,7 +60,7 @@ devtools::use_data(AveHhPerBlockGroup, overwrite = TRUE)
 #identifies the level of geography that is iterated over. For example, a
 #congestion module could be applied by Marea. The name that is given to this
 #list is the name of the module concatenated with "Specifications". In this
-#case, the name is "CreateHouseholdsSpecifications".
+#case, the name is "CreateBzoneDevSpecifications".
 #
 #The specifications list is saved and exported so that it will be in the
 #namespace of the package and can be read by visioneval functions. The
@@ -74,39 +74,123 @@ devtools::use_data(AveHhPerBlockGroup, overwrite = TRUE)
 #Acceptable values are "Region", "Azone", "Bzone", "Czone", and "Marea".
 
 #Inp: A list of scenario inputs that are to be read from files and loaded into
-#the datastore. The following need to be specified for every data item (i.e.
-#column in a table):
-#  NAME: the name of a data item in the input table;
-#  FILE: the name of the file that contains the table;
-#  TABLE: the name of the datastore table the item is to be put into;
-#  TYPE: the data type (i.e. double, integer, character, logical);
-#  UNITS: the measurement units for the data;
-#  NAVALUE: the value used to represent NA in the datastore;
-#  SIZE: the maximum number of characters (or 0 for numeric data)
-#  PROHIBIT: data conditions that are prohibited or "" if not applicable;
-#  ISELEMENTOF: allowed categorical data values or "" if not applicable;
-#  UNLIKELY: data conditions that are unlikely or "" if not applicable;
-#  TOTAL: the total for all values (e.g. 1) or NA if not applicable.
+#the datastore. The list is structured in the same way as the specifications
+#list for estimation data described above. A specification must be provided for
+#each column of an input file other than the "Geo" and "Year" columns of the
+#file. If more than one column of the file has the same specifications, they can
+#be included in one specification as described and shown below. The following
+#components need to be included in each specification:
+#NAME = a string representation of the name of a data item in the input file.
+#This is also the name that will be used for the dataset in the datastore. If
+#the data in more than one column of the input file has the same specifications,
+#multiple names can be listed in this component. An example is shown in the
+#CreateBzones.R script.
+#FILE = a string representation of the name of the file that contains the table.
+#This is just the name of the file, not the full path name for the file. All
+#input files are stored in the "inputs" directory.
+#TABLE = a string representation of the name of the datastore table the item is
+#to be put into. This may be either a table that the module creates or a table
+#that another module has created.
+#GROUP = a string representation of the name of the group which contains the
+#table in the datastore. There are 3 possible values: "Global", "BaseYear", and
+#"Year". If "Global" is specified, the table is located in the 'Global' group
+#which applies to all model run years. If "BaseYear" is specified, the table in
+#located in the year group (e.g. '2010') for the year that is identified as the
+#base year in the run parameters for the model. If "Year" is specified, the
+#table is located in the year group for the year that the model is being run
+#for (e.g. if the model is being run for the year 2050, the group would be
+#'2050').
+#TYPE = a string representation of the data type: i.e. "double", "integer",
+#character, logical).
+#UNITS = a string identifying the the measurement units for the data
+#(e.g. "persons per square mile");
+#NAVALUE = the value that will be used to represent NA in the datastore. NA
+#values can't be stored directly in the HDF5 datastore. Therefore in order
+#to store NA values, a value needs to be defined to represent it. That value
+#needs to be a value that would not be calculated by the module. For example,
+#a negative number might be used to represent an NA value when all values for
+#the dataset will be 0 or a positive number.
+#SIZE = the maximum number of characters that character type data will have. If
+#the data is not character type, the value must be 0.
+#PROHIBIT = one or more strings that identify data conditions that are
+#prohibited. The syntax for identifying these is the same as that described in
+#Section 1 of this script. If there are no prohibited conditions, an empty
+#string (i.e. "") must be provided.
+#ISELEMENTOF = one or more strings that identify allowed values for categorical
+#data. The syntax for identifying these is the same as that described in Section
+#1 of this script. If no ISELEMENTOF specification is needed, an empty string
+#must be provided.
+#UNLIKELY = one or more strings that identify unlikely conditions. The syntax is
+#the same as that described in Section 1 of this script. If no UNLIKELY
+#specification is needed, and empty string must be provided.
+#TOTAL = specifies a total that the column must sum to. This is most useful
+#for checking that values which are proportions (or percentages) add up to 1
+#(or 100). If there is no specification for a total, an empty string (i.e. "")
+#must be provided.
 
 #Get: Identifies data to be loaded from the datastore. The
 #following need to be specified for every data item:
-#  NAME: the name of the dataset to be loaded;
-#  TABLE: the name of the table that the dataset is a part of;
-#  TYPE: the data type (i.e. double, integer, character, logical);
-#  UNITS: the measurement units for the data;
-#  PROHIBIT: data conditions that are prohibited or "" if not applicable;
-#  ISELEMENTOF: allowed categorical data values or "" if not applicable.
+#NAME = a string representation of the name of the dataset to be loaded from the
+#datastore. If multiple datasets are to be loaded from the same table and the
+#specifications for all the datasets are the same, a list of all the datasets
+#may be specified as described above.
+#TABLE = a string representation of the the name of the table that the dataset
+#is a part of.
+#GROUP = a string representation of the name of the group which contains the
+#table in the datastore. There are 3 possible values: "Global", "BaseYear", and
+#"Year". If "Global" is specified, the table is located in the 'Global' group
+#which applies to all model run years. If "BaseYear" is specified, the table in
+#located in the year group (e.g. '2010') for the year that is identified as the
+#base year in the run parameters for the model. If "Year" is specified, the
+#table is located in the year group for the year that the model is being run
+#for (e.g. if the model is being run for the year 2050, the group would be
+#'2050').
+#TYPE = a string representation of the data type of the dataset
+#(i.e. "double", "integer", "character", "logical").
+#UNITS = a string representation of the measurement units for the data.
+#PROHIBIT = one or more strings that identify data conditions that are
+#prohibited. The syntax for identifying these is the same as that described in
+#Section 1 of this script. If there are no prohibited conditions, an empty
+#string (i.e. "") must be provided.
+#ISELEMENTOF = one or more strings that identify allowed values for categorical
+#data. The syntax for identifying these is the same as that described in Section
+#1 of this script. If no ISELEMENTOF specification is needed, an empty string
+#must be provided.
 
 #Set: Identifies data that is produced by the module that is to be saved in the
 #datastore. The following need to be specified for every data item:
-#  NAME: the name of the data item that is to be saved;
-#  TABLE: the name of the table that the dataset is a part of;
-#  TYPE: the data type (i.e. double, integer, character, logical);
-#  UNITS: the measurement units for the data;
-#  NAVALUE: the value used to represent NA in the datastore;
-#  PROHIBIT: data conditions that are prohibited or "" if not applicable;
-#  ISELEMENTOF: allowed categorical data values or "" if not applicable;
-#  SIZE: the maximum number of characters (or 0 for numeric data).
+#Get: Identifies data to be loaded from the datastore. The
+#following need to be specified for every data item:
+#NAME = a string representation of the name of the dataset to be saved to in the
+#datastore. If multiple datasets are to be saved into the same table and the
+#specifications for all the datasets are the same, a list of all the datasets
+#may be specified as described above.
+#TABLE = a string representation of the the name of the table that the dataset
+#is a part of.
+#GROUP = a string representation of the name of the group which contains the
+#table in the datastore. There are 3 possible values: "Global", "BaseYear", and
+#"Year". If "Global" is specified, the table is located in the 'Global' group
+#which applies to all model run years. If "BaseYear" is specified, the table in
+#located in the year group (e.g. '2010') for the year that is identified as the
+#base year in the run parameters for the model. If "Year" is specified, the
+#table is located in the year group for the year that the model is being run
+#for (e.g. if the model is being run for the year 2050, the group would be
+#'2050').
+#TYPE = a string representation of the data type of the dataset
+#(i.e. "double", "integer", "character", "logical").
+#UNITS = a string representation of the measurement units for the data.
+#PROHIBIT = one or more strings that identify data conditions that are
+#prohibited. The syntax for identifying these is the same as that described in
+#Section 1 of this script. If there are no prohibited conditions, an empty
+#string (i.e. "") must be provided.
+#ISELEMENTOF = one or more strings that identify allowed values for categorical
+#data. The syntax for identifying these is the same as that described in Section
+#1 of this script. If no ISELEMENTOF specification is needed, an empty string
+#must be provided.
+#SIZE = An optional attribute identifying the the maximum number of characters
+#that character type data may have. If the module will calculate the number of
+#characters then this attribute may be omitted. If the data is not character
+#type, the value must be 0.
 
 #Define the data specifications
 #------------------------------
@@ -116,37 +200,15 @@ CreateBzonesSpecifications <- list(
   #Specify input data
   Inp = items(
     item(
-      NAME = "Metropolitan",
+      NAME =
+        items("Metropolitan",
+              "Town",
+              "Rural"),
       FILE = "devtype_proportions.csv",
       TABLE = "Azone",
+      GROUP = "Year",
       TYPE = "double",
-      UNITS = "none",
-      NAVALUE = -1,
-      SIZE = 0,
-      PROHIBIT = c("NA", "< 0", "> 1"),
-      ISELEMENTOF = "",
-      UNLIKELY = "",
-      TOTAL = ""
-    ),
-    item(
-      NAME = "Town",
-      FILE = "devtype_proportions.csv",
-      TABLE = "Azone",
-      TYPE = "double",
-      UNITS = "none",
-      NAVALUE = -1,
-      SIZE = 0,
-      PROHIBIT = c("NA", "< 0", "> 1"),
-      ISELEMENTOF = "",
-      UNLIKELY = "",
-      TOTAL = ""
-    ),
-    item(
-      NAME = "Rural",
-      FILE = "devtype_proportions.csv",
-      TABLE = "Azone",
-      TYPE = "double",
-      UNITS = "none",
+      UNITS = "",
       NAVALUE = -1,
       SIZE = 0,
       PROHIBIT = c("NA", "< 0", "> 1"),
@@ -160,48 +222,54 @@ CreateBzonesSpecifications <- list(
     item(
       NAME = "Azone",
       TABLE = "Azone",
+      GROUP = "Year",
       TYPE = "character",
-      UNITS = "none",
+      UNITS = "",
       PROHIBIT = "",
       ISELEMENTOF = ""
     ),
     item(
       NAME = "NumHh",
       TABLE = "Azone",
+      GROUP = "Year",
       TYPE = "integer",
-      UNITS = "persons",
+      UNITS = "households",
       PROHIBIT = c("NA", "<= 0"),
       ISELEMENTOF = ""
     ),
     item(
       NAME = "Marea",
       TABLE = "Azone",
+      GROUP = "Year",
       TYPE = "character",
-      UNITS = "none",
-      PROHIBIT = c("NA", "<= 0"),
+      UNITS = "",
+      PROHIBIT = "",
       ISELEMENTOF = ""
     ),
     item(
       NAME = "Metropolitan",
       TABLE = "Azone",
+      GROUP = "Year",
       TYPE = "double",
-      UNITS = "none",
+      UNITS = "",
       PROHIBIT = c("NA", "< 0", "> 1"),
       ISELEMENTOF = ""
     ),
     item(
       NAME = "Town",
       TABLE = "Azone",
-      TYPE = "integer",
-      UNITS = "persons",
+      GROUP = "Year",
+      TYPE = "double",
+      UNITS = "",
       PROHIBIT = c("NA", "< 0", "> 1"),
       ISELEMENTOF = ""
     ),
     item(
       NAME = "Rural",
       TABLE = "Azone",
-      TYPE = "integer",
-      UNITS = "persons",
+      GROUP = "Year",
+      TYPE = "double",
+      UNITS = "",
       PROHIBIT = c("NA", "< 0", "> 1"),
       ISELEMENTOF = ""
     )
@@ -211,8 +279,9 @@ CreateBzonesSpecifications <- list(
     item(
       NAME = "Bzone",
       TABLE = "Bzone",
+      GROUP = "Year",
       TYPE = "character",
-      UNITS = "none",
+      UNITS = "",
       NAVALUE = "NA",
       PROHIBIT = "",
       ISELEMENTOF = ""
@@ -220,8 +289,9 @@ CreateBzonesSpecifications <- list(
     item(
       NAME = "Azone",
       TABLE = "Bzone",
+      GROUP = "Year",
       TYPE = "character",
-      UNITS = "none",
+      UNITS = "",
       NAVALUE = "NA",
       PROHIBIT = "",
       ISELEMENTOF = ""
@@ -229,8 +299,9 @@ CreateBzonesSpecifications <- list(
     item(
       NAME = "Marea",
       TABLE = "Bzone",
+      GROUP = "Year",
       TYPE = "character",
-      UNITS = "none",
+      UNITS = "",
       NAVALUE = "NA",
       PROHIBIT = "",
       ISELEMENTOF = ""
@@ -238,8 +309,9 @@ CreateBzonesSpecifications <- list(
     item(
       NAME = "DevType",
       TABLE = "Bzone",
+      GROUP = "Year",
       TYPE = "character",
-      UNITS = "none",
+      UNITS = "",
       NAVALUE = "NA",
       PROHIBIT = "",
       ISELEMENTOF = c("Metropolitan", "Town", "Rural")
@@ -247,8 +319,9 @@ CreateBzonesSpecifications <- list(
     item(
       NAME = "NumHh",
       TABLE = "Bzone",
+      GROUP = "Year",
       TYPE = "integer",
-      UNITS = "none",
+      UNITS = "",
       NAVALUE = -1,
       PROHIBIT = c("NA", "<= 0"),
       ISELEMENTOF = "",
