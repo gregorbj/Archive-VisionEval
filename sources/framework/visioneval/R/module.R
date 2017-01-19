@@ -64,6 +64,32 @@ items <- list
 #' @return A data frame containing the estimation data.
 #' @export
 processEstimationInputs <- function(Inp_ls, FileName, ModuleName) {
+  #Define a function which expands a specification with multiple NAME items
+  expandSpec <- function(SpecToExpand_ls) {
+    Names_ <- unlist(SpecToExpand_ls$NAME)
+    Expanded_ls <- list()
+    for (i in 1:length(Names_)) {
+      Temp_ls <- SpecToExpand_ls
+      Temp_ls$NAME <- Names_[i]
+      Expanded_ls <- c(Expanded_ls, list(Temp_ls))
+    }
+    Expanded_ls
+  }
+  #Define a function to process a component of a specifications list
+  processComponent <- function(Component_ls) {
+    Result_ls <- list()
+    for (i in 1:length(Component_ls)) {
+      Temp_ls <- Component_ls[[i]]
+      if (length(Temp_ls$NAME) == 1) {
+        Result_ls <- c(Result_ls, list(Temp_ls))
+      } else {
+        Result_ls <- c(Result_ls, expandSpec(Temp_ls))
+      }
+    }
+    Result_ls
+  }
+  #Expand the specifications
+  Inp_ls <- processComponent(Inp_ls)
   #Try to load the estimation file
   FilePath <- paste0("inst/extdata/", FileName)
   if (!file.exists(FilePath)) {
