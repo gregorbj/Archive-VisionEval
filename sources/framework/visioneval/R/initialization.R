@@ -624,62 +624,66 @@ loadModelParameters <- function(ModelParamFile = "model_parameters.json") {
 parseModelScript <- function(FilePath = "run_model.R") {
   Script_ <- readLines(FilePath)
   RunModuleIdx_ <- grep("runModule", Script_)
-  StartIdx_ <- sapply(RunModuleIdx_, function(x) {
-    OpenParen_ <- grep("\\(", Script_)
-    OpenParen_[OpenParen_ >= x][1]
-  })
-  EndIdx_ <- sapply(RunModuleIdx_, function(x) {
-    CloseParen_ <- grep(")", Script_)
-    CloseParen_[CloseParen_ >= x][1]
-  })
-  removeCharacters <-
-    function(String,
-             ToRemove = c("runModule", " ", "\\(", ")", '\\\"')) {
+  getArgs <-
+    function(String){
+      String <-
+        substr(String,
+               regexpr("runModule", String) + 9,
+               nchar(String))
+      String <-
+        substring(String,
+                  1,
+                  regexpr("\\)", String))
+      ToRemove = c(" ", "\\(", ")", '\\\"')
       for (SubString in ToRemove) {
         String <- gsub(SubString, "", String)
       }
-      String
+      PrelimArgs_ <- unlist(strsplit(String, ","))
+      PrelimArgs_ls <- sapply(PrelimArgs_, function(x) strsplit(x, "="))
+      if (length(PrelimArgs_ls) == 3) {
+        Args_ <- c(ModuleName = "", PackageName = "", Year = "")
+        if (length(PrelimArgs_ls[[1]]) == 1) {
+          Args_["ModuleName"] <- PrelimArgs_ls[[1]]
+        } else {
+          ArgName <- PrelimArgs_ls[[1]][1]
+          if (ArgName %in% names(Args_)) {
+            Args_[ArgName] <- PrelimArgs_[[1]][2]
+          } else {
+            Error
+          }
+        }
+        if (length(PrelimArgs_ls[[2]]) == 1) {
+          Args_["PackageName"] <- PrelimArgs_ls[[2]]
+        } else {
+          ArgName <- PrelimArgs_ls[[2]][1]
+          if (ArgName %in% names(Args_)) {
+            Args_[ArgName] <- PrelimArgs_ls[[2]][2]
+          } else {
+            Error
+          }
+        }
+        if (length(PrelimArgs_ls[[3]]) == 1) {
+          Args_["Year"] <- PrelimArgs_ls[[3]]
+        } else {
+          ArgName <- PrelimArgs_ls[[3]][1]
+          if (ArgName %in% names(Args_)) {
+            Args_[ArgName] <- PrelimArgs_ls[[3]][2]
+          } else {
+            Error
+          }
+        }
+      } else {
+        Error
+      }
+      Args_
     }
-  getArgs <- function(Lines_, StartIdx, EndIdx) {
-    Extract_ <-
-      unlist(strsplit(
-        removeCharacters(paste(Lines_[StartIdx:EndIdx], collapse = " ")),
-        ","
-      ))
-    #Get module name
-    ModuleNameIdx <- grep("ModuleName", Extract_)
-    if (length(ModuleNameIdx) != 0) {
-      ModuleName <- unlist(strsplit(Extract_[ModuleNameIdx], "="))[2]
-    } else {
-      ModuleName <- Extract_[1]
-    }
-    #Get package name
-    PackageNameIdx <- grep("PackageName", Extract_)
-    if (length(PackageNameIdx) != 0) {
-      PackageName <- unlist(strsplit(Extract_[PackageNameIdx], "="))[2]
-    } else {
-      PackageName <- Extract_[2]
-    }
-    #Get time frame
-    TimeFrameIdx <- grep("TimeFrame", Extract_)
-    if (length(TimeFrameIdx) != 0) {
-      TimeFrame <- unlist(strsplit(Extract_[TimeFrameIdx], "="))[2]
-    } else {
-      TimeFrame <- Extract_[3]
-    }
-    #Return vector of results
-    c(
-      ModuleName = ModuleName,
-      PackageName = PackageName,
-      TimeFrame = TimeFrame
-    )
-  }
   ModuleCalls_ls <- list()
-  for (i in 1:length(StartIdx_)) {
+  for (i in 1:length(RunModuleIdx_)) {
     ModuleCalls_ls[[i]] <-
-      getArgs(Script_, StartIdx_[i], EndIdx_[i])
+      getArgs(Script_[RunModuleIdx_[i]])
   }
-  data.frame(do.call(rbind, ModuleCalls_ls), stringsAsFactors = FALSE)
+  AllArgs_df <- data.frame(do.call(rbind, ModuleCalls_ls), stringsAsFactors = FALSE)
+  unique(AllArgs_df)
 }
 
 
@@ -1206,7 +1210,8 @@ processModuleInputs <-
           GeoYrSpec_df[order(GeoYrSpec_df$Year, GeoYrSpec_df$Geo),]
         GeoYrData_df <-
           Data_df[order(Data_df$Year, Data_df$Geo), c("Geo", "Year")]
-        if (!all.equal(GeoYrSpec_df, GeoYrData_df)) {
+        if (!all.equal(GeoYrSpec_df$Geo, GeoYrData_df$Geo) |
+            !all.equal(GeoYrSpec_df$Year, GeoYrData_df$Year)) {
           Message <- paste(
             "Input file error. Error in the 'Geo' and 'Year' fields of the file",
             FileName, "that", ModuleName, "requires."
