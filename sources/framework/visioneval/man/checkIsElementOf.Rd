@@ -2,7 +2,7 @@
 % Please edit documentation in R/validation.R
 \name{checkIsElementOf}
 \alias{checkIsElementOf}
-\title{Check if values in set}
+\title{Check if data values are in a specified set of values}
 \usage{
 checkIsElementOf(Data_, SetElements_, DataName)
 }

@@ -4,14 +4,15 @@
 \alias{getDatasetAttr}
 \title{Get attributes of a dataset}
 \usage{
-getDatasetAttr(Name, Table, Year, DstoreListing_df)
+getDatasetAttr(Name, Table, Group, DstoreListing_df)
 }
 \arguments{
 \item{Name}{a string identifying the dataset name.}
 
 \item{Table}{a string identifying the table the dataset is a part of.}
 
-\item{Year}{a string or numeric representation of the year.}
+\item{Group}{a string or numeric representation of the group the table is a
+part of.}
 
 \item{DstoreListing_df}{a dataframe which lists the contents of the datastore
 as contained in the model state file.}

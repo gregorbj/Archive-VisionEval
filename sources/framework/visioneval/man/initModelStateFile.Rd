@@ -4,7 +4,7 @@
 \alias{initModelStateFile}
 \title{Initialize model state.}
 \usage{
-initModelStateFile(Dir = "defs", ParamFile = "parameters.json")
+initModelStateFile(Dir = "defs", ParamFile = "run_parameters.json")
 }
 \arguments{
 \item{Dir}{A string identifying the name of the directory where the global

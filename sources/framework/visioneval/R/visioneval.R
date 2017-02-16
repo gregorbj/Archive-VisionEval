@@ -51,79 +51,119 @@
 #' message if initialization has been successful.
 #' @export
 initializeModel <-
-  function(ParamDir = "defs",
-           RunParamFile = "run_parameters.json",
-           GeoFile = "geo.csv",
-           ModelParamFile = "model_parameters.json",
-           DatastoreToLoad = NULL) {
+  function(
+    ParamDir = "defs",
+    RunParamFile = "run_parameters.json",
+    GeoFile = "geo.csv",
+    ModelParamFile = "model_parameters.json",
+    LoadDatastore = NULL,
+    IgnoreDatastore = FALSE,
+    SaveDatastore = TRUE) {
+
     #Initialize model state and log files
     #------------------------------------
+    Msg <-
+      paste0(Sys.time(), " -- Initializing Model.")
+    print(Msg)
     initModelStateFile(Dir = ParamDir, ParamFile = RunParamFile)
     initLog()
+    writeLog(Msg)
+
     #Initialize geography and load model parameters
     #----------------------------------------------
-    if (is.null(DatastoreToLoad)) {
+    if (is.null(LoadDatastore) &
+        file.exists(getModelState()[["DatastoreName"]])) {
+      LoadDatastore <- getModelState()[["DatastoreName"]]
+    }
+    if (!is.null(LoadDatastore)) {
+      loadDatastore(
+        FileToLoad = LoadDatastore,
+        GeoFile = GeoFile,
+        SaveDatastore = SaveDatastore)
+    } else {
       initDatastore()
       readGeography(Dir = ParamDir, GeoFile = GeoFile)
       initDatastoreGeography()
       loadModelParameters(ModelParamFile = ModelParamFile)
-      #Or load existing model datastore
-    } else {
-      loadDatastore(FileToLoad = DatastoreToLoad, GeoFile = GeoFile)
     }
+
     #Parse script to make table of all the module calls & check whether present
     #--------------------------------------------------------------------------
     ModuleCalls_df <- parseModelScript(FilePath = "run_model.R")
     #Check that all module packages are installed and all modules are present
     ModuleCheck <- checkModulesExist(ModuleCalls_df = ModuleCalls_df)
-    #Make data transactions simulation list
-    #--------------------------------------
-    Transactions_ls <-
-      simDataTransactions(ModuleCalls_df = ModuleCalls_df)
-    #Check simulated transactions
-    #----------------------------
-    #Check whether modules are overwriting data items
-    if (length(Transactions_ls$Err) != 0) {
-      ErrorMsg <-
-        paste("One or more modules will overwrite dataset created by other modules.",
-              "Check log for details.")
-      writeLog(Transactions_ls$Err)
-      stop(ErrorMsg)
+
+    #Check whether the specifications for all modules are proper
+    #-----------------------------------------------------------
+    HasSpecErrors <- FALSE
+    for (i in 1:nrow(ModuleCalls_df)) {
+      ModuleName <- ModuleCalls_df[i, "ModuleName"]
+      PackageName <- ModuleCalls_df[i, "PackageName"]
+      Specs_ls <- getModuleSpecs(ModuleName, PackageName)
+      Errors_ <- checkModuleSpecs(Specs_ls, ModuleName)
+      if (length(Errors_) != 0) {
+        Msg <-
+          paste0("Specifications for module '", ModuleName,
+                 "' have the following errors.")
+        writeLog(Msg)
+        writeLog(Errors_)
+        HasSpecErrors <- TRUE
+        rm(Msg)
+      }
+      rm(ModuleName, PackageName, Specs_ls, Errors_)
     }
-    #Check data transactions
-    Check_ls <- checkSimTransactions(Transactions_ls = Transactions_ls)
-    HasErrors_ <- unlist(lapply(Check_ls, function(x) x$HasErrors))
-    HasWarnings_ <- unlist(lapply(Check_ls, function(x) x$HasWarnings))
-    if (any(HasWarnings_)) {
-      WarningMsg_ <-
-        do.call(c, lapply(Check_ls[HasWarnings_], function(x) x$Warnings))
-      writeLog(WarningMsg_)
-      warning("Data transactions check has one or more warnings. Check log for listing.")
+    if (HasSpecErrors) {
+      Msg <-
+        paste0("One or more modules has specification errors. ",
+               "Check log for detailed descriptions.")
+      stop(Msg)
     }
-    if (any(HasErrors_)) {
-      ErrorMsg_ <-
-        do.call(c, lapply(Check_ls[HasErrors_], function(x) x$Errors))
-      writeLog(ErrorMsg_)
-      stop("Data transactions check has one or more errors! Check log for listing.")
+
+    #Simulate model run
+    #------------------
+    #Function call is disabled until simDataTransactions can handle situation
+    #where module calls for different years that don't cause table conflicts
+    #do not report non-existent conflicts.
+    #simDataTransactions(ModuleCalls_df)
+
+    #Check and process module inputs
+    #-------------------------------
+    #Set up a list to store processed inputs for all modules
+    ProcessedInputs_ls <- list()
+    #Process inputs for all modules and add results to list
+    for (i in 1:nrow(ModuleCalls_df)) {
+      Module <- ModuleCalls_df$ModuleName[i]
+      Package <- ModuleCalls_df$PackageName[i]
+      ModuleSpecs_ls <- getModuleSpecs(Module, Package)
+      if (!is.null(ModuleSpecs_ls$Inp)) {
+        ProcessedInputs_ls[[Module]] <-
+          processModuleInputs(ModuleSpecs_ls, Module)
+      }
     }
-    #Load inputs into datastore
-    #--------------------------
-    AllInp_ls <- Transactions_ls$Out$Inp
-    #First check whether there are errors
-    InpCheck_ls <-
-      processModuleInputs(Inp_ls = AllInp_ls, Dir = "inputs", OnlyCheck = TRUE)
-    #If there are no errors then load all the inputs
-    if (InpCheck_ls["FileErrors"] == 0 & InpCheck_ls["DataErrors"] == 0) {
-      processModuleInputs(Inp_ls = AllInp_ls, Dir = "inputs", OnlyCheck = FALSE)
-    } else {
-      ErrorMsg <-
-        paste("There are one or more errors in scenario input files.",
-              "Check log for details.")
-      stop(ErrorMsg)
+    #Check whether there are any input errors
+    HasErrors <-
+      any(unlist(lapply(ProcessedInputs_ls, function(x) {
+        x$Errors != 0
+      })))
+    if (HasErrors) {
+      stop("Input files have errors. Check the log for details.")
     }
+
+    #Load model inputs into the datastore
+    #------------------------------------
+    for (i in 1:nrow(ModuleCalls_df)) {
+      Module <- ModuleCalls_df$ModuleName[i]
+      Package <- ModuleCalls_df$PackageName[i]
+      ModuleSpecs_ls <- getModuleSpecs(Module, Package)
+      if (!is.null(ModuleSpecs_ls$Inp)) {
+        inputsToDatastore(ProcessedInputs_ls[[Module]], ModuleSpecs_ls, Module)
+      }
+    }
+
     #If no errors print out message
     #------------------------------
-    SuccessMsg <- "Model successfully initialized."
+    SuccessMsg <-
+      paste0(Sys.time(), " -- Model successfully initialized.")
     writeLog(SuccessMsg)
     print(SuccessMsg)
   }
@@ -144,141 +184,47 @@ initializeModel <-
 #' @return None. The function writes results to the specified locations in the
 #'   datastore and prints a message to the console when the module is being run.
 #' @export
-
-runModule <- function(ModuleName, PackageName, Year) {
+runModule <- function(ModuleName, PackageName) {
   #Log and print starting message
   #------------------------------
-  Message <- paste("Starting module", ModuleName)
-  writeLog(Message)
-  print(Message)
+  Msg <-
+    paste0(Sys.time(), " -- Starting module '", ModuleName,
+           "' for year '", Year, "'.")
+  writeLog(Msg)
+  print(Msg)
   #Load the package and module
   #---------------------------
   Function <- paste0(PackageName, "::", ModuleName)
   Specs <- paste0(PackageName, "::", ModuleName, "Specifications")
-  requireNamespace(PackageName)
+  #requireNamespace(PackageName)
   M <- list()
   M$Func <- eval(parse(text = Function))
   M$Specs <- processModuleSpecs(eval(parse(text = Specs)))
-  #Read the model run state
-  #------------------------
-  G <- getModelState()
-  G$Year <- Year
-  #Run procedure if RunBy = Region
-  #-------------------------------
+  #Run module
+  #----------
   if (M$Specs$RunBy == "Region") {
-    #Initialize list that will be passed to module
-    L <- list()
-    #Add the model run state to the input list
-    L$G <- G
-    #Fetch data identified in Get specs
-    for (i in 1:length(M$Specs$Get)) {
-      Spec_ls <- M$Specs$Get[[i]]
-      #Identify Group, Table and Name to get data from
-      if (Spec_ls$GROUP == "Global") Group <- "Global"
-      if (Spec_ls$GROUP == "BaseYear") Group <- G$BaseYear
-      if (Spec_ls$GROUP == "Year") Group <- Year
-      Table <- Spec_ls$TABLE
-      Name <- Spec_ls$NAME
-      #Fetch the data and add to the input list
-      Data_ <- readFromTable(Name, Table, Group)
-      L[[Name]] <- Data_
-    }
-    #Run module and assign return value to list (R)
+    #Get data from datastore
+    L <- getFromDatastore(M$Specs, Geo = NULL)
+    #Run module and store results in datastore
     R <- M$Func(L)
-    #Write results to datastore
-    SetSpecs_ls <- M$Specs$Set
-    for (i in 1:length(SetSpecs_ls)) {
-      Spec_ls <- SetSpecs_ls[[i]]
-      #Identify the Group, Table and Name to assign to
-      if (Spec_ls$GROUP == "Global") Group <- "Global"
-      if (Spec_ls$GROUP == "BaseYear") Group <- G$BaseYear
-      if (Spec_ls$GROUP == "Year") Group <- Year
-      Table <- Spec_ls$TABLE
-      Name <- Spec_ls$NAME
-      #Assign a MODULE attribute to the specifications
-      Spec_ls$MODULE <- ModuleName
-      #Assign table LENGTH and data SIZE attributes
-      if (is.null(Spec_ls$LENGTH) & !is.null(R$LENGTH[Table])) {
-        Spec_ls$LENGTH <- R$LENGTH[Table]
-      }
-      if (is.null(Spec_ls$SIZE) & !is.null(R$SIZE[Name])) {
-        Spec_ls$SIZE <- R$SIZE[Name]
-      }
-      #Write the dataset
-      writeToTable(Data_ = R[[Name]],
-                   Spec_ls = Spec_ls,
-                   Group = Group,
-                   Index = NULL)
-    }
-    #Run procedure by geographic area
-    #--------------------------------
+    setInDatastore(R, M$Specs, ModuleName, Geo = NULL)
   } else {
-    #Create index function for each Get specification
-    GetIdx_ <- lapply(M$Specs$Get, function(x) {
-      if (x$GROUP == "Global") Group <- "Global"
-      if (x$GROUP == "BaseYear") Group <- G$BaseYear
-      if (x$GROUP == "Year") Group <- Year
-      createIndex(M$Specs$RunBy, x$TABLE, Group)
-    })
-    #Create index function for each Set specifications that is not ignored
-    SetIdx_ <- lapply(M$Specs$Set, function(x) {
-      if (x$GROUP == "Global") Group <- "Global"
-      if (x$GROUP == "BaseYear") Group <- G$BaseYear
-      if (x$GROUP == "Year") Group <- Year
-      createIndex(M$Specs$RunBy, x$TABLE, Year)
-    })
-    #Get vector of geography names to run by
-    RunByNames <- readFromTable(Name = M$Specs$RunBy, Table = M$Specs$RunBy, Year)
-    #Run for each geographic area
-    for (ByName in RunByNames) {
-      #Initialize list that will be passed to module
-      L <- list()
-      #Add the model run state to the input list
-      L$G <- G
-      #Make list of module inputs specified by Get specs
-      for (i in 1:length(M$Specs$Get)) {
-        Spec_ls <- M$Specs$Get[[i]]
-        #Identify Group, Table and Name to get data from
-        if (Spec_ls$GROUP == "Global") Group <- "Global"
-        if (Spec_ls$GROUP == "BaseYear") Group <- G$BaseYear
-        if (Spec_ls$GROUP == "Year") Group <- Year
-        Table <- Spec_ls$TABLE
-        Name <- Spec_ls$NAME
-        #Generate the position index
-        Idx_ <- GetIdx_[[i]](ByName)
-        #Read the data and assign to the list
-        Data_ <- readFromTable(Name, Table, Group, Index = Idx_)
-        L[[Name]] <- Data_
-      }
-      #Run module and assign return value to list (R)
+    GeoCategory <- M$Specs$RunBy
+    Geo_ <- readFromTable(GeoCategory, GeoCategory, Year)
+    #Run module for each geographic area
+    for (Geo in Geo_) {
+      #Get data from datastore for geographic area
+      L <- getFromDatastore(M$Specs, Geo = Geo)
+      #Run model for geographic area and store results in datastore
       R <- M$Func(L)
-      #Write results to datastore
-      for (i in 1:length(M$Specs$Set)) {
-        Spec_ls <- M$Specs$Set[[i]]
-        #Identify the Group, Table and Name to assign to
-        if (Spec_ls$GROUP == "Global") Group <- "Global"
-        if (Spec_ls$GROUP == "BaseYear") Group <- G$BaseYear
-        if (Spec_ls$GROUP == "Year") Group <- Year
-        Table <- Spec_ls$TABLE
-        Name <- Spec_ls$NAME
-        #Assign a MODULE attribute to the specifications
-        Spec_ls$MODULE <- ModuleName
-        #Generate the position index
-        Idx_ <- SetIdx_[[i]](ByName)
-        #Assign table LENGTH and data SIZE attributes
-        if (is.null(Spec_ls$LENGTH) & !is.null(R$LENGTH[Table])) {
-          Spec_ls$LENGTH <- R$LENGTH[Table]
-        }
-        if (is.null(Spec_ls$SIZE) & !is.null(R$SIZE[Name])) {
-          Spec_ls$SIZE <- R$SIZE[Name]
-        }
-        #Write the dataset
-        writeToTable(Data_ = R[[Name]],
-                     Spec_ls = Spec_ls,
-                     Group = Group,
-                     Index = Idx_)
-      }
+      setInDatastore(R, M$Specs, ModuleName, Geo = Geo)
     }
   }
-  unloadNamespace(PackageName)
+  #Log and print ending message
+  #----------------------------
+  Msg <-
+    paste0(Sys.time(), " -- Finish module '", ModuleName,
+           "' for year '", Year, "'.")
+  writeLog(Msg)
+  print(Msg)
 }

@@ -4,38 +4,57 @@
 \alias{initializeModel}
 \title{Initialize model.}
 \usage{
-initializeModel(Dir = "defs", ParamFile = "parameters.json",
-  GeoFile = "geo.csv")
+initializeModel(ParamDir = "defs", RunParamFile = "run_parameters.json",
+  GeoFile = "geo.csv", ModelParamFile = "model_parameters.json",
+  LoadDatastore = NULL, IgnoreDatastore = FALSE, SaveDatastore = TRUE)
 }
 \arguments{
-\item{Dir}{A string identifying the relative or absolute path to the
+\item{ParamDir}{A string identifying the relative or absolute path to the
 directory where the parameter and geography definition files are located.
 The default value is "defs".}
 
-\item{ParamFile}{A string identifying the name of a JSON-formatted text file
-that contains global parameters needed by the framework in order to set up
-the working environment. The default value is "parameters.json".}
+\item{RunParamFile}{A string identifying the name of a JSON-formatted text
+file that contains parameters needed to identify and manage the model run.
+The default value is "run_parameters.json".}
 
 \item{GeoFile}{A string identifying the name of a text file in
 comma-separated values format that contains the geographic specifications
 for the model. The default value is "geo.csv".}
+
+\item{ModelParamFile}{A string identifying the name of a JSON-formatted text
+file that contains global model parameters that are important to a model and
+may be shared by several modules.}
+
+\item{DatastoreToLoad}{NULL or a string identifying the relative or absolute
+path to a datastore to be copied to serve as the starting datastore for the
+model run. The default value is NULL (no datastore will be copied).}
 }
 \value{
-None
+None. The function prints to the log file messages which identify
+whether or not there are errors in initialization. It also prints a success
+message if initialization has been successful.
 }
 \description{
-\code{initializeModel}Function initializes a VisionEval model given the
-location of files that establish model parameters and geography.
+\code{initializeModel}Function initializes a VisionEval model, loading all
+parameters and inputs, and making checks to ensure that model can run
+successfully.
 }
 \details{
 This function does several things to initialize the model environment and
-datastore including: initializing a file that is used to keep track of the
-state of key model run variables and the datastore, initializes a log to
-which messages are written, creates the datastore and initializes its
-structure, reads in and checks the geographic specifications, and initializes
-the geography in the datastore. <TO DO: ENABLE LOADING OF EXISTING DATASTORE,
-CHECK WHETHER ALL SPECIFIED PACKAGES EXIST, WHETHER SPECIFIED INPUT FILES
-EXIST AND CONTENTS ARE CORRECT, AND WHETHER ALL DATA DEPENDENCIES WIL BE
-SATISFIED.>
+datastore including:
+1) Initializing a file that is used to keep track of the state of key model
+run variables and the datastore;
+2) Initializes a log to which messages are written;
+3) Creates the datastore and initializes its structure, reads in and checks
+the geographic specifications and initializes the geography in the datastore,
+or loads an existing datastore if one has been identified;
+4) Parses the model run script to identify the modules in their order of
+execution and checks whether all the identified packages are installed and
+the modules exist in the packages;
+5) Checks that all data requested from the datastore will be available when
+it is requested and that the request specifications match the datastore
+specifications;
+6) Checks all of the model input files to determine whether they they are
+complete and comply with specifications.
 }
 

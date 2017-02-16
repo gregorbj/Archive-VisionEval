@@ -4,8 +4,7 @@
 \alias{runModule}
 \title{Run module.}
 \usage{
-runModule(ModuleName, PackageName, Year, IgnoreInp_ = NULL,
-  IgnoreSet_ = NULL)
+runModule(ModuleName, PackageName)
 }
 \arguments{
 \item{ModuleName}{A string identifying the name of a module object.}
@@ -14,16 +13,10 @@ runModule(ModuleName, PackageName, Year, IgnoreInp_ = NULL,
 a part of.}
 
 \item{Year}{A string identifying the run year.}
-
-\item{IgnoreInp_}{A string vector identifying the names of any inputs
-specified by the module that are to be ignored.}
-
-\item{IgnoreSet_}{A string vector identifying the names of any data items in
-the module's 'Set' specifications that are to be ignored.}
 }
 \value{
 None. The function writes results to the specified locations in the
-  datastore.
+  datastore and prints a message to the console when the module is being run.
 }
 \description{
 \code{runModule} runs a model module.

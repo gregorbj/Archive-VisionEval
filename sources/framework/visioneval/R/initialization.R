@@ -108,6 +108,7 @@ initModelStateFile <- function(Dir = "defs", ParamFile = "run_parameters.json") 
     stop(Message)
   } else {
     Parm <- fromJSON(ParamFilePath)
+
     setModelState(Parm)
   }
   TRUE
@@ -188,6 +189,9 @@ writeLog <- function(Msg = "") {
 #' @param GeoFile A string identifying the name of the geography definition file
 #'   (see 'readGeography' function) that is consistent with the saved datastore.
 #'   The geography definition file must be located in the 'defs' directory.
+#' @param SaveDatastore A logical identifying whether an existing datastore
+#'   will be saved. It is renamed by appending the system time to the name. The
+#'   default value is TRUE.
 #' @return TRUE if the datastore is loaded. It copies the saved datastore to
 #'   working directory as 'datastore.h5'. If a 'datastore.h5' file already
 #'   exists, it first renames that file as 'archive-datastore.h5'. The function
@@ -195,13 +199,19 @@ writeLog <- function(Msg = "") {
 #'   and the contents of the loaded datastore. If the stored file does not exist
 #'   an error is thrown.
 #' @export
-loadDatastore <- function(FileToLoad, GeoFile) {
+loadDatastore <- function(FileToLoad, GeoFile, SaveDatastore = TRUE) {
   GeoFile <- paste0("defs/", GeoFile)
   G <- getModelState()
   #If data store exists, rename
   DatastoreName <- G$DatastoreName
-  if (file.exists(DatastoreName)) {
-    file.rename(DatastoreName, paste("archive", DatastoreName, sep = "-"))
+  if (file.exists(DatastoreName) & SaveDatastore) {
+    TimeString <- gsub(" ", "_", as.character(Sys.time()))
+    ArchiveDatastoreName <-
+      paste0(unlist(strsplit(DatastoreName, "\\."))[1],
+            "_", TimeString, ".",
+            unlist(strsplit(DatastoreName, "\\."))[2])
+    ArchiveDatastoreName <- gsub(":", "-", ArchiveDatastoreName)
+    file.copy(DatastoreName, ArchiveDatastoreName)
   }
   if (file.exists(FileToLoad)) {
     file.copy(FileToLoad, DatastoreName)
@@ -437,8 +447,7 @@ initDatastoreGeography <- function() {
                        NAVALUE = "NA",
                        PROHIBIT = "",
                        ISELEMENTOF = "",
-                       SIZE = max(nchar(Azones_)),
-                       LENGTH = length(Azones_))
+                       SIZE = max(nchar(Azones_)))
   if(G$BzoneSpecified) {
     Bzones_ <- unique(G$Geo_df$Bzone)
     BzoneSpec_ls <- list(MODULE = "visioneval",
@@ -449,12 +458,10 @@ initDatastoreGeography <- function() {
                          NAVALUE = "NA",
                          PROHIBIT = "",
                          ISELEMENTOF = "",
-                         SIZE = max(nchar(Bzones_)),
-                         LENGTH = length(Bzones_))
+                         SIZE = max(nchar(Bzones_)))
   }
   if(G$CzoneSpecified) {
     Czones_ <- unique(G$Geo_df$Czone)
-    Czone <- length(Czones_)
     CzoneSpec_ls <- list(MODULE = "visioneval",
                          NAME = "Czone",
                          TABLE = "Czone",
@@ -463,18 +470,21 @@ initDatastoreGeography <- function() {
                          NAVALUE = "NA",
                          PROHIBIT = "",
                          ISELEMENTOF = "",
-                         SIZE = max(nchar(Czones_)),
-                         LENGTH = length(Czones_))
+                         SIZE = max(nchar(Czones_)))
   }
   #Initialize geography tables and zone datasets
   for (Year in G$Years) {
-    initTable(list(TABLE = "Region", LENGTH = 1), Group = Year)
+    initTable(Table = "Region", Group = Year, Length = 1)
+    initTable(Table = "Azone", Group = Year, Length = length(Azones_))
     initDataset(AzoneSpec_ls, Group = Year)
+    initTable(Table = "Marea", Group = Year, Length = length(Mareas_))
     initDataset(MareaSpec_ls, Group = Year)
     if(G$BzoneSpecified) {
+      initTable(Table = "Bzone", Group = Year, Length = length(Bzones_))
       initDataset(BzoneSpec_ls, Group = Year)
     }
     if(G$CzoneSpecified) {
+      initTable(Table = "Czone", Group = Year, Length = length(Czones_))
       initDataset(CzoneSpec_ls, Group = Year)
     }
   }
@@ -577,6 +587,7 @@ loadModelParameters <- function(ModelParamFile = "model_parameters.json") {
   } else {
     Param_df <- fromJSON(ParamFile)
     Group <- "Global"
+    initTable(Table = "Model", Group = "Global", Length = 1)
     for (i in 1:nrow(Param_df)) {
       Type <- Param_df$TYPE[i]
       if (Type == "character") {
@@ -622,8 +633,13 @@ loadModelParameters <- function(ModelParamFile = "model_parameters.json") {
 #' identify the 'ModuleName', the 'PackageName', and the 'TimeFrame'.
 #' @export
 parseModelScript <- function(FilePath = "run_model.R") {
+  writeLog("Parsing model script")
   Script_ <- readLines(FilePath)
   RunModuleIdx_ <- grep("runModule", Script_)
+  Errors_ <- character(0)
+  addError <- function(Error) {
+    Errors_ <<- c(Errors_, Error)
+  }
   getArgs <-
     function(String){
       String <-
@@ -640,16 +656,22 @@ parseModelScript <- function(FilePath = "run_model.R") {
       }
       PrelimArgs_ <- unlist(strsplit(String, ","))
       PrelimArgs_ls <- sapply(PrelimArgs_, function(x) strsplit(x, "="))
-      if (length(PrelimArgs_ls) == 3) {
-        Args_ <- c(ModuleName = "", PackageName = "", Year = "")
+      Args_ <- c(ModuleName = "", PackageName = "")
+      #If both arguments to runModule function call are present process
+      if (length(PrelimArgs_ls) == 2) {
         if (length(PrelimArgs_ls[[1]]) == 1) {
           Args_["ModuleName"] <- PrelimArgs_ls[[1]]
         } else {
           ArgName <- PrelimArgs_ls[[1]][1]
           if (ArgName %in% names(Args_)) {
-            Args_[ArgName] <- PrelimArgs_[[1]][2]
+            Args_[ArgName] <- PrelimArgs_ls[[1]][2]
           } else {
-            Error
+            addError(
+              paste(
+                "First argument for the following call to 'runModule' has incorrect argument name.",
+                "\n", String
+              )
+            )
           }
         }
         if (length(PrelimArgs_ls[[2]]) == 1) {
@@ -659,21 +681,23 @@ parseModelScript <- function(FilePath = "run_model.R") {
           if (ArgName %in% names(Args_)) {
             Args_[ArgName] <- PrelimArgs_ls[[2]][2]
           } else {
-            Error
+            addError(
+              paste(
+                "Second argument for the following call to 'runModule' has incorrect argument name.",
+                "\n", String
+              )
+            )
           }
         }
-        if (length(PrelimArgs_ls[[3]]) == 1) {
-          Args_["Year"] <- PrelimArgs_ls[[3]]
-        } else {
-          ArgName <- PrelimArgs_ls[[3]][1]
-          if (ArgName %in% names(Args_)) {
-            Args_[ArgName] <- PrelimArgs_ls[[3]][2]
-          } else {
-            Error
-          }
-        }
+
+        #If both arguments are not present return an error message
       } else {
-        Error
+        addError(
+          paste(
+            "The following call to 'runModule' is missing one or both arguments.",
+            "\n", String
+          )
+        )
       }
       Args_
     }
@@ -682,10 +706,16 @@ parseModelScript <- function(FilePath = "run_model.R") {
     ModuleCalls_ls[[i]] <-
       getArgs(Script_[RunModuleIdx_[i]])
   }
-  AllArgs_df <- data.frame(do.call(rbind, ModuleCalls_ls), stringsAsFactors = FALSE)
-  unique(AllArgs_df)
+  if (length(Errors_) != 0) {
+    writeLog("One or more 'runModule' function calls have errors as follows:")
+    writeLog(Errors_)
+    stop("One or more errors in model run script. Must fix before model initialization can be completed.")
+  } else {
+    writeLog("Success parsing model script")
+    AllArgs_df <- data.frame(do.call(rbind, ModuleCalls_ls), stringsAsFactors = FALSE)
+    return(unique(AllArgs_df))
+  }
 }
-
 
 #CHECK MODULE AVAILABILITY
 #=========================
@@ -748,8 +778,12 @@ checkModulesExist <- function(ModuleCalls_df) {
                  Pkg)
         writeLog(Message)
       }
-      return(FALSE)
-      #Otherwise return TRUE because all packages and modules are accounted for
+      Msg <-
+        paste0("One or more modules are missing from the specified packages. ",
+               "This must be corrected before model can be run. ",
+               "Details can be found in the log.")
+      stop(Msg)
+    #Otherwise return TRUE because all packages and modules are accounted for
     } else {
       return(TRUE)
     }
@@ -786,14 +820,135 @@ checkModulesExist <- function(ModuleCalls_df) {
 #' defined for the module in the package.
 #' @export
 getModuleSpecs <- function(ModuleName, PackageName) {
-  requireNamespace(PackageName)
-  Spec_ls <- eval(parse(text = paste0(PackageName, "::", ModuleName, "Specifications")))
-  unloadNamespace(PackageName)
-  Spec_ls
+  eval(parse(text = paste0(PackageName, "::", ModuleName, "Specifications")))
 }
 # Test_ls <-
 #   getModuleSpecs(ModuleName = "CreateBzones", PackageName = "vedemo1")
 # rm(Test_ls)
+
+
+#CHECK MODULE SPECIFICATIONS
+#===========================
+#' Checks module specifications for completeness and for incorrect entries
+#'
+#' \code{checkModuleSpecs}Function checks module specifications for completeness
+#' and for proper values.
+#'
+#' This function reads a processed module specifications list and checks whether
+#' the specifications are complete and whether the values are appropriate.
+#'
+#' @param Spec_ls a list containing the module specifications as produced
+#' by the 'processModuleSpecs' function.
+#' @param ModuleName a string that identifies the name of the module (used for
+#' to identify the module in any error messages.)
+#' @return A vector containing messages identifying any errors that are found.
+#' @export
+checkModuleSpecs <- function(Specs_ls, ModuleName) {
+  Errors_ <- character(0)
+  #Define function to check one Inp, Get, or Set specification
+  checkSpec <- function(Spec_ls, SpecName, SpecType, SpecNum, DataType, Set = NULL) {
+    if (is.null(Spec_ls[[SpecName]])) {
+      Msg <-
+        paste0("Missing ", SpecName, " specification for ", SpecType,
+               " specification #", SpecNum, ".")
+      Errors_ <<- c(Errors_, Msg)
+    } else {
+      if (any(sapply(Spec_ls[[SpecName]], function(x) length(x) == 0)) |
+          any(sapply(Spec_ls[[SpecName]], function(x) x == "")) |
+          any(sapply(Spec_ls[[SpecName]], function(x) mode(x) != DataType))) {
+        Msg <-
+          paste0(SpecName, " specification for ", SpecType, " specification #",
+                 SpecNum, " is either empty or has the wrong type. ",
+                 "Must be a non-empty entry of type ", DataType, ".")
+        Errors_ <<- c(Errors_, Msg)
+      } else {
+        if (!is.null(Set)) {
+          if (!(Spec_ls[[SpecName]] %in% Set)) {
+            Msg <-
+              paste0(SpecName, " specification for ", SpecType, " specification #",
+                     SpecNum, " does not have an allowed value. ",
+                     "It must be one of the following values: ",
+                     paste(Set, collapse = ", "), ".")
+            Errors_ <<- c(Errors_, Msg)
+          }
+        }
+        if(SpecType == "Inp" &
+           SpecName == "FILE" &
+           length(grep(".csv", Spec_ls[[SpecName]])) == 0) {
+          Msg <-
+            paste0(SpecName, " specification for ", SpecType, " specification #",
+                   SpecNum, " must be a file name with a '.csv' extension.")
+          Errors_ <<- c(Errors_, Msg)
+        }
+      }
+    }
+  }
+  #Check RunBy
+  AllowedVals_ <- c("Region", "Azone", "Bzone", "Czone", "Marea")
+  if (!(Specs_ls$RunBy %in% AllowedVals_)) {
+    Msg <-
+      paste0(
+        "'RunBy' specification for module '", ModuleName,
+        "' does not have allowed value. ",
+        "Allowed values are 'Region', 'Azone', 'Bzone', 'Czone', and 'Marea'."
+      )
+    Errors_ <- c(Errors_, Msg)
+  }
+  #Check NewInpTable if component exists
+  if (!is.null(Specs_ls$NewInpTable)) {
+    for (i in 1:length(Specs_ls$NewInpTable)) {
+      checkSpec(Specs_ls$NewInpTable[[i]], "TABLE", "NewInpTable", i, "character")
+      checkSpec(Specs_ls$NewInpTable[[i]], "GROUP", "NewInpTable", i, "character",
+                c("Global", "Year"))
+    }
+  }
+  #Check NewSetTable if component exists
+  if (!is.null(Specs_ls$NewSetTable)) {
+    for (i in 1:length(Specs_ls$NewSetTable)) {
+      checkSpec(Specs_ls$NewSetTable[[i]], "TABLE", "NewSetTable", i, "character")
+      checkSpec(Specs_ls$NewSetTable[[i]], "GROUP", "NewSetTable", i, "character",
+                c("Global", "Year"))
+    }
+  }
+  #Check Inp specifications if component exists
+  if (!is.null(Specs_ls$Inp)) {
+    for (i in 1:length(Specs_ls$Inp)) {
+      checkSpec(Specs_ls$Inp[[i]], "NAME", "Inp", i, "character")
+      checkSpec(Specs_ls$Inp[[i]], "FILE", "Inp", i, "character")
+      checkSpec(Specs_ls$Inp[[i]], "TABLE", "Inp", i, "character")
+      checkSpec(Specs_ls$Inp[[i]], "GROUP", "Inp", i, "character",
+                c("Global", "Year"))
+      checkSpec(Specs_ls$Inp[[i]], "TYPE", "Inp", i, "character",
+                c("character", "integer", "double", "logical"))
+      checkSpec(Specs_ls$Inp[[i]], "UNITS", "Inp", i, "character")
+    }
+  }
+  #Check Get specifications
+  for (i in 1:length(Specs_ls$Get)) {
+    checkSpec(Specs_ls$Get[[i]], "NAME", "Get", i, "character")
+    checkSpec(Specs_ls$Get[[i]], "TABLE", "Get", i, "character")
+    checkSpec(Specs_ls$Get[[i]], "GROUP", "Get", i, "character",
+              c("Global", "Year", "BaseYear"))
+    checkSpec(Specs_ls$Get[[i]], "TYPE", "Get", i, "character",
+              c("character", "integer", "double", "logical"))
+    checkSpec(Specs_ls$Get[[i]], "UNITS", "Get", i, "character")
+  }
+  #Check Set specifications
+  for (i in 1:length(Specs_ls$Set)) {
+    checkSpec(Specs_ls$Set[[i]], "NAME", "Set", i, "character")
+    checkSpec(Specs_ls$Set[[i]], "TABLE", "Set", i, "character")
+    checkSpec(Specs_ls$Set[[i]], "GROUP", "Set", i, "character",
+              c("Global", "Year"))
+    checkSpec(Specs_ls$Set[[i]], "TYPE", "Set", i, "character",
+              c("character", "integer", "double", "logical"))
+    checkSpec(Specs_ls$Set[[i]], "UNITS", "Set", i, "character")
+  }
+  #Return errors
+  Errors_
+}
+# Test Code
+# source("tests/data/bad_test_specs.R")
+# Errors_ <- checkModuleSpecs(BadTestSpec_ls, "BadSpecTest")
 
 
 #PROCESS MODULE SPECIFICATIONS
@@ -837,20 +992,27 @@ processModuleSpecs <- function(Spec_ls) {
     }
     Result_ls
   }
-  #Create output list with components
-  Out_ls <-
-    list(
-      RunBy = Spec_ls$RunBy,
-      Inp = list(),
-      Get = list(),
-      Set = list()
-    )
-  #Process the list components
-  Out_ls$Inp <- processComponent(Spec_ls$Inp)
-  Out_ls$Get <- processComponent(Spec_ls$Get)
-  Out_ls$Set <- processComponent(Spec_ls$Set)
+  #Process the list components and return the results
+  Out_ls <- list()
+  Out_ls$RunBy <- Spec_ls$RunBy
+  if (!is.null(Spec_ls$NewInpTable)) {
+    Out_ls$NewInpTable <- Spec_ls$NewInpTable
+  }
+  if (!is.null(Spec_ls$NewSetTable)) {
+    Out_ls$NewSetTable <- Spec_ls$NewSetTable
+  }
+  if (!is.null(Spec_ls$Inp)) {
+    Out_ls$Inp <- processComponent(Spec_ls$Inp)
+  }
+  if (!is.null(Spec_ls$Get)) {
+    Out_ls$Get <- processComponent(Spec_ls$Get)
+  }
+  if (!is.null(Spec_ls$Set)) {
+    Out_ls$Set <- processComponent(Spec_ls$Set)
+  }
   Out_ls
 }
+# Test Code
 # item <- list
 # items <- list
 # source("tests/data/test_specs.R")
@@ -863,433 +1025,325 @@ processModuleSpecs <- function(Spec_ls) {
 #' Create simulation of datastore transactions.
 #'
 #' \code{simDataTransactions}Function loads all module specifications in order
-#' and creates a simulated listing of the data which is in the datastore and
-#' the requests of data from the datastore.
+#' (by run year) and creates a simulated listing of the data which is in the
+#' datastore and the requests of data from the datastore and checks whether
+#' tables will be present to put datasets in and that datasets will be present
+#' that data is to be retrieved from.
 #'
-#' This function steps through a data frame of module calls as produced by
-#' 'parseModelScript', loads and processes the module specifications, and
-#' organizes the specifications in a list which represents the data which is in
-#' the datastore at each step, and the data which is requested from the
-#' datastore at each step. The list includes the identification of groups,
-#' tables, and data sets, data set attributes, and the relative order when a
-#' data set is placed in the data set and when it is requested from the data
-#' set. The function also collects all of the 'Inp' components of all modules
-#' into one list to facilitate processing all inputs during model
-#' initialization.
+#' This function creates a list of the datastore listings for the working
+#' datastore and for all datastore references. The list includes a 'Global'
+#' component, in which 'Global' references are simulated, components for each
+#' model run year, in which 'Year' references are simulated, and if the base
+#' year is not one of the run years, a base year component, in which base year
+#' references are simulated. For each model run year the function steps through
+#' a data frame of module calls as produced by 'parseModelScript', and loads and
+#' processes the module specifications in order: adds 'NewInpTable' references,
+#' adds 'Inp' dataset references, checks whether references to datasets
+#' identified in 'Get' specifications are present, adds 'NewSetTable' references,
+#' and adds 'Set' dataset references. The function compiles a vector of error
+#' and warning messages. Error messages are made if: 1) a 'NewInpTable' or
+#' 'NewSetTable' specification of a module would create a new table for a table
+#' that already exists; 2) a dataset identified by a 'Get' specification would
+#' not be present in the working datastore or any referenced datastores; 3) the
+#' 'Get' specifications for a dataset would not be consistent with the
+#' specifications for the dataset in the datastore. The function compiles
+#' warnings if a 'Set' specification will cause existing data in the working
+#' datastore to be overwritten. The function writes warning and error messages
+#' to the log and stops program execution if there are any errors.
 #'
 #' @param ModuleCalls_df A data frame of module calls as produced by the
 #' 'parseModelScript' function.
-#' @return A list having 3 components: Inp, Dstore, Get. Inp is a list of all
-#' of the module 'Inp' specifications. Dstore is a list organized as the
-#' datastore would be organized with the exception that numbered year groups
-#' are represented by a 'BaseYear' and a 'Year' group.
+#' @return There is no return value. The function has the side effect of
+#' writing messages to the log and stops program execution if there are any
+#' errors.
 #' @export
 simDataTransactions <- function(ModuleCalls_df) {
-  #Load model state
   G <- getModelState()
-  #Initialize outputs list
-  Out_ls <-
-    list(Inp = list(),
-         Get = list(),
-         Dstore = list(
-           Global = list(),
-           BaseYear = list(),
-           Year = list()
-         ))
-  #Initialize errors vector
+
+  #Initialize errors and warnings vectors
+  #--------------------------------------
   Errors_ <- character(0)
-  #Add datastore listing information
-  Datastore_df <- G$Datastore
-  for (i in 1:nrow(Datastore_df)) {
-    Names_ <- unlist(strsplit(Datastore_df$groupname[i], "/"))
-    if (length(Names_) == 3) {
-      #Identify GROUP, TABLE, and NAME
-      if (Names_[1] == "Global") {
-        GROUP <- Names_[1]
-      } else {
-        if (Names_[1] == G$BaseYear) {
-          GROUP <- "BaseYear"
+  addError <- function(Msg) {
+    Errors_ <<- c(Errors_, Msg)
+  }
+  Warnings_ <- character(0)
+  addWarning <- function(Msg) {
+    Warnings_ <<- c(Warnings_, Msg)
+  }
+
+  #Make a list to store the working datastore and all referenced datastores
+  #------------------------------------------------------------------------
+  RunYears_ <- getYears()
+  BaseYear <- G$BaseYear
+  if (BaseYear %in% RunYears_) {
+    Years_ <- RunYears_
+  } else {
+    Years_ <- c(BaseYear, RunYears_)
+  }
+  Dstores_ls <-
+    list(
+      Global = list()
+    )
+  for (Year in Years_) Dstores_ls[[Year]] <- list()
+
+  #Add the working datastore inventory to the datastores list
+  #----------------------------------------------------------
+  Dstores_ls[["Global"]][[G$DatastoreName]] <- G$Datastore
+  for (Year in RunYears_) {
+    Dstores_ls[[Year]][[G$DatastoreName]] <- G$Datastore
+  }
+
+  #Function to get datastore inventory corresponding to datastore reference
+  #------------------------------------------------------------------------
+  getInventoryRef <- function(DstoreRef) {
+    SplitRef_ <- unlist(strsplit(DstoreRef, "/"))
+    RefHead <- paste(SplitRef_[-length(SplitRef_)], collapse = "/")
+    paste(RefHead, "ModelState.Rda", sep = "/")
+  }
+
+  #Get datastore inventories for datastore references
+  #--------------------------------------------------
+  if (!is.null(G$DatastoreReferences)) {
+    RefNames_ <- names(G$DatastoreReferences)
+    for (Name in RefNames_) {
+      Refs_ <- G$DatastoreReferences[[Name]]
+      for (Ref in Refs_) {
+        if (file.exists(Ref)) {
+          Dstores_ls[[Name]][[Ref]] <-
+            getModelState("Datastore", FileName = getInventoryRef(Ref))
         } else {
-          GROUP <- "Year"
+          Msg <-
+            paste0("The file '", Ref,
+                   "' included in the 'DatastoreReferences' in the ",
+                   "'run_parameters.json' file is not present.")
+          addError(Msg)
         }
       }
-      TABLE <- Names_[2]
-      #Add TABLE component if does not exist
-      if (is.null(Out_ls$Dstore[[GROUP]][[TABLE]])) {
-        Out_ls$Dstore[[GROUP]][[TABLE]] <- list()
-      }
-      #Create NAME component and add attributes
-      NAME <- Names_[3]
-      Attr_ls <- getDatasetAttr(Names_[3], Names_[2], Names_[1], Datastore_df)
-      CREATOR <- "Initialization"
-      Out_ls$Dstore[[GROUP]][[TABLE]][[NAME]] <-
-        list(CREATOR = CREATOR,
-             ORDER = 0,
-             TYPE = Attr_ls$TYPE,
-             UNITS = Attr_ls$UNITS,
-             NAVALUE = Attr_ls$NAVALUE,
-             PROHIBIT = Attr_ls$PROHIBIT,
-             ISELEMENTOF = Attr_ls$ISELEMENTOF)
     }
   }
-  #Iterate through module calls and process specifications
-  for (i in 1:nrow(ModuleCalls_df)) {
-    Module <- ModuleCalls_df$ModuleName[i]
-    Package <- ModuleCalls_df$PackageName[i]
-    InSpec_ls <-
-      getModuleSpecs(Module, Package)
-    Spec_ls <- processModuleSpecs(InSpec_ls)
-    ###Process INP Specifications###
-    for (j in 1:length(Spec_ls$Inp)) {
-      Ls <- Spec_ls$Inp[[j]]
-      GROUP <- Ls$GROUP
-      TABLE <- Ls$TABLE
-      NAME <- Ls$NAME
-      Ls$MODULE <- paste(Package, Module, sep = "/")
-      Out_ls$Inp <- c(Out_ls$Inp, list(Ls))
-      #Add TABLE component if does not exist
-      if (is.null(Out_ls$Dstore[[GROUP]][[TABLE]])) {
-        Out_ls$Dstore[[GROUP]][[TABLE]] <- list()
-      }
-      #If dataset NAME already exists, make an error message
-      if (!is.null(Out_ls$Dstore[[GROUP]][[TABLE]][[NAME]])) {
-        CREATOR <- Out_ls$Dstore[[GROUP]][[TABLE]][[NAME]]$CREATOR
-        ErrMsg <-
-          paste0("Input processing for module '", Module,
-                 "' in package '", Package,
-                 "' will overwrite data set '", GROUP, "/", TABLE, "/", NAME,
-                 "that was created by '", CREATOR)
-        Errors_ <- c(Errors_, ErrMsg)
-      } else {
-        #Otherwise create NAME component and add attributes
-        CREATOR <- paste(Package, Module, sep = "/")
-        Out_ls$Dstore[[GROUP]][[TABLE]][[NAME]] <-
-          list(CREATOR = CREATOR,
-               ORDER = 0,
-               TYPE = Ls$TYPE,
-               UNITS = Ls$UNITS,
-               NAVALUE = Ls$NAVALUE,
-               PROHIBIT = Ls$PROHIBIT,
-               ISELEMENTOF = Ls$ISELEMENTOF)
-      }
-      rm(Ls, GROUP, TABLE, NAME, CREATOR)
+
+  #Define function to add table reference to datastore inventory
+  #-------------------------------------------------------------
+  addTableRef <- function(Dstore_df, TableSpec_) {
+    Group <- TableSpec_$GROUP
+    if (Group == "Year") Group <- Year
+    Table <- TableSpec_$TABLE
+    #Check if table already exists
+    HasTable <- checkTableExistence(Table, Group, Dstore_df)
+    #If table exists then error, otherwise add reference to table
+    if (HasTable) {
+      Msg <-
+        paste0("Error: MakeInpTable specification for module '", TableSpec_$MODULE,
+               "' will create an input table '", Table,
+               "' that already exists in the working datastore.")
+      addError(Msg)
+      return()
+    } else {
+      NewDstore_df <- data.frame(
+        group = c(Dstore_df$group, paste0("/", Group)),
+        name = c(Dstore_df$name, Table),
+        groupname = c(Dstore_df$groupname, paste0(Group, "/", Table)),
+        stringsAsFactors = FALSE
+      )
     }
-    rm(j)
-    ###Process GET Specifications###
-    for (j in 1:length(Spec_ls$Get)) {
-      Ls <- Spec_ls$Get[[j]]
-      Ls$REQUESTOR <- paste(Package, Module, sep = "/")
-      Ls$ORDER <- i
-      Out_ls$Get <- c(Out_ls$Get, list(Ls))
-      rm(Ls)
-    }
-    rm(j)
-    ###Process SET Specifications###
-    for (j in 1:length(Spec_ls$Set)) {
-      Ls <- Spec_ls$Set[[j]]
-      GROUP <- Ls$GROUP
-      TABLE <- Ls$TABLE
-      NAME <- Ls$NAME
-      #Add TABLE component if does not exist
-      if (is.null(Out_ls$Dstore[[GROUP]][[TABLE]])) {
-        Out_ls$Dstore[[GROUP]][[TABLE]] <- list()
-      }
-      #If dataset NAME already exists, make an error message
-      if (!is.null(Out_ls$Dstore[[GROUP]][[TABLE]][[NAME]])) {
-        CREATOR <- Out_ls$Dstore[[GROUP]][[TABLE]][[NAME]]$CREATOR
-        ErrMsg <-
-          paste0("Input processing for module '", Module,
-                 "' in package '", Package,
-                 "' will overwrite data set '", GROUP, "/", TABLE, "/", NAME,
-                 "that was created by '", CREATOR)
-        Errors_ <- c(Errors_, ErrMsg)
-      } else {
-        #Otherwise create NAME component and add attributes
-        CREATOR <- paste(Package, Module, sep = "/")
-        Out_ls$Dstore[[GROUP]][[TABLE]][[NAME]] <-
-          list(CREATOR = CREATOR,
-               ORDER = i,
-               TYPE = Ls$TYPE,
-               UNITS = Ls$UNITS,
-               NAVALUE = Ls$NAVALUE,
-               PROHIBIT = Ls$PROHIBIT,
-               ISELEMENTOF = Ls$ISELEMENTOF)
-      }
-      rm(Ls, GROUP, TABLE, NAME, CREATOR)
-    }
-    rm(j)
+    NewDstore_df$attributes <- c(Dstore_df$attributes, list(TableSpec_))
+    NewDstore_df
   }
-  list(Out = Out_ls, Err = Errors_)
-}
 
-# Test_df <- parseModelScript("tests/data/run_model.R")
-# Test_ls <- simDataTransactions(Test_df)
-
-
-#CHECK SIMULATED DATASTORE TRANSACTIONS FOR CONSISTENCY
-#======================================================
-#' Check the simulation of datastore transactions.
-#'
-#' \code{checkSimTransactions}Function checks the list which simulates datastore
-#' transactions created by the 'simDataTransactions' function for consistency
-#' between requests for data in 'Get' specifications with data that would be
-#' present in the datastore when the Get requests are made.
-#'
-#' This function evaluates the simulated datastore transactions list created by
-#' the 'simDataTransactions' function for consistency between requests for data
-#' in 'Get' specifications with data that would be present in the datastore when
-#' the Get requests are made. The consistency checks are:
-#' 1. Whether the requested data set would be in the datastore
-#' 2. Whether the requested data set would be in the datastore prior to when the
-#' request is made.
-#' 3. Whether the specifications of the data in the datastore are consistent
-#' with the specifications for the data that are requested.
-#' The function returns a list which contains the results of all data checks.
-#' Each component is a list that contains the results of the checks for one
-#' dataset. The component identifies the package and module requesting the
-#' dataset (Module), the name of the group/table/dataset being checked
-#' (Dataset), whether there are any errors (HasErrors), error messages if there
-#' are any errors (Errors), whether there are any warnings (HasWarnings), and
-#' warning messages if there are any warnings (Warnings).
-#'
-#' @param Transactions_ls A list as produced by the 'simDataTransactions'
-#' function.
-#' @return A list containing the results of each dataset check.
-#' @export
-checkSimTransactions <- function(Transactions_ls) {
-  Check_ls <- list()
-  Get_ls <- Transactions_ls$Out$Get
-  Dstore_ls <- Transactions_ls$Out$Dstore
-  for (i in 1:length(Get_ls)) {
-    Check_ls[[i]] <- list()
-    Err_ <- character(0)
-    Warn_ <- character(0)
-    GROUP <- Get_ls[[i]]$GROUP
-    TABLE <- Get_ls[[i]]$TABLE
-    NAME <- Get_ls[[i]]$NAME
-    ORDER <- Get_ls[[i]]$NAME
-    REQUESTOR <- Get_ls[[i]]$REQUESTOR
-    Check_ls[[i]]$Module <- REQUESTOR
-    Check_ls[[i]]$Dataset <- paste(GROUP, TABLE, NAME, sep = "/")
-    if (is.null(Dstore_ls[[GROUP]][[TABLE]][[NAME]])) {
-      Message <-
-        paste0("Package/module ", REQUESTOR, " has Get specification for data ",
-               GROUP, "/", TABLE, "/", NAME,
-               " that will not be in the datastore.")
-      Err_ <- c(Err_, Message)
-      rm(Message)
-    } else {
-      CREATOR <- Dstore_ls[[GROUP]][[TABLE]][[NAME]]$CREATOR
-      if (ORDER <= Dstore_ls[[GROUP]][[TABLE]][[NAME]]$ORDER) {
-        Message <-
-          paste0("Package/module ", REQUESTOR, " has Get specification for data ",
-                 GROUP, "/", TABLE, "/", NAME,
-                 " that will only present in the datastore after it is requested. ",
-                 "Package/module ", CREATOR,
-                 " which supplies the dataset needs to be run before this module.")
-        Err_ <- c(Err_, Message)
-        rm(Message)
-      } else {
-        AttrToCheck_ <- c("TYPE", "UNITS", "PROHIBIT", "ISELEMENTOF")
-        GetAttr_ls <- Get_ls[[i]][AttrToCheck_]
-        DstoreAttr_ls <-
-          Dstore_ls[[GROUP]][[TABLE]][[NAME]][AttrToCheck_]
-        SpecCheck_ls <-
-          checkSpecConsistency(GetAttr_ls, DstoreAttr_ls)
-        if (length(SpecCheck_ls$Errors != 0)) {
-          Message <-
-            paste0("Package/module ", REQUESTOR, " has Get specification for data ",
-                   GROUP, "/", TABLE, "/", NAME,
-                   " that is not consistent with Set specification of package/module ",
-                   CREATOR, " as follows.")
-          Err_ <- c(Err_, Message, SpecCheck_ls$Errors)
-          rm(Message)
-        }
-        if (length(SpecCheck_ls$Warnings != 0)) {
-          Message <-
-            paste0("Package/module ", REQUESTOR, " has Get specification for data UNITS ",
-                   GROUP, "/", TABLE, "/", NAME,
-                   " that is not consistent with Set specification of package/module ",
-                   CREATOR, " as follows.")
-          Warn_ <- c(Warn_, Message, SpecCheck_ls$Warnings)
-          rm(Message)
-        }
-        rm(AttrToCheck_, GetAttr_ls, DstoreAttr_ls, SpecCheck_ls)
+  #Define function to add dataset reference to datastore inventory
+  #---------------------------------------------------------------
+  addDatasetRef <- function(Dstore_df, DatasetSpec_) {
+    Group <- DatasetSpec_$GROUP
+    if (Group == "Year") Group <- Year
+    Table <- DatasetSpec_$TABLE
+    Name <- DatasetSpec_$NAME
+    #Check if dataset already exists
+    HasDataset <- checkDataset(Name, Table, Group, Dstore_df)
+    #If dataset exists then warn and check consistency of specifications
+    if (HasDataset) {
+      #Add warning that existing dataset will be overwritten
+      Msg <-
+        paste0("Module '", Module, "' will overwrite dataset '", Name,
+               "' in table '", Table, "'.")
+      addWarning(Msg)
+      #Check attributes are consistent
+      DstoreDatasetAttr_ls <-
+        getDatasetAttr(Name, Table, Group, Dstore_df)
+      AttrConsistency_ls <-
+        checkSpecConsistency(DatasetSpec_, DstoreDatasetAttr_ls)
+      if (length(AttrConsistency_ls$Errors != 0)) {
+        addError(AttrConsistency_ls$Errors)
       }
-      rm(CREATOR)
-    }
-    if (length(Err_) == 0) {
-      Check_ls[[i]]$HasErrors <- FALSE
+      return(Dstore_df)
     } else {
-      Check_ls[[i]]$HasErrors <- TRUE
-      Check_ls[[i]]$Errors <- Err_
+      NewDstore_df <- data.frame(
+        group = c(Dstore_df$group, paste0("/", Group)),
+        name = c(Dstore_df$name, Name),
+        groupname = c(Dstore_df$groupname, paste0(Group, "/", Table, "/", Name)),
+        stringsAsFactors = FALSE
+      )
+      NewDstore_df$attributes <-
+        c(Dstore_df$attributes,
+          list(DatasetSpec_[c("NAVALUE", "SIZE", "TYPE", "UNITS")]))
+      NewDstore_df
     }
-    if (length(Warn_) == 0) {
-      Check_ls[[i]]$HasWarnings <- FALSE
-    } else {
-      Check_ls[[i]]$HasWarnings <- TRUE
-      Check_ls[[i]]$Warnings <- Warn_
-    }
-    rm(GROUP, TABLE, NAME, ORDER, REQUESTOR)
   }
-  Check_ls
-}
 
+  #Iterate through run years and modules to simulate model run
+  #-----------------------------------------------------------
+  for (Year in RunYears_) {
+    #Iterate through module calls
+    for (i in 1:nrow(ModuleCalls_df)) {
+      Module <- ModuleCalls_df$ModuleName[i]
+      Package <- ModuleCalls_df$PackageName[i]
+      ModuleSpecs_ls <- processModuleSpecs(getModuleSpecs(Module, Package))
 
-#PROCESS MODULE INPUTS
-#=====================
-#' Check input files and load into datastore if correct.
-#'
-#' \code{processModuleInputs} checks whether specified module inputs meet
-#' specifications and load into datastore if OnlyCheck argument is false.
-#'
-#' This function checks whether all the specified scenario inputs meet
-#' specifications. Checks include whether the specified files exist, whether the
-#' files include data for all years and specified zones, and whether every data
-#' item meets specifications. Data specifications.
-#'
-#' @param Inp_ls A list which meets standards for specifying input
-#' characteristics.
-#' @param ModuleName A string identifying the module name.
-#' @param Dir A string identifying the relative path name to the directory where
-#'   input files are located.
-#' @param OnlyCheck A logical value. If TRUE, the function will only check the
-#'   inputs. If FALSE, the function will check the inputs and load the input
-#'   data into the datastore.
-#' @return A numeric vector having 3 elements (FileErrors, DataErrors,
-#'   DataWarnings). Each element identifies how may data errors or warnings were
-#'   found.
-#' @export
-processModuleInputs <-
-  function(Inp_ls, Dir = "inputs", OnlyCheck = TRUE, Ignore_ = NULL) {
-    G <- getModelState()
-    FileName <- ""
-    FileErr_ <- character(0)
-    for (i in 1:length(Inp_ls)) {
-      Spec_ls <- Inp_ls[[i]]
-      DataErr_ls <-
-        list(Errors = character(0), Warnings = character(0))
-      #Check for file errors only if not already done
-      if (Spec_ls$FILE != FileName) {
-        FileName <- Spec_ls$FILE
-        #Check that input file exists
-        if (!file.exists(file.path(Dir, FileName))) {
-          Message <- paste(
-            "Input file error.", "File", FileName, "required by",
-            ModuleName, "is not present in the 'inputs' directory."
-          )
-          writeLog(Message)
-          FileErr_ <- c(FileErr_, Message)
-          next()
+      #Add 'Inp' table references to the working datastore inventory
+      #-------------------------------------------------------------
+      if (!is.null(ModuleSpecs_ls$NewInpTable)) {
+        for (j in 1:length(ModuleSpecs_ls$NewInpTable)) {
+          Spec_ls <- ModuleSpecs_ls$NewInpTable[[j]]
+          Spec_ls$MODULE <- Module
+          if (Spec_ls[["GROUP"]] == "Global") {
+            RefGroup <- "Global"
+          } else {
+            RefGroup <- Year
+          }
+          Dstore_df <- Dstores_ls[[RefGroup]][[G$DatastoreName]]
+          if (!((RefGroup == "Global") & (Year != RunYears_[1]))) {
+            Dstores_ls[[RefGroup]][[G$DatastoreName]] <-
+            addTableRef(Dstore_df, Spec_ls)
+          }
+          rm(Spec_ls, RefGroup, Dstore_df)
         }
+        rm(j)
       }
-      #Load data
-      Data_df <- read.csv(file.path(Dir, FileName), as.is = TRUE)
-      #Check the specifications for GROUP
-      Group <- Spec_ls$GROUP
-      if (!(Group %in% c("Global", "BaseYear", "Year"))) {
-        Message <- paste0(
-          "Specified 'GROUP' (", Group, ") does not have allowed value",
-          " which must be either 'Global', 'BaseYear', or 'Year'."
-        )
-        writeLog(Message)
-        FileErr_ <- c(FileErr_,Message)
-        next()
+
+      #Add 'Inp' dataset references to the working datastore inventory
+      #---------------------------------------------------------------
+      if (!is.null(ModuleSpecs_ls$Inp)) {
+        for (j in 1:length(ModuleSpecs_ls$Inp)) {
+          Spec_ls <- ModuleSpecs_ls$Inp[[j]]
+          Spec_ls$MODULE <- Module
+          if (Spec_ls[["GROUP"]] == "Global") {
+            RefGroup <- "Global"
+          } else {
+            RefGroup <- Year
+          }
+          Dstore_df <- Dstores_ls[[RefGroup]][[G$DatastoreName]]
+          if (!((RefGroup == "Global") & (Year != RunYears_[1]))) {
+            Dstores_ls[[RefGroup]][[G$DatastoreName]] <-
+              addDatasetRef(Dstore_df, Spec_ls)
+          }
+          rm(Spec_ls, RefGroup, Dstore_df)
+        }
+        rm(j)
       }
-      #If is a 'Year' group table, check whether geography & year entries are correct
-      if (Group == "Year") {
-        GeoYrSpec_df <- do.call(rbind, lapply(G$Years, function(x) {
-          Geo_ <- readFromTable(Spec_ls$TABLE, Spec_ls$TABLE, x, Index = NULL)
-          data.frame(
-            Geo = Geo_,
-            Year = rep(as.integer(x), length(Geo_)),
-            stringsAsFactors = FALSE
-          )
-        }))
-        GeoYrSpec_df <-
-          GeoYrSpec_df[order(GeoYrSpec_df$Year, GeoYrSpec_df$Geo),]
-        GeoYrData_df <-
-          Data_df[order(Data_df$Year, Data_df$Geo), c("Geo", "Year")]
-        if (!all.equal(GeoYrSpec_df$Geo, GeoYrData_df$Geo) |
-            !all.equal(GeoYrSpec_df$Year, GeoYrData_df$Year)) {
-          Message <- paste(
-            "Input file error. Error in the 'Geo' and 'Year' fields of the file",
-            FileName, "that", ModuleName, "requires."
-          )
-          writeLog(Message)
-          FileErr_ <- c(FileErr_, Message)
-          next()
-        }
-      }
-      #If is a 'BaseYear' group table, check whether geography entries are correct
-      if (Group == "BaseYear") {
-        GeoSpec_ <-
-          readFromTable(Spec_ls$TABLE, Spec_ls$TABLE, G$BaseYear, Index = NULL)
-        GeoData_ <- Data_df$Geo
-        HasMissingGeo_ <- any(!(GeoData_ %in% GeoSpec_))
-        HasExtraGeo_ <- any(!(GeoSpec_ %in% GeoData_))
-        if (HasMissingGeo_ | HasExtraGeo_) {
-          Message <- paste(
-            "Input file error. Error in the 'Geo' field of the file",
-            FileName, "that", ModuleName, "requires."
-          )
-          writeLog(Message)
-          FileErr_ <- c(FileErr_, Message)
-          next()
-        }
-      }
-      #Check dataset
-      DatasetName <- Spec_ls$NAME
-      if (!DatasetName %in% Ignore_) {
-        Data_ <- Data_df[[DatasetName]]
-        DataCheck_ls <-
-          checkDataConsistency(DatasetName, Data_, Spec_ls)
-        if (length(DataCheck_ls$Errors) != 0) {
-          writeLog(DataCheck_ls$Errors)
-          DataErr_ls$Errors <-
-            c(DataErr_ls$Errors, DataCheck_ls$Errors)
-        }
-        if (length(DataCheck_ls$Warnings) != 0) {
-          writeLog(DataCheck_ls$Warnings)
-          DataErr_ls$Warnings <-
-            c(DataErr_ls$Warnings, DataCheck_ls$Warnings)
-        }
-      }
-      #If no errors and OnlyCheck is FALSE, then load the data into the datastore
-      if ((length(FileErr_) == 0) &
-          (length(DataErr_ls$Errors) == 0) & (OnlyCheck == FALSE)) {
-        if (Group == "Global") {
-          DtoWrite_ <- Data_df[,DatasetName]
-          Spec_ls$LENGTH <- length(DtoWrite_)
-          writeToTable(DtoWrite_, Spec_ls, Group)
-        }
-        if (Group == "BaseYear") {
-          DstoreGeo_ <- readFromTable(Spec_ls$TABLE, Spec_ls$TABLE, G$BaseYear)
-          DtoWrite_ <-
-            YearData_df[[DatasetName]][match(DstoreGeo_, Data_df$Geo)]
-          writeToTable(DtoWrite_, Spec_ls, G$BaseYear)
-        }
-        if (Group == "Year") {
-          for (Year in G$Years) {
-            DstoreGeo_ <- readFromTable(Spec_ls$TABLE, Spec_ls$TABLE, Year)
-            YearData_df <- Data_df[Data_df$Year == Year,]
-            DtoWrite_ <-
-              YearData_df[[DatasetName]][match(DstoreGeo_, Data_df$Geo)]
-            writeToTable(DtoWrite_, Spec_ls, Year)
+
+      #Check for presence of 'Get' dataset references in datastore inventory
+      #---------------------------------------------------------------------
+      if (!is.null(ModuleSpecs_ls$Get)) {
+        for (j in 1:length(ModuleSpecs_ls$Get)) {
+          Spec_ls <- ModuleSpecs_ls$Get[[j]]
+          Group <- Spec_ls[["GROUP"]]
+          Table <- Spec_ls[["TABLE"]]
+          Name <- Spec_ls[["NAME"]]
+          if (Group == "Global") {
+            Group <- "Global"
+          }
+          if (Group == "BaseYear") {
+            Group <- G$BaseYear
+          }
+          if (Group == "Year") {
+            Group <- Year
+          }
+          DatasetFound <- FALSE
+          for (k in 1:length(Dstores_ls[[Group]])) {
+            Dstore_df <- Dstores_ls[[Group]][[k]]
+            DatasetInDstore <- checkDataset(Name, Table, Group, Dstore_df)
+            if (!DatasetInDstore) {
+              next()
+            } else {
+              DatasetFound <- TRUE
+              DstoreAttr_ <- getDatasetAttr(Name, Table, Group, Dstore_df)
+              AttrConsistency_ls <-
+                checkSpecConsistency(Spec_ls, DstoreAttr_)
+              if (length(AttrConsistency_ls$Errors != 0)) {
+                addError(AttrConsistency_ls$Errors)
+              }
+              rm(DstoreAttr_, AttrConsistency_ls)
+            }
+            rm(Dstore_df, DatasetInDstore)
+          }
+          if (!DatasetFound) {
+            Msg <-
+              paste0("Module '", Module,
+                     "' has a 'Get' specification for dataset '", Name,
+                     "' in table '", Table,
+                     "' that will not be present in the working datastore or ",
+                     "any referenced datastores when it is needed.")
+            addError(Msg)
           }
         }
       }
-    }
-    Result_ <- c(
-      FileErrors = 0, DataErrors = 0, DataWarnings = 0
-    )
-    if (length(DataErr_ls$Errors) != 0)
-      Result_["DataErrors"] <- length(DataErr_ls$Errors)
-    if (length(DataErr_ls$Warnings) != 0)
-      Result_["DataWarnings"] <- length(DataErr_ls$Warnings)
-    if (length(FileErr_) != 0)
-      Result_["FileErrors"] <- length(FileErr_)
-    Result_
-  }
 
+      #Add 'Set' table references to the working datastore inventory
+      #-------------------------------------------------------------
+      if (!is.null(ModuleSpecs_ls$NewSetTable)) {
+        for (j in 1:length(ModuleSpecs_ls$NewSetTable)) {
+          Spec_ls <- ModuleSpecs_ls$NewSetTable[[j]]
+          Spec_ls$MODULE <- Module
+          if (Spec_ls[["GROUP"]] == "Global") {
+            RefGroup <- "Global"
+          } else {
+            RefGroup <- Year
+          }
+          Dstore_df <- Dstores_ls[[RefGroup]][[G$DatastoreName]]
+          Dstores_ls[[RefGroup]][[G$DatastoreName]] <-
+            addTableRef(Dstore_df, Spec_ls)
+          rm(Spec_ls, RefGroup, Dstore_df)
+        }
+      }
+
+      #Add 'Set' dataset references to the working datastore inventory
+      #---------------------------------------------------------------
+      if (!is.null(ModuleSpecs_ls$Set)) {
+        for (j in 1:length(ModuleSpecs_ls$Set)) {
+          Spec_ls <- ModuleSpecs_ls$Set[[j]]
+          Spec_ls$MODULE <- Module
+          if (Spec_ls[["GROUP"]] == "Global") {
+            Group <- "Global"
+          } else {
+            Group <- Year
+          }
+          Dstore_df <- Dstores_ls[[Group]][[G$DatastoreName]]
+          Dstores_ls[[Group]][[G$DatastoreName]] <-
+            addDatasetRef(Dstore_df, Spec_ls)
+          rm(Spec_ls, Group, Dstore_df)
+        }
+      }
+
+      rm(Module, Package, ModuleSpecs_ls)
+    }
+  }
+  writeLog("Simulating model run.")
+  if (length(Warnings_) != 0) {
+    Msg <-
+      paste0("Model run simulation had one or more warnings. ",
+             "Datasets will be be overwritten when the model runs. ",
+             "Check that this is what it intended. ")
+    writeLog(Msg)
+    writeLog(Warnings_)
+  }
+  if (length(Errors_) == 0) {
+    writeLog("Model run simulation completed without identifying any errors.")
+  } else {
+    Msg <-
+      paste0("Model run simulation has found one or more errors. ",
+             "The following errors must be corrected before the model may be run.")
+    writeLog(Msg)
+    writeLog(Errors_)
+    stop(paste(Msg, "Check log for details."))
+  }
+}
 

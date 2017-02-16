@@ -10,69 +10,6 @@
 #datastore listing (Datastore) that is maintained in the model state file.
 
 
-#CHECK GROUP EXISTENCE
-#=====================
-#' Check existence of named group in the datastore
-#'
-#' \code{checkGroup} checks whether datastore has the specified group
-#'
-#' This function checks whether the datastore has the specified group. Allowed
-#' inputs are
-#'
-#' @param Group A string or numeric representation of the group to check.
-#' @param DstoreListing_df a dataframe which lists the contents of the datastore
-#'   as contained in the model state file.
-#' @return A string representation of the group.
-#' @export
-checkGroup <- function(Group, DstoreListing_df) {
-  #Group <- as.character(Group)
-  if (!(Group %in% DstoreListing_df$groupname)) {
-    Message <- paste("Group", Group, "has not been created in the datastore.")
-    writeLog(Message)
-    stop(Message)
-  } else {
-    return(Group)
-  }
-}
-
-
-#CHECK TABLE EXISTENCE
-#=====================
-#' Check table existence
-#'
-#' \code{checkTable} checks whether datastore contains a specified table
-#'
-#' This function checks whether the datastore has a group for the specified
-#' table and datastore group. If so, it returns the full path name to the table.
-#'
-#' @param Table a string representation of the table name.
-#' @param Group a string or numeric representation of the group.
-#' @param DstoreListing_df a dataframe which lists the contents of the datastore
-#'   as contained in the model state file.
-#' @param ThrowError a logical identifying whether function execution should be
-#' stopped if an error is found. The default value is TRUE.
-#' @return A string representation of the full path name for the table in the
-#' datastore.
-#' @export
-checkTable <- function(Table, Group, DstoreListing_df, ThrowError = TRUE) {
-  Group <- checkGroup(Group, DstoreListing_df)
-  Table <- as.character(Table)
-  TableName <- file.path(Group, Table)
-  TableExists <- TableName %in% DstoreListing_df$groupname
-  if (!TableExists) {
-    Message <- paste("Group", TableName, "has not been created in the datastore.")
-    writeLog(Message)
-    if (ThrowError) {
-      stop(Message)
-    } else {
-      return(list(FALSE, TableName))
-    }
-  } else {
-    return(list(TRUE, TableName))
-  }
-}
-
-
 #CHECK DATASET EXISTENCE
 #=======================
 #' Check dataset existence
@@ -91,31 +28,16 @@ checkTable <- function(Table, Group, DstoreListing_df, ThrowError = TRUE) {
 #' part of.
 #' @param DstoreListing_df a dataframe which lists the contents of the datastore
 #'   as contained in the model state file.
-#' @param ThrowError a logical value that determines whether an error should be
-#'   thrown or whether the results of the check should just be returned to the
-#'   calling function.
-#' @return A string identifying the full path name for the dataset in the
-#'   datastore.
+#' @return A logical identifying whether the dataset is in the datastore
 #' @export
-checkDataset <- function(Name, Table, Group, DstoreListing_df, ThrowError = TRUE) {
+checkDataset <- function(Name, Table, Group, DstoreListing_df) {
   Name <- as.character(Name)
   Table <- as.character(Table)
   Group <- as.character(Group)
-  TableName <- checkTable(Table, Group, DstoreListing_df)[[2]]
-  DatasetName <- file.path(TableName, Name)
+  #TableName <- checkTable(Table, Group, DstoreListing_df)[[2]]
+  DatasetName <- file.path(Group, Table, Name)
   DatasetExists <- DatasetName %in% DstoreListing_df$groupname
-  if (!DatasetExists) {
-    Message <-
-      paste("Dataset", DatasetName, "has not been initialized in the datastore.")
-    writeLog(Message)
-    if (ThrowError) {
-      stop(Message)
-    } else {
-      return(list(FALSE, DatasetName))
-    }
-  } else {
-    return(list(TRUE, DatasetName))
-  }
+  ifelse (DatasetExists, TRUE, FALSE)
 }
 
 
@@ -137,9 +59,57 @@ checkDataset <- function(Name, Table, Group, DstoreListing_df, ThrowError = TRUE
 #' @return A named list of the dataset attributes.
 #' @export
 getDatasetAttr <- function(Name, Table, Group, DstoreListing_df) {
-  DatasetName <- checkDataset(Name, Table, Group, DstoreListing_df)[[2]]
+  DatasetName <- file.path(Group, Table, Name)
+  #checkDataset(Name, Table, Group, DstoreListing_df)[[2]]
   DatasetIdx <- which(DstoreListing_df$groupname == DatasetName)
   DstoreListing_df$attributes[[DatasetIdx]]
+}
+
+
+#CHECK WHETHER TABLE EXISTS
+#==========================
+#' Check whether table exists in the datastore
+#'
+#' \code{checkTableExistence} checks whether a table is present in the
+#' datastore.
+#'
+#' This function checks whether a table is present in the datastore.
+#'
+#' @param Table a string identifying the table.
+#' @param Group a string or numeric representation of the group the table is a
+#' part of.
+#' @param DstoreListing_df a dataframe which lists the contents of the datastore
+#'   as contained in the model state file.
+#' @return A logical identifying whether a table is present in the datastore.
+#' @export
+checkTableExistence <- function(Table, Group, DstoreListing_df) {
+  TableName <- file.path(Group, Table)
+  TableName %in% DstoreListing_df$groupname
+}
+
+
+#GET LENGTH OF TABLE IN DATASTORE
+#================================
+#' Get the length of a table in the datastore
+#'
+#' \code{getTableLength} retrieves the LENGTH attribute for a table in the
+#' datastore.
+#'
+#' This function extracts the LENGTH attribute for a table in the datastore.
+#'
+#' @param Table a string identifying the table.
+#' @param Group a string or numeric representation of the group the table is a
+#' part of.
+#' @param DstoreListing_df a dataframe which lists the contents of the datastore
+#'   as contained in the model state file.
+#' @return A number that table length.
+#' @export
+getTableLength <- function(Table, Group, DstoreListing_df) {
+  TableName <- file.path(Group, Table)
+  TableIdx <- which(DstoreListing_df$groupname == TableName)
+  Length <- unlist(DstoreListing_df$attributes[[TableIdx]])
+  names(Length) <- NULL
+  Length
 }
 
 

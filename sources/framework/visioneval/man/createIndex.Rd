@@ -4,7 +4,7 @@
 \alias{createIndex}
 \title{Create datastore index.}
 \usage{
-createIndex(Name, Table, Year)
+createIndex(Name, Table, Group)
 }
 \arguments{
 \item{Name}{A string identifying the dataset the index is being created
@@ -13,7 +13,7 @@ for.}
 \item{Table}{A string identifying the name of the table the index is
 being created for.}
 
-\item{Year}{A string identifying the year group the table is located in.}
+\item{Group}{A string identifying the group the table is located in.}
 }
 \value{
 A function that creates a vector of positions corresponding to the
