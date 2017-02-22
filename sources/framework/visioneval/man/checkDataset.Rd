@@ -4,25 +4,21 @@
 \alias{checkDataset}
 \title{Check dataset existence}
 \usage{
-checkDataset(Name, Table, Year, DstoreListing_df, ThrowError = TRUE)
+checkDataset(Name, Table, Group, DstoreListing_df)
 }
 \arguments{
 \item{Name}{a string identifying the dataset name.}
 
 \item{Table}{a string identifying the table the dataset is a part of.}
 
-\item{Year}{a string or numeric representation of the year.}
+\item{Group}{a string or numeric representation of the group the table is a
+part of.}
 
 \item{DstoreListing_df}{a dataframe which lists the contents of the datastore
 as contained in the model state file.}
-
-\item{ThrowError}{a logical value that determines whether an error should be
-thrown or whether the results of the check should just be returned to the
-calling function.}
 }
 \value{
-A string identifying the full path name for the dataset in the
-  datastore.
+A logical identifying whether the dataset is in the datastore
 }
 \description{
 \code{checkDataset} checks whether a dataset exists and if so returns the
@@ -30,7 +26,7 @@ full path name.
 }
 \details{
 This function checks whether a dataset exists. The dataset is identified by
-its name and the table and year names it is in. If the dataset is not in the
+its name and the table and group names it is in. If the dataset is not in the
 datastore, an error is thrown. If it is located in the datastore, the full
 path name to the dataset is returned.
 }

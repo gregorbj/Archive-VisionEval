@@ -4,7 +4,7 @@
 \alias{readFromTable}
 \title{Read from table.}
 \usage{
-readFromTable(Name, Table, Year, Index = NULL)
+readFromTable(Name, Table, Group, File = "datastore.h5", Index = NULL)
 }
 \arguments{
 \item{Name}{A string identifying the name of the dataset to be read from.}
@@ -12,7 +12,10 @@ readFromTable(Name, Table, Year, Index = NULL)
 \item{Table}{A string identifying the complete name of the table where the
 dataset is located.}
 
-\item{Year}{a string representation of the model run year.}
+\item{Group}{a string representation of the name of the datastore group the
+data is to be read from.}
+
+\item{File}{a string representation of the file path of the datastore}
 
 \item{Index}{A numeric vector identifying the positions the data is to be
 written to. NULL if the entire dataset is to be read.}

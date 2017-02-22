@@ -1,0 +1,4 @@
+ModuleName,PackageName,TimeFrame
+CreateHouseholds,vedemo1,Global
+CreateBzones,vedemo1,BaseYear
+CreateBzoneDev,vedemo1,CurrentYear

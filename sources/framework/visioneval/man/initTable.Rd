@@ -4,13 +4,14 @@
 \alias{initTable}
 \title{Initialize table in datastore.}
 \usage{
-initTable(Spec_ls, Year)
+initTable(Table, Group, Length)
 }
 \arguments{
+\item{Group}{a string representation of the name of the group the table is to
+be created in.}
+
 \item{Spec_ls}{a list containing the standard module 'Set' specifications
 described in the model system design documentation.}
-
-\item{Year}{a string representation of the model run year.}
 }
 \value{
 The value TRUE is returned if the function is successful at creating

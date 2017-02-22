@@ -1,0 +1,9 @@
+{
+  "Model": "RSPM",
+  "DatastoreName": "datastore.h5",
+  "Scenario": "Test",
+  "Description": "Test scenario",
+  "Region": "Oregon",
+  "BaseYear": "2010",
+  "Years": ["2010", "2050"]
+}

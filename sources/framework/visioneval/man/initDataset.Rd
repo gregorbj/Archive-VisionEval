@@ -4,13 +4,14 @@
 \alias{initDataset}
 \title{Initialize dataset in datastore table.}
 \usage{
-initDataset(Spec_ls, Year)
+initDataset(Spec_ls, Group)
 }
 \arguments{
 \item{Spec_ls}{a list containing the standard module 'Set' specifications
 described in the model system design documentation.}
 
-\item{Year}{a string representation of the model run year.}
+\item{Group}{a string representation of the name of the group the table is to
+be created in.}
 }
 \value{
 TRUE if dataset is successfully initialized. If the dataset already

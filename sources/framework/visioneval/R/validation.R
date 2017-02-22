@@ -2,74 +2,12 @@
 #validation.R
 #============
 
-#This script defines functions that are used to perform validate data prior to
+#This script defines functions that are used to validate data prior to
 #reading or writing to the datastore. The functions check whether the datastore
 #contains the group/table/dataset requested and whether the data match
 #specifications. Unlike the functions defined in the "hdf5.R" script, these
 #functions don't directly interact with the datastore. Instead, they rely on the
 #datastore listing (Datastore) that is maintained in the model state file.
-
-
-#CHECK YEAR GROUP EXISTENCE
-#==========================
-#' Check year group existence
-#'
-#' \code{checkYear} checks whether datastore has group for specified year
-#'
-#' This function checks whether the datastore has a group for the argument year.
-#' It also converts the year into a character type and returns the value.
-#'
-#' @param Year A string or numeric representation of the year to check.
-#' @param DstoreListing_df a dataframe which lists the contents of the datastore
-#'   as contained in the model state file.
-#' @return A string representation of the input year.
-#' @export
-checkYear <- function(Year, DstoreListing_df) {
-  Year <- as.character(Year)
-  if (!(Year %in% DstoreListing_df$groupname)) {
-    Message <- paste("Group", Year, "has not been created in the datastore.")
-    writeLog(Message)
-    stop(Message)
-  }
-  Year
-}
-
-
-#CHECK TABLE EXISTENCE
-#=====================
-#' Check table existence
-#'
-#' \code{checkTable} checks whether datastore contains a specified table
-#'
-#' This function checks whether the datastore has a group for the specified
-#' table and year. If so, it returns the full path name to the table.
-#'
-#' @param Table a string representation of the table name.
-#' @param Year a string or numeric representation of the year.
-#' @param DstoreListing_df a dataframe which lists the contents of the datastore
-#'   as contained in the model state file.
-#' @param ThrowError a logical identifying whether function execution should be
-#' stopped if an error is found. The default value is TRUE.
-#' @return A string representation of the full path name for the table in the
-#' datastore.
-#' @export
-checkTable <- function(Table, Year, DstoreListing_df, ThrowError = TRUE) {
-  Year <- checkYear(Year, DstoreListing_df)
-  Table <- as.character(Table)
-  TableName <- file.path(Year, Table)
-  TableExists <- TableName %in% DstoreListing_df$groupname
-  if (!TableExists) {
-    Message <- paste("Group", TableName, "has not been created in the datastore.")
-    writeLog(Message)
-    if (ThrowError) {
-      stop(Message)
-    } else {
-      return(list(FALSE, TableName))
-    }
-  } else {
-    return(list(TRUE, TableName))
-  }
-}
 
 
 #CHECK DATASET EXISTENCE
@@ -80,40 +18,26 @@ checkTable <- function(Table, Year, DstoreListing_df, ThrowError = TRUE) {
 #' full path name.
 #'
 #' This function checks whether a dataset exists. The dataset is identified by
-#' its name and the table and year names it is in. If the dataset is not in the
+#' its name and the table and group names it is in. If the dataset is not in the
 #' datastore, an error is thrown. If it is located in the datastore, the full
 #' path name to the dataset is returned.
 #'
 #' @param Name a string identifying the dataset name.
 #' @param Table a string identifying the table the dataset is a part of.
-#' @param Year a string or numeric representation of the year.
+#' @param Group a string or numeric representation of the group the table is a
+#' part of.
 #' @param DstoreListing_df a dataframe which lists the contents of the datastore
 #'   as contained in the model state file.
-#' @param ThrowError a logical value that determines whether an error should be
-#'   thrown or whether the results of the check should just be returned to the
-#'   calling function.
-#' @return A string identifying the full path name for the dataset in the
-#'   datastore.
+#' @return A logical identifying whether the dataset is in the datastore
 #' @export
-checkDataset <- function(Name, Table, Year, DstoreListing_df, ThrowError = TRUE) {
+checkDataset <- function(Name, Table, Group, DstoreListing_df) {
   Name <- as.character(Name)
   Table <- as.character(Table)
-  Year <- as.character(Year)
-  TableName <- checkTable(Table, Year, DstoreListing_df)[[2]]
-  DatasetName <- file.path(TableName, Name)
+  Group <- as.character(Group)
+  #TableName <- checkTable(Table, Group, DstoreListing_df)[[2]]
+  DatasetName <- file.path(Group, Table, Name)
   DatasetExists <- DatasetName %in% DstoreListing_df$groupname
-  if (!DatasetExists) {
-    Message <-
-      paste("Dataset", DatasetName, "has not been initialized in the datastore.")
-    writeLog(Message)
-    if (ThrowError) {
-      stop(Message)
-    } else {
-      return(list(FALSE, DatasetName))
-    }
-  } else {
-    return(list(TRUE, DatasetName))
-  }
+  ifelse (DatasetExists, TRUE, FALSE)
 }
 
 
@@ -128,15 +52,64 @@ checkDataset <- function(Name, Table, Year, DstoreListing_df, ThrowError = TRUE)
 #'
 #' @param Name a string identifying the dataset name.
 #' @param Table a string identifying the table the dataset is a part of.
-#' @param Year a string or numeric representation of the year.
+#' @param Group a string or numeric representation of the group the table is a
+#' part of.
 #' @param DstoreListing_df a dataframe which lists the contents of the datastore
 #'   as contained in the model state file.
 #' @return A named list of the dataset attributes.
 #' @export
-getDatasetAttr <- function(Name, Table, Year, DstoreListing_df) {
-  DatasetName <- checkDataset(Name, Table, Year, DstoreListing_df)[[2]]
+getDatasetAttr <- function(Name, Table, Group, DstoreListing_df) {
+  DatasetName <- file.path(Group, Table, Name)
+  #checkDataset(Name, Table, Group, DstoreListing_df)[[2]]
   DatasetIdx <- which(DstoreListing_df$groupname == DatasetName)
   DstoreListing_df$attributes[[DatasetIdx]]
+}
+
+
+#CHECK WHETHER TABLE EXISTS
+#==========================
+#' Check whether table exists in the datastore
+#'
+#' \code{checkTableExistence} checks whether a table is present in the
+#' datastore.
+#'
+#' This function checks whether a table is present in the datastore.
+#'
+#' @param Table a string identifying the table.
+#' @param Group a string or numeric representation of the group the table is a
+#' part of.
+#' @param DstoreListing_df a dataframe which lists the contents of the datastore
+#'   as contained in the model state file.
+#' @return A logical identifying whether a table is present in the datastore.
+#' @export
+checkTableExistence <- function(Table, Group, DstoreListing_df) {
+  TableName <- file.path(Group, Table)
+  TableName %in% DstoreListing_df$groupname
+}
+
+
+#GET LENGTH OF TABLE IN DATASTORE
+#================================
+#' Get the length of a table in the datastore
+#'
+#' \code{getTableLength} retrieves the LENGTH attribute for a table in the
+#' datastore.
+#'
+#' This function extracts the LENGTH attribute for a table in the datastore.
+#'
+#' @param Table a string identifying the table.
+#' @param Group a string or numeric representation of the group the table is a
+#' part of.
+#' @param DstoreListing_df a dataframe which lists the contents of the datastore
+#'   as contained in the model state file.
+#' @return A number that table length.
+#' @export
+getTableLength <- function(Table, Group, DstoreListing_df) {
+  TableName <- file.path(Group, Table)
+  TableIdx <- which(DstoreListing_df$groupname == TableName)
+  Length <- unlist(DstoreListing_df$attributes[[TableIdx]])
+  names(Length) <- NULL
+  Length
 }
 
 
@@ -181,27 +154,31 @@ checkSpecConsistency <- function(Spec_ls, DstoreAttr_) {
     )
     Warnings_ <- c(Warnings_, Message)
   }
-  if (!all(Spec_ls$PROHIBIT %in% DstoreAttr_$PROHIBIT) |
-      !all(DstoreAttr_$PROHIBIT %in% Spec_ls$PROHIBIT)) {
-    SpecProhibit <- paste(Spec_ls$PROHIBIT, collapse = ", ")
-    DstoreProhibit <- paste(DstoreAttr_$PROHIBIT, collapse = ", ")
-    Message <- paste0(
-      "PROHIBIT mismatch for ", Spec_ls$NAME, ". ",
-      "Module ", Spec_ls$MODULE, " specifies PROHIBIT as (", SpecProhibit, "). ",
-      "Datastore specifies PROHIBIT as (", DstoreProhibit, ")."
-    )
-    Errors_ <- c(Errors_, Message)
+  if (!is.null(Spec_ls$PROHIBIT) & !is.null(DstoreAttr_$PROHIBIT)) {
+    if (!all(Spec_ls$PROHIBIT %in% DstoreAttr_$PROHIBIT) |
+        !all(DstoreAttr_$PROHIBIT %in% Spec_ls$PROHIBIT)) {
+      SpecProhibit <- paste(Spec_ls$PROHIBIT, collapse = ", ")
+      DstoreProhibit <- paste(DstoreAttr_$PROHIBIT, collapse = ", ")
+      Message <- paste0(
+        "PROHIBIT mismatch for ", Spec_ls$NAME, ". ",
+        "Module ", Spec_ls$MODULE, " specifies PROHIBIT as (", SpecProhibit, "). ",
+        "Datastore specifies PROHIBIT as (", DstoreProhibit, ")."
+      )
+      Errors_ <- c(Errors_, Message)
+    }
   }
-  if (!all(Spec_ls$ISELEMENTOF %in% DstoreAttr_$ISELEMENTOF) |
-      !all(DstoreAttr_$ISELEMENTOF %in% Spec_ls$ISELEMENTOF)) {
-    SpecElements <- paste(Spec_ls$ISELEMENTOF, collapse = ", ")
-    DstoreElements <- paste(DstoreAttr_$ISELEMENTOF, collapse = ", ")
-    Message <- paste0(
-      "ISELEMENTOF mismatch for ", Spec_ls$NAME, ". ",
-      "Module ", Spec_ls$MODULE, " specifies ISELEMENTOF as (", SpecElements, "). ",
-      "Datastore specifies ISELEMENTOF as (", DstoreElements, ")."
-    )
-    Errors_ <- c(Errors_, Message)
+  if (!is.null(Spec_ls$ISELEMENTOF) & !is.null(DstoreAttr_$ISELEMENTOF)) {
+    if (!all(Spec_ls$ISELEMENTOF %in% DstoreAttr_$ISELEMENTOF) |
+        !all(DstoreAttr_$ISELEMENTOF %in% Spec_ls$ISELEMENTOF)) {
+      SpecElements <- paste(Spec_ls$ISELEMENTOF, collapse = ", ")
+      DstoreElements <- paste(DstoreAttr_$ISELEMENTOF, collapse = ", ")
+      Message <- paste0(
+        "ISELEMENTOF mismatch for ", Spec_ls$NAME, ". ",
+        "Module ", Spec_ls$MODULE, " specifies ISELEMENTOF as (", SpecElements, "). ",
+        "Datastore specifies ISELEMENTOF as (", DstoreElements, ")."
+      )
+      Errors_ <- c(Errors_, Message)
+    }
   }
   list(Errors = Errors_, Warnings = Warnings_)
 }
@@ -326,9 +303,9 @@ checkMatchConditions <- function(Data_, Conditions_, DataName, ConditionType) {
 }
 
 
-#CHECK IF VALUES IN SET
-#======================
-#' Check if values in set
+#CHECK IF DATA VALUES ARE IN A SPECIFIED SET OF VALUES
+#=====================================================
+#' Check if data values are in a specified set of values
 #'
 #' \code{checkIsElementOf} checks whether a data vector contains any elements
 #' that are not in an allowed set of values.
@@ -418,16 +395,20 @@ checkDataConsistency <- function(DatasetName, Data_, DstoreAttr_) {
     }
   }
   #Check if any values in PROHIBIT
-  if (DstoreAttr_$PROHIBIT[1] != "") {
-    Message <- checkMatchConditions(
-      Data_, DstoreAttr_$PROHIBIT, DatasetName, "PROHIBIT")
-    Errors_ <- c(Errors_, Message)
+  if (!is.null(DstoreAttr_$PROHIBIT)) {
+    if (DstoreAttr_$PROHIBIT[1] != "") {
+      Message <- checkMatchConditions(
+        Data_, DstoreAttr_$PROHIBIT, DatasetName, "PROHIBIT")
+      Errors_ <- c(Errors_, Message)
+    }
   }
   #Check if all values in ISELEMENTOF
-  if (DstoreAttr_$ISELEMENTOF[1] != "") {
-    Message <- checkIsElementOf(
-      Data_, DstoreAttr_$ISELEMENTOF, DatasetName)
-    Errors_ <- c(Errors_, Message)
+  if (!is.null(DstoreAttr_$ISELEMENTOF)) {
+    if (DstoreAttr_$ISELEMENTOF[1] != "") {
+      Message <- checkIsElementOf(
+        Data_, DstoreAttr_$ISELEMENTOF, DatasetName)
+      Errors_ <- c(Errors_, Message)
+    }
   }
   #Check if any values in UNLIKELY
   if (!is.null(DstoreAttr_$UNLIKELY)) {

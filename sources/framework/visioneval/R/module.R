@@ -5,136 +5,6 @@
 #This script defines functions related to the development and use of modules.
 
 
-#WRITE INPUTS TO DATASTORE
-#=========================
-#' Write inputs to datastore.
-#'
-#' \code{processModuleInputs} checks whether specified module inputs meet
-#' specifications and load into datastore if OnlyCheck argument is false.
-#'
-#' This function checks whether all the specified scenario inputs meet
-#' specifications. Checks include whether the specified files exist, whether the
-#' files include data for all years and specified zones, and whether every data
-#' item meets specifications. Data specifications.
-#'
-#' @param Inp_ls A list which meets standards for specifying input
-#' characteristics.
-#' @param ModuleName A string identifying the module name.
-#' @param Dir A string identifying the relative path name to the directory where
-#'   input files are located.
-#' @param OnlyCheck A logical value. If TRUE, the function will only check the
-#'   inputs. If FALSE, the function will check the inputs and load the input
-#'   data into the datastore.
-#' @param Ignore_ A vector of the names of data items that will not be checked
-#'   or loaded. If NULL, all data items will be checked and loaded.
-#' @return A numeric vector having 3 elements (FileErrors, DataErrors,
-#'   DataWarnings). Each element identifies how may data errors or warnings were
-#'   found.
-#' @export
-processModuleInputs <-
-  function(Inp_ls, ModuleName, Dir = "inputs", OnlyCheck = TRUE, Ignore_ = NULL) {
-    G <- getModelState()
-    FileName <- ""
-    FileErr_ <- character(0)
-    for (i in 1:length(Inp_ls)) {
-      Spec_ls <- Inp_ls[[i]]
-      Spec_ls$MODULE <- ModuleName
-      DataErr_ls <-
-        list(Errors = character(0), Warnings = character(0))
-      #Check for file errors only if not already done
-      if (Spec_ls$FILE != FileName) {
-        FileName <- Spec_ls$FILE
-        #Check that input file exists
-        if (!file.exists(file.path(Dir, FileName))) {
-          Message <- paste(
-            "Input file error.", "File", FileName, "required by",
-            ModuleName, "is not present in the 'inputs' directory."
-          )
-          writeLog(Message)
-          FileErr_ <- c(FileErr_, Message)
-          next()
-        }
-      }
-      #Load data
-      Data_df <- read.csv(file.path(Dir, FileName), as.is = TRUE)
-      #Check whether is table to be saved in Global group
-      IsGlobalTable <- unlist(strsplit(Spec_ls$TABLE, "/"))[1] == "Global"
-      if (IsGlobalTable) {
-        Spec_ls$TABLE <- unlist(strsplit(Spec_ls$TABLE, "/"))[2]
-        Year <- "Global"
-      }
-      #If not a global table check whether geography & year entries are correct
-      if (!IsGlobalTable) {
-        GeoYrSpec_df <- do.call(rbind, lapply(G$Years, function(x) {
-          Geo_ <- readFromTable(Spec_ls$TABLE, Spec_ls$TABLE, x, Index = NULL)
-          data.frame(
-            Geo = Geo_,
-            Year = rep(as.integer(x), length(Geo_)),
-            stringsAsFactors = FALSE
-          )
-        }))
-        GeoYrSpec_df <-
-          GeoYrSpec_df[order(GeoYrSpec_df$Year, GeoYrSpec_df$Geo),]
-        GeoYrData_df <-
-          Data_df[order(Data_df$Year, Data_df$Geo), c("Geo", "Year")]
-        if (!all.equal(GeoYrSpec_df, GeoYrData_df)) {
-          Message <- paste(
-            "Input file error. Error in the 'Geo' and 'Year' fields of the file",
-            FileName, "that", ModuleName, "requires."
-          )
-          writeLog(Message)
-          FileErr_ <- c(FileErr_, Message)
-          next()
-        }
-      }
-      #Check dataset
-      DatasetName <- Spec_ls$NAME
-      if (!DatasetName %in% Ignore_) {
-        Data_ <- Data_df[[DatasetName]]
-        DataCheck_ls <-
-          checkDataConsistency(DatasetName, Data_, Spec_ls)
-        if (length(DataCheck_ls$Errors) != 0) {
-          writeLog(DataCheck_ls$Errors)
-          DataErr_ls$Errors <-
-            c(DataErr_ls$Errors, DataCheck_ls$Errors)
-        }
-        if (length(DataCheck_ls$Warnings) != 0) {
-          writeLog(DataCheck_ls$Warnings)
-          DataErr_ls$Warnings <-
-            c(DataErr_ls$Warnings, DataCheck_ls$Warnings)
-        }
-      }
-      #If no errors and OnlyCheck is FALSE, then load the data into the datastore
-      if ((length(FileErr_) == 0) &
-          (length(DataErr_ls$Errors) == 0) & (OnlyCheck == FALSE)) {
-        if (IsGlobalTable) {
-          DtoWrite_ <- Data_df[,DatasetName]
-          Spec_ls$LENGTH <- length(DtoWrite_)
-          writeToTable(DtoWrite_, Spec_ls, Year)
-        } else {
-          for (Year in G$Years) {
-            DstoreGeo_ <- readFromTable(Spec_ls$TABLE, Spec_ls$TABLE, Year)
-            YearData_df <- Data_df[Data_df$Year == Year,]
-            DtoWrite_ <-
-              YearData_df[[DatasetName]][match(DstoreGeo_, Data_df$Geo)]
-            writeToTable(DtoWrite_, Spec_ls, Year)
-          }
-        }
-      }
-    }
-    Result_ <- c(
-      FileErrors = 0, DataErrors = 0, DataWarnings = 0
-    )
-    if (length(DataErr_ls$Errors) != 0)
-      Result_["DataErrors"] <- length(DataErr_ls$Errors)
-    if (length(DataErr_ls$Warnings) != 0)
-      Result_["DataWarnings"] <- length(DataErr_ls$Warnings)
-    if (length(FileErr_) != 0)
-      Result_["FileErrors"] <- length(FileErr_)
-    Result_
-  }
-
-
 #DEFINE LIST ALIAS
 #=================
 #' Alias for list function.
@@ -194,6 +64,32 @@ items <- list
 #' @return A data frame containing the estimation data.
 #' @export
 processEstimationInputs <- function(Inp_ls, FileName, ModuleName) {
+  #Define a function which expands a specification with multiple NAME items
+  expandSpec <- function(SpecToExpand_ls) {
+    Names_ <- unlist(SpecToExpand_ls$NAME)
+    Expanded_ls <- list()
+    for (i in 1:length(Names_)) {
+      Temp_ls <- SpecToExpand_ls
+      Temp_ls$NAME <- Names_[i]
+      Expanded_ls <- c(Expanded_ls, list(Temp_ls))
+    }
+    Expanded_ls
+  }
+  #Define a function to process a component of a specifications list
+  processComponent <- function(Component_ls) {
+    Result_ls <- list()
+    for (i in 1:length(Component_ls)) {
+      Temp_ls <- Component_ls[[i]]
+      if (length(Temp_ls$NAME) == 1) {
+        Result_ls <- c(Result_ls, list(Temp_ls))
+      } else {
+        Result_ls <- c(Result_ls, expandSpec(Temp_ls))
+      }
+    }
+    Result_ls
+  }
+  #Expand the specifications
+  Inp_ls <- processComponent(Inp_ls)
   #Try to load the estimation file
   FilePath <- paste0("inst/extdata/", FileName)
   if (!file.exists(FilePath)) {
@@ -201,8 +97,9 @@ processEstimationInputs <- function(Inp_ls, FileName, ModuleName) {
                      "required to estimate parameters for module", ModuleName,
                      "is missing.")
     stop(Message)
+  } else {
+    Data_df <- read.csv(FilePath, as.is = TRUE)
   }
-  Data_df <- read.csv(FilePath, as.is = TRUE)
   #Check whether all the necessary columns exist and remove unnecessary ones
   Names <- unlist(lapply(Inp_ls, function(x) x$NAME))
   if (!all(Names %in% names(Data_df))) {

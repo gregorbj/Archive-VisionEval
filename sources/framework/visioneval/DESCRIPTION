@@ -1,8 +1,8 @@
 Package: visioneval
 Type: Package
 Title: Software Framework for VisionEval Model System
-Version: 0.2
-Date: 2016-02-27
+Version: 0.5
+Date: 2017-02-16
 Author: Brian Gregor <gregorb@or-analytics.com>["aut", "cre"]
 Maintainer: Brian Gregor <gregorb@or-analytics.com>
 Copyright: Oregon Department of Transportation

@@ -105,7 +105,8 @@ initDatastore <- function() {
 #'
 #' @param Spec_ls a list containing the standard module 'Set' specifications
 #'   described in the model system design documentation.
-#' @param Year a string representation of the model run year.
+#' @param Group a string representation of the name of the group the table is to
+#' be created in.
 #' @return The value TRUE is returned if the function is successful at creating
 #'   the table. In addition, the listDatastore function is run to update the
 #'   inventory in the model state file. The function stops if the group in which
@@ -113,21 +114,12 @@ initDatastore <- function() {
 #'   written to the log.
 #' @export
 #' @import rhdf5
-initTable <- function(Spec_ls, Year) {
+initTable <- function(Table, Group, Length) {
   G <- getModelState()
-  Year <- checkYear(Year, G$Datastore)
-  if (!is.null(Spec_ls$LENGTH)) {
-    Length <- Spec_ls$LENGTH
-  } else {
-    Message <- paste0("LENGTH specification for table (", Spec_ls$TABLE,
-                      ") is not present.")
-    writeLog(Message)
-    stop(Message)
-  }
-  NewGroup <- paste(Year, Spec_ls$TABLE, sep = "/")
+  NewTable <- paste(Group, Table, sep = "/")
   H5File <- H5Fopen(G$DatastoreName)
-  h5createGroup(H5File, NewGroup)
-  H5Group <- H5Gopen(H5File, NewGroup)
+  h5createGroup(H5File, NewTable)
+  H5Group <- H5Gopen(H5File, NewTable)
   h5writeAttribute(Length, H5Group, "LENGTH")
   H5Gclose(H5Group)
   H5Fclose(H5File)
@@ -149,37 +141,18 @@ initTable <- function(Spec_ls, Year) {
 #'
 #' @param Spec_ls a list containing the standard module 'Set' specifications
 #'   described in the model system design documentation.
-#' @param Year a string representation of the model run year.
+#' @param Group a string representation of the name of the group the table is to
+#' be created in.
 #' @return TRUE if dataset is successfully initialized. If the dataset already
 #' exists the function throws an error and writes an error message to the log.
 #' Updates the model state file.
 #' @export
 #' @import rhdf5
-initDataset <- function(Spec_ls, Year) {
+initDataset <- function(Spec_ls, Group) {
   G <- getModelState()
-  Table <- paste(Year, Spec_ls$TABLE, sep = "/")
+  Table <- paste(Group, Spec_ls$TABLE, sep = "/")
   Name <- Spec_ls$NAME
   DatasetName <- paste(Table, Name, sep = "/")
-  #Initialize table if it does not exist
-  if (!(Table %in% G$Datastore$groupname)) {
-    Message <-
-      paste("Table", Table, "has not been created in the datastore.",
-            "Attempting to create.")
-    writeLog(Message)
-    initTable(Spec_ls, Year)
-    G <- getModelState()
-  }
-  #Check if the dataset already exists
-  DatasetExists <- DatasetName %in% G$Datastore$groupname
-  if (DatasetExists) {
-    Message <- paste(
-      "Dataset", Name, "already exists in table",
-      Table, "-- stopping dataset initialization."
-    )
-    writeLog(Message)
-    warning(Message)
-    return(FALSE)
-  }
   #Read SIZE specification or throw error if doesn't exist
   if (!is.null(Spec_ls$SIZE)) {
     Size <- Spec_ls$SIZE
@@ -204,8 +177,12 @@ initDataset <- function(Spec_ls, Year) {
   h5writeAttribute(Spec_ls$UNITS, H5Data, "UNITS")
   h5writeAttribute(Size, H5Data, "SIZE")
   h5writeAttribute(Spec_ls$TYPE, H5Data, "TYPE")
-  h5writeAttribute(Spec_ls$PROHIBIT, H5Data, "PROHIBIT")
-  h5writeAttribute(Spec_ls$ISELEMENTOF, H5Data, "ISELEMENTOF")
+  if (!is.null(Spec_ls$PROHIBIT)) {
+    h5writeAttribute(Spec_ls$PROHIBIT, H5Data, "PROHIBIT")
+  }
+  if (!is.null(Spec_ls$ISELEMENTOF)) {
+    h5writeAttribute(Spec_ls$ISELEMENTOF, H5Data, "ISELEMENTOF")
+  }
   H5Dclose(H5Data)
   H5Fclose(H5File)
   #Update datastore inventory
@@ -225,97 +202,32 @@ initDataset <- function(Spec_ls, Year) {
 #' location indexes in the dataset. The function makes several checks prior to
 #' attempting to write to the datastore including : the desired table exists in
 #' the datastore, the input data is a vector, the data and index conform to each
-#' other and to the table length, the type, size, and units of the data match
-#' the datastore specifications. On successful completion, the function calls
+#' other and to the table length. On successful completion, the function calls
 #' 'listDatastore' to update the datastore listing in the run environment.
 #'
 #' @param Data_ A vector of data to be written.
 #' @param Spec_ls a list containing the standard module 'Set' specifications
 #'   described in the model system design documentation.
-#' @param Year a string representation of the model run year.
+#' @param Group a string representation of the name of the datastore group the
+#' data is to be written to.
 #' @param Index A numeric vector identifying the positions the data is to be
 #'   written to.
 #' @return TRUE if data is sucessfully written. Updates model state file.
 #' @export
 #' @import rhdf5
-writeToTable <- function(Data_, Spec_ls, Year, Index = NULL) {
+writeToTable <- function(Data_, Spec_ls, Group, Index = NULL) {
   G <- getModelState()
   Name <- Spec_ls$NAME
   Table <- Spec_ls$TABLE
-  #Check that table exists to write to and attempt to create if not
-  TableCheck <- checkTable(Table, Year, G$Datastore, ThrowError = FALSE)
-  if (!TableCheck[[1]]) {
-    Message <-
-      paste("Table", Table, "has not been created in the datastore.",
-            "Attempting to create.")
-    writeLog(Message)
-    initTable(Spec_ls, Year)
-    G <- getModelState()
-  }
   #Check that dataset exists to write to and attempt to create if not
-  DatasetCheck <- checkDataset(Name, Table, Year, G$Datastore, ThrowError = FALSE)
-  if (!DatasetCheck[[1]]) {
-    Message <-
-      paste("Dataset", Name, "has not been initialized in the datastore.",
-            "Attempting to initialize.")
-    writeLog(Message)
-    initDataset(Spec_ls, Year)
+  DatasetExists <- checkDataset(Name, Table, Group, G$Datastore)
+  if (!DatasetExists) {
+    initDataset(Spec_ls, Group)
     G <- getModelState()
-  }
-  #Check that data is a vector
-  if (!is.vector(Data_)) {
-    Message <-
-      paste0("Data ", Name, " does not conform to ", Table, ". Must be a vector.")
-    writeLog(Message)
-    stop(Message)
-  }
-  #Check whether the data is consistent with datastore attributes
-  DstoreAttr_ls <- getDatasetAttr(Name, Table, Year, G$Datastore)
-  SpecCheck_ls <- checkSpecConsistency(Spec_ls, DstoreAttr_ls)
-  if (length(SpecCheck_ls$Errors) != 0) {
-    writeLog(SpecCheck_ls$Errors)
-    stop("Specifications of data to be written don't conform with datastore specifications.")
-  }
-  if (length(SpecCheck_ls$Warnings) != 0) {
-    writeLog(SpecCheck_ls$Warnings)
-  }
-  DataCheck_ls <- checkDataConsistency(Name, Data_, DstoreAttr_ls)
-  if (length(DataCheck_ls$Errors) != 0) {
-    writeLog(DataCheck_ls$Errors)
-    stop("Data to be written doesn't conform with datastore specifications.")
-  }
-  if (length(DataCheck_ls$Warnings) != 0) {
-    writeLog(DataCheck_ls$Warnings)
-  }
-  #Check that the data conforms to the table if not indexed write
-  TableAttr_ <-
-    unlist(G$Datastore$attributes[G$Datastore$groupname == file.path(Year, Table)])
-  AllowedLength <- TableAttr_["LENGTH"]
-  if (is.null(Index) & (length(Data_) != AllowedLength)) {
-    Message <-
-      paste0(Name, " doesn't conform to", Table, ". must have length = ",
-             AllowedLength)
-    writeLog(Message)
-    stop(Message)
-  }
-  #Check that if there is an index, the length is equal to the length of Data
-  if (!is.null(Index) & (length(Data_) != length(Index))) {
-    Message <-
-      paste0("Length of Data vector and length of Index vector don't match.")
-    writeLog(Message)
-    stop(Message)
-  }
-  #Check that indices conform to table if indexed write
-  if (any(Index > AllowedLength)) {
-    Message <-
-      paste0("One or more specified indicies for writing data to ", Table,
-             " exceed ", AllowedLength)
-    writeLog(Message)
-    stop(Message)
   }
   #Write the dataset
   Data_[is.na(Data_)] <- Spec_ls$NAVALUE
-  DatasetName <- file.path(Year, Table, Name)
+  DatasetName <- file.path(Group, Table, Name)
   if (is.null(Index)) {
     h5write(Data_, file = G$DatastoreName, name = DatasetName)
   } else {
@@ -341,22 +253,40 @@ writeToTable <- function(Data_, Spec_ls, Year, Index = NULL) {
 #' @param Name A string identifying the name of the dataset to be read from.
 #' @param Table A string identifying the complete name of the table where the
 #'   dataset is located.
-#' @param Year a string representation of the model run year.
+#' @param Group a string representation of the name of the datastore group the
+#' data is to be read from.
+#' @param File a string representation of the file path of the datastore
 #' @param Index A numeric vector identifying the positions the data is to be
 #'   written to. NULL if the entire dataset is to be read.
 #' @return A vector of the same type stored in the datastore and specified in
 #'   the TYPE attribute.
 #' @export
 #' @import rhdf5
-readFromTable <- function(Name, Table, Year, Index = NULL) {
-  G <- getModelState()
+readFromTable <- function(Name, Table, Group, File = "datastore.h5", Index = NULL) {
+  getModelListing <- function(DstoreRef) {
+    SplitRef_ <- unlist(strsplit(DstoreRef, "/"))
+    RefHead <- paste(SplitRef_[-length(SplitRef_)], collapse = "/")
+    if (RefHead == "") {
+      ModelStateFile <- "ModelState.Rda"
+    } else {
+      ModelStateFile <- paste(RefHead, "ModelState.Rda", sep = "/")
+    }
+    getModelState(FileName = ModelStateFile)
+  }
+  G <- getModelListing(DstoreRef = File)
   #Check that dataset exists to read from
-  DatasetCheck <- checkDataset(Name, Table, Year, G$Datastore, ThrowError = TRUE)
-  DatasetName <- DatasetCheck[[2]]
+  DatasetExists <- checkDataset(Name, Table, Group, G$Datastore)
+  if (DatasetExists) {
+    DatasetName <- file.path(Group, Table, Name)
+  } else {
+    Message <-
+      paste("Dataset", Name, "in table", Table, "in group", Group, "doesn't exist.")
+    stop(Message)
+  }
   #If there is an Index, check that it is in bounds
   if (!is.null(Index)) {
     TableAttr_ <-
-      unlist(G$Datastore$attributes[G$Datastore$groupname == file.path(Year, Table)])
+      unlist(G$Datastore$attributes[G$Datastore$groupname == file.path(Group, Table)])
     AllowedLength <- TableAttr_["LENGTH"]
     if (any(Index > AllowedLength)) {
       Message <-
@@ -402,14 +332,614 @@ readFromTable <- function(Name, Table, Year, Index = NULL) {
 #'   for.
 #' @param Table A string identifying the name of the table the index is
 #'   being created for.
-#' @param Year A string identifying the year group the table is located in.
+#' @param Group A string identifying the group the table is located in.
 #' @return A function that creates a vector of positions corresponding to the
 #'   location of the supplied value in the index field.
 #' @export
-createIndex <- function(Name, Table, Year) {
+createIndex <- function(Name, Table, Group) {
   ValsToIndexBy <-
-    readFromTable(Name, Table, Year)
+    readFromTable(Name, Table, Group)
   return(function(IndexVal) {
     which(ValsToIndexBy == IndexVal)
   })
 }
+
+
+#INITIALIZE DATA LIST
+#====================
+#' Initialize a list for data transferred to and from datastore
+#'
+#' \code{initDataList} creates a list to be used for transferring data to and
+#' from the datastore.
+#'
+#' This function initializes a list to store data that is transferred from
+#' the datastore to a module or returned from a module to be saved in the
+#' datastore. The list has 3 named components (Global, Year, and BaseYear). This
+#' is the standard structure for data being passed to and from a module and the
+#' datastore.
+#'
+#' @return A list that has 3 named list components: Global, Year, BaseYear
+#' @export
+initDataList <- function() {
+  list(Global = list(),
+       Year = list(),
+       BaseYear = list())
+}
+
+
+#GET DATA SETS IDENTIFIED IN MODULE SPECIFICATIONS FROM DATASTORE
+#================================================================
+#' Retrieve data identified in 'Get' specifications from datastore
+#'
+#' \code{getFromDatastore} retrieves datasets identified in a module's 'Get'
+#' specifications from the datastore.
+#'
+#' This function retrieves from the datastore all of the data sets identified in
+#' a module's 'Get' specifications. If the module's specifications include the
+#' name of a geographic area, then the function will retrieve the data for that
+#' geographic area.
+#'
+#' @param ModuleSpec_ls a list of module specifications that is consistent with
+#' the VisionEval requirements
+#' @param Geo a string identifying the name of the geographic area to get the
+#' data for. For example, if the module is specified to be run by Azone, then
+#' Geo would be the name of a particular Azone.
+#' @return A list containing all the data sets specified in the module's
+#' 'Get' specifications for the identified geographic area.
+#' @export
+getFromDatastore <- function(ModuleSpec_ls, Geo = NULL) {
+  #Process module Get specifications
+  GetSpec_ls <- processModuleSpecs(ModuleSpec_ls)$Get
+  #Make a list to hold the retrieved data
+  L <- initDataList()
+  #Add the model state and year to the list
+  G <- getModelState()
+  G$Year <- Year
+  L$G <- G
+  #Get data specified in list
+  for (i in 1:length(GetSpec_ls)) {
+    Spec_ls <- GetSpec_ls[[i]]
+    Group <- Spec_ls$GROUP
+    Table <- Spec_ls$TABLE
+    Name <- Spec_ls$NAME
+    #Identify datastore files and groups to get data from
+    if (Group == "Global") {
+      DstoreGroup <- "Global"
+      if (!is.null(G$DatastoreReferences$Global)) {
+        Files_ <- c(G$DatastoreName, G$DatastoreReferences$Global)
+      } else {
+        Files_ <- G$DatastoreName
+      }
+    }
+    if (Group == "BaseYear") {
+      DstoreGroup <- G$BaseYear
+      if (G$BaseYear %in% G$Years) {
+        Files_ <- G$DatastoreName
+      } else {
+        Files_ <- G$DatastoreReferences[[G$BaseYear]]
+      }
+    }
+    if (Group == "Year") {
+      DstoreGroup <- Year
+      if (!is.null(G$DatastoreReferences[[Year]])) {
+        Files_ <- c(G$DatastoreName, G$DatastoreReferences[[Year]])
+      } else {
+        Files_ <- G$DatastoreName
+      }
+    }
+    #Add table component to list if does not exist
+    if (is.null(L[[Group]][[Table]])) {
+      L[[Group]][[Table]] <- list()
+      # attributes(L[[Group]][[Table]]) <-
+      #   list(LENGTH = getTableLength(Table, DstoreGroup, G$Datastore))
+    }
+    #Make an index to the data
+    if (!is.null(Geo)) {
+      idxFun <- createIndex(ModuleSpec_ls$RunBy, Table, DstoreGroup)
+      index <- idxFun(Geo)
+    } else {
+      Index <- NULL
+    }
+    #Fetch the data and add to the input list
+    getModelListing <- function(DstoreRef) {
+      SplitRef_ <- unlist(strsplit(DstoreRef, "/"))
+      RefHead <- paste(SplitRef_[-length(SplitRef_)], collapse = "/")
+      if (RefHead == "") {
+        ModelStateFile <- "ModelState.Rda"
+      } else {
+        ModelStateFile <- paste(RefHead, "ModelState.Rda", sep = "/")
+      }
+      getModelState(FileName = ModelStateFile)
+    }
+    for (File in Files_) {
+      DstoreListing_ls <- getModelListing(DstoreRef = File)$Datastore
+      DatasetExists <- checkDataset(Name, Table, DstoreGroup, DstoreListing_ls)
+      if (DatasetExists) {
+        L[[Group]][[Table]][[Name]] <-
+          readFromTable(Name, Table, DstoreGroup, File, Index)
+        break()
+      }
+    }
+    rm(Spec_ls, Group, Table, Name, DstoreGroup, Files_)
+  }
+  #Return the list
+  L
+}
+
+
+#SAVE DATA SETS RETURNED BY A MODULE IN THE DATASTORE
+#====================================================
+#' Save the data sets returned by a module in the datastore
+#'
+#' \code{setInDatastore} saves to the datastore the data returned in a standard
+#' list by a module.
+#'
+#' This function saves to the datastore the data sets identified in a module's
+#' 'Set' specifications and included in the list returned by the module. If a
+#' particular geographic area is identified, the data are saved to the positions
+#' in the data sets in the datastore corresponding to the identified geographic
+#' area.
+#'
+#' @param Data_ls a list containing the data to be saved. The list is organized
+#' by group, table, and data set.
+#' @param ModuleSpec_ls a list of module specifications that is consistent with
+#' the VisionEval requirements
+#' @param ModuleName a string identifying the name of the module (used to document
+#' the module creating the data in the datastore)
+#' @param Geo a string identifying the name of the geographic area to get the
+#' data for. For example, if the module is specified to be run by Azone, then
+#' Geo would be the name of a particular Azone.
+#' @return A list containing all the data sets specified in the module's
+#' 'Get' specifications for the identified geographic area.
+#' @export
+setInDatastore <-
+  function(Data_ls, ModuleSpec_ls, ModuleName, Geo = NULL) {
+    #Get the model state
+    G <- getModelState()
+    #Make any specified tables
+    if (!is.null(ModuleSpec_ls$NewSetTable)) {
+      TableSpec_ls <- ModuleSpec_ls$NewSetTable
+      for (i in 1:length(TableSpec_ls)) {
+        Table <- TableSpec_ls[[i]]$TABLE
+        Group <- TableSpec_ls[[i]]$GROUP
+        if (Group == "Global") DstoreGroup <- "Global"
+        if (Group == "Year") DstoreGroup <- Year
+        TableExists <- checkTableExistence(Table, DstoreGroup, G$Datastore)
+        if (!TableExists) {
+          Length <- attributes(Data_ls[[Group]][[Table]])$LENGTH
+          initTable(Table, DstoreGroup, Length)
+          rm(Table, Group, DstoreGroup, TableExists, Length)
+        } else {
+          rm(Table, Group, DstoreGroup, TableExists)
+        }
+      }
+    }
+    #Process module Set specifications
+    SetSpec_ls <- processModuleSpecs(ModuleSpec_ls)$Set
+    for (i in 1:length(SetSpec_ls)) {
+      #Identify datastore save location from specifications
+      Spec_ls <- SetSpec_ls[[i]]
+      Spec_ls$MODULE <- ModuleName
+      Group <- Spec_ls$GROUP
+      Table <- Spec_ls$TABLE
+      Name <- Spec_ls$NAME
+      if (Group == "Global") DstoreGroup <- "Global"
+      if (Group == "Year") DstoreGroup <- Year
+      #Make an index to the data
+      if (!is.null(Geo)) {
+        idxFun <- createIndex(ModuleSpec_ls$RunBy, Table, DstoreGroup)
+        index <- idxFun(Geo)
+      } else {
+        Index <- NULL
+      }
+      #Save the data
+      Data_ <- Data_ls[[Group]][[Table]][[Name]]
+      if (!is.null(attributes(Data_)$SIZE)) {
+        Spec_ls$SIZE <- attributes(Data_)$SIZE
+      }
+      writeToTable(Data_, Spec_ls, DstoreGroup, Index)
+      rm(Spec_ls, Group, Table, Name, Data_)
+    }
+    TRUE
+  }
+
+
+#CHECK YEARS AND GEOGRAPHY OF INPUT FILE
+#=======================================
+#' Check years and geography of input file
+#'
+#' \code{checkInputYearGeo} checks the 'Year' and 'Geo' columns of an input file
+#' to determine whether they are complete and have no duplications.
+#'
+#' This function checks the 'Year' and 'Geo' columns of an input file to
+#' determine whether there are records for all run years specified for the
+#' model and for all geographic areas for the level of geography. It also checks
+#' for redundant year and geography entries.
+#'
+#' @param Year_ the vector extract of the 'Year' column from the input data.
+#' @param Geo_ the vector extract of the 'Geo' column from the input data.
+#' @param Group a string identifying the 'GROUP' specification for the data sets
+#' contained in the input file.
+#' @param Table a string identifying the 'TABLE' specification for the data sets
+#' contained in the input file.
+#' @return A list containing the results of the check. The list has two
+#' mandatory components and two optional components. 'CompleteInput' is a
+#' logical that identifies whether records are present for all years and
+#' geographic areas. 'DupInput' identifies where are any redundant year and
+#' geography entries. If 'CompleteInput' is FALSE, the list contains a
+#' 'MissingInputs' component that is a string identifying the missing year and
+#' geography records. If 'DupInput' is TRUE, the list contains a component that
+#' is a string identifying the duplicated year and geography records.
+#' @export
+checkInputYearGeo <- function(Year_, Geo_, Group, Table) {
+  Result_ls <- list()
+  G <- getModelState()
+  #Make a vector of required year and geography combinations
+  if (Group == "Year") {
+    Required_df <-
+      expand.grid(G$Years, unique(G$Geo_df[[Table]]), stringsAsFactors = FALSE)
+  }
+  names(Required_df) <- c("Year", "Geo")
+  RequiredNames_ <- sort(paste(Required_df$Year, Required_df$Geo, sep = "/"))
+  #Make a vector of year and geography combinations in the inputs
+  InputNames_ <- sort(paste(Year_, Geo_, sep = "/"))
+  #Check that there are missing records
+  CompleteInputCheck_ <- RequiredNames_ %in% InputNames_
+  Result_ls$CompleteInput <- all(CompleteInputCheck_)
+  if (!all(CompleteInputCheck_)) {
+    MissingNames_ <- RequiredNames_[!CompleteInputCheck_]
+    Result_ls$MissingInputs <-
+      paste(MissingNames_, collapse = ", ")
+  }
+  #Check whether there are duplicated records
+  DuplicatedInputCheck_ <- duplicated(InputNames_)
+  Result_ls$DupInput <- any(DuplicatedInputCheck_)
+  if (any(DuplicatedInputCheck_)) {
+    DuplicateNames_ <- InputNames_[DuplicatedInputCheck_]
+    Result_ls$DuplicatedInputs <-
+      paste(DuplicateNames_, collapse = ", ")
+  }
+  #Return the result
+  Result_ls
+}
+
+
+#FIND SPECIFICATION CORRESPONDING TO A NAME, TABLE, AND GROUP
+#============================================================
+#' Find the full specification corresponding to a defined NAME, TABLE, and GROUP
+#'
+#' \code{findSpec} returns the full dataset specification for defined NAME,
+#' TABLE, and GROUP.
+#'
+#' This function finds and returns the full specification from a specifications
+#' list whose NAME, TABLE and GROUP values correspond to the Name, Table, and
+#' Group argument values. The specifications list must be in standard format and
+#' must be for only 'Inp', 'Get', or 'Set' specifications.
+#'
+#' @param Specs_ls a standard specifications list for 'Inp', 'Get', or 'Set'
+#' @param Name a string for the name of the dataset
+#' @param Table a string for the table that the dataset resides in
+#' @param Group a string for the generic group that the table resides in
+#' @return A list containing the full specifications for the dataset
+#' @export
+findSpec <- function(Specs_ls, Name, Table, Group) {
+  SpecIdx <- which(unlist(lapply(Specs_ls, function(x) {
+    x$NAME == Name & x$TABLE == Table & x$GROUP == Group
+  })))
+  Specs_ls[[SpecIdx]]
+}
+
+
+#SORT DATA FRAME TO MATCH ORDER OF GEOGRAPHY IN DATASTORE TABLE
+#==============================================================
+#' Sort a data frame so that the order of rows matches the geography in a
+#' datastore table.
+#'
+#' \code{sortGeoTable} returns a data frame whose rows are sorted to match the
+#' geography in a specified table in the datastore.
+#'
+#' This function sorts the rows of a data frame that the 'Geo' field in the
+#' data frame matches the corresponding geography names in the specified table
+#' in the datastore. The function returns the sorted table.
+#'
+#' @param Data_df a data frame that contains a 'Geo' field containing the names
+#' of the geographic areas to sort by and any number of additional data fields.
+#' @param Table a string for the table that is to be matched against.
+#' @param Group a string for the generic group that the table resides in.
+#' @return The data frame which has been sorted to match the order of geography
+#' in the specified table in the datastore.
+#' @export
+sortGeoTable <- function(Data_df, Table, Group) {
+  if (!("Geo" %in% names(Data_df))) {
+    Msg <-
+      paste0(
+        "Data frame does not have a 'Geo' field. ",
+        "A 'Geo' field must be included in order for the table to be sorted ",
+        "to match the geography of the specified table in the datastore."
+      )
+    stop(Msg)
+  }
+  DstoreNames_ <- readFromTable(Table, Table, Group)
+  Order_ <- match(DstoreNames_, Data_df$Geo)
+  Data_df[Order_,]
+}
+
+
+#PROCESS MODULE INPUT FILES
+#==========================
+#' Process module input files
+#'
+#' \code{processModuleInputs} processes input files identified in a module's
+#' 'Inp' specifications in preparation for saving in the datastore.
+#'
+#' This function processes the input files identified in a module's 'Inp'
+#' specifications in preparation for saving the data in the datastore. Several
+#' processes are carried out. The existence of each specified input file is
+#' checked. Files that are not global, are checked to determine that they have
+#' 'Year' and 'Geo' columns. The entries in the 'Year' and 'Geo' columns are
+#' checked to make sure they are complete and there are no duplicates. The data
+#' in each column are checked against specifications to determine conformance.
+#' The function returns a list which contains a list of error messages and a
+#' list of the data inputs. The function also writes error messages and warnings
+#' to the log file.
+#'
+#' @param ModuleSpec_ls a list of module specifications that is consistent with
+#' the VisionEval requirements.
+#' @param ModuleName a string identifying the name of the module (used to document
+#' module in error messages).
+#' @param Dir a string identifying the relative path to the directory where the
+#' model inputs are contained.
+#' @return A list containing the results of the input processing. The list has
+#' two components. The first (Errors) is a vector of identified file and data
+#' errors. The second (Data) is a list containing the data in the input files
+#' organized in the standard format for data exchange with the datastore.
+#' @export
+processModuleInputs <-
+  function(ModuleSpec_ls, ModuleName, Dir = "inputs") {
+    G <- getModelState()
+    FileErr_ <- character(0)
+    FileWarn_ <- character(0)
+    InpSpec_ls <- processModuleSpecs(ModuleSpec_ls)$Inp
+
+    #ORGANIZE THE SPECIFICATIONS BY INPUT FILE AND NAME
+    SortSpec_ls <- list()
+    for (i in 1:length(InpSpec_ls)) {
+      Spec_ls <- InpSpec_ls[[i]]
+      File <- Spec_ls$FILE
+      Name <- Spec_ls$NAME
+      if (is.null(SortSpec_ls[[File]])) {
+        SortSpec_ls[[File]] <- list()
+      }
+      SortSpec_ls[[File]][[Name]] <- Spec_ls
+      rm(Spec_ls, File, Name)
+    }
+    #Initialize a list to store all the input data
+    Data_ls <- initDataList()
+
+    #ITERATE THROUGH SORTED SPECIFICATIONS AND LOAD DATA INTO LIST
+    Files_ <- names(SortSpec_ls)
+    for (File in Files_) {
+      #Extract the specifications
+      Spec_ls <- SortSpec_ls[[File]]
+      #Check that file exists
+      if (!file.exists(file.path(Dir, File))) {
+        Msg <-
+          paste(
+            "Input file error.", "File '", File, "' required by '",
+            ModuleName, "' is not present in the 'inputs' directory."
+          )
+        FileErr_ <- c(FileErr_, Msg)
+        next()
+      }
+      #Read in the data file
+      Data_df <- read.csv(file.path(Dir, File), as.is = TRUE)
+      #Identify the group and table the data is to be placed in
+      Group <- unique(unlist(lapply(Spec_ls, function(x) x$GROUP)))
+      if (length(Group) != 1) {
+        Msg <-
+          paste0(
+            "Input specification error for module '", ModuleName,
+            "' for input file '", File, "'. ",
+            "All datasets must have the same 'Group' specification."
+          )
+        FileErr_ <- c(FileErr_, Msg)
+        Group <- Group[1]
+      }
+      Table <- unique(unlist(lapply(Spec_ls, function(x) x$TABLE)))
+      if (length(Table) != 1) {
+        Msg <-
+          paste0(
+            "Input specification error for module '", ModuleName,
+            "' for input file '", File, "'. ",
+            "All datasets must have the same 'Table' specification."
+          )
+        FileErr_ <- c(FileErr_, Msg)
+        Table <- Table[1]
+      }
+      #Add Table and table attributes to data list if not already there
+      if (is.null(Data_ls[[Group]][[Table]])) {
+        Data_ls[[Group]][[Table]] <- list()
+      }
+      #If Group is Year, check that Geo and Year fields are correct
+      if (Group  == "Year") {
+        #Check that there are 'Year' and 'Geo' fields
+        HasYearField <- "Year" %in% names(Data_df)
+        HasGeoField <- "Geo" %in% names(Data_df)
+        if (!(HasYearField & HasGeoField)) {
+          Msg <-
+            paste0(
+              "Input file error for module '", ModuleName,
+              "' for input file '", File, "'. ",
+              "'Group' specification is 'Year' or 'RunYear' ",
+              "but the input file is missing required 'Year' ",
+              "and/or 'Geo' fields."
+            )
+          FileErr_ <- c(FileErr_, Msg)
+          next()
+        }
+        #Check that the file thas inputs for all years and geographic units
+        #If so, save Year and Geo to table
+        CorrectYearGeo <-
+          checkInputYearGeo(Data_df$Year, Data_df$Geo, Group, Table)
+        if (CorrectYearGeo$CompleteInput & !CorrectYearGeo$DupInput) {
+          Data_ls[[Group]][[Table]]$Year <- Data_df$Year
+          Data_ls[[Group]][[Table]]$Geo <- Data_df$Geo
+        } else {
+          if (!CorrectYearGeo$CompleteInput) {
+            Msg <-
+              paste0(
+                "Input file error for module '", ModuleName,
+                "' for input file '", File, "'. ",
+                "Is missing inputs for the following Year/", Table,
+                " combinations: ", CorrectYearGeo$MissingInputs
+              )
+            FileErr_ <- c(FileErr_, Msg)
+          }
+          if(CorrectYearGeo$DupInput){
+            Msg <-
+              paste0(
+                "Input file error for module '", ModuleName,
+                "' for input file '", File, "'. ",
+                "Has duplicate inputs for the following Year/", Table,
+                " combinations: ", CorrectYearGeo$DuplicatedInputs
+              )
+            FileErr_ <- c(FileErr_, Msg)
+          }
+          next()
+        }
+      }
+      #Check and load data into list
+      DataErr_ls <- list(Errors = character(0), Warnings = character(0))
+      for (Name in names(Spec_ls)) {
+        ThisSpec_ls <- Spec_ls[[Name]]
+        Data_ <- Data_df[[Name]]
+        DataCheck_ls <-
+          checkDataConsistency(Name, Data_, ThisSpec_ls)
+        if (length(DataCheck_ls$Errors) != 0) {
+          writeLog(DataCheck_ls$Errors)
+          DataErr_ls$Errors <-
+            c(DataErr_ls$Errors, DataCheck_ls$Errors)
+          next()
+        }
+        if (length(DataCheck_ls$Warnings) != 0) {
+          writeLog(DataCheck_ls$Warnings)
+          DataErr_ls$Warnings <-
+            c(DataErr_ls$Warnings, DataCheck_ls$Warnings)
+        }
+        Data_ls[[Group]][[Table]][[Name]] <- Data_
+      }
+      if (length(DataErr_ls$Errors) != 0) {
+        Msg <-
+          paste0(
+            "Input file error for module '", ModuleName,
+            "' for input file '", File, "'. ",
+            "Has one or more errors in the data inputs as follows:"
+          )
+        FileErr_ <- c(FileErr_, Msg, DataErr_ls$Errors)
+        writeLog(FileErr_)
+      }
+      if (length(DataErr_ls$Warnings) != 0) {
+        Msg <-
+          paste0(
+            "Input file warnings for module '", ModuleName,
+            "' for input file '", File, "'. ",
+            "Has one or more warnings for the data inputs as follows:"
+          )
+        FileWarn_ <- c(FileWarn_, Msg, DataErr_ls$Warnings)
+        writeLog(FileWarn_)
+      }
+    }#End loop through input files
+
+    #RETURN THE RESULTS
+    list(Errors = FileErr_, Data = Data_ls)
+  }
+
+
+#WRITE PROCESSED INPUTS TO DATASTORE
+#===================================
+#' Write the datasets in a list of module inputs that have been processed to the
+#' datastore.
+#'
+#' \code{inputsToDatastore} takes a list of processed module input files and
+#' writes the datasets to the datastore.
+#'
+#' This function takes a processed list of input datasets specified by a module
+#' created by the application of the 'processModuleInputs' function and writes
+#' the datasets in the list to the datastore.
+#'
+#' @param Inputs_ls a list processes module inputs as created by the
+#' 'processModuleInputs' function.
+#' @param ModuleSpec_ls a list of module specifications that is consistent with
+#' the VisionEval requirements.
+#' @param ModuleName a string identifying the name of the module (used to
+#' document the dataset in the datastore).
+#' @return A logical indicating successful completion. Most of the outputs of
+#' the function are the side effects of writing data to the datastore.
+#' @export
+inputsToDatastore <-
+  function(Inputs_ls, ModuleSpec_ls, ModuleName) {
+    #Make sure the inputs are error free
+    if (length(Inputs_ls$Errors) != 0) {
+      Msg <-
+        paste0(
+          "Unable to write module inputs for module '", ModuleName, "'. ",
+          "There are one or more errors in the inputs or input specifications."
+        )
+      stop(Msg)
+    }
+    #Set up processing
+    Errors_ <- character(0)
+    Data_ls <- Inputs_ls$Data
+    InpSpec_ls <- processModuleSpecs(ModuleSpec_ls)$Inp
+    #Set up new tables
+    if (!is.null(ModuleSpec_ls$NewInpTable)) {
+      TableSpec_ls <- ModuleSpec_ls$NewInpTable
+      for (i in 1:length(TableSpec_ls)) {
+        Table <- TableSpec_ls[[i]]$TABLE
+        Group <- TableSpec_ls[[i]]$GROUP
+        if (Group != "Region") {
+          Msg <-
+            paste0(
+              "NewInpTable specification error for module '", ModuleName, "'. ",
+              "New input tables can only be made in the 'Global' group. "
+            )
+          Errors_ <- c(Errors_, Msg)
+        }
+        Length <- length(Data_ls[[Group]][[Table]][[1]])
+        initTable(Table, Group, Length)
+      }
+    }
+    #Write Global group tables to datastore
+    if (length(Data_ls[["Global"]]) > 0) {
+      for (Table in names(Data_ls[["Global"]])) {
+        for (Name in names(Data_ls[["Global"]][[Table]])) {
+          Data_ <- Data_ls[[Group]][[Table]][[Name]]
+          Spec_ls <- findSpec(InpSpec_ls, Name, Table, Group)
+          Spec_ls$MODULE <- ModuleName
+          writeToTable(Data_, Spec_ls, Group)
+        }
+      }
+    }
+    #Write Year group tables to datastore
+    if (length(Data_ls[["Year"]]) > 0) {
+      for (Table in names(Data_ls[["Year"]])) {
+        Data_df <-
+          data.frame(Data_ls[["Year"]][[Table]], stringsAsFactors = FALSE)
+        for (Year in unique(as.character(Data_df$Year))) {
+          YrData_df <- Data_df[Data_df$Year == Year,]
+          SortData_df <- sortGeoTable(YrData_df, Table, Year)
+          FieldsToSave_ <-
+            names(SortData_df)[!(names(SortData_df) %in% c("Year", "Geo"))]
+          for (Name in FieldsToSave_) {
+            Spec_ls <- findSpec(InpSpec_ls, Name, Table, "Year")
+            Spec_ls$MODULE <- ModuleName
+            writeToTable(SortData_df[[Name]], Spec_ls, Year)
+            rm(Spec_ls)
+          }
+          rm(YrData_df, SortData_df, FieldsToSave_)
+        }
+        rm(Data_df)
+      }
+    }
+    TRUE
+  }
