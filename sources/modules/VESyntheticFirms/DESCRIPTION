@@ -1,0 +1,24 @@
+Package: VisionEvalSyntheticFirms
+Title: VisionEval Synthetic Firms module for RPAT
+Version: 0.3
+Date: 2017-02-17
+Author: Ben Stabler <ben.stabler@rsginc.com>, Peter Andrews <peter.andrews@rsginc.com>, Brian Gregor <gregor@or-analytics.com>
+Maintainer: Ben Stabler <ben.stabler@rsginc.com>, Peter Andrews <peter.andrews@rsginc.com>
+Copyright: RSG
+URL: https://github.com/RSGInc/VisionEvalSyntheticFirms
+Description: VisionEval Synthetic Firms module
+License: Apache 2
+LazyData: true
+Depends:
+    R (>= 3.3.2)
+Imports:
+    visioneval,
+    reshape
+Suggests:
+    knitr
+VignetteBuilder: knitr
+Encoding: UTF-8
+RoxygenNote: 5.0.1
+Collate:
+    'CreateBaseSyntheticFirms.R'
+    'CreateFutureSyntheticFirms.R'

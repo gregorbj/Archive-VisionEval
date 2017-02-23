@@ -1,0 +1,21 @@
+Package: SimHouseholds
+Type: Package
+Title: Create Simulated Households with Attributes
+Version: 0.1.5
+Author: Brian Gregor <gregorb@or-analytics.com>["aut", "cre"]
+Maintainer: Brian Gregor <gregorb@or-analytics.com>
+Copyright: Oregon Department of Transportation
+URL: https://github.com/gregorbj/RSPM_VisionEval
+Description: This package contains several modules which create synthetic
+    households with attributes of persons by age group, income, and housing
+    type.
+License: Apache 2
+LazyData: TRUE
+Depends: R (>= 3.1.0)
+Imports:
+    visioneval,
+    devtools
+Suggests:
+    knitr
+VignetteBuilder: knitr
+RoxygenNote: 5.0.1

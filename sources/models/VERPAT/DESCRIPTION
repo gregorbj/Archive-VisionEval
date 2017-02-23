@@ -1,0 +1,25 @@
+Package: VisionEvalRPAT
+Type: Package
+Title: RPAT implementation using the VisionEval Model System
+Version: 0.0.0.9500
+Date: 2017-02-16
+Author: Ben Stabler <ben.stabler@rsginc.com>, Peter Andrews <peter.andrews@rsginc.com>, Brian Gregor <gregor@or-analytics.com>
+Maintainer: Ben Stabler <ben.stabler@rsginc.com>, Peter Andrews <peter.andrews@rsginc.com>
+Copyright: RSG
+URL: https://github.com/RSGInc/VisionEvalRPAT
+Description: RPAT re-implemented as a series of VisionEval modules
+License: Apache 2
+Depends:
+    R (>= 3.3.2)
+Imports:
+    visioneval,
+    devtools,
+    data.table,
+    reshape
+Suggests:
+    knitr
+VignetteBuilder: knitr
+Encoding: UTF-8
+LazyData: true
+Collate:
+    'run_model.R'
