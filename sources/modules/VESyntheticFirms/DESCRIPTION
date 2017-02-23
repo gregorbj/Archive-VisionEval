@@ -1,11 +1,11 @@
-Package: VisionEvalSyntheticFirms
+Package: VESyntheticFirms
 Title: VisionEval Synthetic Firms module for RPAT
 Version: 0.3
 Date: 2017-02-17
 Author: Ben Stabler <ben.stabler@rsginc.com>, Peter Andrews <peter.andrews@rsginc.com>, Brian Gregor <gregor@or-analytics.com>
 Maintainer: Ben Stabler <ben.stabler@rsginc.com>, Peter Andrews <peter.andrews@rsginc.com>
 Copyright: RSG
-URL: https://github.com/RSGInc/VisionEvalSyntheticFirms
+URL: https://github.com/gregorbj/VisionEval/sources/modules/VESyntheticFirms
 Description: VisionEval Synthetic Firms module
 License: Apache 2
 LazyData: true

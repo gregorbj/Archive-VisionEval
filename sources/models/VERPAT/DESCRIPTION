@@ -1,12 +1,12 @@
-Package: VisionEvalRPAT
+Package: VERPAT
 Type: Package
-Title: RPAT implementation using the VisionEval Model System
+Title: RPAT re-implemented as a series of VisionEval modules
 Version: 0.0.0.9500
 Date: 2017-02-16
 Author: Ben Stabler <ben.stabler@rsginc.com>, Peter Andrews <peter.andrews@rsginc.com>, Brian Gregor <gregor@or-analytics.com>
 Maintainer: Ben Stabler <ben.stabler@rsginc.com>, Peter Andrews <peter.andrews@rsginc.com>
 Copyright: RSG
-URL: https://github.com/RSGInc/VisionEvalRPAT
+URL: https://github.com/gregorbj/sources/models/VERPAT
 Description: RPAT re-implemented as a series of VisionEval modules
 License: Apache 2
 Depends:

@@ -1,11 +1,11 @@
-Package: SimHouseholds
+Package: VESimHouseholds
 Type: Package
-Title: Create Simulated Households with Attributes
+Title: Create Simulated Households with Attributes for VE
 Version: 0.1.5
 Author: Brian Gregor <gregorb@or-analytics.com>["aut", "cre"]
 Maintainer: Brian Gregor <gregorb@or-analytics.com>
 Copyright: Oregon Department of Transportation
-URL: https://github.com/gregorbj/RSPM_VisionEval
+URL: https://github.com/gregorbj/VisionEval/sources/modules/VESimHouseholds
 Description: This package contains several modules which create synthetic
     households with attributes of persons by age group, income, and housing
     type.

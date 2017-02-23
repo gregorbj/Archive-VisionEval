@@ -1,12 +1,32 @@
 # VisionEval #
-This project documents the development of a model system and supporting software framework for building collaborative disaggregate strategic planning models. The name for this model system and framework is *VisionEval*. Background information is available on the project [webpage](https://gregorbj.github.io/VisionEval/).
+VisionEval (VE) is a model system and supporting software framework for building collaborative disaggregate strategic planning models. Background information is available on the project [webpage](https://gregorbj.github.io/VisionEval/) and project administration is available on the linked [wiki](https://github.com/gregorbj/VisionEval/wiki).
 
-This repository contains code and documentation for the VisionEval model system and for the software framework that implements. The software framework is written in the R programming language for statistical computing and graphics. The software framework is available as a R package, *visioneval*. The purpose of the model system and framework is to enable models be created in a plug-and-play fashion from modules that are also distributed as R packages. A simple R script is used to implement a model by initializing the model environment and then calling modules successively. This repository contains currently contains a demonstration module package and demonstration model script and associated resources. In the future, the repository will hold a number of working modules, model scripts, and resources that implement the GreenSTEP model and related strategic planning models.
+The VE software framework is written in the R programming language for statistical computing and graphics. The software framework is available as a R package, *visioneval*. The purpose of the model system and framework is to enable models be created in a plug-and-play fashion from modules that are also distributed as R packages. A simple R script is used to implement a model by initializing the model environment and then calling modules successively. This repository contains currently contains a demonstration module package and demonstration model script and associated resources. In the future, the repository will hold a number of working modules, model scripts, and resources that implement the GreenSTEP model and related strategic planning models.
 
-This repository is organized into four main directories.  
-- The **sources** directory contains all of the sources for the *visioneval* package, demonstration modules, and demonstration model scripts and associated resources. These are contained in the *framework*, *modules*, and *models* directories respectively.  
-- The **binaries** directory contains binary copies of the packages and archives of models. This directory is organized by operating system. Currently only windows binaries have been produced. The windows directory is organized like the sources directory with subdirectories for the framework, modules, and models binaries.  
-- The **documents** directory contains documentation of the model system. The *model_system_design.md* document is the most complete at the present time.
-- The **presentations** directory contains presentations on the model system.
+This repository is organized into two directories
+- The **sources** directory contains four directories:
+  - [visioneval framework](https://gregorbj.github.io/VisionEval/sources/framework) package
+  - [VE modules](https://gregorbj.github.io/VisionEval/sources/modules) such as VESimHouseholds and VESyntheticFirms
+  - [VE models](https://gregorbj.github.io/VisionEval/sources/models) such as the pilot version of VERPAT
+  - [VE GUI](https://gregorbj.github.io/VisionEval/sources/VEGUI) graphical user interface and scenario viewer / visualizer for running and viewing results of VE models
+- The **api** directory contains documentation of the model system. The *model_system_design.md* document is the most complete at the present time.
 
-At the present time, using the model system requires some familiarity with R. For those who are less familiar with R and GitHub, the first thing you should do is install [R Studio](https://www.rstudio.com/home/). Then download a zipped version of this repository by clicking on the "Download ZIP" button. Unzip the downloaded archive and go to the "sources/models/demo1" directory and open the "demo1.Rproj" file in R Studio. Once the project is open, open the "setup.R" script in R Studio and run the script. This will install all of the R packages needed to run the demo. Then open the "run_model.R" script in R Studio. It might be best to run this script a few lines at a time to understand what is being done.  
+# Getting Started
+The installation and setup steps are:
+  1. Install [R](https://cran.r-project.org) in a location where you have write access.
+  2. Start R
+  3. Run the following commands to download and install the required libraries and their dependencies:
+
+```
+install.packagessource("http://bioconductor.org/biocLite.R")
+biocLite()
+biocLite("rhdf5")
+install.packages("devtools")
+library("devtools")
+install_github("gregorbj/VisionEval/sources/framework/visioneval")
+install_github("gregorbj/VisionEval/sources/modules/VESyntheticFirms")
+install_github("gregorbj/VisionEval/sources/modules/VESimHouseholds")
+install_github("gregorbj/VisionEval/sources/models/VERPAT")
+```
+
+For those who are less familiar with R, we recommend installing [R Studio](https://www.rstudio.com/home/).

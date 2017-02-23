@@ -2,12 +2,12 @@
 #run_model.R
 #===========
 
-#This script demonstrates the VisionEval framework for a demonstration RPAT
-#Module
+#This script demonstrates the VisionEval framework for a demonstration RPAT Module
 
 #Load libraries
 #--------------
 library(visioneval)
+library(VESyntheticFirms)
 
 #Initialize model
 #----------------
@@ -26,9 +26,9 @@ initializeModel(
 BaseYear <- getModelState()$BaseYear
 for(Year in getYears()) {
   if (Year == BaseYear) {
-    runModule(ModuleName = "CreateBaseSyntheticFirms", PackageName = "VisionEvalSyntheticFirms")
+    runModule(ModuleName = "CreateBaseSyntheticFirms", PackageName = "VESyntheticFirms")
   } else {
-    runModule(ModuleName = "CreateFutureSyntheticFirms", PackageName = "VisionEvalSyntheticFirms")
+    runModule(ModuleName = "CreateFutureSyntheticFirms", PackageName = "VESyntheticFirms")
   }
 }
 
