@@ -12,7 +12,8 @@ This repository is organized into two directories:
 - The **api** directory contains documentation of the model system. The [model system design](https://github.com/gregorbj/VisionEval/blob/master/api/model_system_design.md) document is the most complete at the present time.
 
 # Getting Started
-The installation and setup steps are:
+
+## Installation and Setup
   1. Install [R](https://cran.r-project.org) in a location where you have write access.
   2. Start R
   3. Run the following commands to download and install the required libraries and their dependencies:
@@ -29,7 +30,7 @@ install_github("gregorbj/VisionEval/sources/modules/VESimHouseholds")
 install_github("gregorbj/VisionEval/sources/models/VERPAT")
 ```
 
-# Running the Pilot VERPAT
+## Running the Pilot VERPAT
   1. Start R
   3. Run the following commands:
 
@@ -39,7 +40,7 @@ setwd(full_path_to_VERPAT)
 source("run_model.R")
 ```
 
-# Running the Pilot VEGUI
+## Running the Pilot VEGUI
   1. Start R
   3. Run the following commands:
 
