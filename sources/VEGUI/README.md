@@ -10,9 +10,9 @@ VisionEval R Shiny GUI and Scenario Viewer (Visualizer)
 install.packages("shiny")
 ```
 
-# Running VEGUI
+# Running VE GUI
   1. Start R
-  2. Run the following commands to download and run VEGUI:
+  2. Run the following commands to download and run VE GUI:
 
 ```
 library("shiny")

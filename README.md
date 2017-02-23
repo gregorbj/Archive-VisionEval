@@ -30,7 +30,7 @@ install_github("gregorbj/VisionEval/sources/modules/VESimHouseholds")
 install_github("gregorbj/VisionEval/sources/models/VERPAT")
 ```
 
-## Running the Pilot VERPAT
+## Running the Pilot VE RPAT
   1. Start R
   3. Run the following commands:
 
@@ -40,7 +40,7 @@ setwd(full_path_to_VERPAT)
 source("run_model.R")
 ```
 
-## Running the Pilot VEGUI
+## Running the Pilot VE GUI
   1. Start R
   3. Run the following commands:
 
