@@ -9,7 +9,7 @@ This repository is organized into two directories:
   - [VE modules](https://github.com/gregorbj/VisionEval/tree/master/sources/modules) such as VESimHouseholds and VESyntheticFirms
   - VE models such as the pilot version of [VERPAT](https://github.com/gregorbj/VisionEval/tree/master/sources/models/VERPAT)
   - [VE GUI](https://github.com/gregorbj/VisionEval/tree/master/sources/VEGUI) graphical user interface and scenario viewer / visualizer for running and viewing results of VE models
-- The **api** directory contains documentation of the model system. The *model_system_design.md* document is the most complete at the present time.
+- The **api** directory contains documentation of the model system. The [model system design](https://github.com/gregorbj/VisionEval/blob/master/api/model_system_design.md) document is the most complete at the present time.
 
 # Getting Started
 The installation and setup steps are:
@@ -27,6 +27,25 @@ install_github("gregorbj/VisionEval/sources/framework/visioneval")
 install_github("gregorbj/VisionEval/sources/modules/VESyntheticFirms")
 install_github("gregorbj/VisionEval/sources/modules/VESimHouseholds")
 install_github("gregorbj/VisionEval/sources/models/VERPAT")
+```
+
+# Running the Pilot VERPAT
+  1. Start R
+  3. Run the following commands:
+
+```
+full_path_to_VERPAT = "C:/projects/development/VisionEval/sources/models/VERPAT"
+setwd(full_path_to_VERPAT)
+source("run_model.R")
+```
+
+# Running the Pilot VEGUI
+  1. Start R
+  3. Run the following commands:
+
+```
+library("shiny")
+runGitHub( "gregorbj/VisionEval", subdir="sources/VEGUI")
 ```
 
 For those new to R, we recommend installing [R Studio](https://www.rstudio.com/home/).
