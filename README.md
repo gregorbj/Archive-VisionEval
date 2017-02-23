@@ -5,10 +5,10 @@ The VE software framework is written in the R programming language for statistic
 
 This repository is organized into two directories
 - The **sources** directory contains four directories:
-  - [visioneval framework](http://www.github.com/gregorbj/VisionEval/sources/framework) package
-  - [VE modules](http://www.github.com/gregorbj/VisionEval/sources/modules) such as VESimHouseholds and VESyntheticFirms
-  - [VE models](http://www.github.com/gregorbj/VisionEval/sources/models) such as the pilot version of VERPAT
-  - [VE GUI](http://www.github.com/gregorbj/VisionEval/sources/VEGUI) graphical user interface and scenario viewer / visualizer for running and viewing results of VE models
+  - [visioneval framework](https://github.com/gregorbj/VisionEval/tree/master/sources/framework/visioneval) package
+  - [VE modules](https://github.com/gregorbj/VisionEval/sources/modules) such as VESimHouseholds and VESyntheticFirms
+  - [VE models](https://github.com/gregorbj/VisionEval/sources/models) such as the pilot version of VERPAT
+  - [VE GUI](https://github.com/gregorbj/VisionEval/sources/VEGUI) graphical user interface and scenario viewer / visualizer for running and viewing results of VE models
 - The **api** directory contains documentation of the model system. The *model_system_design.md* document is the most complete at the present time.
 
 # Getting Started
