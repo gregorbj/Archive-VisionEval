@@ -16,5 +16,5 @@ install.packages("shiny")
 
 ```
 library("shiny")
-runGitHub( "gregorbj/sources/VEGUI")
+runGitHub( "gregorbj/VisionEval", subdir="sources/VEGUI")
 ```

@@ -7,7 +7,7 @@ VisionEval RPAT
   3. Run the following commands to download and install the required libraries and their dependencies:
 
 ```
-install.packagessource("http://bioconductor.org/biocLite.R")
+source("http://bioconductor.org/biocLite.R")
 biocLite()
 biocLite("rhdf5")
 install.packages("devtools")
