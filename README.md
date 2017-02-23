@@ -29,4 +29,4 @@ install_github("gregorbj/VisionEval/sources/modules/VESimHouseholds")
 install_github("gregorbj/VisionEval/sources/models/VERPAT")
 ```
 
-For those who are less familiar with R, we recommend installing [R Studio](https://www.rstudio.com/home/).
+For those new to R, we recommend installing [R Studio](https://www.rstudio.com/home/).
