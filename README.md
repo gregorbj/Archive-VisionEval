@@ -30,9 +30,9 @@ install_github("gregorbj/VisionEval/sources/modules/VESimHouseholds")
 install_github("gregorbj/VisionEval/sources/models/VERPAT")
 ```
 
-## Running the Pilot VE RPAT
+## Running the Pilot VE RPAT from within R
   1. Start R
-  3. Run the following commands:
+  2. Run the following commands:
 
 ```
 full_path_to_VERPAT = "C:/projects/development/VisionEval/sources/models/VERPAT"
@@ -40,14 +40,16 @@ setwd(full_path_to_VERPAT)
 source("run_model.R")
 ```
 
-## Running the Pilot VE GUI
+## Running the Pilot VE GUI to run Pilot VE RPAT
   1. Start R
-  3. Run the following commands:
+  2. Run the following commands:
 
 ```
 library("shiny")
 library("shinyFiles")
 runGitHub( "gregorbj/VisionEval", subdir="sources/VEGUI")
 ```
+  3. Navigate to the VERPAT run_model.R script
+  4. Run the model
 
 For those new to R, we recommend installing [R Studio](https://www.rstudio.com/home/).

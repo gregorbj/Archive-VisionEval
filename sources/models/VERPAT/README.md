@@ -16,7 +16,7 @@ install_github("gregorbj/VisionEval/sources/framework/visioneval")
 install_github("gregorbj/VisionEval/sources/modules/VESyntheticFirms")
 ```
 
-# Running the Pilot VE RPAT
+# Running the Pilot VE RPAT from within R
   1. Start R
   3. Run the following commands:
 
@@ -25,3 +25,5 @@ full_path_to_VERPAT = "C:/projects/development/VisionEval/sources/models/VERPAT"
 setwd(full_path_to_VERPAT)
 source("run_model.R")
 ```
+
+The Pilot VE RPAT can also be run with the [Pilot VE GUI](https://github.com/gregorbj/VisionEval/tree/master/sources/VEGUI).
