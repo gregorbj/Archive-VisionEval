@@ -12,8 +12,12 @@ shinyUI(fluidPage(
         
         img(src="visioneval_logo.png", height=100, width=100, style="margin:10px 10px"),
     
-        shinyFilesButton('file', label='Select Model Run Script', 
-          title='Please select model run script', multiple=FALSE)
+        shinyFilesButton('file', label='Select Run Script', 
+          title='Please select model run script', multiple=FALSE),
+          
+        actionButton("runmodel", "Run Model Script"), 
+        
+        width=2
         
       ),
       
