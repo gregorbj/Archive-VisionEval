@@ -8,6 +8,7 @@ VisionEval R Shiny GUI and Scenario Viewer (Visualizer)
 
 ```
 install.packages("shiny")
+install.packages("shinyFiles")
 ```
 
 # Running VE GUI
@@ -16,5 +17,17 @@ install.packages("shiny")
 
 ```
 library("shiny")
+library("shinyFiles")
 runGitHub( "gregorbj/VisionEval", subdir="sources/VEGUI")
+```
+
+  3. Or run it from within R with:
+
+```
+library("shiny")
+library("shinyFiles")
+
+full_path_to_VEGUI = "C:/projects/development/VisionEval/sources/VEGUI"
+setwd(full_path_to_VEGUI)
+runApp('../VEGUI')
 ```

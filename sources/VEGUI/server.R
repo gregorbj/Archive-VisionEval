@@ -1,20 +1,31 @@
 library(shiny)
+library(shinyFiles)
+library(visioneval)
 
-# Define server logic required to draw a histogram
+# Define server logic
 shinyServer(function(input, output) {
+    
+    #file picker
+    shinyFileChoose(input, 'file', root=getVolumes(''), filetypes=c('', 'R'))
+    
+    #run model on file name change
+    observeEvent(input$file, {
+      
+      #parse script name
+      inFile = parseFilePaths(roots=getVolumes(''), input$file)
+      scriptName = as.character(inFile$datapath)
+      output$filepath = renderPrint( { scriptName } ) 
+        
+      #run model
+      setwd(dirname(scriptName))
+      output$scriptprint = renderPrint( { 
+        capture.output(source(scriptName, local=FALSE)) #sourced in global environment
+      } )
+      
+      #read resulting datastore
+      datastorePrint = capture.output(getModelState("Datastore"))
+      output$datastorelist = renderPrint( { datastorePrint } )
 
-  # Expression that generates a histogram. The expression is
-  # wrapped in a call to renderPlot to indicate that:
-  #
-  #  1) It is "reactive" and therefore should re-execute automatically
-  #     when inputs change
-  #  2) Its output type is a plot
+    })
 
-  output$distPlot <- renderPlot({
-    x    <- faithful[, 2]  # Old Faithful Geyser data
-    bins <- seq(min(x), max(x), length.out = input$bins + 1)
-
-    # draw the histogram with the specified number of bins
-    hist(x, breaks = bins, col = 'darkgray', border = 'white')
-  })
 })

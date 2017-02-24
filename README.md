@@ -46,6 +46,7 @@ source("run_model.R")
 
 ```
 library("shiny")
+library("shinyFiles")
 runGitHub( "gregorbj/VisionEval", subdir="sources/VEGUI")
 ```
 
