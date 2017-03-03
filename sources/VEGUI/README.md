@@ -35,6 +35,6 @@ full_path_to_VEGUI = "C:/projects/development/VisionEval/sources/VEGUI"
 setwd(full_path_to_VEGUI)
 runApp('../VEGUI')
 ```
-  4. Navigate to the VERPAT run_model.R script
+  4. Navigate to the VERPAT run_model.R script in the copy of this repository on your computer
   5. Run the model
   

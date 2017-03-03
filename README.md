@@ -55,7 +55,7 @@ library("shiny")
 library("shinyFiles")
 runGitHub( "gregorbj/VisionEval", subdir="sources/VEGUI")
 ```
-  3. Navigate to the VERPAT run_model.R script
+  3. Navigate to the VERPAT run_model.R script in the copy of this repository on your computer
   4. Run the model
 
 For those new to R, we recommend installing [R Studio](https://www.rstudio.com/home/).
