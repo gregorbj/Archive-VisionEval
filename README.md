@@ -14,7 +14,7 @@ This repository is organized into two directories:
 # Getting Started
 
 ## Installation and Setup
-  1. Install [R](https://cran.r-project.org) in a location where you have write access.
+  1. Install [R 3.3+](https://cran.r-project.org) in a location where you have write access.
   2. Start R
   3. Run the following commands to download and install the required libraries and their dependencies:
 
@@ -23,6 +23,9 @@ source("http://bioconductor.org/biocLite.R")
 biocLite()
 biocLite("rhdf5")
 install.packages("devtools")
+install.packages("plyr")
+install.packages("shiny")
+install.packages("shinyFiles")
 library("devtools")
 install_github("gregorbj/VisionEval/sources/framework/visioneval")
 install_github("gregorbj/VisionEval/sources/modules/VESyntheticFirms")
@@ -30,23 +33,29 @@ install_github("gregorbj/VisionEval/sources/modules/VESimHouseholds")
 install_github("gregorbj/VisionEval/sources/models/VERPAT")
 ```
 
-## Running the Pilot VERPAT
+## Running the Pilot VE RPAT from within R
+  1. Git Clone (i.e. copy) this repository to your computer.
   1. Start R
-  3. Run the following commands:
+  2. Run the following commands:
 
 ```
+#point to the location of the cloned repository, not the location of the auto-installed R packages
 full_path_to_VERPAT = "C:/projects/development/VisionEval/sources/models/VERPAT"
 setwd(full_path_to_VERPAT)
 source("run_model.R")
 ```
 
-## Running the Pilot VEGUI
+## Running the Pilot VE GUI to run Pilot VE RPAT
+  1. Git Clone (i.e. copy) this repository to your computer.
   1. Start R
-  3. Run the following commands:
+  2. Run the following commands:
 
 ```
 library("shiny")
+library("shinyFiles")
 runGitHub( "gregorbj/VisionEval", subdir="sources/VEGUI")
 ```
+  3. Navigate to the VERPAT run_model.R script in the copy of this repository on your computer
+  4. Run the model
 
 For those new to R, we recommend installing [R Studio](https://www.rstudio.com/home/).
