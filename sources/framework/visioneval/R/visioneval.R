@@ -43,9 +43,13 @@
 #' @param ModelParamFile A string identifying the name of a JSON-formatted text
 #' file that contains global model parameters that are important to a model and
 #' may be shared by several modules.
-#' @param DatastoreToLoad NULL or a string identifying the relative or absolute
-#' path to a datastore to be copied to serve as the starting datastore for the
-#' model run. The default value is NULL (no datastore will be copied).
+#' @param LoadDatastore A logical identifying whether an existing datastore
+#' should be loaded.
+#' @param DatastoreName A string identifying the full path name of a datastore
+#' to load or NULL if an existing datastore in the working directory is to be
+#' loaded.
+#' @param SaveDatastore A string identifying whether if an existing datastore
+#' in the working directory should be saved rather than removed.
 #' @return None. The function prints to the log file messages which identify
 #' whether or not there are errors in initialization. It also prints a success
 #' message if initialization has been successful.
@@ -56,8 +60,8 @@ initializeModel <-
     RunParamFile = "run_parameters.json",
     GeoFile = "geo.csv",
     ModelParamFile = "model_parameters.json",
-    LoadDatastore = NULL,
-    IgnoreDatastore = FALSE,
+    LoadDatastore = FALSE,
+    DatastoreName = NULL,
     SaveDatastore = TRUE) {
 
     #Initialize model state and log files
@@ -69,17 +73,42 @@ initializeModel <-
     initLog()
     writeLog(Msg)
 
-    #Initialize geography and load model parameters
-    #----------------------------------------------
-    if (is.null(LoadDatastore) &
-        file.exists(getModelState()[["DatastoreName"]])) {
-      LoadDatastore <- getModelState()[["DatastoreName"]]
-    }
-    if (!is.null(LoadDatastore)) {
-      loadDatastore(
-        FileToLoad = LoadDatastore,
-        GeoFile = GeoFile,
-        SaveDatastore = SaveDatastore)
+    #Load existing model if specified and initialize geography
+    #---------------------------------------------------------
+    if (LoadDatastore) {
+      if (!is.null(DatastoreName)) {
+        if (file.exists(DatastoreName)) {
+          loadDatastore(
+            FileToLoad = DatastoreName,
+            GeoFile = GeoFile,
+            SaveDatastore = SaveDatastore
+          )
+        } else {
+          Msg <-
+            paste0("Call of 'initializeModel' function has error. ",
+                   "'LoadDatastore' argument is TRUE, but ",
+                   "file specified by 'DatastoreName' argument (",
+                   DatastoreName, ") does not exist.")
+          stop(Msg)
+        }
+      } else {
+        if (file.exists(getModelState()[["DatastoreName"]])) {
+          LoadDatastore <- getModelState()[["DatastoreName"]]
+          loadDatastore(
+            FileToLoad = DatastoreName,
+            GeoFile = GeoFile,
+            SaveDatastore = SaveDatastore
+          )
+        } else {
+          Msg <-
+            paste0("Call of 'initializeModel' function has error. ",
+                   "'LoadDatastore' argument is TRUE, but ",
+                   "since the 'DatastoreName' argument is NULL, ",
+                   "it is attempting to load the previous datastore ",
+                   "which can't be found.")
+          stop(Msg)
+        }
+      }
     } else {
       initDatastore()
       readGeography(Dir = ParamDir, GeoFile = GeoFile)
