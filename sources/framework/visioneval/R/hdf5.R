@@ -271,7 +271,7 @@ readFromTable <- function(Name, Table, Group, File = "datastore.h5", Index = NUL
     } else {
       ModelStateFile <- paste(RefHead, "ModelState.Rda", sep = "/")
     }
-    getModelState(FileName = ModelStateFile)
+    readModelState(FileName = ModelStateFile)
   }
   G <- getModelListing(DstoreRef = File)
   #Check that dataset exists to read from
@@ -449,7 +449,7 @@ getFromDatastore <- function(ModuleSpec_ls, Geo = NULL) {
       } else {
         ModelStateFile <- paste(RefHead, "ModelState.Rda", sep = "/")
       }
-      getModelState(FileName = ModelStateFile)
+      readModelState(FileName = ModelStateFile)
     }
     for (File in Files_) {
       DstoreListing_ls <- getModelListing(DstoreRef = File)$Datastore

@@ -6,54 +6,110 @@
 #run. Several of the functions are also invoked when modules are run.
 
 
+#INITIALIZE MODEL STATE
+#======================
+#' Initialize model state.
+#'
+#' \code{initModelState} loads model run parameters into the model state
+#' list in the global workspace and saves as file.
+#'
+#' This function creates the model state list and loads model run parameters
+#' recorded in the 'parameters.json' file into the model state list. It also
+#' saves the model state list in a file (ModelState.Rda).
+#'
+#' @param Dir A string identifying the name of the directory where the global
+#' parameters file is located. The default value is "defs".
+#' @param ParamFile A string identifying the name of the global parameters file.
+#' The default value is "parameters.json".
+#' @return TRUE if the model state list is created and file is saved. It creates
+#' the model state list and loads parameters recorded in the 'parameters.json'
+#' file into the model state lists and saves a model state file.
+#' @export
+#' @import jsonlite
+initModelStateFile <- function(Dir = "defs", ParamFile = "run_parameters.json") {
+  ParamFilePath <- file.path(Dir,  ParamFile)
+  if (!file.exists(ParamFilePath)) {
+    Message <- paste("Missing", ParamFilePath, "file.")
+    stop(Message)
+  } else {
+    ModelState_ls <<- fromJSON(ParamFilePath)
+    save(ModelState_ls, file = "ModelState.Rda")
+  }
+  TRUE
+}
+
+
 #UPDATE MODEL STATE
 #==================
 #' Update model state.
 #'
-#' \code{setModelState} updates the file that keeps track of the model state
-#' with list of components to update
+#' \code{setModelState} updates the list that keeps track of the model state
+#' with list of components to update and resaves in the model state file.
 #'
 #' Key variables that are important for managing the model run are stored in a
-#' list (ModelState_ls) that is saved in the 'ModelState.Rda' file. This
-#' function loads the file and updates  entries with a supplied named list of
-#' values, and then saves the results in the file.
+#' list (ModelState_ls) that is in the global workspace and saved in the
+#' 'ModelState.Rda' file. This function updates  entries in the model state list
+#' with a supplied named list of values, and then saves the results in the file.
 #'
 #' @param ChangeState_ls A named list of components to change in ModelState_ls
 #' @param FileName A string identifying the name of the file that contains
 #' the ModelState_ls list. The default name is 'ModelState.Rda'.
-#' @return TRUE if the model state file is changed.
+#' @return TRUE if the model state list and file are changed.
 #' @export
 setModelState <- function(ChangeState_ls, FileName = "ModelState.Rda") {
-  if (file.exists(FileName)) {
-    load(FileName)
-  }
-  if (!("ModelState_ls" %in% ls())) ModelState_ls <- list()
+  NewModelState_ls <- ModelState_ls
   for (i in 1:length(ChangeState_ls)) {
-    ModelState_ls[[names(ChangeState_ls[i])]] <- ChangeState_ls[[i]]
+    NewModelState_ls[[names(ChangeState_ls[i])]] <- ChangeState_ls[[i]]
   }
+  ModelState_ls <<- NewModelState_ls
   save(ModelState_ls, file = "ModelState.Rda")
   TRUE
 }
 
 
-#RETRIEVE MODEL STATE
-#====================
-#' Retrieve model state.
+#GET MODEL STATE VALUES
+#======================
+#' Get values from model state list.
 #'
-#' \code{getModelState} reads components of the file that keeps track of the
+#' \code{getModelState} reads components of the list that keeps track of the
 #' model state
 #'
 #' Key variables that are important for managing the model run are stored in a
-#' list (ModelState_ls) that is saved in the 'ModelState.Rda' file. This
-#' function loads the file and extracts named components of the list.
+#' list (ModelState_ls) that is managed in the global environment. This
+#' function extracts named components of the list.
 #'
 #' @param Names_ A string vector of the components to extract from the
 #' ModelState_ls list.
-#' @param FileName A string identifying the name of the file that contains
-#' the ModelState_ls list. The default name is 'ModelState.Rda'.
 #' @return A list containing the specified components from the model state file.
 #' @export
-getModelState <- function(Names_ = "All", FileName = "ModelState.Rda") {
+getModelState <- function(Names_ = "All") {
+  State_ls <- ModelState_ls
+  if (Names_[1] == "All") {
+    return(State_ls)
+  } else {
+    return(State_ls[Names_])
+  }
+}
+
+
+#READ MODEL STATE FILE
+#=====================
+#' Reads values from model state file.
+#'
+#' \code{readModelState} reads components of the file that saves a copy of the
+#' model state
+#'
+#' The model state is stored in a list (ModelState_ls) that is also saved as a
+#' file (ModelState.Rda) whenever the list is updated. This function reads the
+#' contents of the ModelState.Rda file.
+#'
+#' @param Names_ A string vector of the components to extract from the
+#' ModelState_ls list.
+#' @param FileName A string vector with the full path name of the model state
+#' file.
+#' @return A list containing the specified components from the model state file.
+#' @export
+readModelState <- function(Names_ = "All", FileName = "ModelState.Rda") {
   if (file.exists(FileName)) {
     load(FileName)
   }
@@ -79,39 +135,6 @@ getModelState <- function(Names_ = "All", FileName = "ModelState.Rda") {
 #' @export
 getYears <- function() {
   unlist(getModelState("Years"))
-}
-
-
-#INITIALIZE MODEL STATE
-#======================
-#' Initialize model state.
-#'
-#' \code{initModelStateFile} loads model run parameters into the model state
-#' file that is used to keep track of the model state.
-#'
-#' This function creates the model state file and loads model run parameters
-#' recorded in the 'parameters.json' file into the model state file.
-#'
-#' @param Dir A string identifying the name of the directory where the global
-#' parameters file is located. The default value is "defs".
-#' @param ParamFile A string identifying the name of the global parameters file.
-#' The default value is "parameters.json".
-#' @return TRUE if the model state file is created. It creates the model state
-#' file and loads parameters recorded in the 'parameters.json' file into the
-#' model state file.
-#' @export
-#' @import jsonlite
-initModelStateFile <- function(Dir = "defs", ParamFile = "run_parameters.json") {
-  ParamFilePath <- file.path(Dir,  ParamFile)
-  if (!file.exists(ParamFilePath)) {
-    Message <- paste("Missing", ParamFilePath, "file.")
-    stop(Message)
-  } else {
-    Parm <- fromJSON(ParamFilePath)
-
-    setModelState(Parm)
-  }
-  TRUE
 }
 
 
@@ -1110,7 +1133,7 @@ simDataTransactions <- function(ModuleCalls_df) {
       for (Ref in Refs_) {
         if (file.exists(Ref)) {
           Dstores_ls[[Name]][[Ref]] <-
-            getModelState("Datastore", FileName = getInventoryRef(Ref))
+            readModelState("Datastore", FileName = getInventoryRef(Ref))
         } else {
           Msg <-
             paste0("The file '", Ref,
