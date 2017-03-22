@@ -6,7 +6,7 @@
 \usage{
 initializeModel(ParamDir = "defs", RunParamFile = "run_parameters.json",
   GeoFile = "geo.csv", ModelParamFile = "model_parameters.json",
-  LoadDatastore = NULL, IgnoreDatastore = FALSE, SaveDatastore = TRUE)
+  LoadDatastore = FALSE, DatastoreName = NULL, SaveDatastore = TRUE)
 }
 \arguments{
 \item{ParamDir}{A string identifying the relative or absolute path to the
@@ -25,9 +25,15 @@ for the model. The default value is "geo.csv".}
 file that contains global model parameters that are important to a model and
 may be shared by several modules.}
 
-\item{DatastoreToLoad}{NULL or a string identifying the relative or absolute
-path to a datastore to be copied to serve as the starting datastore for the
-model run. The default value is NULL (no datastore will be copied).}
+\item{LoadDatastore}{A logical identifying whether an existing datastore
+should be loaded.}
+
+\item{DatastoreName}{A string identifying the full path name of a datastore
+to load or NULL if an existing datastore in the working directory is to be
+loaded.}
+
+\item{SaveDatastore}{A string identifying whether if an existing datastore
+in the working directory should be saved rather than removed.}
 }
 \value{
 None. The function prints to the log file messages which identify

@@ -4,7 +4,8 @@
 \alias{setModelState}
 \title{Update model state.}
 \usage{
-setModelState(ChangeState_ls, FileName = "ModelState.Rda")
+setModelState(ChangeState_ls, State_ls = ModelState_ls,
+  FileName = "ModelState.Rda")
 }
 \arguments{
 \item{ChangeState_ls}{A named list of components to change in ModelState_ls}
@@ -13,16 +14,16 @@ setModelState(ChangeState_ls, FileName = "ModelState.Rda")
 the ModelState_ls list. The default name is 'ModelState.Rda'.}
 }
 \value{
-TRUE if the model state file is changed.
+TRUE if the model state list and file are changed.
 }
 \description{
-\code{setModelState} updates the file that keeps track of the model state
-with list of components to update
+\code{setModelState} updates the list that keeps track of the model state
+with list of components to update and resaves in the model state file.
 }
 \details{
 Key variables that are important for managing the model run are stored in a
-list (ModelState_ls) that is saved in the 'ModelState.Rda' file. This
-function loads the file and updates  entries with a supplied named list of
-values, and then saves the results in the file.
+list (ModelState_ls) that is in the global workspace and saved in the
+'ModelState.Rda' file. This function updates  entries in the model state list
+with a supplied named list of values, and then saves the results in the file.
 }
 
