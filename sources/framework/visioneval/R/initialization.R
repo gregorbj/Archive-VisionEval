@@ -56,8 +56,9 @@ initModelStateFile <- function(Dir = "defs", ParamFile = "run_parameters.json") 
 #' the ModelState_ls list. The default name is 'ModelState.Rda'.
 #' @return TRUE if the model state list and file are changed.
 #' @export
-setModelState <- function(ChangeState_ls, FileName = "ModelState.Rda") {
-  NewModelState_ls <- ModelState_ls
+setModelState <-
+  function(ChangeState_ls, State_ls = ModelState_ls, FileName = "ModelState.Rda") {
+  NewModelState_ls <- State_ls
   for (i in 1:length(ChangeState_ls)) {
     NewModelState_ls[[names(ChangeState_ls[i])]] <- ChangeState_ls[[i]]
   }
@@ -80,10 +81,10 @@ setModelState <- function(ChangeState_ls, FileName = "ModelState.Rda") {
 #'
 #' @param Names_ A string vector of the components to extract from the
 #' ModelState_ls list.
+#' @param State_ls The model state list which by default is ModelState_ls.
 #' @return A list containing the specified components from the model state file.
 #' @export
-getModelState <- function(Names_ = "All") {
-  State_ls <- ModelState_ls
+getModelState <- function(Names_ = "All", State_ls = ModelState_ls) {
   if (Names_[1] == "All") {
     return(State_ls)
   } else {
@@ -649,96 +650,131 @@ loadModelParameters <- function(ModelParamFile = "model_parameters.json") {
 #' list of the calls with their arguments in the order of the calls in the
 #' script.
 #'
-#' @param Path A string identifying the relative or absolute path to the
+#' @param FilePath A string identifying the relative or absolute path to the
 #'   model run script is located.
 #' @return A data frame containing information on the calls to 'runModule' in the
 #' order of the calls. Each row represents a module call in order. The columns
-#' identify the 'ModuleName', the 'PackageName', and the 'TimeFrame'.
+#' identify the 'ModuleName', the 'PackageName', and the 'RunFor' value.
 #' @export
 parseModelScript <- function(FilePath = "run_model.R") {
   writeLog("Parsing model script")
-  Script_ <- readLines(FilePath)
-  RunModuleIdx_ <- grep("runModule", Script_)
+  Script <- paste(readLines(FilePath), collapse = " ")
+  RunModuleCalls_ <- unlist(strsplit(Script, "runModule"))[-1]
   Errors_ <- character(0)
   addError <- function(Error) {
     Errors_ <<- c(Errors_, Error)
   }
+  #Utility function to remove spaces from string
+  removeSpaces <- function(String) {
+    gsub(" ", "", String)
+  }
+  #Utility function to clean up string
+  cleanString <- function(String) {
+    ToRemove = c(" ", "\\(", ")", '\\\"')
+    for (SubString in ToRemove) {
+      String <- gsub(SubString, "", String)
+    }
+    String
+  }
+  #Utility function to extract the arguments part of a function call
+  extractArgsString <- function(String) {
+    substring(String,
+              regexpr("\\(", String),
+              regexpr("\\)", String))
+  }
+  #Utility function to extract the value of a named argument
+  getNamedArgumentValue <-
+    function(ArgString, ArgName) {
+      CommaPos <- regexpr(",", ArgString)
+      if (CommaPos > 0) {
+        ArgValue <-
+          substring(ArgString,
+                    regexpr("=", ArgString) + 1,
+                    CommaPos - 1)
+      } else {
+        ArgValue <-
+          substring(ArgString,
+                    regexpr("=", ArgString) + 1,
+                    nchar(ArgString))
+      }
+      cleanString(ArgValue)
+    }
+  #Utility function to extract the value of an unnamed argument
+  getUnnamedArgumentValue <-
+    function(ArgString) {
+      ArgStringTrim <-
+        substring(ArgString,
+                  regexpr("\\\"", ArgString) + 1,
+                  nchar(ArgString))
+      cleanString(
+        substring(ArgStringTrim,
+                  1,
+                  regexpr("\\\"", ArgStringTrim))
+      )
+    }
+  #Function to extract the name and value of an argument from a string
+  getArg <-
+    function(ArgsString, ArgPos) {
+      ArgString <- removeSpaces(ArgsString[ArgPos])
+      #Define standard argument names
+      ArgNames_ <-
+        c("ModuleName", "PackageName", "RunFor", "Year")
+      #Check whether any of the argument names is in the ArgString
+      ArgNameCheck_ <-
+        sapply(ArgNames_, function(x) {
+          ArgName <- paste0(x, "=")
+          regexpr(ArgName, ArgString)
+        }) > 0
+      if (any(ArgNameCheck_)) {
+        ArgName <- names(ArgNameCheck_)[ArgNameCheck_]
+        ArgValue <- getNamedArgumentValue(ArgString, ArgName)
+      } else {
+        ArgName <- ArgNames_[ArgPos]
+        ArgValue <- getUnnamedArgumentValue(ArgString)
+      }
+      list(ArgName = ArgName, ArgValue = ArgValue)
+    }
+  #Function to extract all the arguments of runModule function call
   getArgs <-
     function(String){
-      String <-
-        substr(String,
-               regexpr("runModule", String) + 9,
-               nchar(String))
-      String <-
-        substring(String,
-                  1,
-                  regexpr("\\)", String))
-      ToRemove = c(" ", "\\(", ")", '\\\"')
-      for (SubString in ToRemove) {
-        String <- gsub(SubString, "", String)
+      PrelimArgs_ <- unlist(strsplit(extractArgsString(String), ","))
+      Args_ls <-
+        list(ModuleName = NULL,
+             PackageName = NULL,
+             RunFor = NULL)
+      for (i in 1:length(PrelimArgs_)) {
+        Arg_ls <- getArg(PrelimArgs_, i)
+        Args_ls[[Arg_ls$ArgName]] <- Arg_ls$ArgValue
       }
-      PrelimArgs_ <- unlist(strsplit(String, ","))
-      PrelimArgs_ls <- sapply(PrelimArgs_, function(x) strsplit(x, "="))
-      Args_ <- c(ModuleName = "", PackageName = "")
-      #If both arguments to runModule function call are present process
-      if (length(PrelimArgs_ls) == 2) {
-        if (length(PrelimArgs_ls[[1]]) == 1) {
-          Args_["ModuleName"] <- PrelimArgs_ls[[1]]
-        } else {
-          ArgName <- PrelimArgs_ls[[1]][1]
-          if (ArgName %in% names(Args_)) {
-            Args_[ArgName] <- PrelimArgs_ls[[1]][2]
-          } else {
-            addError(
-              paste(
-                "First argument for the following call to 'runModule' has incorrect argument name.",
-                "\n", String
-              )
-            )
-          }
-        }
-        if (length(PrelimArgs_ls[[2]]) == 1) {
-          Args_["PackageName"] <- PrelimArgs_ls[[2]]
-        } else {
-          ArgName <- PrelimArgs_ls[[2]][1]
-          if (ArgName %in% names(Args_)) {
-            Args_[ArgName] <- PrelimArgs_ls[[2]][2]
-          } else {
-            addError(
-              paste(
-                "Second argument for the following call to 'runModule' has incorrect argument name.",
-                "\n", String
-              )
-            )
-          }
-        }
-
-        #If both arguments are not present return an error message
-      } else {
-        addError(
-          paste(
-            "The following call to 'runModule' is missing one or both arguments.",
-            "\n", String
-          )
-        )
-      }
-      Args_
+      unlist(Args_ls)
     }
-  ModuleCalls_ls <- list()
-  for (i in 1:length(RunModuleIdx_)) {
-    ModuleCalls_ls[[i]] <-
-      getArgs(Script_[RunModuleIdx_[i]])
+  #Iterate through RunModuleCalls_ and extract the arguments
+  Args_ls <- list()
+  for (i in 1:length(RunModuleCalls_)) {
+    Args_ <- getArgs(RunModuleCalls_[i])
+    #Error if not all mandatory arguments are matched
+    if (length(Args_) != 3) {
+      Msg <- paste0(
+        "runModule call #", i, " has improperly specified arguments."
+      )
+      addError(Msg)
+    }
+    #Add to list
+    Args_ls[[i]] <- Args_
   }
+  #If there are any errors, print error message
   if (length(Errors_) != 0) {
     writeLog("One or more 'runModule' function calls have errors as follows:")
     writeLog(Errors_)
     stop("One or more errors in model run script. Must fix before model initialization can be completed.")
   } else {
     writeLog("Success parsing model script")
-    AllArgs_df <- data.frame(do.call(rbind, ModuleCalls_ls), stringsAsFactors = FALSE)
-    return(unique(AllArgs_df))
+    ModuleCalls_df <-
+      data.frame(do.call(rbind, Args_ls), stringsAsFactors = FALSE)
+    setModelState(list(ModuleCalls_df = ModuleCalls_df))
   }
 }
+
 
 #CHECK MODULE AVAILABILITY
 #=========================
@@ -779,7 +815,7 @@ checkModulesExist <- function(ModuleCalls_df) {
     ModuleCheck_ls <-
       lapply(ModuleCalls_ls_df, function(x) {
         PkgName <- x$PackageName[1]
-        PkgData_ <- data(package=PkgName)$results[,"Item"]
+      PkgData_ <- data(package=PkgName)$results[,"Item"]
         PkgModules_ <- PkgData_[grep("Specifications", PkgData_)]
         PkgModules_ <- gsub("Specifications", "", PkgModules_)
         Calls_ <- x$ModuleName
