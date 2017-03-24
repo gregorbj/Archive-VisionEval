@@ -2,8 +2,8 @@
   "Model": "RSPM",
   "Scenario": "Base year RSPM pilot",
   "Description": "Base year RSPM pilot",
-  "Region": "Atlanta",
-  "BaseYear": "2015",
-  "Years": ["2015"],
+  "Region": "RVMPO",
+  "BaseYear": "2010",
+  "Years": ["2010"],
   "DatastoreName": "datastore.h5"
 }
