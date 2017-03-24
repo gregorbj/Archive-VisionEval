@@ -15,8 +15,8 @@ initializeModel(
   RunParamFile = "run_parameters.json",
   GeoFile = "geo.csv",
   ModelParamFile = "model_parameters.json",
-  LoadDatastore = NULL,
-  IgnoreDatastore = FALSE,
+  LoadDatastore = FALSE,
+  DatastoreName = NULL,
   SaveDatastore = TRUE
   )  
 
