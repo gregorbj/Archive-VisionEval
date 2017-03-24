@@ -118,9 +118,11 @@ initializeModel <-
 
     #Parse script to make table of all the module calls & check whether present
     #--------------------------------------------------------------------------
-    ModuleCalls_df <- parseModelScript(FilePath = "run_model.R")
+    parseModelScript(FilePath = "run_model.R")
+    ModuleCalls_df <- unique(getModelState()$ModuleCalls_df)
     #Check that all module packages are installed and all modules are present
-    ModuleCheck <- checkModulesExist(ModuleCalls_df = ModuleCalls_df)
+    ModuleCheck <-
+      checkModulesExist(ModuleCalls_df = ModuleCalls_df)
 
     #Check whether the specifications for all modules are proper
     #-----------------------------------------------------------
@@ -209,16 +211,28 @@ initializeModel <-
 #' @param ModuleName A string identifying the name of a module object.
 #' @param PackageName A string identifying the name of the package the module is
 #'   a part of.
-#' @param Year A string identifying the run year.
+#' @param RunFor A string identifying whether to run the module for all years
+#' "AllYears", only the base year "BaseYear", or for all years except the base
+#' year "NotBaseYear".
+#' @param RunYear A string identifying the run year.
 #' @return None. The function writes results to the specified locations in the
 #'   datastore and prints a message to the console when the module is being run.
 #' @export
-runModule <- function(ModuleName, PackageName) {
+runModule <- function(ModuleName, PackageName, RunFor, RunYear = Year) {
+  #Check whether the module should be run for the current run year
+  #---------------------------------------------------------------
+  BaseYear <- getModelState()$BaseYear
+  if (RunYear == BaseYear & RunFor == "NotBaseYear") {
+    return()
+  }
+  if (RunYear != BaseYear & RunFor == "BaseYear") {
+    return()
+  }
   #Log and print starting message
   #------------------------------
   Msg <-
     paste0(Sys.time(), " -- Starting module '", ModuleName,
-           "' for year '", Year, "'.")
+           "' for year '", RunYear, "'.")
   writeLog(Msg)
   print(Msg)
   #Load the package and module
@@ -239,7 +253,7 @@ runModule <- function(ModuleName, PackageName) {
     setInDatastore(R, M$Specs, ModuleName, Geo = NULL)
   } else {
     GeoCategory <- M$Specs$RunBy
-    Geo_ <- readFromTable(GeoCategory, GeoCategory, Year)
+    Geo_ <- readFromTable(GeoCategory, GeoCategory, RunYear)
     #Run module for each geographic area
     for (Geo in Geo_) {
       #Get data from datastore for geographic area

@@ -384,17 +384,19 @@ initDataList <- function() {
 #' @param Geo a string identifying the name of the geographic area to get the
 #' data for. For example, if the module is specified to be run by Azone, then
 #' Geo would be the name of a particular Azone.
+#' @param RunYear a string identifying the model year being run. The default is
+#' the Year object in the global workspace.
 #' @return A list containing all the data sets specified in the module's
 #' 'Get' specifications for the identified geographic area.
 #' @export
-getFromDatastore <- function(ModuleSpec_ls, Geo = NULL) {
+getFromDatastore <- function(ModuleSpec_ls, Geo = NULL, RunYear = Year) {
   #Process module Get specifications
   GetSpec_ls <- processModuleSpecs(ModuleSpec_ls)$Get
   #Make a list to hold the retrieved data
   L <- initDataList()
   #Add the model state and year to the list
   G <- getModelState()
-  G$Year <- Year
+  G$Year <- RunYear
   L$G <- G
   #Get data specified in list
   for (i in 1:length(GetSpec_ls)) {
@@ -420,9 +422,9 @@ getFromDatastore <- function(ModuleSpec_ls, Geo = NULL) {
       }
     }
     if (Group == "Year") {
-      DstoreGroup <- Year
-      if (!is.null(G$DatastoreReferences[[Year]])) {
-        Files_ <- c(G$DatastoreName, G$DatastoreReferences[[Year]])
+      DstoreGroup <- RunYear
+      if (!is.null(G$DatastoreReferences[[RunYear]])) {
+        Files_ <- c(G$DatastoreName, G$DatastoreReferences[[RunYear]])
       } else {
         Files_ <- G$DatastoreName
       }

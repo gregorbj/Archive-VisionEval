@@ -2,27 +2,26 @@
 % Please edit documentation in R/initialization.R
 \name{getModelState}
 \alias{getModelState}
-\title{Retrieve model state.}
+\title{Get values from model state list.}
 \usage{
-getModelState(Names_ = "All", FileName = "ModelState.Rda")
+getModelState(Names_ = "All", State_ls = ModelState_ls)
 }
 \arguments{
 \item{Names_}{A string vector of the components to extract from the
 ModelState_ls list.}
 
-\item{FileName}{A string identifying the name of the file that contains
-the ModelState_ls list. The default name is 'ModelState.Rda'.}
+\item{State_ls}{The model state list which by default is ModelState_ls.}
 }
 \value{
 A list containing the specified components from the model state file.
 }
 \description{
-\code{getModelState} reads components of the file that keeps track of the
+\code{getModelState} reads components of the list that keeps track of the
 model state
 }
 \details{
 Key variables that are important for managing the model run are stored in a
-list (ModelState_ls) that is saved in the 'ModelState.Rda' file. This
-function loads the file and extracts named components of the list.
+list (ModelState_ls) that is managed in the global environment. This
+function extracts named components of the list.
 }
 
