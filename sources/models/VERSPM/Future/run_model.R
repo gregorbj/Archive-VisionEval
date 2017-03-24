@@ -23,6 +23,9 @@ initializeModel(
 #Run all demo modules for all years
 #----------------------------------
 for(Year in getYears()) {
-  runModule(ModuleName = "CreateHouseholds", PackageName = "SimHouseholds")
+  runModule(
+    ModuleName = "CreateHouseholds", 
+    PackageName = "SimHouseholds",
+    RunFor = "AllYears")
 }
 
