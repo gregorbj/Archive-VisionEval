@@ -77,7 +77,7 @@ CreateBaseSyntheticFirmsSpecifications <- list(
   NewSetTable = items(
     item(
       TABLE = "Business",
-      GROUP = "Year"
+      GROUP = "BaseYear"
     )
   ),
   #Specify input data
