@@ -1255,6 +1255,9 @@ simDataTransactions <- function(ModuleCalls_df) {
     for (i in 1:nrow(ModuleCalls_df)) {
       Module <- ModuleCalls_df$ModuleName[i]
       Package <- ModuleCalls_df$PackageName[i]
+      RunFor <- ModuleCalls_df$RunFor[i]
+      if (RunFor == "BaseYear" & Year != "BaseYear") break()
+      if (RunFor == "NotBaseYear" & Year == "BaseYear") break()
       ModuleSpecs_ls <- processModuleSpecs(getModuleSpecs(Module, Package))
 
       #Add 'Inp' table references to the working datastore inventory
@@ -1383,8 +1386,9 @@ simDataTransactions <- function(ModuleCalls_df) {
       }
 
       rm(Module, Package, ModuleSpecs_ls)
-    }
-  }
+    } #End for loop through module calls
+  } #End for loop through years
+
   writeLog("Simulating model run.")
   if (length(Warnings_) != 0) {
     Msg <-
