@@ -226,6 +226,14 @@ writeToTable <- function(Data_, Spec_ls, Group, Index = NULL) {
     G <- getModelState()
   }
   #Write the dataset
+  if (is.null(Data_)) {
+    Message <-
+      paste0(
+        "writeToTable passed NULL Data_ "
+      )
+    writeLog(Message)
+    stop(Message)
+  }
   Data_[is.na(Data_)] <- Spec_ls$NAVALUE
   DatasetName <- file.path(Group, Table, Name)
   if (is.null(Index)) {
@@ -536,6 +544,15 @@ setInDatastore <-
       }
       #Save the data
       Data_ <- Data_ls[[Group]][[Table]][[Name]]
+      if (is.null(Data_)) {
+        Message <-
+          paste0(
+            "setInDatastore got NULL Data_ with arguments Group: ", Group, ", Table: ", Table, ", Name: ", Name
+          )
+        writeLog(Message)
+        stop(Message)
+      }
+
       if (!is.null(attributes(Data_)$SIZE)) {
         Spec_ls$SIZE <- attributes(Data_)$SIZE
       }
