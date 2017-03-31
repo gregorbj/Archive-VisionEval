@@ -1,6 +1,5 @@
 library(shiny)
 library(shinyFiles)
-library(shinyjs)
 library(visioneval)
 library(DT)
 library(shinyBS)
@@ -11,7 +10,6 @@ if (interactive()) {
 
 # Define UI for application
 ui <- fluidPage(
-  useShinyjs(),
   titlePanel("Pilot Model Runner and Scenario Viewer"),
 
   sidebarLayout(
@@ -31,8 +29,6 @@ ui <- fluidPage(
       ),
 
       actionButton("runModel", "Run Model Script"),
-      actionButton("resetScriptOutput", "Reset script output"),
-      actionButton("resetScriptName", "Reset script name"),
 
       width = 2
 
@@ -48,7 +44,7 @@ ui <- fluidPage(
         h3("Script Output"),
         verbatimTextOutput('scriptOutput', TRUE),
         h3("Datastore List"),
-        verbatimTextOutput('datastorelist', TRUE)
+        verbatimTextOutput('datastoreList', TRUE)
         #DT::dataTableOutput('parseModelScriptTable')
       ) #end conditionalPanel
     ) #end mainPanel
@@ -90,41 +86,38 @@ server <- function(input, output, session) {
     return(scriptInfo)
   }) #end reactive
 
+  getRunInfo <- eventReactive(input$runModel, {
+    req(input$file)
+    req(input$runModel)
+    runInfo <- list()
+    runInfo$datastoreList <- ""
+    runInfo <- list()
+    scriptInfo <- getScriptInfo()
+    setwd(scriptInfo$fileDirectory)
+    runInfo$scriptOutput = capture.output(source(scriptInfo$datapath))
+    #read resulting datastore
+    if (file.exists("ModelState.Rda")) {
+      runInfo$datastoreList = capture.output(getModelState("Datastore"))
+     } else {
+      output$datastoreList = renderPrint({
+        "Temp fix for now: rerun model to read datastore"
+      })
+    }
+    return(runInfo)
+  }) #end reactive
+
   #output$parseModelScriptTable = DT::renderDataTable(getScriptInfo()$parsedModelScript)
 
   output$scriptName = renderPrint({
     getScriptInfo()$datapath
   })
 
-   observeEvent(input$resetScriptOutput, {
-    reset("scriptOutput")
+  output$scriptOutput = renderPrint({
+    getRunInfo()$scriptOutput
   })
 
-  observeEvent(input$resetScriptName, {
-    reset("scriptName")
-  })
-
-  #run model on click
-  observeEvent(input$runModel, {
-    reset("scriptOutput")
-    reset("datastorelist")
-    scriptInfo <- getScriptInfo()
-    setwd(scriptInfo$fileDirectory)
-    output$scriptOutput = renderPrint({
-      capture.output(source(scriptInfo$datapath))
-    })
-    #read resulting datastore
-    if (file.exists("ModelState.Rda")) {
-      datastorePrint = capture.output(getModelState("Datastore"))
-      output$datastorelist = renderPrint({
-        datastorePrint
-      })
-    } else {
-      output$datastorelist = renderPrint({
-        "Temp fix for now: rerun model to read datastore"
-      })
-    }
-
+  output$datastoreList = renderPrint({
+    getRunInfo()$datastoreList
   })
 
 } #end server
