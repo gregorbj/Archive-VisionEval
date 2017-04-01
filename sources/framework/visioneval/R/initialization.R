@@ -772,6 +772,7 @@ parseModelScript <- function(FilePath = "run_model.R") {
     ModuleCalls_df <-
       data.frame(do.call(rbind, Args_ls), stringsAsFactors = FALSE)
     setModelState(list(ModuleCalls_df = ModuleCalls_df))
+    return(ModuleCalls_df)
   }
 }
 
