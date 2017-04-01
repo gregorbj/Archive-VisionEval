@@ -74,6 +74,9 @@ server <- function(input, output, session) {
     scriptInfo$fileDirectory <- dirname(scriptInfo$datapath)
     scriptInfo$fileBase <- basename(scriptInfo$datapath)
     setwd(scriptInfo$fileDirectory)
+    #must call initializeModel even though don't know the correct parameters
+    #because otherwise parseModelScript gets an error: Warning: Error in getModelState: object 'ModelState_ls' not found
+    visioneval::initializeModel()
     scriptInfo$modelModules <- visioneval::parseModelScript(scriptInfo$datapath)
     return(scriptInfo)
   }) #end reactive
