@@ -44,8 +44,11 @@ ui <- fluidPage(
         h3("Script Output"),
         verbatimTextOutput('scriptOutput', TRUE),
         h3("Datastore List"),
-        verbatimTextOutput('datastoreList', TRUE)
-        #DT::dataTableOutput('parseModelScriptTable')
+        verbatimTextOutput('datastoreList', TRUE),
+        verbatimTextOutput('traceOutput', TRUE),
+        fluidRow(
+          DT::dataTableOutput("modulesTable")
+        )
       ) #end conditionalPanel
     ) #end mainPanel
   ) #end sidebarLayout
@@ -70,19 +73,8 @@ server <- function(input, output, session) {
       normalizePath(as.character(inFile$datapath))
     scriptInfo$fileDirectory <- dirname(scriptInfo$datapath)
     scriptInfo$fileBase <- basename(scriptInfo$datapath)
-    scriptInfo$parsedModelScript <- parse(scriptInfo$datapath)
-
-    callsToInitialize <- grepl("^initializeModel", scriptInfo$parsedModelScript)
-    if (sum(callsToInitialize) != 1) {
-      createAlert(
-        session = session,
-        anchorId = "parseProblems",
-        title = "Invalid initializeModel",
-        content = paste0(datapath, " should have one call to initializeModel")
-      )
-      return()
-    } else {
-    }
+    setwd(scriptInfo$fileDirectory)
+    scriptInfo$modelModules <- visioneval::parseModelScript(scriptInfo$datapath)
     return(scriptInfo)
   }) #end reactive
 
@@ -94,7 +86,18 @@ server <- function(input, output, session) {
     runInfo <- list()
     scriptInfo <- getScriptInfo()
     setwd(scriptInfo$fileDirectory)
+    runInfo$traceOutput <- "CAN I SEE THIS?"
+    foo <- "bar"
+    trace(visioneval::initializeModel, tracer=function() {
+      print("What the hey!")
+      print(paste0("The value of foo: ", foo))
+      print(paste0("Inside call runInfo$traceOutput: ", runInfo$traceOutput))
+      runInfo$traceOutput <- "visioneval::initializeModel entered"
+      print(paste0("Inside call after change runInfo$traceOutput: ", runInfo$traceOutput))
+    }, print = FALSE)
     runInfo$scriptOutput = capture.output(source(scriptInfo$datapath))
+    print(paste0("After call runInfo$traceOutput: ", runInfo$traceOutput))
+
     #read resulting datastore
     if (file.exists("ModelState.Rda")) {
       runInfo$datastoreList = capture.output(getModelState("Datastore"))
@@ -106,7 +109,9 @@ server <- function(input, output, session) {
     return(runInfo)
   }) #end reactive
 
-  #output$parseModelScriptTable = DT::renderDataTable(getScriptInfo()$parsedModelScript)
+  output$modulesTable = DT::renderDataTable({
+    DT::datatable(getScriptInfo()$modelModules)
+    })
 
   output$scriptName = renderPrint({
     getScriptInfo()$datapath
@@ -114,6 +119,10 @@ server <- function(input, output, session) {
 
   output$scriptOutput = renderPrint({
     getRunInfo()$scriptOutput
+  })
+
+  output$traceOutput = renderPrint({
+    getRunInfo()$traceOutput
   })
 
   output$datastoreList = renderPrint({
