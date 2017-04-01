@@ -2,6 +2,7 @@ library(shiny)
 library(shinyFiles)
 library(visioneval)
 library(DT)
+library(data.table)
 library(shinyBS)
 
 if (interactive()) {
@@ -10,6 +11,8 @@ if (interactive()) {
 
 # Define UI for application
 ui <- fluidPage(
+  tags$head(tags$style(type = "text/css",
+                       ".recalculating { opacity: 1.0; }")),
   titlePanel("Pilot Model Runner and Scenario Viewer"),
 
   sidebarLayout(
@@ -37,18 +40,21 @@ ui <- fluidPage(
     mainPanel(
       bsAlert("parseProblems"),
       conditionalPanel(
-        condition =  "true", #"input.file != null",
+        condition =  "true",
+        #"input.file != null",
 
         h3("Script Name"),
         verbatimTextOutput('scriptName', TRUE),
+        h3("Log"),
+        DT::dataTableOutput("logTable"),
+        h3("Modules"),
+        DT::dataTableOutput("modulesTable"),
+        h3("Model State"),
+        verbatimTextOutput('modelState', FALSE),
         h3("Script Output"),
-        verbatimTextOutput('scriptOutput', TRUE),
+        verbatimTextOutput('scriptOutput', FALSE),
         h3("Datastore List"),
-        verbatimTextOutput('datastoreList', TRUE),
-        verbatimTextOutput('traceOutput', TRUE),
-        fluidRow(
-          DT::dataTableOutput("modulesTable")
-        )
+        verbatimTextOutput('datastoreList', FALSE)
       ) #end conditionalPanel
     ) #end mainPanel
   ) #end sidebarLayout
@@ -56,8 +62,15 @@ ui <- fluidPage(
 
 
 server <- function(input, output, session) {
+  assign(
+    "VEGUI_logOutput",
+    value = data.table::data.table(message = character()),
+    envir = .GlobalEnv
+  )
 
-    shinyFileChoose(
+  assign("ModelState_ls", value = "", envir = .GlobalEnv)
+
+  shinyFileChoose(
     input = input,
     id = 'file',
     session = session,
@@ -67,65 +80,123 @@ server <- function(input, output, session) {
 
   getScriptInfo <- reactive({
     req(input$file)
+    print(paste0(Sys.time(), ": getScriptInfo called"))
     scriptInfo <- list()
     inFile = parseFilePaths(roots = getVolumes(''), input$file)
     scriptInfo$datapath <-
       normalizePath(as.character(inFile$datapath))
     scriptInfo$fileDirectory <- dirname(scriptInfo$datapath)
+    scriptInfo$modelStateFile <- file.path(scriptInfo$fileDirectory, 'ModelState.Rda')
     scriptInfo$fileBase <- basename(scriptInfo$datapath)
-    setwd(scriptInfo$fileDirectory)
-    #must call initializeModel even though don't know the correct parameters
-    #because otherwise parseModelScript gets an error: Warning: Error in getModelState: object 'ModelState_ls' not found
-    visioneval::initializeModel()
-    scriptInfo$modelModules <- visioneval::parseModelScript(scriptInfo$datapath)
     return(scriptInfo)
   }) #end reactive
+
+  getParseInfo <- reactive({
+    req(input$file)
+    print(paste0(Sys.time(), ": getParseInfo called"))
+    parseInfo <- list()
+    scriptInfo <- getScriptInfo()
+    setwd(scriptInfo$fileDirectory)
+    # use trace to hook into visioneval::log
+    trace(visioneval::writeLog,
+          exit = quote(
+            assign(
+              "VEGUI_logOutput",
+              envir = .GlobalEnv,
+              value = rbind(
+                data.table::data.table(message = Content),
+                get("VEGUI_logOutput", envir = .GlobalEnv)
+              )
+            )
+          ),
+          print = FALSE)
+
+    #must call initializeModel even though don't know the correct parameters
+    #because otherwise parseModelScript gets an error: Warning:ror in getModelState: object 'ModelState_ls' not found
+    visioneval::initializeModel()
+
+    #makeReactiveBinding("ModelState_ls", env =.GlobalEnv)
+    parseInfo$modelModules <-
+      visioneval::parseModelScript(scriptInfo$datapath)
+    return(parseInfo)
+  }) #end reactive
+
 
   getRunInfo <- eventReactive(input$runModel, {
     req(input$file)
     req(input$runModel)
+    print(paste0(Sys.time(), ": getRunInfo called"))
     runInfo <- list()
     runInfo$datastoreList <- ""
     runInfo <- list()
     scriptInfo <- getScriptInfo()
     setwd(scriptInfo$fileDirectory)
-    runInfo$traceOutput <- "CAN I SEE THIS?"
-    foo <- "bar"
-    trace(visioneval::initializeModel, tracer=function() {
-      print("What the hey!")
-      print(paste0("The value of foo: ", foo))
-      print(paste0("Inside call runInfo$traceOutput: ", runInfo$traceOutput))
-      runInfo$traceOutput <- "visioneval::initializeModel entered"
-      print(paste0("Inside call after change runInfo$traceOutput: ", runInfo$traceOutput))
-    }, print = FALSE)
     runInfo$scriptOutput = capture.output(source(scriptInfo$datapath))
-    print(paste0("After call runInfo$traceOutput: ", runInfo$traceOutput))
 
     #read resulting datastore
     if (file.exists("ModelState.Rda")) {
       runInfo$datastoreList = capture.output(getModelState("Datastore"))
-     } else {
-      output$datastoreList = renderPrint({
-        "Temp fix for now: rerun model to read datastore"
-      })
+    } else {
+      runInfo$datastoreList = "Temp fix for now: rerun model to read datastore"
     }
     return(runInfo)
   }) #end reactive
 
-  output$modulesTable = DT::renderDataTable({
-    DT::datatable(getScriptInfo()$modelModules)
-    })
+  #Don't know how to get shiny to auto update when VEGUI_logOutput changes so use a timer.. :-(
+  # Re-execute this reactive expression after a set interval
+  getLogData <- reactivePoll(
+    100,
+    session,
+    # This function returns the time that the logfile was last
+    # modified
+    checkFunc = function() {
+      nrow(VEGUI_logOutput)
+    },
+    # This function returns the content of the logfile
+    valueFunc = function() {
+      VEGUI_logOutput
+    }
+  ) #getLogData()
+
+  # Re-execute this reactive expression after a set interval
+  getModelState <- reactivePoll(
+    100,
+    session,
+    # This function returns the time that the logfile was last
+    # modified
+    checkFunc = function() {
+      if (class(ModelState_ls) == "list") {
+        file.mtime(getScriptInfo()$modelStateFile)
+      } else {
+        -1
+      }
+
+    },
+    # This function returns the content of the logfile
+    valueFunc = function() {
+      ModelState_ls
+    }
+  ) #end getModelState()
 
   output$scriptName = renderPrint({
     getScriptInfo()$datapath
   })
 
-  output$scriptOutput = renderPrint({
-    getRunInfo()$scriptOutput
+
+  output$logTable = DT::renderDataTable({
+    DT::datatable(getLogData())
   })
 
-  output$traceOutput = renderPrint({
-    getRunInfo()$traceOutput
+  output$modelState = renderPrint({
+    getModelState()
+  })
+
+  output$modulesTable = DT::renderDataTable({
+    DT::datatable(getParseInfo()$modelModules)
+  })
+
+  output$scriptOutput = renderPrint({
+    getRunInfo()$scriptOutput
   })
 
   output$datastoreList = renderPrint({
