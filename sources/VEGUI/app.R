@@ -62,6 +62,8 @@ ui <- fluidPage(
 
 
 server <- function(input, output, session) {
+  future.env <- new.env()
+
   assign(
     "VEGUI_logOutput",
     value = data.table::data.table(message = character()),
@@ -131,7 +133,9 @@ server <- function(input, output, session) {
     runInfo <- list()
     scriptInfo <- getScriptInfo()
     setwd(scriptInfo$fileDirectory)
-    runInfo$scriptOutput = capture.output(source(scriptInfo$datapath))
+    future.env$scriptOutput %<-% capture.output(source(scriptInfo$datapath))
+    future.env$scriptOutputFuture <- futureOf(future.env$scriptOutput)
+    getScriptOutpt$resume()
 
     #read resulting datastore
     if (file.exists("ModelState.Rda")) {
@@ -141,6 +145,20 @@ server <- function(input, output, session) {
     }
     return(runInfo)
   }) #end reactive
+
+  getScriptOutput <- reactive({
+    if (resolved(future.env$scriptOutputFuture)) {
+      getScriptOutput$suspend()
+      return(future.env$scriptOutput)
+    } else {
+      invalidateLater(500)
+      return(NULL)
+    }
+  }, suspended = TRUE)
+
+  session$onSessionEnded(function() {
+    getScriptOutput$suspend()
+  })
 
   #Don't know how to get shiny to auto update when VEGUI_logOutput changes so use a timer.. :-(
   # Re-execute this reactive expression after a set interval
@@ -196,7 +214,7 @@ server <- function(input, output, session) {
   })
 
   output$scriptOutput = renderPrint({
-    getRunInfo()$scriptOutput
+    getScriptOutput()
   })
 
   output$datastoreList = renderPrint({
