@@ -42,26 +42,26 @@ ui <- fluidPage(
     ),
 
     mainPanel(
-      bsAlert("parseProblems"),
-      conditionalPanel(
-        condition =  "true",
-        #"input.file != null",
-
-        h3("Script Name"),
-        verbatimTextOutput('scriptName', TRUE),
-        h3("visioneval Log (newest at top)"),
-        DT::dataTableOutput("veLogTable"),
-        h3("Debug console (newest at top)"),
-        DT::dataTableOutput("debugConsoleTable"),
-        h3("Modules"),
-        DT::dataTableOutput("modulesTable"),
-        h3("Model State"),
-        verbatimTextOutput('modelState', FALSE),
-        h3("Script Output"),
-        verbatimTextOutput('scriptOutput', FALSE),
-        h3("Datastore List"),
-        verbatimTextOutput('datastoreList', FALSE)
-      ) #end conditionalPanel
+      tabsetPanel(
+        tabPanel(
+          "Main",
+          bsAlert("parseProblems"),
+          h3("Script Name"),
+          verbatimTextOutput('scriptName', TRUE),
+          h3("Modules"),
+          DT::dataTableOutput("modulesTable")
+        ),
+        tabPanel("Model State",
+                 verbatimTextOutput('modelState', FALSE)),
+        tabPanel("Debug console",
+                 DT::dataTableOutput("debugConsoleTable")),
+        tabPanel("visioneval Log",
+                 DT::dataTableOutput("veLogTable")),
+        tabPanel(
+          "script source output",
+          verbatimTextOutput('scriptOutput', FALSE)
+        )
+      )
     ) #end mainPanel
   ) #end sidebarLayout
 ) #end ui
@@ -91,9 +91,10 @@ server <- function(input, output, session) {
   debugConsole <- function(msg) {
     timeStampedMsg <- paste0(Sys.time(), ": ", msg)
     flush.console()
-    debugConsoleOutput <<- rbind(data.table::data.table(message = timeStampedMsg),
-                                debugConsoleOutput)
-    print(paste0(nrow(debugConsoleOutput),": ", timeStampedMsg))
+    debugConsoleOutput <<-
+      rbind(data.table::data.table(message = timeStampedMsg),
+            debugConsoleOutput)
+    print(paste0(nrow(debugConsoleOutput), ": ", timeStampedMsg))
   }
 
   getScriptInfo <- eventReactive(input$file, {
@@ -182,7 +183,7 @@ server <- function(input, output, session) {
     # modified
     checkFunc = function() {
       result <- nrow(debugConsoleOutput)
-      debugConsole(paste0("getDebugConsoleOutput checkFunc returning: ", result))
+      #debugConsole(paste0("getDebugConsoleOutput checkFunc returning: ", result))
       return(result)
     },
     # This function returns the content of the logfile
@@ -191,9 +192,10 @@ server <- function(input, output, session) {
     }
   ) #end reactivePoll getDebugConsoleOutput
 
-    output$debugConsoleTable = DT::renderDataTable({
+  output$debugConsoleTable = DT::renderDataTable({
     DT::datatable(getDebugConsoleOutput())
   })
+
   #Don't know how to get shiny to auto update when VEGUI_logOutput changes so use a timer.. :-(
   # Re-execute this reactive expression after a set interval
   getVELogData <- reactivePoll(
@@ -203,7 +205,7 @@ server <- function(input, output, session) {
     # modified
     checkFunc = function() {
       result <- nrow(VEGUI_logOutput)
-      debugConsole(paste0("getVELogData checkFunc returning: ", result))
+      #debugConsole(paste0("getVELogData checkFunc returning: ", result))
       return(result)
     },
     # This function returns the content of the logfile
@@ -226,8 +228,8 @@ server <- function(input, output, session) {
       result <- -1
       if (class(ModelState_ls) == "list") {
         result <- file.mtime(getScriptInfo()$modelStateFile)
-        debugConsole(paste0("getModelState checkFunc returning: ", result))
       }
+      #debugConsole(paste0("getModelState checkFunc returning: ", result))
       return(result)
     },
     # This function returns the content of the logfile
