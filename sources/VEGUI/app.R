@@ -4,6 +4,10 @@ library(visioneval)
 library(DT)
 library(data.table)
 library(shinyBS)
+library(future)
+
+#use of future in shiny: http://stackoverflow.com/questions/41610354/calling-a-shiny-javascript-callback-from-within-a-future
+plan(multiprocess) #tell 'future' library to use multiprocessing
 
 if (interactive()) {
   options(shiny.reactlog = TRUE)
@@ -45,8 +49,10 @@ ui <- fluidPage(
 
         h3("Script Name"),
         verbatimTextOutput('scriptName', TRUE),
-        h3("Log"),
-        DT::dataTableOutput("logTable"),
+        h3("visioneval Log (newest at top)"),
+        DT::dataTableOutput("veLogTable"),
+        h3("Debug console (newest at top)"),
+        DT::dataTableOutput("debugConsoleTable"),
         h3("Modules"),
         DT::dataTableOutput("modulesTable"),
         h3("Model State"),
@@ -62,15 +68,17 @@ ui <- fluidPage(
 
 
 server <- function(input, output, session) {
-  future.env <- new.env()
-
+  #VEGUI_logOutput must be in Global so that trace functions inside visioneval can write to it
   assign(
     "VEGUI_logOutput",
     value = data.table::data.table(message = character()),
     envir = .GlobalEnv
   )
-
+  #ModelState_ls must be in Global because that is what visioneval creates -- this is just a placeholder
   assign("ModelState_ls", value = "", envir = .GlobalEnv)
+
+  debugConsoleOutput <-
+    data.table::data.table(message = character())
 
   shinyFileChoose(
     input = input,
@@ -80,22 +88,31 @@ server <- function(input, output, session) {
     filetypes = c('R')
   )
 
-  getScriptInfo <- reactive({
-    req(input$file)
-    print(paste0(Sys.time(), ": getScriptInfo called"))
+  debugConsole <- function(msg) {
+    timeStampedMsg <- paste0(Sys.time(), ": ", msg)
+    flush.console()
+    debugConsoleOutput <<- rbind(data.table::data.table(message = timeStampedMsg),
+                                debugConsoleOutput)
+    print(paste0(nrow(debugConsoleOutput),": ", timeStampedMsg))
+  }
+
+  getScriptInfo <- eventReactive(input$file, {
+    debugConsole("getScriptInfo called")
     scriptInfo <- list()
     inFile = parseFilePaths(roots = getVolumes(''), input$file)
     scriptInfo$datapath <-
       normalizePath(as.character(inFile$datapath))
     scriptInfo$fileDirectory <- dirname(scriptInfo$datapath)
-    scriptInfo$modelStateFile <- file.path(scriptInfo$fileDirectory, 'ModelState.Rda')
+    scriptInfo$modelStateFile <-
+      file.path(scriptInfo$fileDirectory, 'ModelState.Rda')
     scriptInfo$fileBase <- basename(scriptInfo$datapath)
+    debugConsole("getScriptInfo exit")
     return(scriptInfo)
   }) #end reactive
 
   getParseInfo <- reactive({
-    req(input$file)
-    print(paste0(Sys.time(), ": getParseInfo called"))
+    req(getScriptInfo()$fileDirectory)
+    debugConsole("getParseInfo called")
     parseInfo <- list()
     scriptInfo <- getScriptInfo()
     setwd(scriptInfo$fileDirectory)
@@ -120,105 +137,115 @@ server <- function(input, output, session) {
     #makeReactiveBinding("ModelState_ls", env =.GlobalEnv)
     parseInfo$modelModules <-
       visioneval::parseModelScript(scriptInfo$datapath)
+    debugConsole("getParseInfo exit")
     return(parseInfo)
   }) #end reactive
 
 
   getRunInfo <- eventReactive(input$runModel, {
     req(input$file)
-    req(input$runModel)
-    print(paste0(Sys.time(), ": getRunInfo called"))
+    debugConsole("getRunInfo called")
     runInfo <- list()
     runInfo$datastoreList <- ""
     runInfo <- list()
     scriptInfo <- getScriptInfo()
     setwd(scriptInfo$fileDirectory)
-    future.env$scriptOutput %<-% capture.output(source(scriptInfo$datapath))
-    future.env$scriptOutputFuture <- futureOf(future.env$scriptOutput)
-    getScriptOutpt$resume()
-
-    #read resulting datastore
-    if (file.exists("ModelState.Rda")) {
-      runInfo$datastoreList = capture.output(getModelState("Datastore"))
-    } else {
-      runInfo$datastoreList = "Temp fix for now: rerun model to read datastore"
-    }
+    runInfo$scriptOutput <-
+      future(capture.output(source(scriptInfo$datapath)))
+    check_if_future_data_is_loaded$resume()
     return(runInfo)
   }) #end reactive
 
-  getScriptOutput <- reactive({
-    if (resolved(future.env$scriptOutputFuture)) {
-      getScriptOutput$suspend()
-      return(future.env$scriptOutput)
-    } else {
-      invalidateLater(500)
-      return(NULL)
+
+  check_if_future_data_is_loaded <- observe({
+    req(getRunInfo)
+    debugConsole("check_if_future_data_is_loaded called")
+    invalidateLater(1000)
+    runInfo <- getRunInfo()
+    if (resolved(runInfo$scriptOutput)) {
+      debugConsole(
+        "check_if_future_data_is_loaded found resolved(runInfo$scriptOutput) == TRUE"
+      )
+      check_if_future_data_is_loaded$suspend()
+      output$scriptOutput <- renderPrint({
+        runInfo$scriptOutput
+      })
     }
   }, suspended = TRUE)
 
-  session$onSessionEnded(function() {
-    getScriptOutput$suspend()
-  })
-
   #Don't know how to get shiny to auto update when VEGUI_logOutput changes so use a timer.. :-(
   # Re-execute this reactive expression after a set interval
-  getLogData <- reactivePoll(
-    100,
+  getDebugConsoleOutput <- reactivePoll(
+    1000,
     session,
     # This function returns the time that the logfile was last
     # modified
     checkFunc = function() {
-      nrow(VEGUI_logOutput)
+      result <- nrow(debugConsoleOutput)
+      debugConsole(paste0("getDebugConsoleOutput checkFunc returning: ", result))
+      return(result)
+    },
+    # This function returns the content of the logfile
+    valueFunc = function() {
+      debugConsoleOutput
+    }
+  ) #end reactivePoll getDebugConsoleOutput
+
+    output$debugConsoleTable = DT::renderDataTable({
+    DT::datatable(getDebugConsoleOutput())
+  })
+  #Don't know how to get shiny to auto update when VEGUI_logOutput changes so use a timer.. :-(
+  # Re-execute this reactive expression after a set interval
+  getVELogData <- reactivePoll(
+    1000,
+    session,
+    # This function returns the time that the logfile was last
+    # modified
+    checkFunc = function() {
+      result <- nrow(VEGUI_logOutput)
+      debugConsole(paste0("getVELogData checkFunc returning: ", result))
+      return(result)
     },
     # This function returns the content of the logfile
     valueFunc = function() {
       VEGUI_logOutput
     }
-  ) #getLogData()
+  ) #end reactivePoll getVELogData
+
+  output$veLogTable = DT::renderDataTable({
+    DT::datatable(getVELogData())
+  })
 
   # Re-execute this reactive expression after a set interval
   getModelState <- reactivePoll(
-    100,
+    1000,
     session,
     # This function returns the time that the logfile was last
     # modified
     checkFunc = function() {
+      result <- -1
       if (class(ModelState_ls) == "list") {
-        file.mtime(getScriptInfo()$modelStateFile)
-      } else {
-        -1
+        result <- file.mtime(getScriptInfo()$modelStateFile)
+        debugConsole(paste0("getModelState checkFunc returning: ", result))
       }
-
+      return(result)
     },
     # This function returns the content of the logfile
     valueFunc = function() {
       ModelState_ls
     }
-  ) #end getModelState()
-
-  output$scriptName = renderPrint({
-    getScriptInfo()$datapath
-  })
-
-
-  output$logTable = DT::renderDataTable({
-    DT::datatable(getLogData())
-  })
+  ) #end reactivePoll getModelState
 
   output$modelState = renderPrint({
     getModelState()
   })
 
+  output$scriptName = renderPrint({
+    getScriptInfo()$datapath
+  })
+
   output$modulesTable = DT::renderDataTable({
     DT::datatable(getParseInfo()$modelModules)
-  })
-
-  output$scriptOutput = renderPrint({
-    getScriptOutput()
-  })
-
-  output$datastoreList = renderPrint({
-    getRunInfo()$datastoreList
   })
 
 } #end server
