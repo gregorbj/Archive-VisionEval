@@ -6,9 +6,10 @@ library(data.table)
 library(shinyBS)
 library(future)
 library(testit)
+library(shinyjs)
 
 #use of future in shiny: http://stackoverflow.com/questions/41610354/calling-a-shiny-javascript-callback-from-within-a-future
-plan(multiprocess) #tell 'future' library to use multiprocessing
+plan(multiprocess) #tell "future" library to use multiprocessing
 
 if (interactive()) {
   options(shiny.reactlog = TRUE)
@@ -16,6 +17,7 @@ if (interactive()) {
 
 # Define UI for application
 ui <- fluidPage(
+  useShinyjs(),
   tags$head(tags$style(type = "text/css",
                        ".recalculating { opacity: 1.0; }")),
   titlePanel("Pilot Model Runner and Scenario Viewer"),
@@ -30,9 +32,9 @@ ui <- fluidPage(
       ),
 
       shinyFilesButton(
-        'file',
-        label = 'Select Run Script',
-        title = 'Please select model run script',
+        "file",
+        label = "Select Run Script",
+        title = "Please select model run script",
         multiple = FALSE
       ),
 
@@ -48,38 +50,31 @@ ui <- fluidPage(
           "Main",
           bsAlert("parseProblems"),
           h3("Script Name"),
-          verbatimTextOutput('scriptName', TRUE),
+          verbatimTextOutput("scriptName", TRUE),
           h3("Modules"),
           DT::dataTableOutput("modulesTable")
         ),
         tabPanel("Model State",
-                 verbatimTextOutput('modelState', FALSE)),
+                 verbatimTextOutput("modelState", FALSE)),
         tabPanel(
           "Debug console",
           h5("(most recent first)"),
           DT::dataTableOutput("debugConsoleTable")
         ),
         tabPanel("visioneval Log",
-                 DT::dataTableOutput("veLogTable")),
+                 verbatimTextOutput("veLogTable", FALSE)),
         tabPanel(
           "script source output",
-          verbatimTextOutput('scriptOutput', FALSE)
+          verbatimTextOutput("scriptOutput", FALSE)
         )
       )
     ) #end mainPanel
   ) #end sidebarLayout
 ) #end ui
 
+DEFAULT_POLL_INTERVAL <- 500 #milliseconds
 
 server <- function(input, output, session) {
-  #VEGUI_logOutput must be in Global so that trace functions inside visioneval can write to it
-  assign(
-    "VEGUI_logOutput",
-    value = data.table::data.table(message = character()),
-    envir = .GlobalEnv
-  )
-  #ModelState_ls must be in Global because that is what visioneval creates -- this is just a placeholder
-  assign("ModelState_ls", value = "", envir = .GlobalEnv)
 
   MODEL_MODULES <- "modelModules"
   SCRIPT_OUTPUT <- "scriptOutput"
@@ -87,8 +82,44 @@ server <- function(input, output, session) {
     reactiveValues(MODEL_MODULES = NULL, SCRIPT_OUTPUT = NULL)
   asyncDataBeingLoaded <- list()
 
+  MODEL_STATE_LS <- "ModelState_ls" #global variable used by visioneval
+  MODEL_STATE <- "modelState"
+  VE_LOG <- "veLog"
+  CAPTURED_SOURCE <- "capturedSource"
+
+  filePaths <-
+    list(VE_LOG = "", MODEL_STATE = "", CAPTURED_SOURCE = tempfile(pattern = "VEGUI_source_capture", fileext = ".txt"))
+
+  oldFilePaths <- filePaths
+
+  reactiveFileReaders <-
+    reactiveValues(VE_LOG = NULL, MODEL_STATE = NULL, CAPTURED_SOURCE = NULL)
+
+  SafeReadLines <- function(filePath) {
+    debugConsole(paste0("SafeReadLines called to load ", filePath, ". Exists? ", file.exists(filePath)))
+    result <- ""
+    if (file.exists(filePath)) {
+      result <- readLines(filePath)
+    }
+    return(result)
+  }
+
+  #http://stackoverflow.com/questions/38064038/reading-an-rdata-file-into-shiny-application
+  # This function, borrowed from http://www.r-bloggers.com/safe-loading-of-rdata-files/, load the Rdata into a new environment to avoid side effects
+  LoadToEnvironment <- function(filePath, env = new.env()) {
+    debugConsole(paste0("LoadToEnvironment called to load ", filePath, ". Exists? ", file.exists(filePath)))
+    if (file.exists(filePath)) {
+      load(filePath, env)
+    }
+    return(env)
+  }
+
   startAsyncDataLoad <- function(asyncDataName, futureObj) {
-    debugConsole(paste0("startAsyncDataLoad asyncDataName '", asyncDataName, "' entered"))
+    debugConsole(paste0(
+      "startAsyncDataLoad asyncDataName '",
+      asyncDataName,
+      "' entered"
+    ))
     testit::assert(
       paste0(
         "startAsyncDataLoad called with asyncDataName: ",
@@ -100,11 +131,20 @@ server <- function(input, output, session) {
     checkAsyncDataBeingLoaded$suspend()
     asyncDataBeingLoaded[[asyncDataName]] <<- futureObj
     checkAsyncDataBeingLoaded$resume()
-    debugConsole(paste0("startAsyncDataLoad asyncDataName '", asyncDataName, "' exited"))
+    debugConsole(paste0(
+      "startAsyncDataLoad asyncDataName '",
+      asyncDataName,
+      "' exited"
+    ))
   } #end startAsyncDataLoad
 
   checkAsyncDataBeingLoaded <- observe({
-    debugConsole(paste0("checkAsyncDataBeingLoaded called. names(asyncDataBeingLoaded): ", names(asyncDataBeingLoaded)))
+    debugConsole(
+      paste0(
+        "checkAsyncDataBeingLoaded called. names(asyncDataBeingLoaded): ",
+        names(asyncDataBeingLoaded)
+      )
+    )
     invalidateLater(1000)
     for (asyncDataName in names(asyncDataBeingLoaded)) {
       asyncFutureObject <- asyncDataBeingLoaded[[asyncDataName]]
@@ -128,10 +168,10 @@ server <- function(input, output, session) {
 
   shinyFileChoose(
     input = input,
-    id = 'file',
+    id = "file",
     session = session,
     roots = getVolumes(),
-    filetypes = c('R')
+    filetypes = c("R")
   )
 
   debugConsole <- function(msg) {
@@ -147,21 +187,15 @@ server <- function(input, output, session) {
   getScriptInfo <- eventReactive(input$file, {
     debugConsole("getScriptInfo called")
     scriptInfo <- list()
-    inFile = parseFilePaths(roots = getVolumes(''), input$file)
+    inFile = parseFilePaths(roots = getVolumes(""), input$file)
     scriptInfo$datapath <-
       normalizePath(as.character(inFile$datapath))
     scriptInfo$fileDirectory <- dirname(scriptInfo$datapath)
-    scriptInfo$modelStateFile <-
-      file.path(scriptInfo$fileDirectory, 'ModelState.Rda')
     scriptInfo$fileBase <- basename(scriptInfo$datapath)
     startAsyncDataLoad(MODEL_MODULES, future(getModelModules(scriptInfo$datapath)))
-    debugConsole("getScriptInfo exit")
-    return(scriptInfo)
-  }) #end reactive
-
-  getModelModules <- function(datapath) {
-    setwd(dirname(datapath))
-    # use trace to hook into visioneval::log
+    filePaths$MODEL_STATE <<-
+      file.path(scriptInfo$fileDirectory, "ModelState.Rda")
+    # #use trace to hook into visioneval::log
     # trace(visioneval::writeLog,
     #       exit = quote(assign(
     #         "VEGUI_logOutput",
@@ -172,36 +206,38 @@ server <- function(input, output, session) {
     #         )
     #       )),
     #       print = FALSE)
+    debugConsole("getScriptInfo exit")
+    return(scriptInfo)
+  }) #end getScriptInfo reactive
 
-    #must call initializeModel even though don't know the correct parameters
-    #because otherwise parseModelScript gets an error: Warning:ror in getModelState: object 'ModelState_ls' not found
-    visioneval::initializeModel()
-
+  getModelModules <- function(datapath) {
+    setwd(dirname(datapath))
     modelModules <-
-      visioneval::parseModelScript(datapath)
+      visioneval::parseModelScript(datapath, TestMode = TRUE)
     return(modelModules)
   } #end getModelModules
 
-  observeEvent(input$runModel, label="runModel", handlerExpr={
+  observeEvent(input$runModel, label = "runModel", handlerExpr = {
     req(input$file)
     debugConsole("observeEvent input$runModel entered")
     datapath <- getScriptInfo()$datapath
-    startAsyncDataLoad(SCRIPT_OUTPUT, future(getScriptOutput(datapath)))
-    debugConsole("observeEvent input$runModel entered")
+    enable(id = "scriptOutput", "")
+    enable(id = "modeState", "")
+    startAsyncDataLoad(SCRIPT_OUTPUT, future(getScriptOutput(datapath, filePaths$CAPTURED_SOURCE)))
+    debugConsole("observeEvent input$runModel exited")
   }) #end runModel observeEvent
 
-getScriptOutput <- function(datapath) {
-  debugConsole("getScriptOutput entered")
-  setwd(dirname(datapath))
-  scriptOutput <- capture.output(source(datapath))
-  debugConsole("getScriptOutput exited")
-  return(scriptOutput)
-}
+  getScriptOutput <- function(datapath, captureFile) {
+    debugConsole("getScriptOutput entered")
+    setwd(dirname(datapath))
+    capture.output(source(datapath), file = captureFile)
+    debugConsole("getScriptOutput exited")
+    return(NULL)
+  }
 
-  #Don't know how to get shiny to auto update when VEGUI_logOutput changes so use a timer.. :-(
   # Re-execute this reactive expression after a set interval
   getDebugConsoleOutput <- reactivePoll(
-    1000,
+    DEFAULT_POLL_INTERVAL,
     session,
     # This function returns the time that the logfile was last
     # modified
@@ -216,63 +252,76 @@ getScriptOutput <- function(datapath) {
     }
   ) #end reactivePoll getDebugConsoleOutput
 
-  #Don't know how to get shiny to auto update when VEGUI_logOutput changes so use a timer.. :-(
-  # Re-execute this reactive expression after a set interval
-  getVELogData <- reactivePoll(
-    1000,
-    session,
-    # This function returns the time that the logfile was last
-    # modified
-    checkFunc = function() {
-      result <- nrow(VEGUI_logOutput)
-      #debugConsole(paste0("getVELogData checkFunc returning: ", result))
-      return(result)
-    },
-    # This function returns the content of the logfile
-    valueFunc = function() {
-      VEGUI_logOutput
-    }
-  ) #end reactivePoll getVELogData
+
+
+  reactiveFileReaders[[VE_LOG]] <-
+    reactiveFileReader(DEFAULT_POLL_INTERVAL,
+                       session,
+                       filePath = function() {
+                         if (oldFilePaths$VE_LOG != filePaths$VE_LOG) {
+                           debugConsole(paste0("VE_LOG: ", oldFilePaths$VE_LOG, " != ", filePaths$VE_LOG))
+                           oldFilePaths$VE_LOG <<- filePaths$VE_LOG
+                         }
+                         return(filePaths$VE_LOG)
+                       }, #use a function so change of filePath will trigger refresh....
+                       readFunc = SafeReadLines)
+
+  reactiveFileReaders[[MODEL_STATE]] <-
+    reactiveFileReader(DEFAULT_POLL_INTERVAL,
+                       session,
+                       filePath = function() {
+                         if (oldFilePaths$MODEL_STATE != filePaths$MODEL_STATE) {
+                           debugConsole(paste0("MODEL_STATE: ", oldFilePaths$MODEL_STATE, " != ", filePaths$MODEL_STATE))
+                           oldFilePaths$MODEL_STATE <<- filePaths$MODEL_STATE
+                         }
+                         return(filePaths$MODEL_STATE)
+                         }, #use a function so change of filePath will trigger refresh....
+                       readFunc = function(filePath) {
+                         debugConsole(paste0("MODEL_STATE function called to load ", filePath, ". Exists? ", file.exists(filePath)))
+                         if (file.exists(filePath)) {
+                         env <- LoadToEnvironment(filePath)
+                         testit::assert(
+                           paste0("'", filePath, "' must contain '", MODEL_STATE_LS, "'"),
+                           exists(MODEL_STATE_LS, envir = env)
+                         )
+                         ModelState_Ls <-
+                           env[[MODEL_STATE_LS]]
+                         filePaths$VE_LOG <<-
+                           file.path(getScriptInfo()$fileDirectory,ModelState_Ls$LogFile)
+                         return(ModelState_Ls)
+                         } else {
+                           return("")
+                         }
+                       })
+
 
   # Re-execute this reactive expression after a set interval
-  getModelState <- reactivePoll(
-    1000,
-    session,
-    # This function returns the time that the logfile was last
-    # modified
-    checkFunc = function() {
-      result <- -1
-      localModelState <- get("ModelState_ls", envir=.GlobalEnv)
-      classOFModelState <- class(localModelState)
-      #debugConsole(paste0("class(ModelState_ls): ", classOFModelState))
-      if (classOFModelState == "list") {
-        result <- file.mtime(getScriptInfo()$modelStateFile)
-      }
-      #debugConsole(paste0("getModelState checkFunc returning: ", result))
-      return(result)
-    },
-    # This function returns the content of the logfile
-    valueFunc = function() {
-      localModelState <- get("ModelState_ls", envir=.GlobalEnv)
-      return(localModelState)
-    }
-  ) #end reactivePoll getModelState
+  reactiveFileReaders[[CAPTURED_SOURCE]] <-
+    reactiveFileReader(DEFAULT_POLL_INTERVAL,
+                       session,
+                       filePath = function() {
+                         if (oldFilePaths$CAPTURED_SOURCE != filePaths$CAPTURED_SOURCE) {
+                           debugConsole(paste0(oldFilePaths$CAPTURED_SOURCE, " != ", filePaths$CAPTURED_SOURCE))
+                           oldFilePaths$CAPTURED_SOURCE <<- filePaths$CAPTURED_SOURCE
+                         }
+                         return(filePaths$CAPTURED_SOURCE)
+                       }, #use a function so change of filePath will trigger refresh....
+                       readFunc = SafeReadLines) #end reactiveFileReader
 
   output$debugConsoleTable = DT::renderDataTable({
     DT::datatable(getDebugConsoleOutput())
   })
 
-  output$veLogTable = DT::renderDataTable({
-    print("output$veLogTable")
-    DT::datatable(getVELogData())
+  output$veLogTable = renderPrint({
+    reactiveFileReaders[[VE_LOG]]()
   })
 
   output$modelState = renderPrint({
-    getModelState()
+    reactiveFileReaders[[MODEL_STATE]]()
   })
 
   output$scriptOutput <- renderPrint({
-    asyncData[[SCRIPT_OUTPUT]]
+    reactiveFileReaders[[CAPTURED_SOURCE]]()
   })
 
   output$scriptName = renderPrint({
