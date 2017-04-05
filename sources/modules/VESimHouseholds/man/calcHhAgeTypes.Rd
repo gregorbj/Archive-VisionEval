@@ -23,4 +23,3 @@ This function produces a matrix of probabilities that a person in one of six
 age groups is in one of 524 household types where each household type is
 determined by the number of persons in each age category.
 }
-
