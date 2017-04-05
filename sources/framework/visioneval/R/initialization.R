@@ -662,8 +662,17 @@ parseModelScript <-
     if (!TestMode) {
       writeLog("Parsing model script")
     }
+    if (!file.exists(FilePath)) {
+      Msg <-
+        paste0("Specified model script file (", FilePath, ") does not exist.")
+      stop(Msg)
+    }
     Script <- paste(readLines(FilePath), collapse = " ")
     RunModuleCalls_ <- unlist(strsplit(Script, "runModule"))[-1]
+    if (length(RunModuleCalls_) == 0) {
+      Msg <- "Specified script contains no 'runModule' function calls."
+      stop(Msg)
+    }
     Errors_ <- character(0)
     addError <- function(Error) {
       Errors_ <<- c(Errors_, Error)
