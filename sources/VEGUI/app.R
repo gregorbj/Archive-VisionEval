@@ -7,6 +7,7 @@ library(shinyBS)
 library(future)
 library(testit)
 library(shinyjs)
+library(jsonlite)
 
 #use of future in shiny: http://stackoverflow.com/questions/41610354/calling-a-shiny-javascript-callback-from-within-a-future
 plan(multiprocess) #tell "future" library to use multiprocessing
@@ -14,6 +15,15 @@ plan(multiprocess) #tell "future" library to use multiprocessing
 if (interactive()) {
   options(shiny.reactlog = TRUE)
 }
+
+MODEL_PARAMETERS_FILE <- "Model_Parameters_File"
+RUN_PARAMETERS_FILE <- "Run_Parameters_File"
+GEO_CSV_FILE <- "Geo_File"
+MODEL_STATE <- "Model_State"
+MODEL_MODULES <- "Model_Modules"
+VE_LOG <- "visionEval_Log"
+CAPTURED_SOURCE <- "run_module_output"
+
 
 # Define UI for application
 ui <- fluidPage(
@@ -38,7 +48,7 @@ ui <- fluidPage(
         multiple = FALSE
       ),
 
-      actionButton("runModel", "Run Model Script"),
+      disabled(actionButton("runModel", "Run Model Script")),
 
       width = 2
 
@@ -50,22 +60,30 @@ ui <- fluidPage(
           "Main",
           bsAlert("parseProblems"),
           h3("Script Name"),
-          verbatimTextOutput("scriptName", TRUE),
+          verbatimTextOutput("scriptName", FALSE),
           h3("Modules"),
           DT::dataTableOutput("modulesTable")
         ),
-        tabPanel("Model State",
-                 verbatimTextOutput("modelState", FALSE)),
+        tabPanel(MODEL_STATE,
+                 verbatimTextOutput(MODEL_STATE, FALSE)),
+        tabPanel(
+          MODEL_PARAMETERS_FILE,
+          verbatimTextOutput(MODEL_PARAMETERS_FILE, FALSE)
+        ),
+        tabPanel(GEO_CSV_FILE,
+                 verbatimTextOutput(GEO_CSV_FILE, FALSE)),
+        tabPanel(
+          RUN_PARAMETERS_FILE,
+          verbatimTextOutput(RUN_PARAMETERS_FILE, FALSE)
+        ),
+        tabPanel(VE_LOG,
+                 verbatimTextOutput(VE_LOG, FALSE)),
+        tabPanel(CAPTURED_SOURCE,
+                 verbatimTextOutput(CAPTURED_SOURCE, FALSE)),
         tabPanel(
           "Debug console",
           h5("(most recent first)"),
           DT::dataTableOutput("debugConsoleTable")
-        ),
-        tabPanel("visioneval Log",
-                 verbatimTextOutput("veLogTable", FALSE)),
-        tabPanel(
-          "script source output",
-          verbatimTextOutput("scriptOutput", FALSE)
         )
       )
     ) #end mainPanel
@@ -73,86 +91,215 @@ ui <- fluidPage(
 ) #end ui
 
 DEFAULT_POLL_INTERVAL <- 500 #milliseconds
+SafeReadJSON <- function(filePath) {
+  debugConsole(paste0(
+    "readJSON function called to load ",
+    filePath,
+    ". Exists? ",
+    file.exists(filePath)
+  ))
+  if (file.exists(filePath)) {
+    fileContent <- fromJSON(filePath)
+    return(fileContent)
+  } else {
+    return("")
+  }
+}# end SafeReadJSON
+
+SafeReadLines <- function(filePath) {
+  debugConsole(paste0(
+    "SafeReadLines called to load ",
+    filePath,
+    ". Exists? ",
+    file.exists(filePath)
+  ))
+  result <- ""
+  if (file.exists(filePath)) {
+    result <- readLines(filePath)
+  }
+  return(result)
+}
+
+SafeReadCSV <- function(filePath) {
+  debugConsole(paste0(
+    "SafeReadCSV called to load ",
+    filePath,
+    ". Exists? ",
+    file.exists(filePath)
+  ))
+  result <- ""
+  if (file.exists(filePath)) {
+    result <- read.csv(filePath)
+  }
+  return(result)
+}
+
+#http://stackoverflow.com/questions/38064038/reading-an-rdata-file-into-shiny-application
+# This function, borrowed from http://www.r-bloggers.com/safe-loading-of-rdata-files/, load the Rdata into a new environment to avoid side effects
+LoadToEnvironment <- function(filePath, env = new.env()) {
+  debugConsole(paste0(
+    "LoadToEnvironment called to load ",
+    filePath,
+    ". Exists? ",
+    file.exists(filePath)
+  ))
+  if (file.exists(filePath)) {
+    load(filePath, env)
+  }
+  return(env)
+}
+
 
 server <- function(input, output, session) {
+  assign("intializeModelArguments",
+         envir = .GlobalEnv,
+         value = "foo")
 
-  MODEL_MODULES <- "modelModules"
-  SCRIPT_OUTPUT <- "scriptOutput"
   asyncData <-
-    reactiveValues(MODEL_MODULES = NULL, SCRIPT_OUTPUT = NULL)
+    reactiveValues()
   asyncDataBeingLoaded <- list()
+  # asyncData[[MODEL_MODULES]] <- data.table::data.table() #empty table as a placeholder until data arrives
 
-  MODEL_STATE_LS <- "ModelState_ls" #global variable used by visioneval
-  MODEL_STATE <- "modelState"
-  VE_LOG <- "veLog"
-  CAPTURED_SOURCE <- "capturedSource"
+  MODEL_STATE_LS <-
+    "ModelState_ls" #global variable used by visioneval
 
   filePaths <-
-    list(VE_LOG = "", MODEL_STATE = "", CAPTURED_SOURCE = tempfile(pattern = "VEGUI_source_capture", fileext = ".txt"))
+    list()
+
+  filePaths[[CAPTURED_SOURCE]] <-
+    tempfile(pattern = "VEGUI_source_capture", fileext = ".txt")
 
   oldFilePaths <- filePaths
 
-  reactiveFileReaders <-
-    reactiveValues(VE_LOG = NULL, MODEL_STATE = NULL, CAPTURED_SOURCE = NULL)
-
-  SafeReadLines <- function(filePath) {
-    debugConsole(paste0("SafeReadLines called to load ", filePath, ". Exists? ", file.exists(filePath)))
-    result <- ""
-    if (file.exists(filePath)) {
-      result <- readLines(filePath)
-    }
-    return(result)
+  debugConsole <- function(msg) {
+    time <- Sys.time()
+    newRow <- data.table::data.table(time = time, message = msg)
+    debugConsoleOutput <<-
+      rbind(newRow,
+            debugConsoleOutput)
+    print(paste0(nrow(debugConsoleOutput), ": ", time, ": ", msg))
+    flush.console()
   }
 
-  #http://stackoverflow.com/questions/38064038/reading-an-rdata-file-into-shiny-application
-  # This function, borrowed from http://www.r-bloggers.com/safe-loading-of-rdata-files/, load the Rdata into a new environment to avoid side effects
-  LoadToEnvironment <- function(filePath, env = new.env()) {
-    debugConsole(paste0("LoadToEnvironment called to load ", filePath, ". Exists? ", file.exists(filePath)))
-    if (file.exists(filePath)) {
-      load(filePath, env)
-    }
-    return(env)
-  }
+  reactiveFileReaders <- list()
 
-  startAsyncDataLoad <- function(asyncDataName, futureObj) {
-    debugConsole(paste0(
-      "startAsyncDataLoad asyncDataName '",
-      asyncDataName,
-      "' entered"
-    ))
-    testit::assert(
-      paste0(
-        "startAsyncDataLoad called with asyncDataName: ",
-        asyncDataName,
-        " which is not is in asyncData",
-        asyncDataName %in% names(asyncData)
+  registerReactiveFileHandler <-
+    function(reactiveFileNameKey, readFunc = SafeReadLines) {
+      # debugConsole(
+      #   paste0(
+      #     "registerReactiveFileHandler called to register ",
+      #     reactiveFileNameKey,
+      #     "'"
+      #   )
+      # )
+      debugConsole(
+        paste0(
+          "ENTER registerReactiveFileHandler  '",
+          reactiveFileNameKey,
+          "' names(reactiveFileReaders): ",
+          names(reactiveFileReaders)
+        )
       )
-    )
-    checkAsyncDataBeingLoaded$suspend()
-    asyncDataBeingLoaded[[asyncDataName]] <<- futureObj
-    checkAsyncDataBeingLoaded$resume()
-    debugConsole(paste0(
-      "startAsyncDataLoad asyncDataName '",
-      asyncDataName,
-      "' exited"
-    ))
-  } #end startAsyncDataLoad
+      reactiveFileReaders[[reactiveFileNameKey]] <<-
+        reactiveFileReader(
+          DEFAULT_POLL_INTERVAL,
+          session,
+          filePath = function() {
+            if (is.null(oldFilePaths[[reactiveFileNameKey]]) ||
+                (oldFilePaths[[reactiveFileNameKey]] != filePaths[[reactiveFileNameKey]])) {
+              if (is.null(oldFilePaths[[reactiveFileNameKey]])) {
+                # debugConsole(
+                #   paste0(
+                #     "registerReactiveFileHandler  '",
+                #     reactiveFileNameKey,
+                #     "' filePath() called when oldName == NULL. names(reactiveFileReaders): ",
+                #     names(reactiveFileReaders)
+                #   )
+                # )
+                if (is.null(filePaths[[reactiveFileNameKey]])) {
+                  #trick so that the debugConsole above only runs once per reactiveFileNameKey
+                  filePaths[[reactiveFileNameKey]] <<- ""
+                  oldFilePaths[[reactiveFileNameKey]] <<-
+                    filePaths[[reactiveFileNameKey]]
+                }
+              } else { #if old was not null}
+                debugConsole(paste0(
+                  reactiveFileNameKey,
+                  ": '",
+                  oldFilePaths[[reactiveFileNameKey]],
+                  "' != '",
+                  filePaths[[reactiveFileNameKey]],
+                  "'"
+                ))
+              }
+              oldFilePaths[[reactiveFileNameKey]] <<-
+                filePaths[[reactiveFileNameKey]]
+            }
+            returnValue <- filePaths[[reactiveFileNameKey]]
+            if (is.null(returnValue())) {
+              returnValue <-
+                "" #cannot be null since it is used by reactiveFileReader in file.info.
+            }
+            return(returnValue)
+          },
+          #end filePath function
+          #use a function so change of filePath will trigger refresh....
+          readFunc = readFunc
+        )#end reactiveFileReader
+      debugConsole(
+        paste0(
+          "EXIT registerReactiveFileHandler  '",
+          reactiveFileNameKey,
+          "' names(reactiveFileReaders): ",
+          names(reactiveFileReaders)
+        )
+      )
+      Sys.sleep(time = 1)
+    } #end registerReactiveFileHandler
+
+  startAsyncDataLoad <-
+    function(asyncDataName, futureObj, callback = NULL) {
+      debugConsole(paste0(
+        "startAsyncDataLoad asyncDataName '",
+        asyncDataName,
+        "' called"
+      ))
+      checkAsyncDataBeingLoaded$suspend()
+      asyncData[[asyncDataName]] <<- NULL
+      asyncDataBeingLoaded[[asyncDataName]] <<-
+        list(futureObj = futureObj,
+             callback = callback)
+      checkAsyncDataBeingLoaded$resume()
+    } #end startAsyncDataLoad
 
   checkAsyncDataBeingLoaded <- observe({
-    debugConsole(
-      paste0(
-        "checkAsyncDataBeingLoaded called. names(asyncDataBeingLoaded): ",
-        names(asyncDataBeingLoaded)
-      )
-    )
-    invalidateLater(1000)
+    invalidateLater(DEFAULT_POLL_INTERVAL)
     for (asyncDataName in names(asyncDataBeingLoaded)) {
-      asyncFutureObject <- asyncDataBeingLoaded[[asyncDataName]]
+      asyncFutureObject <- asyncDataBeingLoaded[[asyncDataName]]$futureObj
       if (resolved(asyncFutureObject)) {
-        asyncData[[asyncDataName]] <<- value(asyncFutureObject)
+        debugConsole(paste0(
+          "checkAsyncDataBeingLoaded resolved: '",
+          asyncDataName,
+          "'"
+        ))
+        #NOTE future will send any errors it caught when we ask it for the value -- same as if we had evaluated the expression ourselves
+        tryCatch(
+          expr = {
+            asyncData[[asyncDataName]] <<- value(asyncFutureObject)
+          },
+          warning = function(w) {
+            debugConsole(paste0("'", asyncDataName, "' returned a warning: ", w))
+          },
+          error = function(e) {
+            debugConsole(paste0("'", asyncDataName, "' returned an error: ", e))
+          }
+        )#end tryCatch
+        callback <- asyncDataBeingLoaded[[asyncDataName]]$callback
         asyncDataBeingLoaded[[asyncDataName]] <<- NULL
-        debugConsole(paste0("checkAsyncDataBeingLoaded resolved: ", asyncDataName))
-      }
+        if (!is.null(callback)) {
+          callback(asyncDataName, asyncData[[asyncDataName]])
+        }
+      } #end if resolved
     }#end loop over async data items being loaded
     #if there are no more asynchronous data items being loaded then stop checking
     if (length(asyncDataBeingLoaded) == 0) {
@@ -174,39 +321,80 @@ server <- function(input, output, session) {
     filetypes = c("R")
   )
 
-  debugConsole <- function(msg) {
-    time <- Sys.time()
-    newRow <- data.table::data.table(time = time, message = msg)
-    debugConsoleOutput <<-
-      rbind(newRow,
-            debugConsoleOutput)
-    print(paste0(nrow(debugConsoleOutput), ": ", time, ": ", msg))
-    flush.console()
-  }
+  registerReactiveFileHandler(VE_LOG)
+  registerReactiveFileHandler(CAPTURED_SOURCE)
+  registerReactiveFileHandler(MODEL_PARAMETERS_FILE, SafeReadJSON)
+  registerReactiveFileHandler(RUN_PARAMETERS_FILE, SafeReadJSON)
+  registerReactiveFileHandler(GEO_CSV_FILE, SafeReadCSV)
+
+  registerReactiveFileHandler(
+    MODEL_STATE,
+    #use a function so change of filePath will trigger refresh....
+    readFunc = function(filePath) {
+      debugConsole(paste0(
+        "MODEL_STATE function called to load ",
+        filePath,
+        ". Exists? ",
+        file.exists(filePath)
+      ))
+      if (file.exists(filePath)) {
+        env <- LoadToEnvironment(filePath)
+        testit::assert(
+          paste0("'", filePath, "' must contain '", MODEL_STATE_LS, "'"),
+          exists(MODEL_STATE_LS, envir = env)
+        )
+        ModelState_Ls <-
+          env[[MODEL_STATE_LS]]
+        filePaths$VE_LOG <<-
+          file.path(getScriptInfo()$fileDirectory, ModelState_Ls$LogFile)
+        return(ModelState_Ls)
+      } else {
+        return("")
+      }
+    }# end readFunc
+  ) #end call to registerReactiveFileHandler
 
   getScriptInfo <- eventReactive(input$file, {
-    debugConsole("getScriptInfo called")
+    debugConsole("getScriptInfo entered")
     scriptInfo <- list()
     inFile = parseFilePaths(roots = getVolumes(""), input$file)
     scriptInfo$datapath <-
       normalizePath(as.character(inFile$datapath))
     scriptInfo$fileDirectory <- dirname(scriptInfo$datapath)
     scriptInfo$fileBase <- basename(scriptInfo$datapath)
-    startAsyncDataLoad(MODEL_MODULES, future(getModelModules(scriptInfo$datapath)))
-    filePaths$MODEL_STATE <<-
+    disable(id = "runModel", selector = NULL)
+    startAsyncDataLoad(
+      MODEL_MODULES,
+      future(getModelModules(scriptInfo$datapath)),
+      callback = function(asyncDataName, asyncData) {
+        if (!is.null(asyncData)) {
+          enable(id = "runModel", selector = NULL)
+        }
+        debugConsole(
+          paste0(
+            "callback asyncDataName '",
+            asyncDataName,
+            "' returning with data of size ",
+            object.size(asyncData)
+          )
+        )
+      }
+    )
+    filePaths[[MODEL_STATE]] <<-
       file.path(scriptInfo$fileDirectory, "ModelState.Rda")
-    # #use trace to hook into visioneval::log
-    # trace(visioneval::writeLog,
-    #       exit = quote(assign(
-    #         "VEGUI_logOutput",
-    #         envir = .GlobalEnv,
-    #         value = rbind(
-    #           data.table::data.table(message = Content),
-    #           get("VEGUI_logOutput", envir = .GlobalEnv)
-    #         )
-    #       )),
-    #       print = FALSE)
-    debugConsole("getScriptInfo exit")
+
+    defsDirectory <- file.path(scriptInfo$fileDirectory, "defs")
+
+    filePaths[[MODEL_PARAMETERS_FILE]] <<-
+      file.path(defsDirectory, "model_parameters.json")
+
+    filePaths[[RUN_PARAMETERS_FILE]] <<-
+      file.path(defsDirectory, "run_parameters.json")
+
+    filePaths[[GEO_CSV_FILE]] <<-
+      file.path(defsDirectory, "geo.csv")
+
+    debugConsole("getScriptInfo exited")
     return(scriptInfo)
   }) #end getScriptInfo reactive
 
@@ -221,9 +409,23 @@ server <- function(input, output, session) {
     req(input$file)
     debugConsole("observeEvent input$runModel entered")
     datapath <- getScriptInfo()$datapath
-    enable(id = "scriptOutput", "")
-    enable(id = "modeState", "")
-    startAsyncDataLoad(SCRIPT_OUTPUT, future(getScriptOutput(datapath, filePaths$CAPTURED_SOURCE)))
+    enable(id = "scriptOutput", selector = NULL)
+    enable(id = "modeState", selector = NULL)
+    disable(id = "file", selector = NULL)
+    disable(id = "runModel", selector = NULL)
+    startAsyncDataLoad(CAPTURED_SOURCE, future(getScriptOutput(datapath, filePaths[[CAPTURED_SOURCE]])),
+                       function(asyncDataName, asyncData) {
+                         enable(id = "file", selector = NULL)
+                         enable(id = "runModel", selector = NULL)
+                         debugConsole(
+                           paste0(
+                             "callback asyncDataName '",
+                             asyncDataName,
+                             "' returning with data of size ",
+                             object.size(asyncData)
+                           )
+                         )
+                       })
     debugConsole("observeEvent input$runModel exited")
   }) #end runModel observeEvent
 
@@ -251,62 +453,6 @@ server <- function(input, output, session) {
       debugConsoleOutput
     }
   ) #end reactivePoll getDebugConsoleOutput
-
-
-
-  reactiveFileReaders[[VE_LOG]] <-
-    reactiveFileReader(DEFAULT_POLL_INTERVAL,
-                       session,
-                       filePath = function() {
-                         if (oldFilePaths$VE_LOG != filePaths$VE_LOG) {
-                           debugConsole(paste0("VE_LOG: ", oldFilePaths$VE_LOG, " != ", filePaths$VE_LOG))
-                           oldFilePaths$VE_LOG <<- filePaths$VE_LOG
-                         }
-                         return(filePaths$VE_LOG)
-                       }, #use a function so change of filePath will trigger refresh....
-                       readFunc = SafeReadLines)
-
-  reactiveFileReaders[[MODEL_STATE]] <-
-    reactiveFileReader(DEFAULT_POLL_INTERVAL,
-                       session,
-                       filePath = function() {
-                         if (oldFilePaths$MODEL_STATE != filePaths$MODEL_STATE) {
-                           debugConsole(paste0("MODEL_STATE: ", oldFilePaths$MODEL_STATE, " != ", filePaths$MODEL_STATE))
-                           oldFilePaths$MODEL_STATE <<- filePaths$MODEL_STATE
-                         }
-                         return(filePaths$MODEL_STATE)
-                         }, #use a function so change of filePath will trigger refresh....
-                       readFunc = function(filePath) {
-                         debugConsole(paste0("MODEL_STATE function called to load ", filePath, ". Exists? ", file.exists(filePath)))
-                         if (file.exists(filePath)) {
-                         env <- LoadToEnvironment(filePath)
-                         testit::assert(
-                           paste0("'", filePath, "' must contain '", MODEL_STATE_LS, "'"),
-                           exists(MODEL_STATE_LS, envir = env)
-                         )
-                         ModelState_Ls <-
-                           env[[MODEL_STATE_LS]]
-                         filePaths$VE_LOG <<-
-                           file.path(getScriptInfo()$fileDirectory,ModelState_Ls$LogFile)
-                         return(ModelState_Ls)
-                         } else {
-                           return("")
-                         }
-                       })
-
-
-  # Re-execute this reactive expression after a set interval
-  reactiveFileReaders[[CAPTURED_SOURCE]] <-
-    reactiveFileReader(DEFAULT_POLL_INTERVAL,
-                       session,
-                       filePath = function() {
-                         if (oldFilePaths$CAPTURED_SOURCE != filePaths$CAPTURED_SOURCE) {
-                           debugConsole(paste0(oldFilePaths$CAPTURED_SOURCE, " != ", filePaths$CAPTURED_SOURCE))
-                           oldFilePaths$CAPTURED_SOURCE <<- filePaths$CAPTURED_SOURCE
-                         }
-                         return(filePaths$CAPTURED_SOURCE)
-                       }, #use a function so change of filePath will trigger refresh....
-                       readFunc = SafeReadLines) #end reactiveFileReader
 
   output$debugConsoleTable = DT::renderDataTable({
     DT::datatable(getDebugConsoleOutput())
