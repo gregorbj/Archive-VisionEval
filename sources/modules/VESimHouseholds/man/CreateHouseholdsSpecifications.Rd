@@ -24,4 +24,3 @@ CreateHouseholdsSpecifications
 A list containing specifications for the CreateHouseholds module.
 }
 \keyword{datasets}
-
