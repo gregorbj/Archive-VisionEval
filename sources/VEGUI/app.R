@@ -113,6 +113,8 @@ server <- function(input, output, session) {
     tempfile(pattern = "VEGUI_source_capture", fileext = ".txt")
 
   oldFilePaths <- filePaths
+  reactiveFileReaders <- list()
+
 
   debugConsole <- function(msg) {
     testit::assert("debugConsole was passed NULL!", !is.null(msg))
@@ -183,15 +185,14 @@ server <- function(input, output, session) {
     return(env)
   }
 
-  reactiveFileReaders <- reactiveValues()
-
   registerReactiveFileHandler <-
     function(reactiveFileNameKey, readFunc = SafeReadLines) {
       debugConsole(
         paste0(
           "registerReactiveFileHandler called to register ",
           reactiveFileNameKey,
-          "'"
+          "' names(reactiveFileReaders): ",
+          paste0(collapse=", ", names(reactiveFileReaders))
         )
       )
       reactiveFileReaders[[reactiveFileNameKey]] <<-
@@ -201,31 +202,14 @@ server <- function(input, output, session) {
           filePath = function() {
             if (is.null(oldFilePaths[[reactiveFileNameKey]]) ||
                 (oldFilePaths[[reactiveFileNameKey]] != filePaths[[reactiveFileNameKey]])) {
-              if (is.null(oldFilePaths[[reactiveFileNameKey]])) {
-                debugConsole(
-                  paste0(
-                    "registerReactiveFileHandler  '",
-                    reactiveFileNameKey,
-                    "' filePath() called when oldName == NULL. names(reactiveFileReaders): ",
-                    paste0(collapse=", ", names(reactiveFileReaders))
-                  )
-                )
-                if (is.null(filePaths[[reactiveFileNameKey]])) {
-                  #trick so that the debugConsole above only runs once per reactiveFileNameKey
-                  filePaths[[reactiveFileNameKey]] <<- ""
-                  oldFilePaths[[reactiveFileNameKey]] <<-
-                    filePaths[[reactiveFileNameKey]]
-                }
-              } else { #if old was not null}
-                debugConsole(paste0(
-                  reactiveFileNameKey,
-                  ": '",
-                  oldFilePaths[[reactiveFileNameKey]],
-                  "' != '",
-                  filePaths[[reactiveFileNameKey]],
-                  "'"
-                ))
+              if (is.null(filePaths[[reactiveFileNameKey]])) {
+                #cannot be null since it is used by reactiveFileReader in file.info so change to blank which does not cause an error
+                filePaths[[reactiveFileNameKey]] <<- ""
               }
+              debugConsole(paste0(reactiveFileNameKey,
+                                  ": set to '",
+                                  filePaths[[reactiveFileNameKey]],
+                                  "'"))
               oldFilePaths[[reactiveFileNameKey]] <<-
                 filePaths[[reactiveFileNameKey]]
             }
@@ -330,7 +314,7 @@ server <- function(input, output, session) {
         )
         ModelState_Ls <-
           env[[MODEL_STATE_LS]]
-        filePaths$VE_LOG <<-
+        filePaths[[VE_LOG]] <<-
           file.path(getScriptInfo()$fileDirectory, ModelState_Ls$LogFile)
         return(ModelState_Ls)
       } else {
