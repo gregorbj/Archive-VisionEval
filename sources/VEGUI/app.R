@@ -91,63 +91,6 @@ ui <- fluidPage(
 ) #end ui
 
 DEFAULT_POLL_INTERVAL <- 500 #milliseconds
-SafeReadJSON <- function(filePath) {
-  debugConsole(paste0(
-    "readJSON function called to load ",
-    filePath,
-    ". Exists? ",
-    file.exists(filePath)
-  ))
-  if (file.exists(filePath)) {
-    fileContent <- fromJSON(filePath)
-    return(fileContent)
-  } else {
-    return("")
-  }
-}# end SafeReadJSON
-
-SafeReadLines <- function(filePath) {
-  debugConsole(paste0(
-    "SafeReadLines called to load ",
-    filePath,
-    ". Exists? ",
-    file.exists(filePath)
-  ))
-  result <- ""
-  if (file.exists(filePath)) {
-    result <- readLines(filePath)
-  }
-  return(result)
-}
-
-SafeReadCSV <- function(filePath) {
-  debugConsole(paste0(
-    "SafeReadCSV called to load ",
-    filePath,
-    ". Exists? ",
-    file.exists(filePath)
-  ))
-  result <- ""
-  if (file.exists(filePath)) {
-    result <- read.csv(filePath)
-  }
-  return(result)
-}
-
-#http://stackoverflow.com/questions/38064038/reading-an-rdata-file-into-shiny-application
-# This function, borrowed from http://www.r-bloggers.com/safe-loading-of-rdata-files/, load the Rdata into a new environment to avoid side effects
-LoadToEnvironment <- function(filePath, env = new.env()) {
-  debugConsole(paste0(
-    "LoadToEnvironment called to load ",
-    filePath,
-    ". Exists? ",
-    file.exists(filePath)
-  ))
-  if (file.exists(filePath)) {
-    load(filePath, env)
-  }
-  return(env)
-}
 
 
 server <- function(input, output, session) {
@@ -182,23 +125,73 @@ server <- function(input, output, session) {
     flush.console()
   }
 
-  reactiveFileReaders <- list()
+  SafeReadJSON <- function(filePath) {
+    debugConsole(paste0(
+      "readJSON function called to load ",
+      filePath,
+      ". Exists? ",
+      file.exists(filePath)
+    ))
+    if (file.exists(filePath)) {
+      fileContent <- fromJSON(filePath)
+      return(fileContent)
+    } else {
+      return("")
+    }
+  }# end SafeReadJSON
+
+  SafeReadLines <- function(filePath) {
+    debugConsole(paste0(
+      "SafeReadLines called to load ",
+      filePath,
+      ". Exists? ",
+      file.exists(filePath)
+    ))
+    result <- ""
+    if (file.exists(filePath)) {
+      result <- readLines(filePath)
+    }
+    return(result)
+  }
+
+  SafeReadCSV <- function(filePath) {
+    debugConsole(paste0(
+      "SafeReadCSV called to load ",
+      filePath,
+      ". Exists? ",
+      file.exists(filePath)
+    ))
+    result <- ""
+    if (file.exists(filePath)) {
+      result <- read.csv(filePath)
+    }
+    return(result)
+  }
+
+  #http://stackoverflow.com/questions/38064038/reading-an-rdata-file-into-shiny-application
+  # This function, borrowed from http://www.r-bloggers.com/safe-loading-of-rdata-files/, load the Rdata into a new environment to avoid side effects
+  LoadToEnvironment <- function(filePath, env = new.env()) {
+    debugConsole(paste0(
+      "LoadToEnvironment called to load ",
+      filePath,
+      ". Exists? ",
+      file.exists(filePath)
+    ))
+    if (file.exists(filePath)) {
+      load(filePath, env)
+    }
+    return(env)
+  }
+
+  reactiveFileReaders <- reactiveValues()
 
   registerReactiveFileHandler <-
     function(reactiveFileNameKey, readFunc = SafeReadLines) {
-      # debugConsole(
-      #   paste0(
-      #     "registerReactiveFileHandler called to register ",
-      #     reactiveFileNameKey,
-      #     "'"
-      #   )
-      # )
       debugConsole(
         paste0(
-          "ENTER registerReactiveFileHandler  '",
+          "registerReactiveFileHandler called to register ",
           reactiveFileNameKey,
-          "' names(reactiveFileReaders): ",
-          paste0(collapse=", ", names(reactiveFileReaders))
+          "'"
         )
       )
       reactiveFileReaders[[reactiveFileNameKey]] <<-
@@ -209,14 +202,14 @@ server <- function(input, output, session) {
             if (is.null(oldFilePaths[[reactiveFileNameKey]]) ||
                 (oldFilePaths[[reactiveFileNameKey]] != filePaths[[reactiveFileNameKey]])) {
               if (is.null(oldFilePaths[[reactiveFileNameKey]])) {
-                # debugConsole(
-                #   paste0(
-                #     "registerReactiveFileHandler  '",
-                #     reactiveFileNameKey,
-                #     "' filePath() called when oldName == NULL. names(reactiveFileReaders): ",
-                #     names(reactiveFileReaders)
-                #   )
-                # )
+                debugConsole(
+                  paste0(
+                    "registerReactiveFileHandler  '",
+                    reactiveFileNameKey,
+                    "' filePath() called when oldName == NULL. names(reactiveFileReaders): ",
+                    paste0(collapse=", ", names(reactiveFileReaders))
+                  )
+                )
                 if (is.null(filePaths[[reactiveFileNameKey]])) {
                   #trick so that the debugConsole above only runs once per reactiveFileNameKey
                   filePaths[[reactiveFileNameKey]] <<- ""
@@ -237,7 +230,7 @@ server <- function(input, output, session) {
                 filePaths[[reactiveFileNameKey]]
             }
             returnValue <- filePaths[[reactiveFileNameKey]]
-            if (is.null(returnValue())) {
+            if (is.null(returnValue)) {
               returnValue <-
                 "" #cannot be null since it is used by reactiveFileReader in file.info.
             }
@@ -247,16 +240,7 @@ server <- function(input, output, session) {
           #use a function so change of filePath will trigger refresh....
           readFunc = readFunc
         )#end reactiveFileReader
-      debugConsole(
-        paste0(
-          "EXIT registerReactiveFileHandler  '",
-          reactiveFileNameKey,
-          "' names(reactiveFileReaders): ",
-          paste0(collapse=", ", names(reactiveFileReaders))
-        )
-      )
-      Sys.sleep(time = 1)
-    } #end registerReactiveFileHandler
+     } #end registerReactiveFileHandler
 
   startAsyncDataLoad <-
     function(asyncDataName, futureObj, callback = NULL) {
@@ -459,15 +443,27 @@ server <- function(input, output, session) {
     DT::datatable(getDebugConsoleOutput())
   })
 
-  output$veLogTable = renderPrint({
+  output[[VE_LOG]] = renderPrint({
     reactiveFileReaders[[VE_LOG]]()
   })
 
-  output$modelState = renderPrint({
+  output[[GEO_CSV_FILE]] = renderPrint({
+    reactiveFileReaders[[GEO_CSV_FILE]]()
+  })
+
+  output[[RUN_PARAMETERS_FILE]] = renderPrint({
+    reactiveFileReaders[[RUN_PARAMETERS_FILE]]()
+  })
+
+  output[[MODEL_PARAMETERS_FILE]] = renderPrint({
+    reactiveFileReaders[[MODEL_PARAMETERS_FILE]]()
+  })
+
+  output[[MODEL_STATE]] = renderPrint({
     reactiveFileReaders[[MODEL_STATE]]()
   })
 
-  output$scriptOutput <- renderPrint({
+  output[[CAPTURED_SOURCE]] <- renderPrint({
     reactiveFileReaders[[CAPTURED_SOURCE]]()
   })
 
