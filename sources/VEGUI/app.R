@@ -18,12 +18,13 @@ if (interactive()) {
 
 MODEL_PARAMETERS_FILE <- "Model_Parameters_File"
 RUN_PARAMETERS_FILE <- "Run_Parameters_File"
-GEO_CSV_FILE <- "Geo_File"
-MODEL_STATE <- "Model_State"
+GEO_CSV_FILE <- "Geo File"
+MODEL_STATE_FILE <- "Model State File"
 MODEL_MODULES <- "Model_Modules"
 VE_LOG <- "visionEval_Log"
 CAPTURED_SOURCE <- "run_module_output"
-
+MODEL_STATE_LS <-
+  "Model_State_LS"
 
 # Define UI for application
 ui <- fluidPage(
@@ -64,8 +65,10 @@ ui <- fluidPage(
           h3("Modules"),
           DT::dataTableOutput("modulesTable")
         ),
-        tabPanel(MODEL_STATE,
-                 verbatimTextOutput(MODEL_STATE, FALSE)),
+        tabPanel(MODEL_STATE_LS,
+                 verbatimTextOutput(MODEL_STATE_LS, FALSE)),
+        tabPanel(MODEL_STATE_FILE,
+                 verbatimTextOutput(MODEL_STATE_FILE, FALSE)),
         tabPanel(
           MODEL_PARAMETERS_FILE,
           verbatimTextOutput(MODEL_PARAMETERS_FILE, FALSE)
@@ -94,21 +97,18 @@ DEFAULT_POLL_INTERVAL <- 500 #milliseconds
 
 
 server <- function(input, output, session) {
-  assign("intializeModelArguments",
+  assign("ModelState_ls",
          envir = .GlobalEnv,
-         value = "foo")
+         value = "placeholder_from_VE_GUI")
 
   asyncData <-
     reactiveValues()
   asyncDataBeingLoaded <- list()
-  # asyncData[[MODEL_MODULES]] <- data.table::data.table() #empty table as a placeholder until data arrives
-
-  MODEL_STATE_LS <-
-    "ModelState_ls" #global variable used by visioneval
 
   filePaths <-
     list()
 
+  otherReactiveValues <- reactiveValues()
   filePaths[[CAPTURED_SOURCE]] <-
     tempfile(pattern = "VEGUI_source_capture", fileext = ".txt")
 
@@ -189,7 +189,7 @@ server <- function(input, output, session) {
     function(reactiveFileNameKey, readFunc = SafeReadLines) {
       debugConsole(
         paste0(
-          "registerReactiveFileHandler called to register ",
+          "registerReactiveFileHandler called to register '",
           reactiveFileNameKey,
           "' names(reactiveFileReaders): ",
           paste0(collapse=", ", names(reactiveFileReaders))
@@ -297,11 +297,11 @@ server <- function(input, output, session) {
   registerReactiveFileHandler(GEO_CSV_FILE, SafeReadCSV)
 
   registerReactiveFileHandler(
-    MODEL_STATE,
+    MODEL_STATE_FILE,
     #use a function so change of filePath will trigger refresh....
     readFunc = function(filePath) {
       debugConsole(paste0(
-        "MODEL_STATE function called to load ",
+        "MODEL_STATE_FILE function called to load ",
         filePath,
         ". Exists? ",
         file.exists(filePath)
@@ -309,13 +309,13 @@ server <- function(input, output, session) {
       if (file.exists(filePath)) {
         env <- LoadToEnvironment(filePath)
         testit::assert(
-          paste0("'", filePath, "' must contain '", MODEL_STATE_LS, "'"),
+          paste0("'", filePath, "' must contain '", MODEL_STATE_LS, "' but has this instead: ", str(env)),
           exists(MODEL_STATE_LS, envir = env)
         )
-        ModelState_Ls <-
+        myModelState_Ls <-
           env[[MODEL_STATE_LS]]
         filePaths[[VE_LOG]] <<-
-          file.path(getScriptInfo()$fileDirectory, ModelState_Ls$LogFile)
+          file.path(getScriptInfo()$fileDirectory, myModelState_Ls$LogFile)
         return(ModelState_Ls)
       } else {
         return("")
@@ -331,10 +331,23 @@ server <- function(input, output, session) {
       normalizePath(as.character(inFile$datapath))
     scriptInfo$fileDirectory <- dirname(scriptInfo$datapath)
     scriptInfo$fileBase <- basename(scriptInfo$datapath)
+    setwd(scriptInfo$fileDirectory)
+    visioneval::initModelStateFile()
+    visioneval::initLog()
+    visioneval::writeLog("VE_GUI called visioneval::initModelStateFile() and visioneval::initLog()")
+    otherReactiveValues[[MODEL_STATE_LS]] <<- ModelState_ls
+    filePaths[[VE_LOG]] <<- file.path(scriptInfo$fileDirectory, ModelState_ls$LogFile)
+    debugConsole(
+      paste0(
+        "after visioneval::initModelStateFile() and visioneval::initLog() global variable ModelState_ls has size: ",
+        object.size(ModelState_ls)
+      )
+    )
     disable(id = "runModel", selector = NULL)
     startAsyncDataLoad(
       MODEL_MODULES,
-      future(getModelModules(scriptInfo$datapath)),
+      future({ModelState_ls
+        getModelModules(scriptInfo$datapath)}),
       callback = function(asyncDataName, asyncData) {
         if (!is.null(asyncData)) {
           enable(id = "runModel", selector = NULL)
@@ -349,7 +362,7 @@ server <- function(input, output, session) {
         )
       }
     )
-    filePaths[[MODEL_STATE]] <<-
+    filePaths[[MODEL_STATE_FILE]] <<-
       file.path(scriptInfo$fileDirectory, "ModelState.Rda")
 
     defsDirectory <- file.path(scriptInfo$fileDirectory, "defs")
@@ -443,8 +456,12 @@ server <- function(input, output, session) {
     reactiveFileReaders[[MODEL_PARAMETERS_FILE]]()
   })
 
-  output[[MODEL_STATE]] = renderPrint({
-    reactiveFileReaders[[MODEL_STATE]]()
+  output[[MODEL_STATE_FILE]] = renderPrint({
+    reactiveFileReaders[[MODEL_STATE_FILE]]()
+  })
+
+  output[[MODEL_STATE_LS]] = renderPrint({
+    otherReactiveValues[[MODEL_STATE_LS]]
   })
 
   output[[CAPTURED_SOURCE]] <- renderPrint({
