@@ -172,6 +172,7 @@ server <- function(input, output, session) {
   oldFilePaths <- filePaths
 
   debugConsole <- function(msg) {
+    testit::assert("debugConsole was passed NULL!", !is.null(msg))
     time <- Sys.time()
     newRow <- data.table::data.table(time = time, message = msg)
     debugConsoleOutput <<-
@@ -197,7 +198,7 @@ server <- function(input, output, session) {
           "ENTER registerReactiveFileHandler  '",
           reactiveFileNameKey,
           "' names(reactiveFileReaders): ",
-          names(reactiveFileReaders)
+          paste0(collapse=", ", names(reactiveFileReaders))
         )
       )
       reactiveFileReaders[[reactiveFileNameKey]] <<-
@@ -251,7 +252,7 @@ server <- function(input, output, session) {
           "EXIT registerReactiveFileHandler  '",
           reactiveFileNameKey,
           "' names(reactiveFileReaders): ",
-          names(reactiveFileReaders)
+          paste0(collapse=", ", names(reactiveFileReaders))
         )
       )
       Sys.sleep(time = 1)
