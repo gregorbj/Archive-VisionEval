@@ -4,7 +4,8 @@
 \alias{createHhByAge}
 \title{Create simulated households for an Azone}
 \usage{
-createHhByAge(Prsn_Ap, MaxIter = 100)
+createHhByAge(Prsn_Ap, MaxIter = 100, TargetHhSize = NA,
+  TargetProp1PerHh = NA)
 }
 \arguments{
 \item{Prsn_Ap}{A named vector containing the number of persons in each age
@@ -13,6 +14,12 @@ category.}
 \item{MaxIter}{An integer specifying the maximum number of iterations the
 algorithm should use to balance and reconcile the population allocation to
 household types.}
+
+\item{TargetHhSize}{A double specifying a household size target value or NA
+if there is no target.}
+
+\item{TargetProp1PerHh}{A double specifying a target for the proportion of
+households that are one-person households or NA if there is no target.}
 }
 \value{
 A list containing 7 components. Each component is a vector where each
@@ -24,7 +31,7 @@ Age20to29 - number of persons age 20 to 29 in the household
 Age30to54 - number of persons age 30 to 54 in the household
 Age 55to64 - number of persons age 55 to 64 in the household
 Age65Plus - number of persons 65 or older in the household
-Hhsize - total number of persons in the household
+HhSize - total number of persons in the household
 }
 \description{
 \code{createHhByAge} creates a set of simulated households for an Azone that
@@ -49,4 +56,3 @@ continues until the difference between the assigned population and the input
 population by age group is less than 0.1%. After the households are
 synthesized, the size of each household is calculated.
 }
-

@@ -15,4 +15,3 @@ HtProb_HtAp
 A dataset containing the proportions of households by household size.
 }
 \keyword{datasets}
-
