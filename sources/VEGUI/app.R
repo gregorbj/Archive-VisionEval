@@ -1,4 +1,5 @@
 library(shiny)
+library(shinyjs)
 library(shinyFiles)
 library(visioneval)
 library(DT)
@@ -6,7 +7,6 @@ library(data.table)
 library(shinyBS)
 library(future)
 library(testit)
-library(shinyjs)
 library(jsonlite)
 
 #use of future in shiny: http://stackoverflow.com/questions/41610354/calling-a-shiny-javascript-callback-from-within-a-future
@@ -24,7 +24,9 @@ MODEL_MODULES <- "Model_Modules"
 VE_LOG <- "visionEval_Log"
 CAPTURED_SOURCE <- "run_module_output"
 MODEL_STATE_LS <-
-  "Model_State_LS"
+  "ModelState_ls"
+
+volumeRoots = getVolumes("")
 
 # Define UI for application
 ui <- fluidPage(
@@ -43,10 +45,16 @@ ui <- fluidPage(
       ),
 
       shinyFilesButton(
-        "file",
+        id="selectRunScript",
         label = "Select Run Script",
         title = "Please select model run script",
         multiple = FALSE
+      ),
+
+      shinySaveButton(
+        id="copyModelDirectory",
+        label = "Save scenario as...",
+        title = "Please select location for new folder containing copy of current model"
       ),
 
       disabled(actionButton("runModel", "Run Model Script")),
@@ -172,7 +180,7 @@ server <- function(input, output, session) {
 
   #http://stackoverflow.com/questions/38064038/reading-an-rdata-file-into-shiny-application
   # This function, borrowed from http://www.r-bloggers.com/safe-loading-of-rdata-files/, load the Rdata into a new environment to avoid side effects
-  LoadToEnvironment <- function(filePath, env = new.env()) {
+  LoadToEnvironment <- function(filePath, env = new.env(parent = emptyenv())) {
     debugConsole(paste0(
       "LoadToEnvironment called to load ",
       filePath,
@@ -282,14 +290,24 @@ server <- function(input, output, session) {
   #don't know how to create data.table with particular types without actually creating a row so need to delete it...
   debugConsoleOutput <-  debugConsoleOutput[-1] #removes all rows
 
+  shinyFileSave(
+    input = input,
+    id = "copyModelDirectory",
+    session = session,
+    roots = volumeRoots
+  )
+
   shinyFileChoose(
     input = input,
-    id = "file",
+    id = "selectRunScript",
     session = session,
-    roots = getVolumes(),
+    roots = volumeRoots,
     filetypes = c("R")
   )
 
+  observe({
+    toggleState(id="copyModelDirectory", condition=input$selectRunScript, selector=NULL)
+  })
   registerReactiveFileHandler(VE_LOG)
   registerReactiveFileHandler(CAPTURED_SOURCE)
   registerReactiveFileHandler(MODEL_PARAMETERS_FILE, SafeReadJSON)
@@ -308,25 +326,29 @@ server <- function(input, output, session) {
       ))
       if (file.exists(filePath)) {
         env <- LoadToEnvironment(filePath)
+        debugConsole(paste0(
+          "MODEL_STATE_FILE loaded ",
+          filePath,
+          ". names(env): ", paste0(collapse=", ", names(env))
+        ))
         testit::assert(
-          paste0("'", filePath, "' must contain '", MODEL_STATE_LS, "' but has this instead: ", str(env)),
-          exists(MODEL_STATE_LS, envir = env)
-        )
+          paste0("'", filePath, "' must contain '", MODEL_STATE_LS, "' but has this instead: ",
+                 paste0(collapse=", ", names(env))), MODEL_STATE_LS %in% names(env))
         myModelState_Ls <-
           env[[MODEL_STATE_LS]]
         filePaths[[VE_LOG]] <<-
           file.path(getScriptInfo()$fileDirectory, myModelState_Ls$LogFile)
-        return(ModelState_Ls)
+        return(myModelState_Ls)
       } else {
         return("")
       }
     }# end readFunc
   ) #end call to registerReactiveFileHandler
 
-  getScriptInfo <- eventReactive(input$file, {
+  getScriptInfo <- eventReactive(input$selectRunScript, {
     debugConsole("getScriptInfo entered")
     scriptInfo <- list()
-    inFile = parseFilePaths(roots = getVolumes(""), input$file)
+    inFile = parseFilePaths(roots = volumeRoots, input$selectRunScript)
     scriptInfo$datapath <-
       normalizePath(as.character(inFile$datapath))
     scriptInfo$fileDirectory <- dirname(scriptInfo$datapath)
@@ -343,15 +365,25 @@ server <- function(input, output, session) {
         object.size(ModelState_ls)
       )
     )
-    disable(id = "runModel", selector = NULL)
+    filePaths[[MODEL_STATE_FILE]] <<-
+      file.path(scriptInfo$fileDirectory, "ModelState.Rda")
+    #assign(x="myEnv", value=new.env(parent = emptyenv()), envir=.GlobalEnv)
+    myEnv <- new.env(parent = emptyenv())
+    myEnv[["foo"]] <- "bar"
     startAsyncDataLoad(
       MODEL_MODULES,
       future({ModelState_ls
-        getModelModules(scriptInfo$datapath)}),
+        getModelModules(scriptInfo$datapath, myEnv)}),
       callback = function(asyncDataName, asyncData) {
         if (!is.null(asyncData)) {
           enable(id = "runModel", selector = NULL)
+          enable(id = "copyModelDirectory", selector = NULL)
         }
+        debugConsole(
+          paste0("names(myEnv): ",
+                 names(myEnv)
+          )
+        )
         debugConsole(
           paste0(
             "callback asyncDataName '",
@@ -362,8 +394,6 @@ server <- function(input, output, session) {
         )
       }
     )
-    filePaths[[MODEL_STATE_FILE]] <<-
-      file.path(scriptInfo$fileDirectory, "ModelState.Rda")
 
     defsDirectory <- file.path(scriptInfo$fileDirectory, "defs")
 
@@ -380,25 +410,29 @@ server <- function(input, output, session) {
     return(scriptInfo)
   }) #end getScriptInfo reactive
 
-  getModelModules <- function(datapath) {
+  getModelModules <- function(datapath, environmentToUse) {
     setwd(dirname(datapath))
     modelModules <-
       visioneval::parseModelScript(datapath, TestMode = TRUE)
+    assign(x="fish", value="carp", envir=environmentToUse)
+    environmentToUse[["mammal"]] <- "elephant"
     return(modelModules)
   } #end getModelModules
 
   observeEvent(input$runModel, label = "runModel", handlerExpr = {
-    req(input$file)
+    req(input$selectRunScript)
     debugConsole("observeEvent input$runModel entered")
     datapath <- getScriptInfo()$datapath
     enable(id = "scriptOutput", selector = NULL)
     enable(id = "modeState", selector = NULL)
-    disable(id = "file", selector = NULL)
+    disable(id = "selectRunScript", selector = NULL)
     disable(id = "runModel", selector = NULL)
+    disable(id = "copyModelDirectory", selector = NULL)
     startAsyncDataLoad(CAPTURED_SOURCE, future(getScriptOutput(datapath, filePaths[[CAPTURED_SOURCE]])),
                        function(asyncDataName, asyncData) {
-                         enable(id = "file", selector = NULL)
+                         enable(id = "selectRunScript", selector = NULL)
                          enable(id = "runModel", selector = NULL)
+                         enable(id = "copyModelDirectory", selector = NULL)
                          debugConsole(
                            paste0(
                              "callback asyncDataName '",
@@ -411,8 +445,30 @@ server <- function(input, output, session) {
     debugConsole("observeEvent input$runModel exited")
   }) #end runModel observeEvent
 
+  observeEvent(input$copyModelDirectory,
+               label = "copyModelDirectory",
+               handlerExpr = {
+                 req(input$selectRunScript)
+                 debugConsole("observeEvent input$copyModelDirectory entered")
+                 datapath <- getScriptInfo()$datapath
+                 disable(id = "selectRunScript", selector = NULL)
+                 disable(id = "runModel", selector = NULL)
+                 disable(id = "copyModelDirectory", selector = NULL)
+                 inCopyDirectory = parseSavePath(roots = volumeRoots, input$copyModelDirectory)
+                 file.copy(
+                   from = datapath,
+                   to = inCopyDirectory,
+                   recursive = TRUE,
+                   copy.date = TRUE,
+                   copy.mode = TRUE
+                 )
+                 debugConsole("observeEvent input$copyModelDirectory exited")
+               }) #end runModel observeEvent
   getScriptOutput <- function(datapath, captureFile) {
     debugConsole("getScriptOutput entered")
+    #store the current ModelState in the global options
+    #so that the process will use the same log fiel as the one we have already started tracking...
+    options("visioneval::ModelState_ls"=ModelState_ls)
     setwd(dirname(datapath))
     capture.output(source(datapath), file = captureFile)
     debugConsole("getScriptOutput exited")
