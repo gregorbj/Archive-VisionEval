@@ -45,19 +45,23 @@ ui <- fluidPage(
       ),
 
       shinyFilesButton(
-        id="selectRunScript",
+        id = "selectRunScript",
         label = "Select Run Script",
         title = "Please select model run script",
         multiple = FALSE
       ),
 
-      shinySaveButton(
-        id="copyModelDirectory",
-        label = "Save scenario as...",
-        title = "Please select location for new folder containing copy of current model"
-      ),
 
       disabled(actionButton("runModel", "Run Model Script")),
+
+      shinySaveButton(
+        id = "copyModelDirectory",
+        label = "Copy model directory...",
+        title = "Please select location for new folder containing copy of current model",
+        #must specify a filetype due to shinyFiles bug https://github.com/thomasp85/shinyFiles/issues/56
+        #even though in my case I am creating a folder so don't care about the mime type
+        filetype = list('hidden_mime_type' = c(""))
+      ),
 
       width = 2
 
@@ -75,8 +79,10 @@ ui <- fluidPage(
         ),
         tabPanel(MODEL_STATE_LS,
                  verbatimTextOutput(MODEL_STATE_LS, FALSE)),
-        tabPanel(MODEL_STATE_FILE,
-                 verbatimTextOutput(MODEL_STATE_FILE, FALSE)),
+        tabPanel(
+          MODEL_STATE_FILE,
+          verbatimTextOutput(MODEL_STATE_FILE, FALSE)
+        ),
         tabPanel(
           MODEL_PARAMETERS_FILE,
           verbatimTextOutput(MODEL_PARAMETERS_FILE, FALSE)
@@ -180,18 +186,19 @@ server <- function(input, output, session) {
 
   #http://stackoverflow.com/questions/38064038/reading-an-rdata-file-into-shiny-application
   # This function, borrowed from http://www.r-bloggers.com/safe-loading-of-rdata-files/, load the Rdata into a new environment to avoid side effects
-  LoadToEnvironment <- function(filePath, env = new.env(parent = emptyenv())) {
-    debugConsole(paste0(
-      "LoadToEnvironment called to load ",
-      filePath,
-      ". Exists? ",
-      file.exists(filePath)
-    ))
-    if (file.exists(filePath)) {
-      load(filePath, env)
+  LoadToEnvironment <-
+    function(filePath, env = new.env(parent = emptyenv())) {
+      debugConsole(paste0(
+        "LoadToEnvironment called to load ",
+        filePath,
+        ". Exists? ",
+        file.exists(filePath)
+      ))
+      if (file.exists(filePath)) {
+        load(filePath, env)
+      }
+      return(env)
     }
-    return(env)
-  }
 
   registerReactiveFileHandler <-
     function(reactiveFileNameKey, readFunc = SafeReadLines) {
@@ -200,7 +207,7 @@ server <- function(input, output, session) {
           "registerReactiveFileHandler called to register '",
           reactiveFileNameKey,
           "' names(reactiveFileReaders): ",
-          paste0(collapse=", ", names(reactiveFileReaders))
+          paste0(collapse = ", ", names(reactiveFileReaders))
         )
       )
       reactiveFileReaders[[reactiveFileNameKey]] <<-
@@ -232,7 +239,7 @@ server <- function(input, output, session) {
           #use a function so change of filePath will trigger refresh....
           readFunc = readFunc
         )#end reactiveFileReader
-     } #end registerReactiveFileHandler
+    } #end registerReactiveFileHandler
 
   startAsyncDataLoad <-
     function(asyncDataName, futureObj, callback = NULL) {
@@ -306,7 +313,11 @@ server <- function(input, output, session) {
   )
 
   observe({
-    toggleState(id="copyModelDirectory", condition=input$selectRunScript, selector=NULL)
+    toggleState(
+      id = "copyModelDirectory",
+      condition = input$selectRunScript,
+      selector = NULL
+    )
   })
   registerReactiveFileHandler(VE_LOG)
   registerReactiveFileHandler(CAPTURED_SOURCE)
@@ -318,26 +329,38 @@ server <- function(input, output, session) {
     MODEL_STATE_FILE,
     #use a function so change of filePath will trigger refresh....
     readFunc = function(filePath) {
-      debugConsole(paste0(
-        "MODEL_STATE_FILE function called to load ",
-        filePath,
-        ". Exists? ",
-        file.exists(filePath)
-      ))
+      debugConsole(
+        paste0(
+          "MODEL_STATE_FILE function called to load ",
+          filePath,
+          ". Exists? ",
+          file.exists(filePath)
+        )
+      )
       if (file.exists(filePath)) {
         env <- LoadToEnvironment(filePath)
         debugConsole(paste0(
           "MODEL_STATE_FILE loaded ",
           filePath,
-          ". names(env): ", paste0(collapse=", ", names(env))
+          ". names(env): ",
+          paste0(collapse = ", ", names(env))
         ))
         testit::assert(
-          paste0("'", filePath, "' must contain '", MODEL_STATE_LS, "' but has this instead: ",
-                 paste0(collapse=", ", names(env))), MODEL_STATE_LS %in% names(env))
+          paste0(
+            "'",
+            filePath,
+            "' must contain '",
+            MODEL_STATE_LS,
+            "' but has this instead: ",
+            paste0(collapse = ", ", names(env))
+          ),
+          MODEL_STATE_LS %in% names(env)
+        )
         myModelState_Ls <-
           env[[MODEL_STATE_LS]]
         filePaths[[VE_LOG]] <<-
-          file.path(getScriptInfo()$fileDirectory, myModelState_Ls$LogFile)
+          file.path(getScriptInfo()$fileDirectory,
+                    myModelState_Ls$LogFile)
         return(myModelState_Ls)
       } else {
         return("")
@@ -358,7 +381,8 @@ server <- function(input, output, session) {
     visioneval::initLog()
     visioneval::writeLog("VE_GUI called visioneval::initModelStateFile() and visioneval::initLog()")
     otherReactiveValues[[MODEL_STATE_LS]] <<- ModelState_ls
-    filePaths[[VE_LOG]] <<- file.path(scriptInfo$fileDirectory, ModelState_ls$LogFile)
+    filePaths[[VE_LOG]] <<-
+      file.path(scriptInfo$fileDirectory, ModelState_ls$LogFile)
     debugConsole(
       paste0(
         "after visioneval::initModelStateFile() and visioneval::initLog() global variable ModelState_ls has size: ",
@@ -372,18 +396,17 @@ server <- function(input, output, session) {
     myEnv[["foo"]] <- "bar"
     startAsyncDataLoad(
       MODEL_MODULES,
-      future({ModelState_ls
-        getModelModules(scriptInfo$datapath, myEnv)}),
+      future({
+        ModelState_ls
+        getModelModules(scriptInfo$datapath, myEnv)
+      }),
       callback = function(asyncDataName, asyncData) {
         if (!is.null(asyncData)) {
           enable(id = "runModel", selector = NULL)
           enable(id = "copyModelDirectory", selector = NULL)
         }
-        debugConsole(
-          paste0("names(myEnv): ",
-                 names(myEnv)
-          )
-        )
+        debugConsole(paste0("names(myEnv): ",
+                            names(myEnv)))
         debugConsole(
           paste0(
             "callback asyncDataName '",
@@ -414,7 +437,9 @@ server <- function(input, output, session) {
     setwd(dirname(datapath))
     modelModules <-
       visioneval::parseModelScript(datapath, TestMode = TRUE)
-    assign(x="fish", value="carp", envir=environmentToUse)
+    assign(x = "fish",
+           value = "carp",
+           envir = environmentToUse)
     environmentToUse[["mammal"]] <- "elephant"
     return(modelModules)
   } #end getModelModules
@@ -454,11 +479,34 @@ server <- function(input, output, session) {
                  disable(id = "selectRunScript", selector = NULL)
                  disable(id = "runModel", selector = NULL)
                  disable(id = "copyModelDirectory", selector = NULL)
-                 inCopyDirectory = parseSavePath(roots = volumeRoots, input$copyModelDirectory)
+                 inCopy = parseSavePath(roots = volumeRoots, input$copyModelDirectory)
+                 #suppressWarnings because the path does not yet exist
+                 inCopyDirectory <-
+                   suppressWarnings(normalizePath(as.character(inCopy$datapath)))
+                 if (!dir.exists(inCopyDirectory)) {
+                   if (file.exists(inCopyDirectory)) {
+                     file.remove(inCopyDirectory)
+                   }
+                   dir.create(inCopyDirectory)
+                   testit::assert(
+                     paste0(
+                       "Expect directory to exist after creation: '",
+                       inCopyDirectory,
+                       "'"
+                     ),
+                     dir.exists(inCopyDirectory)
+                   )
+                 }
+                 fromDirectory <- dirname(datapath)
+                 filesAndDirectoriesToCopy <-
+                   list.files(fromDirectory,
+                              full.names = TRUE,
+                              recursive = FALSE)
                  file.copy(
-                   from = datapath,
+                   from = filesAndDirectoriesToCopy,
                    to = inCopyDirectory,
                    recursive = TRUE,
+                   overwrite = TRUE,
                    copy.date = TRUE,
                    copy.mode = TRUE
                  )
@@ -468,7 +516,7 @@ server <- function(input, output, session) {
     debugConsole("getScriptOutput entered")
     #store the current ModelState in the global options
     #so that the process will use the same log fiel as the one we have already started tracking...
-    options("visioneval::ModelState_ls"=ModelState_ls)
+    options("visioneval::ModelState_ls" = ModelState_ls)
     setwd(dirname(datapath))
     capture.output(source(datapath), file = captureFile)
     debugConsole("getScriptOutput exited")
