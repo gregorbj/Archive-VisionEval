@@ -319,7 +319,12 @@ server <- function(input, output, session) {
       selector = NULL
     )
   })
-  registerReactiveFileHandler(VE_LOG)
+  registerReactiveFileHandler(VE_LOG, readFunc = function(filePath) {
+    fileContents <- SafeReadLines(filePath)
+    startModulesLogStatements <- grep(,useBytes = TRUE, pattern="-- Finishing module", x = fileContents)
+    print(paste0("startModulesLogStatements", startModulesLogStatements))
+    return(fileContents)
+  }) #end VE_LOG file handler
   registerReactiveFileHandler(CAPTURED_SOURCE)
   registerReactiveFileHandler(MODEL_PARAMETERS_FILE, SafeReadJSON)
   registerReactiveFileHandler(RUN_PARAMETERS_FILE, SafeReadJSON)
