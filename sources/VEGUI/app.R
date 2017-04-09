@@ -272,10 +272,10 @@ server <- function(input, output, session) {
             asyncData[[asyncDataName]] <<- value(asyncFutureObject)
           },
           warning = function(w) {
-            debugConsole(paste0("'", asyncDataName, "' returned a warning: ", w))
+            debugConsole(paste0("checkAsyncDataBeingLoaded: '", asyncDataName, "' returned a warning: ", w))
           },
           error = function(e) {
-            debugConsole(paste0("'", asyncDataName, "' returned an error: ", e))
+            debugConsole(paste0("checkAsyncDataBeingLoaded: '", asyncDataName, "' returned an error: ", e))
           }
         )#end tryCatch
         callback <- asyncDataBeingLoaded[[asyncDataName]]$callback
@@ -321,7 +321,7 @@ server <- function(input, output, session) {
   })
   registerReactiveFileHandler(VE_LOG, readFunc = function(filePath) {
     fileContents <- SafeReadLines(filePath)
-    startModulesLogStatements <- grep(,useBytes = TRUE, pattern="-- Finishing module", x = fileContents)
+    startModulesLogStatements <- grep(pattern="-- Finishing module", x = fileContents, useBytes = TRUE, )
     print(paste0("startModulesLogStatements", startModulesLogStatements))
     return(fileContents)
   }) #end VE_LOG file handler
@@ -381,6 +381,8 @@ server <- function(input, output, session) {
       normalizePath(as.character(inFile$datapath))
     scriptInfo$fileDirectory <- dirname(scriptInfo$datapath)
     scriptInfo$fileBase <- basename(scriptInfo$datapath)
+
+    #call the first few methods so can find out log file value and get the ModelState_ls global
     setwd(scriptInfo$fileDirectory)
     visioneval::initModelStateFile()
     visioneval::initLog()
@@ -396,22 +398,18 @@ server <- function(input, output, session) {
     )
     filePaths[[MODEL_STATE_FILE]] <<-
       file.path(scriptInfo$fileDirectory, "ModelState.Rda")
-    #assign(x="myEnv", value=new.env(parent = emptyenv()), envir=.GlobalEnv)
-    myEnv <- new.env(parent = emptyenv())
-    myEnv[["foo"]] <- "bar"
+    getModelModules(scriptInfo$datapath)
     startAsyncDataLoad(
       MODEL_MODULES,
       future({
         ModelState_ls
-        getModelModules(scriptInfo$datapath, myEnv)
+        getModelModules(scriptInfo$datapath)
       }),
       callback = function(asyncDataName, asyncData) {
         if (!is.null(asyncData)) {
           enable(id = "runModel", selector = NULL)
           enable(id = "copyModelDirectory", selector = NULL)
         }
-        debugConsole(paste0("names(myEnv): ",
-                            names(myEnv)))
         debugConsole(
           paste0(
             "callback asyncDataName '",
@@ -438,14 +436,11 @@ server <- function(input, output, session) {
     return(scriptInfo)
   }) #end getScriptInfo reactive
 
-  getModelModules <- function(datapath, environmentToUse) {
+  getModelModules <- function(datapath) {
+    debugConsole(paste0("getModelModules entered with datapath: ", datapath))
     setwd(dirname(datapath))
     modelModules <-
       visioneval::parseModelScript(datapath, TestMode = TRUE)
-    assign(x = "fish",
-           value = "carp",
-           envir = environmentToUse)
-    environmentToUse[["mammal"]] <- "elephant"
     return(modelModules)
   } #end getModelModules
 
@@ -474,6 +469,18 @@ server <- function(input, output, session) {
                        })
     debugConsole("observeEvent input$runModel exited")
   }) #end runModel observeEvent
+
+  getScriptOutput <- function(datapath, captureFile) {
+    debugConsole("getScriptOutput entered")
+    #store the current ModelState in the global options
+    #so that the process will use the same log file as the one we have already started tracking...
+    options("visioneval.preExistingModelState" = ModelState_ls)
+    setwd(dirname(datapath))
+    capture.output(source(datapath), file = captureFile)
+    options("visioneval.preExistingModelState" = NULL)
+    debugConsole("getScriptOutput exited")
+    return(NULL)
+  } #end getScriptOutput
 
   observeEvent(input$copyModelDirectory,
                label = "copyModelDirectory",
@@ -516,17 +523,7 @@ server <- function(input, output, session) {
                    copy.mode = TRUE
                  )
                  debugConsole("observeEvent input$copyModelDirectory exited")
-               }) #end runModel observeEvent
-  getScriptOutput <- function(datapath, captureFile) {
-    debugConsole("getScriptOutput entered")
-    #store the current ModelState in the global options
-    #so that the process will use the same log fiel as the one we have already started tracking...
-    options("visioneval::ModelState_ls" = ModelState_ls)
-    setwd(dirname(datapath))
-    capture.output(source(datapath), file = captureFile)
-    debugConsole("getScriptOutput exited")
-    return(NULL)
-  }
+               }) #end copyModelDirectory observeEvent
 
   # Re-execute this reactive expression after a set interval
   getDebugConsoleOutput <- reactivePoll(
