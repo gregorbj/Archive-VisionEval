@@ -334,7 +334,7 @@ server <- function(input, output, session) {
   registerReactiveFileHandler(VE_LOG, readFunc = function(filePath) {
     fileContents <- SafeReadLines(filePath)
     startModulesLogStatements <- grep(pattern="-- Finishing module", x = fileContents, useBytes = TRUE, )
-    print(paste0("startModulesLogStatements", startModulesLogStatements))
+    debugConsole(paste0("startModulesLogStatements", paste0(collapse=", ", startModulesLogStatements)))
     return(fileContents)
   }) #end VE_LOG file handler
   registerReactiveFileHandler(CAPTURED_SOURCE)
@@ -546,26 +546,32 @@ server <- function(input, output, session) {
                }) #end copyModelDirectory observeEvent
 
   output[[DEBUG_CONSOLE_OUTPUT]] = renderDataTable({
+    getScriptInfo()
     otherReactiveValues[[DEBUG_CONSOLE_OUTPUT]]
   })
 
   output[[VE_LOG]] = renderPrint({
+    getScriptInfo()
     reactiveFileReaders[[VE_LOG]]()
   })
 
   output[[GEO_CSV_FILE]] = renderPrint({
+    getScriptInfo()
     reactiveFileReaders[[GEO_CSV_FILE]]()
   })
 
   output[[RUN_PARAMETERS_FILE]] = renderPrint({
+    getScriptInfo()
     reactiveFileReaders[[RUN_PARAMETERS_FILE]]()
   })
 
   output[[MODEL_PARAMETERS_FILE]] = renderPrint({
+    getScriptInfo()
     reactiveFileReaders[[MODEL_PARAMETERS_FILE]]()
   })
 
   output[[MODEL_STATE_FILE]] = renderPrint({
+    getScriptInfo()
     reactiveFileReaders[[MODEL_STATE_FILE]]()
   })
 
@@ -582,6 +588,7 @@ server <- function(input, output, session) {
   })
 
   output$modulesTable = renderDataTable({
+    getScriptInfo()
     asyncData[[MODEL_MODULES]]
   })
 
