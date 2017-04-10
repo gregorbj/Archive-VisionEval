@@ -27,6 +27,8 @@ CAPTURED_SOURCE <- "run_module_output"
 MODEL_STATE_LS <-
   "ModelState_ls"
 
+MOST_RECENT_LOG_STATUS <- "mostRecentLogStatus"
+
 volumeRoots = getVolumes("")
 
 # Define UI for application
@@ -78,6 +80,7 @@ ui <- fluidPage(
     ),
 
     mainPanel(
+      verbatimTextOutput(MOST_RECENT_LOG_STATUS, FALSE),
       tabsetPanel(
         tabPanel(
           "Main",
@@ -85,7 +88,7 @@ ui <- fluidPage(
           h3("Script Name"),
           verbatimTextOutput("scriptName", FALSE),
           h3("Modules"),
-          dataTableOutput("modulesTable")
+          dataTableOutput(MODEL_MODULES)
         ),
         tabPanel(MODEL_STATE_LS,
                  verbatimTextOutput(MODEL_STATE_LS, FALSE)),
@@ -137,6 +140,8 @@ server <- function(input, output, session) {
 
   otherReactiveValues[[DEBUG_CONSOLE_OUTPUT]] <-
     data.table::data.table(time = Sys.time(), message = "Placeholder to be deleted")[-1,]
+
+  otherReactiveValues[[MOST_RECENT_LOG_STATUS]] <- ""
 
   filePaths[[CAPTURED_SOURCE]] <-
     tempfile(pattern = "VEGUI_source_capture", fileext = ".txt")
@@ -333,7 +338,7 @@ server <- function(input, output, session) {
   })
   registerReactiveFileHandler(VE_LOG, readFunc = function(filePath) {
     fileContents <- SafeReadLines(filePath)
-    startModulesLogStatements <- grep(pattern="-- Finishing module", x = fileContents, useBytes = TRUE, )
+    startModulesLogStatements <- grep(pattern="-- Finishing module", x = fileContents, useBytes = TRUE, value = TRUE)
     debugConsole(paste0("startModulesLogStatements", paste0(collapse=", ", startModulesLogStatements)))
     return(fileContents)
   }) #end VE_LOG file handler
@@ -375,9 +380,6 @@ server <- function(input, output, session) {
         )
         myModelState_Ls <-
           env[[MODEL_STATE_LS]]
-        filePaths[[VE_LOG]] <<-
-          file.path(getScriptInfo()$fileDirectory,
-                    myModelState_Ls$LogFile)
         return(myModelState_Ls)
       } else {
         return("")
@@ -400,8 +402,15 @@ server <- function(input, output, session) {
     visioneval::initLog()
     visioneval::writeLog("VE_GUI called visioneval::initModelStateFile() and visioneval::initLog()")
     otherReactiveValues[[MODEL_STATE_LS]] <<- ModelState_ls
+
+
+
+
     filePaths[[VE_LOG]] <<-
       file.path(scriptInfo$fileDirectory, ModelState_ls$LogFile)
+
+
+
     debugConsole(
       paste0(
         "after visioneval::initModelStateFile() and visioneval::initLog() global variable ModelState_ls has size: ",
@@ -587,7 +596,11 @@ server <- function(input, output, session) {
     getScriptInfo()$datapath
   })
 
-  output$modulesTable = renderDataTable({
+  output[[MOST_RECENT_LOG_STATUS]] = renderText({
+    otherReactiveValues[[MOST_RECENT_LOG_STATUS]]
+  })
+
+  output[[MODEL_MODULES]] = renderDataTable({
     getScriptInfo()
     asyncData[[MODEL_MODULES]]
   })
