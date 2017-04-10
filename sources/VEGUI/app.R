@@ -222,9 +222,9 @@ server <- function(input, output, session) {
         paste0(
           "registerReactiveFileHandler called to register '",
           reactiveFileNameKey
-          # ,
-          # "' names(reactiveFileReaders): ",
-          # paste0(collapse = ", ", names(reactiveFileReaders))
+          ,
+          "' names(reactiveFileReaders): ",
+          paste0(collapse = ", ", names(isolate(reactiveFileReaders)))
         )
       )
       reactiveFileReaders[[reactiveFileNameKey]] <<-
