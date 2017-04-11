@@ -10,8 +10,8 @@ library(testit)
 library(jsonlite)
 
 #https://github.com/tdhock/namedCapture
-if(!require(namedCapture)) {
-  if(!require(devtools)) {
+if (!require(namedCapture)) {
+  if (!require(devtools)) {
     install.packages("devtools")
   }
   devtools::install_github("tdhock/namedCapture")
@@ -24,109 +24,116 @@ if (interactive()) {
   options(shiny.reactlog = TRUE)
 }
 
-DEBUG_CONSOLE_OUTPUT <- "debugConsoleOutput"
-MODEL_PARAMETERS_FILE <- "Model_Parameters_File"
-RUN_PARAMETERS_FILE <- "Run_Parameters_File"
+DEBUG_CONSOLE_OUTPUT <- "Console output"
+MODEL_PARAMETERS_FILE <- "Model parameters"
+RUN_PARAMETERS_FILE <- "Run parameters"
 GEO_CSV_FILE <- "Geo File"
-MODEL_STATE_FILE <- "Model State File"
-MODEL_MODULES <- "Model_Modules"
-VE_LOG <- "visionEval_Log"
-CAPTURED_SOURCE <- "run_module_output"
+MODEL_STATE_FILE <- "Model state"
+MODEL_MODULES <- "Modules in model"
+VE_LOG <- "Log"
+CAPTURED_SOURCE <- "VisionEval console output"
 MODEL_STATE_LS <-
   "ModelState_ls"
+SELECT_RUN_SCRIPT_BUTTON <- "selectRunScriptButton"
+COPY_MODEL_BUTTON <- "copyModelButton"
+RUN_MODEL_BUTTON <- "runModel"
+SCRIPT_NAME <- "scriptName"
 
-MODULE_PROGRESS <- "moduleProgress"
+MODULE_PROGRESS <- "Module progress"
+PAGE_TITLE <- "Pilot Model Runner and Scenario Viewer"
 
 volumeRoots = getVolumes("")
 
 # Define UI for application
 ui <- fluidPage(
   useShinyjs(),
-  tags$head(tags$style(type = "text/css",
-                       ".recalculating { opacity: 1.0; }"),
-            # resize to window: http://stackoverflow.com/a/37060206/283973
-            tags$script('$(document).on("shiny:connected", function(e) {
-                            Shiny.onInputChange("innerWidth", window.innerWidth);
-                                  });
-                                  $(window).resize(function(e) {
-                                  Shiny.onInputChange("innerWidth", window.innerWidth);
-                                  });'
-                        )
-            ),
-  titlePanel("Pilot Model Runner and Scenario Viewer"),
+  tags$head(
+    tags$style(type = "text/css",
+               ".recalculating { opacity: 1.0; }"),
+    # resize to window: http://stackoverflow.com/a/37060206/283973
+    tags$script(
+      '$(document).on("shiny:connected", function(e) {
+      Shiny.onInputChange("innerWidth", window.innerWidth);
+      });
+      $(window).resize(function(e) {
+      Shiny.onInputChange("innerWidth", window.innerWidth);
+      });'
+                        ),
+    #end tag$script
+    tags$meta(charset = "UTF-8"),
+    tags$meta(name = "google", content = "notranslate"),
+    tags$meta(`http-equiv` = "Content-Language", content = "en")
+  ),
+  #end tag$head
+  titlePanel(windowTitle = PAGE_TITLE,
+             title =
+               div(
+                 img(
+                   src = "visioneval_logo.png",
+                   height = 100,
+                   width = 100,
+                   style = "margin:10px 10px"
+                 ),
+                 PAGE_TITLE
+               )
+             ),
 
-  sidebarLayout(
-    sidebarPanel(
-      img(
-        src = "visioneval_logo.png",
-        height = 100,
-        width = 100,
-        style = "margin:10px 10px"
-      ),
 
+  navlistPanel(
+    tabPanel(
+      "Scenario",
       shinyFilesButton(
-        id = "selectRunScript",
-        label = "Select Run Script",
+        id = SELECT_RUN_SCRIPT_BUTTON,
+        label = "Select scenario",
         title = "Please select model run script",
         multiple = FALSE
       ),
-
-
-      disabled(actionButton("runModel", "Run Model Script")),
-
+      h3("Run script: "),
+      verbatimTextOutput(SCRIPT_NAME, FALSE),
       shinySaveButton(
-        id = "copyModelDirectory",
-        label = "Copy model directory...",
+        id = COPY_MODEL_BUTTON,
+        label = "Copy scenario...",
         title = "Please select location for new folder containing copy of current model",
         #must specify a filetype due to shinyFiles bug https://github.com/thomasp85/shinyFiles/issues/56
         #even though in my case I am creating a folder so don't care about the mime type
         filetype = list('hidden_mime_type' = c(""))
       ),
 
-      width = 2
-
+      tags$title("To Be Implemented...")
     ),
-
-    mainPanel(
-      dataTableOutput(MODULE_PROGRESS),
-      tabsetPanel(
-        tabPanel(
-          "Main",
-          bsAlert("parseProblems"),
-          h3("Script Name"),
-          verbatimTextOutput("scriptName", FALSE),
-          h3("Modules"),
-          dataTableOutput(MODEL_MODULES)
-        ),
-        tabPanel(MODEL_STATE_LS,
-                 verbatimTextOutput(MODEL_STATE_LS, FALSE)),
-        tabPanel(
-          MODEL_STATE_FILE,
-          verbatimTextOutput(MODEL_STATE_FILE, FALSE)
-        ),
-        tabPanel(
-          MODEL_PARAMETERS_FILE,
-          verbatimTextOutput(MODEL_PARAMETERS_FILE, FALSE)
-        ),
-        tabPanel(GEO_CSV_FILE,
-                 dataTableOutput(GEO_CSV_FILE)),
-        tabPanel(
-          RUN_PARAMETERS_FILE,
-          verbatimTextOutput(RUN_PARAMETERS_FILE, FALSE)
-        ),
-        tabPanel(VE_LOG,
-                 verbatimTextOutput(VE_LOG, FALSE)),
-        tabPanel(CAPTURED_SOURCE,
-                 verbatimTextOutput(CAPTURED_SOURCE, FALSE)),
-        tabPanel(
-          "Debug console",
-          h5("(most recent first)"),
-          dataTableOutput(DEBUG_CONSOLE_OUTPUT)
-        )
-      )
-    ) #end mainPanel
-  ) #end sidebarLayout
-) #end ui
+    tabPanel(
+      "Settings",
+      h3(MODEL_STATE_FILE),
+      verbatimTextOutput(MODEL_STATE_FILE, FALSE),
+      h3(MODEL_PARAMETERS_FILE),
+      verbatimTextOutput(MODEL_PARAMETERS_FILE, FALSE),
+      h3(GEO_CSV_FILE),
+      tableOutput(GEO_CSV_FILE),
+      h3(RUN_PARAMETERS_FILE),
+      verbatimTextOutput(RUN_PARAMETERS_FILE, FALSE)
+    ),
+    tabPanel("Inputs",
+             tags$label("To Be Implemented...")
+             ),
+    tabPanel(
+      "Run",
+      h3(MODEL_MODULES),
+      tableOutput(MODEL_MODULES),
+      actionButton(RUN_MODEL_BUTTON, "Run Model Script"),
+      h3(MODULE_PROGRESS),
+      tableOutput(MODULE_PROGRESS),
+      h3(CAPTURED_SOURCE),
+      verbatimTextOutput(CAPTURED_SOURCE, FALSE)
+    ),
+    tabPanel(
+      "Logs",
+      h3(VE_LOG),
+      tableOutput(VE_LOG),
+      h3(DEBUG_CONSOLE_OUTPUT),
+      tableOutput(DEBUG_CONSOLE_OUTPUT)
+    )
+  ) #end navlistPanel
+  ) #end ui <- fluid page
 
 DEFAULT_POLL_INTERVAL <- 500 #milliseconds
 
@@ -147,7 +154,7 @@ server <- function(input, output, session) {
     reactiveValues() #WARNING- DON'T USE VARIABLES TO INITIALIZE LIST KEYS - the variable name will be used, not the value
 
   otherReactiveValues[[DEBUG_CONSOLE_OUTPUT]] <-
-    data.table::data.table(time = Sys.time(), message = "Placeholder to be deleted")[-1,]
+    data.table::data.table(time = paste(Sys.time()), message = "Placeholder to be deleted")[-1, ]
 
   otherReactiveValues[[MODULE_PROGRESS]] <- data.table::data.table()
 
@@ -160,13 +167,16 @@ server <- function(input, output, session) {
 
   debugConsole <- function(msg) {
     testit::assert("debugConsole was passed NULL!", !is.null(msg))
-    time <- Sys.time()
+    time <- paste(Sys.time())
     newRow <- data.table::data.table(time = time, message = msg)
-    existingRows <- isolate(otherReactiveValues[[DEBUG_CONSOLE_OUTPUT]])
+    existingRows <-
+      isolate(otherReactiveValues[[DEBUG_CONSOLE_OUTPUT]])
     otherReactiveValues[[DEBUG_CONSOLE_OUTPUT]] <<-
       rbind(newRow,
             existingRows)
-    print(paste0(nrow(isolate(otherReactiveValues[[DEBUG_CONSOLE_OUTPUT]])), ": ", time, ": ", msg))
+    print(paste0(nrow(isolate(
+      otherReactiveValues[[DEBUG_CONSOLE_OUTPUT]]
+    )), ": ", time, ": ", msg))
     flush.console()
   }
 
@@ -237,7 +247,9 @@ server <- function(input, output, session) {
           reactiveFileNameKey
           ,
           "' names(reactiveFileReaders): ",
-          paste0(collapse = ", ", names(isolate(reactiveFileReaders)))
+          paste0(collapse = ", ", names(isolate(
+            reactiveFileReaders
+          )))
         )
       )
       reactiveFileReaders[[reactiveFileNameKey]] <<-
@@ -302,10 +314,24 @@ server <- function(input, output, session) {
             asyncData[[asyncDataName]] <<- value(asyncFutureObject)
           },
           warning = function(w) {
-            debugConsole(paste0("checkAsyncDataBeingLoaded: '", asyncDataName, "' returned a warning: ", w))
+            debugConsole(
+              paste0(
+                "checkAsyncDataBeingLoaded: '",
+                asyncDataName,
+                "' returned a warning: ",
+                w
+              )
+            )
           },
           error = function(e) {
-            debugConsole(paste0("checkAsyncDataBeingLoaded: '", asyncDataName, "' returned an error: ", e))
+            debugConsole(
+              paste0(
+                "checkAsyncDataBeingLoaded: '",
+                asyncDataName,
+                "' returned an error: ",
+                e
+              )
+            )
           }
         )#end tryCatch
         callback <- asyncDataBeingLoaded[[asyncDataName]]$callback
@@ -324,38 +350,38 @@ server <- function(input, output, session) {
 
   shinyFileSave(
     input = input,
-    id = "copyModelDirectory",
+    id = COPY_MODEL_BUTTON,
     session = session,
     roots = volumeRoots
   )
 
   shinyFileChoose(
     input = input,
-    id = "selectRunScript",
+    id = SELECT_RUN_SCRIPT_BUTTON,
     session = session,
     roots = volumeRoots,
     filetypes = c("R")
   )
 
   observe({
-    toggleState(
-      id = "copyModelDirectory",
-      condition = input$selectRunScript,
-      selector = NULL
-    )
+    toggleState(id = COPY_MODEL_BUTTON,
+                condition = input[[SELECT_RUN_SCRIPT_BUTTON]],
+                selector = NULL)
   })
 
   SafeReadAndCleanLines <- function(filePath) {
-    debugConsole(paste0(
-      "SafeReadAndCleanLinesfunction called to load ",
-      filePath,
-      ". Exists? ",
-      file.exists(filePath)
-    ))
+    debugConsole(
+      paste0(
+        "SafeReadAndCleanLinesfunction called to load ",
+        filePath,
+        ". Exists? ",
+        file.exists(filePath)
+      )
+    )
     fileContents <- SafeReadLines(filePath)
     results <- c()
-    for(line in fileContents) {
-      if (nchar(trimws(line))>0) {
+    for (line in fileContents) {
+      if (nchar(trimws(line)) > 0) {
         #remove all leading and/or traiing spaces or quotes
         cleanLine <- gsub("^[ \"]+|[v\"]+$", "", line)
         if (nchar(cleanLine) > 0) {
@@ -373,7 +399,7 @@ server <- function(input, output, session) {
     result <- data.table::data.table()
     if (length(cleanedLogLines) > 0) {
       modulesFoundInLogFile <-
-        data.table::as.data.table(str_match_named(rev(cleanedLogLines), pattern))[!is.na(actionType), ]
+        data.table::as.data.table(str_match_named(rev(cleanedLogLines), pattern))[!is.na(actionType),]
       if (nrow(modulesFoundInLogFile) > 0) {
         result <- modulesFoundInLogFile
       }
@@ -381,28 +407,38 @@ server <- function(input, output, session) {
     return(result)
   }) #end getModuleProgress
 
-  registerReactiveFileHandler(VE_LOG, readFunc = function(filePath) {
-    cleanedLines <- SafeReadAndCleanLines(filePath)
-    debugConsole(paste0("startModulesLogStatements", paste0(collapse=", ", cleanedLines)))
-    return(cleanedLines)
-  }) #end VE_LOG file handler
+  registerReactiveFileHandler(
+    VE_LOG,
+    readFunc = function(filePath) {
+      cleanedLines <- SafeReadAndCleanLines(filePath)
+      debugConsole(paste0(
+        "startModulesLogStatements",
+        paste0(collapse = ", ", cleanedLines)
+      ))
+      return(cleanedLines)
+    }
+  ) #end VE_LOG file handler
 
-  registerReactiveFileHandler(CAPTURED_SOURCE,
-                              readFunc = function(filePath) {
-                                debugConsole(paste0(
-                                  "registerReactiveFileHandler for CAPTURED_SOURCE called to load ",
-                                  filePath,
-                                  ". Exists? ",
-                                  file.exists(filePath)
-                                ))
-                                lines <- SafeReadLines(filePath)
-                                if (length(lines) > 1) {
-                                  result <- paste0(collapse="\n", lines)
-                                } else {
-                                  result <- lines
-                                }
-                                return(result)
-                              })
+  registerReactiveFileHandler(
+    CAPTURED_SOURCE,
+    readFunc = function(filePath) {
+      debugConsole(
+        paste0(
+          "registerReactiveFileHandler for CAPTURED_SOURCE called to load ",
+          filePath,
+          ". Exists? ",
+          file.exists(filePath)
+        )
+      )
+      lines <- SafeReadLines(filePath)
+      if (length(lines) > 1) {
+        result <- paste0(collapse = "\n", lines)
+      } else {
+        result <- lines
+      }
+      return(result)
+    }
+  )
   registerReactiveFileHandler(MODEL_PARAMETERS_FILE, SafeReadJSON)
   registerReactiveFileHandler(RUN_PARAMETERS_FILE, SafeReadJSON)
   registerReactiveFileHandler(GEO_CSV_FILE, SafeReadCSV)
@@ -447,68 +483,69 @@ server <- function(input, output, session) {
     }# end readFunc
   ) #end call to registerReactiveFileHandler
 
-  getScriptInfo <- eventReactive(input$selectRunScript, {
-    debugConsole("getScriptInfo entered")
-    scriptInfo <- list()
-    inFile = parseFilePaths(roots = volumeRoots, input$selectRunScript)
-    scriptInfo$datapath <-
-      normalizePath(as.character(inFile$datapath))
-    scriptInfo$fileDirectory <- dirname(scriptInfo$datapath)
-    scriptInfo$fileBase <- basename(scriptInfo$datapath)
+  getScriptInfo <-
+    eventReactive(input[[SELECT_RUN_SCRIPT_BUTTON]], {
+      debugConsole("getScriptInfo entered")
+      scriptInfo <- list()
+      inFile = parseFilePaths(roots = volumeRoots, input[[SELECT_RUN_SCRIPT_BUTTON]])
+      scriptInfo$datapath <-
+        normalizePath(as.character(inFile$datapath))
+      scriptInfo$fileDirectory <- dirname(scriptInfo$datapath)
+      scriptInfo$fileBase <- basename(scriptInfo$datapath)
 
-    #call the first few methods so can find out log file value and get the ModelState_ls global
-    setwd(scriptInfo$fileDirectory)
-    visioneval::initModelStateFile()
-    visioneval::initLog()
-    visioneval::writeLog("VE_GUI called visioneval::initModelStateFile() and visioneval::initLog()")
-    otherReactiveValues[[MODEL_STATE_LS]] <<- ModelState_ls
-    filePaths[[VE_LOG]] <<-
-      file.path(scriptInfo$fileDirectory, ModelState_ls$LogFile)
-    debugConsole(
-      paste0(
-        "after visioneval::initModelStateFile() and visioneval::initLog() global variable ModelState_ls has size: ",
-        object.size(ModelState_ls)
-      )
-    )
-    filePaths[[MODEL_STATE_FILE]] <<-
-      file.path(scriptInfo$fileDirectory, "ModelState.Rda")
-    getModelModules(scriptInfo$datapath)
-    startAsyncDataLoad(
-      MODEL_MODULES,
-      future({
-        ModelState_ls
-        getModelModules(scriptInfo$datapath)
-      }),
-      callback = function(asyncDataName, asyncData) {
-        if (!is.null(asyncData)) {
-          enable(id = "runModel", selector = NULL)
-          enable(id = "copyModelDirectory", selector = NULL)
-        }
-        debugConsole(
-          paste0(
-            "callback asyncDataName '",
-            asyncDataName,
-            "' returning with data of size ",
-            object.size(asyncData)
-          )
+      #call the first few methods so can find out log file value and get the ModelState_ls global
+      setwd(scriptInfo$fileDirectory)
+      visioneval::initModelStateFile()
+      visioneval::initLog()
+      visioneval::writeLog("VE_GUI called visioneval::initModelStateFile() and visioneval::initLog()")
+      otherReactiveValues[[MODEL_STATE_LS]] <<- ModelState_ls
+      filePaths[[VE_LOG]] <<-
+        file.path(scriptInfo$fileDirectory, ModelState_ls$LogFile)
+      debugConsole(
+        paste0(
+          "after visioneval::initModelStateFile() and visioneval::initLog() global variable ModelState_ls has size: ",
+          object.size(ModelState_ls)
         )
-      }
-    )
+      )
+      filePaths[[MODEL_STATE_FILE]] <<-
+        file.path(scriptInfo$fileDirectory, "ModelState.Rda")
+      getModelModules(scriptInfo$datapath)
+      startAsyncDataLoad(
+        MODEL_MODULES,
+        future({
+          ModelState_ls
+          getModelModules(scriptInfo$datapath)
+        }),
+        callback = function(asyncDataName, asyncData) {
+          if (!is.null(asyncData)) {
+            enable(id = RUN_MODEL_BUTTON, selector = NULL)
+            enable(id = COPY_MODEL_BUTTON, selector = NULL)
+          }
+          debugConsole(
+            paste0(
+              "callback asyncDataName '",
+              asyncDataName,
+              "' returning with data of size ",
+              object.size(asyncData)
+            )
+          )
+        }
+      )
 
-    defsDirectory <- file.path(scriptInfo$fileDirectory, "defs")
+      defsDirectory <- file.path(scriptInfo$fileDirectory, "defs")
 
-    filePaths[[MODEL_PARAMETERS_FILE]] <<-
-      file.path(defsDirectory, "model_parameters.json")
+      filePaths[[MODEL_PARAMETERS_FILE]] <<-
+        file.path(defsDirectory, "model_parameters.json")
 
-    filePaths[[RUN_PARAMETERS_FILE]] <<-
-      file.path(defsDirectory, "run_parameters.json")
+      filePaths[[RUN_PARAMETERS_FILE]] <<-
+        file.path(defsDirectory, "run_parameters.json")
 
-    filePaths[[GEO_CSV_FILE]] <<-
-      file.path(defsDirectory, "geo.csv")
+      filePaths[[GEO_CSV_FILE]] <<-
+        file.path(defsDirectory, "geo.csv")
 
-    debugConsole("getScriptInfo exited")
-    return(scriptInfo)
-  }) #end getScriptInfo reactive
+      debugConsole("getScriptInfo exited")
+      return(scriptInfo)
+    }) #end getScriptInfo reactive
 
   getModelModules <- function(datapath) {
     debugConsole(paste0("getModelModules entered with datapath: ", datapath))
@@ -518,8 +555,8 @@ server <- function(input, output, session) {
     return(modelModules)
   } #end getModelModules
 
-  observeEvent(input$runModel, label = "runModel", handlerExpr = {
-    req(input$selectRunScript)
+  observeEvent(input$runModel, label = RUN_MODEL_BUTTON, handlerExpr = {
+    req(input[[SELECT_RUN_SCRIPT_BUTTON]])
     debugConsole("observeEvent input$runModel entered")
     datapath <- getScriptInfo()$datapath
     enable(id = "scriptOutput", selector = NULL)
@@ -541,19 +578,19 @@ server <- function(input, output, session) {
   }) #end runModel observeEvent
 
   disableActionButtons <- function() {
-    disable(id = "selectRunScript", selector = NULL)
-    disable(id = "runModel", selector = NULL)
-    disable(id = "copyModelDirectory", selector = NULL)
+    disable(id = SELECT_RUN_SCRIPT_BUTTON, selector = NULL)
+    disable(id = RUN_MODEL_BUTTON, selector = NULL)
+    disable(id = COPY_MODEL_BUTTON, selector = NULL)
   }
 
   enableActionButtons <- function() {
-    enable(id = "selectRunScript", selector = NULL)
-    enable(id = "runModel", selector = NULL)
-    enable(id = "copyModelDirectory", selector = NULL)
+    enable(id = SELECT_RUN_SCRIPT_BUTTON, selector = NULL)
+    enable(id = RUN_MODEL_BUTTON, selector = NULL)
+    enable(id = COPY_MODEL_BUTTON, selector = NULL)
 
   }
 
-    getScriptOutput <- function(datapath, captureFile) {
+  getScriptOutput <- function(datapath, captureFile) {
     debugConsole("getScriptOutput entered")
     #store the current ModelState in the global options
     #so that the process will use the same log file as the one we have already started tracking...
@@ -566,7 +603,7 @@ server <- function(input, output, session) {
   } #end getScriptOutput
 
   observeEvent(input$copyModelDirectory,
-               label = "copyModelDirectory",
+               label = COPY_MODEL_BUTTON,
                handlerExpr = {
                  req(input$selectRunScript)
                  debugConsole("observeEvent input$copyModelDirectory entered")
@@ -607,53 +644,56 @@ server <- function(input, output, session) {
                  debugConsole("observeEvent input$copyModelDirectory exited")
                }) #end copyModelDirectory observeEvent
 
-  output[[DEBUG_CONSOLE_OUTPUT]] = renderDataTable({
+  output[[DEBUG_CONSOLE_OUTPUT]] = renderTable({
     getScriptInfo()
     otherReactiveValues[[DEBUG_CONSOLE_OUTPUT]]
   })
 
-  output[[VE_LOG]] = renderText({
+  output[[VE_LOG]] = renderTable({
     getScriptInfo()
-    paste0(collapse="\n", reactiveFileReaders[[VE_LOG]]())
+    paste0(collapse = "\n", reactiveFileReaders[[VE_LOG]]())
   })
 
-  output[[GEO_CSV_FILE]] = renderDataTable({
+  output[[GEO_CSV_FILE]] = renderTable({
     getScriptInfo()
     reactiveFileReaders[[GEO_CSV_FILE]]()
   })
 
   output[[RUN_PARAMETERS_FILE]] = renderText({
     getScriptInfo()
-    jsonlite::toJSON(reactiveFileReaders[[RUN_PARAMETERS_FILE]](), pretty=TRUE)
+    jsonlite::toJSON(reactiveFileReaders[[RUN_PARAMETERS_FILE]](), pretty =
+                       TRUE)
   })
 
   output[[MODEL_PARAMETERS_FILE]] = renderText({
     getScriptInfo()
-    jsonlite::toJSON(reactiveFileReaders[[MODEL_PARAMETERS_FILE]](), pretty=TRUE)
+    jsonlite::toJSON(reactiveFileReaders[[MODEL_PARAMETERS_FILE]](), pretty =
+                       TRUE)
   })
 
   output[[MODEL_STATE_FILE]] = renderText({
     getScriptInfo()
-    jsonlite::toJSON(reactiveFileReaders[[MODEL_STATE_FILE]](), pretty=TRUE)
+    jsonlite::toJSON(reactiveFileReaders[[MODEL_STATE_FILE]](), pretty =
+                       TRUE)
   })
 
   output[[MODEL_STATE_LS]] = renderText({
-    jsonlite::toJSON(otherReactiveValues[[MODEL_STATE_LS]], pretty=TRUE)
+    jsonlite::toJSON(otherReactiveValues[[MODEL_STATE_LS]], pretty = TRUE)
   })
 
   output[[CAPTURED_SOURCE]] <- renderText({
     reactiveFileReaders[[CAPTURED_SOURCE]]()
   })
 
-  output$scriptName = renderText({
+  output[[SCRIPT_NAME]] = renderText({
     getScriptInfo()$datapath
   })
 
-  output[[MODULE_PROGRESS]] = renderDataTable({
+  output[[MODULE_PROGRESS]] = renderTable({
     getModuleProgress()
   })
 
-  output[[MODEL_MODULES]] = renderDataTable({
+  output[[MODEL_MODULES]] = renderTable({
     getScriptInfo()
     asyncData[[MODEL_MODULES]]
   })
