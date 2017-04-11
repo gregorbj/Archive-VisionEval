@@ -9,6 +9,14 @@ library(future)
 library(testit)
 library(jsonlite)
 
+#https://github.com/tdhock/namedCapture
+if(!require(namedCapture)) {
+  if(!require(devtools)) {
+    install.packages("devtools")
+  }
+  devtools::install_github("tdhock/namedCapture")
+}
+
 #use of future in shiny: http://stackoverflow.com/questions/41610354/calling-a-shiny-javascript-callback-from-within-a-future
 plan(multiprocess) #tell "future" library to use multiprocessing
 
@@ -27,7 +35,7 @@ CAPTURED_SOURCE <- "run_module_output"
 MODEL_STATE_LS <-
   "ModelState_ls"
 
-MOST_RECENT_LOG_STATUS <- "mostRecentLogStatus"
+MODULE_PROGRESS <- "moduleProgress"
 
 volumeRoots = getVolumes("")
 
@@ -80,7 +88,7 @@ ui <- fluidPage(
     ),
 
     mainPanel(
-      verbatimTextOutput(MOST_RECENT_LOG_STATUS, FALSE),
+      dataTableOutput(MODULE_PROGRESS, FALSE),
       tabsetPanel(
         tabPanel(
           "Main",
@@ -101,7 +109,7 @@ ui <- fluidPage(
           verbatimTextOutput(MODEL_PARAMETERS_FILE, FALSE)
         ),
         tabPanel(GEO_CSV_FILE,
-                 verbatimTextOutput(GEO_CSV_FILE, FALSE)),
+                 dataTableOutput(GEO_CSV_FILE)),
         tabPanel(
           RUN_PARAMETERS_FILE,
           verbatimTextOutput(RUN_PARAMETERS_FILE, FALSE)
@@ -141,7 +149,7 @@ server <- function(input, output, session) {
   otherReactiveValues[[DEBUG_CONSOLE_OUTPUT]] <-
     data.table::data.table(time = Sys.time(), message = "Placeholder to be deleted")[-1,]
 
-  otherReactiveValues[[MOST_RECENT_LOG_STATUS]] <- ""
+  otherReactiveValues[[MODULE_PROGRESS]] <- data.table::data.table()
 
   filePaths[[CAPTURED_SOURCE]] <-
     tempfile(pattern = "VEGUI_source_capture", fileext = ".txt")
@@ -336,13 +344,57 @@ server <- function(input, output, session) {
       selector = NULL
     )
   })
-  registerReactiveFileHandler(VE_LOG, readFunc = function(filePath) {
+
+  SafeReadAndCleanLines <- function(filePath) {
+    debugConsole(paste0(
+      "SafeReadAndCleanLinesfunction called to load ",
+      filePath,
+      ". Exists? ",
+      file.exists(filePath)
+    ))
     fileContents <- SafeReadLines(filePath)
-    startModulesLogStatements <- grep(pattern="-- Finishing module", x = fileContents, useBytes = TRUE, value = TRUE)
+    results <- list()
+    for(line in fileContents) {
+      if (nchar(trimws(line))>0) {
+        #remove all leading and/or traiing spaces or quotes
+        cleanLine <- gsub("^[ \"]+|[v\"]+$", "", line)
+        if (nchar(cleanLine) > 0) {
+          results <- c(results, cleanLine)
+        }
+      }
+    } #end loop over lines
+    return(results)
+  }
+
+  getModuleProgress <- reactive({
+    pattern <- "-- (?<actionType>(Finish|Start)(ing)?) module '(?<moduleName>[^']+)' for year '(?<year>[^']+)'"
+    cleanedLogLines <- reactiveFileReaders[[VE_LOG]]()
+    modulesFoundInLogFile <- data.table::as.data.table(str_match_named(cleanedLogLines, pattern))
+    return(modulesFoundInLogFile)
+  }) #end getModuleProgress
+
+  registerReactiveFileHandler(VE_LOG, readFunc = function(filePath) {
+    cleanedLines <- SafeReadAndCleanLines(filePath)
     debugConsole(paste0("startModulesLogStatements", paste0(collapse=", ", startModulesLogStatements)))
-    return(fileContents)
+    return(cleanedLines)
   }) #end VE_LOG file handler
-  registerReactiveFileHandler(CAPTURED_SOURCE)
+
+  registerReactiveFileHandler(CAPTURED_SOURCE,
+                              readFunc = function(filePath) {
+                                debugConsole(paste0(
+                                  "registerReactiveFileHandler for CAPTURED_SOURCE called to load ",
+                                  filePath,
+                                  ". Exists? ",
+                                  file.exists(filePath)
+                                ))
+                                lines <- SafeReadLines(filePath)
+                                if (length(lines) > 1) {
+                                  result <- paste0(collapse="\n", lines)
+                                } else {
+                                  result <- lines
+                                }
+                                return(result)
+                              })
   registerReactiveFileHandler(MODEL_PARAMETERS_FILE, SafeReadJSON)
   registerReactiveFileHandler(RUN_PARAMETERS_FILE, SafeReadJSON)
   registerReactiveFileHandler(GEO_CSV_FILE, SafeReadCSV)
@@ -402,15 +454,8 @@ server <- function(input, output, session) {
     visioneval::initLog()
     visioneval::writeLog("VE_GUI called visioneval::initModelStateFile() and visioneval::initLog()")
     otherReactiveValues[[MODEL_STATE_LS]] <<- ModelState_ls
-
-
-
-
     filePaths[[VE_LOG]] <<-
       file.path(scriptInfo$fileDirectory, ModelState_ls$LogFile)
-
-
-
     debugConsole(
       paste0(
         "after visioneval::initModelStateFile() and visioneval::initLog() global variable ModelState_ls has size: ",
@@ -559,45 +604,45 @@ server <- function(input, output, session) {
     otherReactiveValues[[DEBUG_CONSOLE_OUTPUT]]
   })
 
-  output[[VE_LOG]] = renderPrint({
+  output[[VE_LOG]] = renderText({
     getScriptInfo()
-    reactiveFileReaders[[VE_LOG]]()
+    paste0(collapse="\n", reactiveFileReaders[[VE_LOG]]())
   })
 
-  output[[GEO_CSV_FILE]] = renderPrint({
+  output[[GEO_CSV_FILE]] = renderDataTable({
     getScriptInfo()
     reactiveFileReaders[[GEO_CSV_FILE]]()
   })
 
-  output[[RUN_PARAMETERS_FILE]] = renderPrint({
+  output[[RUN_PARAMETERS_FILE]] = renderText({
     getScriptInfo()
-    reactiveFileReaders[[RUN_PARAMETERS_FILE]]()
+    jsonlite::toJSON(reactiveFileReaders[[RUN_PARAMETERS_FILE]](), pretty=TRUE)
   })
 
-  output[[MODEL_PARAMETERS_FILE]] = renderPrint({
+  output[[MODEL_PARAMETERS_FILE]] = renderText({
     getScriptInfo()
-    reactiveFileReaders[[MODEL_PARAMETERS_FILE]]()
+    jsonlite::toJSON(reactiveFileReaders[[MODEL_PARAMETERS_FILE]](), pretty=TRUE)
   })
 
-  output[[MODEL_STATE_FILE]] = renderPrint({
+  output[[MODEL_STATE_FILE]] = renderText({
     getScriptInfo()
-    reactiveFileReaders[[MODEL_STATE_FILE]]()
+    jsonlite::toJSON(reactiveFileReaders[[MODEL_STATE_FILE]](), pretty=TRUE)
   })
 
-  output[[MODEL_STATE_LS]] = renderPrint({
-    otherReactiveValues[[MODEL_STATE_LS]]
+  output[[MODEL_STATE_LS]] = renderText({
+    jsonlite::toJSON(otherReactiveValues[[MODEL_STATE_LS]], pretty=TRUE)
   })
 
-  output[[CAPTURED_SOURCE]] <- renderPrint({
+  output[[CAPTURED_SOURCE]] <- renderText({
     reactiveFileReaders[[CAPTURED_SOURCE]]()
   })
 
-  output$scriptName = renderPrint({
+  output$scriptName = renderText({
     getScriptInfo()$datapath
   })
 
-  output[[MOST_RECENT_LOG_STATUS]] = renderText({
-    otherReactiveValues[[MOST_RECENT_LOG_STATUS]]
+  output[[MODULE_PROGRESS]] = renderDataTable({
+    getModuleProgress()
   })
 
   output[[MODEL_MODULES]] = renderDataTable({
