@@ -24,22 +24,22 @@ if (interactive()) {
   options(shiny.reactlog = TRUE)
 }
 
-DEBUG_CONSOLE_OUTPUT <- "Console output"
-MODEL_PARAMETERS_FILE <- "Model parameters"
-RUN_PARAMETERS_FILE <- "Run parameters"
-GEO_CSV_FILE <- "Geo File"
-MODEL_STATE_FILE <- "Model state"
-MODEL_MODULES <- "Modules in model"
-VE_LOG <- "Log"
-CAPTURED_SOURCE <- "VisionEval console output"
+DEBUG_CONSOLE_OUTPUT <- "DEBUG_CONSOLE_OUTPUT"
+MODEL_PARAMETERS_FILE <- "MODEL_PARAMETERS_FILE"
+RUN_PARAMETERS_FILE <- "RUN_PARAMETERS_FILE"
+GEO_CSV_FILE <- "GEO_CSV_FILE"
+MODEL_STATE_FILE <- "MODEL_STATE_FILE"
+MODEL_MODULES <- "MODEL_MODULES"
+VE_LOG <- "VE_LOG"
+CAPTURED_SOURCE <- "CAPTURED_SOURCE"
 MODEL_STATE_LS <-
   "ModelState_ls"
-SELECT_RUN_SCRIPT_BUTTON <- "selectRunScriptButton"
-COPY_MODEL_BUTTON <- "copyModelButton"
-RUN_MODEL_BUTTON <- "runModel"
+SELECT_RUN_SCRIPT_BUTTON <- "SELECT_RUN_SCRIPT_BUTTON"
+COPY_MODEL_BUTTON <- "COPY_MODEL_BUTTON"
+RUN_MODEL_BUTTON <- "RUN_MODEL_BUTTON"
 SCRIPT_NAME <- "scriptName"
 
-MODULE_PROGRESS <- "Module progress"
+MODULE_PROGRESS <- "MODULE_PROGRESS"
 PAGE_TITLE <- "Pilot Model Runner and Scenario Viewer"
 
 volumeRoots = getVolumes("")
@@ -80,11 +80,12 @@ ui <- fluidPage(
 
 
   navlistPanel(
+    id="navlist",
     tabPanel(
       "Scenario",
       shinyFilesButton(
         id = SELECT_RUN_SCRIPT_BUTTON,
-        label = "Select scenario",
+        label = "Select scenario script...",
         title = "Please select model run script",
         multiple = FALSE
       ),
@@ -102,34 +103,38 @@ ui <- fluidPage(
       tags$title("To Be Implemented...")
     ),
     tabPanel(
-      "Settings",
-      h3(MODEL_STATE_FILE),
+      title="Settings",
+      value="TAB_SETTINGS",
+      h3("Model state"),
       verbatimTextOutput(MODEL_STATE_FILE, FALSE),
-      h3(MODEL_PARAMETERS_FILE),
+      h3("Model parameters"),
       verbatimTextOutput(MODEL_PARAMETERS_FILE, FALSE),
-      h3(GEO_CSV_FILE),
+      h3("Geo File"),
       tableOutput(GEO_CSV_FILE),
-      h3(RUN_PARAMETERS_FILE),
+      h3("Run parameters"),
       verbatimTextOutput(RUN_PARAMETERS_FILE, FALSE)
     ),
     tabPanel("Inputs",
+             value="TAB_INPUTS",
              tags$label("To Be Implemented...")
              ),
     tabPanel(
       "Run",
-      h3(MODEL_MODULES),
-      tableOutput(MODEL_MODULES),
+      value="TAB_RUN",
       actionButton(RUN_MODEL_BUTTON, "Run Model Script"),
-      h3(MODULE_PROGRESS),
+      h3("Module progress"),
       tableOutput(MODULE_PROGRESS),
-      h3(CAPTURED_SOURCE),
+      h3("Modules in model"),
+      tableOutput(MODEL_MODULES),
+      h3("VisionEval console output"),
       verbatimTextOutput(CAPTURED_SOURCE, FALSE)
     ),
     tabPanel(
       "Logs",
-      h3(VE_LOG),
+      value="TAB_LOGS",
+      h3("Log"),
       tableOutput(VE_LOG),
-      h3(DEBUG_CONSOLE_OUTPUT),
+      h3("Console output"),
       tableOutput(DEBUG_CONSOLE_OUTPUT)
     )
   ) #end navlistPanel
@@ -139,10 +144,6 @@ DEFAULT_POLL_INTERVAL <- 500 #milliseconds
 
 
 server <- function(input, output, session) {
-  assign("ModelState_ls",
-         envir = .GlobalEnv,
-         value = "placeholder_from_VE_GUI")
-
   asyncData <-
     reactiveValues()
   asyncDataBeingLoaded <- list()
@@ -364,9 +365,25 @@ server <- function(input, output, session) {
   )
 
   observe({
-    toggleState(id = COPY_MODEL_BUTTON,
+    shinyjs::toggleState(id = COPY_MODEL_BUTTON,
                 condition = input[[SELECT_RUN_SCRIPT_BUTTON]],
                 selector = NULL)
+  })
+
+  #how to hide/show tabs https://github.com/daattali/advanced-shiny/blob/master/hide-tab/app.R
+  observe({
+    toggle(condition = input[[SELECT_RUN_SCRIPT_BUTTON]], anim=TRUE,
+                    selector = "#navlist li a[data-value=TAB_SETTINGS]")
+
+    toggle(condition = input[[SELECT_RUN_SCRIPT_BUTTON]], anim=TRUE,
+           selector = "#navlist li a[data-value=TAB_INPUTS]")
+
+    toggle(condition = input[[SELECT_RUN_SCRIPT_BUTTON]], anim=TRUE,
+           selector = "#navlist li a[data-value=TAB_RUN]")
+
+    toggle(condition = input[[SELECT_RUN_SCRIPT_BUTTON]], anim=TRUE,
+           selector = "#navlist li a[data-value=TAB_LOGS]")
+
   })
 
   SafeReadAndCleanLines <- function(filePath) {
@@ -555,7 +572,7 @@ server <- function(input, output, session) {
     return(modelModules)
   } #end getModelModules
 
-  observeEvent(input$runModel, label = RUN_MODEL_BUTTON, handlerExpr = {
+  observeEvent(input[[RUN_MODEL_BUTTON]], label = RUN_MODEL_BUTTON, handlerExpr = {
     req(input[[SELECT_RUN_SCRIPT_BUTTON]])
     debugConsole("observeEvent input$runModel entered")
     datapath <- getScriptInfo()$datapath
@@ -645,13 +662,12 @@ server <- function(input, output, session) {
                }) #end copyModelDirectory observeEvent
 
   output[[DEBUG_CONSOLE_OUTPUT]] = renderTable({
-    getScriptInfo()
     otherReactiveValues[[DEBUG_CONSOLE_OUTPUT]]
   })
 
   output[[VE_LOG]] = renderTable({
     getScriptInfo()
-    paste0(collapse = "\n", reactiveFileReaders[[VE_LOG]]())
+    reactiveFileReaders[[VE_LOG]]()
   })
 
   output[[GEO_CSV_FILE]] = renderTable({
@@ -675,10 +691,6 @@ server <- function(input, output, session) {
     getScriptInfo()
     jsonlite::toJSON(reactiveFileReaders[[MODEL_STATE_FILE]](), pretty =
                        TRUE)
-  })
-
-  output[[MODEL_STATE_LS]] = renderText({
-    jsonlite::toJSON(otherReactiveValues[[MODEL_STATE_LS]], pretty = TRUE)
   })
 
   output[[CAPTURED_SOURCE]] <- renderText({
