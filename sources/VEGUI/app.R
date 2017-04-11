@@ -88,7 +88,7 @@ ui <- fluidPage(
     ),
 
     mainPanel(
-      dataTableOutput(MODULE_PROGRESS, FALSE),
+      dataTableOutput(MODULE_PROGRESS),
       tabsetPanel(
         tabPanel(
           "Main",
@@ -353,7 +353,7 @@ server <- function(input, output, session) {
       file.exists(filePath)
     ))
     fileContents <- SafeReadLines(filePath)
-    results <- list()
+    results <- c()
     for(line in fileContents) {
       if (nchar(trimws(line))>0) {
         #remove all leading and/or traiing spaces or quotes
@@ -367,15 +367,23 @@ server <- function(input, output, session) {
   }
 
   getModuleProgress <- reactive({
-    pattern <- "-- (?<actionType>(Finish|Start)(ing)?) module '(?<moduleName>[^']+)' for year '(?<year>[^']+)'"
+    pattern <-
+      "(?<date>^20[0-9]{2}(?:-[0-9]{2}){2}) (?<time>[^ ]+) :.*-- (?<actionType>(?:Finish|Start)(?:ing)?) module '(?<moduleName>[^']+)' for year '(?<year>[^']+)'"
     cleanedLogLines <- reactiveFileReaders[[VE_LOG]]()
-    modulesFoundInLogFile <- data.table::as.data.table(str_match_named(cleanedLogLines, pattern))
-    return(modulesFoundInLogFile)
+    result <- data.table::data.table()
+    if (length(cleanedLogLines) > 0) {
+      modulesFoundInLogFile <-
+        data.table::as.data.table(str_match_named(rev(cleanedLogLines), pattern))[!is.na(actionType), ]
+      if (nrow(modulesFoundInLogFile) > 0) {
+        result <- modulesFoundInLogFile
+      }
+    }
+    return(result)
   }) #end getModuleProgress
 
   registerReactiveFileHandler(VE_LOG, readFunc = function(filePath) {
     cleanedLines <- SafeReadAndCleanLines(filePath)
-    debugConsole(paste0("startModulesLogStatements", paste0(collapse=", ", startModulesLogStatements)))
+    debugConsole(paste0("startModulesLogStatements", paste0(collapse=", ", cleanedLines)))
     return(cleanedLines)
   }) #end VE_LOG file handler
 
