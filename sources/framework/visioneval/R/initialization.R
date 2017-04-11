@@ -183,16 +183,21 @@ initLog <- function() {
 #' logs the time as well as the message to the run log.
 #'
 #' @param Msg A character string.
+#' @param Print logical (default: FALSE). If True Msg will be printed in
+#' additon to being added to log
 #' @return TRUE if the message is written to the log uccessfully.
 #' It appends the time and the message text to the run log.
 #' @export
-writeLog <- function(Msg = "") {
+writeLog <- function(Msg = "", Print = FALSE) {
   LogFile <- unlist(getModelState("LogFile"))
   Con <- file(LogFile, open = "a")
   Time <- as.character(Sys.time())
   Content <- paste(Time, ":", Msg, "\n")
   writeLines(Content, Con)
   close(Con)
+  if (Print) {
+    print(Content)
+  }
 }
 
 

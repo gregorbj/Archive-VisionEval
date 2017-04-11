@@ -69,9 +69,18 @@ initializeModel <-
     Msg <-
       paste0(Sys.time(), " -- Initializing Model.")
     print(Msg)
-    initModelStateFile(Dir = ParamDir, ParamFile = RunParamFile)
-    initLog()
-    writeLog(Msg)
+
+    #unusual code to work with VE_GUI which needs to know log file location before long running operation begins...
+    preExistingModelState <- getOption("visioneval.preExistingModelState", NULL)
+    if (is.null(preExistingModelState)) {
+      initModelStateFile(Dir = ParamDir, ParamFile = RunParamFile)
+      initLog()
+      writeLog(Msg)
+    } else {
+      writeLog("option visioneval.keepExistingModelState TRUE so skipping initModelStateFile and initLog",
+               Print=TRUE)
+      ModelState_ls <<- preExistingModelState
+    }
 
     #Load existing model if specified and initialize geography
     #---------------------------------------------------------
