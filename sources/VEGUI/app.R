@@ -24,7 +24,6 @@ if (!require(shinyTree)) {
   devtools::install_github("trestletech/shinyTree")
 }
 
-install_github("trestletech/shinyTree")
 #use of future in shiny: http://stackoverflow.com/questions/41610354/calling-a-shiny-javascript-callback-from-within-a-future
 plan(multiprocess) #tell "future" library to use multiprocessing
 
@@ -712,6 +711,11 @@ server <- function(input, output, session) {
     else if (length(root) > 1) {
       leafList <- setNames(lapply(1:length(root), function(i) ""), root)
       root <- leafList
+    } else {
+      #must be a leaf but shinyTree requires even these be lists
+      leafNode <- list()
+      leafNode[[as.character(root)]] <- "ignored"
+      root <- leafNode
     }
     return(root)
   } #end semiFlatten
