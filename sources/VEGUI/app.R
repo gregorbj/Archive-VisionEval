@@ -698,12 +698,9 @@ server <- function(input, output, session) {
   semiFlatten <- function(root) {
     if (class(root) == "list") {
       #given a list containinig sublists get rid of any levels that do not have names
-      while (is.null(names(root))) {
-        unlisted <- unlist(root, recursive=FALSE)
-        testit::assert(paste0("Class of unlisted object is not a list, it is a: ",
-                              class(unlisted)), class(unlisted) == "list")
-        root <- unlisted
-        bar <- 7
+      if (is.null(names(root))) {
+        namedRoot <- setNames(root, 1:length(root))
+        root <- namedRoot
       }
       for (name in names(root)) {
         #replace node with semiFlattened node
