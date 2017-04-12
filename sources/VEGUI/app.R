@@ -48,6 +48,8 @@ SCRIPT_NAME <- "SCRIPT_NAME"
 INPUTS_TREE <- "INPUTS_TREE"
 INPUTS_TREE_SELECTED_TEXT <- "INPUTS_TREE_SELECTED_TEXT"
 OUTPUTS_TREE <- "OUTPUTS_TREE"
+HDF5_TABLES <- "HDF5_TABLES"
+INPUT_FILES <- "INPUT_FILES"
 
 MODULE_PROGRESS <- "MODULE_PROGRESS"
 PAGE_TITLE <- "Pilot Model Runner and Scenario Viewer"
@@ -124,33 +126,37 @@ ui <- fluidPage(
     ),
     tabPanel("Inputs",
              value="TAB_INPUTS",
+             h3("Input files:"),
+             tableOutput(INPUT_FILES),
+             h3("Datastore tables:"),
+             tableOutput(HDF5_TABLES),
+             h3("Module specifications:"),
              "Currently Selected:",
-             verbatimTextOutput(INPUTS_TREE_SELECTED_TEXT),
-             hr(),
+             verbatimTextOutput(INPUTS_TREE_SELECTED_TEXT, placeholder = TRUE),
              shinyTree(INPUTS_TREE)
              ),
     tabPanel(
       "Run",
       value="TAB_RUN",
       actionButton(RUN_MODEL_BUTTON, "Run Model Script"),
-      h3("Module progress"),
+      h3("Module progress:"),
       tableOutput(MODULE_PROGRESS),
-      h3("Modules in model"),
+      h3("Modules in model:"),
       tableOutput(MODEL_MODULES),
-      h3("VisionEval console output"),
+      h3("VisionEval console output:"),
       verbatimTextOutput(CAPTURED_SOURCE, FALSE)
     ),
-    tabPanel("Outputs",
-             value="TAB_OUTPUTS",
-             shinyTree(OUTPUTS_TREE),
-             tags$label("To Be Implemented...")
-    ),
+    # tabPanel("Outputs",
+    #          value="TAB_OUTPUTS",
+    #          shinyTree(OUTPUTS_TREE),
+    #          tags$label("To Be Implemented...")
+    # ),
     tabPanel(
       "Logs",
       value="TAB_LOGS",
-      h3("Log"),
+      h3("Log:"),
       tableOutput(VE_LOG),
-      h3("Console output"),
+      h3("Console output:"),
       tableOutput(DEBUG_CONSOLE_OUTPUT)
     )
   ) #end navlistPanel
@@ -765,7 +771,19 @@ server <- function(input, output, session) {
       } # end if tree has a selection
     } #end if tree exists
     return(results)
-  })
+  }) #end output[[INPUTS_TREE_SELECTED_TEXT]]
+
+  output[[HDF5_TABLES]] = renderTable({
+    tree <- input[[INPUTS_TREE]]
+    dt <- data.table::data.table()
+    return(dt)
+  }) #end output[[HDF5_TABLES]]
+
+  output[[INPUT_FILES]] = renderTable({
+    tree <- input[[INPUTS_TREE]]
+    dt <- data.table::data.table()
+    return(dt)
+  }) #end output[[INPUT_FILES]]
 
   output[[VE_LOG]] = renderTable({
     getScriptInfo()
