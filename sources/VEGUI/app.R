@@ -44,8 +44,10 @@ MODEL_STATE_LS <-
 SELECT_RUN_SCRIPT_BUTTON <- "SELECT_RUN_SCRIPT_BUTTON"
 COPY_MODEL_BUTTON <- "COPY_MODEL_BUTTON"
 RUN_MODEL_BUTTON <- "RUN_MODEL_BUTTON"
-SCRIPT_NAME <- "scriptName"
-INPUTS_TREE <- "inputsTree"
+SCRIPT_NAME <- "SCRIPT_NAME"
+INPUTS_TREE <- "INPUTS_TREE"
+INPUTS_TREE_SELECTED_TEXT <- "INPUTS_TREE_SELECTED_TEXT"
+OUTPUTS_TREE <- "OUTPUTS_TREE"
 
 MODULE_PROGRESS <- "MODULE_PROGRESS"
 PAGE_TITLE <- "Pilot Model Runner and Scenario Viewer"
@@ -122,8 +124,10 @@ ui <- fluidPage(
     ),
     tabPanel("Inputs",
              value="TAB_INPUTS",
-             shinyTree(INPUTS_TREE),
-             tags$label("To Be Implemented...")
+             "Currently Selected:",
+             verbatimTextOutput(INPUTS_TREE_SELECTED_TEXT),
+             hr(),
+             shinyTree(INPUTS_TREE)
              ),
     tabPanel(
       "Run",
@@ -135,6 +139,11 @@ ui <- fluidPage(
       tableOutput(MODEL_MODULES),
       h3("VisionEval console output"),
       verbatimTextOutput(CAPTURED_SOURCE, FALSE)
+    ),
+    tabPanel("Outputs",
+             value="TAB_OUTPUTS",
+             shinyTree(OUTPUTS_TREE),
+             tags$label("To Be Implemented...")
     ),
     tabPanel(
       "Logs",
@@ -379,16 +388,19 @@ server <- function(input, output, session) {
 
   #how to hide/show tabs https://github.com/daattali/advanced-shiny/blob/master/hide-tab/app.R
   observe({
-    toggle(condition = input[[SELECT_RUN_SCRIPT_BUTTON]], anim=TRUE,
+    toggle(id=NULL, condition = input[[SELECT_RUN_SCRIPT_BUTTON]], anim=TRUE, animType = "Slide", time = 0.25,
                     selector = "#navlist li a[data-value=TAB_SETTINGS]")
 
-    toggle(condition = input[[SELECT_RUN_SCRIPT_BUTTON]], anim=TRUE,
+    toggle(id=NULL, condition = input[[SELECT_RUN_SCRIPT_BUTTON]], anim=TRUE, animType = "Slide", time = 0.25,
            selector = "#navlist li a[data-value=TAB_INPUTS]")
 
-    toggle(condition = input[[SELECT_RUN_SCRIPT_BUTTON]], anim=TRUE,
+    toggle(id=NULL, condition = input[[SELECT_RUN_SCRIPT_BUTTON]], anim=TRUE, animType = "Slide", time = 0.25,
            selector = "#navlist li a[data-value=TAB_RUN]")
 
-    toggle(condition = input[[SELECT_RUN_SCRIPT_BUTTON]], anim=TRUE,
+    toggle(id=NULL, condition = input[[SELECT_RUN_SCRIPT_BUTTON]], anim=TRUE, animType = "Slide", time = 0.25,
+           selector = "#navlist li a[data-value=TAB_OUTPUTS]")
+
+    toggle(id=NULL, condition = input[[SELECT_RUN_SCRIPT_BUTTON]], anim=TRUE, animType = "Slide", time = 0.25,
            selector = "#navlist li a[data-value=TAB_LOGS]")
 
   })
@@ -722,6 +734,37 @@ server <- function(input, output, session) {
 
   output[[INPUTS_TREE]] <- renderTree({
     getInputsTree()
+  })
+
+  output[[INPUTS_TREE_SELECTED_TEXT]] <- renderText({
+
+    tree <- input[[INPUTS_TREE]]
+    results <- ""
+    if (!is.null(tree)) {
+      selectedItemPaths <- list()
+      selectedItems <- get_selected(tree)
+      if (length(selectedItems) > 0) {
+        for (selectedItemNumber in 1:length(selectedItems)) {
+          selectedItem <- selectedItems[[selectedItemNumber]]
+          #https://rdrr.io/cran/shinyTree/man/get_selected.html
+          ancestry <-
+            attr(selectedItem, "ancestry") # character vector
+          selectedNode <- as.character(selectedItem)
+          totalPath <- c(ancestry, selectedNode)
+          isFile <- length(ancestry) > 0 && (ancestry[[length(ancestry)]] == "FILE")
+          pathInfo <- list(
+            "ancestry" = ancestry,
+            "finalNode" = selectedNode,
+            "fullPath" = paste0(collapse = "-->", totalPath),
+            "isFile" = isFile
+          )
+          selectedItemPaths[[selectedItemNumber]] <- pathInfo
+        } #end for over selected items
+        results <- paste0(collapse="\n", lapply(selectedItemPaths,
+                                                function(x) x$fullPath))
+      } # end if tree has a selection
+    } #end if tree exists
+    return(results)
   })
 
   output[[VE_LOG]] = renderTable({
