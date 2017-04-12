@@ -17,6 +17,14 @@ if (!require(namedCapture)) {
   devtools::install_github("tdhock/namedCapture")
 }
 
+if (!require(shinyTree)) {
+  if (!require(devtools)) {
+    install.packages("devtools")
+  }
+  devtools::install_github("trestletech/shinyTree")
+}
+
+install_github("trestletech/shinyTree")
 #use of future in shiny: http://stackoverflow.com/questions/41610354/calling-a-shiny-javascript-callback-from-within-a-future
 plan(multiprocess) #tell "future" library to use multiprocessing
 
@@ -38,6 +46,7 @@ SELECT_RUN_SCRIPT_BUTTON <- "SELECT_RUN_SCRIPT_BUTTON"
 COPY_MODEL_BUTTON <- "COPY_MODEL_BUTTON"
 RUN_MODEL_BUTTON <- "RUN_MODEL_BUTTON"
 SCRIPT_NAME <- "scriptName"
+INPUTS_TREE <- "inputsTree"
 
 MODULE_PROGRESS <- "MODULE_PROGRESS"
 PAGE_TITLE <- "Pilot Model Runner and Scenario Viewer"
@@ -98,9 +107,7 @@ ui <- fluidPage(
         #must specify a filetype due to shinyFiles bug https://github.com/thomasp85/shinyFiles/issues/56
         #even though in my case I am creating a folder so don't care about the mime type
         filetype = list('hidden_mime_type' = c(""))
-      ),
-
-      tags$title("To Be Implemented...")
+      )
     ),
     tabPanel(
       title="Settings",
@@ -116,6 +123,7 @@ ui <- fluidPage(
     ),
     tabPanel("Inputs",
              value="TAB_INPUTS",
+             shinyTree(INPUTS_TREE),
              tags$label("To Be Implemented...")
              ),
     tabPanel(
@@ -416,7 +424,7 @@ server <- function(input, output, session) {
     result <- data.table::data.table()
     if (length(cleanedLogLines) > 0) {
       modulesFoundInLogFile <-
-        data.table::as.data.table(str_match_named(rev(cleanedLogLines), pattern))[!is.na(actionType),]
+        data.table::as.data.table(namedCapture::str_match_named(rev(cleanedLogLines), pattern))[!is.na(actionType),]
       if (nrow(modulesFoundInLogFile) > 0) {
         result <- modulesFoundInLogFile
       }
@@ -568,7 +576,7 @@ server <- function(input, output, session) {
     debugConsole(paste0("getModelModules entered with datapath: ", datapath))
     setwd(dirname(datapath))
     modelModules <-
-      visioneval::parseModelScript(datapath, TestMode = TRUE)
+      data.table::as.data.table(visioneval::parseModelScript(datapath, TestMode = TRUE))
     return(modelModules)
   } #end getModelModules
 
@@ -663,6 +671,56 @@ server <- function(input, output, session) {
 
   output[[DEBUG_CONSOLE_OUTPUT]] = renderTable({
     otherReactiveValues[[DEBUG_CONSOLE_OUTPUT]]
+  })
+
+  getInputsTree <- reactive({
+    modules <- asyncData[[MODEL_MODULES]]
+
+    scriptInfo <- getScriptInfo()
+    #prepare for calling into visioneval for module specs
+    setwd(scriptInfo$fileDirectory)
+    packages <- sort(unique(modules[,PackageName]))
+
+    root <- list()
+    for(packageName in packages) {
+      packageNode <- list()
+      modulesInPackage <- sort(modules[PackageName == (packageName), ModuleName])
+      for(moduleName in modulesInPackage) {
+        ModuleSpecs_ls <- visioneval::processModuleSpecs(visioneval::getModuleSpecs(moduleName, packageName))
+        semiFlattened <- semiFlatten(ModuleSpecs_ls)
+        packageNode[[moduleName]] <- semiFlattened
+      } #end for moduleName
+      root[[packageName]] <- packageNode
+    } #end packageName
+    return(root)
+  }) #end getInputsTree <- reactive({
+
+  semiFlatten <- function(root) {
+    if (class(root) == "list") {
+      #given a list containinig sublists get rid of any levels that do not have names
+      while (is.null(names(root))) {
+        unlisted <- unlist(root, recursive=FALSE)
+        testit::assert(paste0("Class of unlisted object is not a list, it is a: ",
+                              class(unlisted)), class(unlisted) == "list")
+        root <- unlisted
+        bar <- 7
+      }
+      for (name in names(root)) {
+        #replace node with semiFlattened node
+        nodeValue <- root[[name]]
+          semiFlattenedNode <- semiFlatten(nodeValue)
+          root[[name]] <- semiFlattenedNode
+      } #end for loop over child nodes
+    } # end if list
+    else if (length(root) > 1) {
+      leafList <- setNames(lapply(1:length(root), function(i) ""), root)
+      root <- leafList
+    }
+    return(root)
+  } #end semiFlatten
+
+  output[[INPUTS_TREE]] <- renderTree({
+    getInputsTree()
   })
 
   output[[VE_LOG]] = renderTable({
