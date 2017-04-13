@@ -22,6 +22,7 @@ This repository is organized into two directories:
 source("http://bioconductor.org/biocLite.R")
 biocLite()
 biocLite("rhdf5")
+
 install.packages("devtools")
 install.packages("plyr")
 install.packages("shiny")
@@ -33,7 +34,6 @@ install.packages("future")
 install.packages("testit")
 install.packages("jsonlite")
 
-#https://github.com/tdhock/namedCapture
 devtools::install_github("tdhock/namedCapture")
 devtools::install_github("trestletech/shinyTree")
 
