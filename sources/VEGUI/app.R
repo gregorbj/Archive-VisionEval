@@ -704,7 +704,7 @@ server <- function(input, output, session) {
       modulesInPackage <- sort(modules[PackageName == (packageName), ModuleName])
       for(moduleName in modulesInPackage) {
         ModuleSpecs_ls <- visioneval::processModuleSpecs(visioneval::getModuleSpecs(moduleName, packageName))
-        semiFlattened <- semiFlatten(ModuleSpecs_ls)
+        semiFlattened <- semiFlatten(ModuleSpecs_ls, "ModuleSpecs_ls")
         packageNode[[moduleName]] <- semiFlattened
       } #end for moduleName
       root[[packageName]] <- packageNode
@@ -712,19 +712,23 @@ server <- function(input, output, session) {
     return(root)
   }) #end getInputsTree <- reactive({
 
-  semiFlatten <- function(node) {
+  semiFlatten <- function(node, ancestorPath) {
     if (is.list(node)) {
-      #given a list containinig sublists get rid of any levels that do not have names
+      #if a list does not have names, use the index in names as the name
       if (is.null(names(node))) {
-        namedRoot <- setNames(node, 1:length(node))
-        node <- namedRoot
+        names(node) <- 1:length(node)
       }
       for (name in names(node)) {
         #replace node with semiFlattened node
-        nodeValue <- node[[name]]
-          semiFlattenedNode <- semiFlatten(nodeValue)
-          attr(semiFlattenedNode, "parent") <- node
-          node[[name]] <- semiFlattenedNode
+        childPath <- paste0(ancestorPath, "-->", name)
+        childNodeValue <- node[[name]]
+
+        semiFlattenedChildNode <-
+          semiFlatten(childNodeValue, childPath)
+        attr(semiFlattenedChildNode, "ancestorPath") <-
+          childPath
+        #replace the child with the flattened version
+        node[[name]] <- semiFlattenedChildNode
       } #end for loop over child nodes
     } # end if list
     else if (length(node) > 1) {
@@ -745,16 +749,16 @@ server <- function(input, output, session) {
   output[[INPUT_FILES]] = renderTable({
     getInputsTree()
     fileItems <- extractFromTree("FILE")
-    files <- unique(data.table::data.table(File = fileItems$resultList,
-                                           TreePath = fileItems$resultAncestorsList))
+    files <- unique(data.table::data.table(File = fileItems$resultList))
+                                           # TreePath = fileItems$resultAncestorsList))
     return(files)
   }) #end output[[INPUT_FILES]]
 
   output[[HDF5_TABLES]] = renderTable({
     getInputsTree()
     tableItems <- extractFromTree("TABLE")
-    tables <- unique(data.table::data.table(File = tableItems$resultList,
-                                            TreePath = tableItems$resultAncestorsList))
+    tables <- unique(data.table::data.table(File = tableItems$resultList))
+                                            # TreePath = tableItems$resultAncestorsList))
     return(tables)
   }) #end output[[HDF5_TABLES]]
 
@@ -781,18 +785,7 @@ server <- function(input, output, session) {
   } #end extractFromTree
 
   getAncestorPath <- function(leaf) {
-    ancestors <- vector('character')
-    getAncestorNamesInternal <- function(node) {
-      nodeName <- names(node)[[1]]
-      ancestors <<- c(nodeName, ancestors)
-      #stored parent when building the tree
-      if ('parent' %in% names(attributes(node))) {
-        parentNode <- attr(node, "parent")
-        getAncestorNamesInternal(parentNode) #RECURSIVE
-      }
-    } #end function getAncestorNames
-    getAncestorNamesInternal(leaf)
-    ancestorPath <- paste0(collapse="-->", ancestors)
+    ancestorPath <- attr(leaf, "ancestorPath")
     return(ancestorPath)
   } #end getAncestorPath
 
