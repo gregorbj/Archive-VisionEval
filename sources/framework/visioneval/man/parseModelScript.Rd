@@ -7,13 +7,13 @@
 parseModelScript(FilePath = "run_model.R")
 }
 \arguments{
-\item{Path}{A string identifying the relative or absolute path to the
+\item{FilePath}{A string identifying the relative or absolute path to the
 model run script is located.}
 }
 \value{
 A data frame containing information on the calls to 'runModule' in the
 order of the calls. Each row represents a module call in order. The columns
-identify the 'ModuleName', the 'PackageName', and the 'TimeFrame'.
+identify the 'ModuleName', the 'PackageName', and the 'RunFor' value.
 }
 \description{
 \code{parseModel}Function reads and parses the model script to identify the

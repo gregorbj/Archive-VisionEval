@@ -7,7 +7,7 @@
 #Load libraries
 #--------------
 library(visioneval)
-library(VESyntheticFirms)
+#library(VESyntheticFirms)
 
 #Initialize model
 #----------------
@@ -16,8 +16,8 @@ initializeModel(
   RunParamFile = "run_parameters.json",
   GeoFile = "geo.csv",
   ModelParamFile = "model_parameters.json",
-  LoadDatastore = NULL,
-  IgnoreDatastore = FALSE,
+  LoadDatastore = FALSE,
+  DatastoreName = NULL,
   SaveDatastore = TRUE
   )
 
@@ -25,10 +25,13 @@ initializeModel(
 #---------------------------------
 BaseYear <- getModelState()$BaseYear
 for(Year in getYears()) {
-  if (Year == BaseYear) {
-    runModule(ModuleName = "CreateBaseSyntheticFirms", PackageName = "VESyntheticFirms")
-  } else {
-    runModule(ModuleName = "CreateFutureSyntheticFirms", PackageName = "VESyntheticFirms")
-  }
+  runModule(
+    ModuleName = "CreateBaseSyntheticFirms",
+    PackageName = "VESyntheticFirms",
+    RunFor = "BaseYear")
+  runModule(
+    ModuleName = "CreateFutureSyntheticFirms",
+    PackageName = "VESyntheticFirms",
+    RunFor = "NotBaseYear")
 }
 

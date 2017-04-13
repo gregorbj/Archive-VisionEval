@@ -22,21 +22,30 @@ This repository is organized into two directories:
 source("http://bioconductor.org/biocLite.R")
 biocLite()
 biocLite("rhdf5")
+
 install.packages("devtools")
 install.packages("plyr")
 install.packages("shiny")
+install.packages("shinyjs")
 install.packages("shinyFiles")
-library("devtools")
-install_github("gregorbj/VisionEval/sources/framework/visioneval")
-install_github("gregorbj/VisionEval/sources/modules/VESyntheticFirms")
-install_github("gregorbj/VisionEval/sources/modules/VESimHouseholds")
-install_github("gregorbj/VisionEval/sources/models/VERPAT")
+install.packages("data.table")
+install.packages("shinyBS")
+install.packages("future")
+install.packages("testit")
+install.packages("jsonlite")
+
+devtools::install_github("tdhock/namedCapture")
+devtools::install_github("trestletech/shinyTree")
+
+devtools::install_github("gregorbj/VisionEval/sources/framework/visioneval")
+devtools::install_github("gregorbj/VisionEval/sources/modules/VESyntheticFirms")
+devtools::install_github("gregorbj/VisionEval/sources/modules/VESimHouseholds")
 ```
 
 ## Running the Pilot VE RPAT from within R
-  1. Git Clone (i.e. copy) this repository to your computer.
-  1. Start R
-  2. Run the following commands:
+  1. Git Clone (i.e. copy) this repository https://github.com/gregorbj/VisionEval.git to your computer.
+  2. Start R
+  3. Run the following commands:
 
 ```
 #point to the location of the cloned repository, not the location of the auto-installed R packages

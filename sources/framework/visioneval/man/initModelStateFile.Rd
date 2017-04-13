@@ -14,16 +14,17 @@ parameters file is located. The default value is "defs".}
 The default value is "parameters.json".}
 }
 \value{
-TRUE if the model state file is created. It creates the model state
-file and loads parameters recorded in the 'parameters.json' file into the
-model state file.
+TRUE if the model state list is created and file is saved. It creates
+the model state list and loads parameters recorded in the 'parameters.json'
+file into the model state lists and saves a model state file.
 }
 \description{
-\code{initModelStateFile} loads model run parameters into the model state
-file that is used to keep track of the model state.
+\code{initModelState} loads model run parameters into the model state
+list in the global workspace and saves as file.
 }
 \details{
-This function creates the model state file and loads model run parameters
-recorded in the 'parameters.json' file into the model state file.
+This function creates the model state list and loads model run parameters
+recorded in the 'parameters.json' file into the model state list. It also
+saves the model state list in a file (ModelState.Rda).
 }
 

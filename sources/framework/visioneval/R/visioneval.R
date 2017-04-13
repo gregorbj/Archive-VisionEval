@@ -43,9 +43,13 @@
 #' @param ModelParamFile A string identifying the name of a JSON-formatted text
 #' file that contains global model parameters that are important to a model and
 #' may be shared by several modules.
-#' @param DatastoreToLoad NULL or a string identifying the relative or absolute
-#' path to a datastore to be copied to serve as the starting datastore for the
-#' model run. The default value is NULL (no datastore will be copied).
+#' @param LoadDatastore A logical identifying whether an existing datastore
+#' should be loaded.
+#' @param DatastoreName A string identifying the full path name of a datastore
+#' to load or NULL if an existing datastore in the working directory is to be
+#' loaded.
+#' @param SaveDatastore A string identifying whether if an existing datastore
+#' in the working directory should be saved rather than removed.
 #' @return None. The function prints to the log file messages which identify
 #' whether or not there are errors in initialization. It also prints a success
 #' message if initialization has been successful.
@@ -56,8 +60,8 @@ initializeModel <-
     RunParamFile = "run_parameters.json",
     GeoFile = "geo.csv",
     ModelParamFile = "model_parameters.json",
-    LoadDatastore = NULL,
-    IgnoreDatastore = FALSE,
+    LoadDatastore = FALSE,
+    DatastoreName = NULL,
     SaveDatastore = TRUE) {
 
     #Initialize model state and log files
@@ -65,21 +69,55 @@ initializeModel <-
     Msg <-
       paste0(Sys.time(), " -- Initializing Model.")
     print(Msg)
-    initModelStateFile(Dir = ParamDir, ParamFile = RunParamFile)
-    initLog()
-    writeLog(Msg)
 
-    #Initialize geography and load model parameters
-    #----------------------------------------------
-    if (is.null(LoadDatastore) &
-        file.exists(getModelState()[["DatastoreName"]])) {
-      LoadDatastore <- getModelState()[["DatastoreName"]]
+    #unusual code to work with VE_GUI which needs to know log file location before long running operation begins...
+    preExistingModelState <- getOption("visioneval.preExistingModelState", NULL)
+    if (is.null(preExistingModelState)) {
+      initModelStateFile(Dir = ParamDir, ParamFile = RunParamFile)
+      initLog()
+      writeLog(Msg)
+    } else {
+      writeLog("option visioneval.keepExistingModelState TRUE so skipping initModelStateFile and initLog",
+               Print=TRUE)
+      ModelState_ls <<- preExistingModelState
     }
-    if (!is.null(LoadDatastore)) {
-      loadDatastore(
-        FileToLoad = LoadDatastore,
-        GeoFile = GeoFile,
-        SaveDatastore = SaveDatastore)
+
+    #Load existing model if specified and initialize geography
+    #---------------------------------------------------------
+    if (LoadDatastore) {
+      if (!is.null(DatastoreName)) {
+        if (file.exists(DatastoreName)) {
+          loadDatastore(
+            FileToLoad = DatastoreName,
+            GeoFile = GeoFile,
+            SaveDatastore = SaveDatastore
+          )
+        } else {
+          Msg <-
+            paste0("Call of 'initializeModel' function has error. ",
+                   "'LoadDatastore' argument is TRUE, but ",
+                   "file specified by 'DatastoreName' argument (",
+                   DatastoreName, ") does not exist.")
+          stop(Msg)
+        }
+      } else {
+        if (file.exists(getModelState()[["DatastoreName"]])) {
+          LoadDatastore <- getModelState()[["DatastoreName"]]
+          loadDatastore(
+            FileToLoad = DatastoreName,
+            GeoFile = GeoFile,
+            SaveDatastore = SaveDatastore
+          )
+        } else {
+          Msg <-
+            paste0("Call of 'initializeModel' function has error. ",
+                   "'LoadDatastore' argument is TRUE, but ",
+                   "since the 'DatastoreName' argument is NULL, ",
+                   "it is attempting to load the previous datastore ",
+                   "which can't be found.")
+          stop(Msg)
+        }
+      }
     } else {
       initDatastore()
       readGeography(Dir = ParamDir, GeoFile = GeoFile)
@@ -89,9 +127,11 @@ initializeModel <-
 
     #Parse script to make table of all the module calls & check whether present
     #--------------------------------------------------------------------------
-    ModuleCalls_df <- parseModelScript(FilePath = "run_model.R")
+    parseModelScript(FilePath = "run_model.R")
+    ModuleCalls_df <- unique(getModelState()$ModuleCalls_df)
     #Check that all module packages are installed and all modules are present
-    ModuleCheck <- checkModulesExist(ModuleCalls_df = ModuleCalls_df)
+    ModuleCheck <-
+      checkModulesExist(ModuleCalls_df = ModuleCalls_df)
 
     #Check whether the specifications for all modules are proper
     #-----------------------------------------------------------
@@ -124,7 +164,7 @@ initializeModel <-
     #Function call is disabled until simDataTransactions can handle situation
     #where module calls for different years that don't cause table conflicts
     #do not report non-existent conflicts.
-    #simDataTransactions(ModuleCalls_df)
+    simDataTransactions(ModuleCalls_df)
 
     #Check and process module inputs
     #-------------------------------
@@ -180,16 +220,28 @@ initializeModel <-
 #' @param ModuleName A string identifying the name of a module object.
 #' @param PackageName A string identifying the name of the package the module is
 #'   a part of.
-#' @param Year A string identifying the run year.
+#' @param RunFor A string identifying whether to run the module for all years
+#' "AllYears", only the base year "BaseYear", or for all years except the base
+#' year "NotBaseYear".
+#' @param RunYear A string identifying the run year.
 #' @return None. The function writes results to the specified locations in the
 #'   datastore and prints a message to the console when the module is being run.
 #' @export
-runModule <- function(ModuleName, PackageName) {
+runModule <- function(ModuleName, PackageName, RunFor, RunYear = Year) {
+  #Check whether the module should be run for the current run year
+  #---------------------------------------------------------------
+  BaseYear <- getModelState()$BaseYear
+  if (RunYear == BaseYear & RunFor == "NotBaseYear") {
+    return()
+  }
+  if (RunYear != BaseYear & RunFor == "BaseYear") {
+    return()
+  }
   #Log and print starting message
   #------------------------------
   Msg <-
     paste0(Sys.time(), " -- Starting module '", ModuleName,
-           "' for year '", Year, "'.")
+           "' for year '", RunYear, "'.")
   writeLog(Msg)
   print(Msg)
   #Load the package and module
@@ -210,7 +262,7 @@ runModule <- function(ModuleName, PackageName) {
     setInDatastore(R, M$Specs, ModuleName, Geo = NULL)
   } else {
     GeoCategory <- M$Specs$RunBy
-    Geo_ <- readFromTable(GeoCategory, GeoCategory, Year)
+    Geo_ <- readFromTable(GeoCategory, GeoCategory, RunYear)
     #Run module for each geographic area
     for (Geo in Geo_) {
       #Get data from datastore for geographic area

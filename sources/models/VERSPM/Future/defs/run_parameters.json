@@ -1,0 +1,13 @@
+{
+  "Model": "RSPM",
+  "Scenario": "Future year RSPM pilot",
+  "Description": "Future year RSPM pilot",
+  "Region": "RVMPO",
+  "BaseYear": "2010",
+  "Years": ["2038"],
+  "DatastoreName": "datastore.h5",
+  "DatastoreReferences": {
+    "Global": "../BaseYear/datastore.h5",
+    "2010": "../BaseYear/datastore.h5"
+  }
+}
