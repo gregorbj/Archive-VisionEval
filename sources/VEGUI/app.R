@@ -1,13 +1,12 @@
-library(shiny)
-library(shinyjs)
-library(shinyFiles)
 library(visioneval)
-#library(DT)
-library(data.table)
-library(shinyBS)
-library(future)
-library(testit)
-library(jsonlite)
+library("shiny")
+library("shinyjs")
+library("shinyFiles")
+library("data.table")
+library("shinyBS")
+library("future")
+library("testit")
+library("jsonlite")
 
 #https://github.com/tdhock/namedCapture
 if (!require(namedCapture)) {
@@ -16,6 +15,7 @@ if (!require(namedCapture)) {
   }
   devtools::install_github("tdhock/namedCapture")
 }
+library(namedCapture)
 
 if (!require(shinyTree)) {
   if (!require(devtools)) {
@@ -23,6 +23,7 @@ if (!require(shinyTree)) {
   }
   devtools::install_github("trestletech/shinyTree")
 }
+library(shinyTree)
 
 #use of future in shiny: http://stackoverflow.com/questions/41610354/calling-a-shiny-javascript-callback-from-within-a-future
 plan(multiprocess) #tell "future" library to use multiprocessing
