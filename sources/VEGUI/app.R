@@ -124,7 +124,7 @@ ui <- fluidPage(
       h3("Run parameters"),
       verbatimTextOutput(RUN_PARAMETERS_FILE, FALSE)
     ),
-    tabPanel("Inputs",
+    tabPanel("Module specifications",
              value="TAB_INPUTS",
              h3("Input files:"),
              tableOutput(INPUT_FILES),
@@ -421,7 +421,7 @@ server <- function(input, output, session) {
       )
     )
     fileContents <- SafeReadLines(filePath)
-    results <- c()
+    results <- vector('character') #a zero length vector unlike c() which is NULL
     for (line in fileContents) {
       if (nchar(trimws(line)) > 0) {
         #remove all leading and/or traiing spaces or quotes
@@ -712,30 +712,34 @@ server <- function(input, output, session) {
     return(root)
   }) #end getInputsTree <- reactive({
 
-  semiFlatten <- function(root) {
-    if (class(root) == "list") {
+  semiFlatten <- function(node) {
+    if (is.list(node)) {
       #given a list containinig sublists get rid of any levels that do not have names
-      if (is.null(names(root))) {
-        namedRoot <- setNames(root, 1:length(root))
-        root <- namedRoot
+      if (is.null(names(node))) {
+        namedRoot <- setNames(node, 1:length(node))
+        node <- namedRoot
       }
-      for (name in names(root)) {
+      for (name in names(node)) {
         #replace node with semiFlattened node
-        nodeValue <- root[[name]]
+        nodeValue <- node[[name]]
           semiFlattenedNode <- semiFlatten(nodeValue)
-          root[[name]] <- semiFlattenedNode
+          attr(semiFlattenedNode, "parent") <- node
+          node[[name]] <- semiFlattenedNode
       } #end for loop over child nodes
     } # end if list
-    else if (length(root) > 1) {
-      leafList <- setNames(lapply(1:length(root), function(i) ""), root)
-      root <- leafList
+    else if (length(node) > 1) {
+      #since not a list this is probably a vector of strings
+      #need to convert to a list with the strings as the key and the value is irrelevant
+      emptyListWithNumbersAsKeys <- lapply(1:length(node), function(i) "ignored-type-1")
+      leafList <- setNames(emptyListWithNumbersAsKeys, node)
+      node <- leafList
     } else {
       #must be a leaf but shinyTree requires even these be lists
       leafNode <- list()
-      leafNode[[as.character(root)]] <- "ignored"
-      root <- leafNode
+      leafNode[[as.character(node)]] <- "ignored-type-2"
+      node <- leafNode
     }
-    return(root)
+    return(node)
   } #end semiFlatten
 
   output[[INPUTS_TREE]] <- renderTree({
@@ -774,16 +778,62 @@ server <- function(input, output, session) {
   }) #end output[[INPUTS_TREE_SELECTED_TEXT]]
 
   output[[HDF5_TABLES]] = renderTable({
-    tree <- input[[INPUTS_TREE]]
+    tree <- getInputsTree()
     dt <- data.table::data.table()
     return(dt)
   }) #end output[[HDF5_TABLES]]
 
+  getAncestorPath <- function(leaf) {
+    ancestors <- vector('character')
+    getAncestorNamesInternal <- function(node) {
+      nodeName <- names(node)[[1]]
+      ancestors <<- c(nodeName, ancestors)
+      #stored parent when building the tree
+      if ('parent' %in% names(attributes(node))) {
+        parentNode <- attr(node, "parent")
+        getAncestorNamesInternal(parentNode) #RECURSIVE
+      }
+    } #end function getAncestorNames
+    getAncestorNamesInternal(leaf)
+    ancestorPath <- paste0(collapse="-->", ancestors)
+    return(ancestorPath)
+  } #end getAncestorPath
+
+  extractFromTree <- function(target) {
+    resultList <- vector('character') #a zero length vector unlike c() which is NULL
+    resultAncestorsList <- vector('character') #a zero length vector unlike c() which is NULL
+    extractFilesFromTree <- function(node) {
+      names <- names(node)
+      for (name in names) {
+        currentNode <- node[[name]]
+        if (name == target) {
+          targetValue <- names(currentNode)[[1]]
+          ancestorPath <- getAncestorPath(currentNode)
+          resultList <<- c(resultList, targetValue)
+          resultAncestorsList <<- c(resultAncestorsList, ancestorPath)
+        } else {
+          extractFilesFromTree(currentNode) #RECURSIVE
+        }
+      } #end for loop over names
+    } # end internal function
+    extractFilesFromTree(getInputsTree())
+    return(list("resultList" = resultList,
+                "resultAncestorsList" = resultAncestorsList))
+  } #end extractFromTree
+
   output[[INPUT_FILES]] = renderTable({
-    tree <- input[[INPUTS_TREE]]
-    dt <- data.table::data.table()
-    return(dt)
+    fileItems <- extractFromTree("FILE")
+    files <- unique(data.table::data.table(File = fileItems$resultList,
+                                           TreePath = fileItems$resultAncestorsList))
+    return(files)
   }) #end output[[INPUT_FILES]]
+
+  output[[HDF5_TABLES]] = renderTable({
+    tableItems <- extractFromTree("TABLE")
+    tables <- unique(data.table::data.table(File = tableItems$resultList,
+                                            TreePath = tableItems$resultAncestorsList))
+    return(tables)
+  }) #end output[[HDF5_TABLES]]
 
   output[[VE_LOG]] = renderTable({
     getScriptInfo()
