@@ -742,12 +742,65 @@ server <- function(input, output, session) {
     return(node)
   } #end semiFlatten
 
+  output[[INPUT_FILES]] = renderTable({
+    getInputsTree()
+    fileItems <- extractFromTree("FILE")
+    files <- unique(data.table::data.table(File = fileItems$resultList,
+                                           TreePath = fileItems$resultAncestorsList))
+    return(files)
+  }) #end output[[INPUT_FILES]]
+
+  output[[HDF5_TABLES]] = renderTable({
+    getInputsTree()
+    tableItems <- extractFromTree("TABLE")
+    tables <- unique(data.table::data.table(File = tableItems$resultList,
+                                            TreePath = tableItems$resultAncestorsList))
+    return(tables)
+  }) #end output[[HDF5_TABLES]]
+
+  extractFromTree <- function(target) {
+    resultList <- vector('character') #a zero length vector unlike c() which is NULL
+    resultAncestorsList <- vector('character') #a zero length vector unlike c() which is NULL
+    extractFilesFromTree <- function(node) {
+      names <- names(node)
+      for (name in names) {
+        currentNode <- node[[name]]
+        if (name == target) {
+          targetValue <- names(currentNode)[[1]]
+          ancestorPath <- getAncestorPath(currentNode)
+          resultList <<- c(resultList, targetValue)
+          resultAncestorsList <<- c(resultAncestorsList, ancestorPath)
+        } else {
+          extractFilesFromTree(currentNode) #RECURSIVE
+        }
+      } #end for loop over names
+    } # end internal function
+    extractFilesFromTree(getInputsTree())
+    return(list("resultList" = resultList,
+                "resultAncestorsList" = resultAncestorsList))
+  } #end extractFromTree
+
+  getAncestorPath <- function(leaf) {
+    ancestors <- vector('character')
+    getAncestorNamesInternal <- function(node) {
+      nodeName <- names(node)[[1]]
+      ancestors <<- c(nodeName, ancestors)
+      #stored parent when building the tree
+      if ('parent' %in% names(attributes(node))) {
+        parentNode <- attr(node, "parent")
+        getAncestorNamesInternal(parentNode) #RECURSIVE
+      }
+    } #end function getAncestorNames
+    getAncestorNamesInternal(leaf)
+    ancestorPath <- paste0(collapse="-->", ancestors)
+    return(ancestorPath)
+  } #end getAncestorPath
+
   output[[INPUTS_TREE]] <- renderTree({
     getInputsTree()
   })
 
   output[[INPUTS_TREE_SELECTED_TEXT]] <- renderText({
-
     tree <- input[[INPUTS_TREE]]
     results <- ""
     if (!is.null(tree)) {
@@ -776,64 +829,6 @@ server <- function(input, output, session) {
     } #end if tree exists
     return(results)
   }) #end output[[INPUTS_TREE_SELECTED_TEXT]]
-
-  output[[HDF5_TABLES]] = renderTable({
-    tree <- getInputsTree()
-    dt <- data.table::data.table()
-    return(dt)
-  }) #end output[[HDF5_TABLES]]
-
-  getAncestorPath <- function(leaf) {
-    ancestors <- vector('character')
-    getAncestorNamesInternal <- function(node) {
-      nodeName <- names(node)[[1]]
-      ancestors <<- c(nodeName, ancestors)
-      #stored parent when building the tree
-      if ('parent' %in% names(attributes(node))) {
-        parentNode <- attr(node, "parent")
-        getAncestorNamesInternal(parentNode) #RECURSIVE
-      }
-    } #end function getAncestorNames
-    getAncestorNamesInternal(leaf)
-    ancestorPath <- paste0(collapse="-->", ancestors)
-    return(ancestorPath)
-  } #end getAncestorPath
-
-  extractFromTree <- function(target) {
-    resultList <- vector('character') #a zero length vector unlike c() which is NULL
-    resultAncestorsList <- vector('character') #a zero length vector unlike c() which is NULL
-    extractFilesFromTree <- function(node) {
-      names <- names(node)
-      for (name in names) {
-        currentNode <- node[[name]]
-        if (name == target) {
-          targetValue <- names(currentNode)[[1]]
-          ancestorPath <- getAncestorPath(currentNode)
-          resultList <<- c(resultList, targetValue)
-          resultAncestorsList <<- c(resultAncestorsList, ancestorPath)
-        } else {
-          extractFilesFromTree(currentNode) #RECURSIVE
-        }
-      } #end for loop over names
-    } # end internal function
-    extractFilesFromTree(getInputsTree())
-    return(list("resultList" = resultList,
-                "resultAncestorsList" = resultAncestorsList))
-  } #end extractFromTree
-
-  output[[INPUT_FILES]] = renderTable({
-    fileItems <- extractFromTree("FILE")
-    files <- unique(data.table::data.table(File = fileItems$resultList,
-                                           TreePath = fileItems$resultAncestorsList))
-    return(files)
-  }) #end output[[INPUT_FILES]]
-
-  output[[HDF5_TABLES]] = renderTable({
-    tableItems <- extractFromTree("TABLE")
-    tables <- unique(data.table::data.table(File = tableItems$resultList,
-                                            TreePath = tableItems$resultAncestorsList))
-    return(tables)
-  }) #end output[[HDF5_TABLES]]
 
   output[[VE_LOG]] = renderTable({
     getScriptInfo()
