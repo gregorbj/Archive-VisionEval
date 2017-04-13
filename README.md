@@ -35,9 +35,7 @@ install.packages("jsonlite")
 
 #https://github.com/tdhock/namedCapture
 devtools::install_github("tdhock/namedCapture")
-library(namedCapture)
 devtools::install_github("trestletech/shinyTree")
-library(shinyTree)
 
 devtools::install_github("gregorbj/VisionEval/sources/framework/visioneval")
 devtools::install_github("gregorbj/VisionEval/sources/modules/VESyntheticFirms")
