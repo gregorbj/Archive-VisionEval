@@ -16,8 +16,13 @@ This repository is organized into two directories:
 ## Installation and Setup
   1. Install [R 3.3+](https://cran.r-project.org) in a location where you have write access.
   2. Start R
-  3. Run the following commands to download and install the required libraries and their dependencies:
-
+  3. If working within a proxy server (like ODOT), run the following commands to be able to install from GitHub:
+```
+library(httr)
+set_config(use_proxy(url="proxynew.odot.state.or.us", port=8080)) 
+set_config( config( ssl_verifypeer = 0L ) )
+```
+  4. Run the following commands to download and install the required libraries and their dependencies:
 ```
 source("http://bioconductor.org/biocLite.R")
 biocLite()
@@ -43,7 +48,7 @@ devtools::install_github("gregorbj/VisionEval/sources/modules/VESimHouseholds")
 ```
 
 ## Running the Pilot VE RPAT from within R
-  1. Git Clone (i.e. copy) this repository https://github.com/gregorbj/VisionEval.git to your computer.
+  1. Git Clone (i.e. copy) this repository to your computer.
   2. Start R
   3. Run the following commands:
 
@@ -61,10 +66,11 @@ source("run_model.R")
 
 ```
 library("shiny")
-library("shinyFiles")
-runGitHub( "gregorbj/VisionEval", subdir="sources/VEGUI")
+runGitHub("gregorbj/VisionEval", subdir="sources/VEGUI")
 ```
-  3. Navigate to the VERPAT run_model.R script in the copy of this repository on your computer
-  4. Run the model
+  3. The VE GUI should launch in your browser
+  4. Click "Select Scenario Script" and navigate to the VERPAT run_model.R script in your local repository
+  5. Click "Run" and then "Run Model Script" to run the VERPAT model
 
-For those new to R, we recommend installing [R Studio](https://www.rstudio.com/home/).
+
+For those new to R, we recommend installing [R Studio](http://www.rstudio.com).
