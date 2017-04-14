@@ -16,7 +16,7 @@ This repository is organized into two directories:
 ## Installation and Setup
   1. Install [R 3.3+](https://cran.r-project.org) in a location where you have write access.
   2. Start R
-  3. If working within a proxy server (like ODOT), run the following commands to be able to install from GitHub:
+  3. If working within a proxy server (like ODOT), run the following commands to enable install from GitHub:
 ```
 library(httr)
 set_config(use_proxy(url="proxynew.odot.state.or.us", port=8080)) 
@@ -43,6 +43,7 @@ devtools::install_github("tdhock/namedCapture")
 devtools::install_github("trestletech/shinyTree")
 
 devtools::install_github("gregorbj/VisionEval/sources/framework/visioneval")
+
 devtools::install_github("gregorbj/VisionEval/sources/modules/VESyntheticFirms")
 devtools::install_github("gregorbj/VisionEval/sources/modules/VESimHouseholds")
 ```
