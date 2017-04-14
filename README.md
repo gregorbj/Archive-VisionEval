@@ -43,7 +43,10 @@ devtools::install_github("tdhock/namedCapture")
 devtools::install_github("trestletech/shinyTree")
 
 devtools::install_github("gregorbj/VisionEval/sources/framework/visioneval")
-
+```
+  5. Run the following commands to download and install the required VE modules:
+```
+#the following modules are required for the pilot VERPAT; others are required for VERSPM
 devtools::install_github("gregorbj/VisionEval/sources/modules/VESyntheticFirms")
 devtools::install_github("gregorbj/VisionEval/sources/modules/VESimHouseholds")
 ```
