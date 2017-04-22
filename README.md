@@ -39,10 +39,10 @@ install.packages("shinyBS")
 install.packages("future")
 install.packages("testit")
 install.packages("jsonlite")
+install.packages("shinyAce")
 
 devtools::install_github("tdhock/namedCapture")
 devtools::install_github("trestletech/shinyTree")
-devtools::install_github("mul118/shinyMCE")
 
 devtools::install_github("gregorbj/VisionEval/sources/framework/visioneval")
 ```
