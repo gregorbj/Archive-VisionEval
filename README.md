@@ -40,6 +40,7 @@ install.packages("future")
 install.packages("testit")
 install.packages("jsonlite")
 install.packages("shinyAce")
+install.packages("envDocument")
 
 devtools::install_github("tdhock/namedCapture")
 devtools::install_github("trestletech/shinyTree")
