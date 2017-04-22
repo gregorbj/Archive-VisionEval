@@ -1,12 +1,13 @@
 library(visioneval)
-library("shiny")
-library("shinyjs")
-library("shinyFiles")
-library("data.table")
-library("shinyBS")
-library("future")
-library("testit")
-library("jsonlite")
+library(shiny)
+library(shinyjs)
+library(shinyFiles)
+library(data.table)
+library(shinyBS)
+library(future)
+library(testit)
+library(jsonlite)
+library(DT)
 
 #https://github.com/tdhock/namedCapture
 if (!require(namedCapture)) {
@@ -24,6 +25,10 @@ if (!require(shinyTree)) {
   devtools::install_github("trestletech/shinyTree")
 }
 library(shinyTree)
+
+#DT options https://rstudio.github.io/DT/options.html
+# only display the table, and nothing else
+options(DT.options = list(dom = 't', rownames='f'))
 
 #use of future in shiny: http://stackoverflow.com/questions/41610354/calling-a-shiny-javascript-callback-from-within-a-future
 plan(multiprocess) #tell "future" library to use multiprocessing
@@ -51,6 +56,8 @@ INPUTS_TREE_SELECTED_TEXT <- "INPUTS_TREE_SELECTED_TEXT"
 OUTPUTS_TREE <- "OUTPUTS_TREE"
 HDF5_TABLES <- "HDF5_TABLES"
 INPUT_FILES <- "INPUT_FILES"
+EDIT_INPUT_FILE_ID <- "EDIT_INPUT_FILE_ID"
+EDIT_INPUT_FILE_LAST_CLICK <- "EDIT_INPUT_FILE_LAST_CLICK"
 
 MODULE_PROGRESS <- "MODULE_PROGRESS"
 PAGE_TITLE <- "Pilot Model Runner and Scenario Viewer"
@@ -72,6 +79,11 @@ ui <- fluidPage(
       Shiny.onInputChange("innerWidth", window.innerWidth);
       });'
                         ),
+
+      tags$script("$(document).on('click', '#INPUT_FILES button', function () {
+                  Shiny.onInputChange('EDIT_INPUT_FILE_ID',this.id);
+                  Shiny.onInputChange('EDIT_INPUT_FILE_LAST_CLICK', Math.random())
+                  });"),
     #end tag$script
     tags$meta(charset = "UTF-8"),
     tags$meta(name = "google", content = "notranslate"),
@@ -121,16 +133,16 @@ ui <- fluidPage(
       h3("Model parameters"),
       verbatimTextOutput(MODEL_PARAMETERS_FILE, FALSE),
       h3("Geo File"),
-      tableOutput(GEO_CSV_FILE),
+      DT::dataTableOutput(GEO_CSV_FILE),
       h3("Run parameters"),
       verbatimTextOutput(RUN_PARAMETERS_FILE, FALSE)
     ),
     tabPanel("Module specifications",
              value="TAB_INPUTS",
              h3("Input files:"),
-             tableOutput(INPUT_FILES),
+             DT::dataTableOutput(INPUT_FILES),
              h3("Datastore tables:"),
-             tableOutput(HDF5_TABLES),
+             DT::dataTableOutput(HDF5_TABLES),
              h3("Module specifications:"),
              "Currently Selected:",
              verbatimTextOutput(INPUTS_TREE_SELECTED_TEXT, placeholder = TRUE),
@@ -141,9 +153,9 @@ ui <- fluidPage(
       value="TAB_RUN",
       actionButton(RUN_MODEL_BUTTON, "Run Model Script"),
       h3("Module progress:"),
-      tableOutput(MODULE_PROGRESS),
+      DT::dataTableOutput(MODULE_PROGRESS),
       h3("Modules in model:"),
-      tableOutput(MODEL_MODULES),
+      DT::dataTableOutput(MODEL_MODULES),
       h3("VisionEval console output:"),
       verbatimTextOutput(CAPTURED_SOURCE, FALSE)
     ),
@@ -153,12 +165,12 @@ ui <- fluidPage(
     #          tags$label("To Be Implemented...")
     # ),
     tabPanel(
-      "Logs",
+      "Logs (newest first) ",
       value="TAB_LOGS",
       h3("Log:"),
-      tableOutput(VE_LOG),
+      DT::dataTableOutput(VE_LOG),
       h3("Console output:"),
-      tableOutput(DEBUG_CONSOLE_OUTPUT)
+      DT::dataTableOutput(DEBUG_CONSOLE_OUTPUT)
     )
   ) #end navlistPanel
   ) #end ui <- fluid page
@@ -171,9 +183,6 @@ server <- function(input, output, session) {
     reactiveValues()
   asyncDataBeingLoaded <- list()
 
-  filePaths <-
-    list()
-
   otherReactiveValues <-
     reactiveValues() #WARNING- DON'T USE VARIABLES TO INITIALIZE LIST KEYS - the variable name will be used, not the value
 
@@ -182,12 +191,12 @@ server <- function(input, output, session) {
 
   otherReactiveValues[[MODULE_PROGRESS]] <- data.table::data.table()
 
-  filePaths[[CAPTURED_SOURCE]] <-
+  reactiveFilePaths <-reactiveValues()
+
+  reactiveFilePaths[[CAPTURED_SOURCE]] <-
     tempfile(pattern = "VEGUI_source_capture", fileext = ".txt")
 
-  oldFilePaths <- filePaths
   reactiveFileReaders <- list()
-
 
   debugConsole <- function(msg) {
     testit::assert("debugConsole was passed NULL!", !is.null(msg))
@@ -281,20 +290,7 @@ server <- function(input, output, session) {
           DEFAULT_POLL_INTERVAL,
           session,
           filePath = function() {
-            if (is.null(oldFilePaths[[reactiveFileNameKey]]) ||
-                (oldFilePaths[[reactiveFileNameKey]] != filePaths[[reactiveFileNameKey]])) {
-              if (is.null(filePaths[[reactiveFileNameKey]])) {
-                #cannot be null since it is used by reactiveFileReader in file.info so change to blank which does not cause an error
-                filePaths[[reactiveFileNameKey]] <<- ""
-              }
-              debugConsole(paste0(reactiveFileNameKey,
-                                  ": set to '",
-                                  filePaths[[reactiveFileNameKey]],
-                                  "'"))
-              oldFilePaths[[reactiveFileNameKey]] <<-
-                filePaths[[reactiveFileNameKey]]
-            }
-            returnValue <- filePaths[[reactiveFileNameKey]]
+            returnValue <- reactiveFilePaths[[reactiveFileNameKey]]
             if (is.null(returnValue)) {
               returnValue <-
                 "" #cannot be null since it is used by reactiveFileReader in file.info.
@@ -455,10 +451,10 @@ server <- function(input, output, session) {
     readFunc = function(filePath) {
       cleanedLines <- SafeReadAndCleanLines(filePath)
       debugConsole(paste0(
-        "startModulesLogStatements",
+        "VE_LOG",
         paste0(collapse = ", ", cleanedLines)
       ))
-      return(cleanedLines)
+      return(rev(cleanedLines))
     }
   ) #end VE_LOG file handler
 
@@ -542,7 +538,7 @@ server <- function(input, output, session) {
       visioneval::initLog()
       visioneval::writeLog("VE_GUI called visioneval::initModelStateFile() and visioneval::initLog()")
       otherReactiveValues[[MODEL_STATE_LS]] <<- ModelState_ls
-      filePaths[[VE_LOG]] <<-
+      reactiveFilePaths[[VE_LOG]] <<-
         file.path(scriptInfo$fileDirectory, ModelState_ls$LogFile)
       debugConsole(
         paste0(
@@ -550,7 +546,7 @@ server <- function(input, output, session) {
           object.size(ModelState_ls)
         )
       )
-      filePaths[[MODEL_STATE_FILE]] <<-
+      reactiveFilePaths[[MODEL_STATE_FILE]] <<-
         file.path(scriptInfo$fileDirectory, "ModelState.Rda")
       getModelModules(scriptInfo$datapath)
       startAsyncDataLoad(
@@ -577,13 +573,13 @@ server <- function(input, output, session) {
 
       defsDirectory <- file.path(scriptInfo$fileDirectory, "defs")
 
-      filePaths[[MODEL_PARAMETERS_FILE]] <<-
+      reactiveFilePaths[[MODEL_PARAMETERS_FILE]] <<-
         file.path(defsDirectory, "model_parameters.json")
 
-      filePaths[[RUN_PARAMETERS_FILE]] <<-
+      reactiveFilePaths[[RUN_PARAMETERS_FILE]] <<-
         file.path(defsDirectory, "run_parameters.json")
 
-      filePaths[[GEO_CSV_FILE]] <<-
+      reactiveFilePaths[[GEO_CSV_FILE]] <<-
         file.path(defsDirectory, "geo.csv")
 
       debugConsole("getScriptInfo exited")
@@ -605,7 +601,7 @@ server <- function(input, output, session) {
     enable(id = "scriptOutput", selector = NULL)
     enable(id = "modeState", selector = NULL)
     disableActionButtons()
-    startAsyncDataLoad(CAPTURED_SOURCE, future(getScriptOutput(datapath, filePaths[[CAPTURED_SOURCE]])),
+    startAsyncDataLoad(CAPTURED_SOURCE, future(getScriptOutput(datapath, isolate(reactiveFilePaths[[CAPTURED_SOURCE]]))),
                        function(asyncDataName, asyncData) {
                          enableActionButtons()
                          debugConsole(
@@ -687,8 +683,8 @@ server <- function(input, output, session) {
                  debugConsole("observeEvent input$copyModelDirectory exited")
                }) #end copyModelDirectory observeEvent
 
-  output[[DEBUG_CONSOLE_OUTPUT]] = renderTable({
-    otherReactiveValues[[DEBUG_CONSOLE_OUTPUT]]
+  output[[DEBUG_CONSOLE_OUTPUT]] = renderDataTable({
+    DT::datatable(otherReactiveValues[[DEBUG_CONSOLE_OUTPUT]], options = list(dom = 'ft'))
   })
 
   getInputsTree <- reactive({
@@ -747,20 +743,40 @@ server <- function(input, output, session) {
     return(node)
   } #end semiFlatten
 
-  output[[INPUT_FILES]] = renderTable({
+  getInputFilesTable <- reactive({
     getInputsTree()
     fileItems <- extractFromTree("FILE")
-    files <- unique(data.table::data.table(File = fileItems$resultList))
-                                           # TreePath = fileItems$resultAncestorsList))
-    return(files)
+    inputFilesDataTable <- unique(data.table::data.table(File = fileItems$resultList))
+    return(inputFilesDataTable)
+  })
+
+  output[[INPUT_FILES]] = renderDataTable({
+    DT <- getInputFilesTable()
+    DT[["Actions"]]<-
+      paste0('
+             <div class="btn-group" role="group" aria-label="Basic example">
+             <button type="button" class="btn btn-secondary edit" id=edite_',1:nrow(DT),'>Edit</button>
+             </div>
+             ')
+    returnValue <- DT::datatable(DT,
+              escape=F)
+    return(returnValue)
   }) #end output[[INPUT_FILES]]
 
-  output[[HDF5_TABLES]] = renderTable({
+  #https://antoineguillot.wordpress.com/2017/03/01/three-r-shiny-tricks-to-make-your-shiny-app-shines-33-buttons-to-delete-edit-and-compare-datatable-rows
+  observeEvent(input[[EDIT_INPUT_FILE_LAST_CLICK]], label = EDIT_INPUT_FILE_LAST_CLICK, handlerExpr = {
+    buttonId <- input[[EDIT_INPUT_FILE_ID]]
+    row_to_edit=as.numeric(gsub("edit_","",buttonId))
+    DT <- getInputFilesTable()
+    debugConsole(paste0("got click inside table. id: ", input[[EDIT_INPUT_FILE_ID]], "row to edit: ", row_to_edit, " fileName: ", DT[row_to_edit, File]))
+  })
+
+  output[[HDF5_TABLES]] = renderDataTable({
     getInputsTree()
     tableItems <- extractFromTree("TABLE")
     tables <- unique(data.table::data.table(File = tableItems$resultList))
                                             # TreePath = tableItems$resultAncestorsList))
-    return(tables)
+    return(DT::datatable(tables))
   }) #end output[[HDF5_TABLES]]
 
   extractFromTree <- function(target) {
@@ -824,14 +840,18 @@ server <- function(input, output, session) {
     return(results)
   }) #end output[[INPUTS_TREE_SELECTED_TEXT]]
 
-  output[[VE_LOG]] = renderTable({
+  output[[VE_LOG]] = renderDataTable({
     getScriptInfo()
-    reactiveFileReaders[[VE_LOG]]()
+    logLines <- reactiveFileReaders[[VE_LOG]]()
+    DT <- data.table::data.table(message = logLines)
+    returnValue <- DT::datatable(DT)
+    return(returnValue)
   })
 
-  output[[GEO_CSV_FILE]] = renderTable({
+  output[[GEO_CSV_FILE]] = renderDataTable({
     getScriptInfo()
-    reactiveFileReaders[[GEO_CSV_FILE]]()
+    returnValue <- DT::datatable(reactiveFileReaders[[GEO_CSV_FILE]]())
+    return(returnValue)
   })
 
   output[[RUN_PARAMETERS_FILE]] = renderText({
@@ -860,13 +880,15 @@ server <- function(input, output, session) {
     getScriptInfo()$datapath
   })
 
-  output[[MODULE_PROGRESS]] = renderTable({
-    getModuleProgress()
+  output[[MODULE_PROGRESS]] = renderDataTable({
+    returnValue <- DT::datatable(getModuleProgress())
+    return(returnValue)
   })
 
-  output[[MODEL_MODULES]] = renderTable({
+  output[[MODEL_MODULES]] = renderDataTable({
     getScriptInfo()
-    asyncData[[MODEL_MODULES]]
+    returnValue <- DT::datatable(asyncData[[MODEL_MODULES]])
+    return(returnValue)
   })
 
 } #end server
