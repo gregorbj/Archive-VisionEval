@@ -9,6 +9,7 @@ library(testit)
 library(jsonlite)
 library(DT)
 
+
 #https://github.com/tdhock/namedCapture
 if (!require(namedCapture)) {
   if (!require(devtools)) {
@@ -17,6 +18,14 @@ if (!require(namedCapture)) {
   devtools::install_github("tdhock/namedCapture")
 }
 library(namedCapture)
+
+if (!require(shinyMCE)) {
+  if (!require("devtools"))
+    install.packages("devtools")
+  devtools::install_github("mul118/shinyMCE")
+}
+
+library(shinyMCE)
 
 if (!require(shinyTree)) {
   if (!require(devtools)) {
@@ -58,6 +67,7 @@ HDF5_TABLES <- "HDF5_TABLES"
 INPUT_FILES <- "INPUT_FILES"
 EDIT_INPUT_FILE_ID <- "EDIT_INPUT_FILE_ID"
 EDIT_INPUT_FILE_LAST_CLICK <- "EDIT_INPUT_FILE_LAST_CLICK"
+EDITOR_INPUT_FILE <- "EDITOR_INPUT_FILE"
 
 MODULE_PROGRESS <- "MODULE_PROGRESS"
 PAGE_TITLE <- "Pilot Model Runner and Scenario Viewer"
@@ -141,6 +151,7 @@ ui <- fluidPage(
              value="TAB_INPUTS",
              h3("Input files:"),
              DT::dataTableOutput(INPUT_FILES),
+             shinyMCE::tinyMCE(EDITOR_INPUT_FILE, content=""),
              h3("Datastore tables:"),
              DT::dataTableOutput(HDF5_TABLES),
              h3("Module specifications:"),
@@ -385,9 +396,19 @@ server <- function(input, output, session) {
 
   observe({
     shinyjs::toggleState(id = COPY_MODEL_BUTTON,
-                condition = input[[SELECT_RUN_SCRIPT_BUTTON]],
-                selector = NULL)
+                         condition = input[[SELECT_RUN_SCRIPT_BUTTON]],
+                         selector = NULL)
   })
+
+  observe({
+    toggle(id=EDITOR_INPUT_FILE,
+           condition = otherReactiveValues[[EDITOR_INPUT_FILE]],
+           anim=TRUE,
+           animType = "Slide",
+           time = 0.25,
+           selector = NULL)
+  })
+
 
   #how to hide/show tabs https://github.com/daattali/advanced-shiny/blob/master/hide-tab/app.R
   observe({
@@ -755,7 +776,7 @@ server <- function(input, output, session) {
     DT[["Actions"]]<-
       paste0('
              <div class="btn-group" role="group" aria-label="Basic example">
-             <button type="button" class="btn btn-secondary edit" id=edite_',1:nrow(DT),'>Edit</button>
+             <button type="button" class="btn btn-secondary edit" id=edit_',1:nrow(DT),'>Edit</button>
              </div>
              ')
     returnValue <- DT::datatable(DT,
@@ -768,7 +789,14 @@ server <- function(input, output, session) {
     buttonId <- input[[EDIT_INPUT_FILE_ID]]
     row_to_edit=as.numeric(gsub("edit_","",buttonId))
     DT <- getInputFilesTable()
-    debugConsole(paste0("got click inside table. id: ", input[[EDIT_INPUT_FILE_ID]], "row to edit: ", row_to_edit, " fileName: ", DT[row_to_edit, File]))
+    fileName <- DT[row_to_edit, File]
+    debugConsole(paste0("got click inside table. id: ", input[[EDIT_INPUT_FILE_ID]], " row to edit: ", row_to_edit, " fileName: ", fileName))
+
+    filePath <- file.path(getScriptInfo()$fileDirectory, "inputs", fileName)
+    otherReactiveValues[[EDITOR_INPUT_FILE]] <- TRUE
+    fileLines <- SafeReadAndCleanLines(filePath)
+    fileContent <- paste0(collapse="\n", fileLines)
+    shinyMCE::updateTinyMCE(session, EDITOR_INPUT_FILE, content = fileContent)
   })
 
   output[[HDF5_TABLES]] = renderDataTable({
