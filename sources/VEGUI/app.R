@@ -76,12 +76,12 @@ volumeRoots = getVolumes("")
 ui <- fluidPage(
   useShinyjs(),
   tags$head(
-    tags$style(
-      type = "text/css",
-      ".recalculating { opacity: 1.0; }",
-      #want to not disply leaf icons
-      "li.jstree-leaf > a .jstree-icon { display: none !important; }"
-    ),
+    # tags$style(
+    #   type = "text/css",
+    #   ".recalculating { opacity: 1.0; }",
+    #   #want to not display leaf icons
+    #   "li.jstree-leaf > a .jstree-icon { display: none !important; }"
+    # ),
     # resize to window: http://stackoverflow.com/a/37060206/283973
     tags$script(
       '$(document).on("shiny:connected", function(e) {
@@ -687,18 +687,11 @@ server <- function(input, output, session) {
         #replace node with semiFlattened node
         childPath <- paste0(ancestorPath, "-->", name)
         childNodeValue <- node[[name]]
-
-        if (is.character(childNodeValue) &&
-            (nchar(trimws(childNodeValue)) == 0)) {
-          node[[name]] <- structure("", sticon="signal")
-        }
-        else {
-          semiFlattenedChildNode <-
-            semiFlatten(childNodeValue, childPath)
-          attr(semiFlattenedChildNode, "ancestorPath") <- childPath
-          #replace the child with the flattened version
-          node[[name]] <- semiFlattenedChildNode
-        }
+        semiFlattenedChildNode <-
+          semiFlatten(childNodeValue, childPath)
+        attr(semiFlattenedChildNode, "ancestorPath") <- childPath
+        #replace the child with the flattened version
+        node[[name]] <- semiFlattenedChildNode
       } #end for loop over child nodes
     } # end if list
     else if (length(node) > 1) {
@@ -711,9 +704,13 @@ server <- function(input, output, session) {
       node <- leafList
     } else {
       #must be a leaf but shinyTree requires even these be lists
-      leafNode <- list()
-      leafNode[[as.character(node)]] <- "ignored-type-2"
-      attr(leafNode[[as.character(node)]], "sticon") <- "signal"
+      nodeString <- trimws(as.character(node))
+      if (nodeString == "") {
+        nodeString <- "{empty}"
+      }
+      #icons https://shiny.rstudio.com/reference/shiny/latest/icon.html
+      leafNode <- structure(list(), sticon="signal")
+      leafNode[[nodeString]] <- structure("ignored-type-2", sticon="asterisk")
       node <- leafNode
     }
     return(node)
