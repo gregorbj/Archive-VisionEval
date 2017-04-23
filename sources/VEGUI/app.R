@@ -798,7 +798,6 @@ server <- function(input, output, session) {
             file.rename(filePath, paste0(filePath,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"), ".bak"))
             editedContent <- input[[EDITOR_INPUT_FILE]]
             write(editedContent, filePath)
-            print(paste("Going to save edited content:", editedContent))
             otherReactiveValues[[EDITOR_INPUT_FILE]] <- FALSE
           } else if (action == "cancel") {
             otherReactiveValues[[EDITOR_INPUT_FILE]] <- FALSE
