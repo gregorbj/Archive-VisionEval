@@ -538,6 +538,8 @@ server <- function(input, output, session) {
       reactiveFilePaths[[GEO_CSV_FILE]] <<-
         file.path(defsDirectory, "geo.csv")
 
+      #change to the settings tab
+      updateNavlistPanel(session, "navlist", selected = "TAB_SETTINGS")
       debugConsole("getScriptInfo exited")
       return(scriptInfo)
     }) #end getScriptInfo reactive
