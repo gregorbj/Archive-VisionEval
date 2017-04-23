@@ -76,9 +76,12 @@ volumeRoots = getVolumes("")
 ui <- fluidPage(
   useShinyjs(),
   tags$head(
-    tags$style(type = "text/css",
-               ".recalculating { opacity: 1.0; }",
-              "li.jstree-leaf > a .jstree-icon { display: none !important; }"),
+    tags$style(
+      type = "text/css",
+      ".recalculating { opacity: 1.0; }",
+      #want to not disply leaf icons
+      "li.jstree-leaf > a .jstree-icon { display: none !important; }"
+    ),
     # resize to window: http://stackoverflow.com/a/37060206/283973
     tags$script(
       '$(document).on("shiny:connected", function(e) {
@@ -554,7 +557,7 @@ server <- function(input, output, session) {
     req(input[[SELECT_RUN_SCRIPT_BUTTON]])
     debugConsole("observeEvent input$runModel entered")
     datapath <- getScriptInfo()$datapath
-   disableActionButtons()
+    disableActionButtons()
     startAsyncTask(
       CAPTURED_SOURCE,
       future(getScriptOutput(
@@ -685,8 +688,11 @@ server <- function(input, output, session) {
         childPath <- paste0(ancestorPath, "-->", name)
         childNodeValue <- node[[name]]
 
-        if (!is.character(childNodeValue) ||
-            (nchar(trimws(childNodeValue)) > 0)) {
+        if (is.character(childNodeValue) &&
+            (nchar(trimws(childNodeValue)) == 0)) {
+          node[[name]] <- structure("", sticon="signal")
+        }
+        else {
           semiFlattenedChildNode <-
             semiFlatten(childNodeValue, childPath)
           attr(semiFlattenedChildNode, "ancestorPath") <- childPath
@@ -707,6 +713,7 @@ server <- function(input, output, session) {
       #must be a leaf but shinyTree requires even these be lists
       leafNode <- list()
       leafNode[[as.character(node)]] <- "ignored-type-2"
+      attr(leafNode[[as.character(node)]], "sticon") <- "signal"
       node <- leafNode
     }
     return(node)
