@@ -77,7 +77,8 @@ ui <- fluidPage(
   useShinyjs(),
   tags$head(
     tags$style(type = "text/css",
-               ".recalculating { opacity: 1.0; }"),
+               ".recalculating { opacity: 1.0; }",
+              "li.jstree-leaf > a .jstree-icon { display: none !important; }"),
     # resize to window: http://stackoverflow.com/a/37060206/283973
     tags$script(
       '$(document).on("shiny:connected", function(e) {
@@ -157,7 +158,7 @@ navlistPanel(
     h3("Module specifications:"),
     "Currently Selected:",
     verbatimTextOutput(INPUTS_TREE_SELECTED_TEXT, placeholder = TRUE),
-    shinyTree(INPUTS_TREE)
+    shinyTree::shinyTree(INPUTS_TREE)
   ),
   tabPanel(
     "Run",
@@ -360,45 +361,9 @@ server <- function(input, output, session) {
       anim = TRUE,
       animType = "Slide",
       time = 0.25,
-      selector = "#navlist li a[data-value=TAB_SETTINGS]"
+      #select all items where data-value starts with 'TAB_'. The ^= similar to ^ in grep 'starts with'
+      selector = "#navlist li a[data-value^=TAB_]"
     )
-
-    toggle(
-      id = NULL,
-      condition = input[[SELECT_RUN_SCRIPT_BUTTON]],
-      anim = TRUE,
-      animType = "Slide",
-      time = 0.25,
-      selector = "#navlist li a[data-value=TAB_INPUTS]"
-    )
-
-    toggle(
-      id = NULL,
-      condition = input[[SELECT_RUN_SCRIPT_BUTTON]],
-      anim = TRUE,
-      animType = "Slide",
-      time = 0.25,
-      selector = "#navlist li a[data-value=TAB_RUN]"
-    )
-
-    toggle(
-      id = NULL,
-      condition = input[[SELECT_RUN_SCRIPT_BUTTON]],
-      anim = TRUE,
-      animType = "Slide",
-      time = 0.25,
-      selector = "#navlist li a[data-value=TAB_OUTPUTS]"
-    )
-
-    toggle(
-      id = NULL,
-      condition = input[[SELECT_RUN_SCRIPT_BUTTON]],
-      anim = TRUE,
-      animType = "Slide",
-      time = 0.25,
-      selector = "#navlist li a[data-value=TAB_LOGS]"
-    )
-
   })
 
   SafeReadAndCleanLines <- function(filePath) {
@@ -554,12 +519,10 @@ server <- function(input, output, session) {
           #   elapsedTime = elapsedTime,
           #   caughtError = caughtError,
           #   caughtWarning = caughtWarning
+          enableActionButtons()
           asyncDatum <- asyncResult[["taskResult"]]
           asyncData[[MODEL_MODULES]] <<- asyncDatum
-          if (!is.null(asyncDatum)) {
-            enable(id = RUN_MODEL_BUTTON, selector = NULL)
-            enable(id = COPY_MODEL_BUTTON, selector = NULL)
-          }
+          getInputsTree() #start this since it takes a while
         },
         debug = TRUE
       )
@@ -591,9 +554,7 @@ server <- function(input, output, session) {
     req(input[[SELECT_RUN_SCRIPT_BUTTON]])
     debugConsole("observeEvent input$runModel entered")
     datapath <- getScriptInfo()$datapath
-    enable(id = "scriptOutput", selector = NULL)
-    enable(id = "modeState", selector = NULL)
-    disableActionButtons()
+   disableActionButtons()
     startAsyncTask(
       CAPTURED_SOURCE,
       future(getScriptOutput(
@@ -608,6 +569,7 @@ server <- function(input, output, session) {
         #   elapsedTime = elapsedTime,
         #   caughtError = caughtError,
         #   caughtWarning = caughtWarning
+        enableActionButtons()
         asyncDatum <- asyncResult[["taskResult"]]
         asyncData[[CAPTURED_SOURCE]] <<- asyncDatum
       },
@@ -723,12 +685,14 @@ server <- function(input, output, session) {
         childPath <- paste0(ancestorPath, "-->", name)
         childNodeValue <- node[[name]]
 
-        semiFlattenedChildNode <-
-          semiFlatten(childNodeValue, childPath)
-        attr(semiFlattenedChildNode, "ancestorPath") <-
-          childPath
-        #replace the child with the flattened version
-        node[[name]] <- semiFlattenedChildNode
+        if (!is.character(childNodeValue) ||
+            (nchar(trimws(childNodeValue)) > 0)) {
+          semiFlattenedChildNode <-
+            semiFlatten(childNodeValue, childPath)
+          attr(semiFlattenedChildNode, "ancestorPath") <- childPath
+          #replace the child with the flattened version
+          node[[name]] <- semiFlattenedChildNode
+        }
       } #end for loop over child nodes
     } # end if list
     else if (length(node) > 1) {
@@ -840,7 +804,9 @@ server <- function(input, output, session) {
   } #end getAncestorPath
 
   output[[INPUTS_TREE]] <- renderTree({
-    getInputsTree()
+    specTree <- getInputsTree()
+    foo <- "bar"
+    return(specTree)
   })
 
   output[[INPUTS_TREE_SELECTED_TEXT]] <- renderText({
