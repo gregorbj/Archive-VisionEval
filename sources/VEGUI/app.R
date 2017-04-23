@@ -201,7 +201,7 @@ server <- function(input, output, session) {
     reactiveValues() #WARNING- DON'T USE VARIABLES TO INITIALIZE LIST KEYS - the variable name will be used, not the value
 
   otherReactiveValues[[DEBUG_CONSOLE_OUTPUT]] <-
-    data.table::data.table(time = paste(Sys.time()), message = "Placeholder to be deleted")[-1, ]
+    data.table::data.table(time = paste(Sys.time()), message = "Placeholder to be deleted")[-1,]
 
   otherReactiveValues[[MODULE_PROGRESS]] <- data.table::data.table()
 
@@ -400,7 +400,7 @@ server <- function(input, output, session) {
     result <- data.table::data.table()
     if (length(cleanedLogLines) > 0) {
       modulesFoundInLogFile <-
-        data.table::as.data.table(namedCapture::str_match_named(rev(cleanedLogLines), pattern))[!is.na(actionType),]
+        data.table::as.data.table(namedCapture::str_match_named(rev(cleanedLogLines), pattern))[!is.na(actionType), ]
       if (nrow(modulesFoundInLogFile) > 0) {
         result <- modulesFoundInLogFile
       }
@@ -709,8 +709,9 @@ server <- function(input, output, session) {
         nodeString <- "{empty}"
       }
       #icons https://shiny.rstudio.com/reference/shiny/latest/icon.html
-      leafNode <- structure(list(), sticon="signal")
-      leafNode[[nodeString]] <- structure("ignored-type-2", sticon="asterisk")
+      leafNode <- structure(list(), sticon = "signal")
+      leafNode[[nodeString]] <-
+        structure("ignored-type-2", sticon = "asterisk")
       node <- leafNode
     }
     return(node)
@@ -721,6 +722,14 @@ server <- function(input, output, session) {
     fileItems <- extractFromTree("FILE")
     inputFilesDataTable <-
       unique(data.table::data.table(File = fileItems$resultList))
+
+    #just for testing duplicate the table
+    # inputFilesDataTable <-
+    #   rbindlist(list(
+    #     inputFilesDataTable,
+    #     inputFilesDataTable,
+    #     inputFilesDataTable
+    #   ))
     return(inputFilesDataTable)
   })
 
@@ -730,9 +739,15 @@ server <- function(input, output, session) {
       paste0(
         '
         <div class="btn-group" role="group" aria-label="Basic example">
-        <button type="button" class="btn btn-secondary edit" id=edit_',
+        <button type="button" class="btn btn-secondary" id=edit_',
         1:nrow(DT),
         '>Edit</button>
+        <button type="button" class="btn btn-secondary" disabled id=cancel_',
+        1:nrow(DT),
+        '>Cancel</button>
+        <button type="button" class="btn btn-secondary" disabled id=save_',
+        1:nrow(DT),
+        '>Save</button>
         </div>
         '
       )
@@ -744,27 +759,78 @@ server <- function(input, output, session) {
   #https://antoineguillot.wordpress.com/2017/03/01/three-r-shiny-tricks-to-make-your-shiny-app-shines-33-buttons-to-delete-edit-and-compare-datatable-rows
   observeEvent(input[[EDIT_INPUT_FILE_LAST_CLICK]], label = EDIT_INPUT_FILE_LAST_CLICK, handlerExpr = {
     buttonId <- input[[EDIT_INPUT_FILE_ID]]
-    row_to_edit = as.numeric(gsub("edit_", "", buttonId))
+    namedResult <- data.table::as.data.table(namedCapture::str_match_named(buttonId, "^(?<action>[^_]+)_(?<row>.*)$"))
+    action <- namedResult[, action]
+    row <- as.integer(namedResult[, row])
     DT <- getInputFilesTable()
-    fileName <- DT[row_to_edit, File]
+    fileName <- DT[row, File]
     debugConsole(
-      paste0(
-        "got click inside table. id: ",
-        input[[EDIT_INPUT_FILE_ID]],
-        " row to edit: ",
-        row_to_edit,
-        " fileName: ",
+      paste(
+        "got click inside table.  buttonId:",
+        buttonId,
+        " action:",
+        action,
+        "row:",
+        row,
+        "fileName:",
         fileName
       )
     )
 
-    filePath <-
-      file.path(getScriptInfo()$fileDirectory, "inputs", fileName)
-    otherReactiveValues[[EDITOR_INPUT_FILE]] <- TRUE
-    fileLines <- SafeReadAndCleanLines(filePath)
-    fileContent <- paste0(collapse = "\n", fileLines)
-    shinyAce::updateAceEditor(session, EDITOR_INPUT_FILE, value = fileContent)
-  })
+    for (rowNumber in 1:nrow(DT)) {
+      editButtonOnRow <- paste0("edit", "_", rowNumber)
+      if (rowNumber == row) {
+        cancelButtonOnRow <- paste0("cancel", "_", rowNumber)
+        saveButtonOnRow <- paste0("save", "_", rowNumber)
+        filePath <-
+          file.path(getScriptInfo()$fileDirectory, "inputs", fileName)
+        #do the appropriate action
+        if (action == "edit") {
+          otherReactiveValues[[EDITOR_INPUT_FILE]] <- TRUE
+          fileLines <- SafeReadAndCleanLines(filePath)
+          fileContent <- paste0(collapse = "\n", fileLines)
+          shinyAce::updateAceEditor(session, EDITOR_INPUT_FILE, value = fileContent)
+          shinyjs::disable(editButtonOnRow, selector = NULL)
+          shinyjs::enable(saveButtonOnRow, selector = NULL)
+          shinyjs::enable(cancelButtonOnRow, selector = NULL)
+        } else {
+          if (action == "save") {
+            file.rename(filePath, paste0(filePath,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"), ".bak"))
+            editedContent <- input[[EDITOR_INPUT_FILE]]
+            write(editedContent, filePath)
+            print(paste("Going to save edited content:", editedContent))
+            otherReactiveValues[[EDITOR_INPUT_FILE]] <- FALSE
+          } else if (action == "cancel") {
+            otherReactiveValues[[EDITOR_INPUT_FILE]] <- FALSE
+          } else {
+            stop(
+              paste(
+                "Got an unexpected button action. buttonId:",
+                buttonId,
+                " action:",
+                action,
+                "row:",
+                row
+              )
+            )
+          }
+          shinyAce::updateAceEditor(session, EDITOR_INPUT_FILE, value = "")
+          shinyjs::enable(editButtonOnRow, selector = NULL)
+          shinyjs::disable(saveButtonOnRow, selector = NULL)
+          shinyjs::disable(cancelButtonOnRow, selector = NULL)
+        }
+      } else {
+        #if not row clicked on then enable or disable edit button
+        #depending whether we beginning editing (disable all others)
+        #or finishing editing (re-enabling all others)
+        if (action == "edit") {
+          shinyjs::disable(editButtonOnRow, selector = NULL)
+        } else {
+          shinyjs::enable(editButtonOnRow, selector = NULL)
+        }
+      } #end if not clicked on row
+    } #end for loop over files
+  }) #end observeEven click on button in file table
 
   output[[HDF5_TABLES]] = renderDataTable({
     getInputsTree()
