@@ -10,6 +10,7 @@ library(jsonlite)
 library(DT)
 library(shinyAce)
 library(envDocument)
+library(rhdf5)
 
 #How to get script directory: http://stackoverflow.com/a/30306616/283973
 scriptDir <- getSrcDirectory(function(x)
@@ -66,6 +67,9 @@ INPUT_FILES <- "INPUT_FILES"
 EDIT_INPUT_FILE_ID <- "EDIT_INPUT_FILE_ID"
 EDIT_INPUT_FILE_LAST_CLICK <- "EDIT_INPUT_FILE_LAST_CLICK"
 EDITOR_INPUT_FILE <- "EDITOR_INPUT_FILE"
+DATASTORE <- "DATASTORE"
+DATASTORE_TREE <- "DATASTORE_TREE"
+DATASTORE_TABLE <- "DATASTORE_TABLE"
 
 MODULE_PROGRESS <- "MODULE_PROGRESS"
 PAGE_TITLE <- "Pilot Model Runner and Scenario Viewer"
@@ -141,6 +145,9 @@ navlistPanel(
   tabPanel(
     title = "Settings",
     value = "TAB_SETTINGS",
+    h3("Datastore:"),
+    shinyTree::shinyTree(DATASTORE_TREE),
+    DT::dataTableOutput(DATASTORE_TABLE),
     h3("Model state"),
     verbatimTextOutput(MODEL_STATE_FILE, FALSE),
     h3("Model parameters"),
@@ -417,6 +424,17 @@ server <- function(input, output, session) {
   ) #end VE_LOG file handler
 
   registerReactiveFileHandler(
+    DATASTORE,
+    readFunc = function(filePath) {
+      returnValue <- list(
+      table = rhdf5::h5ls(filePath),
+      tree = rhdf5::h5dump(filePath, load=FALSE)
+      )
+      return(returnValue)
+    }
+  ) #end DATASTORE
+
+  registerReactiveFileHandler(
     CAPTURED_SOURCE,
     readFunc = function(filePath) {
       debugConsole(
@@ -495,7 +513,6 @@ server <- function(input, output, session) {
       visioneval::initModelStateFile()
       visioneval::initLog()
       visioneval::writeLog("VE_GUI called visioneval::initModelStateFile() and visioneval::initLog()")
-      otherReactiveValues[[MODEL_STATE_LS]] <<- ModelState_ls
       reactiveFilePaths[[VE_LOG]] <<-
         file.path(scriptInfo$fileDirectory, ModelState_ls$LogFile)
       debugConsole(
@@ -504,32 +521,12 @@ server <- function(input, output, session) {
           object.size(ModelState_ls)
         )
       )
+
+      reactiveFilePaths[[DATASTORE]] <<-
+        file.path(scriptInfo$fileDirectory, ModelState_ls$DatastoreName)
+
       reactiveFilePaths[[MODEL_STATE_FILE]] <<-
         file.path(scriptInfo$fileDirectory, "ModelState.Rda")
-      getModelModules(scriptInfo$datapath)
-      startAsyncTask(
-        MODEL_MODULES,
-        future({
-          ModelState_ls
-          getModelModules(scriptInfo$datapath)
-        }),
-        callback = function(asyncResult) {
-          # asyncResult:
-          #   asyncTaskName = asyncTaskName,
-          #   taskResult = taskResult,
-          #   submitTime = submitTime,
-          #   endTime = endTime,
-          #   elapsedTime = elapsedTime,
-          #   caughtError = caughtError,
-          #   caughtWarning = caughtWarning
-          enableActionButtons()
-          asyncDatum <- asyncResult[["taskResult"]]
-          asyncData[[MODEL_MODULES]] <<- asyncDatum
-          getInputsTree() #start this since it takes a while
-        },
-        debug = TRUE
-      )
-
       defsDirectory <- file.path(scriptInfo$fileDirectory, "defs")
 
       reactiveFilePaths[[MODEL_PARAMETERS_FILE]] <<-
@@ -545,13 +542,14 @@ server <- function(input, output, session) {
       return(scriptInfo)
     }) #end getScriptInfo reactive
 
-  getModelModules <- function(datapath) {
+  getModelModules <- reactive({
     debugConsole(paste0("getModelModules entered with datapath: ", datapath))
+    datapath <- getScriptInfo()$datapath
     setwd(dirname(datapath))
     modelModules <-
       data.table::as.data.table(visioneval::parseModelScript(datapath, TestMode = TRUE))
     return(modelModules)
-  } #end getModelModules
+  }) #end getModelModules
 
   observeEvent(input[[RUN_MODEL_BUTTON]], label = RUN_MODEL_BUTTON, handlerExpr = {
     req(input[[SELECT_RUN_SCRIPT_BUTTON]])
@@ -573,8 +571,8 @@ server <- function(input, output, session) {
         #   caughtError = caughtError,
         #   caughtWarning = caughtWarning
         enableActionButtons()
-        asyncDatum <- asyncResult[["taskResult"]]
-        asyncData[[CAPTURED_SOURCE]] <<- asyncDatum
+        #don't need to get result since it is written to reactiveFilePaths[[CAPTURED_SOURCE]] file
+        #which is already being observer
       },
       debug = TRUE
     )
@@ -653,7 +651,7 @@ server <- function(input, output, session) {
   })
 
   getInputsTree <- reactive({
-    modules <- asyncData[[MODEL_MODULES]]
+    modules <- getModelModules()
 
     scriptInfo <- getScriptInfo()
     #prepare for calling into visioneval for module specs
@@ -834,8 +832,9 @@ server <- function(input, output, session) {
   output[[HDF5_TABLES]] = renderDataTable({
     getInputsTree()
     tableItems <- extractFromTree("TABLE")
+    groupItems <- extractFromTree("GROUP")
     tables <-
-      unique(data.table::data.table(File = tableItems$resultList))
+      unique(data.table::data.table(Group = groupItems$resultList, Table = tableItems$resultList))
     # TreePath = tableItems$resultAncestorsList))
     return(DT::datatable(tables))
   }) #end output[[HDF5_TABLES]]
@@ -874,8 +873,17 @@ server <- function(input, output, session) {
 
   output[[INPUTS_TREE]] <- renderTree({
     specTree <- getInputsTree()
-    foo <- "bar"
     return(specTree)
+  })
+
+  output[[DATASTORE_TREE]] <- renderTree({
+    datastoreTree <- reactiveFileReaders[[DATASTORE]]()$tree
+    return(datastoreTree)
+  })
+
+  output[[DATASTORE_TABLE]] <- renderDataTable({
+    datastoreTable <- reactiveFileReaders[[DATASTORE]]()$table
+    return(DT::datatable(datastoreTable, options = list(dom="lftipr")))
   })
 
   output[[INPUTS_TREE_SELECTED_TEXT]] <- renderText({
@@ -960,7 +968,7 @@ server <- function(input, output, session) {
 
   output[[MODEL_MODULES]] = renderDataTable({
     getScriptInfo()
-    returnValue <- DT::datatable(asyncData[[MODEL_MODULES]])
+    returnValue <- DT::datatable(getModelModules())
     return(returnValue)
   })
 
