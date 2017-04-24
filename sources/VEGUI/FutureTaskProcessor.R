@@ -1,3 +1,4 @@
+if (!require(future)) install.packages("future")
 library(future)
 #FutureTaskProcessor.R https://gist.github.com/PeterVermont/a4a29d2c6b88e4ee012a869dedb5099c#file-futuretaskprocessor-r
 
