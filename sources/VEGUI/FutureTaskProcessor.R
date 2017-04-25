@@ -49,7 +49,9 @@ startAsyncTask <-
     asyncTasksRunning[[asyncTaskName]] <<- asyncTaskObject
   } #end startAsyncTask
 
-
+getNumberOfRunningTasks <- function() {
+  return(length(asyncTasksRunning))
+}
 getRunningTasksStatus <- function() {
   getRunningTaskStatus <- function(asyncTaskObject) {
     if (is.null(asyncTaskObject) ||
@@ -105,15 +107,15 @@ processRunningTasks <-
     for (asyncTaskName in names(asyncTasksRunning)) {
       if (!is.null(maximumTasksToResolve) &&
           (numTasksResolved >= maximumTasksToResolve)) {
-        if (debug)
-          print(
-            paste0(
-              Sys.time(),
-              ": processRunningTasks: stopping checking for resolved tasks because maximumTasksToResolve (",
-              maximumTasksToResolve,
-              ") already resolved."
-            )
-          )
+        # if (debug)
+        #   print(
+        #     paste0(
+        #       Sys.time(),
+        #       ": processRunningTasks: stopping checking for resolved tasks because maximumTasksToResolve (",
+        #       maximumTasksToResolve,
+        #       ") already resolved."
+        #     )
+        #   )
         break
       } #end checking if need to break because of maximumTasksToResolve
       asyncTaskObject <- asyncTasksRunning[[asyncTaskName]]
@@ -183,11 +185,14 @@ processRunningTasks <-
               Sys.time(),
               ": processRunningTasks finished: '",
               asyncTaskName,
-              "'. submitTime: ",
-              submitTime,
-              ", endTime: ",
-              endTime,
-              "', elapsed time: ",
+              "' and there are ",
+              getNumberOfRunningTasks(),
+              " additional task still running.",
+              # " submitTime: ",
+              # submitTime,
+              # ", endTime: ",
+              # endTime,
+              " Elapsed time since submitted: ",
               elapsedTime
             )
           )
