@@ -73,6 +73,8 @@ EDITOR_INPUT_FILE <- "EDITOR_INPUT_FILE"
 DATASTORE <- "DATASTORE"
 DATASTORE_TREE <- "DATASTORE_TREE"
 DATASTORE_TABLE <- "DATASTORE_TABLE"
+VIEW_DATASTORE_TABLE_ID <- "VIEW_DATASTORE_TABLE_ID"
+VIEW_DATASTORE_TABLE_LAST_CLICK <- "VIEW_DATASTORE_TABLE_LAST_CLICK"
 TAB_SETTINGS <- "TAB_SETTINGS"
 TAB_INPUTS <- "TAB_INPUTS"
 
@@ -105,6 +107,12 @@ ui <- fluidPage(
       "$(document).on('click', '#INPUT_FILES button', function () {
       Shiny.onInputChange('EDIT_INPUT_FILE_ID',this.id);
       Shiny.onInputChange('EDIT_INPUT_FILE_LAST_CLICK', Math.random())
+      });"
+),
+tags$script(
+  "$(document).on('click', '#DATASTORE_TABLE button', function () {
+      Shiny.onInputChange('VIEW_DATASTORE_TABLE_ID',this.id);
+      Shiny.onInputChange('VIEW_DATASTORE_TABLE_LAST_CLICK', Math.random())
       });"
 ),
 #end tag$script
@@ -153,6 +161,7 @@ navlistPanel(
     h3("Datastore:"),
     shinyTree::shinyTree(DATASTORE_TREE),
     DT::dataTableOutput(DATASTORE_TABLE),
+    shinyAce::aceEditor(VIEW_DATASTORE_TABLE, value = ""),
     h3("Model state"),
     verbatimTextOutput(MODEL_STATE_FILE, FALSE),
     h3("Model parameters"),
@@ -367,6 +376,16 @@ server <- function(input, output, session) {
     )
   })
 
+  observe({
+    toggle(
+      id = VIEW_DATASTORE_TABLE,
+      condition = otherReactiveValues[[VIEW_DATASTORE_TABLE]],
+      anim = TRUE,
+      animType = "Slide",
+      time = 0.25,
+      selector = NULL
+    )
+  })
 
   #how to hide/show tabs https://github.com/daattali/advanced-shiny/blob/master/hide-tab/app.R
   observe({
@@ -739,6 +758,87 @@ server <- function(input, output, session) {
   })
 
   #https://antoineguillot.wordpress.com/2017/03/01/three-r-shiny-tricks-to-make-your-shiny-app-shines-33-buttons-to-delete-edit-and-compare-datatable-rows
+  observeEvent(input[[VIEW_DATASTORE_TABLE_LAST_CLICK]], label = VIEW_DATASTORE_TABLE_LAST_CLICK, handlerExpr = {
+    buttonId <- input[[VIEW_DATASTORE_TABLE_ID]]
+    namedResult <-
+      data.table::as.data.table(namedCapture::str_match_named(buttonId, "^(?<action>[^_]+)_(?<row>.*)$"))
+    action <- namedResult[, action]
+    row <- as.integer(namedResult[, row])
+    DT <- getInputFilesTable()
+    fileName <- DT[row, File]
+    debugConsole(
+      paste(
+        "got click inside table.  buttonId:",
+        buttonId,
+        " action:",
+        action,
+        "row:",
+        row,
+        "fileName:",
+        fileName
+      )
+    )
+
+    for (rowNumber in 1:nrow(DT)) {
+      viewButtonOnRow <- paste0("view", "_", rowNumber)
+      if (rowNumber == row) {
+        cancelButtonOnRow <- paste0("cancel", "_", rowNumber)
+        saveButtonOnRow <- paste0("save", "_", rowNumber)
+        filePath <-
+          file.path(getScriptInfo()$fileDirectory, "inputs", fileName)
+        #do the appropriate action
+        if (action == "view") {
+          otherReactiveValues[[VIEW_DATASTORE_TABLE]] <- TRUE
+          fileLines <- SafeReadAndCleanLines(filePath)
+          fileContent <- paste0(collapse = "\n", fileLines)
+          shinyAce::updateAceEditor(session, VIEW_DATASTORE_TABLE, value = fileContent)
+          shinyjs::disable(viewButtonOnRow, selector = NULL)
+          shinyjs::enable(saveButtonOnRow, selector = NULL)
+          shinyjs::enable(cancelButtonOnRow, selector = NULL)
+        } else {
+          if (action == "save") {
+            file.rename(filePath, paste0(
+              filePath,
+              "_",
+              format(Sys.time(), "%Y-%m-%d_%H-%M"),
+              ".bak"
+            ))
+            viewedContent <- input[[VIEW_DATASTORE_TABLE]]
+            write(viewedContent, filePath)
+            otherReactiveValues[[VIEW_DATASTORE_TABLE]] <- FALSE
+          } else if (action == "cancel") {
+            otherReactiveValues[[VIEW_DATASTORE_TABLE]] <- FALSE
+          } else {
+            stop(
+              paste(
+                "Got an unexpected button action. buttonId:",
+                buttonId,
+                " action:",
+                action,
+                "row:",
+                row
+              )
+            )
+          }
+          shinyAce::updateAceEditor(session, VIEW_DATASTORE_TABLE, value = "")
+          shinyjs::enable(viewButtonOnRow, selector = NULL)
+          shinyjs::disable(saveButtonOnRow, selector = NULL)
+          shinyjs::disable(cancelButtonOnRow, selector = NULL)
+        }
+      } else {
+        #if not row clicked on then enable or disable view button
+        #depending whether we beginning viewing (disable all others)
+        #or finishing viewing (re-enabling all others)
+        if (action == "view") {
+          shinyjs::disable(viewButtonOnRow, selector = NULL)
+        } else {
+          shinyjs::enable(viewButtonOnRow, selector = NULL)
+        }
+      } #end if not clicked on row
+    } #end for loop over files
+  }) #end observeEvent click on button in DATASTORE table
+
+  #https://antoineguillot.wordpress.com/2017/03/01/three-r-shiny-tricks-to-make-your-shiny-app-shines-33-buttons-to-delete-edit-and-compare-datatable-rows
   observeEvent(input[[EDIT_INPUT_FILE_LAST_CLICK]], label = EDIT_INPUT_FILE_LAST_CLICK, handlerExpr = {
     buttonId <- input[[EDIT_INPUT_FILE_ID]]
     namedResult <-
@@ -817,7 +917,7 @@ server <- function(input, output, session) {
         }
       } #end if not clicked on row
     } #end for loop over files
-  }) #end observeEven click on button in file table
+  }) #end observeEvent click on button in file table
 
 
   extractFromTree <- function(target) {
