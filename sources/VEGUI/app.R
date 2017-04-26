@@ -435,7 +435,7 @@ server <- function(input, output, session) {
         returnValue <- NULL
       } else {
         returnValue <- list(
-          table = rhdf5::h5ls(filePath),
+          table = data.table::data.table(rhdf5::h5ls(filePath)),
           tree = rhdf5::h5dump(filePath, load = FALSE)
         )
       }
@@ -864,7 +864,7 @@ server <- function(input, output, session) {
         )
       )
     # TreePath = tableItems$resultAncestorsList))
-    return(DT::datatable(tables))
+    return(DT::datatable(tables), selection = 'none')
   }) #end getOutputHDF5_TABLES
 
   getOutputINPUT_FILES <- reactive({
@@ -886,7 +886,7 @@ server <- function(input, output, session) {
         '
       )
     returnValue <- DT::datatable(DT,
-                                 escape = F)
+                                 escape = F, selection = 'none')
     return(returnValue)
   }) #end getOutputINPUT_FILES
 
@@ -945,14 +945,30 @@ server <- function(input, output, session) {
       dataTable <- data.table::data.table()
     } else {
       dataTable <- result$table
+      dataTable[["Actions"]] <-
+        paste0(
+          '
+          <div class="btn-group" role="group" aria-label="Basic example">
+          <button type="button" class="btn btn-secondary" id=view_',
+          1:nrow(dataTable),
+          '>View</button>
+          <button type="button" class="btn btn-secondary" disabled id=cancel_',
+          1:nrow(dataTable),
+          '>Cancel</button>
+          <button type="button" class="btn btn-secondary" disabled id=export_',
+          1:nrow(dataTable),
+          '>Export csv</button>
+          </div>
+          '
+        )
     }
-    return(DT::datatable(dataTable, options = list(dom = "lftipr")))
+    return(DT::datatable(dataTable, escape=F, selection = 'none', options = list(dom = "lftipr")))
   })
 
   output[[GEO_CSV_FILE]] = renderDataTable({
     getScriptInfo()
     returnValue <-
-      DT::datatable(reactiveFileReaders[[GEO_CSV_FILE]]())
+      DT::datatable(reactiveFileReaders[[GEO_CSV_FILE]](), selection = 'none')
     return(returnValue)
   })
 
@@ -976,7 +992,7 @@ server <- function(input, output, session) {
 
   ###RUN TAB_RUN
   output[[MODULE_PROGRESS]] = renderDataTable({
-    returnValue <- DT::datatable(getModuleProgress())
+    returnValue <- DT::datatable(getModuleProgress(), selection = 'none')
     return(returnValue)
   })
 
@@ -986,7 +1002,7 @@ server <- function(input, output, session) {
 
   output[[MODEL_MODULES]] = renderDataTable({
     getScriptInfo()
-    returnValue <- DT::datatable(getModelModules())
+    returnValue <- DT::datatable(getModelModules(), selection = 'none')
     return(returnValue)
   })
 
@@ -1013,12 +1029,12 @@ server <- function(input, output, session) {
     getScriptInfo()
     logLines <- reactiveFileReaders[[VE_LOG]]()
     DT <- data.table::data.table(message = logLines)
-    returnValue <- DT::datatable(DT)
+    returnValue <- DT::datatable(DT, selection = 'none')
     return(returnValue)
   })
 
   output[[DEBUG_CONSOLE_OUTPUT]] = renderDataTable({
-    DT::datatable(otherReactiveValues[[DEBUG_CONSOLE_OUTPUT]], options = list(dom = 'ft'))
+    DT::datatable(otherReactiveValues[[DEBUG_CONSOLE_OUTPUT]], options = list(dom = 'ft'), selection = 'none')
   })
 
   # #the Module Specifications tab is slow to display so give it a head start
