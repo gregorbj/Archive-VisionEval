@@ -74,7 +74,7 @@ INPUT_FILE_EDIT_BUTTON_PREFIX <- "input_file_edit"
 INPUT_FILE_CANCEL_BUTTON_PREFIX <- "input_file_cancel"
 INPUT_FILE_SAVE_BUTTON_PREFIX <- "input_file_save"
 DATASTORE <- "DATASTORE"
-DATASTORE_TREE <- "DATASTORE_TREE"
+# DATASTORE_TREE <- "DATASTORE_TREE"
 DATASTORE_TABLE <- "DATASTORE_TABLE"
 VIEW_DATASTORE_TABLE <- "VIEW_DATASTORE_TABLE"
 VIEW_DATASTORE_TABLE_ID <- "VIEW_DATASTORE_TABLE_ID"
@@ -151,31 +151,29 @@ navlistPanel(
       id = SELECT_RUN_SCRIPT_BUTTON,
       label = "Select scenario script...",
       title = "Please select model run script",
-      multiple = FALSE
+      multiple = FALSE,
+      list(R="R")
     ),
     h3("Run script: "),
     verbatimTextOutput(SCRIPT_NAME, FALSE),
-    shinySaveButton(
+    shinyFiles::shinySaveButton(
       id = COPY_MODEL_BUTTON,
       label = "Copy scenario...",
       title = "Please select location for new folder containing copy of current model",
-      #must specify a filetype due to shinyFiles bug https://github.com/thomasp85/shinyFiles/issues/56
-      #even though in my case I am creating a folder so don't care about the mime type
-      filetype = list('hidden_mime_type' = c(""))
-    )
+      list('hidden_mime_type'=c(""))
+      )
   ),
   tabPanel(
     title = "Settings",
     value = TAB_SETTINGS,
     h3("Datastore:"),
-    shinyTree::shinyTree(DATASTORE_TREE),
+    # shinyTree::shinyTree(DATASTORE_TREE),
     DT::dataTableOutput(DATASTORE_TABLE),
-    shinySaveButton(
+    shinyFiles::shinySaveButton(
       id = DATASTORE_TABLE_EXPORT_BUTTON,
-      label = "Export data tatable...",
-      title = "Please select location exported data",
-      filetype = list(txt = "txt", csv = "csv")
-    ),
+      label = "Export displayed datastore data...",
+      title = "Please pick location and name for the exported data...",
+      list(`tab separated values (txt)`="txt", `tab separated values (tsv)`="tsv")),
     DT::dataTableOutput(VIEW_DATASTORE_TABLE),
     h3("Model state"),
     verbatimTextOutput(MODEL_STATE_FILE, FALSE),
@@ -353,27 +351,25 @@ server <- function(input, output, session) {
         )#end reactiveFileReader
     } #end registerReactiveFileHandler
 
-  #need to call processRunningTasks so that the callback to the futureFunction will be hit
-  checkAsyncDataBeingLoaded <- observe({
-    invalidateLater(DEFAULT_POLL_INTERVAL)
-    processRunningTasks(debug = TRUE)
-  }, suspended = FALSE) # checkAsyncDataBeingLoaded
-
-  shinyFileSave(
+  shinyFiles::shinyFileSave(
     input = input,
     id = COPY_MODEL_BUTTON,
     session = session,
-    roots = volumeRoots
+    roots = volumeRoots,
+    #must specify a filetype due to shinyFiles bug https://github.com/thomasp85/shinyFiles/issues/56
+    #even though in my case I am creating a folder so don't care about the mime type
+    filetypes=c("")
   )
 
-  shinyFileSave(
+  shinyFiles::shinyFileSave(
     input = input,
     id = DATASTORE_TABLE_EXPORT_BUTTON,
     session = session,
-    roots = volumeRoots
+    roots = volumeRoots,
+    filetypes = c("txt","tsv")
   )
 
-  shinyFileChoose(
+  shinyFiles::shinyFileChoose(
     input = input,
     id = SELECT_RUN_SCRIPT_BUTTON,
     session = session,
@@ -433,6 +429,12 @@ server <- function(input, output, session) {
     )
   })
 
+  #need to call processRunningTasks so that the callback to the futureFunction will be hit
+  observe(label = RUN_MODEL_BUTTON, x = {
+    invalidateLater(DEFAULT_POLL_INTERVAL)
+    processRunningTasks(debug = TRUE)
+  }) #end observe(label = RUN_MODEL_BUTTON
+
   SafeReadAndCleanLines <- function(filePath) {
     # debugConsole(
     #   paste0(
@@ -486,10 +488,9 @@ server <- function(input, output, session) {
       if (!file.exists(filePath)) {
         returnValue <- NULL
       } else {
-        returnValue <- list(
-          table = data.table::data.table(rhdf5::h5ls(filePath)),
-          tree = rhdf5::h5dump(filePath, load = FALSE)
-        )
+        table = data.table::data.table(rhdf5::h5ls(filePath))
+        table <- table[otype=="H5I_GROUP", .(Group=group, Name=name)]
+        returnValue <- table
       }
       return(returnValue)
     }
@@ -682,7 +683,7 @@ server <- function(input, output, session) {
   observeEvent(input[[COPY_MODEL_BUTTON]],
                label = COPY_MODEL_BUTTON,
                handlerExpr = {
-                 req(input$selectRunScript)
+                 req(input[[SELECT_RUN_SCRIPT_BUTTON]])
                  debugConsole("observeEvent input[[COPY_MODEL_BUTTON]] entered")
                  datapath <- getScriptInfo()$datapath
                  disableActionButtons()
@@ -726,10 +727,13 @@ server <- function(input, output, session) {
                handlerExpr = {
                  debugConsole("observeEvent input[[DATASTORE_TABLE_EXPORT_BUTTON]] entered")
                  fileinfo = shinyFiles::parseSavePath(roots = volumeRoots, input[[DATASTORE_TABLE_EXPORT_BUTTON]])
-                 datapath <- fileinfo$datapath
-                 print(paste("Saving exported HDF5 table to:", datapath))
-                 viewedContent <- input[[VIEW_DATASTORE_TABLE]]
-                 write(viewedContent, datapath)
+                 datapath <- as.character(fileinfo$datapath)
+                 dataTable <- otherReactiveValues[[VIEW_DATASTORE_TABLE]]
+                 print(paste("Saving exported HDF5 table with", nrow(dataTable), "rows and ", ncol(dataTable), "to:", datapath))
+                 data.table::fwrite(dataTable, datapath, sep="\t")
+                 if (!file.exists(datapath)) {
+                   stop(paste("Right after saving file it is missing:", datapath))
+                 }
                  otherReactiveValues[[VIEW_DATASTORE_TABLE]] <-
                    FALSE
                  debugConsole("observeEvent(input[[DATASTORE_TABLE_EXPORT_BUTTON]], exited")
@@ -823,10 +827,10 @@ server <- function(input, output, session) {
       data.table::as.data.table(namedCapture::str_match_named(buttonId, "^(?<action>.+)_(?<row>[^_]+)$"))
     action <- namedResult[, action]
     row <- as.integer(namedResult[, row])
-    hdf5PathTable <- reactiveFileReaders[[DATASTORE]]()$table
+    hdf5PathTable <- reactiveFileReaders[[DATASTORE]]()
     hdf5Row <- hdf5PathTable[row]
 
-    hdf5SectionIdentifier <- paste0(hdf5Row$group, "/", hdf5Row$name)
+    hdf5SectionIdentifier <- paste0(hdf5Row$Group, "/", hdf5Row$Name)
     debugConsole(
       paste(
         "got click inside table.  buttonId:",
@@ -836,9 +840,9 @@ server <- function(input, output, session) {
         "row:",
         row,
         "group:",
-        hdf5Row$group,
+        hdf5Row$Group,
         "name:",
-        hdf5Row$name,
+        hdf5Row$Name,
         "hdf5SectionIdentifier",
         hdf5SectionIdentifier
       )
@@ -1092,33 +1096,33 @@ server <- function(input, output, session) {
 
   output[[VIEW_DATASTORE_TABLE]] = renderDataTable({
     hdf5DataTable <- otherReactiveValues[[VIEW_DATASTORE_TABLE]]
-    if (data.table::is.data.table(hdf5DataTable)) {
+    if (data.table::is.data.table(hdf5DataTable) && nrow(hdf5DataTable) > 0) {
       returnValue <-
         DT::datatable(hdf5DataTable, selection = 'none')
     } else {
       returnValue <-
-        DT::datatable(data.table::data.table())
+        DT::datatable(data.table::data.table(Message=c("There is no data for selected Datastore group")))
     }
     return(returnValue)
   })
 
   ###SETTINGS TAB_SETTINGS
-  output[[DATASTORE_TREE]] <- renderTree({
-    result <- reactiveFileReaders[[DATASTORE]]()
-    if (is.null(result)) {
-      returnValue <- list("{does not exist (yet)}" = "")
-    } else {
-      returnValue <- result$tree
-    }
-    return(returnValue)
-  })
+  # output[[DATASTORE_TREE]] <- renderTree({
+  #   result <- reactiveFileReaders[[DATASTORE]]()
+  #   if (is.null(result)) {
+  #     returnValue <- list("{does not exist (yet)}" = "")
+  #   } else {
+  #     returnValue <- result$tree
+  #   }
+  #   return(returnValue)
+  # })
 
   output[[DATASTORE_TABLE]] <- renderDataTable({
     result <- reactiveFileReaders[[DATASTORE]]()
     if (is.null(result)) {
       dataTable <- data.table::data.table()
     } else {
-      dataTable <- result$table
+      dataTable <- result
       dataTable[["Actions"]] <-
         paste0(
           '
@@ -1133,11 +1137,6 @@ server <- function(input, output, session) {
           '_',
           1:nrow(dataTable),
           '>Cancel</button>
-          <button type="button" class="btn btn-secondary" disabled id=',
-          DATASTORE_TABLE_EXPORT_BUTTON_PREFIX,
-          '_',
-          1:nrow(dataTable),
-          '>Export csv</button>
           </div>
           '
         )
@@ -1145,8 +1144,7 @@ server <- function(input, output, session) {
     return(DT::datatable(
       dataTable,
       escape = F,
-      selection = 'none',
-      options = list(dom = "lftipr")
+      selection = 'none'
     ))
     })
 
