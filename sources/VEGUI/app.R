@@ -79,6 +79,7 @@ DATASTORE_TABLE <- "DATASTORE_TABLE"
 VIEW_DATASTORE_TABLE <- "VIEW_DATASTORE_TABLE"
 VIEW_DATASTORE_TABLE_ID <- "VIEW_DATASTORE_TABLE_ID"
 VIEW_DATASTORE_TABLE_LAST_CLICK <- "VIEW_DATASTORE_TABLE_LAST_CLICK"
+DATASTORE_TABLE_IDENTIFIER <- "DATASTORE_TABLE_IDENTIFIER"
 
 DATASTORE_TABLE_VIEW_BUTTON_PREFIX <- "datastore_view"
 DATASTORE_TABLE_CANCEL_BUTTON_PREFIX <- "datastore_cancel"
@@ -174,6 +175,7 @@ navlistPanel(
       label = "Export displayed datastore data...",
       title = "Please pick location and name for the exported data...",
       list(`tab separated values (txt)`="txt", `tab separated values (tsv)`="tsv")),
+    verbatimTextOutput(DATASTORE_TABLE_IDENTIFIER, FALSE),
     DT::dataTableOutput(VIEW_DATASTORE_TABLE),
     h3("Model state"),
     verbatimTextOutput(MODEL_STATE_FILE, FALSE),
@@ -224,13 +226,10 @@ navlistPanel(
 ) #end navlistPanel
 ) #end ui <- fluid page
 
-DEFAULT_POLL_INTERVAL <- 500 #milliseconds
+DEFAULT_POLL_INTERVAL <- 1500 #milliseconds
 
 
 server <- function(input, output, session) {
-  asyncData <-
-    reactiveValues()
-
   otherReactiveValues <-
     reactiveValues() #WARNING- DON'T USE VARIABLES TO INITIALIZE LIST KEYS - the variable name will be used, not the value
 
@@ -593,15 +592,10 @@ server <- function(input, output, session) {
       reactiveFilePaths[[DATASTORE]] <<-
         file.path(scriptInfo$fileDirectory, ModelState_ls$DatastoreName)
 
-      #From now on we will get the current ModelState by reading the object stored on disk
-      #store the current ModelState in the global options
-      #so that the process will use the same log file as the one we have already started tracking...
-      options("visioneval.preExistingModelState" = ModelState_ls)
-
-      #ModelState_ls is in out global environment which is different than the environment the visioneval functions that are called
-      #asynchronously with future so this copy will never be updated so we therefore remove it to reduce confusion
-      rm("ModelState_ls", envir = .GlobalEnv)
-
+      # #ModelState_ls is in out global environment which is different than the environment the visioneval functions that are called
+      # #asynchronously with future so this copy will never be updated so we therefore remove it to reduce confusion
+      # rm("ModelState_ls", envir = .GlobalEnv)
+      #
       #Fome now on we will get the current ModelState by reading the object stored on disk
       reactiveFilePaths[[MODEL_STATE_FILE]] <<-
         file.path(scriptInfo$fileDirectory, "ModelState.Rda")
@@ -638,9 +632,10 @@ server <- function(input, output, session) {
     disableActionButtons()
     startAsyncTask(
       CAPTURED_SOURCE,
-      future(getScriptOutput(
+      future({ModelState_ls #reference ModelState_ls so future will recognize it as a global
+             getScriptOutput(
         datapath, isolate(reactiveFilePaths[[CAPTURED_SOURCE]])
-      )),
+      )}),
       callback = function(asyncResult) {
         # asyncResult:
         #   asyncTaskName = asyncTaskName,
@@ -673,6 +668,10 @@ server <- function(input, output, session) {
   }
 
   getScriptOutput <- function(datapath, captureFile) {
+    #From now on we will get the current ModelState by reading the object stored on disk
+    #store the current ModelState in the global options
+    #so that the process will use the same log file as the one we have already started tracking...
+    options("visioneval.preExistingModelState" = ModelState_ls)
     debugConsole("getScriptOutput entered")
     setwd(dirname(datapath))
     capture.output(source(datapath), file = captureFile)
@@ -831,7 +830,7 @@ server <- function(input, output, session) {
     hdf5PathTable <- reactiveFileReaders[[DATASTORE]]()
     hdf5Row <- hdf5PathTable[row]
 
-    hdf5SectionIdentifier <- paste0(hdf5Row$Group, "/", hdf5Row$Name)
+    otherReactiveValues[[DATASTORE_TABLE_IDENTIFIER]] <- paste0(hdf5Row$Group, "/", hdf5Row$Name)
     debugConsole(
       paste(
         "got click inside table.  buttonId:",
@@ -844,8 +843,8 @@ server <- function(input, output, session) {
         hdf5Row$Group,
         "name:",
         hdf5Row$Name,
-        "hdf5SectionIdentifier",
-        hdf5SectionIdentifier
+        "otherReactiveValues[[DATASTORE_TABLE_IDENTIFIER]]",
+        otherReactiveValues[[DATASTORE_TABLE_IDENTIFIER]]
       )
     )
 
@@ -858,7 +857,7 @@ server <- function(input, output, session) {
         filePath <- reactiveFilePaths[[DATASTORE]]
         #do the appropriate action
         if (action == DATASTORE_TABLE_VIEW_BUTTON_PREFIX) {
-          fileContent <- rhdf5::h5read(filePath, hdf5SectionIdentifier)
+          fileContent <- rhdf5::h5read(filePath, otherReactiveValues[[DATASTORE_TABLE_IDENTIFIER]])
           hdf5DataTable <- data.table::as.data.table(fileContent)
           otherReactiveValues[[VIEW_DATASTORE_TABLE]] <-
             hdf5DataTable
@@ -1095,6 +1094,10 @@ server <- function(input, output, session) {
     getScriptInfo()$datapath
   })
 
+  output[[DATASTORE_TABLE_IDENTIFIER]] = renderText({
+    otherReactiveValues[[DATASTORE_TABLE_IDENTIFIER]]
+  })
+
   output[[VIEW_DATASTORE_TABLE]] = renderDataTable({
     hdf5DataTable <- otherReactiveValues[[VIEW_DATASTORE_TABLE]]
     if (data.table::is.data.table(hdf5DataTable) && nrow(hdf5DataTable) > 0) {
@@ -1102,7 +1105,8 @@ server <- function(input, output, session) {
         DT::datatable(hdf5DataTable, selection = 'none')
     } else {
       returnValue <-
-        DT::datatable(data.table::data.table(Message=c("There is no data for selected Datastore group")))
+        DT::datatable(data.table::data.table(Message=c(paste("There is no data for '",
+                                                             otherReactiveValues[[DATASTORE_TABLE_IDENTIFIER]], "'."))))
     }
     return(returnValue)
   })
