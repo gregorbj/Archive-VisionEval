@@ -70,11 +70,20 @@ INPUT_FILES <- "INPUT_FILES"
 EDIT_INPUT_FILE_ID <- "EDIT_INPUT_FILE_ID"
 EDIT_INPUT_FILE_LAST_CLICK <- "EDIT_INPUT_FILE_LAST_CLICK"
 EDITOR_INPUT_FILE <- "EDITOR_INPUT_FILE"
+INPUT_FILE_EDIT_BUTTON_PREFIX <- "input_file_edit"
+INPUT_FILE_CANCEL_BUTTON_PREFIX <- "input_file_cancel"
+INPUT_FILE_SAVE_BUTTON_PREFIX <- "input_file_save"
 DATASTORE <- "DATASTORE"
 DATASTORE_TREE <- "DATASTORE_TREE"
 DATASTORE_TABLE <- "DATASTORE_TABLE"
+VIEW_DATASTORE_TABLE <- "VIEW_DATASTORE_TABLE"
 VIEW_DATASTORE_TABLE_ID <- "VIEW_DATASTORE_TABLE_ID"
 VIEW_DATASTORE_TABLE_LAST_CLICK <- "VIEW_DATASTORE_TABLE_LAST_CLICK"
+
+DATASTORE_TABLE_VIEW_BUTTON_PREFIX <- "datastore_view"
+DATASTORE_TABLE_CANCEL_BUTTON_PREFIX <- "datastore_cancel"
+DATASTORE_TABLE_EXPORT_BUTTON <- "datastore_export"
+
 TAB_SETTINGS <- "TAB_SETTINGS"
 TAB_INPUTS <- "TAB_INPUTS"
 
@@ -161,7 +170,13 @@ navlistPanel(
     h3("Datastore:"),
     shinyTree::shinyTree(DATASTORE_TREE),
     DT::dataTableOutput(DATASTORE_TABLE),
-    shinyAce::aceEditor(VIEW_DATASTORE_TABLE, value = ""),
+    shinySaveButton(
+      id = DATASTORE_TABLE_EXPORT_BUTTON,
+      label = "Export data tatable...",
+      title = "Please select location exported data",
+      filetype=list(txt="txt", csv="csv")
+    ),
+    DT::dataTableOutput(VIEW_DATASTORE_TABLE),
     h3("Model state"),
     verbatimTextOutput(MODEL_STATE_FILE, FALSE),
     h3("Model parameters"),
@@ -379,7 +394,7 @@ server <- function(input, output, session) {
   observe({
     toggle(
       id = VIEW_DATASTORE_TABLE,
-      condition = otherReactiveValues[[VIEW_DATASTORE_TABLE]],
+      condition = data.table::is.data.table(otherReactiveValues[[VIEW_DATASTORE_TABLE]]),
       anim = TRUE,
       animType = "Slide",
       time = 0.25,
@@ -541,6 +556,10 @@ server <- function(input, output, session) {
       visioneval::initModelStateFile()
       visioneval::initLog()
       visioneval::writeLog("VE_GUI called visioneval::initModelStateFile() and visioneval::initLog()")
+      #the visioneval functions will create global variable 'ModelState_ls'
+      if (!exists("ModelState_ls", envir = .GlobalEnv)) {
+        stop("Something is wrong! Did not see global variable ModelState_ls after calling visioneval functions")
+      }
       reactiveFilePaths[[VE_LOG]] <<-
         file.path(scriptInfo$fileDirectory, ModelState_ls$LogFile)
       debugConsole(
@@ -553,6 +572,15 @@ server <- function(input, output, session) {
       reactiveFilePaths[[DATASTORE]] <<-
         file.path(scriptInfo$fileDirectory, ModelState_ls$DatastoreName)
 
+      #store the current ModelState in the global options
+      #so that the process will use the same log file as the one we have already started tracking...
+      options("visioneval.preExistingModelState" = ModelState_ls)
+
+      #ModelState_ls is in out global environment which is different than the environment the visioneval functions that are called
+      #asynchronously with future so this copy will never be updated so we therefore remove it to reduce confusion
+      rm("ModelState_ls",envir=.GlobalEnv)
+
+      #Fome now on we will get the current ModelState by reading the object stored on disk
       reactiveFilePaths[[MODEL_STATE_FILE]] <<-
         file.path(scriptInfo$fileDirectory, "ModelState.Rda")
       defsDirectory <- file.path(scriptInfo$fileDirectory, "defs")
@@ -624,9 +652,6 @@ server <- function(input, output, session) {
 
   getScriptOutput <- function(datapath, captureFile) {
     debugConsole("getScriptOutput entered")
-    #store the current ModelState in the global options
-    #so that the process will use the same log file as the one we have already started tracking...
-    options("visioneval.preExistingModelState" = ModelState_ls)
     setwd(dirname(datapath))
     capture.output(source(datapath), file = captureFile)
     options("visioneval.preExistingModelState" = NULL)
@@ -761,11 +786,13 @@ server <- function(input, output, session) {
   observeEvent(input[[VIEW_DATASTORE_TABLE_LAST_CLICK]], label = VIEW_DATASTORE_TABLE_LAST_CLICK, handlerExpr = {
     buttonId <- input[[VIEW_DATASTORE_TABLE_ID]]
     namedResult <-
-      data.table::as.data.table(namedCapture::str_match_named(buttonId, "^(?<action>[^_]+)_(?<row>.*)$"))
+      data.table::as.data.table(namedCapture::str_match_named(buttonId, "^(?<action>.+)_(?<row>[^_]+)$"))
     action <- namedResult[, action]
     row <- as.integer(namedResult[, row])
-    DT <- getInputFilesTable()
-    fileName <- DT[row, File]
+    hdf5PathTable <- reactiveFileReaders[[DATASTORE]]()$table
+    hdf5Row <- hdf5PathTable[row]
+
+    hdf5SectionIdentifier <- paste0(hdf5Row$group,"/", hdf5Row$name)
     debugConsole(
       paste(
         "got click inside table.  buttonId:",
@@ -774,39 +801,39 @@ server <- function(input, output, session) {
         action,
         "row:",
         row,
-        "fileName:",
-        fileName
+        "group:",
+        hdf5Row$group,
+        "name:",
+        hdf5Row$name,
+        "hdf5SectionIdentifier",
+        hdf5SectionIdentifier
       )
     )
 
-    for (rowNumber in 1:nrow(DT)) {
-      viewButtonOnRow <- paste0("view", "_", rowNumber)
+    for (rowNumber in 1:nrow(hdf5PathTable)) {
+      viewButtonOnRow <- paste0(DATASTORE_TABLE_VIEW_BUTTON_PREFIX, "_", rowNumber)
       if (rowNumber == row) {
-        cancelButtonOnRow <- paste0("cancel", "_", rowNumber)
-        saveButtonOnRow <- paste0("save", "_", rowNumber)
-        filePath <-
-          file.path(getScriptInfo()$fileDirectory, "inputs", fileName)
+        cancelButtonOnRow <- paste0(DATASTORE_TABLE_CANCEL_BUTTON_PREFIX, "_", rowNumber)
+        exportButtonOnRow <- paste0(DATASTORE_TABLE_EXPORT_BUTTON_PREFIX, "_", rowNumber)
+        filePath <- reactiveFilePaths[[DATASTORE]]
         #do the appropriate action
-        if (action == "view") {
-          otherReactiveValues[[VIEW_DATASTORE_TABLE]] <- TRUE
-          fileLines <- SafeReadAndCleanLines(filePath)
-          fileContent <- paste0(collapse = "\n", fileLines)
-          shinyAce::updateAceEditor(session, VIEW_DATASTORE_TABLE, value = fileContent)
+        if (action == DATASTORE_TABLE_VIEW_BUTTON_PREFIX) {
+          fileContent <- rhdf5::h5read(filePath, hdf5SectionIdentifier)
+          hdf5DataTable <- data.table::as.data.table(fileContent)
+          otherReactiveValues[[VIEW_DATASTORE_TABLE]] <- hdf5DataTable
           shinyjs::disable(viewButtonOnRow, selector = NULL)
-          shinyjs::enable(saveButtonOnRow, selector = NULL)
+          shinyjs::enable(exportButtonOnRow, selector = NULL)
           shinyjs::enable(cancelButtonOnRow, selector = NULL)
         } else {
-          if (action == "save") {
-            file.rename(filePath, paste0(
-              filePath,
-              "_",
-              format(Sys.time(), "%Y-%m-%d_%H-%M"),
-              ".bak"
-            ))
+          if (action == DATASTORE_TABLE_EXPORT_BUTTON_PREFIX) {
+            shinyFileSave(input, exportButtonOnRow, roots=volumeRoots, session=session)
+            fileinfo <- parseSavePath(volumeRoots, input[[exportButtonOnRow]])
+            datapath <- fileinfo$datapath
+            print(paste("Saving exported HDF5 table to:", datapath))
             viewedContent <- input[[VIEW_DATASTORE_TABLE]]
-            write(viewedContent, filePath)
+            write(viewedContent, datapath)
             otherReactiveValues[[VIEW_DATASTORE_TABLE]] <- FALSE
-          } else if (action == "cancel") {
+          } else if (action == DATASTORE_TABLE_CANCEL_BUTTON_PREFIX) {
             otherReactiveValues[[VIEW_DATASTORE_TABLE]] <- FALSE
           } else {
             stop(
@@ -820,16 +847,15 @@ server <- function(input, output, session) {
               )
             )
           }
-          shinyAce::updateAceEditor(session, VIEW_DATASTORE_TABLE, value = "")
           shinyjs::enable(viewButtonOnRow, selector = NULL)
-          shinyjs::disable(saveButtonOnRow, selector = NULL)
+          shinyjs::disable(exportButtonOnRow, selector = NULL)
           shinyjs::disable(cancelButtonOnRow, selector = NULL)
         }
       } else {
         #if not row clicked on then enable or disable view button
         #depending whether we beginning viewing (disable all others)
         #or finishing viewing (re-enabling all others)
-        if (action == "view") {
+        if (action == DATASTORE_TABLE_VIEW_BUTTON_PREFIX) {
           shinyjs::disable(viewButtonOnRow, selector = NULL)
         } else {
           shinyjs::enable(viewButtonOnRow, selector = NULL)
@@ -842,7 +868,7 @@ server <- function(input, output, session) {
   observeEvent(input[[EDIT_INPUT_FILE_LAST_CLICK]], label = EDIT_INPUT_FILE_LAST_CLICK, handlerExpr = {
     buttonId <- input[[EDIT_INPUT_FILE_ID]]
     namedResult <-
-      data.table::as.data.table(namedCapture::str_match_named(buttonId, "^(?<action>[^_]+)_(?<row>.*)$"))
+      data.table::as.data.table(namedCapture::str_match_named(buttonId, "^(?<action>.+)_(?<row>[^_]+)$"))
     action <- namedResult[, action]
     row <- as.integer(namedResult[, row])
     DT <- getInputFilesTable()
@@ -861,14 +887,14 @@ server <- function(input, output, session) {
     )
 
     for (rowNumber in 1:nrow(DT)) {
-      editButtonOnRow <- paste0("edit", "_", rowNumber)
+      editButtonOnRow <- paste0(INPUT_FILE_EDIT_BUTTON_PREFIX, "_", rowNumber)
       if (rowNumber == row) {
-        cancelButtonOnRow <- paste0("cancel", "_", rowNumber)
-        saveButtonOnRow <- paste0("save", "_", rowNumber)
+        cancelButtonOnRow <- paste0(INPUT_FILE_CANCEL_BUTTON_PREFIX, "_", rowNumber)
+        saveButtonOnRow <- paste0(INPUT_FILE_SAVE_BUTTON_PREFIX, "_", rowNumber)
         filePath <-
           file.path(getScriptInfo()$fileDirectory, "inputs", fileName)
         #do the appropriate action
-        if (action == "edit") {
+        if (action == INPUT_FILE_EDIT_BUTTON_PREFIX) {
           otherReactiveValues[[EDITOR_INPUT_FILE]] <- TRUE
           fileLines <- SafeReadAndCleanLines(filePath)
           fileContent <- paste0(collapse = "\n", fileLines)
@@ -877,7 +903,7 @@ server <- function(input, output, session) {
           shinyjs::enable(saveButtonOnRow, selector = NULL)
           shinyjs::enable(cancelButtonOnRow, selector = NULL)
         } else {
-          if (action == "save") {
+          if (action == INPUT_FILE_SAVE_BUTTON_PREFIX) {
             file.rename(filePath, paste0(
               filePath,
               "_",
@@ -887,7 +913,7 @@ server <- function(input, output, session) {
             editedContent <- input[[EDITOR_INPUT_FILE]]
             write(editedContent, filePath)
             otherReactiveValues[[EDITOR_INPUT_FILE]] <- FALSE
-          } else if (action == "cancel") {
+          } else if (action == INPUT_FILE_CANCEL_BUTTON_PREFIX) {
             otherReactiveValues[[EDITOR_INPUT_FILE]] <- FALSE
           } else {
             stop(
@@ -910,7 +936,7 @@ server <- function(input, output, session) {
         #if not row clicked on then enable or disable edit button
         #depending whether we beginning editing (disable all others)
         #or finishing editing (re-enabling all others)
-        if (action == "edit") {
+        if (action == INPUT_FILE_EDIT_BUTTON_PREFIX) {
           shinyjs::disable(editButtonOnRow, selector = NULL)
         } else {
           shinyjs::enable(editButtonOnRow, selector = NULL)
@@ -954,8 +980,8 @@ server <- function(input, output, session) {
 
   getOutputHDF5_TABLES <- reactive({
     getInputsTree()
-    tableItems <- extractFromTree("TABLE")
     groupItems <- extractFromTree("GROUP")
+    tableItems <- extractFromTree("TABLE")
     tables <-
       unique(
         data.table::data.table(
@@ -964,7 +990,8 @@ server <- function(input, output, session) {
         )
       )
     # TreePath = tableItems$resultAncestorsList))
-    return(DT::datatable(tables), selection = 'none')
+    returnValue <- DT::datatable(tables, selection = 'none')
+    return(returnValue)
   }) #end getOutputHDF5_TABLES
 
   getOutputINPUT_FILES <- reactive({
@@ -973,13 +1000,13 @@ server <- function(input, output, session) {
       paste0(
         '
         <div class="btn-group" role="group" aria-label="Basic example">
-        <button type="button" class="btn btn-secondary" id=edit_',
+        <button type="button" class="btn btn-secondary" id=', INPUT_FILE_EDIT_BUTTON_PREFIX, '_',
         1:nrow(DT),
         '>Edit</button>
-        <button type="button" class="btn btn-secondary" disabled id=cancel_',
+        <button type="button" class="btn btn-secondary" disabled id=', INPUT_FILE_CANCEL_BUTTON_PREFIX, '_',
         1:nrow(DT),
         '>Cancel</button>
-        <button type="button" class="btn btn-secondary" disabled id=save_',
+        <button type="button" class="btn btn-secondary" disabled id=', INPUT_FILE_SAVE_BUTTON_PREFIX, '_',
         1:nrow(DT),
         '>Save</button>
         </div>
@@ -1028,6 +1055,18 @@ server <- function(input, output, session) {
     getScriptInfo()$datapath
   })
 
+  output[[VIEW_DATASTORE_TABLE]] = renderDataTable({
+    hdf5DataTable <- otherReactiveValues[[VIEW_DATASTORE_TABLE]]
+    if (data.table::is.data.table(hdf5DataTable)) {
+      returnValue <-
+        DT::datatable(hdf5DataTable, selection = 'none')
+    } else {
+      returnValue <-
+        DT::datatable(data.table::data.table())
+    }
+    return(returnValue)
+  })
+
   ###SETTINGS TAB_SETTINGS
   output[[DATASTORE_TREE]] <- renderTree({
     result <- reactiveFileReaders[[DATASTORE]]()
@@ -1049,13 +1088,13 @@ server <- function(input, output, session) {
         paste0(
           '
           <div class="btn-group" role="group" aria-label="Basic example">
-          <button type="button" class="btn btn-secondary" id=view_',
+          <button type="button" class="btn btn-secondary" id=', DATASTORE_TABLE_VIEW_BUTTON_PREFIX, '_',
           1:nrow(dataTable),
           '>View</button>
-          <button type="button" class="btn btn-secondary" disabled id=cancel_',
+          <button type="button" class="btn btn-secondary" disabled id=', DATASTORE_TABLE_CANCEL_BUTTON_PREFIX, '_',
           1:nrow(dataTable),
           '>Cancel</button>
-          <button type="button" class="btn btn-secondary" disabled id=export_',
+          <button type="button" class="btn btn-secondary" disabled id=', DATASTORE_TABLE_EXPORT_BUTTON_PREFIX, '_',
           1:nrow(dataTable),
           '>Export csv</button>
           </div>
