@@ -593,6 +593,7 @@ server <- function(input, output, session) {
       reactiveFilePaths[[DATASTORE]] <<-
         file.path(scriptInfo$fileDirectory, ModelState_ls$DatastoreName)
 
+      #From now on we will get the current ModelState by reading the object stored on disk
       #store the current ModelState in the global options
       #so that the process will use the same log file as the one we have already started tracking...
       options("visioneval.preExistingModelState" = ModelState_ls)
