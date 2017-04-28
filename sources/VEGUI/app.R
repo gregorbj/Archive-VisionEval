@@ -82,8 +82,8 @@ VIEW_DATASTORE_TABLE_LAST_CLICK <- "VIEW_DATASTORE_TABLE_LAST_CLICK"
 DATASTORE_TABLE_IDENTIFIER <- "DATASTORE_TABLE_IDENTIFIER"
 
 DATASTORE_TABLE_VIEW_BUTTON_PREFIX <- "datastore_view"
-DATASTORE_TABLE_CANCEL_BUTTON_PREFIX <- "datastore_cancel"
-DATASTORE_TABLE_EXPORT_BUTTON <- "datastore_export"
+DATASTORE_TABLE_CLOSE_BUTTON <- "DATASTORE_TABLE_CLOSE_BUTTON"
+DATASTORE_TABLE_EXPORT_BUTTON <- "DATASTORE_TABLE_EXPORT_BUTTON"
 
 TAB_SETTINGS <- "TAB_SETTINGS"
 TAB_INPUTS <- "TAB_INPUTS"
@@ -153,7 +153,7 @@ navlistPanel(
       label = "Select scenario script...",
       title = "Please select model run script",
       multiple = FALSE,
-      list(R="R")
+      list(R = "R")
     ),
     h3("Run script: "),
     verbatimTextOutput(SCRIPT_NAME, FALSE),
@@ -161,8 +161,8 @@ navlistPanel(
       id = COPY_MODEL_BUTTON,
       label = "Copy scenario...",
       title = "Please select location for new folder containing copy of current model",
-      list('hidden_mime_type'=c(""))
-      )
+      list('hidden_mime_type' = c(""))
+    )
   ),
   tabPanel(
     title = "Settings",
@@ -174,7 +174,12 @@ navlistPanel(
       id = DATASTORE_TABLE_EXPORT_BUTTON,
       label = "Export displayed datastore data...",
       title = "Please pick location and name for the exported data...",
-      list(`tab separated values (txt)`="txt", `tab separated values (tsv)`="tsv")),
+      list(
+        `tab separated values (txt)` = "txt",
+        `tab separated values (tsv)` = "tsv"
+      )
+    ),
+    actionButton(DATASTORE_TABLE_CLOSE_BUTTON, "Close Datastore table"),
     verbatimTextOutput(DATASTORE_TABLE_IDENTIFIER, FALSE),
     DT::dataTableOutput(VIEW_DATASTORE_TABLE),
     h3("Model state"),
@@ -234,7 +239,7 @@ server <- function(input, output, session) {
     reactiveValues() #WARNING- DON'T USE VARIABLES TO INITIALIZE LIST KEYS - the variable name will be used, not the value
 
   otherReactiveValues[[DEBUG_CONSOLE_OUTPUT]] <-
-    data.table::data.table(time = paste(Sys.time()), message = "Placeholder to be deleted")[-1,]
+    data.table::data.table(time = paste(Sys.time()), message = "Placeholder to be deleted")[-1, ]
 
   otherReactiveValues[[MODULE_PROGRESS]] <- data.table::data.table()
 
@@ -357,7 +362,7 @@ server <- function(input, output, session) {
     roots = volumeRoots,
     #must specify a filetype due to shinyFiles bug https://github.com/thomasp85/shinyFiles/issues/56
     #even though in my case I am creating a folder so don't care about the mime type
-    filetypes=c("")
+    filetypes = c("")
   )
 
   shinyFiles::shinyFileSave(
@@ -365,7 +370,7 @@ server <- function(input, output, session) {
     id = DATASTORE_TABLE_EXPORT_BUTTON,
     session = session,
     roots = volumeRoots,
-    filetypes = c("txt","tsv")
+    filetypes = c("txt", "tsv")
   )
 
   shinyFiles::shinyFileChoose(
@@ -394,27 +399,27 @@ server <- function(input, output, session) {
   })
 
   observe({
-    toggle(
-      id = VIEW_DATASTORE_TABLE,
+    shinyjs::toggle(
+      id = NULL,
       condition = data.table::is.data.table(otherReactiveValues[[VIEW_DATASTORE_TABLE]]),
       anim = TRUE,
       animType = "Slide",
       time = 0.25,
-      selector = NULL
+      selector = "#VIEW_DATASTORE_TABLE, #DATASTORE_TABLE_EXPORT_BUTTON, #DATASTORE_TABLE_IDENTIFIER, #DATASTORE_TABLE_CLOSE_BUTTON"
     )
   })
-
-  observe({
-    toggle(
-      id = DATASTORE_TABLE_EXPORT_BUTTON,
-      condition = data.table::is.data.table(otherReactiveValues[[VIEW_DATASTORE_TABLE]]),
-      anim = TRUE,
-      animType = "Slide",
-      time = 0.25,
-      selector = NULL
-    )
-  })
-
+#
+#   observe({
+#     toggle(
+#       id = DATASTORE_TABLE_EXPORT_BUTTON,
+#       condition = data.table::is.data.table(otherReactiveValues[[VIEW_DATASTORE_TABLE]]),
+#       anim = TRUE,
+#       animType = "Slide",
+#       time = 0.25,
+#       selector = NULL
+#     )
+#   })
+#
   #how to hide/show tabs https://github.com/daattali/advanced-shiny/blob/master/hide-tab/app.R
   observe({
     toggle(
@@ -429,10 +434,10 @@ server <- function(input, output, session) {
   })
 
   #need to call processRunningTasks so that the callback to the futureFunction will be hit
-  observe(label = RUN_MODEL_BUTTON, x = {
+  observe(label = "processRunningTasks", x = {
     invalidateLater(DEFAULT_POLL_INTERVAL)
     processRunningTasks(debug = TRUE)
-  }) #end observe(label = RUN_MODEL_BUTTON
+  }) #end observe(label = processRunningTasks
 
   SafeReadAndCleanLines <- function(filePath) {
     # debugConsole(
@@ -465,7 +470,7 @@ server <- function(input, output, session) {
     result <- data.table::data.table()
     if (length(cleanedLogLines) > 0) {
       modulesFoundInLogFile <-
-        data.table::as.data.table(namedCapture::str_match_named(rev(cleanedLogLines), pattern))[!is.na(actionType), ]
+        data.table::as.data.table(namedCapture::str_match_named(rev(cleanedLogLines), pattern))[!is.na(actionType),]
       if (nrow(modulesFoundInLogFile) > 0) {
         result <- modulesFoundInLogFile
       }
@@ -488,7 +493,8 @@ server <- function(input, output, session) {
         returnValue <- NULL
       } else {
         table = data.table::data.table(rhdf5::h5ls(filePath))
-        table <- table[otype=="H5I_GROUP", .(Group=group, Name=name)]
+        table <-
+          table[otype == "H5I_GROUP", .(Group = group, Name = name)]
         returnValue <- table
       }
       return(returnValue)
@@ -632,10 +638,10 @@ server <- function(input, output, session) {
     disableActionButtons()
     startAsyncTask(
       CAPTURED_SOURCE,
-      future({ModelState_ls #reference ModelState_ls so future will recognize it as a global
-             getScriptOutput(
-        datapath, isolate(reactiveFilePaths[[CAPTURED_SOURCE]])
-      )}),
+      future({
+        ModelState_ls #reference ModelState_ls so future will recognize it as a global
+        getScriptOutput(datapath, isolate(reactiveFilePaths[[CAPTURED_SOURCE]]))
+      }),
       callback = function(asyncResult) {
         # asyncResult:
         #   asyncTaskName = asyncTaskName,
@@ -722,20 +728,31 @@ server <- function(input, output, session) {
                  debugConsole("observeEvent input[[copyModelDirectory exited")
                }) #end copyModelDirectory observeEvent
 
+  observeEvent(input[[DATASTORE_TABLE_CLOSE_BUTTON]], label = DATASTORE_TABLE_CLOSE_BUTTON, handlerExpr = {
+    otherReactiveValues[[VIEW_DATASTORE_TABLE]] <-
+      FALSE
+  })
+
   observeEvent(input[[DATASTORE_TABLE_EXPORT_BUTTON]],
                label = DATASTORE_TABLE_EXPORT_BUTTON,
                handlerExpr = {
                  debugConsole("observeEvent input[[DATASTORE_TABLE_EXPORT_BUTTON]] entered")
                  fileinfo = shinyFiles::parseSavePath(roots = volumeRoots, input[[DATASTORE_TABLE_EXPORT_BUTTON]])
                  datapath <- as.character(fileinfo$datapath)
-                 dataTable <- otherReactiveValues[[VIEW_DATASTORE_TABLE]]
-                 print(paste("Saving exported HDF5 table with", nrow(dataTable), "rows and ", ncol(dataTable), "to:", datapath))
-                 data.table::fwrite(dataTable, datapath, sep="\t")
+                 dataTable <-
+                   otherReactiveValues[[VIEW_DATASTORE_TABLE]]
+                 print(paste(
+                   "Saving exported HDF5 table with",
+                   nrow(dataTable),
+                   "rows and ",
+                   ncol(dataTable),
+                   "to:",
+                   datapath
+                 ))
+                 data.table::fwrite(dataTable, datapath, sep = "\t")
                  if (!file.exists(datapath)) {
                    stop(paste("Right after saving file it is missing:", datapath))
                  }
-                 otherReactiveValues[[VIEW_DATASTORE_TABLE]] <-
-                   FALSE
                  debugConsole("observeEvent(input[[DATASTORE_TABLE_EXPORT_BUTTON]], exited")
                }) #end  observeEvent(input[[DATASTORE_TABLE_EXPORT_BUTTON]],
 
@@ -830,7 +847,8 @@ server <- function(input, output, session) {
     hdf5PathTable <- reactiveFileReaders[[DATASTORE]]()
     hdf5Row <- hdf5PathTable[row]
 
-    otherReactiveValues[[DATASTORE_TABLE_IDENTIFIER]] <- paste0(hdf5Row$Group, "/", hdf5Row$Name)
+    otherReactiveValues[[DATASTORE_TABLE_IDENTIFIER]] <-
+      paste0(hdf5Row$Group, "/", hdf5Row$Name)
     debugConsole(
       paste(
         "got click inside table.  buttonId:",
@@ -847,51 +865,11 @@ server <- function(input, output, session) {
         otherReactiveValues[[DATASTORE_TABLE_IDENTIFIER]]
       )
     )
-
-    for (rowNumber in 1:nrow(hdf5PathTable)) {
-      viewButtonOnRow <-
-        paste0(DATASTORE_TABLE_VIEW_BUTTON_PREFIX, "_", rowNumber)
-      if (rowNumber == row) {
-        cancelButtonOnRow <-
-          paste0(DATASTORE_TABLE_CANCEL_BUTTON_PREFIX, "_", rowNumber)
-        filePath <- reactiveFilePaths[[DATASTORE]]
-        #do the appropriate action
-        if (action == DATASTORE_TABLE_VIEW_BUTTON_PREFIX) {
-          fileContent <- rhdf5::h5read(filePath, otherReactiveValues[[DATASTORE_TABLE_IDENTIFIER]])
-          hdf5DataTable <- data.table::as.data.table(fileContent)
-          otherReactiveValues[[VIEW_DATASTORE_TABLE]] <-
-            hdf5DataTable
-          shinyjs::disable(viewButtonOnRow, selector = NULL)
-          shinyjs::enable(cancelButtonOnRow, selector = NULL)
-        } else {
-          if (action == DATASTORE_TABLE_CANCEL_BUTTON_PREFIX) {
-            otherReactiveValues[[VIEW_DATASTORE_TABLE]] <- FALSE
-          } else {
-            stop(
-              paste(
-                "Got an unexpected button action. buttonId:",
-                buttonId,
-                " action:",
-                action,
-                "row:",
-                row
-              )
-            )
-          }
-          shinyjs::enable(viewButtonOnRow, selector = NULL)
-          shinyjs::disable(cancelButtonOnRow, selector = NULL)
-        }
-      } else {
-        #if not row clicked on then enable or disable view button
-        #depending whether we beginning viewing (disable all others)
-        #or finishing viewing (re-enabling all others)
-        if (action == DATASTORE_TABLE_VIEW_BUTTON_PREFIX) {
-          shinyjs::disable(viewButtonOnRow, selector = NULL)
-        } else {
-          shinyjs::enable(viewButtonOnRow, selector = NULL)
-        }
-      } #end if not clicked on row
-    } #end for loop over files
+    fileContent <-
+      rhdf5::h5read(reactiveFilePaths[[DATASTORE]], otherReactiveValues[[DATASTORE_TABLE_IDENTIFIER]])
+    hdf5DataTable <- data.table::as.data.table(fileContent)
+    otherReactiveValues[[VIEW_DATASTORE_TABLE]] <-
+      hdf5DataTable
   }) #end observeEvent click on button in DATASTORE table
 
   #https://antoineguillot.wordpress.com/2017/03/01/three-r-shiny-tricks-to-make-your-shiny-app-shines-33-buttons-to-delete-edit-and-compare-datatable-rows
@@ -1100,13 +1078,16 @@ server <- function(input, output, session) {
 
   output[[VIEW_DATASTORE_TABLE]] = renderDataTable({
     hdf5DataTable <- otherReactiveValues[[VIEW_DATASTORE_TABLE]]
-    if (data.table::is.data.table(hdf5DataTable) && nrow(hdf5DataTable) > 0) {
+    if (data.table::is.data.table(hdf5DataTable) &&
+        nrow(hdf5DataTable) > 0) {
       returnValue <-
-        DT::datatable(hdf5DataTable, selection = 'none')
+        DT::datatable(hdf5DataTable, selection = 'single')
     } else {
       returnValue <-
-        DT::datatable(data.table::data.table(Message=c(paste("There is no data for '",
-                                                             otherReactiveValues[[DATASTORE_TABLE_IDENTIFIER]], "'."))))
+        DT::datatable(data.table::data.table(Message = c(
+          paste("There is no data for '",
+                otherReactiveValues[[DATASTORE_TABLE_IDENTIFIER]], "'.")
+        )))
     }
     return(returnValue)
   })
@@ -1137,20 +1118,13 @@ server <- function(input, output, session) {
           '_',
           1:nrow(dataTable),
           '>View</button>
-          <button type="button" class="btn btn-secondary" disabled id=',
-          DATASTORE_TABLE_CANCEL_BUTTON_PREFIX,
-          '_',
-          1:nrow(dataTable),
-          '>Cancel</button>
           </div>
           '
         )
     }
-    return(DT::datatable(
-      dataTable,
-      escape = F,
-      selection = 'none'
-    ))
+    return(DT::datatable(dataTable,
+                         escape = F,
+                         selection = 'none'))
     })
 
   output[[GEO_CSV_FILE]] = renderDataTable({
