@@ -9,7 +9,7 @@ This repository is organized into two directories:
   - [VE modules](https://github.com/gregorbj/VisionEval/tree/master/sources/modules) such as VESimHouseholds and VESyntheticFirms
   - VE models such as the pilot version of [VERPAT](https://github.com/gregorbj/VisionEval/tree/master/sources/models/VERPAT)
   - [VE GUI](https://github.com/gregorbj/VisionEval/tree/master/sources/VEGUI) graphical user interface and scenario viewer / visualizer for running and viewing results of VE models
-- The **api** directory contains documentation of the model system. The [model system design](https://github.com/gregorbj/VisionEval/blob/master/api/model_system_design.md) document is the most complete at the present time.
+- The **api** directory contains documentation of the model system. The [model system design](https://github.com/gregorbj/VisionEval/blob/master/api/model_system_design.md) document is the most complete at the present time. VisionEval framework functions are documented in a [network visualization](https://github.com/gregorbj/VisionEval/blob/master/api/visioneval_functions.html) of the functions and their call relationships. Functions are represented by network nodes. Call relationships are represented by arrows which point from the calling function to the called function. Function details are shown at the bottom of the page when a function node is selected.
 
 # Getting Started
 
@@ -34,10 +34,13 @@ install.packages("shiny")
 install.packages("shinyjs")
 install.packages("shinyFiles")
 install.packages("data.table")
+install.packages("DT")
 install.packages("shinyBS")
 install.packages("future")
 install.packages("testit")
 install.packages("jsonlite")
+install.packages("shinyAce")
+install.packages("envDocument")
 
 devtools::install_github("tdhock/namedCapture")
 devtools::install_github("trestletech/shinyTree")
