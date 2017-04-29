@@ -25,4 +25,3 @@ datastore.
 \details{
 This function checks whether a table is present in the datastore.
 }
-

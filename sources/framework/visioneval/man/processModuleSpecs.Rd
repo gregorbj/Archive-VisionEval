@@ -23,4 +23,3 @@ specifications include multiple listings of data sets (i.e. fields) in a
 table, this function expands the listing to establish a separate
 specification for each data set.
 }
-

@@ -27,4 +27,3 @@ This function creates the model state list and loads model run parameters
 recorded in the 'parameters.json' file into the model state list. It also
 saves the model state list in a file (ModelState.Rda).
 }
-

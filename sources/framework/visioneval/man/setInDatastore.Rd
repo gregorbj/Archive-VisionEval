@@ -35,4 +35,3 @@ particular geographic area is identified, the data are saved to the positions
 in the data sets in the datastore corresponding to the identified geographic
 area.
 }
-

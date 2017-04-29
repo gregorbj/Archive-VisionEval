@@ -37,4 +37,3 @@ determine whether there are records for all run years specified for the
 model and for all geographic areas for the level of geography. It also checks
 for redundant year and geography entries.
 }
-

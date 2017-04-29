@@ -23,4 +23,3 @@ geographic levels. The function reads the model geography (Geo_df) from the
 model state file. Upon successful completion, the function calls the
 listDatastore function to update the datastore listing in the global list.
 }
-

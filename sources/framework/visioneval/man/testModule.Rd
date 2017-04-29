@@ -32,4 +32,3 @@ include all of the outputs that are specified, whether the outputs meet all
 of the specifications, and if the outputs are character strings, whether
 there is a specification for the SIZE parameter.
 }
-

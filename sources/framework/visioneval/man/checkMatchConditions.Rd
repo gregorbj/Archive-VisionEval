@@ -36,4 +36,3 @@ each element with a specified value (e.g. "< 0", "> 1", "!= 10"). This
 function is used both for checking for the presence of prohibited values and
 for the presence of unlikely values.
 }
-

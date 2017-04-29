@@ -38,4 +38,3 @@ The function returns a list which contains a list of error messages and a
 list of the data inputs. The function also writes error messages and warnings
 to the log file.
 }
-

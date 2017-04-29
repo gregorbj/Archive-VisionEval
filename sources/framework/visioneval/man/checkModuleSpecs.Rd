@@ -24,4 +24,3 @@ and for proper values.
 This function reads a processed module specifications list and checks whether
 the specifications are complete and whether the values are appropriate.
 }
-

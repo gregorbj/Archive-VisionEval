@@ -36,4 +36,3 @@ This function copies a saved datastore as the working datastore attributes
 the global list with related geographic information. This function enables
 scenario variants to be built from a constant set of starting conditions.
 }
-

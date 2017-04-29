@@ -27,4 +27,3 @@ stored. Initialization establishes a name for the dataset and key attributes
 associated with the data. Function calls initTable if the table the
 dataset is to be placed in has not been initialized.
 }
-

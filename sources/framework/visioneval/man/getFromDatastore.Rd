@@ -31,4 +31,3 @@ a module's 'Get' specifications. If the module's specifications include the
 name of a geographic area, then the function will retrieve the data for that
 geographic area.
 }
-

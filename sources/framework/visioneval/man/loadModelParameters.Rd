@@ -26,4 +26,3 @@ name, value, and data type. The function creates a 'Model' group in the
 'Global' group and stores the values of the appropriate type in the 'Model'
 group.
 }
-

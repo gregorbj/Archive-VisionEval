@@ -31,4 +31,3 @@ types. A table is initialized in the datastore by initializing a group whose
 name is the table name and assigning a 'LENGTH' attribute which specifies the
 length that all data vectors in the table must have.
 }
-

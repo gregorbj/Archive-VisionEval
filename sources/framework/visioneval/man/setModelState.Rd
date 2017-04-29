@@ -26,4 +26,3 @@ list (ModelState_ls) that is in the global workspace and saved in the
 'ModelState.Rda' file. This function updates  entries in the model state list
 with a supplied named list of values, and then saves the results in the file.
 }
-

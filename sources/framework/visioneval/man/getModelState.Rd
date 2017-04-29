@@ -24,4 +24,3 @@ Key variables that are important for managing the model run are stored in a
 list (ModelState_ls) that is managed in the global environment. This
 function extracts named components of the list.
 }
-

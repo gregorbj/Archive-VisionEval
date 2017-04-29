@@ -34,4 +34,3 @@ is generated if the specified type is 'character' but the input data type is
 'integer', 'double' or 'logical' since these can be coerced correctly, but
 that may not be what is intended (e.g. zone names may be input as numbers).
 }
-

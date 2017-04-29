@@ -28,4 +28,3 @@ list whose NAME, TABLE and GROUP values correspond to the Name, Table, and
 Group argument values. The specifications list must be in standard format and
 must be for only 'Inp', 'Get', or 'Set' specifications.
 }
-

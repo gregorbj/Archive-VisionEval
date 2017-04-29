@@ -31,4 +31,3 @@ consistent with the dataset attributes.
 This function compares characteristics of data to be written to a dataset to
 the dataset attributes to determine whether they are consistent.
 }
-

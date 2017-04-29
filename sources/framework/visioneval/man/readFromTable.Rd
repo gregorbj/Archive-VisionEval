@@ -33,4 +33,3 @@ function checks whether the table and dataset exist and whether all specified
 indices are within the length of the table. The function converts any values
 equal to the NAVALUE attribute to NA.
 }
-

@@ -4,7 +4,7 @@
 \alias{parseModelScript}
 \title{Parse model script.}
 \usage{
-parseModelScript(FilePath = "run_model.R")
+parseModelScript(FilePath = "run_model.R", TestMode = FALSE)
 }
 \arguments{
 \item{FilePath}{A string identifying the relative or absolute path to the
@@ -26,4 +26,3 @@ and identifies the values assigned to the function arguments. It creates a
 list of the calls with their arguments in the order of the calls in the
 script.
 }
-

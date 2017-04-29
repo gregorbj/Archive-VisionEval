@@ -38,4 +38,3 @@ met, the function stops and transmits an error message. If there are no
 data errors the function returns a data frame containing the data in the
 file.
 }
-

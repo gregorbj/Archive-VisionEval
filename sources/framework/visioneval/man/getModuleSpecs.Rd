@@ -24,4 +24,3 @@ and returns the specifications list.
 This function loads the specifications for a module in a package. It returns
 the specifications list.
 }
-

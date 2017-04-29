@@ -22,4 +22,3 @@ where '<date>' is the initialization date and '<time>' is the initialization
 time. The log is initialized with the scenario name, scenario description and
 the date and time of initialization.
 }
-

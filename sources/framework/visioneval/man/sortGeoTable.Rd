@@ -28,4 +28,3 @@ This function sorts the rows of a data frame that the 'Geo' field in the
 data frame matches the corresponding geography names in the specified table
 in the datastore. The function returns the sorted table.
 }
-

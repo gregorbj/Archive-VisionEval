@@ -25,4 +25,3 @@ datastore.
 \details{
 This function extracts the LENGTH attribute for a table in the datastore.
 }
-

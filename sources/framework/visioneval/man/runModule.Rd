@@ -28,4 +28,3 @@ None. The function writes results to the specified locations in the
 \details{
 This function runs a module for  a specified year.
 }
-

@@ -22,4 +22,3 @@ This function checks whether the results from testing a module contain any
 errors. The function stops script execution if there are any errors and the
 message contains a list of the errors.
 }
-

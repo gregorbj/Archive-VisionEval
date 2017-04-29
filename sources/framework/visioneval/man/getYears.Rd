@@ -16,4 +16,3 @@ A character vector of the model run years.
 This is a convenience function to make it easier to retrieve the Years
 component of the model state file.
 }
-

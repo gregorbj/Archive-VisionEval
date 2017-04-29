@@ -18,4 +18,3 @@ This function defines an alternate name for list. It is used in module
 specifications to identify data items in the Inp, Get, and Set portions of
 the specifications.
 }
-
