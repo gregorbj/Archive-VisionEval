@@ -30,8 +30,8 @@
 #' @param DstoreListing_df a dataframe which lists the contents of the datastore
 #'   as contained in the model state file.
 #' @return A logical identifying whether the dataset is in the datastore. It has
-#' an attribute that is a string of the full path to where the module specifies
-#' the data should be in the datastore.
+#' an attribute that is a string of the full path to where the dataset should be
+#' in the datastore.
 #' @export
 checkDataset <- function(Name, Table, Group, DstoreListing_df) {
   Name <- as.character(Name)
