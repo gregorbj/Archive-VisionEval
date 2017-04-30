@@ -14,8 +14,9 @@
 #=======================
 #' Check dataset existence
 #'
-#' \code{checkDataset} checks whether a dataset exists and if so returns the
-#' full path name.
+#' \code{checkDataset} checks whether a dataset exists in the datastore and
+#' returns a TRUE or FALSE value with an attribute of the full path to where the
+#' dataset should be located in the datastore.
 #'
 #' This function checks whether a dataset exists. The dataset is identified by
 #' its name and the table and group names it is in. If the dataset is not in the
@@ -28,7 +29,9 @@
 #' part of.
 #' @param DstoreListing_df a dataframe which lists the contents of the datastore
 #'   as contained in the model state file.
-#' @return A logical identifying whether the dataset is in the datastore
+#' @return A logical identifying whether the dataset is in the datastore. It has
+#' an attribute that is a string of the full path to where the dataset should be
+#' in the datastore.
 #' @export
 checkDataset <- function(Name, Table, Group, DstoreListing_df) {
   Name <- as.character(Name)
