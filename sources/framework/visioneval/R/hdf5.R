@@ -499,8 +499,8 @@ getFromDatastore <- function(ModuleSpec_ls, Geo = NULL, RunYear = Year) {
 #' @param Geo a string identifying the name of the geographic area to get the
 #' data for. For example, if the module is specified to be run by Azone, then
 #' Geo would be the name of a particular Azone.
-#' @return A list containing all the data sets specified in the module's
-#' 'Get' specifications for the identified geographic area.
+#' @return A logical value which is TRUE if the data are successfully saved to
+#' the datastore.
 #' @export
 setInDatastore <-
   function(Data_ls, ModuleSpec_ls, ModuleName, Geo = NULL) {

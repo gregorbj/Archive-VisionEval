@@ -938,7 +938,7 @@
         "Description": "A string identifying the name of the geographic area to get the data for. For example, if the module is specified to be run by Azone, then Geo would be the name of a particular Azone."
       }
     ],
-    "Return": "A list containing all the data sets specified in the module Get specifications for the identified geographic area.",
+    "Return": "A logical value which is TRUE if the data are successfully saved to the datastore.",
     "Calls":
     [ 
       "getModelState",
