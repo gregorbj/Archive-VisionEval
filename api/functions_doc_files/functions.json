@@ -326,10 +326,6 @@
     "Arguments": 
     [
       {
-        "Name": "Dir",
-        "Description": "A string identifying the path to the directory where the 'ModelParamFile' is located."
-      },
-      {
         "Name": "ModelParamFile",
         "Description": "A string identifying the name of the parameter file. The default value is 'model_parameters.json'."
       }
