@@ -496,6 +496,7 @@ getFromDatastore <- function(ModuleSpec_ls, Geo = NULL, RunYear = Year) {
 #' the VisionEval requirements
 #' @param ModuleName a string identifying the name of the module (used to document
 #' the module creating the data in the datastore)
+#' @param Year a string identifying the model run year
 #' @param Geo a string identifying the name of the geographic area to get the
 #' data for. For example, if the module is specified to be run by Azone, then
 #' Geo would be the name of a particular Azone.
@@ -503,7 +504,7 @@ getFromDatastore <- function(ModuleSpec_ls, Geo = NULL, RunYear = Year) {
 #' the datastore.
 #' @export
 setInDatastore <-
-  function(Data_ls, ModuleSpec_ls, ModuleName, Geo = NULL) {
+  function(Data_ls, ModuleSpec_ls, ModuleName, Year, Geo = NULL) {
     #Get the model state
     G <- getModelState()
     #Make any specified tables

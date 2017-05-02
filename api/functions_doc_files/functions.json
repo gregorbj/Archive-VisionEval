@@ -934,6 +934,10 @@
         "Description": "A string identifying the name of the module (used to document the module creating the data in the datastore)"
       },
       {
+        "Name": "Year",
+        "Description": "A string identifying the model run year."
+      },
+      {
         "Name": "Geo",
         "Description": "A string identifying the name of the geographic area to get the data for. For example, if the module is specified to be run by Azone, then Geo would be the name of a particular Azone."
       }
