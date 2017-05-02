@@ -291,14 +291,14 @@ checkMatchConditions <- function(Data_, Conditions_, DataName, ConditionType) {
   Results_ <- character(0)
   DataChecks_ <- list()
   for (i in 1:length(Conditions_)) {
-    DataChecks_[[i]] <- any(sapply(Data_, function(x) {
-      Cond <- Conditions_[i]
-      if (Cond  == "NA") {
-        is.na(x)
-      } else {
-        eval(parse(text = paste(x, Cond)))
-      }
-    }), na.rm = TRUE)
+    Cond <- Conditions_[i]
+    if (Cond  == "NA") {
+      DataChecks_[[i]] <-
+        any(is.na(Data_))
+    } else {
+      DataChecks_[[i]] <-
+        any(eval(parse(text = paste("Data_", Cond))))
+    }
   }
   TrueConditions_ <- Conditions_[unlist(DataChecks_)]
   for (Condition in TrueConditions_) {
