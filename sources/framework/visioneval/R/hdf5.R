@@ -164,12 +164,12 @@ initDataset <- function(Spec_ls, Group) {
   }
   #Create the dataset
   Length <- unlist(h5readAttributes(G$DatastoreName, Table))["LENGTH"]
-  Chunck <- ifelse(Length > 1000, 100, 1)
+  Chunk <- ifelse(Length > 1000, 100, 1)
   H5File <- H5Fopen(G$DatastoreName)
   h5createDataset(
     H5File, DatasetName, dims = Length,
     storage.mode = Spec_ls$TYPE, size = Size + 1,
-    chunk = Chunck, level = 7
+    chunk = Chunk, level = 7
   )
   H5Data <- H5Dopen(H5File, DatasetName)
   h5writeAttribute(Spec_ls$MODULE, H5Data, "MODULE")
