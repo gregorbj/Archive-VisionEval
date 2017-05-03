@@ -19,8 +19,8 @@ as contained in the model state file.}
 }
 \value{
 A logical identifying whether the dataset is in the datastore. It has
-an attribute that is a string of the full path to where the module specifies
-the data should be in the datastore.
+an attribute that is a string of the full path to where the dataset should be
+in the datastore.
 }
 \description{
 \code{checkDataset} checks whether a dataset exists in the datastore and

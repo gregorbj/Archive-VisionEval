@@ -4,7 +4,7 @@
 \alias{setInDatastore}
 \title{Save the data sets returned by a module in the datastore}
 \usage{
-setInDatastore(Data_ls, ModuleSpec_ls, ModuleName, Geo = NULL)
+setInDatastore(Data_ls, ModuleSpec_ls, ModuleName, Year, Geo = NULL)
 }
 \arguments{
 \item{Data_ls}{a list containing the data to be saved. The list is organized
@@ -16,13 +16,15 @@ the VisionEval requirements}
 \item{ModuleName}{a string identifying the name of the module (used to document
 the module creating the data in the datastore)}
 
+\item{Year}{a string identifying the model run year}
+
 \item{Geo}{a string identifying the name of the geographic area to get the
 data for. For example, if the module is specified to be run by Azone, then
 Geo would be the name of a particular Azone.}
 }
 \value{
-A list containing all the data sets specified in the module's
-'Get' specifications for the identified geographic area.
+A logical value which is TRUE if the data are successfully saved to
+the datastore.
 }
 \description{
 \code{setInDatastore} saves to the datastore the data returned in a standard
