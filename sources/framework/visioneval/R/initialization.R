@@ -196,7 +196,7 @@ writeLog <- function(Msg = "", Print = FALSE) {
   writeLines(Content, Con)
   close(Con)
   if (Print) {
-    print(Content)
+    print(gsub(" \n", "", Content))
   }
 }
 
