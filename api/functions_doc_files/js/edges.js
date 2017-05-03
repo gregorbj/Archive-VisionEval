@@ -116,7 +116,6 @@ var edges = new vis.DataSet([
 {"from":53,"to":18,"arrows":"to"},
 {"from":53,"to":43,"arrows":"to"},
 {"from":53,"to":44,"arrows":"to"},
-{"from":53,"to":5,"arrows":"to"},
 {"from":53,"to":21,"arrows":"to"},
 {"from":53,"to":7,"arrows":"to"},
 {"from":53,"to":38,"arrows":"to"},
