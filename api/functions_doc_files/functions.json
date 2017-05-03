@@ -326,10 +326,6 @@
     "Arguments": 
     [
       {
-        "Name": "Dir",
-        "Description": "A string identifying the path to the directory where the 'ModelParamFile' is located."
-      },
-      {
         "Name": "ModelParamFile",
         "Description": "A string identifying the name of the parameter file. The default value is 'model_parameters.json'."
       }
@@ -493,7 +489,7 @@
     "Calls":
     [ 
     ]
-  }, 
+  },
   
   {
     "Name": "getDatasetAttr",
@@ -938,11 +934,15 @@
         "Description": "A string identifying the name of the module (used to document the module creating the data in the datastore)"
       },
       {
+        "Name": "Year",
+        "Description": "A string identifying the model run year."
+      },
+      {
         "Name": "Geo",
         "Description": "A string identifying the name of the geographic area to get the data for. For example, if the module is specified to be run by Azone, then Geo would be the name of a particular Azone."
       }
     ],
-    "Return": "A list containing all the data sets specified in the module Get specifications for the identified geographic area.",
+    "Return": "A logical value which is TRUE if the data are successfully saved to the datastore.",
     "Calls":
     [ 
       "getModelState",
@@ -1262,6 +1262,93 @@
     "Calls":
     [ 
       "checkDataConsistency"
+    ]
+  },
+  
+  {
+    "Name": "checkModuleOutputs",
+    "Group": "developer",
+    "Description": "Checks output list produced by a module for consistency with the module's specifications.",
+    "Arguments":
+    [
+      {
+        "Name": "Data_ls",
+        "Description": "A list of all the datasets returned by a module in the standard list form required by the VisionEval model system."
+      },
+      {
+        "Name": "ModuleSpec_ls",
+        "Description": "A list of module specifications in the standard list form required by the VisionEval model system."
+      },
+      {
+        "Name": "ModuleName",
+        "Description": "A string identifying the name of the module."
+      }
+    ],
+    "Return": "A character vector containing a list of error messages or having a length of 0 if there are no error messages.",
+    "Calls":
+    [
+      "processModuleSpecs",
+      "checkDataConsistency"
+    ]
+  },
+  
+  {
+    "Name": "testModule",
+    "Group": "developer",
+    "Description": "Sets up a test environment and tests a module.",
+    "Arguments":
+    [
+      {
+        "Name": "ModuleName",
+        "Description": "A string identifying the module name."
+      },
+      {
+        "Name": "ParamDir",
+        "Description": "A string identifying the location of the directory where the run parameters, model parameters, and geography definition files are located. The default value is defs. This directory should be located in the tests directory."
+      },
+      {
+        "Name": "RunParamFile",
+        "Description": "A string identifying the name of the run parameters file. The default value is run_parameters.json."
+      },
+      {
+        "Name": "GeoFile",
+        "Description": "A string identifying the name of the file which contains geography definitions."
+      },
+      {
+        "Name": "ModelParamFile",
+        "Description": "A string identifying the name of the file which contains model parameters. The default value is model_parameters.json."
+      },
+      {
+        "Name": "LoadDatastore",
+        "Description": "A logical value identifying whether to load an existing datastore. If TRUE, it loads the datastore whose name is identified in the run_parameters.json file. If FALSE it initializes a new datastore."
+      },
+      {
+        "Name": "SaveDatastore",
+        "Description": "A logical value identifying whether the module outputs will be written to the datastore. If TRUE the module outputs are written to the datastore. If FALSE the outputs are not written to the datastore."
+      }
+    ],
+    "Return": "None. The function writes out messages to the console and to the log as the testing proceeds. These messages include the time when each test starts and when it ends. When a key test fails, requiring a fix before other tests can be run, execution stops and an error message is written to the console. Detailed error messages are also written to the log.",
+    "Calls":
+    [
+      "initModelStateFile",
+      "initLog",
+      "writeLog",
+      "getModelState",
+      "loadDatastore",
+      "initDatastore",
+      "readGeography",
+      "initDatastoreGeography",
+      "loadModelParameters",
+      "processModuleSpecs",
+      "checkModuleSpecs",
+      "processModuleInputs",
+      "inputsToDatastore",
+      "checkDataset",
+      "getYears",
+      "getFromDatastore",
+      "checkModuleOutputs",
+      "readFromTable",
+      "setInDatastore"
     ]
   }
   
