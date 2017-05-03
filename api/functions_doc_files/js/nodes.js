@@ -49,5 +49,7 @@ var nodes = new vis.DataSet([
 {"id":48,"label":"applyLinearModel","group":"developer"},
 {"id":49,"label":"item","group":"developer"},
 {"id":50,"label":"items","group":"developer"},
-{"id":51,"label":"processEstimationInputs","group":"developer"}
+{"id":51,"label":"processEstimationInputs","group":"developer"},
+{"id":52,"label":"checkModuleOutputs","group":"developer"},
+{"id":53,"label":"testModule","group":"developer"}
 ]);
