@@ -512,3 +512,324 @@ testModule <-
     writeLog(Msg, Print = TRUE)
     rm(Msg)
   }
+
+
+#BINARY SEARCH FUNCTION
+#======================
+#' Binary search function to find a parameter which achieves a target value.
+#'
+#' \code{binarySearch} uses a binary search algorithm to find the value of a
+#' function parameter for which the function achieves a target value.
+#'
+#' A binary search algorithm is used by several modules to calibrate the
+#' intercept of a binary logit model to match a specified proportion or to
+#' calibrate a dispersion parameter for a linear model to match a mean value.
+#' This function implements a binary search algorithm in a consistent manner to
+#' be used in all modules that need it. It is written to work with stochastic
+#' models which by their nature don't produce the same outputs given the same
+#' inputs and so will not converge reliably. To deal with the stochasticity,
+#' this function uses a successive averaging  approach to smooth out the effect
+#' of stochastic variation on reliable convergence. Rather than use the results
+#' of a single search iteration to determine the next value range to use in the
+#' search, a weighted average of previous values is used with the more recent
+#' values being weighted more heavily.
+#'
+#' @param Function a function which returns a value which is compared to the
+#' 'Target' argument. The function must take as its first argument a value which
+#' from the 'SearchRange_'. It must return a value that may be compared to the
+#' 'Target' value.
+#' @param SearchRange_ a two element numeric vector which has the lowest and
+#' highest values of the parameter range within which the search will be carried
+#' out.
+#' @param ... one or more optional arguments for the 'Function'.
+#' @param Target a numeric value that is compared with the return value of the
+#' 'Function'.
+#' @param MaxIter an integer specifying the maximum number of iterations
+#' to all the search to attempt.
+#' @param Tolerance a numeric value specifying the proportional difference
+#' between the 'Target' and the return value of the 'Function' to determine
+#' when the search is complete.
+#' @return the value in the 'SearchRange_' for the function parameter which
+#' matches the target value.
+#' @export
+binarySearch <-
+  function(Function,
+           SearchRange_,
+           ...,
+           Target = 0,
+           MaxIter = 100,
+           Tolerance = 0.0001) {
+    #Initialize vectors of low, middle and high values
+    Lo_ <- SearchRange_[1]
+    Mid_ <- mean(SearchRange_)
+    Hi_ <- SearchRange_[2]
+    #Initialize vector to store weighted average of middle value
+    WtMid_ <- numeric(0)
+    #Define function to calculate weighted average value of a vector
+    calcWtAve <- function(Values_) {
+      Wts_ <- (1:length(Values_))^2 / sum((1:length(Values_))^2)
+      sum(Values_ * Wts_)
+    }
+    #Iterate to find best fit
+    for (i in 1:MaxIter) {
+      Lo <- calcWtAve(Lo_)
+      Hi <- calcWtAve(Hi_)
+      #Range of input values to test
+      InValues_ <- c(Lo, (Lo + Hi) / 2, Hi)
+      #Apply Function to calculate results for the InValues_ vector
+      Result_ <-
+        sapply(InValues_, Function, ...)
+      #Check whether any values of Result_ are NA
+      if (any(is.na(Result_))) {
+        Msg <-
+          paste0("Error in 'binarySearch' function to match target value. ",
+                 "The low and/or high values of the search range produce ",
+                 "NA results. The low result is ", Result_[1], ". ",
+                 "The high result is ", Result_[2], ". ",
+                 "Modify the search range to avoid NA values.")
+        stop(Msg)
+      }
+      #Determine which two Result_ values bracket the target value
+      GT_ <- Result_ > Target
+      Idx <- which(diff(GT_) != 0)
+      #Calculate new low and high values
+      if (length(Idx) > 0) {
+        Lo_ <- c(Lo_, InValues_[Idx])
+        Hi_ <- c(Hi_, InValues_[Idx + 1])
+        Mid_ <- c(Mid_, mean(c(InValues_[Idx], InValues_[Idx + 1])))
+      } else {
+        MinIdx <- which(abs(Result_ - Target) == min(abs(Result_ - Target)))
+        Lo_ <- c(Lo_, tail(Lo_, 1))
+        Hi_ <- c(Hi_, tail(Hi_, 1))
+        Mid_ <- c(Mid_, tail(Mid_, 1))
+      }
+      WtMid_ <- c(WtMid_, calcWtAve(Mid_))
+      #Break out of loop if change in weighted mean of midpoint is less than tolerance
+      if (length(Mid_) > 10) {
+        Chg <- diff(tail(Mid_, 4)) / tail(Mid_, 3)
+        if (all(Chg < Tolerance)) break()
+      }
+    }
+    #Return the weighted average of the midpoint value
+    tail(WtMid_, 1)
+  }
+
+
+#MAKE A MODEL FORMULA STRING
+#===========================
+#' Makes a string representation of a model equation.
+#'
+#' \code{makeModelFormulaString} creates a string equivalent of a model equation.
+#'
+#' The return values of model estimation functions such as 'lm' and 'glm'
+#' contain a large amount of information in addition to the parameter estimates
+#' for the specified model. This is particularly the case when the estimation
+#' dataset is large. Most of this information is not needed to apply the model
+#' and including it can add substantially to the size of a package that includes
+#' several estimated models. All that is really needed to implement an estimated
+#' model is an equation of the model terms and estimated coefficients. This
+#' function creates a string representation of the model equation.
+#'
+#' @param EstimatedModel the return value of the 'lm' or 'glm' functions.
+#' @return a string expression of the model equation.
+#' @export
+makeModelFormulaString <- function (EstimatedModel) {
+  # Extract the model coefficients
+  Coeff. <- coefficients( EstimatedModel )
+  # Make the model formula
+  FormulaString <- gsub( ":", " * ", names( Coeff. ) )
+  FormulaString[ 1 ] <- "Intercept"
+  FormulaString <- paste( Coeff., FormulaString, sep=" * " )
+  FormulaString <- paste( FormulaString, collapse= " + " )
+  return(FormulaString)
+}
+
+
+#APPLY A BINOMIAL MODEL
+#======================
+#' Applies an estimated binomial model to a set of input values.
+#'
+#' \code{applyBinomialModel} applies an estimated binomial model to a set of
+#' input data.
+#'
+#' The function calculates the result of applying a binomial logit model to a
+#' set of input data. If a target proportion (TargetProp) is specified, the
+#' function calls the 'binarySearch' function to calculate an adjustment to
+#' the constant of the model equation so that the population proportion matches
+#' the target proportion. The function will also test whether the target search
+#' range specified for the model will produce acceptable values.
+#'
+#' @param Model_ls a list which contains the following components:
+#' 'Type' which has a value of 'binomial';
+#' 'Formula' a string representation of the model equation;
+#' 'Choices' a two-element vector listing the choice set. The first element is
+#' the choice that the binary logit model equation predicts the odds of;
+#' 'PrepFun' a function which prepares the input data frame for the model
+#' application. If no preparation, this element of the list should not be
+#' present or should be set equal to NULL;
+#' 'SearchRange' a two-element numeric vector which specifies the acceptable
+#' search range to use when determining the factor for adjusting the model
+#' constant.
+#' @param Data_df a data frame containing the data required for applying the
+#' model.
+#' @param TargetProp a number identifying a target proportion for the default
+#' choice to be achieved for the input data or NULL if there is no target
+#' proportion to be achieved.
+#' @param CheckTargetSearchRange a logical identifying whether the function
+#' is to only check whether the specified 'SearchRange' for the model will
+#' produce acceptable values (i.e. no NA or NaN values). If FALSE (the default),
+#' the function will run the model and will not check the target search range.
+#' @return a vector of choice values for each record of the input data frame if
+#' the model is being run, or if the function is run to only check the target
+#' search range, a two-element vector identifying if the search range produces
+#' NA or NaN values.
+#' @export
+applyBinomialModel <-
+  function(Model_ls,
+           Data_df,
+           TargetProp = NULL,
+           CheckTargetSearchRange = FALSE) {
+    #Check that model is 'binomial' type
+    if (Model_ls$Type != "binomial") {
+      Msg <- paste0("Wrong model type. ",
+                    "Model is identified as Type = ", Model_ls$Type, ". ",
+                    "Function only works with 'binomial' type models.")
+      stop(Msg)
+    }
+    #Prepare data
+    if (!is.null(Model_ls$PrepFun)) {
+      Data_df <- Model_ls$PrepFun(Data_df)
+    }
+    #Define function to calculate probabilities
+    calcProbs <- function(x) {
+      Results_ <- x + eval(parse(text = Model_ls$Formula), envir = Data_df)
+      Odds_ <- exp(Results_)
+      Odds_ / (1 + Odds_)
+    }
+    #Define function to calculate factor to match target proportion
+    checkProportionMatch <- function(TestValue) {
+      Probs_ <- calcProbs(TestValue)
+      sum(Probs_) / length(Probs_)
+    }
+    #Define a function to assign results
+    assignResults <- function(Probs_) {
+      N <- length(Probs_)
+      Result_ <- rep(Model_ls$Choices[2], N)
+      Result_[runif(N) <= Probs_] <- Model_ls$Choices[1]
+      Result_
+    }
+    #Apply the model
+    if (CheckTargetSearchRange) {
+      Result_ <- c(
+        Lo = checkProportionMatch(Model_ls$SearchRange[1]),
+        Hi = checkProportionMatch(Model_ls$SearchRange[2])
+      )
+    } else {
+      if (is.null(TargetProp)) {
+        Probs_ <- calcProbs(0)
+        Result_ <- assignResults(Probs_)
+      } else {
+        if (TargetProp == 0 | TargetProp == 1) {
+          if (TargetProp == 0) Result_ <- rep(Model_ls$Choices[2], nrow(Data_df))
+          if (TargetProp == 1) Result_ <- rep(Model_ls$Choices[1], nrow(Data_df))
+        } else {
+          Factor <- binarySearch(checkProportionMatch, Model_ls$SearchRange, Target = TargetProp)
+          Probs_ <- calcProbs(Factor)
+          Result_ <- assignResults(Probs_)
+        }
+      }
+    }
+    #Return values
+    Result_
+  }
+
+
+#APPLY A LINEAR MODEL
+#====================
+#' Applies an estimated linear model to a set of input values.
+#'
+#' \code{applyLinearModel} applies an estimated linear model to a set of input
+#' data.
+#'
+#' The function calculates the result of applying a linear regression model to a
+#' set of input data. If a target mean value (TargetMean) is specified, the
+#' function calculates a standard deviation of a sampling distribution which
+#' is applied to linear model results. For each value returned by the linear
+#' model, a sample is drawn from a normal distribution where the mean value of
+#' the distribution is the linear model result and the standard deviation of the
+#' distibution is calculated by the binary search to match the population mean
+#' value to the target mean value. This process is meant to be applied to linear
+#' model where the dependent variable is power transformed. Applying the
+#' sampling distribution to the linear model results increases the dispersion
+#' of results to match the observed dispersion and also matches the mean values
+#' of the untransformed results. This also enables the model to be applied to
+#' situations where the mean value is different than the observed mean value.
+#'
+#' @param Model_ls a list which contains the following components:
+#' 'Type' which has a value of 'linear';
+#' 'Formula' a string representation of the model equation;
+#' 'PrepFun' a function which prepares the input data frame for the model
+#' application. If no preparation, this element of the list should not be
+#' present or should be set equal to NULL;
+#' 'SearchRange' a two-element numeric vector which specifies the acceptable
+#' search range to use when determining the dispersion factor.
+#' 'OutFun' a function that is applied to transform the results of applying the
+#' linear model. For example to untransform a power-transformed variable. If
+#' no transformation is necessary, this element of the list should not be
+#' present or should be set equal to NULL.
+#' @param Data_df a data frame containing the data required for applying the
+#' model.
+#' @param TargetMean a number identifying a target mean value to be achieved  or
+#' NULL if there is no target.
+#' @param CheckTargetSearchRange a logical identifying whether the function
+#' is to only check whether the specified 'SearchRange' for the model will
+#' produce acceptable values (i.e. no NA or NaN values). If FALSE (the default),
+#' the function will run the model and will not check the target search range.
+#' @return a vector of numeric values for each record of the input data frame if
+#' the model is being run, or if the function is run to only check the target
+#' search range, a summary of predicted values when the model is run with
+#' dispersion set at the high value of the search range.
+#' @export
+applyLinearModel <-
+  function(Model_ls,
+           Data_df,
+           TargetMean = NULL,
+           CheckTargetSearchRange = FALSE) {
+    #Prepare data
+    if (!is.null(Model_ls$PrepFun)) {
+      Data_df <- Model_ls$PrepFun(Data_df)
+    }
+    #Define function for applying linear model
+    calcValues <- function() {
+      eval(parse(text = Model_ls$Formula), envir = Data_df)
+    }
+    #Define function to test match with TargetMean
+    testModelMean <- function(SD) {
+      Values_ <- calcValues()
+      Est_ <- Values_ + rnorm(length(Values_), 0, sd = SD)
+      if (!is.null(Model_ls$OutFun)) Est_ <- Model_ls$OutFun(Est_)
+      TargetMean - mean(Est_)
+    }
+    #Define function for checking target search range
+    testSearchRange <- function(Range_) {
+      Values_ <- calcValues()
+      Est_ <- Values_ + rnorm(length(Values_), 0, sd = Range_[2])
+      if (!is.null(Model_ls$OutFun)) Est_ <- Model_ls$OutFun(Est_)
+      Est_
+    }
+    #Calculate result
+    if (CheckTargetSearchRange) {
+      Result_ <- summary(testSearchRange(Model_ls$SearchRange))
+    } else {
+      if (is.null(TargetMean)) {
+        Result_ <- calcValues()
+        if (!is.null(Model_ls$OutFun)) Result_ <- Model_ls$OutFun(Result_)
+      } else {
+        SD <- binarySearch(testModelMean, Model_ls$SearchRange)
+        Result_ <- sapply(calcValues(), function(x) rnorm(1, x, sd = SD))
+        if (!is.null(Model_ls$OutFun)) Result_ <- Model_ls$OutFun(Result_)
+        attributes(Result_) <- list(SD = SD)
+      }
+    }
+    Result_
+  }
