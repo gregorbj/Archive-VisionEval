@@ -87,6 +87,7 @@ DATASTORE_TABLE_EXPORT_BUTTON <- "DATASTORE_TABLE_EXPORT_BUTTON"
 
 TAB_SETTINGS <- "TAB_SETTINGS"
 TAB_INPUTS <- "TAB_INPUTS"
+TAB_OUTPUTS <- "TAB_OUTPUTS"
 
 MODULE_PROGRESS <- "MODULE_PROGRESS"
 PAGE_TITLE <- "Pilot Model Runner and Scenario Viewer"
@@ -167,21 +168,6 @@ navlistPanel(
   tabPanel(
     title = "Settings",
     value = TAB_SETTINGS,
-    h3("Datastore:"),
-    # shinyTree::shinyTree(DATASTORE_TREE),
-    DT::dataTableOutput(DATASTORE_TABLE),
-    shinyFiles::shinySaveButton(
-      id = DATASTORE_TABLE_EXPORT_BUTTON,
-      label = "Export displayed datastore data...",
-      title = "Please pick location and name for the exported data...",
-      list(
-        `tab separated values (txt)` = "txt",
-        `tab separated values (tsv)` = "tsv"
-      )
-    ),
-    actionButton(DATASTORE_TABLE_CLOSE_BUTTON, "Close Datastore table"),
-    verbatimTextOutput(DATASTORE_TABLE_IDENTIFIER, FALSE),
-    DT::dataTableOutput(VIEW_DATASTORE_TABLE),
     h3("Model state"),
     verbatimTextOutput(MODEL_STATE_FILE, FALSE),
     h3("Model parameters"),
@@ -215,11 +201,25 @@ navlistPanel(
     h3("VisionEval console output:"),
     verbatimTextOutput(CAPTURED_SOURCE, FALSE)
   ),
-  # tabPanel("Outputs",
-  #          value="TAB_OUTPUTS",
-  #          shinyTree(OUTPUTS_TREE),
-  #          tags$label("To Be Implemented...")
-  # ),
+  tabPanel(
+    "Outputs",
+    value = "TAB_OUTPUTS",
+    verbatimTextOutput(DATASTORE_TABLE_IDENTIFIER, FALSE),
+    # shinyTree::shinyTree(DATASTORE_TREE),
+    shinyFiles::shinySaveButton(
+      id = DATASTORE_TABLE_EXPORT_BUTTON,
+      label = "Export displayed datastore data...",
+      title = "Please pick location and name for the exported data...",
+      list(
+        `tab separated values (txt)` = "txt",
+        `tab separated values (tsv)` = "tsv"
+      )
+    ),
+    actionButton(DATASTORE_TABLE_CLOSE_BUTTON, "Close Datastore table"),
+    DT::dataTableOutput(VIEW_DATASTORE_TABLE),
+    h3("Datastore:"),
+    DT::dataTableOutput(DATASTORE_TABLE)
+  ),
   tabPanel(
     "Logs (newest first) ",
     value = "TAB_LOGS",
@@ -239,7 +239,7 @@ server <- function(input, output, session) {
     reactiveValues() #WARNING- DON'T USE VARIABLES TO INITIALIZE LIST KEYS - the variable name will be used, not the value
 
   otherReactiveValues[[DEBUG_CONSOLE_OUTPUT]] <-
-    data.table::data.table(time = paste(Sys.time()), message = "Placeholder to be deleted")[-1, ]
+    data.table::data.table(time = paste(Sys.time()), message = "Placeholder to be deleted")[-1,]
 
   otherReactiveValues[[MODULE_PROGRESS]] <- data.table::data.table()
 
@@ -408,18 +408,18 @@ server <- function(input, output, session) {
       selector = "#VIEW_DATASTORE_TABLE, #DATASTORE_TABLE_EXPORT_BUTTON, #DATASTORE_TABLE_IDENTIFIER, #DATASTORE_TABLE_CLOSE_BUTTON"
     )
   })
-#
-#   observe({
-#     toggle(
-#       id = DATASTORE_TABLE_EXPORT_BUTTON,
-#       condition = data.table::is.data.table(otherReactiveValues[[VIEW_DATASTORE_TABLE]]),
-#       anim = TRUE,
-#       animType = "Slide",
-#       time = 0.25,
-#       selector = NULL
-#     )
-#   })
-#
+  #
+  #   observe({
+  #     toggle(
+  #       id = DATASTORE_TABLE_EXPORT_BUTTON,
+  #       condition = data.table::is.data.table(otherReactiveValues[[VIEW_DATASTORE_TABLE]]),
+  #       anim = TRUE,
+  #       animType = "Slide",
+  #       time = 0.25,
+  #       selector = NULL
+  #     )
+  #   })
+  #
   #how to hide/show tabs https://github.com/daattali/advanced-shiny/blob/master/hide-tab/app.R
   observe({
     toggle(
@@ -470,7 +470,7 @@ server <- function(input, output, session) {
     result <- data.table::data.table()
     if (length(cleanedLogLines) > 0) {
       modulesFoundInLogFile <-
-        data.table::as.data.table(namedCapture::str_match_named(rev(cleanedLogLines), pattern))[!is.na(actionType),]
+        data.table::as.data.table(namedCapture::str_match_named(rev(cleanedLogLines), pattern))[!is.na(actionType), ]
       if (nrow(modulesFoundInLogFile) > 0) {
         result <- modulesFoundInLogFile
       }
