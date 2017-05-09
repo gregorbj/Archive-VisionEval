@@ -8,7 +8,7 @@ library(future)
 library(testit)
 library(jsonlite)
 library(DT)
-library(shinyAce)
+library(rhandsontable)
 library(envDocument)
 library(rhdf5)
 
@@ -182,7 +182,8 @@ navlistPanel(
     value = TAB_INPUTS,
     h3("Input files:"),
     DT::dataTableOutput(INPUT_FILES),
-    shinyAce::aceEditor(EDITOR_INPUT_FILE, value = ""),
+    h3("HOT: "),
+    rhandsontable::rHandsontableOutput(EDITOR_INPUT_FILE),
     h3("Datastore tables:"),
     DT::dataTableOutput(HDF5_TABLES),
     h3("Module specifications:"),
@@ -303,7 +304,7 @@ server <- function(input, output, session) {
     ))
     result <- ""
     if (file.exists(filePath)) {
-      result <- read.csv(filePath)
+      result <- data.table::as.data.table(read.csv(filePath))
     }
     return(result)
   }
@@ -387,16 +388,16 @@ server <- function(input, output, session) {
                          selector = NULL)
   })
 
-  observe({
-    toggle(
-      id = EDITOR_INPUT_FILE,
-      condition = otherReactiveValues[[EDITOR_INPUT_FILE]],
-      anim = TRUE,
-      animType = "Slide",
-      time = 0.25,
-      selector = NULL
-    )
-  })
+  # observe({
+  #   toggle(
+  #     id = EDITOR_INPUT_FILE,
+  #     condition = data.table::is.data.table(otherReactiveValues[[EDITOR_INPUT_FILE]]),
+  #     anim = TRUE,
+  #     animType = "Slide",
+  #     time = 0.25,
+  #     selector = NULL
+  #   )
+  # })
 
   observe({
     shinyjs::toggle(
@@ -906,10 +907,9 @@ server <- function(input, output, session) {
           file.path(getScriptInfo()$fileDirectory, "inputs", fileName)
         #do the appropriate action
         if (action == INPUT_FILE_EDIT_BUTTON_PREFIX) {
-          otherReactiveValues[[EDITOR_INPUT_FILE]] <- TRUE
-          fileLines <- SafeReadAndCleanLines(filePath)
-          fileContent <- paste0(collapse = "\n", fileLines)
-          shinyAce::updateAceEditor(session, EDITOR_INPUT_FILE, value = fileContent)
+          fileDataTable <- SafeReadCSV(filePath)
+          print(paste("nrow(fileDataTable):",nrow(fileDataTable)))
+          otherReactiveValues[[EDITOR_INPUT_FILE]] <- fileDataTable
           shinyjs::disable(editButtonOnRow, selector = NULL)
           shinyjs::enable(saveButtonOnRow, selector = NULL)
           shinyjs::enable(cancelButtonOnRow, selector = NULL)
@@ -921,8 +921,11 @@ server <- function(input, output, session) {
               format(Sys.time(), "%Y-%m-%d_%H-%M"),
               ".bak"
             ))
-            editedContent <- input[[EDITOR_INPUT_FILE]]
-            write(editedContent, filePath)
+            rhandsontableContent <- output[[EDITOR_INPUT_FILE]]
+            editedContent <-  rhandsontable::hot_to_r(rhandsontableContent)
+            if (!is.null(editiedContent)) {
+              write(editedContent, filePath)
+            }
             otherReactiveValues[[EDITOR_INPUT_FILE]] <- FALSE
           } else if (action == INPUT_FILE_CANCEL_BUTTON_PREFIX) {
             otherReactiveValues[[EDITOR_INPUT_FILE]] <- FALSE
@@ -938,7 +941,6 @@ server <- function(input, output, session) {
               )
             )
           }
-          shinyAce::updateAceEditor(session, EDITOR_INPUT_FILE, value = "")
           shinyjs::enable(editButtonOnRow, selector = NULL)
           shinyjs::disable(saveButtonOnRow, selector = NULL)
           shinyjs::disable(cancelButtonOnRow, selector = NULL)
@@ -983,6 +985,7 @@ server <- function(input, output, session) {
       "resultAncestorsList" = resultAncestorsList
     ))
   } #end extractFromTree
+
 
   getAncestorPath <- function(leaf) {
     ancestorPath <- attr(leaf, "ancestorPath")
@@ -1033,6 +1036,16 @@ server <- function(input, output, session) {
                                  escape = F, selection = 'none')
     return(returnValue)
   }) #end getOutputINPUT_FILES
+
+  output[[EDITOR_INPUT_FILE]] <- rhandsontable::renderRHandsontable({
+    DF <- otherReactiveValues[[EDITOR_INPUT_FILE]]
+    print(paste0("nrowf(DF): ", nrow(DF), "class(DF): ", class(DF) ))
+    if (is.null(DF) || !data.table::is.data.table(DF)) {
+      DF <- data.table::data.table()
+    }
+    print(paste0("2 nrowf(DF): ", nrow(DF), "class(DF): ", class(DF) ))
+    rhandsontable(DF, useTypes = TRUE, stretchH = "all")
+  })
 
   getOutputINPUTS_TREE_SELECTED_TEXT <- reactive({
     tree <- input[[INPUTS_TREE]]
