@@ -9,6 +9,7 @@ library(testit)
 library(jsonlite)
 library(DT)
 library(rhandsontable)
+library(shinyAce)
 library(envDocument)
 library(rhdf5)
 
@@ -93,6 +94,14 @@ TAB_OUTPUTS <- "TAB_OUTPUTS"
 MODULE_PROGRESS <- "MODULE_PROGRESS"
 PAGE_TITLE <- "Pilot Model Runner and Scenario Viewer"
 
+SAVE_MODEL_STATE_FILE <- "SAVE_MODEL_STATE_FILE"
+REVERT_MODEL_STATE_FILE <- "REVERT_MODEL_STATE_FILE"
+SAVE_MODEL_PARAMETERS_FILE <- "SAVE_MODEL_PARAMETERS_FILE"
+REVERT_MODEL_PARAMETERS_FILE <- "REVERT_MODEL_PARAMETERS_FILE"
+SAVE_RUN_PARAMETERS_FILE <- "SAVE_RUN_PARAMETERS_FILE"
+REVERT_RUN_PARAMETERS_FILE <- "REVERT_RUN_PARAMETERS_FILE"
+
+
 volumeRoots = getVolumes("")
 
 # Define UI for application
@@ -170,14 +179,35 @@ navlistPanel(
     title = "Settings",
     value = TAB_SETTINGS,
     h3("Model state"),
-    verbatimTextOutput(MODEL_STATE_FILE, FALSE),
+    #shinyAce does not support setting height by lines and the updateAceEditor does not have a height parameter so not sure what to do...
+    #https://github.com/trestletech/shinyAce/issues/4
+    shinyAce::aceEditor(MODEL_STATE_FILE, height = (16 * 12)),
+    fluidRow(column(
+      3, actionButton(SAVE_MODEL_STATE_FILE, "Save Changes")
+    ),
+    column(
+      3, actionButton(REVERT_MODEL_STATE_FILE, "Revert Changes")
+    )),
     h3("Model parameters"),
-    verbatimTextOutput(MODEL_PARAMETERS_FILE, FALSE),
+    shinyAce::aceEditor(MODEL_PARAMETERS_FILE, height = (16 * 10)),
+    fluidRow(column(
+      3, actionButton(SAVE_MODEL_PARAMETERS_FILE, "Save Changes")
+    ),
+    column(
+      3, actionButton(REVERT_MODEL_PARAMETERS_FILE, "Revert Changes")
+    )),
     h3("Geo File"),
     DT::dataTableOutput(GEO_CSV_FILE),
     h3("Run parameters"),
-    verbatimTextOutput(RUN_PARAMETERS_FILE, FALSE)
+    shinyAce::aceEditor(RUN_PARAMETERS_FILE, height = (16 * 11)),
+    fluidRow(column(
+      3, actionButton(SAVE_RUN_PARAMETERS_FILE, "Save Changes")
+    ),
+    column(
+      3, actionButton(REVERT_RUN_PARAMETERS_FILE, "Revert Changes")
+    ))
   ),
+
   tabPanel(
     "Module specifications",
     value = TAB_INPUTS,
@@ -909,23 +939,35 @@ server <- function(input, output, session) {
         #do the appropriate action
         if (action == INPUT_FILE_EDIT_BUTTON_PREFIX) {
           fileDataTable <- SafeReadCSV(filePath)
-          otherReactiveValues[[EDITOR_INPUT_FILE_IDENTIFIER]] <-fileName
-          print(paste("nrow(fileDataTable):",nrow(fileDataTable)))
+          otherReactiveValues[[EDITOR_INPUT_FILE_IDENTIFIER]] <-
+            fileName
+          print(paste("nrow(fileDataTable):", nrow(fileDataTable)))
           otherReactiveValues[[EDITOR_INPUT_FILE]] <- fileDataTable
           shinyjs::disable(editButtonOnRow, selector = NULL)
           shinyjs::enable(saveButtonOnRow, selector = NULL)
           shinyjs::enable(cancelButtonOnRow, selector = NULL)
         } else {
           if (action == INPUT_FILE_SAVE_BUTTON_PREFIX) {
-             editedContent <-  rhandsontable::hot_to_r(input[[EDITOR_INPUT_FILE]])
-            if (!is.null(editedContent) && nchar(editedContent) > 0) {
+            editedContent <-
+              rhandsontable::hot_to_r(input[[EDITOR_INPUT_FILE]])
+            if (!is.null(editedContent) &&
+                nchar(editedContent) > 0) {
               file.rename(filePath, paste0(
                 filePath,
                 "_",
                 format(Sys.time(), "%Y-%m-%d_%H-%M"),
                 ".bak"
               ))
-              print(paste0("writing out '", filePath, "' with nrow(editedContent): ",nrow(editedContent), " ncol(editedContent): ",ncol(editedContent)))
+              print(
+                paste0(
+                  "writing out '",
+                  filePath,
+                  "' with nrow(editedContent): ",
+                  nrow(editedContent),
+                  " ncol(editedContent): ",
+                  ncol(editedContent)
+                )
+              )
               data.table::fwrite(editedContent, filePath)
             }
             otherReactiveValues[[EDITOR_INPUT_FILE]] <- FALSE
@@ -1039,14 +1081,20 @@ server <- function(input, output, session) {
     return(returnValue)
   }) #end getOutputINPUT_FILES
 
-  output[[EDITOR_INPUT_FILE]] <- rhandsontable::renderRHandsontable({
-    DF <- otherReactiveValues[[EDITOR_INPUT_FILE]]
-    if (is.null(DF) || !data.table::is.data.table(DF)) {
-      DF <- data.table::data.table("foo"="bar")
-    }
-    print(paste0("nrow(DF): ", nrow(DF), " class(DF): ", paste0(collapse=", ", class(DF))))
-    rhandsontable(DF, useTypes = TRUE, )
-  })
+  output[[EDITOR_INPUT_FILE]] <-
+    rhandsontable::renderRHandsontable({
+      DF <- otherReactiveValues[[EDITOR_INPUT_FILE]]
+      if (is.null(DF) || !data.table::is.data.table(DF)) {
+        DF <- data.table::data.table("foo" = "bar")
+      }
+      print(paste0(
+        "nrow(DF): ",
+        nrow(DF),
+        " class(DF): ",
+        paste0(collapse = ", ", class(DF))
+      ))
+      rhandsontable(DF, useTypes = TRUE, )
+    })
 
   getOutputINPUTS_TREE_SELECTED_TEXT <- reactive({
     tree <- input[[INPUTS_TREE]]
@@ -1152,22 +1200,26 @@ server <- function(input, output, session) {
     return(returnValue)
   })
 
-  output[[RUN_PARAMETERS_FILE]] = renderText({
-    getScriptInfo()
-    jsonlite::toJSON(reactiveFileReaders[[RUN_PARAMETERS_FILE]](), pretty =
-                       TRUE)
-  })
+  observe({
+    updateAceEditor(session,
+                    MODEL_STATE_FILE,
+                    value = jsonlite::toJSON(reactiveFileReaders[[MODEL_STATE_FILE]](), pretty =
+                                               TRUE))
 
-  output[[MODEL_PARAMETERS_FILE]] = renderText({
-    getScriptInfo()
-    jsonlite::toJSON(reactiveFileReaders[[MODEL_PARAMETERS_FILE]](), pretty =
-                       TRUE)
-  })
+    updateAceEditor(
+      session,
+      MODEL_PARAMETERS_FILE,
+      value = jsonlite::toJSON(reactiveFileReaders[[MODEL_PARAMETERS_FILE]](), pretty =
+                                 TRUE)
+    )
 
-  output[[MODEL_STATE_FILE]] = renderText({
-    getScriptInfo()
-    jsonlite::toJSON(reactiveFileReaders[[MODEL_STATE_FILE]](), pretty =
-                       TRUE)
+    updateAceEditor(
+      session,
+      RUN_PARAMETERS_FILE,
+      value = jsonlite::toJSON(reactiveFileReaders[[RUN_PARAMETERS_FILE]](), pretty =
+                                 TRUE)
+    )
+
   })
 
   ###RUN TAB_RUN
