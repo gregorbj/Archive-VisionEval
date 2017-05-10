@@ -70,6 +70,7 @@ INPUT_FILES <- "INPUT_FILES"
 EDIT_INPUT_FILE_ID <- "EDIT_INPUT_FILE_ID"
 EDIT_INPUT_FILE_LAST_CLICK <- "EDIT_INPUT_FILE_LAST_CLICK"
 EDITOR_INPUT_FILE <- "EDITOR_INPUT_FILE"
+EDITOR_INPUT_FILE_IDENTIFIER <- "EDITOR_INPUT_FILE_IDENTIFIER"
 INPUT_FILE_EDIT_BUTTON_PREFIX <- "input_file_edit"
 INPUT_FILE_CANCEL_BUTTON_PREFIX <- "input_file_cancel"
 INPUT_FILE_SAVE_BUTTON_PREFIX <- "input_file_save"
@@ -182,7 +183,7 @@ navlistPanel(
     value = TAB_INPUTS,
     h3("Input files:"),
     DT::dataTableOutput(INPUT_FILES),
-    h3("HOT: "),
+    verbatimTextOutput(EDITOR_INPUT_FILE_IDENTIFIER, FALSE),
     rhandsontable::rHandsontableOutput(EDITOR_INPUT_FILE),
     h3("Datastore tables:"),
     DT::dataTableOutput(HDF5_TABLES),
@@ -388,16 +389,16 @@ server <- function(input, output, session) {
                          selector = NULL)
   })
 
-  # observe({
-  #   toggle(
-  #     id = EDITOR_INPUT_FILE,
-  #     condition = data.table::is.data.table(otherReactiveValues[[EDITOR_INPUT_FILE]]),
-  #     anim = TRUE,
-  #     animType = "Slide",
-  #     time = 0.25,
-  #     selector = NULL
-  #   )
-  # })
+  observe({
+    toggle(
+      id = NULL,
+      condition = data.table::is.data.table(otherReactiveValues[[EDITOR_INPUT_FILE]]),
+      anim = TRUE,
+      animType = "Slide",
+      time = 0.25,
+      selector = "#EDITOR_INPUT_FILE, #EDITOR_INPUT_FILE_IDENTIFIER"
+    )
+  })
 
   observe({
     shinyjs::toggle(
@@ -908,6 +909,7 @@ server <- function(input, output, session) {
         #do the appropriate action
         if (action == INPUT_FILE_EDIT_BUTTON_PREFIX) {
           fileDataTable <- SafeReadCSV(filePath)
+          otherReactiveValues[[EDITOR_INPUT_FILE_IDENTIFIER]] <-fileName
           print(paste("nrow(fileDataTable):",nrow(fileDataTable)))
           otherReactiveValues[[EDITOR_INPUT_FILE]] <- fileDataTable
           shinyjs::disable(editButtonOnRow, selector = NULL)
@@ -915,16 +917,16 @@ server <- function(input, output, session) {
           shinyjs::enable(cancelButtonOnRow, selector = NULL)
         } else {
           if (action == INPUT_FILE_SAVE_BUTTON_PREFIX) {
-            file.rename(filePath, paste0(
-              filePath,
-              "_",
-              format(Sys.time(), "%Y-%m-%d_%H-%M"),
-              ".bak"
-            ))
-            rhandsontableContent <- output[[EDITOR_INPUT_FILE]]
-            editedContent <-  rhandsontable::hot_to_r(rhandsontableContent)
-            if (!is.null(editiedContent)) {
-              write(editedContent, filePath)
+             editedContent <-  rhandsontable::hot_to_r(input[[EDITOR_INPUT_FILE]])
+            if (!is.null(editedContent) && nchar(editedContent) > 0) {
+              file.rename(filePath, paste0(
+                filePath,
+                "_",
+                format(Sys.time(), "%Y-%m-%d_%H-%M"),
+                ".bak"
+              ))
+              print(paste0("writing out '", filePath, "' with nrow(editedContent): ",nrow(editedContent), " ncol(editedContent): ",ncol(editedContent)))
+              data.table::fwrite(editedContent, filePath)
             }
             otherReactiveValues[[EDITOR_INPUT_FILE]] <- FALSE
           } else if (action == INPUT_FILE_CANCEL_BUTTON_PREFIX) {
@@ -1039,12 +1041,11 @@ server <- function(input, output, session) {
 
   output[[EDITOR_INPUT_FILE]] <- rhandsontable::renderRHandsontable({
     DF <- otherReactiveValues[[EDITOR_INPUT_FILE]]
-    print(paste0("nrowf(DF): ", nrow(DF), "class(DF): ", class(DF) ))
     if (is.null(DF) || !data.table::is.data.table(DF)) {
-      DF <- data.table::data.table()
+      DF <- data.table::data.table("foo"="bar")
     }
-    print(paste0("2 nrowf(DF): ", nrow(DF), "class(DF): ", class(DF) ))
-    rhandsontable(DF, useTypes = TRUE, stretchH = "all")
+    print(paste0("nrow(DF): ", nrow(DF), " class(DF): ", paste0(collapse=", ", class(DF))))
+    rhandsontable(DF, useTypes = TRUE, )
   })
 
   getOutputINPUTS_TREE_SELECTED_TEXT <- reactive({
@@ -1087,6 +1088,10 @@ server <- function(input, output, session) {
 
   output[[DATASTORE_TABLE_IDENTIFIER]] = renderText({
     otherReactiveValues[[DATASTORE_TABLE_IDENTIFIER]]
+  })
+
+  output[[EDITOR_INPUT_FILE_IDENTIFIER]] = renderText({
+    otherReactiveValues[[EDITOR_INPUT_FILE_IDENTIFIER]]
   })
 
   output[[VIEW_DATASTORE_TABLE]] = renderDataTable({
