@@ -724,43 +724,112 @@ server <- function(input, output, session) {
     return(NULL)
   } #end getScriptOutput
 
-  saveRevertButtonsValues <- list()
-  observeEvent(
-    # {list(input[[SAVE_MODEL_STATE_FILE]],
-    #   input[[SAVE_MODEL_PARAMETERS_FILE]],
-    #   input[[SAVE_RUN_PARAMETERS_FILE]],
-    #   input[[REVERT_MODEL_STATE_FILE]],
-    #   input[[REVERT_MODEL_PARAMETERS_FILE]],
-    #   input[[REVERT_RUN_PARAMETERS_FILE]])},
-    {
-      lapply(saveRevertButtonsNames, function(buttonName) { input[[buttonName]] })
-    },
-    label = "SAVE_REVERT_PARAMETER_FILES",
-    handlerExpr = {
-      clickedValues <- unlist(lapply(saveRevertButtonsNames, function(buttonName) {
-        returnValue = FALSE
-
-        if (input[[buttonName]] > 0) {
-          if (is.null(saveRevertButtonsValues[[buttonName]])) {
-            #initialize to zero if this is first time through
-            saveRevertButtonsValues[[buttonName]] <<- 0
-          }
-          returnValue <- input[[buttonName]] != saveRevertButtonsValues[[buttonName]]
-          if (returnValue) {
-            #update the saved value
-            saveRevertButtonsValues[[buttonName]] <<-  input[[buttonName]]
-          }
-        }
-        return(returnValue)
-      }))
-      clickedButtonNames <- saveRevertButtonsNames[clickedValues]
-      if (length(clickedButtonNames) != 1) {
-        print(paste0("saveRevertButtons length(clickedButtonNames): ", length(clickedButtonNames), " clickedButtonNames: ", clickedButtonNames))
-      } else {
-        print(paste0("saveRevertButtons clickedButtonNames: ", clickedButtonNames))
-      }
+  saveParameterFile <- function(parameterFileIdentifier) {
+    editedContent <- input[[parameterFileIdentifier]]
+    filePath <- reactiveFilePaths[[parameterFileIdentifier]]
+    if (!is.null(editedContent) &&
+        nchar(editedContent) > 0) {
+      file.rename(filePath, paste0(
+        filePath,
+        "_",
+        format(Sys.time(), "%Y-%m-%d_%H-%M"),
+        ".bak"
+      ))
+      print(
+        paste0(
+          "writing out '",
+          filePath,
+          "' with nrow(editedContent): ",
+          nrow(editedContent),
+          " ncol(editedContent): ",
+          ncol(editedContent)
+        )
+      )
+      write(editedContent, filePath)
     }
-  ) #end saveRevertButtons observeEvent
+  } # end saveParameterFile
+
+  revertParameterFile <- function(parameterFileIdentifier) {
+    updateAceEditor(session,
+                    parameterFileIdentifier,
+                    value = jsonlite::toJSON(reactiveFileReaders[[parameterFileIdentifier]](), pretty =
+                                               TRUE))
+  } # end revertParameterFile
+
+  observeEvent(
+    input[[SAVE_MODEL_STATE_FILE]],
+    handlerExpr = {
+      saveParameterFile(MODEL_STATE_FILE)
+    })
+
+  observeEvent(
+    input[[REVERT_MODEL_STATE_FILE]],
+    handlerExpr = {
+      revertParameterFile(MODEL_STATE_FILE)
+    })
+
+  observeEvent(
+    input[[SAVE_MODEL_PARAMETERS_FILE]],
+    handlerExpr = {
+      saveParameterFile(MODEL_PARAMETERS_FILE)
+    })
+
+  observeEvent(
+    input[[REVERT_MODEL_PARAMETERS_FILE]],
+    handlerExpr = {
+      revertParameterFile(MODEL_PARAMETERS_FILE)
+    })
+
+  observeEvent(
+    input[[SAVE_RUN_PARAMETERS_FILE]],
+    handlerExpr = {
+      saveParameterFile(RUN_PARAMETERS_FILE)
+    })
+
+  observeEvent(
+    input[[REVERT_RUN_PARAMETERS_FILE]],
+    handlerExpr = {
+      revertParameterFile(RUN_PARAMETERS_FILE)
+    })
+
+  # saveRevertButtonsValues <- list()
+  # #it is convenient to use just one observer
+  # observeEvent(
+  #   # {list(input[[SAVE_MODEL_STATE_FILE]],
+  #   #   input[[SAVE_MODEL_PARAMETERS_FILE]],
+  #   #   input[[SAVE_RUN_PARAMETERS_FILE]],
+  #   #   input[[REVERT_MODEL_STATE_FILE]],
+  #   #   input[[REVERT_MODEL_PARAMETERS_FILE]],
+  #   #   input[[REVERT_RUN_PARAMETERS_FILE]])},
+  #   {
+  #     lapply(saveRevertButtonsNames, function(buttonName) { input[[buttonName]] })
+  #   },
+  #   label = "SAVE_REVERT_PARAMETER_FILES",
+  #   handlerExpr = {
+  #     clickedValues <- unlist(lapply(saveRevertButtonsNames, function(buttonName) {
+  #       returnValue = FALSE
+  #
+  #       if (input[[buttonName]] > 0) {
+  #         if (is.null(saveRevertButtonsValues[[buttonName]])) {
+  #           #initialize to zero if this is first time through
+  #           saveRevertButtonsValues[[buttonName]] <<- 0
+  #         }
+  #         returnValue <- input[[buttonName]] != saveRevertButtonsValues[[buttonName]]
+  #         if (returnValue) {
+  #           #update the saved value
+  #           saveRevertButtonsValues[[buttonName]] <<- input[[buttonName]]
+  #         }
+  #       }
+  #       return(returnValue)
+  #     }))
+  #     clickedButtonNames <- saveRevertButtonsNames[clickedValues]
+  #     if (length(clickedButtonNames) != 1) {
+  #       print(paste0("saveRevertButtons length(clickedButtonNames): ", length(clickedButtonNames), " clickedButtonNames: ", clickedButtonNames))
+  #     } else {
+  #       print(paste0("saveRevertButtons clickedButtonNames: ", clickedButtonNames))
+  #     }
+  #   }
+  # ) #end saveRevertButtons observeEvent
 
   observeEvent(input[[DATASTORE_TABLE_CLOSE_BUTTON]], label = DATASTORE_TABLE_CLOSE_BUTTON, handlerExpr = {
     otherReactiveValues[[VIEW_DATASTORE_TABLE]] <-
