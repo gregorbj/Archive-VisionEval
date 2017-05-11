@@ -101,6 +101,11 @@ REVERT_MODEL_PARAMETERS_FILE <- "REVERT_MODEL_PARAMETERS_FILE"
 SAVE_RUN_PARAMETERS_FILE <- "SAVE_RUN_PARAMETERS_FILE"
 REVERT_RUN_PARAMETERS_FILE <- "REVERT_RUN_PARAMETERS_FILE"
 
+saveButtons <- list(SAVE_MODEL_STATE_FILE, SAVE_MODEL_PARAMETERS_FILE, SAVE_RUN_PARAMETERS_FILE)
+
+revertButtons <- list(REVERT_MODEL_STATE_FILE, REVERT_MODEL_PARAMETERS_FILE, REVERT_RUN_PARAMETERS_FILE)
+
+saveRevertButtonsNames <- unlist(list(saveButtons, revertButtons))
 
 volumeRoots = getVolumes("")
 
@@ -194,7 +199,8 @@ navlistPanel(
       3, actionButton(SAVE_MODEL_PARAMETERS_FILE, "Save Changes")
     ),
     column(
-      3, actionButton(REVERT_MODEL_PARAMETERS_FILE, "Revert Changes")
+      3,
+      actionButton(REVERT_MODEL_PARAMETERS_FILE, "Revert Changes")
     )),
     h3("Geo File"),
     DT::dataTableOutput(GEO_CSV_FILE),
@@ -271,7 +277,7 @@ server <- function(input, output, session) {
     reactiveValues() #WARNING- DON'T USE VARIABLES TO INITIALIZE LIST KEYS - the variable name will be used, not the value
 
   otherReactiveValues[[DEBUG_CONSOLE_OUTPUT]] <-
-    data.table::data.table(time = paste(Sys.time()), message = "Placeholder to be deleted")[-1,]
+    data.table::data.table(time = paste(Sys.time()), message = "Placeholder to be deleted")[-1, ]
 
   otherReactiveValues[[MODULE_PROGRESS]] <- data.table::data.table()
 
@@ -502,7 +508,7 @@ server <- function(input, output, session) {
     result <- data.table::data.table()
     if (length(cleanedLogLines) > 0) {
       modulesFoundInLogFile <-
-        data.table::as.data.table(namedCapture::str_match_named(rev(cleanedLogLines), pattern))[!is.na(actionType), ]
+        data.table::as.data.table(namedCapture::str_match_named(rev(cleanedLogLines), pattern))[!is.na(actionType),]
       if (nrow(modulesFoundInLogFile) > 0) {
         result <- modulesFoundInLogFile
       }
@@ -718,47 +724,43 @@ server <- function(input, output, session) {
     return(NULL)
   } #end getScriptOutput
 
-  observeEvent(input[[COPY_MODEL_BUTTON]],
-               label = COPY_MODEL_BUTTON,
-               handlerExpr = {
-                 req(input[[SELECT_RUN_SCRIPT_BUTTON]])
-                 debugConsole("observeEvent input[[COPY_MODEL_BUTTON]] entered")
-                 datapath <- getScriptInfo()$datapath
-                 disableActionButtons()
-                 inCopy = parseSavePath(roots = volumeRoots, input[[COPY_MODEL_BUTTON]])
-                 #suppressWarnings because the path does not yet exist
-                 inCopyDirectory <-
-                   suppressWarnings(normalizePath(as.character(inCopy$datapath)))
-                 if (!dir.exists(inCopyDirectory)) {
-                   if (file.exists(inCopyDirectory)) {
-                     file.remove(inCopyDirectory)
-                   }
-                   dir.create(inCopyDirectory)
-                   testit::assert(
-                     paste0(
-                       "Expect directory to exist after creation: '",
-                       inCopyDirectory,
-                       "'"
-                     ),
-                     dir.exists(inCopyDirectory)
-                   )
-                 }
-                 fromDirectory <- dirname(datapath)
-                 filesAndDirectoriesToCopy <-
-                   list.files(fromDirectory,
-                              full.names = TRUE,
-                              recursive = FALSE)
-                 file.copy(
-                   from = filesAndDirectoriesToCopy,
-                   to = inCopyDirectory,
-                   recursive = TRUE,
-                   overwrite = TRUE,
-                   copy.date = TRUE,
-                   copy.mode = TRUE
-                 )
-                 enableActionButtons()
-                 debugConsole("observeEvent input[[copyModelDirectory exited")
-               }) #end copyModelDirectory observeEvent
+  saveRevertButtonsValues <- list()
+  observeEvent(
+    # {list(input[[SAVE_MODEL_STATE_FILE]],
+    #   input[[SAVE_MODEL_PARAMETERS_FILE]],
+    #   input[[SAVE_RUN_PARAMETERS_FILE]],
+    #   input[[REVERT_MODEL_STATE_FILE]],
+    #   input[[REVERT_MODEL_PARAMETERS_FILE]],
+    #   input[[REVERT_RUN_PARAMETERS_FILE]])},
+    {
+      lapply(saveRevertButtonsNames, function(buttonName) { input[[buttonName]] })
+    },
+    label = "SAVE_REVERT_PARAMETER_FILES",
+    handlerExpr = {
+      clickedValues <- unlist(lapply(saveRevertButtonsNames, function(buttonName) {
+        returnValue = FALSE
+
+        if (input[[buttonName]] > 0) {
+          if (is.null(saveRevertButtonsValues[[buttonName]])) {
+            #initialize to zero if this is first time through
+            saveRevertButtonsValues[[buttonName]] <<- 0
+          }
+          returnValue <- input[[buttonName]] != saveRevertButtonsValues[[buttonName]]
+          if (returnValue) {
+            #update the saved value
+            saveRevertButtonsValues[[buttonName]] <<-  input[[buttonName]]
+          }
+        }
+        return(returnValue)
+      }))
+      clickedButtonNames <- saveRevertButtonsNames[clickedValues]
+      if (length(clickedButtonNames) != 1) {
+        print(paste0("saveRevertButtons length(clickedButtonNames): ", length(clickedButtonNames), " clickedButtonNames: ", clickedButtonNames))
+      } else {
+        print(paste0("saveRevertButtons clickedButtonNames: ", clickedButtonNames))
+      }
+    }
+  ) #end saveRevertButtons observeEvent
 
   observeEvent(input[[DATASTORE_TABLE_CLOSE_BUTTON]], label = DATASTORE_TABLE_CLOSE_BUTTON, handlerExpr = {
     otherReactiveValues[[VIEW_DATASTORE_TABLE]] <-
@@ -1093,7 +1095,7 @@ server <- function(input, output, session) {
         " class(DF): ",
         paste0(collapse = ", ", class(DF))
       ))
-      rhandsontable(DF, useTypes = TRUE, )
+      rhandsontable(DF, useTypes = TRUE,)
     })
 
   getOutputINPUTS_TREE_SELECTED_TEXT <- reactive({
