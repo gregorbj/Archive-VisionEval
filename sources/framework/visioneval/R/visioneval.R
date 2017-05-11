@@ -79,7 +79,7 @@ initializeModel <-
     } else {
       writeLog("option visioneval.keepExistingModelState TRUE so skipping initModelStateFile and initLog",
                Print=TRUE)
-      ModelState_ls <<- preExistingModelState
+      setModelState(preExistingModelState)
     }
 
     #Load existing model if specified and initialize geography
@@ -227,7 +227,7 @@ initializeModel <-
 #' @return None. The function writes results to the specified locations in the
 #'   datastore and prints a message to the console when the module is being run.
 #' @export
-runModule <- function(ModuleName, PackageName, RunFor, RunYear = Year) {
+runModule <- function(ModuleName, PackageName, RunFor, RunYear) {
   #Check whether the module should be run for the current run year
   #---------------------------------------------------------------
   BaseYear <- getModelState()$BaseYear
@@ -256,7 +256,7 @@ runModule <- function(ModuleName, PackageName, RunFor, RunYear = Year) {
   #----------
   if (M$Specs$RunBy == "Region") {
     #Get data from datastore
-    L <- getFromDatastore(M$Specs, Geo = NULL)
+    L <- getFromDatastore(M$Specs, RunYear = RunYear, Geo = NULL)
     #Run module and store results in datastore
     R <- M$Func(L)
     setInDatastore(R, M$Specs, ModuleName, Geo = NULL)
@@ -266,7 +266,7 @@ runModule <- function(ModuleName, PackageName, RunFor, RunYear = Year) {
     #Run module for each geographic area
     for (Geo in Geo_) {
       #Get data from datastore for geographic area
-      L <- getFromDatastore(M$Specs, Geo = Geo)
+      L <- getFromDatastore(M$Specs, RunYear = RunYear, Geo = Geo)
       #Run model for geographic area and store results in datastore
       R <- M$Func(L)
       setInDatastore(R, M$Specs, ModuleName, Geo = Geo)
@@ -276,7 +276,7 @@ runModule <- function(ModuleName, PackageName, RunFor, RunYear = Year) {
   #----------------------------
   Msg <-
     paste0(Sys.time(), " -- Finish module '", ModuleName,
-           "' for year '", Year, "'.")
+           "' for year '", RunYear, "'.")
   writeLog(Msg)
   print(Msg)
 }
