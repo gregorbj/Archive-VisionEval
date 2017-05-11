@@ -100,11 +100,19 @@
     [
       {
         "Name": "Dir",
-        "Description": "A string identifying the name of the directory where the global parameters file is located. The default value is 'defs'."
+        "Description": "A string identifying the name of the directory where the global parameters, deflator, and default units files are located. The default value is defs."
       },
       {
         "Name": "ParamFile",
-        "Description": "A string identifying the name of the global parameters file. The default value is 'parameters.json'."
+        "Description": "A string identifying the name of the global parameters file. The default value is parameters.json."
+      },
+      {
+        "Name": "DeflatorFile",
+        "Description": "A string identifying the name of the file which contains deflator values by year (e.g. consumer price index). The default value is deflators.csv."
+      },
+      {
+        "Name": "UnitsFile",
+        "Description": "A string identifying the name of the file which contains default units for complex data types (e.g. currency, distance, speed, etc.). The default value is units.csv."
       }
     ],
     "Return": "TRUE if the model state list is created and file is saved. It creates the model state list and loads parameters recorded in the 'run_parameters.json' file into the model state lists and saves a model state file.",
@@ -145,8 +153,8 @@
         "Description": "A string vector of the components to extract from the ModelState_ls list."
       },
       {
-        "Name": "State_ls",
-        "Description": "The model state list which by default is ModelState_ls."
+        "Name": "FileName",
+        "Description": "A string that is the file name of the model state file. The default value is ModelState.Rda."
       }
     ],
     "Return": "A list containing the specified components from the ModelState_ls list.",
@@ -186,6 +194,24 @@
     "Return": "A character vector of the model run years.",
     "Calls":
     [ 
+      "getModelState"
+    ]
+  },
+  
+  {
+    "Name": "getUnits",
+    "Group": "control",
+    "Description": "Retrieves the default model units for a complex data type.",
+    "Arguments":
+    [
+      {
+        "Name": "Type",
+        "Description": "A string identifying the complex data type."
+      }
+    ],
+    "Return": "A string identifying the default units for the complex data type.",
+    "Calls":
+    [
       "getModelState"
     ]
   },
@@ -349,6 +375,10 @@
       {
         "Name": "FilePath",
         "Description": "A string identifying the relative or absolute path to the model run script is located."
+      },
+      {
+        "Name": "TestMode",
+        "Description": "A logical identifying whether the function is to run in test mode. When in test mode the function returns the parsed script but does not change the model state or write results to the log."
       }
     ],
     "Return": "None. A data frame containing information on the calls to 'runModule' in the order of the calls is added to the ModelState_ls list. Each row represents a module call in order. The columns identify the 'ModuleName', the 'PackageName', and the 'RunFor' value.",
@@ -401,7 +431,7 @@
   {
     "Name": "checkModuleSpecs",
     "Group": "control",
-    "Description": "Reads a processed module specifications list and checks whether the specifications are complete and whether the values are appropriate.",
+    "Description": "Checks all module specifications for completeness and for proper values.",
     "Arguments": 
     [
       {
@@ -416,6 +446,7 @@
     "Return": "A vector containing messages identifying any errors that are found.",
     "Calls":
     [ 
+      "checkSpec"
     ]
   },
   
@@ -433,6 +464,7 @@
     "Return": "A standard specifications list with expansion of the multiple item specifications.",
     "Calls":
     [ 
+      "expandSpec"
     ]
   },
   
@@ -540,31 +572,6 @@
       }
     ],
     "Return": "A logical identifying whether a table is present in the datastore.",
-    "Calls":
-    [
-    ]
-  },
-  
-  {
-    "Name": "getTableLength",
-    "Group": "control",
-    "Description": "Retrieves the LENGTH attribute for a table in the datastore.",
-    "Arguments": 
-    [
-      {
-        "Name": "Table",
-        "Description": "A string identifying the table."
-      },
-      {
-        "Name": "Group",
-        "Description": "A string or numeric representation of the group the table is a part of."
-      },
-      {
-        "Name": "DstoreListing_df",
-        "Description": "A dataframe which lists the contents of the datastore as contained in the model state file."
-      }
-    ],
-    "Return": "A number that is the table length.",
     "Calls":
     [
     ]
@@ -735,12 +742,16 @@
     "Arguments": 
     [
       {
-        "Name": "Spec_ls",
-        "Description": "A list containing the standard module 'Set' specifications described in the model system design documentation."
+        "Name": "Table",
+        "Description": "A string identifying the name of the table to initialize."
       },
       {
         "Name": "Group",
         "Description": "A string representation of the name of the group the table is to be created in."
+      },
+      {
+        "Name": "Length",
+        "Description": "A number identifying the table length."
       }
     ],
     "Return": "The value TRUE is returned if the function is successful at creating the table. In addition, the listDatastore function is run to update the inventory in the model state file. The function stops if the group in which the table is to be placed does not exist in the datastore and a message is written to the log.",
@@ -770,7 +781,8 @@
     "Calls":
     [ 
       "getModelState",
-      "listDatastore"
+      "listDatastore",
+      "Types"
     ]
   },
   
@@ -911,7 +923,10 @@
       "createIndex",
       "readModelState",
       "checkDataset",
-      "readFromTable"
+      "readFromTable",
+      "deflateCurrency",
+      "convertUnits",
+      "convertMagnitude"
     ]
   },
   
@@ -949,6 +964,9 @@
       "checkTableExistence",
       "processModuleSpecs",
       "createIndex",
+      "deflateCurrency",
+      "convertUnits",
+      "convertMagnitude",
       "writeLog",
       "writeToTable"
     ]
@@ -1063,8 +1081,12 @@
     [ 
       "getModelState",
       "initDataList",
+      "parseInputFieldNames",
       "checkInputYearGeo",
       "checkDataConsistency",
+      "deflateCurrency",
+      "convertUnits",
+      "convertMagnitude",
       "writeLog"
     ]
   },
@@ -1349,6 +1371,229 @@
       "checkModuleOutputs",
       "readFromTable",
       "setInDatastore"
+    ]
+  },
+  
+  {
+    "Name": "parseUnitsSpec",
+    "Group": "control",
+    "Description": "Parses the UNITS attribute of a standard Inp, Get, or Set specification for a dataset to identify the units name, multiplier, and year for currency data. Returns a modified specifications list whose UNITS value is only the units name, and includes a MULTIPLIER attribute and YEAR attribute.",
+    "Arguments":
+    [
+      {
+        "Name": "Spec_ls",
+        "Description": "A standard specifications list for a Inp, Get, or Set item."
+      }
+    ],
+    "Return": "A list that is a standard specifications list with the addition of a MULTIPLIER component and a YEAR component as well as a modification of the UNIT component. The MULTIPLIER component can have the value of NA, a number, or NaN. The value is NA if the multiplier is missing. It is a number if the multiplier is a valid number. The value is NaN if the multiplier is not a valid number. The YEAR component is a character string that is a 4-digit representation of a year or NA if the component is missing or not a proper year. The UNITS component is modified to only be the units name.",
+    "Calls": 
+    [
+    ]
+  },
+  
+  {
+    "Name": "expandSpec",
+    "Group": "control",
+    "Description": "Takes a Inp, Get, or Set specification and processes it to be in a form that can be used by other functions which use the specification in processing inputs or reading from or writing to the datastore. The parseUnitsSpec function is called to parse the UNITS attribute to extract name, multiplier, and year values. When the specification has multiple values for the NAME attribute, the function creates a specification for each name value.",
+    "Arguments":
+    [
+      {
+        "Name": "SpecToExpand_ls",
+        "Description": "A standard specifications list for a specification whose NAME attribute has multiple values."
+      }
+    ],
+    "Return": "A list of standard specifications lists which has a component for each value in the NAME attribute of the input specifications list.",
+    "Calls":
+    [
+      "parseUnitsSpec"
+    ]
+  },
+  
+  {
+    "Name": "checkSpecTypeUnits",
+    "Group": "control",
+    "Description": "Checks correctness of TYPE, UNITS, MULTIPLIER and YEAR attributes of expanded specification. This function is called by the checkModuleSpecs function.",
+    "Arguments":
+    [
+      {
+        "Name": "Spec_ls",
+        "Description": "A list for a single specification (e.g. a Get specification for a dataset) that has been processed with the parseUnitsSpec function to split the name, multiplier, and year elements of the UNITS specification."
+      },
+      {
+        "Name": "SpecGroup",
+        "Description": "A string identifying the group that this specification comes from (e.g. Inp, Get, Set)."
+      },
+      {
+        "Name": "SpecNum",
+        "Description": "A number identifying which specification in the order of the SpecGroup. This is used to identify the subject specification if an error is identified."
+      }
+      
+    ],
+    "Return": "A vector containing messages identifying any errors that are found.",
+    "Calls":
+    [
+      "Types"
+    ]
+  },
+  
+  {
+    "Name": "checkSpec",
+    "Group": "control",
+    "Description": "Function checks a single module specification for completeness and for proper values.",
+    "Arguments":
+    [
+      {
+        "Name": "Spec_ls",
+        "Description": "A list containing the specifications for a single item in a module specifications list."
+      },
+      {
+        "Name": "SpecGroup",
+        "Description": "A string identifying the specifications group the specification is in (e.g. RunBy, NewInpTable, NewSetTable, Inp, Get, Set). This is used in the error messages to identify which specification has errors."
+      },
+      {
+        "Name": "SpecNum",
+        "Description": "An integer identifying which specification in the specifications group has errors."
+      }
+    ],
+    "Return": "A vector containing messages identifying any errors that are found.",
+    "Calls":
+    [
+      "parseUnitsSpec",
+      "checkSpecTypeUnits",
+      "SpecRequirements"
+    ]
+  },
+  
+  {
+    "Name": "Types",
+    "Group": "control",
+    "Description": "Returns a list of returns a list of recognized data types, the units for each type, and storage mode of each type.",
+    "Arguments":
+    [
+    ],
+    "Return": "A list containing a component for each recognized type. Each component lists the recognized units for the type and the storage mode. There are currently 4 simple types and 10 complex type. The simple types are integer, double, character and logical. The complex types are currency, distance, area, mass, volume, time, speed, vehicle_distance, passenger_distance, and payload_distance.",
+    "Calls":
+    [
+    ]
+  },
+  
+  {
+    "Name": "SpecRequirements",
+    "Group": "control",
+    "Description": "Returns a list of basic requirements for module specifications to be used for checking correctness of specifications.",
+    "Arguments":
+    [
+    ],
+    "Return": "A list comprised of six named components: RunBy, NewInpTable, NewSetTable, Inp, Get, Set. Each main component is a list that has a component for each specification item that has values to be checked. For each such item there is a list having two components: ValueType and ValuesAllowed. The ValueType component identifies the data type that the data entry for the item must have (e.g. character, integer). The ValuesAllowed item identifies what values the item may have.",
+    "Calls":
+    [
+    ]
+  },
+  
+  {
+    "Name": "parseInputFieldNames",
+    "Group": "control",
+    "Description": "parses the field names of an input file to separate out the field name, currency year (if data is currency type), and value multiplier.",
+    "Arguments":
+    [
+      {
+        "Name": "FieldNames_",
+        "Description": "A character vector containing the field names of an input file."
+      },
+      {
+        "Name": "Specs_ls",
+        "Description": "A list of specifications for fields in the input file."
+      },
+      {
+        "Name": "FileName",
+        "Description": "A string identifying the name of the file that the field names are from. This is used for writing error messages."
+      }
+    ],
+    "Return": "A named list with one component for each field. Each component is a list having 4 named components: Error, Name, Year, Multiplier. The Error component has a value of character(0) if there are no errors or a character vector of error messages if there are errors. The Name component is a string with the name of the field. The Year component is a string with the year component if the data type is currency or NA if the data type is not currency or if the Year component has an invalid value. The Multiplier is a number if the multiplier component is present and is valid. It is NA if there is no multiplier component and NaN if the multiplier is invalid.  Each component of  the list is named with the value of the Name component (i.e. the field name without the year and multiplier elements.)",
+    "Calls":
+    [
+      "getModelState"
+    ]       
+  },
+  
+  {
+    "Name": "convertUnits",
+    "Group": "control",
+    "Description": "Converts values between different units of measure for complex data types recognized by the visioneval code.",
+    "Arguments":
+    [
+      {
+        "Name": "Values_",
+        "Description": "A numeric vector of values to convert from one unit to another."
+      },
+      {
+        "Name": "DataType",
+        "Description": "A string identifying the data type."
+      },
+      {
+        "Name": "FromUnits",
+        "Description": "A string identifying the units of measure of the Values_."
+      },
+      {
+        "Name": "ToUnits",
+        "Description": "A string identifying the units of measure to convert the Values_ to."
+      }
+    ],
+    "Return": "A numeric vector of values corresponding the the input Values_. If the DataType is not one of the identified complex types or if the FromUnits or ToUnits are not recognized, the input vector Values_ is returned. In this case, the Converted attribute of the returned values is FALSE. If the DataType is a recognized complex type and the FromUnits and ToUnits are recognized, the returned values are in the units of the ToUnits. In this case the Converted attribute of the returned values is TRUE.",
+    "Calls":
+    [
+      "Types"
+    ]
+  },
+  
+  {
+    "Name": "convertMagnitude",
+    "Group": "control",
+    "Description": "Converts values between different magnitudes such as between dollars and thousands of dollars.",
+    "Arguments":
+    [
+      {
+        "Name": "Values_",
+        "Description": "A numeric vector of values to convert from one unit to another."
+      },
+      {
+        "Name": "FromMagnitude",
+        "Description": "A number or string identifying the magnitude of the units of the input Values_."
+      },
+      {
+        "Name": "ToMagnitude",
+        "Description": "A number or string identifying the magnitude to convert the Values_ to."
+      }
+    ],
+    "Return": "A numeric vector of values corresponding the the input Values_ but converted from the magnitude identified in the FromMagnitude argument to the magnitude identified in the ToMagnitude argument. If either the FromMagnitude or the ToMagnitude arguments is NA, the original Values_ are returned. The Converted attribute of the returned values is FALSE. Otherwise the conversion is done and the Converted attribute of the returned values is TRUE.",
+    "Calls":
+    [
+    ]
+  },
+  
+  {
+    "Name": "deflateCurrency",
+    "Group": "control",
+    "Description": "Converts currency values between different years of measure.",
+    "Arguments": 
+    [
+      {
+        "Name": "Values_",
+        "Description": "A numeric vector of values to convert from one currency year to another."
+      },
+      {
+        "Name": "FromYear",
+        "Description": "A number or string identifying the currency year of the input  Values_."
+      },
+      {
+        "Name": "ToYear",
+        "Description": "A number or string identifying the currency year to convert the Values_ to."
+      }
+    ],
+    "Return": "A numeric vector of values corresponding the the input Values_ but converted from the currency year identified in the FromYear argument to the currency year identified in the ToYear argument. If either the FromYear or the ToYear arguments is unaccounted for in the deflator series, the original Values_ are returned with a Converted attribute of FALSE. Otherwise the conversion is done and the Converted attribute of the returned values is TRUE.",
+    "Calls":
+    [
+      "getModelState"
     ]
   }
   
