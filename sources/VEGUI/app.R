@@ -99,6 +99,10 @@ REVERT_MODEL_PARAMETERS_FILE <- "REVERT_MODEL_PARAMETERS_FILE"
 SAVE_RUN_PARAMETERS_FILE <- "SAVE_RUN_PARAMETERS_FILE"
 REVERT_RUN_PARAMETERS_FILE <- "REVERT_RUN_PARAMETERS_FILE"
 
+myFileTypes <- list(
+  `comma separated values` = "csv",
+  `tab separated values` = "tsv"
+)
 volumeRoots = getVolumes("")
 
 # Define UI for application
@@ -175,8 +179,6 @@ navlistPanel(
   tabPanel(
     title = "Settings",
     value = TAB_SETTINGS,
-    h3("Model state"),
-    verbatimTextOutput(MODEL_STATE_FILE, FALSE),
     h3("Model parameters"),
     #shinyAce does not support setting height by lines and the updateAceEditor does not have a height parameter so not sure what to do...
     #https://github.com/trestletech/shinyAce/issues/4
@@ -234,16 +236,16 @@ navlistPanel(
       id = DATASTORE_TABLE_EXPORT_BUTTON,
       label = "Export displayed datastore data...",
       title = "Please pick location and name for the exported data...",
-      list(
-        `tab separated values (txt)` = "txt",
-        `tab separated values (tsv)` = "tsv"
-      )
+      myFileTypes
     ),
     actionButton(DATASTORE_TABLE_CLOSE_BUTTON, "Close Datastore table"),
     DT::dataTableOutput(VIEW_DATASTORE_TABLE),
     h3("Datastore:"),
-    DT::dataTableOutput(DATASTORE_TABLE)
+    DT::dataTableOutput(DATASTORE_TABLE),
+    h3("Model state"),
+    verbatimTextOutput(MODEL_STATE_FILE, FALSE)
   ),
+
   tabPanel(
     "Logs (newest first) ",
     value = "TAB_LOGS",
@@ -394,7 +396,7 @@ server <- function(input, output, session) {
     id = DATASTORE_TABLE_EXPORT_BUTTON,
     session = session,
     roots = volumeRoots,
-    filetypes = c("txt", "tsv")
+    filetypes = myFileTypes
   )
 
   shinyFiles::shinyFileChoose(
@@ -775,8 +777,8 @@ server <- function(input, output, session) {
                label = DATASTORE_TABLE_EXPORT_BUTTON,
                handlerExpr = {
                  debugConsole("observeEvent input[[DATASTORE_TABLE_EXPORT_BUTTON]] entered")
-                 fileinfo = shinyFiles::parseSavePath(roots = volumeRoots, input[[DATASTORE_TABLE_EXPORT_BUTTON]])
-                 datapath <- as.character(fileinfo$datapath)
+                 fileInfo = shinyFiles::parseSavePath(roots = volumeRoots, input[[DATASTORE_TABLE_EXPORT_BUTTON]])
+                 datapath <- as.character(fileInfo$datapath)
                  dataTable <-
                    otherReactiveValues[[VIEW_DATASTORE_TABLE]]
                  print(paste(
@@ -787,7 +789,8 @@ server <- function(input, output, session) {
                    "to:",
                    datapath
                  ))
-                 data.table::fwrite(dataTable, datapath, sep = "\t")
+                 separator <- if (endsWith(datapath, ".tsv")) "\t" else ","
+                 data.table::fwrite(dataTable, datapath, sep = separator)
                  if (!file.exists(datapath)) {
                    stop(paste("Right after saving file it is missing:", datapath))
                  }
