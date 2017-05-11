@@ -94,18 +94,10 @@ TAB_OUTPUTS <- "TAB_OUTPUTS"
 MODULE_PROGRESS <- "MODULE_PROGRESS"
 PAGE_TITLE <- "Pilot Model Runner and Scenario Viewer"
 
-SAVE_MODEL_STATE_FILE <- "SAVE_MODEL_STATE_FILE"
-REVERT_MODEL_STATE_FILE <- "REVERT_MODEL_STATE_FILE"
 SAVE_MODEL_PARAMETERS_FILE <- "SAVE_MODEL_PARAMETERS_FILE"
 REVERT_MODEL_PARAMETERS_FILE <- "REVERT_MODEL_PARAMETERS_FILE"
 SAVE_RUN_PARAMETERS_FILE <- "SAVE_RUN_PARAMETERS_FILE"
 REVERT_RUN_PARAMETERS_FILE <- "REVERT_RUN_PARAMETERS_FILE"
-
-saveButtons <- list(SAVE_MODEL_STATE_FILE, SAVE_MODEL_PARAMETERS_FILE, SAVE_RUN_PARAMETERS_FILE)
-
-revertButtons <- list(REVERT_MODEL_STATE_FILE, REVERT_MODEL_PARAMETERS_FILE, REVERT_RUN_PARAMETERS_FILE)
-
-saveRevertButtonsNames <- unlist(list(saveButtons, revertButtons))
 
 volumeRoots = getVolumes("")
 
@@ -184,17 +176,11 @@ navlistPanel(
     title = "Settings",
     value = TAB_SETTINGS,
     h3("Model state"),
+    verbatimTextOutput(MODEL_STATE_FILE, FALSE),
+    h3("Model parameters"),
     #shinyAce does not support setting height by lines and the updateAceEditor does not have a height parameter so not sure what to do...
     #https://github.com/trestletech/shinyAce/issues/4
-    shinyAce::aceEditor(MODEL_STATE_FILE, height = (16 * 12)),
-    fluidRow(column(
-      3, actionButton(SAVE_MODEL_STATE_FILE, "Save Changes")
-    ),
-    column(
-      3, actionButton(REVERT_MODEL_STATE_FILE, "Revert Changes")
-    )),
-    h3("Model parameters"),
-    shinyAce::aceEditor(MODEL_PARAMETERS_FILE, height = (16 * 10)),
+    shinyAce::aceEditor(MODEL_PARAMETERS_FILE, height = (16 * 10), mode = "json"),
     fluidRow(column(
       3, actionButton(SAVE_MODEL_PARAMETERS_FILE, "Save Changes")
     ),
@@ -205,7 +191,7 @@ navlistPanel(
     h3("Geo File"),
     DT::dataTableOutput(GEO_CSV_FILE),
     h3("Run parameters"),
-    shinyAce::aceEditor(RUN_PARAMETERS_FILE, height = (16 * 11)),
+    shinyAce::aceEditor(RUN_PARAMETERS_FILE, height = (16 * 11), mode = "json"),
     fluidRow(column(
       3, actionButton(SAVE_RUN_PARAMETERS_FILE, "Save Changes")
     ),
@@ -750,23 +736,11 @@ server <- function(input, output, session) {
   } # end saveParameterFile
 
   revertParameterFile <- function(parameterFileIdentifier) {
-    updateAceEditor(session,
+    shinyAce::updateAceEditor(session,
                     parameterFileIdentifier,
                     value = jsonlite::toJSON(reactiveFileReaders[[parameterFileIdentifier]](), pretty =
                                                TRUE))
   } # end revertParameterFile
-
-  observeEvent(
-    input[[SAVE_MODEL_STATE_FILE]],
-    handlerExpr = {
-      saveParameterFile(MODEL_STATE_FILE)
-    })
-
-  observeEvent(
-    input[[REVERT_MODEL_STATE_FILE]],
-    handlerExpr = {
-      revertParameterFile(MODEL_STATE_FILE)
-    })
 
   observeEvent(
     input[[SAVE_MODEL_PARAMETERS_FILE]],
@@ -791,45 +765,6 @@ server <- function(input, output, session) {
     handlerExpr = {
       revertParameterFile(RUN_PARAMETERS_FILE)
     })
-
-  # saveRevertButtonsValues <- list()
-  # #it is convenient to use just one observer
-  # observeEvent(
-  #   # {list(input[[SAVE_MODEL_STATE_FILE]],
-  #   #   input[[SAVE_MODEL_PARAMETERS_FILE]],
-  #   #   input[[SAVE_RUN_PARAMETERS_FILE]],
-  #   #   input[[REVERT_MODEL_STATE_FILE]],
-  #   #   input[[REVERT_MODEL_PARAMETERS_FILE]],
-  #   #   input[[REVERT_RUN_PARAMETERS_FILE]])},
-  #   {
-  #     lapply(saveRevertButtonsNames, function(buttonName) { input[[buttonName]] })
-  #   },
-  #   label = "SAVE_REVERT_PARAMETER_FILES",
-  #   handlerExpr = {
-  #     clickedValues <- unlist(lapply(saveRevertButtonsNames, function(buttonName) {
-  #       returnValue = FALSE
-  #
-  #       if (input[[buttonName]] > 0) {
-  #         if (is.null(saveRevertButtonsValues[[buttonName]])) {
-  #           #initialize to zero if this is first time through
-  #           saveRevertButtonsValues[[buttonName]] <<- 0
-  #         }
-  #         returnValue <- input[[buttonName]] != saveRevertButtonsValues[[buttonName]]
-  #         if (returnValue) {
-  #           #update the saved value
-  #           saveRevertButtonsValues[[buttonName]] <<- input[[buttonName]]
-  #         }
-  #       }
-  #       return(returnValue)
-  #     }))
-  #     clickedButtonNames <- saveRevertButtonsNames[clickedValues]
-  #     if (length(clickedButtonNames) != 1) {
-  #       print(paste0("saveRevertButtons length(clickedButtonNames): ", length(clickedButtonNames), " clickedButtonNames: ", clickedButtonNames))
-  #     } else {
-  #       print(paste0("saveRevertButtons clickedButtonNames: ", clickedButtonNames))
-  #     }
-  #   }
-  # ) #end saveRevertButtons observeEvent
 
   observeEvent(input[[DATASTORE_TABLE_CLOSE_BUTTON]], label = DATASTORE_TABLE_CLOSE_BUTTON, handlerExpr = {
     otherReactiveValues[[VIEW_DATASTORE_TABLE]] <-
@@ -1271,20 +1206,21 @@ server <- function(input, output, session) {
     return(returnValue)
   })
 
-  observe({
-    updateAceEditor(session,
-                    MODEL_STATE_FILE,
-                    value = jsonlite::toJSON(reactiveFileReaders[[MODEL_STATE_FILE]](), pretty =
-                                               TRUE))
+  output[[MODEL_STATE_FILE]] = renderText({
+    getScriptInfo()
+    jsonlite::toJSON(reactiveFileReaders[[MODEL_STATE_FILE]](), pretty =
+                       TRUE)
+  })
 
-    updateAceEditor(
+  observe({
+    shinyAce::updateAceEditor(
       session,
       MODEL_PARAMETERS_FILE,
       value = jsonlite::toJSON(reactiveFileReaders[[MODEL_PARAMETERS_FILE]](), pretty =
                                  TRUE)
     )
 
-    updateAceEditor(
+    shinyAce::updateAceEditor(
       session,
       RUN_PARAMETERS_FILE,
       value = jsonlite::toJSON(reactiveFileReaders[[RUN_PARAMETERS_FILE]](), pretty =
