@@ -34,10 +34,15 @@ install.packages("shiny")
 install.packages("shinyjs")
 install.packages("shinyFiles")
 install.packages("data.table")
+install.packages("DT")
 install.packages("shinyBS")
 install.packages("future")
 install.packages("testit")
 install.packages("jsonlite")
+install.packages("rhandsontable")
+install.packages("shinyAce")
+install.packages("envDocument")
+install.packages("rhandsontable")
 
 devtools::install_github("tdhock/namedCapture")
 devtools::install_github("trestletech/shinyTree")
@@ -70,7 +75,8 @@ source("run_model.R")
 
 ```
 library("shiny")
-runGitHub("gregorbj/VisionEval", subdir="sources/VEGUI")
+runGitHub("gregorbj/VisionEval", subdir="sources/VEGUI", ref="master") #master branch
+runGitHub("gregorbj/VisionEval", subdir="sources/VEGUI", ref="develop") #develop branch
 ```
   3. The VE GUI should launch in your browser
   4. Click "Select Scenario Script" and navigate to the VERPAT run_model.R script in your local repository
