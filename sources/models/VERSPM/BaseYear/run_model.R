@@ -18,13 +18,13 @@ initializeModel(
   LoadDatastore = FALSE,
   DatastoreName = NULL,
   SaveDatastore = TRUE
-  )  
+  )
 
 #Run all demo module for all years
 #---------------------------------
 for(Year in getYears()) {
-  runModule(ModuleName = "CreateHouseholds", 
-            PackageName = "SimHouseholds",
+  runModule(ModuleName = "CreateHouseholds",
+            PackageName = "VESimHouseholds",
             RunFor = "AllYears")
 }
 
