@@ -40,7 +40,7 @@ library(shinyTree)
 
 #DT options https://datatables.net/reference/option/dom
 # only display the table, and nothing else
-options(DT.options = list(dom = 'ti', rownames = 'f'))
+options(DT.options = list(dom = 'tip', rownames = 'f'))
 
 #use of future in shiny: http://stackoverflow.com/questions/41610354/calling-a-shiny-javascript-callback-from-within-a-future
 plan(multiprocess) #tell "future" library to use multiprocessing
