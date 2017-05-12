@@ -7,11 +7,12 @@
 initTable(Table, Group, Length)
 }
 \arguments{
+\item{Table}{a string identifying the name of the table to initialize.}
+
 \item{Group}{a string representation of the name of the group the table is to
 be created in.}
 
-\item{Spec_ls}{a list containing the standard module 'Set' specifications
-described in the model system design documentation.}
+\item{Length}{a number identifying the table length.}
 }
 \value{
 The value TRUE is returned if the function is successful at creating

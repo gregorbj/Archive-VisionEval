@@ -9,6 +9,10 @@ parseModelScript(FilePath = "run_model.R", TestMode = FALSE)
 \arguments{
 \item{FilePath}{A string identifying the relative or absolute path to the
 model run script is located.}
+
+\item{TestMode}{A logical identifying whether the function is to run in test
+mode. When in test mode the function returns the parsed script but does not
+change the model state or write results to the log.}
 }
 \value{
 A data frame containing information on the calls to 'runModule' in the

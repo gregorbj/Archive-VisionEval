@@ -4,8 +4,7 @@
 \alias{setModelState}
 \title{Update model state.}
 \usage{
-setModelState(ChangeState_ls, State_ls = ModelState_ls,
-  FileName = "ModelState.Rda")
+setModelState(ChangeState_ls, FileName = "ModelState.Rda")
 }
 \arguments{
 \item{ChangeState_ls}{A named list of components to change in ModelState_ls}

@@ -14,8 +14,10 @@ A standard specifications list with expansion of the multiple item
 specifications.
 }
 \description{
-\code{processModuleSpecs}Function processes a specifications list and
-expands items that have multiple NAME listings into multiple items.
+\code{processModuleSpecs}Function processes a full module specifications list,
+expanding all elements in the Inp, Get, and Set components by parsing the
+UNITS attributes and duplicating every specification which has multiple
+values for the NAME attribute.
 }
 \details{
 This function process a module specification list. If any of the

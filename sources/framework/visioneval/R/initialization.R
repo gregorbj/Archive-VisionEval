@@ -18,24 +18,70 @@
 #' saves the model state list in a file (ModelState.Rda).
 #'
 #' @param Dir A string identifying the name of the directory where the global
-#' parameters file is located. The default value is "defs".
+#' parameters, deflator, and default units files are located. The default value
+#' is defs.
 #' @param ParamFile A string identifying the name of the global parameters file.
-#' The default value is "parameters.json".
+#' The default value is parameters.json.
+#' @param DeflatorFile A string identifying the name of the file which contains
+#' deflator values by year (e.g. consumer price index). The default value is
+#' deflators.csv.
+#' @param UnitsFile A string identifying the name of the file which contains
+#' default units for complex data types (e.g. currency, distance, speed, etc.).
+#' The default value is units.csv.
 #' @return TRUE if the model state list is created and file is saved. It creates
 #' the model state list and loads parameters recorded in the 'parameters.json'
 #' file into the model state lists and saves a model state file.
 #' @export
 #' @import jsonlite
-initModelStateFile <- function(Dir = "defs", ParamFile = "run_parameters.json") {
+initModelStateFile <-
+  function(Dir = "defs",
+           ParamFile = "run_parameters.json",
+           DeflatorFile = "deflators.csv",
+           UnitsFile = "units.csv") {
   ParamFilePath <- file.path(Dir,  ParamFile)
+  DeflatorFilePath <- file.path(Dir, DeflatorFile)
+  UnitsFilePath <- file.path(Dir, UnitsFile)
   if (!file.exists(ParamFilePath)) {
     Message <- paste("Missing", ParamFilePath, "file.")
     stop(Message)
   } else {
-    ModelState_ls <<- fromJSON(ParamFilePath)
+    ModelState_ls <- fromJSON(ParamFilePath)
+    ModelState_ls$LastChanged <- Sys.time()
+    ModelState_ls$Deflators <- read.csv(DeflatorFilePath, as.is = TRUE)
+    ModelState_ls$Units <- read.csv(UnitsFilePath, as.is = TRUE)
     save(ModelState_ls, file = "ModelState.Rda")
   }
   TRUE
+}
+#initModelStateFile(Dir = "tests/defs")
+
+#GET MODEL STATE VALUES
+#======================
+#' Get values from model state list.
+#'
+#' \code{getModelState} reads components of the list that keeps track of the
+#' model state
+#'
+#' Key variables that are important for managing the model run are stored in a
+#' list (ModelState_ls) that is managed in the global environment. This
+#' function extracts named components of the list.
+#'
+#' @param Names_ A string vector of the components to extract from the
+#' ModelState_ls list.
+#' @param FileName A string that is the file name of the model state file. The
+#' default value is ModelState.Rda.
+#' @return A list containing the specified components from the model state file.
+#' @export
+getModelState <- function(Names_ = "All", FileName = "ModelState.Rda") {
+  if (file.exists(FileName)) {
+    load(FileName)
+  }
+  if ("ModelState_ls" %in% ls()) State_ls <- get("ModelState_ls")
+  if (Names_[1] == "All") {
+    return(State_ls)
+  } else {
+    return(State_ls[Names_])
+  }
 }
 
 
@@ -57,40 +103,15 @@ initModelStateFile <- function(Dir = "defs", ParamFile = "run_parameters.json") 
 #' @return TRUE if the model state list and file are changed.
 #' @export
 setModelState <-
-  function(ChangeState_ls, State_ls = ModelState_ls, FileName = "ModelState.Rda") {
-  NewModelState_ls <- State_ls
-  for (i in 1:length(ChangeState_ls)) {
-    NewModelState_ls[[names(ChangeState_ls[i])]] <- ChangeState_ls[[i]]
+  function(ChangeState_ls, FileName = "ModelState.Rda") {
+    ModelState_ls <- getModelState()
+    for (i in 1:length(ChangeState_ls)) {
+      ModelState_ls[[names(ChangeState_ls[i])]] <- ChangeState_ls[[i]]
+    }
+    ModelState_ls$LastChanged <- Sys.time()
+    save(ModelState_ls, file = FileName)
+    TRUE
   }
-  ModelState_ls <<- NewModelState_ls
-  save(ModelState_ls, file = "ModelState.Rda")
-  TRUE
-}
-
-
-#GET MODEL STATE VALUES
-#======================
-#' Get values from model state list.
-#'
-#' \code{getModelState} reads components of the list that keeps track of the
-#' model state
-#'
-#' Key variables that are important for managing the model run are stored in a
-#' list (ModelState_ls) that is managed in the global environment. This
-#' function extracts named components of the list.
-#'
-#' @param Names_ A string vector of the components to extract from the
-#' ModelState_ls list.
-#' @param State_ls The model state list which by default is ModelState_ls.
-#' @return A list containing the specified components from the model state file.
-#' @export
-getModelState <- function(Names_ = "All", State_ls = ModelState_ls) {
-  if (Names_[1] == "All") {
-    return(State_ls)
-  } else {
-    return(State_ls[Names_])
-  }
-}
 
 
 #READ MODEL STATE FILE
@@ -138,6 +159,34 @@ getYears <- function() {
   unlist(getModelState("Years"))
 }
 
+
+#RETRIEVE DEFAULT UNITS
+#======================
+#' Retrieve default units for model
+#'
+#' \code{getUnits} retrieves the default model units for a complex data type.
+#'
+#' This is a convenience function to make it easier to retrieve the default
+#' units for a complex data type (e.g. distance, volume, speed). The default
+#' units are the units used to store the complex data type in the datastore.
+#'
+#' @param Type A string identifying the complex data type.
+#' @return A string identifying the default units for the complex data type.
+#' @export
+getUnits <- function(Type) {
+  Units_df <- getModelState()$Units
+  Units_ <- Units_df$Units
+  names(Units_) <- Units_df$Type
+  if (!(Type %in% names(Units_))) {
+    return(NA)
+  } else {
+    return(Units_[Type])
+  }
+}
+
+#getUnits("Bogus")
+#getUnits("currency")
+#getUnits("area")
 
 #INITIALIZE RUN LOG
 #==================
@@ -657,6 +706,9 @@ loadModelParameters <- function(ModelParamFile = "model_parameters.json") {
 #'
 #' @param FilePath A string identifying the relative or absolute path to the
 #'   model run script is located.
+#' @param TestMode A logical identifying whether the function is to run in test
+#' mode. When in test mode the function returns the parsed script but does not
+#' change the model state or write results to the log.
 #' @return A data frame containing information on the calls to 'runModule' in the
 #' order of the calls. Each row represents a module call in order. The columns
 #' identify the 'ModuleName', the 'PackageName', and the 'RunFor' value.
@@ -910,136 +962,58 @@ getModuleSpecs <- function(ModuleName, PackageName) {
 # rm(Test_ls)
 
 
-#CHECK MODULE SPECIFICATIONS
-#===========================
-#' Checks module specifications for completeness and for incorrect entries
+#EXPAND SPECIFICATION
+#====================
+#' Expand a Inp, Get, or Set specification so that is can be used by other
+#' functions to process inputs and to read from or write to the datastore.
 #'
-#' \code{checkModuleSpecs}Function checks module specifications for completeness
-#' and for proper values.
+#' \code{expandSpec} takes a Inp, Get, or Set specification and processes it to
+#' be in a form that can be used by other functions which use the specification
+#' in processing inputs or reading from or writing to the datastore. The
+#' parseUnitsSpec function is called to parse the UNITS attribute to extract
+#' name, multiplier, and year values. When the specification has multiple
+#' values for the NAME attribute, the function creates a specification for each
+#' name value.
 #'
-#' This function reads a processed module specifications list and checks whether
-#' the specifications are complete and whether the values are appropriate.
+#' The VisionEval design allows module developers to assign multiple values to
+#' the NAME attributes of a Inp, Get, or Set specification where the other
+#' attributes for those named datasets (or fields) are the same. This greatly
+#' reduces duplication and the potential for error in writing module
+#' specifications. However, other functions that check or use the specifications
+#' are not capable of handling specifications which have NAME attributes
+#' containing multiple values. This function expands a specification with
+#' multiple values for a  NAME attribute into multiple specifications, each with
+#' a single value for the NAME attribute. In addition, the function calls the
+#' parseUnitsSpec function to extract multiplier and year information from the
+#' value of the UNITS attribute. See that function for details.
 #'
-#' @param Spec_ls a list containing the module specifications as produced
-#' by the 'processModuleSpecs' function.
-#' @param ModuleName a string that identifies the name of the module (used for
-#' to identify the module in any error messages.)
-#' @return A vector containing messages identifying any errors that are found.
+#' @param SpecToExpand_ls A standard specifications list for a specification
+#' whose NAME attribute has multiple values.
+#' @return A list of standard specifications lists which has a component for
+#' each value in the NAME attribute of the input specifications list.
 #' @export
-checkModuleSpecs <- function(Specs_ls, ModuleName) {
-  Errors_ <- character(0)
-  #Define function to check one Inp, Get, or Set specification
-  checkSpec <- function(Spec_ls, SpecName, SpecType, SpecNum, DataType, Set = NULL) {
-    if (is.null(Spec_ls[[SpecName]])) {
-      Msg <-
-        paste0("Missing ", SpecName, " specification for ", SpecType,
-               " specification #", SpecNum, ".")
-      Errors_ <<- c(Errors_, Msg)
-    } else {
-      if (any(sapply(Spec_ls[[SpecName]], function(x) length(x) == 0)) |
-          any(sapply(Spec_ls[[SpecName]], function(x) x == "")) |
-          any(sapply(Spec_ls[[SpecName]], function(x) mode(x) != DataType))) {
-        Msg <-
-          paste0(SpecName, " specification for ", SpecType, " specification #",
-                 SpecNum, " is either empty or has the wrong type. ",
-                 "Must be a non-empty entry of type ", DataType, ".")
-        Errors_ <<- c(Errors_, Msg)
-      } else {
-        if (!is.null(Set)) {
-          if (!(Spec_ls[[SpecName]] %in% Set)) {
-            Msg <-
-              paste0(SpecName, " specification for ", SpecType, " specification #",
-                     SpecNum, " does not have an allowed value. ",
-                     "It must be one of the following values: ",
-                     paste(Set, collapse = ", "), ".")
-            Errors_ <<- c(Errors_, Msg)
-          }
-        }
-        if(SpecType == "Inp" &
-           SpecName == "FILE" &
-           length(grep(".csv", Spec_ls[[SpecName]])) == 0) {
-          Msg <-
-            paste0(SpecName, " specification for ", SpecType, " specification #",
-                   SpecNum, " must be a file name with a '.csv' extension.")
-          Errors_ <<- c(Errors_, Msg)
-        }
-      }
-    }
+#Define a function which expands a specification with multiple NAME items
+expandSpec <- function(SpecToExpand_ls) {
+  SpecToExpand_ls <- parseUnitsSpec(SpecToExpand_ls)
+  Names_ <- unlist(SpecToExpand_ls$NAME)
+  Expanded_ls <- list()
+  for (i in 1:length(Names_)) {
+    Temp_ls <- SpecToExpand_ls
+    Temp_ls$NAME <- Names_[i]
+    Expanded_ls <- c(Expanded_ls, list(Temp_ls))
   }
-  #Check RunBy
-  AllowedVals_ <- c("Region", "Azone", "Bzone", "Czone", "Marea")
-  if (!(Specs_ls$RunBy %in% AllowedVals_)) {
-    Msg <-
-      paste0(
-        "'RunBy' specification for module '", ModuleName,
-        "' does not have allowed value. ",
-        "Allowed values are 'Region', 'Azone', 'Bzone', 'Czone', and 'Marea'."
-      )
-    Errors_ <- c(Errors_, Msg)
-  }
-  #Check NewInpTable if component exists
-  if (!is.null(Specs_ls$NewInpTable)) {
-    for (i in 1:length(Specs_ls$NewInpTable)) {
-      checkSpec(Specs_ls$NewInpTable[[i]], "TABLE", "NewInpTable", i, "character")
-      checkSpec(Specs_ls$NewInpTable[[i]], "GROUP", "NewInpTable", i, "character",
-                c("Global", "Year"))
-    }
-  }
-  #Check NewSetTable if component exists
-  if (!is.null(Specs_ls$NewSetTable)) {
-    for (i in 1:length(Specs_ls$NewSetTable)) {
-      checkSpec(Specs_ls$NewSetTable[[i]], "TABLE", "NewSetTable", i, "character")
-      checkSpec(Specs_ls$NewSetTable[[i]], "GROUP", "NewSetTable", i, "character",
-                c("Global", "Year"))
-    }
-  }
-  #Check Inp specifications if component exists
-  if (!is.null(Specs_ls$Inp)) {
-    for (i in 1:length(Specs_ls$Inp)) {
-      checkSpec(Specs_ls$Inp[[i]], "NAME", "Inp", i, "character")
-      checkSpec(Specs_ls$Inp[[i]], "FILE", "Inp", i, "character")
-      checkSpec(Specs_ls$Inp[[i]], "TABLE", "Inp", i, "character")
-      checkSpec(Specs_ls$Inp[[i]], "GROUP", "Inp", i, "character",
-                c("Global", "Year"))
-      checkSpec(Specs_ls$Inp[[i]], "TYPE", "Inp", i, "character",
-                c("character", "integer", "double", "logical"))
-      checkSpec(Specs_ls$Inp[[i]], "UNITS", "Inp", i, "character")
-    }
-  }
-  #Check Get specifications
-  for (i in 1:length(Specs_ls$Get)) {
-    checkSpec(Specs_ls$Get[[i]], "NAME", "Get", i, "character")
-    checkSpec(Specs_ls$Get[[i]], "TABLE", "Get", i, "character")
-    checkSpec(Specs_ls$Get[[i]], "GROUP", "Get", i, "character",
-              c("Global", "Year", "BaseYear"))
-    checkSpec(Specs_ls$Get[[i]], "TYPE", "Get", i, "character",
-              c("character", "integer", "double", "logical"))
-    checkSpec(Specs_ls$Get[[i]], "UNITS", "Get", i, "character")
-  }
-  #Check Set specifications
-  for (i in 1:length(Specs_ls$Set)) {
-    checkSpec(Specs_ls$Set[[i]], "NAME", "Set", i, "character")
-    checkSpec(Specs_ls$Set[[i]], "TABLE", "Set", i, "character")
-    checkSpec(Specs_ls$Set[[i]], "GROUP", "Set", i, "character",
-              c("Global", "Year"))
-    checkSpec(Specs_ls$Set[[i]], "TYPE", "Set", i, "character",
-              c("character", "integer", "double", "logical"))
-    checkSpec(Specs_ls$Set[[i]], "UNITS", "Set", i, "character")
-  }
-  #Return errors
-  Errors_
+  Expanded_ls
 }
-# Test Code
-# source("tests/data/bad_test_specs.R")
-# Errors_ <- checkModuleSpecs(BadTestSpec_ls, "BadSpecTest")
 
 
 #PROCESS MODULE SPECIFICATIONS
 #=============================
 #' Process module specifications to expand items with multiple names.
 #'
-#' \code{processModuleSpecs}Function processes a specifications list and
-#' expands items that have multiple NAME listings into multiple items.
+#' \code{processModuleSpecs}Function processes a full module specifications list,
+#' expanding all elements in the Inp, Get, and Set components by parsing the
+#' UNITS attributes and duplicating every specification which has multiple
+#' values for the NAME attribute.
 #'
 #' This function process a module specification list. If any of the
 #' specifications include multiple listings of data sets (i.e. fields) in a
@@ -1051,27 +1025,12 @@ checkModuleSpecs <- function(Specs_ls, ModuleName) {
 #' specifications.
 #' @export
 processModuleSpecs <- function(Spec_ls) {
-  #Define a function which expands a specification with multiple NAME items
-  expandSpec <- function(SpecToExpand_ls) {
-    Names_ <- unlist(SpecToExpand_ls$NAME)
-    Expanded_ls <- list()
-    for (i in 1:length(Names_)) {
-      Temp_ls <- SpecToExpand_ls
-      Temp_ls$NAME <- Names_[i]
-      Expanded_ls <- c(Expanded_ls, list(Temp_ls))
-    }
-    Expanded_ls
-  }
   #Define a function to process a component of a specifications list
-  processComponent <- function(Component_ls) {
+  processComponent <- function(Component_ls, ComponentGroup) {
     Result_ls <- list()
     for (i in 1:length(Component_ls)) {
       Temp_ls <- Component_ls[[i]]
-      if (length(Temp_ls$NAME) == 1) {
-        Result_ls <- c(Result_ls, list(Temp_ls))
-      } else {
-        Result_ls <- c(Result_ls, expandSpec(Temp_ls))
-      }
+      Result_ls <- c(Result_ls, expandSpec(Temp_ls))
     }
     Result_ls
   }
@@ -1095,12 +1054,6 @@ processModuleSpecs <- function(Spec_ls) {
   }
   Out_ls
 }
-# Test Code
-# item <- list
-# items <- list
-# source("tests/data/test_specs.R")
-# Test_ls <- processModuleSpecs(TestSpec_ls)
-# rm(item, items, TestSpec_ls, Test_ls)
 
 
 #SIMULATE DATA STORE TRANSACTIONS

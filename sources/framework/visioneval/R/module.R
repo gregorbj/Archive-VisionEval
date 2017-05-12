@@ -205,7 +205,7 @@ checkModuleOutputs <-
             DSetLengths_ <- unlist(lapply(Data_ls[[Group]][[Table]], length))
             if (!all(DSetLengths_ == TableLength)) {
               Msg <-
-                paste0("The LENGTH attribute of table, ", TABLE, " in group ",
+                paste0("The LENGTH attribute of table, ", Table, " in group ",
                        Group, " does not match length of datasets to be ",
                        "stored in the table.")
               Errors_ <- c(Errors_, Msg)
@@ -450,7 +450,7 @@ testModule <-
       ResultsCheck_ <- character(0)
       if (Specs_ls$RunBy == "Region") {
         #Get data from datastore
-        L <- getFromDatastore(Specs_ls, Geo = NULL, RunYear = Year)
+        L <- getFromDatastore(Specs_ls, RunYear = Year, Geo = NULL)
         #Run module
         R <- Func(L)
         #Check results
@@ -470,7 +470,7 @@ testModule <-
         #Run module for each geographic area
         for (Geo in Geo_) {
           #Get data from datastore for geographic area
-          L <- getFromDatastore(Specs_ls, Geo = Geo)
+          L <- getFromDatastore(Specs_ls, RunYear = Year, Geo = Geo)
           #Run model for geographic area
           R <- Func(L)
           #Check results
@@ -490,7 +490,7 @@ testModule <-
         Msg <-
           paste0("Following are inconsistencies between module outputs and the ",
                  "module Set specifications:")
-        Msg <- paste(c(Msg, OutputCheck_), collapse = "\n")
+        Msg <- paste(c(Msg, ResultsCheck_), collapse = "\n")
         writeLog(Msg)
         rm(Msg)
         stop(
