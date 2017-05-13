@@ -1,6 +1,6 @@
-## VisionEval Model System Design  
+## VisionEval Model System Design and Users Guide
 **Brian Gregor, Oregon Systems Analytics LLC**  
-**February 29, 2016**  
+**May 11, 2017**  
 **DRAFT**
 
 
@@ -31,7 +31,7 @@ A submodel is the component of a model that calculates one or a few closely rela
 
 
 - **Module**  
-A module, at its heart, is a collection of software parameters that implements a submodel and meets the specifications described in this document.  
+A module, at its heart, is a collection of data and functions that meet the specifications described in this document and that implement a submodel. Modules also include documentation of the submodel. Modules as made available to users as R packages.
 
 
 - **Software Framework**  
@@ -47,7 +47,7 @@ The GreenSTEP model and related models are disaggregate strategic planning model
 
 
 - **Modularity**  
-The model system allows new capabilities to be added in a plug-and-play fashion so models can be improved and extended and so improvements developed for one model can be easily shared with other models. Models are composed of modules that contain all of the data and functionality needed to calculate what they are intended to calculate.  
+The model system will allow new capabilities to be added in a plug-and-play fashion so models can be improved and extended and so improvements developed for one model can be easily shared with other models. Models are composed of modules that contain all of the data and functionality needed to calculate what they are intended to calculate.  
 
 
 - **Loose Coupling**
@@ -59,7 +59,7 @@ The VisionEval software framework and all modules developed to operate in the fr
 
 
 - **Geographic Scalability**  
-The model system enables models to be applied at a variety of geographic scales including metropolitan areas of various sizes, states of various sizes, and multi-state regions. Although models are applied at different scales, they share common geographic definitions to enable modules to be more readily shared between models build for the modeling system.  
+The model system will enable models to be applied at a variety of geographic scales including metropolitan areas of various sizes, states of various sizes, and multi-state regions. Although models are applied at different scales, they share common geographic definitions to enable modules to be more readily shared between models built for the modeling system.  
 
 
 - **Data Accessibility**  
@@ -75,11 +75,11 @@ Since the intent of the model system is to support the development of strategic 
 
 
 - **Operating System Independence**
-The model system should run on any of the 3 major operating systems; Windows, Apple, or Linux. As is the case with GreenSTEP and related models, the VisionEval model system is written in the R programming language. Well-supported and easily installed R implementations exist for these operating systems. Modules will be distributed as standard R packages that can be compiled on all operating systems. Code that is written in another language may be included in a module package as long as it can be compiled in an R package that is usable on all 3 operating systems.  
+The model system will run on any of the 3 major operating systems; Windows, Apple, or Linux. As is the case with GreenSTEP and related models, the VisionEval model system is written in the R programming language. Well-supported and easily installed R implementations exist for these operating systems. Modules will be distributed as standard R packages that can be compiled on all operating systems. Code that is written in another language may be included in a module package as long as it can be compiled in an R package that is usable on all 3 operating systems.  
 
 
 - **Preemptive Error Checking**  
-The model system should incorporate extensive data checking to identify errors in the model setup and inputs at the very beginning of the model run. Error messages should clearing identify the causes of the errors. The objective of early error checking is to avoid model runtime errors that waste model execution time and are difficult to debug.
+The model system will incorporate extensive data checking to identify errors in the model setup and inputs at the very beginning of the model run. Error messages will clearing identify the causes of the errors. The objective of early error checking is to avoid model runtime errors that waste model execution time and are difficult to debug.
 
 ### 4. Model System Software Platform
 The VisionEval model system is built in the R software environment for statistical computing and graphics. There are several reasons for this choice:  
@@ -93,7 +93,7 @@ The VisionEval model system is built in the R software environment for statistic
 
 ### 5. Model System Layers
 The VisionEval model system is composed of 3 layers:  
-1) **Model**: The model layer defines the structure of the model and organizes all of the modules into a coherent model. The model layer also includes a common datastore that is used by all modules.  
+1) **Model**: The model layer defines the structure of the model and organizes all of the modules into a coherent model. The model layer includes a module run script, model definition files, model input files, and common datastore.  
 2) **Modules**: The module layer is the core of a model. Modules contain all of the code and parameters to implement submodels which are the building blocks of models.  
 3) **Software Framework**: The software framework layer provides the functionality for controlling a model run, running modules, and interacting with the common datastore.   
 These layers are illustrated in Figure 1. Following sections describe the design and specifications for each layer.
@@ -101,24 +101,47 @@ These layers are illustrated in Figure 1. Following sections describe the design
 **Figure 1. Overview of RSPM Framework**  
 ![Framework Diagram](img/framework_overview.png)
 
-A VisionEval model is build from a set of compatible modules, a set of specifications for the model and geography, a set of scenario input files, and a simple R script that initializes and runs the model. Following is a simple example of a model script:
+A VisionEval model is built from a set of compatible modules, a set of specifications for the model and geography, a set of scenario input files, and a simple R script that initializes and runs the model. Following is a simple example of a model script:
 
 ```
 #Initialize and check the model
-initializeModel(Dir = "defs", ParamFile = "parameters.json", GeoFile = "geo.csv")
+initializeModel(
+  ParamDir = "defs",
+  RunParamFile = "run_parameters.json",
+  GeoFile = "geo.csv",
+  ModelParamFile = "model_parameters.json",
+  LoadDatastore = FALSE,
+  DatastoreName = NULL,
+  SaveDatastore = TRUE
+)
 
 #Run modules for all forecast years
-for (Year in G$Years) {
-    runModule("CreateHouseholds", "vedemo1", Year)
-    runModule("CreateBzones", "vedemo1", Year)
-    runModule("CreateBzoneDev", "vedemo1", Year)
+for(Year in getYears()) {
+  runModule(
+    ModuleName = "CreateHouseholds", 
+    PackageName = "SimHouseholds",
+    RunFor = "AllYears")
+  runModule(
+    ModuleName = "PredictWorkers",
+    PackageName = "SimHouseholds",
+    RunFor = "AllYears")
+  runModule(
+    ModuleName = "PredictLifeCycle",
+    PackageName = "SimHouseholds",
+    RunFor = "AllYears")
+  runModule(
+    ModuleName = "PredictIncome",
+    PackageName = "SimHouseholds",
+    RunFor = "AllYears")
+  ...
 }
 
+
 ```
-The script calls two functions that are defined by the software framework; *initializeModel* and *runModule*. The *initializeModel* function initializes the model environment and model datastore, checks that all necessary modules are installed, and checks whether all module data dependencies can be satisfied. The arguments of the *initializeModel* function identify where key model definition data are found. The *runModule* function, as the name suggests, runs a module. The arguments of the *runModule* function identify the name of the module to be run, the package the module is in, and the forecast year. There are several other optional arguments that are discussed below. This approach makes it easy for users to combine modules in a 'plug-and-play' fashion. One simply identifies the modules that will be run and the sequence that they will be run in. This is possible in large part for the following reasons:  
+The script calls two functions that are defined by the software framework; *initializeModel* and *runModule*. The *initializeModel* function initializes the model environment and model datastore, checks that all necessary modules are installed, and checks whether all module data dependencies can be satisfied. The arguments of the *initializeModel* function identify where key model definition data are found. The *runModule* function, as the name suggests, runs a module. The arguments of the *runModule* function identify the name of the module to be run, the package the module is in, and whether the module should be run for all years, only the base year, or for all years except for the base year. This approach makes it easy for users to combine modules in a 'plug-and-play' fashion. One simply identifies the modules that will be run and the sequence that they will be run in. This is possible in large part for the following reasons:  
 1) The modules are loosely coupled. Modules only communicate to one another by passing information to and from the datastore.  
 2) The framework establishes standards for key shared aspects of modules including how data attributes are specified and how geography is represented.  
-3) Every module includes detailed specifications for the data that are inputs to the module and for the data that are outputs from the module. These data specifications serve as contracts between modules which the datastore keeps track of and the framework software enforces.  
+3) Every module includes detailed specifications for the data that are inputs to the module and for the data that are outputs from the module. These data specifications serve as contracts that the framework software enforces.  
   These features and how they are designed are described in detail in following sections.  
 
 ### 6. Model Layer Description
@@ -134,21 +157,24 @@ A model application has a very simple directory structure as shown in the follow
 
 ```
 my_model
-|   run_model.R
-|   <ModelState.Rda>
-|   <logXXXX.txt>
-|   <datastore.h5>
+|   run_model.R  
+|   <ModelState.Rda>  
+|   <logXXXX.txt>  
+|   <datastore.h5>  
 |     
-|
+|  
 |____defs
+|    |   run_parameters.json
+|    |   model_parameters.json
 |    |   geography.csv  
-|    |   parameters.json  
-|
-|
+|    |   units.csv  
+|    |   deflators.csv  
+|  
+|  
 |____inputs  
-     |   my_inputs1.csv  
-     |   my_inputs2.csv
-     |   ...
+     |   filename.csv  
+     |   filename.csv  
+     |   ...  
          
 ```
 
@@ -156,33 +182,49 @@ The overall project directory, named *my_model* in this example, may have any na
 
 The *run_model.R* file, introduced in the previous section, initializes the model environment and datastore, checks that all necessary packages are installed, checks whether data dependencies can be satisfied, and then runs modules in a specified sequence. Data checks are performed before any modules are run to catch any errors prior to save time and the aggravation that occurs when a model run fails in midstream due to incorrect data inputs. Data checking in advance is possible because every module includes detailed specifications for its input and output data. All scenario input files are checked against specifications to determine whether the required data exist and are correct. In addition, the state of the datastore is 'simulated' in the order that each module will be run to determine whether the data each module needs will be available in the datastore. After the model has been initialized and all all data checks are satisfactory, the modules are executed in the sequence prescribed in the script. 
 
-The *ModelState.Rda* file is a R binary file that contains a list that holds key variables used in managing the model run. The file is created when the model run is initialized and is updated whenever the state of the datastore changes.
+The *ModelState.Rda* file is a R binary file that contains a list that holds key variables used in managing the model run. The file is created when the model run is initialized and is updated whenever the state of the datastore changes. Framework functions read this file when necessary to validate data and to determine that datastore read and write operations can be completed successfully.
 
 The *logXXXX.txt* file is a text file that is created when the model is initialized. This log file is used to record model run progress and any error or warning messages. The 'XXXX' part of the name is the date and time when the log file is created.
 
 The *datastore.h5* file is an hdf5 formatted file that contains the central datastore for the model. It's structure is described in detail below. Users may use a different name for this file by specifying the name to be used in *parameters.json* file (see below). 
 
-The *defs* directory contains all of the definition files needed to support the model run. Two files are required to be present in this directory: *parameters.json* and *geography.csv*. The *parameters.json* file contains parameters that are specific to the model and parameters that may be shared by modules. The file is a [JSON-formatted](http://www.json.org/) text file. The JSON format is used for several reasons. First, it provides much flexibility in how parameters may be structured. For example a parameter could be a single value or an array of values. Second, the JSON format is well documented and is very easy to learn how to use. It uses standard punctuation for formatting and, unlike XML, doesn't require learning a [markup language](https://en.wikipedia.org/wiki/Markup_language). Third, files are ordinary text files that can be easily read and edited by a number of different text editors available on all major operating systems. There are also a number of commercial and open source tools that simplify the process of editing and checking JSON-formatted files.  
+The *defs* directory contains all of the definition files needed to support the model run. Five files are required to be present in this directory: *run_parameters.json*, *model_parameters.json*, *geography.csv*, *deflators.csv*, and *units.csv*.   
 
-The *parameters.json* file specifies six mandatory parameters which are:  
+The *run_parameters.json* file contains parameters that define key attributes of the model run and relationships to other model runs. The file is a [JSON-formatted](http://www.json.org/) text file. The JSON format is used for several reasons. First, it provides much flexibility in how parameters may be structured. For example a parameter could be a single value or an array of values. Second, the JSON format is well documented and is very easy to learn how to use. It uses standard punctuation for formatting and, unlike XML, doesn't require learning a [markup language](https://en.wikipedia.org/wiki/Markup_language). Third, files are ordinary text files that can be easily read and edited by a number of different text editors available on all major operating systems. There are also a number of commercial and open source tools that simplify the process of editing and checking JSON-formatted files.  
 
-- **DatastoreName** The name of the datastore. This can be any name that is valid for the operating system, but the file extension should be ".h5". Example: "datastore.h5".  
+The *parameters.json* file specifies the following parameters:  
 
-- **Scenario** The name of the scenario. Example: "High-Gas-Price".
+- **Model** The name of the model. Example: "Oregon-GreenSTEP".  
 
-- **Description** A short description of the scenario. Example: "Assume tripling of gas prices".  
+- **Scenario** The name of the scenario. Example: "High-Gas-Price".  
 
-- **Region** The name of the region being modeled. Example: "Oregon".
+- **Description** A short description of the scenario. Example: "Assume tripling of gas prices".   
+- **Region** The name of the region being modeled. Example: "Oregon".  
 
-- **BaseYear** The base year for the model. Example: "2010".
+- **BaseYear** The base year for the model. Example: "2015".  
 
-- **Years** An array of all the 'forecast' years that the model will be run for. Example: ["2010", "2050"].  
+- **Years** An array of all the 'forecast' years that the model will be run for. Example: ["2025", "2050"].  
 
-The *parameters.json* can contain other parameters that need to be available globally to control the execution of the model run script. They should not be parameters that are needed by individual modules. All parameters used by a module should be included in the module. Including module parameters in the list of global parameters would violate the *modularity* and *loose coupling* objectives. One exception to this is the *BaseYear* parameter. Modules that calculate future values as changes from base year values need to know what the base year of the model is. Since the base year depends on the model and not the module, it need to be a model parameter and not a module parameter.
+- **DatastoreName** The name of the datastore. It is recommended that this be named "datastore.h5" for all model runs but it can be any name that is valid for the operating system.   
 
-The *geography.csv* file describes all of the geographic relationships for the model and the names of geographic entities in a [CSV-formatted](https://en.wikipedia.org/wiki/Comma-separated_values) text file. The CSV format, like the JSON format is a plain text file. It is used rather than the JSON format because the geographic relationships are best described in table form and the CSV format is made for tabular data. In addition, a number of different open source and commercial spreadsheet and GIS programs can export tabular data in a CSV-formatted files. The structure of the model system geography is described in detail in the following section.  
+- **DatastoreReferences** This is a listing of other datastores that the framework should look for requested data in. This capability to reference other datastores enables users to split their model runs into stages to efficiently manage scenarios. For example, a user may wish to model how several transportation scenarios work with each of a few land use scenarios. To do this, the user could first set up and run the model for each of the land use scenarios. The user could then set up the transportation scenarios and make copies for each of the land use scenarios. Then the user would for each of the transportation scenarios reference the datastore of the land use scenario that it is associated with. The DatastoreReferences entry would look something like the following (the meaning of the entries is explained below):  
+  "DatastoreReferences": {  
+    "Global": "../BaseYear/datastore.h5",  
+    "2010": "../BaseYear/datastore.h5"  
+  }  
+  
+- **Seed** This is a number that modules use as a random seed to make model runs reproducible.  
 
-The *inputs* directory contains all of the input files for a scenario. All input files are CSV-formatted text files. Each module specifies what input files it needs and names and types of data to be included in the needed files. There are several requirements for the structure of input files. These requirements are described following the next section on model geography.
+
+The *model_parameters.json* can contain global parameters for a particular model configuration that may be used by multiple modules. For example, a model configuration to be a GreenSTEP model may require some parameters that are not required by a model configuration for an RSPM model. For example, the GreenSTEP model uses a parameter that is the total base year DVMT by light-duty vehicles to calibrate a factor used to compute commercial service vehicle travel. Parameters in this file should not include parameters that are specific to a module or data that would more properly be model inputs. While this file is available to establish global model parameters, it should be used sparingly in order enhance transferrability of modules between different models.
+
+The *geography.csv* file describes all of the geographic relationships for the model and the names of geographic entities in a [CSV-formatted](https://en.wikipedia.org/wiki/Comma-separated_values) text file. The CSV format, like the JSON format is a plain text file. It is used rather than the JSON format because the geographic relationships are best described in table form and the CSV format is made for tabular data. In addition, a number of different open source and commercial spreadsheet and GIS programs can export tabular data in a CSV-formatted files. The structure of the model system geography is described in detail in Section 6.2 below.  
+
+The *units.csv* file describes the default units to be used for storing complex data types in the model. The VisionEval model system keeps track of the types and units of measure of all data that is processed. The model system recognizes 4 primitive data types and 10 complex data types. The primitive data types are data types recognized by the R language: 'double', 'integer', 'character', and 'logical'. The complex data types such as 'distance' and 'mass' define types of data that are related and may be converted between related measurement units. The *units.csv* describes the default units used to store complex data types in the datastore. The file structure and an example are described in more detail in Section 6.3 below.
+
+The *deflators.csv* defines the annual deflator values, such as the consumer price index, that are used to convert currency values between different years for currency demonination. The file structure and an example are described in more detail in Section 6.4 below.
+
+The *inputs* directory contains all of the input files for a scenario. All input files are CSV-formatted text files. Each module specifies what input files it needs and names and types of data to be included in the needed files. There are several requirements for the structure of input files. These requirements are described in section 6.5 below.
 
 #### 6.2. Model Geography
 
@@ -195,7 +237,7 @@ The region is the entire model area. Large-scale characteristics that don't vary
 
 
 - **Azones**  
-Azones are large subdivisions of the region containing populations that are similar in size to those of counties or Census Public Use Microsample Areas (PUMA). The counties used in the GreenSTEP and EERPAT models and metropolitan divisions used in the RSPM are examples of Azones. Azones are used to represent population and economic characteristics that vary across the region such as demographic forecasts of persons by age group and average per capita income. Azones are the only level of geography that is required to represent actual geographic areas and may not be simulated.  
+Azones are large subdivisions of the region containing populations that are similar in size to those of counties or Census Public Use Microdata Areas (PUMA). The counties used in the GreenSTEP and EERPAT models and metropolitan divisions used in the RSPM are examples of Azones. Azones are used to represent population and economic characteristics that vary across the region such as demographic forecasts of persons by age group and average per capita income. Azones are the only level of geography that is required to represent actual geographic areas and may not be simulated.  
 
 
 - **Bzones**  
@@ -208,7 +250,7 @@ Bzones are subdivisions of Azones that are similar in size to Census Tracts and 
 
 
 - **Czones**  
-Czones are subdivisions of Bzones that describe more detailed land use characteristics such as whether an area is typified by residential development, commercial development, or mixed-use development. These characteristics may be described using a classification system such as the *development type* system, used by the GreenSTEP and RSPM models, or the *place type* system used by the RPAT model. (In the future it is likely that there will be a merging of these systems.) A Czone may be any size, up to and including the Bzone that it is located within. As with Bzones, Czones may correspond to actual geographic areas such as the traffic analysis zones defined for an urban travel demand model. Perhaps more commonly, Czones will be synthesized based on scenario inputs and attributes of the Azones and Bzones they are situated within.  
+Czones are subdivisions of Bzones that describe more detailed land use characteristics such as whether an area is typified by residential development, commercial development, or mixed-use development. These characteristics may be described using a classification system such as the *development type* system, used by the GreenSTEP and RSPM models, or the *place type* system used by the RPAT model. A Czone may be any size, up to and including the Bzone that it is located within. As with Bzones, Czones may correspond to actual geographic areas such as the traffic analysis zones defined for an urban travel demand model. Perhaps more commonly, Czones will be synthesized based on scenario inputs and attributes of the Azones and Bzones they are situated within.  
 
 
 - **Mareas**  
@@ -216,6 +258,12 @@ Mareas are associated with urbanized portions of metropolitan areas. Mareas are 
 
 
 Geographical relationships for a model are described in the "geography.csv" file contained in the "defs" directory. This file tabulates the names of each geographic unit (except for Region) and the relationships between them. Each row shows a unique relationship. Where a unit of geography is not explictly defined (i.e. it will be simulated), "NA" values are placed in the table. Appendix A shows examples of the "geography.csv" file where only Azones are specified and where Azones and Bzones are specified. It should be noted that there are no naming conventions for individual zones. The user is free to choose what conventions they will use.
+
+#### 6.3. Default Units
+
+The *units.csv* file catalog the default unit used to store complex data types in the describes the default units to be used for storing complex data types in the model. The VisionEval model system keeps track of the types and units of measure of all data that is processed. This is important for managing data in the datastore and for enabling modules to share data correctly. The model system recognizes 4 primitive data types and 10 complex data types. The primitive data types are data types recognized by the R language. They include 'double', 'integer', 'character', and 'logical'. In the case of primitive data types, module developers can specify any units of measure that adequately describe the dataset. For example, an 'integer' type might be used to store data that is measured in units of persons or jobs. 
+
+The complex data types define types of data that are related and may be converted between related measurement units. For example, for the 'currency' data type the framework will convert currency values (e.g. dollars) between different years that the currency is denominated in. As another example, the 'mass' data type is used to measure the quantity of emissions that is often measured using different units such as grams, pounds, and metric tons. Although different modules may specify different measurement units for a complex data type, data of that data type needs to be stored in the datastore consistently with one measurement unit. The *units.csv* describes the default units used in the datastore. The file structure and an example are described in more detail in Section 6.3 below.
 
 #### 6.3. Model Inputs
 The *inputs* directory contains all of the model inputs for a scenario. A model input file is a table that relates one or more input fields to geographic units and years. Because of the tabular nature of the data, all input files are CSV-formatted text files.  
