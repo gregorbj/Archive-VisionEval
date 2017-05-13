@@ -1519,7 +1519,7 @@
   {
     "Name": "convertUnits",
     "Group": "control",
-    "Description": "Converts values between different units of measure for complex data types recognized by the visioneval code.",
+    "Description": "Converts values between different units of measure for complex and compound data types recognized by the visioneval code.",
     "Arguments":
     [
       {
@@ -1539,7 +1539,7 @@
         "Description": "A string identifying the units of measure to convert the Values_ to."
       }
     ],
-    "Return": "A numeric vector of values corresponding the the input Values_. If the DataType is not one of the identified complex types or if the FromUnits or ToUnits are not recognized, the input vector Values_ is returned. In this case, the Converted attribute of the returned values is FALSE. If the DataType is a recognized complex type and the FromUnits and ToUnits are recognized, the returned values are in the units of the ToUnits. In this case the Converted attribute of the returned values is TRUE.",
+    "Return": "A numeric vector of values corresponding the the input Values_. If the DataType is not one of the recognized types or if the FromUnits or ToUnits are not recognized, the input vector Values_ is returned. In this case, the Converted attribute of the returned values is FALSE. If the DataType is a recognized complex type or a compound type and the FromUnits and ToUnits are recognized, the returned values are in the units of the ToUnits. In this case the Converted attribute of the returned values is TRUE.",
     "Calls":
     [
       "Types"
