@@ -11,15 +11,18 @@
 #' Convert values between units of measure.
 #'
 #' \code{convertUnits} converts values between different units of measure for
-#' complex data types recognized by the visioneval code.
+#' complex and compound data types recognized by the visioneval code.
 #'
 #' The visioneval code recognizes 4 simple data types (integer, double, logical,
-#' and character) and 10 complex data types such as distance, mass, speed, etc.
+#' and character) and 9 complex data types (e.g. distance, time, mass).
 #' The simple data types can have any units of measure, but the complex data
-#' types must use units of measure that are declared in the Types() function.
-#' This function contains factors for any two units of measure of a complex data
-#' type. This function converts the values of a complex data type between two
-#' units of measure.
+#' types must use units of measure that are declared in the Types() function. In
+#' addition, there is a compound data type that can have units that are composed
+#' of the units of two or more complex data types. For example, speed is a
+#' compound data type composed of distance divided by speed. With this example,
+#' speed in miles per hour would be represented as MI/HR. This function converts
+#' a vector of values from one unit of measure to another unit of measure.
+#' For compound data type it combines multiple unit conversions.
 #'
 #' @param Values_ a numeric vector of values to convert from one unit to another.
 #' @param DataType a string identifying the data type.
@@ -27,38 +30,103 @@
 #' @param ToUnits a string identifying the units of measure to convert the
 #' Values_ to.
 #' @return A numeric vector of values corresponding the the input Values_. If
-#' the DataType is not one of the identified complex types or if the FromUnits
+#' the DataType is not one of the recognized types or if the FromUnits
 #' or ToUnits are not recognized, the input vector Values_ is returned. In this
 #' case, the Converted attribute of the returned values is FALSE. If the
-#' DataType is a recognized complex type and the FromUnits and ToUnits are
-#' recognized, the returned values are in the units of the ToUnits. In this case
-#' the Converted attribute of the returned values is TRUE.
+#' DataType is a recognized complex type or a compound type and the FromUnits
+#' and ToUnits are recognized, the returned values are in the units of the
+#' ToUnits. In this case the Converted attribute of the returned values is TRUE.
 #' @export
 convertUnits <-
   function(Values_, DataType, FromUnits, ToUnits) {
-    Units_ls <- Types()
-    #Check whether DataType is supported
-    SupportedUnits_ <-
-      names(Types())[!(names(Types()) %in% c("integer", "double", "character", "logical"))]
-    if (DataType %in% SupportedUnits_) {
-      U_ls <- Types()[[DataType]]$units
-      CanConvert <-
-        (FromUnits %in% names(U_ls)) & (ToUnits %in% names(U_ls))
-      if (CanConvert) {
-        if (FromUnits == ToUnits) {
-          Result_ <- Values_
-          attributes(Result_) <- c(attributes(Values_), list(Converted = FALSE))
-        } else {
-          Result_ <- Values_ * U_ls[[FromUnits]][ToUnits]
-          attributes(Result_) <- c(attributes(Values_), list(Converted = TRUE))
-        }
-      } else {
-        Result_ <- Values_
-        attributes(Result_) <- c(attributes(Values_), list(Converted = FALSE))
-      }
-    } else {
+    #Check whether DataType is recognized and simple, complex, or compound
+    Types_ <- names(Types())
+    IsRecognizedType <- DataType %in% Types_
+    IsSimpleType <- DataType %in% c("integer", "double", "character", "logical")
+    IsCompoundType <- DataType == "compound"
+    IsComplexType <- IsRecognizedType & !IsSimpleType & !IsCompoundType
+    #If unrecognized or simple, return the values
+    if (IsSimpleType | !IsRecognizedType) {
       Result_ <- Values_
       attributes(Result_) <- c(attributes(Values_), list(Converted = FALSE))
+    }
+    #If complex or compound convert and return the values
+    if (IsCompoundType | IsComplexType) {
+      #Extract the list of complex types
+      Complex_ <-
+        !(Types_ %in% c("integer", "double", "character", "logical", "compound"))
+      Complex_ls <- Types()[Complex_]
+      #Define function to identify the type corresponding to each unit
+      findTypeFromUnit <- function(Units_) {
+        AllUnits_ <- unlist(lapply(Complex_ls, function(x) names(x$units)))
+        UnitsToTypes_ <- gsub("[0-9]", "", names(AllUnits_))
+        names(UnitsToTypes_) <- AllUnits_
+        UnitsToTypes_[Units_]
+      }
+      #Define function to split units from compound type
+      splitUnits <- function(Units){
+        OperatorLoc_ <- str_locate_all(Units, "[*/]")[[1]][,1]
+        Operators_ <- sapply(OperatorLoc_, function(x) substr(Units, x, x))
+        UnitParts_ <- unlist(str_split(Units, "[*/]"))
+        list(units = UnitParts_,
+             types = findTypeFromUnit(UnitParts_),
+             operators = Operators_)
+      }
+      #Define function to determine whether compound units have the same types
+      compareTypes <- function(From_ls, To_ls) {
+        HasNA <- any(is.na(From_ls$types)) | any(is.na(To_ls$types))
+        DiffLength <- length(From_ls$units) != length(To_ls$units)
+        if (HasNA | DiffLength) {
+          Result <- FALSE
+        } else {
+          Result <- all(From_ls$types == To_ls$types)
+        }
+        Result
+      }
+      #Define function to determine whether operators in compound units are same
+      compareOps <- function(From_ls, To_ls) {
+        HasNA <- any(is.na(From_ls$operators)) | any(is.na(To_ls$operators))
+        DiffLength <- length(From_ls$operators) != length(To_ls$operators)
+        if (HasNA | DiffLength) {
+          Result <- FALSE
+        } else {
+          Result <- all(From_ls$operators == To_ls$operators)
+        }
+        Result
+      }
+      #Define function to calculate conversion factor
+      calcConversionFactor <- function(From_ls, To_ls) {
+        Num <- length(From_ls$units)
+        Formula <- character(0)
+        for(i in 1:Num) {
+          Type <- From_ls$types[i]
+          FromUnit <- From_ls$units[i]
+          ToUnit <- To_ls$units[i]
+          Factor <- Complex_ls[[Type]]$units[[FromUnit]][ToUnit]
+          if (i != Num) {
+            Op <- From_ls$operators[i]
+            Formula <- paste(Formula, Factor, Op)
+          } else {
+            Formula <- paste(Formula, Factor)
+          }
+        }
+        eval(parse(text = Formula))
+      }
+      #Process FromUnits and ToUnits
+      FromUnitSplit_ls <- splitUnits(FromUnits)
+      ToUnitSplit_ls <- splitUnits(ToUnits)
+      #Check that each part of from units is same type as corresponding part
+      #of to units. If so, convert. If not, don't.
+      SameTypes <- compareTypes(FromUnitSplit_ls, ToUnitSplit_ls)
+      SameOps <- compareOps(FromUnitSplit_ls, ToUnitSplit_ls)
+      if (!(SameTypes & SameOps)) {
+        Result_ <- Values_
+        attributes(Result_) <- c(attributes(Values_), list(Converted = FALSE))
+      } else {
+        Factor <- calcConversionFactor(FromUnitSplit_ls, ToUnitSplit_ls)
+        Result_ <- Values_ * Factor
+        attributes(Result_) <- c(attributes(Values_), list(Converted = TRUE))
+      }
     }
     Result_
   }
@@ -69,9 +137,10 @@ convertUnits <-
 # convertUnits(1:10, "distance", "M", "miles")
 # convertUnits(1:10, "distance", "M", "MI")
 # convertUnits(1:10, "distance", "M", "M")
-# convertUnits(1, "mass", "TON", "MT") * convertUnits(1, "distance", "MI", "KM")
-# convertUnits(1, "mass", "MT", "TON") * convertUnits(1, "distance", "KM", "MI")
-
+# convertUnits(1:10, "compound", "MI/HR", "TON/MI")
+# convertUnits(1:10, "compound", "MI/HR", "KM/SEC")
+# convertUnits(1:10, "compound", "MI/HR", "FT/SEC")
+# convertUnits(1:10, "compound", "TRIP/PRSN/DAY", "TRIP/PRSN/YR")
 
 #CONVERT BETWEEN DIFFERENT MEASUREMENT MAGNITUDES
 #================================================
