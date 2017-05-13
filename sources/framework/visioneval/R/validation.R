@@ -126,14 +126,15 @@ checkSpecConsistency <- function(Spec_ls, DstoreAttr_) {
     )
     Errors_ <- c(Errors_, Message)
   }
-  if (Spec_ls$UNITS != DstoreAttr_$UNITS) {
-    Message <- paste0(
-      "UNITS mismatch for ", Spec_ls$NAME, ". ",
-      "Module ", Spec_ls$MODULE, "asks for UNITS = (", Spec_ls$UNITS, "). ",
-      "Datastore contains UNITS = (", DstoreAttr_$UNITS, ")."
-    )
-    Warnings_ <- c(Warnings_, Message)
-  }
+  #With code that allows unit conversions, can't expect units to be the same
+  # if (Spec_ls$UNITS != DstoreAttr_$UNITS) {
+  #   Message <- paste0(
+  #     "UNITS mismatch for ", Spec_ls$NAME, ". ",
+  #     "Module ", Spec_ls$MODULE, "asks for UNITS = (", Spec_ls$UNITS, "). ",
+  #     "Datastore contains UNITS = (", DstoreAttr_$UNITS, ")."
+  #   )
+  #   Warnings_ <- c(Warnings_, Message)
+  # }
   if (!is.null(Spec_ls$PROHIBIT) & !is.null(DstoreAttr_$PROHIBIT)) {
     if (!all(Spec_ls$PROHIBIT %in% DstoreAttr_$PROHIBIT) |
         !all(DstoreAttr_$PROHIBIT %in% Spec_ls$PROHIBIT)) {
@@ -526,76 +527,68 @@ Types <- function(){
     integer = list(units = NA, mode = "integer"),
     character = list(units = NA, mode = "character"),
     logical = list(units = NA, mode = "logical"),
+    compound = list(units = NA, mode = "double"),
     currency = list(
       units = list(USD = NA),
       mode = "double"),
     distance = list(
       units = list(
-        MI = c(FT = 5280, KM = 1.60934, M = 1609.34),
-        FT = c(MI = 0.000189394, KM = 0.0003048, M = 0.3048),
-        KM = c(MI = 0.621371, FT = 3280.84, M = 1000),
-        M = c(MI = 0.000621371, FT = 3.28084, KM = 0.001)),
+        MI = c(MI = 1, FT = 5280, KM = 1.60934, M = 1609.34),
+        FT = c(MI = 0.000189394, FT = 1, KM = 0.0003048, M = 0.3048),
+        KM = c(MI = 0.621371, FT = 3280.84, KM = 1, M = 1000),
+        M = c(MI = 0.000621371, FT = 3.28084, KM = 0.001, M = 1)),
       mode = "double"),
     area = list(
       units = list(
-        SQMI = c(ACRE = 640, SQFT = 2.788e+7, SQM = 2.59e+6, HA = 258.999, SQKM = 2.58999 ),
-        ACRE = c(SQMI = 0.0015625, SQFT = 43560, SQM = 4046.86, HA = 0.404686, SQKM = 0.00404686),
-        SQFT = c(SQMI = 3.587e-8, ACRE = 2.2957e-5, SQM = 0.092903, HA = 9.2903e-6, SQKM = 9.2903e-8),
-        SQM = c(SQMI = 3.861e-7, ACRE = 0.000247105, SQFT = 10.7639, HA = 1e-4, SQKM = 1e-6),
-        HA = c(SQMI = 0.00386102, ACRE = 2.47105, SQFT = 107639, SQM = 0.00386102, SQKM = 0.01),
-        SQKM = c(SQMI = 0.386102, ACRE = 247.105, SQFT = 1.076e+7, SQM = 1e+6, HA = 100)),
+        SQMI = c(SQMI = 1, ACRE = 640, SQFT = 2.788e+7, SQM = 2.59e+6, HA = 258.999, SQKM = 2.58999 ),
+        ACRE = c(SQMI = 0.0015625, ACRE = 1, SQFT = 43560, SQM = 4046.86, HA = 0.404686, SQKM = 0.00404686),
+        SQFT = c(SQMI = 3.587e-8, ACRE = 2.2957e-5, SQFT = 1, SQM = 0.092903, HA = 9.2903e-6, SQKM = 9.2903e-8),
+        SQM = c(SQMI = 3.861e-7, ACRE = 0.000247105, SQFT = 10.7639, SQM = 1, HA = 1e-4, SQKM = 1e-6),
+        HA = c(SQMI = 0.00386102, ACRE = 2.47105, SQFT = 107639, SQM = 0.00386102, HA = 1, SQKM = 0.01),
+        SQKM = c(SQMI = 0.386102, ACRE = 247.105, SQFT = 1.076e+7, SQM = 1e+6, HA = 100, SQKM = 1)),
       mode = "double"
     ),
     mass = list(
       units = list(
-        LB = c(TON = 0.0005, MT = 0.000453592, KG = 0.453592, GM = 453.592),
-        TON = c(LB = 2000, MT = 0.907185, KG = 907.185, GM = 907185),
-        MT = c(LB = 2204.62, TON = 1.10231, KG = 1000, M = 1e+6),
-        KG = c(LB = 2.20462, TON = 0.00110231, MT = 0.001, GM = 1000),
-        GM = c(LB = 0.00220462, TON = 1.1023e-6, MT = 1e-6, KG = 0.001)),
+        LB = c(LB = 1, TON = 0.0005, MT = 0.000453592, KG = 0.453592, GM = 453.592),
+        TON = c(LB = 2000, TON = 1, MT = 0.907185, KG = 907.185, GM = 907185),
+        MT = c(LB = 2204.62, TON = 1.10231, MT = 1, KG = 1000, M = 1e+6),
+        KG = c(LB = 2.20462, TON = 0.00110231, MT = 0.001, KG = 1, GM = 1000),
+        GM = c(LB = 0.00220462, TON = 1.1023e-6, MT = 1e-6, KG = 0.001, GM = 1)),
       mode = "double"
     ),
     volume = list(
       units = list(
-        GAL = c(L = 3.78541),
-        L = c(GAL = 0.264172)),
+        GAL = c(GAL = 1, L = 3.78541),
+        L = c(GAL = 0.264172, L = 1)),
       mode = "double"
     ),
     time = list(
       units = list(
-        YR = c(DAY = 365, HR = 8760, MIN = 525600, SEC = 3.154e+7),
-        DAY = c(YR = 0.00273973, HR = 24, MIN = 1440, SEC = 86400),
-        HR = c(YR = 0.000114155, DAY = 0.0416667, MIN = 60, SEC = 3600),
-        MIN = c(YR = 1.9026e-6, DAY = 0.000694444, HR = 0.0166667, SEC = 60),
-        SEC = c(YR = 3.171e-8, DAY = 1.1574e-5, HR = 0.000277778, MIN = 0.0166667)),
+        YR = c(YR = 1, DAY = 365, HR = 8760, MIN = 525600, SEC = 3.154e+7),
+        DAY = c(YR = 0.00273973, DAY = 1, HR = 24, MIN = 1440, SEC = 86400),
+        HR = c(YR = 0.000114155, DAY = 0.0416667, HR = 1, MIN = 60, SEC = 3600),
+        MIN = c(YR = 1.9026e-6, DAY = 0.000694444, HR = 0.0166667, MIN = 1, SEC = 60),
+        SEC = c(YR = 3.171e-8, DAY = 1.1574e-5, HR = 0.000277778, MIN = 0.0166667, SEC = 1)),
       mode = "double"
     ),
-    speed = list(
+    people = list(
       units = list(
-        MPH = c(FPS = 1.46667, KMPH = 1.60934, MPS = 0.44704),
-        FPS = c(MPH = 0.681818, KMPH = 1.09728, MPS = 0.3048),
-        KMPH = c(MPH = 0.621371, FPS = 0.911344, MPS = 0.277778),
-        MPS = c(MPH = 2.23694, FPS = 3.28084, KMPH = 3.6)),
-      mode = "double"
+        PRSN = c(PRSN = 1)
+      ),
+      mode = "integer"
     ),
-    vehicle_distance = list(
+    vehicles = list(
       units = list(
-        VMT = c(VKT = 1.60934),
-        VKT = c(VMT = 0.621371)),
-      mode = "double"
+        VEH = c(VEH = 1)
+      ),
+      mode = "integer"
     ),
-    passenger_distance = list(
+    trips = list(
       units = list(
-        PMT = c(PKT = 1.60934),
-        PKT = c(PMT = 0.621371)),
-      mode = "double"
-    ),
-    payload_distance = list(
-      units = list(
-        TONMI = c(KGKM = 1459.969, MTKM = 1.459969),
-        KGKM = c(TONMI = 0.0006849435, MTKM = 0.001),
-        MTKM = c(TONMI = 0.6849435, KGKM = 1000)),
-      mode = "double"
+        TRIP = c(TRIP = 1)
+      ),
+      mode = "integer"
     )
   )
 }
