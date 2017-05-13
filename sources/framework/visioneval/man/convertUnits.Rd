@@ -18,23 +18,26 @@ Values_ to.}
 }
 \value{
 A numeric vector of values corresponding the the input Values_. If
-the DataType is not one of the identified complex types or if the FromUnits
+the DataType is not one of the recognized types or if the FromUnits
 or ToUnits are not recognized, the input vector Values_ is returned. In this
 case, the Converted attribute of the returned values is FALSE. If the
-DataType is a recognized complex type and the FromUnits and ToUnits are
-recognized, the returned values are in the units of the ToUnits. In this case
-the Converted attribute of the returned values is TRUE.
+DataType is a recognized complex type or a compound type and the FromUnits
+and ToUnits are recognized, the returned values are in the units of the
+ToUnits. In this case the Converted attribute of the returned values is TRUE.
 }
 \description{
 \code{convertUnits} converts values between different units of measure for
-complex data types recognized by the visioneval code.
+complex and compound data types recognized by the visioneval code.
 }
 \details{
 The visioneval code recognizes 4 simple data types (integer, double, logical,
-and character) and 10 complex data types such as distance, mass, speed, etc.
+and character) and 9 complex data types (e.g. distance, time, mass).
 The simple data types can have any units of measure, but the complex data
-types must use units of measure that are declared in the Types() function.
-This function contains factors for any two units of measure of a complex data
-type. This function converts the values of a complex data type between two
-units of measure.
+types must use units of measure that are declared in the Types() function. In
+addition, there is a compound data type that can have units that are composed
+of the units of two or more complex data types. For example, speed is a
+compound data type composed of distance divided by speed. With this example,
+speed in miles per hour would be represented as MI/HR. This function converts
+a vector of values from one unit of measure to another unit of measure.
+For compound data type it combines multiple unit conversions.
 }
