@@ -54,6 +54,15 @@ TestSpec_ls <- list(
       UNITS = "USD.2010.1e3",
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "AnnualPerCapitaIncome",
+      TABLE = "Azone",
+      GROUP = "Year",
+      TYPE = "currency",
+      UNITS = "USD/PRSN/YR.2010",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = ""
     )
   ),
   #Specify data to saved in the data store
