@@ -589,6 +589,12 @@ Types <- function(){
         TRIP = c(TRIP = 1)
       ),
       mode = "integer"
+    ),
+    households = list(
+      units = list(
+        HH = c(HH = 1)
+      ),
+      mode = "integer"
     )
   )
 }
