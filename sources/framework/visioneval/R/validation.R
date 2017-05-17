@@ -600,6 +600,172 @@ Types <- function(){
 }
 
 
+#CHECK MEASUREMENT UNITS
+#=======================
+#' Check measurement units for consistency with recognized units for stated type.
+#'
+#' \code{checkUnits}checks the specified UNITS for a dataset for consistency
+#' with the recognized units for the TYPE specification for the dataset. It also
+#' splits compound units into elements.
+#'
+#' The visioneval code recognizes 4 simple data types (integer, double, logical,
+#' and character) and 9 complex data types (e.g. distance, time, mass).
+#' The simple data types can have any units of measure, but the complex data
+#' types must use units of measure that are declared in the Types() function. In
+#' addition, there is a compound data type that can have units that are composed
+#' of the units of two or more complex data types. For example, speed is a
+#' compound data type composed of distance divided by speed. With this example,
+#' speed in miles per hour would be represented as MI/HR. This function checks
+#' the UNITS specification for a dataset for consistency with the recognized
+#' units for the given data TYPE. To check the units of a compound data type,
+#' the function splits the units into elements and the operators that separate
+#' the elements. It identifies the element units, the complex data type for each
+#' element and the operators that separate the elements.
+#'
+#' @param DataType a string which identifies the data type as specified in the
+#' TYPE attribute for a data set.
+#' @param Units a string identifying the measurement units as specified in the
+#' UNITS attribute for a data set after processing with the parseUnitsSpec
+#' function.
+#' @return A list which contains the following elements:
+#' DataType: a string identifying the data type.
+#' UnitType: a string identifying whether the units correspond to a 'simple'
+#' data type, a 'complex' data type, or a 'compound' data type.
+#' Units: a string identifying the units.
+#' Elements: a list containing the elements of a compound units. Components of
+#' this list are:
+#' Types: the complex type of each element,
+#' Units: the units of each element,
+#' Operators: the operators that separate the units.
+#' Errors: a string containing an error message or character(0) if no error.
+#' @import stringr
+#' @export
+checkUnits <- function(DataType, Units) {
+  #Define return value template
+  Result_ls <- list(
+    DataType = DataType,
+    UnitType = character(0),
+    Units = character(0),
+    Elements = list(),
+    Errors = character(0)
+  )
+
+  #Identify recognized data types and check if DataType is one of them
+  DT_ <- names(Types())
+  if (!(DataType %in% DT_)) {
+    Msg <- paste0(
+      "Data type is not a recognized data type. ",
+      "Must be one of the following: ",
+      paste(DT_, collapse = ", "), ".")
+    Result_ls$Errors <- Msg
+    return(Result_ls)
+  }
+
+  #Check if Units is a character type and has length equal to one
+  if (length(Units) != 1 | typeof(Units) != "character") {
+    Msg <- paste0(
+      "Units value is not correctly specified. ",
+      "Must be a string and must not be a vector."
+    )
+    Result_ls$Errors <- Msg
+    Result_ls$Units <- Units
+    return(Result_ls)
+  }
+
+  #Identify the units type (either simple, complex, or compound)
+  UT_ <- character(length(DT_))
+  names(UT_) <- DT_
+  UT_[DT_ %in% c("double", "integer", "character", "logical")] <- "simple"
+  UT_[DT_ %in% "compound"] <- "compound"
+  UT_[!UT_ %in% c("simple", "compound")] <- "complex"
+  UnitType <- UT_[DataType]
+  Result_ls$UnitType <- unname(UnitType)
+
+  #Check Simple Type
+  if (UnitType == "simple") {
+    #No check necessary, assign units and return the result
+    Result_ls$Units <- Units
+    return(Result_ls)
+  }
+
+  #Check complex type
+  if (UnitType == "complex") {
+    Result_ls$Units <- Units
+    #Check that Units are recognized for the specified data type
+    AllowedUnits_ <- names(Types()[[DataType]]$units)
+    if (!(Units %in% AllowedUnits_)) {
+      Msg <- paste0(
+        "Units specified for ", DataType, " are not correctly specified. ",
+        "Must be one of the following: ",
+        paste(AllowedUnits_, collapse = ", "), ".")
+      Result_ls$Errors <- Msg
+    }
+    #Return the result
+    return(Result_ls)
+  }
+
+  #Check compound type
+  #Define function to identify the data type from a unit
+  findTypeFromUnit <- function(Units_) {
+    Complex_ls <- Types()[DT_[UT_ == "complex"]]
+    AllUnits_ <- unlist(lapply(Complex_ls, function(x) names(x$units)))
+    UnitsToTypes_ <- gsub("[0-9]", "", names(AllUnits_))
+    names(UnitsToTypes_) <- AllUnits_
+    UnitsToTypes_[Units_]
+  }
+  #Define function to split units from compound type
+  splitUnits <- function(Units){
+    OperatorLoc_ <- str_locate_all(Units, "[*/]")[[1]][,1]
+    Operators_ <- sapply(OperatorLoc_, function(x) substr(Units, x, x))
+    UnitParts_ <- unlist(str_split(Units, "[*/]"))
+    list(units = unname(UnitParts_),
+         types = unname(findTypeFromUnit(UnitParts_)),
+         operators = unname(Operators_))
+  }
+  #Extract the units, types, and operators from the compound units string
+  Result_ls$Units <- Units
+  Units_ls <- splitUnits(Units)
+  Result_ls$Elements$Types <- Units_ls$types
+  Result_ls$Elements$Units <- Units_ls$units
+  Result_ls$Elements$Operators <- Units_ls$operators
+  #Check whether all element units are correct
+  UnitsNotFound <- Units_ls$units[is.na(Units_ls$types)]
+  if (length(UnitsNotFound) != 0) {
+    Msg <- paste0(
+      "One or more of the component units of the compound unit ", Units,
+      " can't be resolved into units of recognized complex data types. ",
+      "The following units elements are not recognized: ",
+      paste(UnitsNotFound, collapse = ", "), ".")
+    Result_ls$Errors <- Msg
+    return(Result_ls)
+  }
+  #Check whether any duplication of data types for element units
+  IsDupType_ <- duplicated(Units_ls$types)
+  if (any(IsDupType_)) {
+    DupTypes_ <- Units_ls$types[IsDupType_]
+    DupUnits_ <- Units_ls$units[Units_ls$types %in% DupTypes_]
+    Msg <- paste0(
+      "Two or more of the component units of the compound unit ", Units,
+      " are units in the same complex data type. ",
+      "It does not make sense to have two units of the same complex type ",
+      "in the same compound expression. The following units have the same type: ",
+      paste(DupUnits_, collapse = ", "), ".")
+    Result_ls$Errors <- Msg
+    return(Result_ls)
+  }
+  #Return the result
+  return(Result_ls)
+}
+# checkUnits("double", "person")
+# checkUnits("Bogus", "person")
+# checkUnits("people", "HH")
+# checkUnits("distance", "MI")
+# checkUnits("compound", "MI+KM")
+# checkUnits("compound", "MI/KM")
+# checkUnits("compound", "MI/HR")
+# checkUnits("compound", "TRIP/PRSN/DAY")
+
+
 #CHECK SPECIFICATION TYPE AND UNITS
 #==================================
 #' Checks the TYPE and UNITS and associated MULTIPLIER and YEAR attributes of a
@@ -643,9 +809,8 @@ checkSpecTypeUnits <- function(Spec_ls, SpecGroup, SpecNum) {
   #Check if type is an allowed type
   if (Type %in% AllowedTypes_) {
     #Check if units are correct for the type
-    AllowedUnits_ <- Types()[[Type]]$units
-    AllowedUnitNames_ <- names(AllowedUnits_)
-    if (is.na(AllowedUnits_[1]) | Units %in% AllowedUnitNames_) {
+    UnitsCheck <- checkUnits(Type, Units)
+    if (length(UnitsCheck$Errors) == 0) {
       #Check that there is a valid year specification if type is currency
       if (Type == "currency") {
         if (is.na(Spec_ls$YEAR) & SpecGroup %in% c("Get", "Set")) {
@@ -699,9 +864,8 @@ checkSpecTypeUnits <- function(Spec_ls, SpecGroup, SpecNum) {
     } else {
       Msg <-
         paste0("UNITS specified for the ", SpecGroup, " specification ",
-               "number ", SpecNum, " are incorrect for specified TYPE. ",
-               "Check user documentation for list  of allowed units ",
-               "for the specified Type.")
+               "number ", SpecNum, " are incorrect as follows: ",
+               UnitsCheck$Errors)
       Errors_ <- c(Errors_, Msg)
     }
   } else {
@@ -1485,11 +1649,11 @@ processModuleInputs <-
         ComplexTypes_ <- names(Types())[!(names(Types()) %in% SimpleTypes_)]
         if (ThisSpec_ls$TYPE %in% ComplexTypes_) {
           FromUnits <- ThisSpec_ls$UNITS
-          ToUnits <- getUnits(ThisSpec_ls$TYPE)
-          if (FromUnits != ToUnits) {
-            Data_ <- convertUnits(Data_, ThisSpec_ls$TYPE, FromUnits, ToUnits)
-          }
-          rm(FromUnits, ToUnits)
+          Conversion_ls <- convertUnits(Data_, ThisSpec_ls$TYPE, FromUnits)
+          Data_ <- Conversion_ls$Values
+          #Update UNITS to reflect datastore units
+          ThisSpec_ls$UNITS <- Conversion_ls$ToUnits
+          rm(FromUnits, Conversion_ls)
         }
         rm(SimpleTypes_, ComplexTypes_)
         #Convert magnitude
@@ -1498,6 +1662,9 @@ processModuleInputs <-
           Data_ <- convertMagnitude(Data_, Multiplier, 1)
         }
         rm(Multiplier)
+        #Assign UNITS attribute to Data_ because storage units may be different
+        #than the input data UNITS
+        attributes(Data_) <- list(UNITS = ThisSpec_ls$UNITS)
         #Assign Data_ to Data_ls
         Data_ls[[Group]][[Table]][[Name]] <- Data_
       }
