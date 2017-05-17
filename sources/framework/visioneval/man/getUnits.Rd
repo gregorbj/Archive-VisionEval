@@ -4,16 +4,18 @@
 \alias{getUnits}
 \title{Retrieve default units for model}
 \usage{
-getUnits(Type)
+getUnits(Type_)
 }
 \arguments{
-\item{Type}{A string identifying the complex data type.}
+\item{Type_}{A string vector identifying the complex data type(s).}
 }
 \value{
-A string identifying the default units for the complex data type.
+A string vector identifying the default units for the complex data
+type(s) or NA if any of the type(s) are not defined.
 }
 \description{
-\code{getUnits} retrieves the default model units for a complex data type.
+\code{getUnits} retrieves the default model units for a vector of complex
+data types.
 }
 \details{
 This is a convenience function to make it easier to retrieve the default

@@ -4,7 +4,7 @@
 \alias{convertUnits}
 \title{Convert values between units of measure.}
 \usage{
-convertUnits(Values_, DataType, FromUnits, ToUnits)
+convertUnits(Values_, DataType, FromUnits, ToUnits = "default")
 }
 \arguments{
 \item{Values_}{a numeric vector of values to convert from one unit to another.}
@@ -14,16 +14,18 @@ convertUnits(Values_, DataType, FromUnits, ToUnits)
 \item{FromUnits}{a string identifying the units of measure of the Values_.}
 
 \item{ToUnits}{a string identifying the units of measure to convert the
-Values_ to.}
+Values_ to. If the ToUnits are 'default' the Values_ are converted to the
+default units for the model.}
 }
 \value{
-A numeric vector of values corresponding the the input Values_. If
-the DataType is not one of the recognized types or if the FromUnits
-or ToUnits are not recognized, the input vector Values_ is returned. In this
-case, the Converted attribute of the returned values is FALSE. If the
-DataType is a recognized complex type or a compound type and the FromUnits
-and ToUnits are recognized, the returned values are in the units of the
-ToUnits. In this case the Converted attribute of the returned values is TRUE.
+A list containing the converted values and additional information as
+follows:
+Values - a numeric vector containing the converted values.
+FromUnits - a string representation of the units converted from.
+ToUnits - a string representation of the units converted to.
+Errors - a string containing an error message or character(0) if no errors.
+Warnings - a string containing a warning message or character(0) if no
+warning.
 }
 \description{
 \code{convertUnits} converts values between different units of measure for
