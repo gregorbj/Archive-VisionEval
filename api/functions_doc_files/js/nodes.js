@@ -61,5 +61,6 @@ var nodes = new vis.DataSet([
 {"id":60,"label":"parseInputFieldNames","group":"control"},
 {"id":61,"label":"convertUnits","group":"control"},
 {"id":62,"label":"convertMagnitude","group":"control"},
-{"id":63,"label":"deflateCurrency","group":"control"}
+{"id":63,"label":"deflateCurrency","group":"control"},
+{"id":64,"label":"checkUnits","group":"control"}
 ]);
