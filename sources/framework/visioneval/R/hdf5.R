@@ -481,10 +481,18 @@ getFromDatastore <- function(ModuleSpec_ls, RunYear, Geo = NULL) {
         SimpleTypes_ <- c("integer", "double", "character", "logical")
         ComplexTypes_ <- names(Types())[!(names(Types()) %in% SimpleTypes_)]
         if (Type %in% ComplexTypes_) {
-          Data_ <-
+          AttrGroup <- switch(
+            Group,
+            Year = RunYear,
+            BaseYear = G$BaseYear,
+            Global = "Global"
+          )
+          Conversion_ls <-
           convertUnits(Data_, Type,
-                       getDatasetAttr(Name, Table, Group, G$Datastore)$UNITS,
+                       getDatasetAttr(Name, Table, RunYear, G$Datastore)$UNITS,
                        Spec_ls$UNITS)
+          Data_ <- Conversion_ls$Values
+          rm(AttrGroup, Conversion_ls)
         }
         rm(SimpleTypes_, ComplexTypes_)
         #Convert magnitude
@@ -586,12 +594,11 @@ setInDatastore <-
         ComplexTypes_ <- names(Types())[!(names(Types()) %in% SimpleTypes_)]
         if (Type %in% ComplexTypes_) {
           FromUnits <- Spec_ls$UNITS
-          ToUnits <- getUnits(Type)
-          if (!is.na(ToUnits)) {
-            Data_ <- convertUnits(Data_, Type, FromUnits, ToUnits)
-            Spec_ls$UNITS <- ToUnits #so writeToTable will attribute with default units
-          }
-          rm(FromUnits, ToUnits)
+          Conversion_ls <- convertUnits(Data_, Type, FromUnits)
+          Data_ <- Conversion_ls$Values
+          #Change units specification to reflect default datastore units
+          Spec_ls$UNITS <- Conversion_ls$ToUnits
+          rm(FromUnits, Conversion_ls)
         }
         rm(SimpleTypes_, ComplexTypes_)
         #Convert magnitude
@@ -676,6 +683,9 @@ inputsToDatastore <-
           Data_ <- Data_ls[[Group]][[Table]][[Name]]
           Spec_ls <- findSpec(InpSpec_ls, Name, Table, Group)
           Spec_ls$MODULE <- ModuleName
+          #Modify units spec to reflect units consistent with defaults for
+          #datastore
+          Spec_ls$UNITS <- attributes(Data_)$UNITS
           writeToTable(Data_, Spec_ls, Group)
         }
       }
@@ -685,6 +695,7 @@ inputsToDatastore <-
       for (Table in names(Data_ls[["Year"]])) {
         Data_df <-
           data.frame(Data_ls[["Year"]][[Table]], stringsAsFactors = FALSE)
+        Units_ls <- lapply(Data_df, function(x) unname(attributes(x)$UNITS))
         for (Year in unique(as.character(Data_df$Year))) {
           YrData_df <- Data_df[Data_df$Year == Year,]
           SortData_df <- sortGeoTable(YrData_df, Table, Year)
@@ -693,6 +704,9 @@ inputsToDatastore <-
           for (Name in FieldsToSave_) {
             Spec_ls <- findSpec(InpSpec_ls, Name, Table, "Year")
             Spec_ls$MODULE <- ModuleName
+            #Modify units spec to reflect units consistent with defaults for
+            #datastore
+            Spec_ls$UNITS <- Units_ls[[Name]]
             writeToTable(SortData_df[[Name]], Spec_ls, Year)
             rm(Spec_ls)
           }
