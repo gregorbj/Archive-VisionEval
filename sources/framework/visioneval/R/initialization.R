@@ -164,24 +164,24 @@ getYears <- function() {
 #======================
 #' Retrieve default units for model
 #'
-#' \code{getUnits} retrieves the default model units for a complex data type.
+#' \code{getUnits} retrieves the default model units for a vector of complex
+#' data types.
 #'
 #' This is a convenience function to make it easier to retrieve the default
 #' units for a complex data type (e.g. distance, volume, speed). The default
 #' units are the units used to store the complex data type in the datastore.
 #'
-#' @param Type A string identifying the complex data type.
-#' @return A string identifying the default units for the complex data type.
+#' @param Type_ A string vector identifying the complex data type(s).
+#' @return A string vector identifying the default units for the complex data
+#' type(s) or NA if any of the type(s) are not defined.
 #' @export
-getUnits <- function(Type) {
+getUnits <- function(Type_) {
   Units_df <- getModelState()$Units
   Units_ <- Units_df$Units
   names(Units_) <- Units_df$Type
-  if (!(Type %in% names(Units_))) {
-    return(NA)
-  } else {
-    return(Units_[Type])
-  }
+  Result_ <- Units_[Type_]
+  if (any(is.na(Result_))) Result_ <- NA
+  Result_
 }
 
 #getUnits("Bogus")
