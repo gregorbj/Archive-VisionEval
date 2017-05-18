@@ -328,7 +328,7 @@ testModule <-
     #Load datastore if specified or initialize new datastore
     #-------------------------------------------------------
     if (LoadDatastore) {
-      print("Attempting to load datastore.")
+      writeLog("Attempting to load datastore.", Print = TRUE)
       DatastoreName <- getModelState()[["DatastoreName"]]
       if (!file.exists(DatastoreName)) {
         Msg <-
@@ -345,7 +345,7 @@ testModule <-
       )
       writeLog("Datastore loaded.", Print = TRUE)
     } else {
-      print("Attempting to initialize datastore.")
+      writeLog("Attempting to initialize datastore.", Print = TRUE)
       initDatastore()
       readGeography(Dir = ParamDir, GeoFile = GeoFile)
       initDatastoreGeography()
