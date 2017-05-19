@@ -381,15 +381,20 @@ testModule <-
 
     #Process, check, and load module inputs
     #--------------------------------------
-    writeLog("Attempting to process, check and load module inputs.",
-             Print = TRUE)
-    ProcessedInputs_ls <- processModuleInputs(Specs_ls, ModuleName)
-    if (length(ProcessedInputs_ls$Errors) != 0)  {
-      stop("Input files have errors. Check the log for details.")
+    if(!is.null(Specs_ls$Inp)) {
+
+      writeLog("Attempting to process, check and load module inputs.",
+               Print = TRUE)
+      ProcessedInputs_ls <- processModuleInputs(Specs_ls, ModuleName)
+      if (length(ProcessedInputs_ls$Errors) != 0)  {
+        stop("Input files have errors. Check the log for details.")
+      }
+      inputsToDatastore(ProcessedInputs_ls, Specs_ls, ModuleName)
+      writeLog("Module inputs successfully checked and loaded into datastore.",
+               Print = TRUE)
+    } else {
+      writeLog("No inputs to process.", Print = TRUE)
     }
-    inputsToDatastore(ProcessedInputs_ls, Specs_ls, ModuleName)
-    writeLog("Module inputs successfully checked and loaded into datastore.",
-             Print = TRUE)
 
     #Check whether datastore contains all data items in Get specifications
     #---------------------------------------------------------------------
