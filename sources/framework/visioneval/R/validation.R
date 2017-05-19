@@ -272,8 +272,10 @@ checkMatchConditions <- function(Data_, Conditions_, DataName, ConditionType) {
       DataChecks_[[i]] <-
         any(is.na(Data_))
     } else {
+      TempData_ <- Data_[!is.na(Data_)]
       DataChecks_[[i]] <-
-        any(eval(parse(text = paste("Data_", Cond))))
+        any(eval(parse(text = paste("TempData_", Cond))))
+      rm(TempData_)
     }
   }
   TrueConditions_ <- Conditions_[unlist(DataChecks_)]
