@@ -400,7 +400,8 @@ initDataList <- function() {
 #' @export
 getFromDatastore <- function(ModuleSpec_ls, RunYear, Geo = NULL) {
   #Process module Get specifications
-  GetSpec_ls <- processModuleSpecs(ModuleSpec_ls)$Get
+  #GetSpec_ls <- processModuleSpecs(ModuleSpec_ls)$Get
+  GetSpec_ls <- ModuleSpec_ls$Get
   #Make a list to hold the retrieved data
   L <- initDataList()
   #Add the model state and year to the list
@@ -448,7 +449,7 @@ getFromDatastore <- function(ModuleSpec_ls, RunYear, Geo = NULL) {
     #Make an index to the data
     if (!is.null(Geo)) {
       idxFun <- createIndex(ModuleSpec_ls$RunBy, Table, DstoreGroup)
-      index <- idxFun(Geo)
+      Index <- idxFun(Geo)
     } else {
       Index <- NULL
     }
