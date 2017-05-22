@@ -831,7 +831,8 @@ applyLinearModel <-
         if (!is.null(Model_ls$OutFun)) Result_ <- Model_ls$OutFun(Result_)
       } else {
         SD <- binarySearch(testModelMean, Model_ls$SearchRange)
-        Result_ <- sapply(calcValues(), function(x) rnorm(1, x, sd = SD))
+        Values_ <- calcValues()
+        Result_ <- Values_ + rnorm(length(Values_), 0, sd = SD)
         if (!is.null(Model_ls$OutFun)) Result_ <- Model_ls$OutFun(Result_)
         attributes(Result_) <- list(SD = SD)
       }
