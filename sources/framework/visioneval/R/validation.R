@@ -531,7 +531,9 @@ Types <- function(){
     logical = list(units = NA, mode = "logical"),
     compound = list(units = NA, mode = "double"),
     currency = list(
-      units = list(USD = NA),
+      units = list(
+        USD = c(USD = 1)
+        ),
       mode = "double"),
     distance = list(
       units = list(
@@ -993,9 +995,6 @@ SpecRequirements <- function(){
 #' @export
 checkSpec <- function(Spec_ls, SpecGroup, SpecNum) {
   Require_ls <- SpecRequirements()[[SpecGroup]]
-  if (SpecGroup %in% c("Inp", "Get", "Set")) {
-    Spec_ls <- parseUnitsSpec(Spec_ls)
-  }
   Errors_ <- character(0)
   #Define function to check one specification requirement
   #ReqName argument is the requirement name (e.g. TYPE). Is NULL for RunBy
@@ -1499,7 +1498,7 @@ processModuleInputs <-
     G <- getModelState()
     FileErr_ <- character(0)
     FileWarn_ <- character(0)
-    InpSpec_ls <- processModuleSpecs(ModuleSpec_ls)$Inp
+    InpSpec_ls <- ModuleSpec_ls$Inp
 
     #ORGANIZE THE SPECIFICATIONS BY INPUT FILE AND NAME
     SortSpec_ls <- list()
