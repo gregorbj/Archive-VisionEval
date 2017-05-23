@@ -179,6 +179,11 @@ checkSpecConsistency <- function(Spec_ls, DstoreAttr_) {
 #' is generated if the specified type is 'character' but the input data type is
 #' 'integer', 'double' or 'logical' since these can be coerced correctly, but
 #' that may not be what is intended (e.g. zone names may be input as numbers).
+#' Note that some modules may use NA inputs as a flag to identify case when
+#' result does not need to match a target. In this case, R will read in the type
+#' of data as logical. In this case, the function sets the data type to be the
+#' same as the specification for the data type so the function not flag a
+#' data type error.
 #'
 #' @param Data_ A data vector.
 #' @param Type A string identifying the specified data type.
@@ -192,6 +197,8 @@ checkSpecConsistency <- function(Spec_ls, DstoreAttr_) {
 #' @export
 checkMatchType <- function(Data_, Type, DataName) {
   DataType <- typeof(Data_)
+  #Because some modules allow NA values as flag instead of target values
+  if (all(is.na(Data_))) DataType <- Type
   Types <- paste0(Type, DataType)
   makeMessage <- function() {
     paste0("Type of data in field '", DataName, "' is ", DataType,
