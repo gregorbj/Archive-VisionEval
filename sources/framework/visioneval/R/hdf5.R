@@ -560,7 +560,8 @@ setInDatastore <-
       }
     }
     #Process module Set specifications
-    SetSpec_ls <- processModuleSpecs(ModuleSpec_ls)$Set
+    #SetSpec_ls <- processModuleSpecs(ModuleSpec_ls)$Set
+    SetSpec_ls <- ModuleSpec_ls$Set
     for (i in 1:length(SetSpec_ls)) {
       #Identify datastore save location from specifications
       Spec_ls <- SetSpec_ls[[i]]
@@ -574,7 +575,7 @@ setInDatastore <-
       #Make an index to the data
       if (!is.null(Geo)) {
         idxFun <- createIndex(ModuleSpec_ls$RunBy, Table, DstoreGroup)
-        index <- idxFun(Geo)
+        Index <- idxFun(Geo)
       } else {
         Index <- NULL
       }
