@@ -27,33 +27,13 @@ library(visioneval)
 #SECTION 1: ESTIMATE AND SAVE MODEL PARAMETERS
 #=============================================
 #This model has just one parameter object, a matrix of the probability that a
-#person in each age group is in one of 524 household types. Each household type
-#is denoted by the number of persons in each age group in the household. The
-#rows of the matrix correspond to the household types. The columns of the matrix
-#correspond to the 6 age groups. Each column of the matrix sums to 1. This
-#matrix is calculated using Census PUMS data tables. The default data included
-#in this package is from the 2000 PUMS data for Oregon. Substitute PUMS data for
-#the region to be modeled to customize the table for the region.
-
-#Describe specifications for data that is to be used in estimating parameters
-#----------------------------------------------------------------------------
-#PUMS household data
-PumsHhInp_ls <- items(
-  item(
-    NAME =
-      items("Age0to14",
-            "Age15to19",
-            "Age20to29",
-            "Age30to54",
-            "Age55to64",
-            "Age65Plus"),
-    TYPE = "integer",
-    PROHIBIT = c("NA", "< 0"),
-    ISELEMENTOF = "",
-    UNLIKELY = "",
-    TOTAL = ""
-  )
-)
+#person in each age group is in one of several hundred household types.
+#Each household type is denoted by the number of persons in each age group in
+#the household. The rows of the matrix correspond to the household types.
+#The columns of the matrix correspond to the 6 age groups. Each column of the
+#matrix sums to 1. The process selects the most frequently observed households.
+#The default is to select the most frequent households which account for 99% of
+#all households.
 
 #Define a function to estimate household size proportion parameters
 #------------------------------------------------------------------
@@ -63,33 +43,48 @@ PumsHhInp_ls <- items(
 #' probabilities.
 #'
 #' This function produces a matrix of probabilities that a person in one of six
-#' age groups is in one of 524 household types where each household type is
+#' age groups is in one of many household types where each household type is
 #' determined by the number of persons in each age category.
 #'
-#' @param Inp_ls A list containing the specifications for
-#' the estimation data contained in "pums_hh.csv".
+#' @param Threshold A number between 0 and 1 identifying the percentile
+#' cutoff for determining the most prevalent households.
 #' @return A matrix where the rows are the household types and the columns are
 #' the age categories and the values are the number of persons.
-calcHhAgeTypes <- function(Inp_ls = PumsHhInp_ls) {
-  #Check and load household size estimation data
-  PumsHh_df <- processEstimationInputs(Inp_ls,
-                                        "pums_hh.csv",
-                                        "CreateHouseholds")
-  #Remove household records that only have persons in 0 to 14 age group
-  HasOlderPersons_ <- rowSums(PumsHh_df[, 2:6]) > 0
-  PumsHh_df <- PumsHh_df[HasOlderPersons_, ]
-  #Cap the number of persons in each age category
-  PumsHh_df$Age0to14[PumsHh_df$Age0to14 > 4] <- 4
-  PumsHh_df$Age15to19[PumsHh_df$Age15to19 > 2] <- 2
-  PumsHh_df$Age20to29[PumsHh_df$Age20to29 > 2] <- 2
-  PumsHh_df$Age30to54[PumsHh_df$Age30to54 > 2] <- 2
-  PumsHh_df$Age55to64[PumsHh_df$Age55to64 > 2] <- 2
-  PumsHh_df$Age65Plus[PumsHh_df$Age65Plus > 2] <- 2
+#' @export
+calcHhAgeTypes <- function(Threshold = 0.99) {
+  load("data/Hh_df.rda")
+  Hh_df <- Hh_df[Hh_df$HhType == "Reg",]
+  Ag <-
+    c("Age0to14",
+      "Age15to19",
+      "Age20to29",
+      "Age30to54",
+      "Age55to64",
+      "Age65Plus")
   #Create vector of household type names
-  HhTypes_ <- apply(PumsHh_df, 1, function(x) paste(x, collapse = "-"))
+  HhType_ <-
+    apply(Hh_df[, Ag], 1, function(x)
+      paste(x, collapse = "-"))
+  #Expand the HH types using HH weights and select most prevalent households
+  ExpHhType_ <- rep(HhType_, Hh_df$HhWeight)
+  #Define function to identify most prevalent households
+  idMostPrevalent <- function(Types_, Cutoff) {
+    TypeTab_ <- rev(sort(tapply(Types_, Types_, length)))
+    TypeProp_ <- cumsum(TypeTab_ / sum(TypeTab_))
+    names(TypeProp_[TypeProp_ <= Cutoff])
+  }
+  #Select most prevalent households
+  SelHhTypes_ <- idMostPrevalent(ExpHhType_, Threshold)
+  SelHh_df <- Hh_df[HhType_ %in% SelHhTypes_, ]
+  SelHhType_ <-
+    apply(SelHh_df[, Ag], 1, function(x)
+      paste(x, collapse = "-"))
+  #Apply household weights to persons by age
+  WtHhPop_df <- sweep(SelHh_df[, Ag], 1, SelHh_df$HhWeight, "*")
   #Tabulate persons by age group by household type
-  AgeTab_ls <- lapply(PumsHh_df, function(x) {
-    tapply(x, HhTypes_, sum)
+  AgeTab_ls <- lapply(WtHhPop_df, function(x) {
+    tapply(x, SelHhType_, function(x)
+      sum(as.numeric(x)))
   })
   AgeTab_HtAp <- do.call(cbind, AgeTab_ls)
   #Calculate and return matrix of probabilities
@@ -98,16 +93,16 @@ calcHhAgeTypes <- function(Inp_ls = PumsHhInp_ls) {
 
 #Create and save household size proportions parameters
 #-----------------------------------------------------
-system.time(HtProb_HtAp <- calcHhAgeTypes())
 HtProb_HtAp <- calcHhAgeTypes()
 #' Household size proportions
 #'
 #' A dataset containing the proportions of households by household size.
 #'
-#' @format A matrix having 524 rows and 6 colums:
+#' @format A matrix having 950 rows (for Oregon data) and 6 colums:
 #' @source CreateHouseholds.R script.
 "HtProb_HtAp"
 devtools::use_data(HtProb_HtAp, overwrite = TRUE)
+rm(calcHhAgeTypes)
 
 
 #================================================
@@ -137,11 +132,11 @@ CreateHouseholdsSpecifications <- list(
               "Age30to54",
               "Age55to64",
               "Age65Plus"),
-      FILE = "pop_by_age.csv",
+      FILE = "azone_hh_pop_by_age.csv",
       TABLE = "Azone",
       GROUP = "Year",
-      TYPE = "integer",
-      UNITS = "persons",
+      TYPE = "people",
+      UNITS = "PRSN",
       NAVALUE = -1,
       SIZE = 0,
       PROHIBIT = c("NA", "< 0"),
@@ -151,11 +146,11 @@ CreateHouseholdsSpecifications <- list(
     ),
     item(
       NAME = "AveHhSize",
-      FILE = "pop_targets.csv",
+      FILE = "azone_hhsize_targets.csv",
       TABLE = "Azone",
       GROUP = "Year",
-      TYPE = "double",
-      UNITS = "people per household",
+      TYPE = "compound",
+      UNITS = "PRSN/HH",
       NAVALUE = -1,
       SIZE = 0,
       PROHIBIT = c("< 0"),
@@ -165,7 +160,7 @@ CreateHouseholdsSpecifications <- list(
     ),
     item(
       NAME = "Prop1PerHh",
-      FILE = "pop_targets.csv",
+      FILE = "azone_hhsize_targets.csv",
       TABLE = "Azone",
       GROUP = "Year",
       TYPE = "double",
@@ -185,11 +180,11 @@ CreateHouseholdsSpecifications <- list(
               "GrpAge30to54",
               "GrpAge55to64",
               "GrpAge65Plus"),
-      FILE = "group_pop_by_age.csv",
+      FILE = "azone_gq_pop_by_age.csv",
       TABLE = "Azone",
       GROUP = "Year",
-      TYPE = "integer",
-      UNITS = "persons",
+      TYPE = "people",
+      UNITS = "PRSN",
       NAVALUE = -1,
       SIZE = 0,
       PROHIBIT = c("NA", "< 0"),
@@ -205,7 +200,7 @@ CreateHouseholdsSpecifications <- list(
       TABLE = "Azone",
       GROUP = "Year",
       TYPE = "character",
-      UNITS = "id",
+      UNITS = "ID",
       PROHIBIT = "",
       ISELEMENTOF = ""
     ),
@@ -219,8 +214,8 @@ CreateHouseholdsSpecifications <- list(
               "Age65Plus"),
       TABLE = "Azone",
       GROUP = "Year",
-      TYPE = "integer",
-      UNITS = "persons",
+      TYPE = "people",
+      UNITS = "PRSN",
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = ""
     ),
@@ -228,8 +223,8 @@ CreateHouseholdsSpecifications <- list(
       NAME = "AveHhSize",
       TABLE = "Azone",
       GROUP = "Year",
-      TYPE = "double",
-      UNITS = "people per household",
+      TYPE = "compound",
+      UNITS = "PRSN/HH",
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = ""
     ),
@@ -252,8 +247,8 @@ CreateHouseholdsSpecifications <- list(
               "GrpAge65Plus"),
       TABLE = "Azone",
       GROUP = "Year",
-      TYPE = "integer",
-      UNITS = "persons",
+      TYPE = "people",
+      UNITS = "PRSN",
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = ""
     )
@@ -264,8 +259,8 @@ CreateHouseholdsSpecifications <- list(
       NAME = "NumHh",
       TABLE = "Azone",
       GROUP = "Year",
-      TYPE = "integer",
-      UNITS = "households",
+      TYPE = "households",
+      UNITS = "HH",
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
@@ -278,7 +273,7 @@ CreateHouseholdsSpecifications <- list(
       TABLE = "Household",
       GROUP = "Year",
       TYPE = "character",
-      UNITS = "id",
+      UNITS = "ID",
       NAVALUE = "NA",
       PROHIBIT = "",
       ISELEMENTOF = ""
@@ -287,8 +282,8 @@ CreateHouseholdsSpecifications <- list(
       NAME = "HhSize",
       TABLE = "Household",
       GROUP = "Year",
-      TYPE = "integer",
-      UNITS = "persons",
+      TYPE = "people",
+      UNITS = "PRSN",
       NAVALUE = -1,
       PROHIBIT = c("NA", "<= 0"),
       ISELEMENTOF = "",
@@ -304,8 +299,8 @@ CreateHouseholdsSpecifications <- list(
               "Age65Plus"),
       TABLE = "Household",
       GROUP = "Year",
-      TYPE = "integer",
-      UNITS = "persons",
+      TYPE = "people",
+      UNITS = "PRSN",
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
@@ -316,11 +311,10 @@ CreateHouseholdsSpecifications <- list(
       TABLE = "Household",
       GROUP = "Year",
       TYPE = "character",
-      UNITS = "id",
+      UNITS = "ID",
       NAVALUE = "NA",
       PROHIBIT = "",
-      ISELEMENTOF = c("Reg", "Grp"),
-      SIZE = 3
+      ISELEMENTOF = ""
     )
   )
 )
@@ -331,7 +325,7 @@ CreateHouseholdsSpecifications <- list(
 #'
 #' A list containing specifications for the CreateHouseholds module.
 #'
-#' @format A list containing 4 components:
+#' @format A list containing 5 components:
 #' \describe{
 #'  \item{RunBy}{the level of geography that the module is run at}
 #'  \item{NewSetTable}{new table to be created for datasets specified in the
@@ -344,6 +338,7 @@ CreateHouseholdsSpecifications <- list(
 #' @source CreateHouseholds.R script.
 "CreateHouseholdsSpecifications"
 devtools::use_data(CreateHouseholdsSpecifications, overwrite = TRUE)
+rm(CreateHouseholdsSpecifications)
 
 
 #=======================================================
@@ -508,7 +503,8 @@ createHhByAge <-
     Hsld_df <- data.frame(do.call(rbind, Hsld_Hh_Ap))
     names(Hsld_df) <- Ap
     Hsld_df$HhSize <- rowSums(Hsld_df)
-    Hsld_df$HhType <- "Reg"
+    Hsld_df$HhType <-
+      apply(Hsld_df[, Ap], 1, function(x) paste(x, collapse = "-"))
     #Randomly order the rows of the matrix and convert into a list of
     #corresponding vectors by age group
     RandomSort <-
@@ -548,13 +544,13 @@ createGrpHhByAge <-
     if (sum(GrpPrsn_Ag > 0)) {
       GrpHh_df <-
         data.frame(
-          Age0to14 = rep(c(1,0,0,0,0,0), GrpPrsn_Ag),
-          Age15to19 = rep(c(0,1,0,0,0,0), GrpPrsn_Ag),
-          Age20to29 = rep(c(0,0,1,0,0,0), GrpPrsn_Ag),
-          Age30to54 = rep(c(0,0,0,1,0,0), GrpPrsn_Ag),
-          Age55to64 = rep(c(0,0,0,0,1,0), GrpPrsn_Ag),
-          Age65Plus = rep(c(0,0,0,0,0,1), GrpPrsn_Ag),
-          HhSize = rep(c(1,1,1,1,1,1), GrpPrsn_Ag),
+          Age0to14 = as.integer(rep(c(1,0,0,0,0,0), GrpPrsn_Ag)),
+          Age15to19 = as.integer(rep(c(0,1,0,0,0,0), GrpPrsn_Ag)),
+          Age20to29 = as.integer(rep(c(0,0,1,0,0,0), GrpPrsn_Ag)),
+          Age30to54 = as.integer(rep(c(0,0,0,1,0,0), GrpPrsn_Ag)),
+          Age55to64 = as.integer(rep(c(0,0,0,0,1,0), GrpPrsn_Ag)),
+          Age65Plus = as.integer(rep(c(0,0,0,0,0,1), GrpPrsn_Ag)),
+          HhSize = as.integer(rep(c(1,1,1,1,1,1), GrpPrsn_Ag)),
           HhType = rep("Grp", sum(GrpPrsn_Ag)),
           stringsAsFactors = FALSE)
       RandomSort <-
@@ -563,13 +559,13 @@ createGrpHhByAge <-
     } else {
       GrpHh_ls <-
         list(
-          Age0to14 = numeric(0),
-          Age15to19 = numeric(0),
-          Age20to29 = numeric(0),
-          Age30to54 = numeric(0),
-          Age55to64 = numeric(0),
-          Age65Plus = numeric(0),
-          HhSize = numeric(0),
+          Age0to14 = integer(0),
+          Age15to19 = integer(0),
+          Age20to29 = integer(0),
+          Age30to54 = integer(0),
+          Age55to64 = integer(0),
+          Age65Plus = integer(0),
+          HhSize = integer(0),
           HhType = character(0))
     }
     GrpHh_ls
@@ -587,16 +583,16 @@ createGrpHhByAge <-
 #' This function creates a set of simulated households for the model region
 #' where each household is assigned a household size, an Azone, a unique ID, and
 #' numbers of persons in each of 6 age categories. The function calls the
-#' createHhByAge function for each Azone to create simulated households
-#' containing persons by age category from a vector of persons by age category
-#' for the Azone. The list of vectors produced by the Create Households function
-#' are to be stored in the "Household" table. Since this table does not exist,
-#' the function calculates a LENGTH value for the table and returns that as
-#' well. The framework uses this information to initialize the Households table.
-#' The function also computes the maximum numbers of characters in the HhId and
-#' Azone datasets and assigns these to a SIZE vector. This is necessary so that
-#' the framework can initialize these datasets in the datastore. All the results
-#' are returned in a list.
+#' createHhByAge and createGrpHhByAge functions for each Azone to create
+#' simulated households containing persons by age category from a vector of
+#' persons by age category for the Azone. The list of vectors produced by the
+#' Create Households function are to be stored in the "Household" table. Since
+#' this table does not exist, the function calculates a LENGTH value for the
+#' table and returns that as well. The framework uses this information to
+#' initialize the Households table. The function also computes the maximum
+#' numbers of characters in the HhId and Azone datasets and assigns these to a
+#' SIZE vector. This is necessary so that the framework can initialize these
+#' datasets in the datastore. All the results are returned in a list.
 #'
 #' @param L A list containing the components listed in the Get specifications
 #' for the module.
@@ -608,8 +604,8 @@ createGrpHhByAge <-
 #' SIZE: A named integer vector having two elements. The first element, "Azone",
 #' identifies the size of the longest Azone name. The second element, "HhId",
 #' identifies the size of the longest HhId.
+#' @import visioneval
 #' @export
-
 CreateHouseholds <- function(L) {
   #Define dimension name vectors
   Ap <-
@@ -625,72 +621,83 @@ CreateHouseholds <- function(L) {
     list(
       Azone = character(0),
       HhId = character(0),
-      HhSize = numeric(0),
+      HhSize = integer(0),
       HhType = character(0),
-      Age0to14 = numeric(0),
-      Age15to19 = numeric(0),
-      Age20to29 = numeric(0),
-      Age30to54 = numeric(0),
-      Age55to64 = numeric(0),
-      Age65Plus = numeric(0)
+      Age0to14 = integer(0),
+      Age15to19 = integer(0),
+      Age20to29 = integer(0),
+      Age30to54 = integer(0),
+      Age55to64 = integer(0),
+      Age65Plus = integer(0)
     )
-    #Make matrix of regular household persons by Azone and age group
-    Prsn_AzAp <-
-      as.matrix(data.frame(L$Year$Azone, stringsAsFactors = FALSE)[,Ap])
-    rownames(Prsn_AzAp) <- Az
-    #Make vector of average household size target by Azone
-    TargetHhSize_Az <- L$Year$Azone$AveHhSize
-    names(TargetHhSize_Az) <- Az
-    #Make vector of target proportion of 1-person households
-    TargetProp1PerHh_Az <- L$Year$Azone$Prop1PerHh
-    names(TargetProp1PerHh_Az) <- Az
-    #Make matrix of group population households by Azone and age group
-    Prsn_AzAg <-
-      as.matrix(data.frame(L$Year$Azone, stringsAsFactors = FALSE)[,Ag])
-    rownames(Prsn_AzAg) <- Az
-    #Simulate households for each Azone and add to output list
-    for (az in Az) {
-      RegHh_ls <-
-        createHhByAge(Prsn_AzAp[az,],
-                      MaxIter=100,
-                      TargetHhSize = TargetHhSize_Az[az],
-                      TargetProp1PerHh = TargetProp1PerHh_Az[az])
-      GrpHh_ls <-
-        createGrpHhByAge(Prsn_AzAg[az,])
-      NumHh <- length(RegHh_ls[[1]]) + length(GrpHh_ls[[1]])
-      Out_ls$Year$Household$Azone <-
-        c(Out_ls$Year$Household$Azone, rep(az, NumHh))
-      Out_ls$Year$Household$HhId <-
-        c(Out_ls$Year$Household$HhId, paste(rep(az, NumHh), 1:NumHh, sep = "-"))
-      Out_ls$Year$Household$HhSize <-
-        c(Out_ls$Year$Household$HhSize, RegHh_ls$HhSize, GrpHh_ls$HhSize)
-      Out_ls$Year$Household$HhType <-
-        c(Out_ls$Year$Household$HhType, RegHh_ls$HhType, GrpHh_ls$HhType)
-      Out_ls$Year$Household$Age0to14 <-
-        c(Out_ls$Year$Household$Age0to14, RegHh_ls$Age0to14, GrpHh_ls$Age0to14)
-      Out_ls$Year$Household$Age15to19 <-
-        c(Out_ls$Year$Household$Age15to19, RegHh_ls$Age15to19, GrpHh_ls$Age15to19)
-      Out_ls$Year$Household$Age20to29 <-
-        c(Out_ls$Year$Household$Age20to29, RegHh_ls$Age20to29, GrpHh_ls$Age20to29)
-      Out_ls$Year$Household$Age30to54 <-
-        c(Out_ls$Year$Household$Age30to54, RegHh_ls$Age30to54, GrpHh_ls$Age30to54)
-      Out_ls$Year$Household$Age55to64 <-
-        c(Out_ls$Year$Household$Age55to64, RegHh_ls$Age55to64, GrpHh_ls$Age55to64)
-      Out_ls$Year$Household$Age65Plus <-
-        c(Out_ls$Year$Household$Age65Plus, RegHh_ls$Age65Plus, GrpHh_ls$Age65Plus)
-      Out_ls$Year$Azone$NumHh <-
-        c(Out_ls$Year$Azone$NumHh, NumHh)
-    }
-    #Calculate LENGTH attribute for Household table
-    attributes(Out_ls$Year$Household)$LENGTH <-
-      length(Out_ls$Year$Household$HhId)
-    #Calculate SIZE attributes for 'Household$Azone' and 'Household$HhId'
-    attributes(Out_ls$Year$Household$Azone)$SIZE <-
-      max(nchar(Out_ls$Year$Household$Azone))
-    attributes(Out_ls$Year$Household$HhId)$SIZE <-
-      max(nchar(Out_ls$Year$Household$HhId))
-    #Return the list
-    Out_ls
+  #Make matrix of regular household persons by Azone and age group
+  Prsn_AzAp <-
+    as.matrix(data.frame(L$Year$Azone, stringsAsFactors = FALSE)[,Ap])
+  rownames(Prsn_AzAp) <- Az
+  #Make vector of average household size target by Azone
+  TargetHhSize_Az <- L$Year$Azone$AveHhSize
+  names(TargetHhSize_Az) <- Az
+  #Make vector of target proportion of 1-person households
+  TargetProp1PerHh_Az <- L$Year$Azone$Prop1PerHh
+  names(TargetProp1PerHh_Az) <- Az
+  #Make matrix of group population households by Azone and age group
+  Prsn_AzAg <-
+    as.matrix(data.frame(L$Year$Azone, stringsAsFactors = FALSE)[,Ag])
+  rownames(Prsn_AzAg) <- Az
+  #Simulate households for each Azone and add to output list
+  for (az in Az) {
+    RegHh_ls <-
+      createHhByAge(Prsn_AzAp[az,],
+                    MaxIter=100,
+                    TargetHhSize = TargetHhSize_Az[az],
+                    TargetProp1PerHh = TargetProp1PerHh_Az[az])
+    GrpHh_ls <-
+      createGrpHhByAge(Prsn_AzAg[az,])
+    NumHh <-
+      length(RegHh_ls[[1]]) + length(GrpHh_ls[[1]])
+    Out_ls$Year$Household$Azone <-
+      c(Out_ls$Year$Household$Azone, rep(az, NumHh))
+    Out_ls$Year$Household$HhId <-
+      c(Out_ls$Year$Household$HhId, paste(rep(az, NumHh), 1:NumHh, sep = "-"))
+    Out_ls$Year$Household$HhSize <-
+      c(Out_ls$Year$Household$HhSize, RegHh_ls$HhSize, GrpHh_ls$HhSize)
+    Out_ls$Year$Household$HhType <-
+      c(Out_ls$Year$Household$HhType, RegHh_ls$HhType, GrpHh_ls$HhType)
+    Out_ls$Year$Household$Age0to14 <-
+      c(Out_ls$Year$Household$Age0to14, RegHh_ls$Age0to14, GrpHh_ls$Age0to14)
+    Out_ls$Year$Household$Age15to19 <-
+      c(Out_ls$Year$Household$Age15to19, RegHh_ls$Age15to19, GrpHh_ls$Age15to19)
+    Out_ls$Year$Household$Age20to29 <-
+      c(Out_ls$Year$Household$Age20to29, RegHh_ls$Age20to29, GrpHh_ls$Age20to29)
+    Out_ls$Year$Household$Age30to54 <-
+      c(Out_ls$Year$Household$Age30to54, RegHh_ls$Age30to54, GrpHh_ls$Age30to54)
+    Out_ls$Year$Household$Age55to64 <-
+      c(Out_ls$Year$Household$Age55to64, RegHh_ls$Age55to64, GrpHh_ls$Age55to64)
+    Out_ls$Year$Household$Age65Plus <-
+      c(Out_ls$Year$Household$Age65Plus, RegHh_ls$Age65Plus, GrpHh_ls$Age65Plus)
+    Out_ls$Year$Azone$NumHh <-
+      c(Out_ls$Year$Azone$NumHh, NumHh)
+  }
+  Out_ls$Year$Household$HhSize <- as.integer(Out_ls$Year$Household$HhSize)
+  Out_ls$Year$Household$Age0to14 <- as.integer(Out_ls$Year$Household$Age0to14)
+  Out_ls$Year$Household$Age15to19 <- as.integer(Out_ls$Year$Household$Age15to19)
+  Out_ls$Year$Household$Age20to29 <- as.integer(Out_ls$Year$Household$Age20to29)
+  Out_ls$Year$Household$Age30to54 <- as.integer(Out_ls$Year$Household$Age30to54)
+  Out_ls$Year$Household$Age55to64 <- as.integer(Out_ls$Year$Household$Age55to64)
+  Out_ls$Year$Household$Age65Plus <- as.integer(Out_ls$Year$Household$Age65Plus)
+  Out_ls$Year$Azone$NumHh <- as.integer(Out_ls$Year$Azone$NumHh)
+  #Calculate LENGTH attribute for Household table
+  attributes(Out_ls$Year$Household)$LENGTH <-
+    length(Out_ls$Year$Household$HhId)
+  #Calculate SIZE attributes for 'Household$Azone' and 'Household$HhId'
+  attributes(Out_ls$Year$Household$Azone)$SIZE <-
+    max(nchar(Out_ls$Year$Household$Azone))
+  attributes(Out_ls$Year$Household$HhId)$SIZE <-
+    max(nchar(Out_ls$Year$Household$HhId))
+  attributes(Out_ls$Year$Household$HhType)$SIZE <-
+    max(nchar(Out_ls$Year$Household$HhType))
+  #Return the list
+  Out_ls
 }
 
 
