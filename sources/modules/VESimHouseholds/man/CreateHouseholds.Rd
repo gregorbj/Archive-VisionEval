@@ -30,14 +30,14 @@ size (number of people in the household), and numbers of persons in each of
 This function creates a set of simulated households for the model region
 where each household is assigned a household size, an Azone, a unique ID, and
 numbers of persons in each of 6 age categories. The function calls the
-createHhByAge function for each Azone to create simulated households
-containing persons by age category from a vector of persons by age category
-for the Azone. The list of vectors produced by the Create Households function
-are to be stored in the "Household" table. Since this table does not exist,
-the function calculates a LENGTH value for the table and returns that as
-well. The framework uses this information to initialize the Households table.
-The function also computes the maximum numbers of characters in the HhId and
-Azone datasets and assigns these to a SIZE vector. This is necessary so that
-the framework can initialize these datasets in the datastore. All the results
-are returned in a list.
+createHhByAge and createGrpHhByAge functions for each Azone to create
+simulated households containing persons by age category from a vector of
+persons by age category for the Azone. The list of vectors produced by the
+Create Households function are to be stored in the "Household" table. Since
+this table does not exist, the function calculates a LENGTH value for the
+table and returns that as well. The framework uses this information to
+initialize the Households table. The function also computes the maximum
+numbers of characters in the HhId and Azone datasets and assigns these to a
+SIZE vector. This is necessary so that the framework can initialize these
+datasets in the datastore. All the results are returned in a list.
 }

@@ -4,7 +4,7 @@
 \name{HtProb_HtAp}
 \alias{HtProb_HtAp}
 \title{Household size proportions}
-\format{A matrix having 524 rows and 6 colums:}
+\format{A matrix having 950 rows (for Oregon data) and 6 colums:}
 \source{
 CreateHouseholds.R script.
 }

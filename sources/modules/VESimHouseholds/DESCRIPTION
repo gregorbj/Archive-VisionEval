@@ -1,20 +1,21 @@
 Package: VESimHouseholds
 Type: Package
 Title: Create Simulated Households with Attributes for VE
-Version: 0.2
+Version: 0.5
 Author: Brian Gregor [aut, cre],
 Maintainer: Brian Gregor <gregorb@or-analytics.com>
 Copyright: AASHTO
 URL: https://github.com/gregorbj/VisionEval/sources/modules/VESimHouseholds
 Description: This package contains several modules which create synthetic
-    households with attributes of persons by age group, income, and housing
-    type.
-License: Apache License 2.0
+    households with attributes of persons by age group, income, workers,
+    life cycle, and housing type.
+License: file LICENSE
 LazyData: TRUE
 Depends: R (>= 3.1.0)
 Imports:
     visioneval,
-    devtools
+    devtools,
+    car
 Suggests:
     knitr
 VignetteBuilder: knitr
