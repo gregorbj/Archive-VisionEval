@@ -22,6 +22,18 @@ testModule(
   SaveDatastore = TRUE
 )
 
+#Test AssignLifeCycle module
+source("R/AssignLifeCycle.R")
+testModule(
+  ModuleName = "AssignLifeCycle",
+  ParamDir = "defs",
+  RunParamFile = "run_parameters.json",
+  GeoFile = "geo.csv",
+  ModelParamFile = "model_parameters.json",
+  LoadDatastore = TRUE,
+  SaveDatastore = TRUE
+)
+
 #Test PredictIncome module
 source("R/PredictIncome.R")
 testModule(
