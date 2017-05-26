@@ -39,27 +39,27 @@ install.packages("shinyBS")
 install.packages("future")
 install.packages("testit")
 install.packages("jsonlite")
-install.packages("rhandsontable")
 install.packages("shinyAce")
 install.packages("envDocument")
 install.packages("rhandsontable")
 
 devtools::install_github("tdhock/namedCapture")
 devtools::install_github("trestletech/shinyTree")
-
-devtools::install_github("gregorbj/VisionEval/sources/framework/visioneval")
 ```
-  5. Run the following commands to download and install the required VE modules:
+  5. Run the following commands to download and install the required VE framework package:
+```
+devtools::install_github("gregorbj/VisionEval/sources/framework/visioneval", ref="master") #master branch
+```
+  6. Run the following commands to download and install the required VE modules:
 ```
 #the following modules are required for the pilot VERPAT; others are required for VERSPM
-devtools::install_github("gregorbj/VisionEval/sources/modules/VESyntheticFirms")
-devtools::install_github("gregorbj/VisionEval/sources/modules/VESimHouseholds")
+devtools::install_github("gregorbj/VisionEval/sources/modules/VESyntheticFirms", ref="master")
+devtools::install_github("gregorbj/VisionEval/sources/modules/VESimHouseholds", ref="master")
 ```
 
 ## Running the Pilot VE RPAT from within R
-  1. Git Clone (i.e. copy) this repository to your computer.
-  2. Start R
-  3. Run the following commands:
+  1. Git Clone (i.e. copy) this repository to your computer.  By default, Git will clone the master branch.
+  2. Start R and run the following commands:
 
 ```
 #point to the location of the cloned repository, not the location of the auto-installed R packages
@@ -69,18 +69,32 @@ source("run_model.R")
 ```
 
 ## Running the Pilot VE GUI to run Pilot VE RPAT
-  1. Git Clone (i.e. copy) this repository to your computer.
-  1. Start R
-  2. Run the following commands:
+  1. Git Clone (i.e. copy) this repository to your computer.  By default, Git will clone the master branch.
+  1. Start R and run the following commands:
 
 ```
 library("shiny")
 runGitHub("gregorbj/VisionEval", subdir="sources/VEGUI", ref="master") #master branch
-runGitHub("gregorbj/VisionEval", subdir="sources/VEGUI", ref="develop") #develop branch
 ```
   3. The VE GUI should launch in your browser
   4. Click "Select Scenario Script" and navigate to the VERPAT run_model.R script in your local repository
   5. Click "Run" and then "Run Model Script" to run the VERPAT model
 
-
 For those new to R, we recommend installing [R Studio](http://www.rstudio.com).
+
+# Develop Branch
+
+The current release version of VisionEval is on the master branch.  The current development version is on
+the develop branch.  To download, install, and test the develop branch resources, do the following:
+  1. Git Clone (i.e. copy) the develop branch to your computer.  By default, Git will clone the master branch.  After cloning, switch to the develop branch.
+  1. Start R and run the following commands:
+```
+devtools::install_github("gregorbj/VisionEval/sources/framework/visioneval", ref="develop")
+
+devtools::install_github("gregorbj/VisionEval/sources/modules/VESyntheticFirms", ref="develop")
+devtools::install_github("gregorbj/VisionEval/sources/modules/VESimHouseholds", ref="develop")
+
+runGitHub("gregorbj/VisionEval", subdir="sources/VEGUI", ref="develop")
+```
+  2. Navigate to and run the VERPAT run_model.R script
+  3. Navigate to and run the VERSPM run_model.R script

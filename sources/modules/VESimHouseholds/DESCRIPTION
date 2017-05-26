@@ -15,7 +15,9 @@ Depends: R (>= 3.1.0)
 Imports:
     visioneval,
     devtools,
-    car
+    car,
+    pbkrtest,
+    quantreg
 Suggests:
     knitr
 VignetteBuilder: knitr
