@@ -58,7 +58,7 @@ devtools::install_github("gregorbj/VisionEval/sources/modules/VESimHouseholds", 
 ```
 
 ## Running the Pilot VE RPAT from within R
-  1. Git Clone (i.e. copy) this repository to your computer.  By default, Git will clone the master branch.
+  1. Git clone (i.e. copy) this repository to your computer.  By default, Git will clone the master branch.
   2. Start R and run the following commands:
 
 ```
@@ -86,7 +86,7 @@ For those new to R, we recommend installing [R Studio](http://www.rstudio.com).
 
 The current release version of VisionEval is on the master branch.  The current development version is on
 the develop branch.  To download, install, and test the develop branch resources, do the following:
-  1. Git Clone (i.e. copy) the develop branch to your computer.  By default, Git will clone the master branch.  After cloning, switch to the develop branch.
+  1. Git clone (i.e. copy) the develop branch to your computer.  By default, Git will clone the master branch.  After cloning, switch to the develop branch.
   1. Start R and run the following commands:
 ```
 devtools::install_github("gregorbj/VisionEval/sources/framework/visioneval", ref="develop")
