@@ -297,6 +297,13 @@ checkModuleOutputs <-
 #' @param SaveDatastore A logical value identifying whether the module outputs
 #' will be written to the datastore. If TRUE the module outputs are written to
 #' the datastore. If FALSE the outputs are not written to the datastore.
+#' @param DoRun A logical value identifying whether the module should be run. If
+#' FALSE, the function will initialize a datastore, check specifications, and
+#' load inputs but will not run the module. That setting is useful for module
+#' development in order to create the all the data needed to develop module. It
+#' is used in conjunction with the getFromDatastore function to create the
+#' dataset that will be provided by the framework. The default value for this
+#' parameter is TRUE.
 #' @return None. The function writes out messages to the console and to the log
 #' as the testing proceeds. These messages include the time when each test
 #' starts and when it ends. When a key test fails, requiring a fix before other
@@ -310,7 +317,8 @@ testModule <-
            GeoFile = "geo.csv",
            ModelParamFile = "model_parameters.json",
            LoadDatastore = FALSE,
-           SaveDatastore = TRUE) {
+           SaveDatastore = TRUE,
+           DoRun = TRUE) {
 
     #Set working directory to tests and return to main module directory on exit
     #--------------------------------------------------------------------------
@@ -443,40 +451,24 @@ testModule <-
 
     #Run the module and check that results meet specifications
     #---------------------------------------------------------
-    writeLog(
-      "Running module and checking whether outputs meet Set specifications.",
-      Print = TRUE
-    )
-    if (SaveDatastore) {
-      writeLog("Also saving module outputs to datastore.", Print = TRUE)
-    }
-    Func <- get(ModuleName)
-    for (Year in getYears()) {
-      ResultsCheck_ <- character(0)
-      if (Specs_ls$RunBy == "Region") {
-        #Get data from datastore
-        L <- getFromDatastore(Specs_ls, RunYear = Year, Geo = NULL)
-        #Run module
-        R <- Func(L)
-        #Check results
-        Check_ <-
-          checkModuleOutputs(
-            Data_ls = R,
-            ModuleSpec_ls = Specs_ls,
-            ModuleName = ModuleName)
-        ResultsCheck_ <- Check_
-        #Save results if SaveDatastore and no errors found
-        if (SaveDatastore & length(Check_) == 0) {
-          setInDatastore(R, Specs_ls, ModuleName, Year, Geo = NULL)
-        }
-      } else {
-        GeoCategory <- Specs_ls$RunBy
-        Geo_ <- readFromTable(GeoCategory, GeoCategory, Year)
-        #Run module for each geographic area
-        for (Geo in Geo_) {
-          #Get data from datastore for geographic area
-          L <- getFromDatastore(Specs_ls, RunYear = Year, Geo = Geo)
-          #Run model for geographic area
+    #The module is run only if the DoRun argument is TRUE. Otherwise the
+    #datastore is initialized, specifications are checked, and inputs are
+    #loaded only.
+    if (DoRun) {
+      writeLog(
+        "Running module and checking whether outputs meet Set specifications.",
+        Print = TRUE
+      )
+      if (SaveDatastore) {
+        writeLog("Also saving module outputs to datastore.", Print = TRUE)
+      }
+      Func <- get(ModuleName)
+      for (Year in getYears()) {
+        ResultsCheck_ <- character(0)
+        if (Specs_ls$RunBy == "Region") {
+          #Get data from datastore
+          L <- getFromDatastore(Specs_ls, RunYear = Year, Geo = NULL)
+          #Run module
           R <- Func(L)
           #Check results
           Check_ <-
@@ -484,30 +476,51 @@ testModule <-
               Data_ls = R,
               ModuleSpec_ls = Specs_ls,
               ModuleName = ModuleName)
-          ResultsCheck_ <- c(ResultsCheck_, Check_)
+          ResultsCheck_ <- Check_
           #Save results if SaveDatastore and no errors found
           if (SaveDatastore & length(Check_) == 0) {
-            setInDatastore(R, Specs_ls, ModuleName, Year, Geo = Geo)
+            setInDatastore(R, Specs_ls, ModuleName, Year, Geo = NULL)
+          }
+        } else {
+          GeoCategory <- Specs_ls$RunBy
+          Geo_ <- readFromTable(GeoCategory, GeoCategory, Year)
+          #Run module for each geographic area
+          for (Geo in Geo_) {
+            #Get data from datastore for geographic area
+            L <- getFromDatastore(Specs_ls, RunYear = Year, Geo = Geo)
+            #Run model for geographic area
+            R <- Func(L)
+            #Check results
+            Check_ <-
+              checkModuleOutputs(
+                Data_ls = R,
+                ModuleSpec_ls = Specs_ls,
+                ModuleName = ModuleName)
+            ResultsCheck_ <- c(ResultsCheck_, Check_)
+            #Save results if SaveDatastore and no errors found
+            if (SaveDatastore & length(Check_) == 0) {
+              setInDatastore(R, Specs_ls, ModuleName, Year, Geo = Geo)
+            }
           }
         }
+        if (length(ResultsCheck_) != 0) {
+          Msg <-
+            paste0("Following are inconsistencies between module outputs and the ",
+                   "module Set specifications:")
+          Msg <- paste(c(Msg, ResultsCheck_), collapse = "\n")
+          writeLog(Msg)
+          rm(Msg)
+          stop(
+            paste0("The outputs for module ", ModuleName, " are inconsistent ",
+                   "with one or more of the module's Set specifications. ",
+                   "Check the log for details."))
+        }
       }
-      if (length(ResultsCheck_) != 0) {
-        Msg <-
-          paste0("Following are inconsistencies between module outputs and the ",
-                 "module Set specifications:")
-        Msg <- paste(c(Msg, ResultsCheck_), collapse = "\n")
-        writeLog(Msg)
-        rm(Msg)
-        stop(
-          paste0("The outputs for module ", ModuleName, " are inconsistent ",
-                 "with one or more of the module's Set specifications. ",
-                 "Check the log for details."))
+      writeLog("Module run successfully and outputs meet Set specifications.",
+               Print = TRUE)
+      if (SaveDatastore) {
+        writeLog("Module outputs saved to datastore.", Print = TRUE)
       }
-    }
-    writeLog("Module run successfully and outputs meet Set specifications.",
-             Print = TRUE)
-    if (SaveDatastore) {
-      writeLog("Module outputs saved to datastore.", Print = TRUE)
     }
 
     #Finish
