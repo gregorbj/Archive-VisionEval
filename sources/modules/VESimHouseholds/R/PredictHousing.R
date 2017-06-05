@@ -247,7 +247,7 @@ PredictHousingSpecifications <- list(
           "GQDU"),
       TABLE = "Bzone",
       GROUP = "Year",
-      TYPE = "character",
+      TYPE = "integer",
       UNITS = "DU",
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = ""
