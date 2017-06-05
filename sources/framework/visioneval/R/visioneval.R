@@ -161,9 +161,6 @@ initializeModel <-
 
     #Simulate model run
     #------------------
-    #Function call is disabled until simDataTransactions can handle situation
-    #where module calls for different years that don't cause table conflicts
-    #do not report non-existent conflicts.
     simDataTransactions(ModuleCalls_df)
 
     #Check and process module inputs
