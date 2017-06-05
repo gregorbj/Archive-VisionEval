@@ -139,7 +139,7 @@ initializeModel <-
     for (i in 1:nrow(ModuleCalls_df)) {
       ModuleName <- ModuleCalls_df[i, "ModuleName"]
       PackageName <- ModuleCalls_df[i, "PackageName"]
-      Specs_ls <- getModuleSpecs(ModuleName, PackageName)
+      Specs_ls <- processModuleSpecs(getModuleSpecs(ModuleName, PackageName))
       Errors_ <- checkModuleSpecs(Specs_ls, ModuleName)
       if (length(Errors_) != 0) {
         Msg <-
@@ -174,7 +174,7 @@ initializeModel <-
     for (i in 1:nrow(ModuleCalls_df)) {
       Module <- ModuleCalls_df$ModuleName[i]
       Package <- ModuleCalls_df$PackageName[i]
-      ModuleSpecs_ls <- getModuleSpecs(Module, Package)
+      ModuleSpecs_ls <- processModuleSpecs(getModuleSpecs(Module, Package))
       if (!is.null(ModuleSpecs_ls$Inp)) {
         ProcessedInputs_ls[[Module]] <-
           processModuleInputs(ModuleSpecs_ls, Module)
@@ -194,7 +194,7 @@ initializeModel <-
     for (i in 1:nrow(ModuleCalls_df)) {
       Module <- ModuleCalls_df$ModuleName[i]
       Package <- ModuleCalls_df$PackageName[i]
-      ModuleSpecs_ls <- getModuleSpecs(Module, Package)
+      ModuleSpecs_ls <- processModuleSpecs(getModuleSpecs(Module, Package))
       if (!is.null(ModuleSpecs_ls$Inp)) {
         inputsToDatastore(ProcessedInputs_ls[[Module]], ModuleSpecs_ls, Module)
       }
@@ -259,7 +259,7 @@ runModule <- function(ModuleName, PackageName, RunFor, RunYear) {
     L <- getFromDatastore(M$Specs, RunYear = RunYear, Geo = NULL)
     #Run module and store results in datastore
     R <- M$Func(L)
-    setInDatastore(R, M$Specs, ModuleName, Geo = NULL)
+    setInDatastore(R, M$Specs, ModuleName, Year = RunYear, Geo = NULL)
   } else {
     GeoCategory <- M$Specs$RunBy
     Geo_ <- readFromTable(GeoCategory, GeoCategory, RunYear)
@@ -269,7 +269,7 @@ runModule <- function(ModuleName, PackageName, RunFor, RunYear) {
       L <- getFromDatastore(M$Specs, RunYear = RunYear, Geo = Geo)
       #Run model for geographic area and store results in datastore
       R <- M$Func(L)
-      setInDatastore(R, M$Specs, ModuleName, Geo = Geo)
+      setInDatastore(R, M$Specs, ModuleName, Year = RunYear, Geo = Geo)
     }
   }
   #Log and print ending message
