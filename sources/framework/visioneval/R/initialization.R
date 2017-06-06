@@ -201,14 +201,22 @@ getUnits <- function(Type_) {
 #' time. The log is initialized with the scenario name, scenario description and
 #' the date and time of initialization.
 #'
+#' @param Suffix A character string appended to the file name for the log file.
+#' For example, if the suffix is 'CreateHouseholds', the log file is named
+#' 'Log_CreateHouseholds.txt'. The default value is NULL in which case the
+#' suffix is the date and time.
 #' @return TRUE if the log is created successfully. It creates a log file in the
 #'   working directory and identifies the name of the log file in the
 #'   model state file.
 #' @export
-initLog <- function() {
+initLog <- function(Suffix = NULL) {
   ModelState_ls <- getModelState()
   LogInitTime <- gsub(" ", "_", as.character(Sys.time()))
-  LogFile <- paste0("Log", gsub(":", "_", LogInitTime), ".txt")
+  if (!is.null(Suffix)) {
+    LogFile <- paste0("Log_", Suffix, ".txt")
+  } else {
+    LogFile <- paste0("Log_", gsub(":", "_", LogInitTime), ".txt")
+  }
   sink(LogFile, append = TRUE)
   cat(ModelState_ls$Scenario)
   cat("\n")
