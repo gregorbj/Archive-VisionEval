@@ -4,7 +4,13 @@
 \alias{initLog}
 \title{Initialize run log.}
 \usage{
-initLog()
+initLog(Suffix = NULL)
+}
+\arguments{
+\item{Suffix}{A character string appended to the file name for the log file.
+For example, if the suffix is 'CreateHouseholds', the log file is named
+'Log_CreateHouseholds.txt'. The default value is NULL in which case the
+suffix is the date and time.}
 }
 \value{
 TRUE if the log is created successfully. It creates a log file in the

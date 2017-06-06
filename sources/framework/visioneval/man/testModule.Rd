@@ -7,7 +7,7 @@
 testModule(ModuleName, ParamDir = "defs",
   RunParamFile = "run_parameters.json", GeoFile = "geo.csv",
   ModelParamFile = "model_parameters.json", LoadDatastore = FALSE,
-  SaveDatastore = TRUE)
+  SaveDatastore = TRUE, DoRun = TRUE)
 }
 \arguments{
 \item{ModuleName}{A string identifying the module name.}
@@ -33,13 +33,25 @@ run_parameters.json file. If FALSE it initializes a new datastore.}
 \item{SaveDatastore}{A logical value identifying whether the module outputs
 will be written to the datastore. If TRUE the module outputs are written to
 the datastore. If FALSE the outputs are not written to the datastore.}
+
+\item{DoRun}{A logical value identifying whether the module should be run. If
+FALSE, the function will initialize a datastore, check specifications, and
+load inputs but will not run the module but will return the list of module
+specifications. That setting is useful for module development in order to
+create the all the data needed to assist with module programming. It is
+used in conjunction with the getFromDatastore function to create the
+dataset that will be provided by the framework. The default value for this
+parameter is TRUE. In that case, the module will be run and the results
+will checked for consistency with the Set specifications.}
 }
 \value{
-None. The function writes out messages to the console and to the log
-as the testing proceeds. These messages include the time when each test
-starts and when it ends. When a key test fails, requiring a fix before other
-tests can be run, execution stops and an error message is written to the
-console. Detailed error messages are also written to the log.
+If DoRun is FALSE, the return value is a list containing the module
+  specifications. If DoRun is TRUE, there is no return value. The function
+  writes out messages to the console and to the log as the testing proceeds.
+  These messages include the time when each test starts and when it ends.
+  When a key test fails, requiring a fix before other tests can be run,
+  execution stops and an error message is written to the console. Detailed
+  error messages are also written to the log.
 }
 \description{
 \code{testModule} sets up a test environment and tests a module.
