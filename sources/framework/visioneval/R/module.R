@@ -298,17 +298,21 @@ checkModuleOutputs <-
 #' will be written to the datastore. If TRUE the module outputs are written to
 #' the datastore. If FALSE the outputs are not written to the datastore.
 #' @param DoRun A logical value identifying whether the module should be run. If
-#' FALSE, the function will initialize a datastore, check specifications, and
-#' load inputs but will not run the module. That setting is useful for module
-#' development in order to create the all the data needed to develop module. It
-#' is used in conjunction with the getFromDatastore function to create the
-#' dataset that will be provided by the framework. The default value for this
-#' parameter is TRUE.
-#' @return None. The function writes out messages to the console and to the log
-#' as the testing proceeds. These messages include the time when each test
-#' starts and when it ends. When a key test fails, requiring a fix before other
-#' tests can be run, execution stops and an error message is written to the
-#' console. Detailed error messages are also written to the log.
+#'   FALSE, the function will initialize a datastore, check specifications, and
+#'   load inputs but will not run the module but will return the list of module
+#'   specifications. That setting is useful for module development in order to
+#'   create the all the data needed to assist with module programming. It is
+#'   used in conjunction with the getFromDatastore function to create the
+#'   dataset that will be provided by the framework. The default value for this
+#'   parameter is TRUE. In that case, the module will be run and the results
+#'   will checked for consistency with the Set specifications.
+#' @return If DoRun is FALSE, the return value is a list containing the module
+#'   specifications. If DoRun is TRUE, there is no return value. The function
+#'   writes out messages to the console and to the log as the testing proceeds.
+#'   These messages include the time when each test starts and when it ends.
+#'   When a key test fails, requiring a fix before other tests can be run,
+#'   execution stops and an error message is written to the console. Detailed
+#'   error messages are also written to the log.
 #' @export
 testModule <-
   function(ModuleName,
@@ -329,7 +333,7 @@ testModule <-
     #------------------------------------
     Msg <- paste0("Testing ", ModuleName, ".")
     initModelStateFile(Dir = ParamDir, ParamFile = RunParamFile)
-    initLog()
+    initLog(ModuleName)
     writeLog(Msg, Print = TRUE)
     rm(Msg)
 
@@ -349,7 +353,7 @@ testModule <-
       loadDatastore(
         FileToLoad = DatastoreName,
         GeoFile = GeoFile,
-        SaveDatastore = SaveDatastore
+        SaveDatastore = FALSE
       )
       writeLog("Datastore loaded.", Print = TRUE)
     } else {
@@ -521,14 +525,13 @@ testModule <-
       if (SaveDatastore) {
         writeLog("Module outputs saved to datastore.", Print = TRUE)
       }
+      #Print success message if no errors found
+      Msg <- paste0("Congratulations. Module ", ModuleName, " passed all tests.")
+      writeLog(Msg, Print = TRUE)
+      rm(Msg)
+    } else {
+      return(Specs_ls)
     }
-
-    #Finish
-    #------
-    #Print success message if no errors found
-    Msg <- paste0("Congratulations. Module ", ModuleName, " passed all tests.")
-    writeLog(Msg, Print = TRUE)
-    rm(Msg)
   }
 
 
