@@ -346,7 +346,7 @@ devtools::use_data(PredictHousingSpecifications, overwrite = TRUE)
 #----------------------------------------------------------------------
 #' Main module function to predict the housing type for all households.
 #'
-#' \code{PredictWorkers} predicts the housing type for all households.
+#' \code{PredictHousing} predicts the housing type for all households.
 #'
 #' This function predicts the housing choice of each household. It uses the
 #' estimated models of binomial choice model for determining the probability
