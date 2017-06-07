@@ -606,6 +606,17 @@ Types <- function(){
         HH = c(HH = 1)
       ),
       mode = "integer"
+    ),
+    employment = list(
+      units = list(
+        JOB = c(JOB = 1)
+      ),
+      mode = "integer"
+    ),
+    activity = list(
+      units = list(
+        HHJOB = c(HHJOB = 1)
+      )
     )
   )
 }
