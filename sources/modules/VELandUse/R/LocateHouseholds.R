@@ -174,7 +174,7 @@ LocateHouseholdsSpecifications <- list(
 #---------------------------------
 #' Specifications list for LocateHouseholds module
 #'
-#' A list containing specifications for the PredictHousing module.
+#' A list containing specifications for the LocateHouseholds module.
 #'
 #' @format A list containing 4 components:
 #' \describe{
