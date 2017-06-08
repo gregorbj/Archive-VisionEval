@@ -16,7 +16,9 @@ LazyData: TRUE
 Depends: R (>= 3.1.0)
 Imports:
     visioneval,
-    devtools
+    devtools,
+    geosphere,
+    fields
 Suggests:
     knitr
 VignetteBuilder: knitr
