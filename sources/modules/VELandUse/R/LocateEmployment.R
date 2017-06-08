@@ -221,14 +221,10 @@ LocateEmployment <- function(L) {
   #------------------------------
   #Calculate the total number of workers for the region
   TotWkr <- sum(L$Year$Azone$NumWkr)
-  #Calculate the total employment for the region by category
+  #Calculate the total employment for the region
   TotEmp <- sum(L$Year$Bzone$TotEmp)
-  RetEmp <- sum(L$Year$Bzone$RetEmp)
-  SvcEmp <- sum(L$Year$Bzone$SvcEmp)
   #Calculate the difference between total workers and total employment
   TotEmpDiff <- TotWkr - TotEmp
-  RetEmpDiff <- round(TotEmpDiff * RetEmp / TotEmp)
-  SvcEmpDiff <- round(TotEmpDiff * SvcEmp / TotEmp)
   #Calculate adjusted total employment by Bzone
   TotEmp_Bz <- L$Year$Bzone$TotEmp
   names(TotEmp_Bz) <- L$Year$Bzone$Bzone
@@ -237,25 +233,24 @@ LocateEmployment <- function(L) {
       EmpDiff = TotEmpDiff,
       Emp_Bz = TotEmp_Bz
     )
-  rm(TotEmp_Bz)
   #Calculate adjusted retail employment by Bzone
   RetEmp_Bz <- L$Year$Bzone$RetEmp
   names(RetEmp_Bz) <- L$Year$Bzone$Bzone
-  RetEmp_ls <-
-    adjustEmployment(
-      EmpDiff = RetEmpDiff,
-      Emp_Bz = RetEmp_Bz
-    )
-  rm(RetEmp_Bz)
+  RetEmpRatio_Bz <- RetEmp_Bz / TotEmp_Bz
+  RetEmp_ls <- list(
+    BalancedEmp_Bz = round(TotEmp_ls$BalancedEmp_Bz * RetEmpRatio_Bz),
+    AdjEmp_Bz = round(TotEmp_ls$AdjEmp_Bz * RetEmpRatio_Bz)
+  )
+  rm(RetEmp_Bz,  RetEmpRatio_Bz)
   #Calculate adjusted service employment by Bzone
   SvcEmp_Bz <- L$Year$Bzone$SvcEmp
   names(SvcEmp_Bz) <- L$Year$Bzone$Bzone
-  SvcEmp_ls <-
-    adjustEmployment(
-      EmpDiff = SvcEmpDiff,
-      Emp_Bz = SvcEmp_Bz
-    )
-  rm(SvcEmp_Bz)
+  SvcEmpRatio_Bz <- SvcEmp_Bz / TotEmp_Bz
+  SvcEmp_ls <- list(
+    BalancedEmp_Bz = round(TotEmp_ls$BalancedEmp_Bz * SvcEmpRatio_Bz),
+    AdjEmp_Bz = round(TotEmp_ls$AdjEmp_Bz * SvcEmpRatio_Bz)
+  )
+  rm(SvcEmp_Bz,  SvcEmpRatio_Bz)
 
   #Return list of results
   #----------------------
