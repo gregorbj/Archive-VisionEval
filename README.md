@@ -22,7 +22,8 @@ library(httr)
 set_config(use_proxy(url="proxynew.odot.state.or.us", port=8080)) 
 set_config( config( ssl_verifypeer = 0L ) )
 ```
-  4. Run the following commands to download and install the required libraries and their dependencies:
+  4. If working with an R install without write access to its library folder (like ODOT), first change your library location to a write accessible location.
+  5. Run the following commands to download and install the required libraries and their dependencies:
 ```
 source("http://bioconductor.org/biocLite.R")
 biocLite()
@@ -46,11 +47,11 @@ install.packages("rhandsontable")
 devtools::install_github("tdhock/namedCapture")
 devtools::install_github("trestletech/shinyTree")
 ```
-  5. Run the following commands to download and install the required VE framework package:
+  6. Run the following commands to download and install the required VE framework package:
 ```
 devtools::install_github("gregorbj/VisionEval/sources/framework/visioneval", ref="master") #master branch
 ```
-  6. Run the following commands to download and install the required VE modules:
+  7. Run the following commands to download and install the required VE modules:
 ```
 #the following modules are required for the pilot VERPAT; others are required for VERSPM
 devtools::install_github("gregorbj/VisionEval/sources/modules/VESyntheticFirms", ref="master")
