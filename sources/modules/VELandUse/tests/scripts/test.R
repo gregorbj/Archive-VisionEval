@@ -1,43 +1,34 @@
-#Test CreateHouseholds module
-source("R/CreateHouseholds.R")
+#Test LocateHouseholds module
+source("R/LocateHouseholds.R")
 testModule(
-  ModuleName = "CreateHouseholds",
-  LoadDatastore = FALSE,
-  SaveDatastore = TRUE,
-  DoRun = TRUE
-)
-
-#Test PredictWorkers module
-source("R/PredictWorkers.R")
-testModule(
-  ModuleName = "PredictWorkers",
+  ModuleName = "LocateHouseholds",
   LoadDatastore = TRUE,
   SaveDatastore = TRUE,
   DoRun = TRUE
 )
 
-#Test AssignLifeCycle module
-source("R/AssignLifeCycle.R")
+#Test LocateEmployment module
+source("R/LocateEmployment.R")
 testModule(
-  ModuleName = "AssignLifeCycle",
+  ModuleName = "LocateEmployment",
   LoadDatastore = TRUE,
   SaveDatastore = TRUE,
   DoRun = TRUE
 )
 
-#Test PredictIncome module
-source("R/PredictIncome.R")
+#Test AssignDevTypes module
+source("R/AssignDevTypes.R")
 testModule(
-  ModuleName = "PredictIncome",
+  ModuleName = "AssignDevTypes",
   LoadDatastore = TRUE,
   SaveDatastore = TRUE,
   DoRun = TRUE
 )
 
-#Test PredictHousing module
-source("R/PredictHousing.R")
+#Test Calculate4DMeasures module
+source("R/Calculate4DMeasures.R")
 testModule(
-  ModuleName = "PredictHousing",
+  ModuleName = "Calculate4DMeasures",
   LoadDatastore = TRUE,
   SaveDatastore = TRUE,
   DoRun = TRUE
