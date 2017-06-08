@@ -123,6 +123,26 @@ LocateHouseholdsSpecifications <- list(
       NAVALUE = -1,
       PROHIBIT = "",
       ISELEMENTOF = c("SF", "MF", "GQ")
+    ),
+    item(
+      NAME = "HhSize",
+      TABLE = "Household",
+      GROUP = "Year",
+      TYPE = "people",
+      UNITS = "PRSN",
+      NAVALUE = -1,
+      PROHIBIT = c("NA", "<= 0"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "Workers",
+      TABLE = "Household",
+      GROUP = "Year",
+      TYPE = "people",
+      UNITS = "PRSN",
+      NAVALUE = -1,
+      PROHIBIT = c("NA", "<= 0"),
+      ISELEMENTOF = ""
     )
   ),
   #Specify data to saved in the data store
@@ -164,6 +184,39 @@ LocateHouseholdsSpecifications <- list(
       UNITS = "DU",
       NAVALUE = -999999,
       PROHIBIT = c("NA"),
+      ISELEMENTOF = "",
+      SIZE = 0
+    ),
+    item(
+      NAME = "Pop",
+      TABLE = "Bzone",
+      GROUP = "Year",
+      TYPE = "people",
+      UNITS = "PRSN",
+      NAVALUE = -1,
+      PROHIBIT = c("NA", "<= 0"),
+      ISELEMENTOF = "",
+      SIZE = 0
+    ),
+    item(
+      NAME = "NumHh",
+      TABLE = "Bzone",
+      GROUP = "Year",
+      TYPE = "households",
+      UNITS = "HH",
+      NAVALUE = -1,
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      SIZE = 0
+    ),
+    item(
+      NAME = "NumWkr",
+      TABLE = "Bzone",
+      GROUP = "Year",
+      TYPE = "people",
+      UNITS = "PRSN",
+      NAVALUE = -1,
+      PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
       SIZE = 0
     )
@@ -305,6 +358,8 @@ LocateHouseholds <- function(L) {
   NumHh <- length(L$Year$Household[[1]])
   #Define a vector of housing types
   Ht <- c("SF", "MF", "GQ")
+  #Define vector of Bzones
+  Bz <- L$Year$Bzone$Bzone
 
   #Balance housing supply and demand
   #---------------------------------
@@ -375,6 +430,17 @@ LocateHouseholds <- function(L) {
       GQUnits_ls$BalancedUnits_Bz,
       Weights_Bz / Weights_Bz
       )
+  #Combine assignmentments by housing type and put in correct order
+  HhBzones_Hh <-
+    c(SFHouseholdBzones_Hh,
+      MFHouseholdBzones_Hh,
+      GQHouseholdBzones_Hh)[L$Year$Household$HhId]
+
+  #Tabulate households, population, and workers by Bzone
+  #-----------------------------------------------------
+  NumHh_Bz <- tapply(HhBzones_Hh, HhBzones_Hh, length)[Bz]
+  Pop_Bz <- tapply(L$Year$Household$HhSize, HhBzones_Hh, sum)[Bz]
+  Wkr_Bz <- tapply(L$Year$Household$Workers, HhBzones_Hh, sum)[Bz]
 
   #Return list of results
   #----------------------
@@ -387,12 +453,10 @@ LocateHouseholds <- function(L) {
          GQDU = integer(0),
          SFDUadj = integer(0),
          MFDUadj = integer(0),
-         GQDUadj = integer(0))
-  #Combine assignmentments by housing type and put in correct order
-  HhBzones_Hh <-
-    c(SFHouseholdBzones_Hh,
-      MFHouseholdBzones_Hh,
-      GQHouseholdBzones_Hh)[L$Year$Household$HhId]
+         GQDUadj = integer(0),
+         Pop = integer(0),
+         NumHh = integer(0),
+         NumWkr = integer(0))
   #Add the household Bzone assignments to the list
   Out_ls$Year$Household$Bzone <- unname(HhBzones_Hh)
   #Add SIZE attribute for the
@@ -405,6 +469,10 @@ LocateHouseholds <- function(L) {
   Out_ls$Year$Bzone$SFDUadj <- as.integer(unname(SFUnits_ls$AdjUnits_Bz))
   Out_ls$Year$Bzone$MFDUadj <- as.integer(unname(MFUnits_ls$AdjUnits_Bz))
   Out_ls$Year$Bzone$GQDUadj <- as.integer(unname(GQUnits_ls$AdjUnits_Bz))
+  #Add the Bzone population and number of households
+  Out_ls$Year$Bzone$Pop <- as.integer(unname(Pop_Bz))
+  Out_ls$Year$Bzone$NumHh <- as.integer(unname(NumHh_Bz))
+  Out_ls$Year$Bzone$NumWkr <- as.integer(unname(Wkr_Bz))
   #Return the outputs list
   Out_ls
 }
