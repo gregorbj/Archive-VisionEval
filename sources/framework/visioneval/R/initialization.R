@@ -829,7 +829,7 @@ parseModelScript <-
     for (i in 1:length(RunModuleCalls_)) {
       Args_ <- getArgs(RunModuleCalls_[i])
       #Error if not all mandatory arguments are matched
-      if (length(Args_) != 3) {
+      if (length(Args_) != 4) {
         Msg <- paste0("runModule call #",
                       i,
                       " has improperly specified arguments.")
