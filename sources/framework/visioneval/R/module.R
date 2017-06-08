@@ -399,6 +399,7 @@ testModule <-
                Print = TRUE)
       ProcessedInputs_ls <- processModuleInputs(Specs_ls, ModuleName)
       if (length(ProcessedInputs_ls$Errors) != 0)  {
+        writeLog(ProcessedInputs_ls$Errors)
         stop("Input files have errors. Check the log for details.")
       }
       inputsToDatastore(ProcessedInputs_ls, Specs_ls, ModuleName)

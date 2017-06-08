@@ -183,6 +183,7 @@ initializeModel <-
         x$Errors != 0
       })))
     if (HasErrors) {
+      writeLog(ProcessedInputs_ls$Errors)
       stop("Input files have errors. Check the log for details.")
     }
 
