@@ -344,10 +344,10 @@ sumValsInDist <- function(DistCutoff, DataToSum_, Lat_, Lng_){
   South <- -180
   East <- 90
   West <- -90
-  MinLng_ <- destPoint(Coord_mx, West, BufferDist)[,1]
-  MaxLng_ <- destPoint(Coord_mx, East, BufferDist)[,1]
-  MinLat_ <- destPoint(Coord_mx, South, BufferDist)[,2]
-  MaxLat_ <- destPoint(Coord_mx, North, BufferDist)[,2]
+  MinLng_ <- geosphere::destPoint(Coord_mx, West, BufferDist)[,1]
+  MaxLng_ <- geosphere::destPoint(Coord_mx, East, BufferDist)[,1]
+  MinLat_ <- geosphere::destPoint(Coord_mx, South, BufferDist)[,2]
+  MaxLat_ <- geosphere::destPoint(Coord_mx, North, BufferDist)[,2]
   #Define function to sum values for Bzones whose centroids are within the
   #specified distance cutoff of a Bzone specified by it's position in the inputs
   sumValsInDist <- function(BzonePos) {
@@ -362,7 +362,7 @@ sumValsInDist <- function(DistCutoff, DataToSum_, Lat_, Lng_){
     OrigLngLat_df <-
       data.frame(lng = Lng_[BzonePos], lat = Lat_[BzonePos])
     Dist_ <-
-      rdist.earth(DestLngLat_df, OrigLngLat_df, miles = TRUE, R = 6371)
+      fields::rdist.earth(DestLngLat_df, OrigLngLat_df, miles = TRUE, R = 6371)
     Data_ <- DataToSum_[Idx_]
     sum(Data_[Dist_ <= DistCutoff])
   }
