@@ -4,12 +4,10 @@
 \alias{adjustHousingSupply}
 \title{Adjusts supply of housing to match total demand for a housing type}
 \usage{
-adjustHousingSupply(TotUnitDiff, Units_Bz)
+adjustHousingSupply(TotUnitTarget, Units_Bz)
 }
 \arguments{
-\item{TotUnitDiff}{An number identifying the total difference in units where
-a positive number indicates more demand than supply and a negative number
-indicates more supply than demand.}
+\item{TotUnitTarget}{An number identifying the total number of units demanded.}
 
 \item{Units_Bz}{A named numeric vector identifying the number of dwelling
 units of the type in each Bzone.}

@@ -4,12 +4,11 @@
 \alias{adjustEmployment}
 \title{Adjusts Bzone employment to match workers}
 \usage{
-adjustEmployment(EmpDiff, Emp_Bz)
+adjustEmployment(EmpTarget, Emp_Bz)
 }
 \arguments{
-\item{EmpDiff}{An number identifying the total difference in employment
-where a positive number indicates more workers than employment and a negative
-number indicates more employment than workers.}
+\item{EmpTarget}{An number identifying the total number of jobs so that each
+worker has a job.}
 
 \item{Emp_Bz}{A named numeric vector identifying the employment of the type
 in each Bzone.}
