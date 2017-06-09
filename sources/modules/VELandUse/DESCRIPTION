@@ -1,6 +1,6 @@
 Package: VELandUse
 Type: Package
-Title: Create Land Use and Transportation System Attributes for VE
+Title: Create Land Use Attributes for VE
 Version: 0.5
 Author: Brian Gregor [aut, cre],
 Maintainer: Brian Gregor <gregorb@or-analytics.com>
