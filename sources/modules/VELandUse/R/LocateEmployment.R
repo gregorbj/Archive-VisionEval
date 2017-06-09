@@ -172,9 +172,8 @@ devtools::use_data(LocateEmploymentSpecifications, overwrite = TRUE)
 #' the total amount of employment for the region equals the total number of
 #' workers for the region.
 #'
-#' @param EmpDiff An number identifying the total difference in employment
-#' where a positive number indicates more workers than employment and a negative
-#' number indicates more employment than workers.
+#' @param EmpTarget An number identifying the total number of jobs so that each
+#' worker has a job.
 #' @param Emp_Bz A named numeric vector identifying the employment of the type
 #' in each Bzone.
 #' @return A list having two components:
@@ -182,16 +181,16 @@ devtools::use_data(LocateEmploymentSpecifications, overwrite = TRUE)
 #' matches workers, and
 #' AdjEmp_Bz A named numeric vector giving the amount of adjustment that was
 #' made to the original employment in each Bzone.
-adjustEmployment <- function(EmpDiff, Emp_Bz) {
-  AdjProbs_Bz <- Emp_Bz / sum(Emp_Bz)
-  AdjEmp_Bz <- Emp_Bz * 0
-  AdjEmp_ <-
-    sample(names(Emp_Bz), abs(EmpDiff), replace = TRUE, prob = AdjProbs_Bz)
-  AdjEmp_Bx <- sign(EmpDiff) * table(AdjEmp_)
-  AdjEmp_Bz[names(AdjEmp_Bx)] <- AdjEmp_Bx
+adjustEmployment <- function(EmpTarget, Emp_Bz) {
+  EmpProbs_Bz <- Emp_Bz / sum(Emp_Bz)
+  RevEmp_Bz <- Emp_Bz * 0
+  RevEmp_ <-
+    sample(names(Emp_Bz), EmpTarget, replace = TRUE, prob = EmpProbs_Bz)
+  RevEmp_Bx <- table(RevEmp_)
+  RevEmp_Bz[names(RevEmp_Bx)] <- RevEmp_Bx
   list(
-    BalancedEmp_Bz = Emp_Bz + AdjEmp_Bz,
-    AdjEmp_Bz = AdjEmp_Bz
+    BalancedEmp_Bz = RevEmp_Bz,
+    AdjEmp_Bz = RevEmp_Bz - Emp_Bz
   )
 }
 
@@ -230,7 +229,7 @@ LocateEmployment <- function(L) {
   names(TotEmp_Bz) <- L$Year$Bzone$Bzone
   TotEmp_ls <-
     adjustEmployment(
-      EmpDiff = TotEmpDiff,
+      EmpTarget = TotWkr,
       Emp_Bz = TotEmp_Bz
     )
   #Calculate adjusted retail employment by Bzone
