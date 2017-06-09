@@ -9,3 +9,5 @@ people,PRSN
 vehicles,VEH
 trips,TRIP
 households,HH
+employment,JOB
+activity,HHJOB
