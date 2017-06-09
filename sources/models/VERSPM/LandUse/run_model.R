@@ -43,5 +43,21 @@ for(Year in getYears()) {
             PackageName = "VESimHouseholds",
             RunFor = "AllYears",
             RunYear = Year)
+  runModule(ModuleName = "LocateHouseholds",
+            PackageName = "VELandUse",
+            RunFor = "AllYears",
+            RunYear = Year)
+  runModule(ModuleName = "LocateEmployment",
+            PackageName = "VELandUse",
+            RunFor = "AllYears",
+            RunYear = Year)
+  runModule(ModuleName = "AssignDevTypes",
+            PackageName = "VELandUse",
+            RunFor = "AllYears",
+            RunYear = Year)
+  runModule(ModuleName = "Calculate4DMeasures",
+            PackageName = "VELandUse",
+            RunFor = "AllYears",
+            RunYear = Year)
 }
 
