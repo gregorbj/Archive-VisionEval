@@ -271,9 +271,7 @@ devtools::use_data(LocateHouseholdsSpecifications, overwrite = TRUE)
 #' supply so that it matches demand. The units of a type in each Bzone are
 #' adjusted in proportion to the total number of units of that type.
 #'
-#' @param TotUnitDiff An number identifying the total difference in units where
-#' a positive number indicates more demand than supply and a negative number
-#' indicates more supply than demand.
+#' @param TotUnitTarget An number identifying the total number of units demanded.
 #' @param Units_Bz A named numeric vector identifying the number of dwelling
 #' units of the type in each Bzone.
 #' @return A list having two components:
@@ -281,16 +279,16 @@ devtools::use_data(LocateHouseholdsSpecifications, overwrite = TRUE)
 #' which matches total demand, and
 #' AdjUnits_Bz A named numeric vector giving the amount of adjustment that was
 #' made to the original number of units in each Bzone.
-adjustHousingSupply <- function(TotUnitDiff, Units_Bz) {
-  AdjProbs_Bz <- Units_Bz / sum(Units_Bz)
-  AdjUnits_Bz <- Units_Bz * 0
-  AdjUnits_ <-
-    sample(names(Units_Bz), abs(TotUnitDiff), replace = TRUE, prob = AdjProbs_Bz)
-  AdjUnits_Bx <- sign(TotUnitDiff) * table(AdjUnits_)
-  AdjUnits_Bz[names(AdjUnits_Bx)] <- AdjUnits_Bx
+adjustHousingSupply <- function(TotUnitTarget, Units_Bz) {
+  UnitProbs_Bz <- Units_Bz / sum(Units_Bz)
+  RevUnits_Bz <- Units_Bz * 0
+  RevUnits_ <-
+    sample(names(Units_Bz), TotUnitTarget, replace = TRUE, prob = UnitProbs_Bz)
+  RevUnits_Bx <- table(RevUnits_)
+  RevUnits_Bz[names(RevUnits_Bx)] <- RevUnits_Bx
   list(
-    BalancedUnits_Bz = Units_Bz + AdjUnits_Bz,
-    AdjUnits_Bz = AdjUnits_Bz
+    BalancedUnits_Bz = RevUnits_Bz,
+    AdjUnits_Bz = RevUnits_Bz - Units_Bz
   )
 }
 
@@ -377,7 +375,7 @@ LocateHouseholds <- function(L) {
   names(SFUnits_Bz) <- L$Year$Bzone$Bzone
   SFUnits_ls <-
     adjustHousingSupply(
-      TotUnitDiff = UnitsDiff_Ht["SF"],
+      TotUnitTarget = Demand_Ht["SF"],
       Units_Bz = SFUnits_Bz
     )
   rm(SFUnits_Bz)
@@ -386,7 +384,7 @@ LocateHouseholds <- function(L) {
   names(MFUnits_Bz) <- L$Year$Bzone$Bzone
   MFUnits_ls <-
     adjustHousingSupply(
-      TotUnitDiff = UnitsDiff_Ht["MF"],
+      TotUnitTarget = Demand_Ht["MF"],
       Units_Bz = MFUnits_Bz
     )
   rm(MFUnits_Bz)
@@ -395,7 +393,7 @@ LocateHouseholds <- function(L) {
   names(GQUnits_Bz) <- L$Year$Bzone$Bzone
   GQUnits_ls <-
     adjustHousingSupply(
-      TotUnitDiff = UnitsDiff_Ht["GQ"],
+      TotUnitTarget = Demand_Ht["GQ"],
       Units_Bz = GQUnits_Bz
     )
   rm(GQUnits_Bz)
