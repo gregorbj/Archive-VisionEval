@@ -1,0 +1,13 @@
+Type,Units
+currency,USD
+distance,MI
+area,SQMI
+mass,LB
+volume,GAL
+time,DAY
+people,PRSN
+vehicles,VEH
+trips,TRIP
+households,HH
+employment,JOB
+activity,HHJOB
