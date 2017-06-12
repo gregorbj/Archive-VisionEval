@@ -94,7 +94,6 @@ AssignDevTypesSpecifications <- list(
       GROUP = "Year",
       TYPE = "character",
       UNITS = "ID",
-      NAVALUE = "NA",
       PROHIBIT = "",
       ISELEMENTOF = ""
     ),
@@ -104,7 +103,6 @@ AssignDevTypesSpecifications <- list(
       GROUP = "Year",
       TYPE = "character",
       UNITS = "dwelling type",
-      NAVALUE = -1,
       PROHIBIT = "",
       ISELEMENTOF = c("SF", "MF", "GQ")
     ),
@@ -114,8 +112,16 @@ AssignDevTypesSpecifications <- list(
       GROUP = "Year",
       TYPE = "character",
       UNITS = "dwelling type",
-      NAVALUE = -1,
       PROHIBIT = "",
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "HhSize",
+      TABLE = "Household",
+      GROUP = "Year",
+      TYPE = "people",
+      UNITS = "PRSN",
+      PROHIBIT = c("NA", "<= 0"),
       ISELEMENTOF = ""
     )
   ),
@@ -131,6 +137,28 @@ AssignDevTypesSpecifications <- list(
       PROHIBIT = "NA",
       ISELEMENTOF = c("Urban", "Rural"),
       SIZE = 5
+    ),
+    item(
+      NAME = "UrbanPop",
+      TABLE = "Bzone",
+      GROUP = "Year",
+      TYPE = "people",
+      UNITS = "PRSN",
+      NAVALUE = -1,
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      SIZE = 0
+    ),
+    item(
+      NAME = "RuralPop",
+      TABLE = "Bzone",
+      GROUP = "Year",
+      TYPE = "people",
+      UNITS = "PRSN",
+      NAVALUE = -1,
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      SIZE = 0
     )
   )
 )
@@ -207,11 +235,24 @@ AssignDevTypes <- function(L) {
   DevType_ <- rep("Rural", NumHh)
   DevType_[runif(NumHh) <= UrbanProb_] <- "Urban"
 
+  #Calculate urban and rural population by Bzone
+  #---------------------------------------------
+  Pop_BzDt <-
+    tapply(L$Year$Household$HhSize,
+           list(L$Year$Household$Bzone, DevType_),
+           sum)[Bz,Dt]
+  Pop_BzDt[is.na(Pop_BzDt)] <- 0
+
   #Return list of results
   #----------------------
   Out_ls <- initDataList()
   Out_ls$Year$Household <-
     list(DevType = DevType_)
+  Out_ls$Year$Bzone <-
+    list(
+      UrbanPop = unname(Pop_BzDt[,"Urban"]),
+      RuralPop = unname(Pop_BzDt[,"Rural"])
+    )
   Out_ls
 }
 
