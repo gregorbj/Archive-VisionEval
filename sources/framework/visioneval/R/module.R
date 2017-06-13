@@ -280,7 +280,9 @@ checkModuleOutputs <-
 #' outputs meet the module's Set specifications. The latter check is carried out
 #' in large part by the checkModuleOutputs function that is called.
 #' #'
-#' @param ModuleName A string identifying the module name.
+#' @param ModuleName A string identifying the module name; may contain prefix for PackageName
+#' @param ProjectDir A string identifying the location of a project. ParamDir ("defs/") can be
+#' specified as being relative to ProjectDir, similarly for "Inputs/".
 #' @param ParamDir A string identifying the location of the directory where
 #' the run parameters, model parameters, and geography definition files are
 #' located. The default value is defs. This directory should be located in the
@@ -316,6 +318,7 @@ checkModuleOutputs <-
 #' @export
 testModule <-
   function(ModuleName,
+           ProjectDir = NULL,
            ParamDir = "defs",
            RunParamFile = "run_parameters.json",
            GeoFile = "geo.csv",
@@ -324,10 +327,28 @@ testModule <-
            SaveDatastore = TRUE,
            DoRun = TRUE) {
 
-    #Set working directory to tests and return to main module directory on exit
-    #--------------------------------------------------------------------------
-    setwd("tests")
-    on.exit(setwd("../"))
+    PkgModuleName <- unlist(strsplit(ModuleName, "::"))
+    if (length(PkgModuleName)==2) {
+      PackageName <- PkgModuleName[1]
+      ModuleName <- PkgModuleName[2]
+      library(PackageName, character.only=TRUE)
+      on.exit(detach(paste0("package:", PackageName), unload=TRUE, character.only=TRUE))
+    } else {
+      PackageName <- NULL
+
+    }
+
+    if ((!is.null(ProjectDir)) && file.exists(ProjectDir)) {
+      ParamDir <- file.path(ProjectDir, ParamDir)
+      InputsDir <- file.path(ProjectDir, "inputs")
+    } else {
+      #Set working directory to tests and return to main module directory on exit
+      #--------------------------------------------------------------------------
+      setwd("tests")
+      on.exit(setwd("../"))
+
+      InputsDir  <- "inputs"
+    }
 
     #Initialize model state and log files
     #------------------------------------
@@ -342,6 +363,10 @@ testModule <-
     if (LoadDatastore) {
       writeLog("Attempting to load datastore.", Print = TRUE)
       DatastoreName <- getModelState()[["DatastoreName"]]
+      # Datastore file is assumed to be in ProjectDir if ProjectDir is not NULL
+      if ((!is.null(ProjectDir)) && file.exists(ProjectDir)) {
+        DatastoreName <- file.path(ProjectDir, DatastoreName)
+      }
       if (!file.exists(DatastoreName)) {
         Msg <-
           paste0("LoadDatastore argument is TRUE but the datastore file ",
@@ -352,6 +377,7 @@ testModule <-
       }
       loadDatastore(
         FileToLoad = DatastoreName,
+        Dir = ParamDir,
         GeoFile = GeoFile,
         SaveDatastore = FALSE
       )
@@ -369,8 +395,12 @@ testModule <-
     #------------------------------------------------------------
     loadSpec <- function() {
       SpecsName <- paste0(ModuleName, "Specifications")
-      SpecsFileName <- paste0("../data/", SpecsName, ".rda")
-      load(SpecsFileName)
+      if (is.null(PackageName)) {
+        SpecsFileName <- file.path("../data", paste0(SpecsName, ".rda"))
+        load(SpecsFileName)
+      } else {
+        data(list=SpecsName, package=PackageName)
+      }
       return(processModuleSpecs(get(SpecsName)))
     }
     writeLog("Attempting to load and check specifications.", Print = TRUE)
@@ -397,7 +427,7 @@ testModule <-
 
       writeLog("Attempting to process, check and load module inputs.",
                Print = TRUE)
-      ProcessedInputs_ls <- processModuleInputs(Specs_ls, ModuleName)
+      ProcessedInputs_ls <- processModuleInputs(Specs_ls, ModuleName, Dir=InputsDir)
       if (length(ProcessedInputs_ls$Errors) != 0)  {
         writeLog(ProcessedInputs_ls$Errors)
         stop("Input files have errors. Check the log for details.")

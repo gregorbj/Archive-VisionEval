@@ -285,8 +285,8 @@ writeLog <- function(Msg = "", Print = FALSE) {
 #'   and the contents of the loaded datastore. If the stored file does not exist
 #'   an error is thrown.
 #' @export
-loadDatastore <- function(FileToLoad, GeoFile, SaveDatastore = TRUE) {
-  GeoFile <- paste0("defs/", GeoFile)
+loadDatastore <- function(FileToLoad, Dir="defs/", GeoFile, SaveDatastore = TRUE) {
+  GeoFile <- file.path(Dir, GeoFile)
   G <- getModelState()
   #If data store exists, rename
   DatastoreName <- G$DatastoreName
