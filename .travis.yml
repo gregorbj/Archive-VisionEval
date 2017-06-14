@@ -9,7 +9,7 @@ warnings_are_errors: false
 
 # Specify folder
 install:
-  - Rscript -e 'install.packages("devtools")'
+  - Rscript -e 'install.packages(c("devtools", "roxygen2"))'
 script:
   - cd sources/framework
   - Rscript -e 'devtools::install_deps("visioneval")'
