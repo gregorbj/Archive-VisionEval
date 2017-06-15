@@ -2,11 +2,13 @@
 #source("R/AssignTransitService.R")
 library(visioneval)
 
-ProjectDir <- normalizePath("./tests")
+TestDir <- normalizePath(".")
+if (!endsWith(TestDir, 'tests'))
+  TestDir <- file.path(TestDir, 'tests')
 
 testModule(
   ModuleName = "VETransportSupply::AssignTransitService",
-  ProjectDir = ProjectDir,
+  ProjectDir = TestDir,
   ParamDir = "defs",
   LoadDatastore = TRUE,
   SaveDatastore = TRUE,
@@ -17,7 +19,7 @@ testModule(
 #source("R/AssignRoadMiles.R")
 testModule(
   ModuleName = "VETransportSupply::AssignRoadMiles",
-  ProjectDir = ProjectDir,
+  ProjectDir = TestDir,
   ParamDir = "defs",
   LoadDatastore = TRUE,
   SaveDatastore = TRUE,

@@ -399,7 +399,8 @@ testModule <-
         SpecsFileName <- file.path("../data", paste0(SpecsName, ".rda"))
         load(SpecsFileName)
       } else {
-        data(list=SpecsName, package=PackageName)
+        data(list=SpecsName, package=PackageName, 
+             envir=environment())
       }
       return(processModuleSpecs(get(SpecsName)))
     }

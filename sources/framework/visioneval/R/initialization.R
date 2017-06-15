@@ -272,6 +272,8 @@ writeLog <- function(Msg = "", Print = FALSE) {
 #' @param FileToLoad A string identifying the full path name to the saved
 #'   datastore. Path name can either be relative to the working directory or
 #'   absolute.
+#' @param Dir A string identifying the path of the geography definition file (GeoFile),
+#'   default to 'defs' relative to the working directory  
 #' @param GeoFile A string identifying the name of the geography definition file
 #'   (see 'readGeography' function) that is consistent with the saved datastore.
 #'   The geography definition file must be located in the 'defs' directory.

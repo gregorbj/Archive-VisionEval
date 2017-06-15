@@ -12,6 +12,11 @@ install:
   - Rscript -e 'install.packages(c("devtools", "roxygen2")); devtools::install_bioc("rhdf5")'
 env:
   - TEST_DIR=sources/framework/visioneval
+  - TEST_DIR=sources/modules/VEAltModes
+  - TEST_DIR=sources/modules/vedemo1
+  - TEST_DIR=sources/modules/VELandUse
+  - TEST_DIR=sources/modules/VESimHouseholds
+  - TEST_DIR=sources/modules/VESyntheticFirms
   - TEST_DIR=sources/modules/VETransportSupply
 script:
   - cd $TEST_DIR
