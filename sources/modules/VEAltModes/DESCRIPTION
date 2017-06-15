@@ -19,3 +19,4 @@ Suggests:
     knitr
 VignetteBuilder: knitr
 RoxygenNote: 5.0.1
+Remotes: gregorbj/VisionEval/sources/framework/visioneval@develop

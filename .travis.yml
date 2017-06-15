@@ -13,6 +13,10 @@ install:
 
 env:
   - TEST_DIR=sources/framework/visioneval
+  - TEST_DIR=sources/modules/VEAltModes
+  - TEST_DIR=sources/modules/VELandUse
+  - TEST_DIR=sources/modules/VESimHouseholds
+  - TEST_DIR=sources/modules/VESyntheticFirms
   - TEST_DIR=sources/modules/VETransportSupply
 
 script:
