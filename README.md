@@ -101,3 +101,7 @@ runGitHub("gregorbj/VisionEval", subdir="sources/VEGUI", ref="develop")
   4. Navigate to and run the VERSPM run_model.R script
 
 Ensure these operations complete successfully before finalizing commits to develop.
+
+# Build Status 
+
+[![Travis-CI Build Status](https://travis-ci.org/cities-lab/VisionEval.svg?branch=develop)](https://travis-ci.org/cities-lab/VisionEval)
