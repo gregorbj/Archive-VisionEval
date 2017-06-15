@@ -10,9 +10,11 @@ warnings_are_errors: false
 install:
   - Rscript -e 'install.packages(c("devtools", "roxygen2", "stringr", "knitr"))'
   - Rscript -e 'devtools::install_github(c("BiocInstaller", "rhdf5"))'
+
 env:
   - TEST_DIR=sources/framework/visioneval
   - TEST_DIR=sources/modules/VETransportSupply
+
 script:
   - cd $TEST_DIR
   - Rscript -e 'devtools::install_deps(".")'
