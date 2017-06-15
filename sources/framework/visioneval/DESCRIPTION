@@ -28,5 +28,3 @@ Imports:
     rhdf5,
     stringr
 RoxygenNote: 6.0.1
-Remotes: 
-    Bioconductor-mirror/rhdf5
