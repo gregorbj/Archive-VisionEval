@@ -9,7 +9,8 @@ warnings_are_errors: false
 
 # Specify folder
 install:
-  - Rscript -e 'install.packages(c("devtools", "roxygen2")); devtools::install_bioc("rhdf5")'
+  - Rscript -e 'install.packages(c("devtools", "roxygen2", "stringr"))'
+  - Rscript -e 'devtools::install_bioc("rhdf5")'
 env:
   - TEST_DIR=sources/framework/visioneval
   - TEST_DIR=sources/modules/VEAltModes
