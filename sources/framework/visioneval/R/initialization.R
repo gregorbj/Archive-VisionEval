@@ -272,6 +272,8 @@ writeLog <- function(Msg = "", Print = FALSE) {
 #' @param FileToLoad A string identifying the full path name to the saved
 #'   datastore. Path name can either be relative to the working directory or
 #'   absolute.
+#' @param Dir A string identifying the path of the geography definition file (GeoFile),
+#'   default to 'defs' relative to the working directory  
 #' @param GeoFile A string identifying the name of the geography definition file
 #'   (see 'readGeography' function) that is consistent with the saved datastore.
 #'   The geography definition file must be located in the 'defs' directory.
@@ -285,8 +287,8 @@ writeLog <- function(Msg = "", Print = FALSE) {
 #'   and the contents of the loaded datastore. If the stored file does not exist
 #'   an error is thrown.
 #' @export
-loadDatastore <- function(FileToLoad, GeoFile, SaveDatastore = TRUE) {
-  GeoFile <- paste0("defs/", GeoFile)
+loadDatastore <- function(FileToLoad, Dir="defs/", GeoFile, SaveDatastore = TRUE) {
+  GeoFile <- file.path(Dir, GeoFile)
   G <- getModelState()
   #If data store exists, rename
   DatastoreName <- G$DatastoreName

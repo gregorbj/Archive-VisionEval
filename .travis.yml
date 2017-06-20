@@ -1,0 +1,25 @@
+# R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
+
+language: R
+sudo: false
+cache: packages
+
+# Be strict when checking our package
+warnings_are_errors: false
+
+install:
+  - Rscript -e 'install.packages(c("devtools", "roxygen2", "stringr", "knitr"))'
+  - Rscript -e 'devtools::install_bioc(c("BiocInstaller", "rhdf5"))'
+
+env:
+  - TEST_DIR=sources/framework/visioneval
+  - TEST_DIR=sources/modules/VEAltModes
+  - TEST_DIR=sources/modules/VELandUse
+  - TEST_DIR=sources/modules/VESimHouseholds
+  - TEST_DIR=sources/modules/VESyntheticFirms
+  - TEST_DIR=sources/modules/VETransportSupply
+
+script:
+  - cd $TEST_DIR
+  - Rscript -e 'devtools::install_deps(".")'
+  - Rscript -e 'devtools::check(".")'
