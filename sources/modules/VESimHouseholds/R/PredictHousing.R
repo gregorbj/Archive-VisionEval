@@ -47,11 +47,11 @@ library(visioneval)
 #' tested in the model. The function estimates the model using these terms
 #' and then drops all terms whose p value is greater than 0.05.
 #' @return A list which has the following components:
-#' Type: a string identifying the type of model ("linear"),
+#' Type: a string identifying the type of model ("binomial"),
 #' Formula: a string representation of the model equation,
-#' PrepFun: a function that prepares inputs to be applied in the linear model,
-#' OutFun: a function that transforms the result of applying the linear model.
-#' Summary: the summary of the linear model estimation results.
+#' PrepFun: a function that prepares inputs to be applied in the binomial model,
+#' OutFun: a function that transforms the result of applying the binomial model.
+#' Summary: the summary of the binomial model estimation results.
 #' @import visioneval
 #Define function to estimate the income model
 estimateHousingModel <- function(Data_df, StartTerms_) {
