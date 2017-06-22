@@ -147,5 +147,7 @@ var edges = new vis.DataSet([
 {"from":61,"to":64,"arrows":"to"},
 {"from":61,"to":8,"arrows":"to"},
 {"from":63,"to":5,"arrows":"to"},
-{"from":64,"to":58,"arrows":"to"}
+{"from":64,"to":58,"arrows":"to"},
+{"from":67,"to":65,"arrows":"to"},
+{"from":67,"to":20,"arrows":"to"}
 ]);
