@@ -1628,6 +1628,79 @@
     [
       "Types"
     ]
-  }    
+  },
+  
+  {
+    "Name": "readVENameRegistry",
+    "Group": "developer",
+    "Description": "Reads the VisionEval name registry and returns a list of data frames containing the Inp and Set specifications.",
+    "Arguments":
+    [
+      {
+        "Name": "NameRegistryDir",
+        "Description": "A string identifying the path to the directory where the name registry file is located."
+      }
+    ],
+    "Return": "A list having two components: Inp and Set. Each component is a data frame containing the respective Inp and Set specifications of registered modules.",
+    "Calls":
+    [
+    ]
+  },
+  
+  {
+    "Name": "getRegisteredGetSpecs",
+    "Group": "developer",
+    "Description": "Returns a data frame of Get specifications for datasets in the VisionEval name registry.",
+    "Arguments":
+    [
+      {
+        "Name": "Names_",
+        "Description": "A character vector of the dataset names to get specifications for."
+      },
+      {
+        "Name": "Tables_",
+        "Description": "A character vector of the tables that the datasets are a part of."
+      },
+      {
+        "Name": "Groups_",
+        "Description": "A character vector of the groups that the tables are a part of."
+      },
+      {
+        "Name": "NameRegistryDir",
+        "Description": "A string identifying the path to the directory where the name registry file is located."
+      }
+    ],
+    "Return": "A list having two components: Inp and Set. Each component is a data frame containing the respective Inp and Set specifications of registered modules.",
+    "Calls":
+    [
+    ]
+  },
+  
+  {
+    "Name": "writeVENameRegistry",
+    "Group": "developer",
+    "Description": "Writes module Inp and Set specifications to the VisionEval name registry.",
+    "Arguments":
+    [
+      {
+        "Name": "ModuleName",
+        "Description": "A string identifying the module name."
+      },
+      {
+        "Name": "PackageName",
+        "Description": "A string identifying the package name."
+      },
+      {
+        "Name": "NameRegistryDir",
+        "Description": "A string identifying the path to the directory where the name registry file is located."
+      }
+    ],
+    "Return": "TRUE if successful. Has a side effect of updating the VisionEval name registry.",
+    "Calls":
+    [
+      "readVENameRegistry",
+      "processModuleSpecs"
+    ]
+  }
   
 ]
