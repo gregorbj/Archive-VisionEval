@@ -20,3 +20,4 @@ Suggests:
     knitr
 VignetteBuilder: knitr
 RoxygenNote: 6.0.1
+Remotes: cities-lab/VisionEval/sources/framework/visioneval@develop
