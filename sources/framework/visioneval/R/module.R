@@ -856,3 +856,156 @@ applyLinearModel <-
     }
     Result_
   }
+
+
+#WRITE TO THE VISIONEVAL NAME REGISTRY
+#=====================================
+#' Writes module Inp and Set specifications to the VisionEval name registry.
+#'
+#' \code{writeVENameRegistry} writes module Inp and Set specifications to the
+#' VisionEval name registry.
+#'
+#' The VisionEval name registry (VENameRegistry.json) keeps track of the
+#' dataset names created by all registered modules by reading in datasets
+#' specified in the module Inp specifications or by returning calculated
+#' datasets as specified in the module Set specifications. This functions adds
+#' the Inp and Set specifications for a module to the registry. It removes any
+#' existing entries for the module first.
+#'
+#' @param ModuleName a string identifying the module name.
+#' @param PackageName a string identifying the package name.
+#' @param NameRegistryDir a string identifying the path to the directory
+#' where the name registry file is located.
+#' @return TRUE if successful. Has a side effect of updating the VisionEval
+#' name registry.
+#' @export
+writeVENameRegistry <-
+  function(ModuleName, PackageName, NameRegistryDir = "..") {
+    #Check whether the name registry file exists
+    NameRegistryFile <- file.path(NameRegistryDir, "VENameRegistry.json")
+    if (!file.exists(NameRegistryFile)) {
+      stop("VENameRegistry.json file is not present in the identified directory.")
+    }
+    #Read in the name registry file as a list
+    NameRegistry_ls <-
+      fromJSON(readLines(NameRegistryFile), simplifyDataFrame = FALSE)
+    #Remove any existing registry entries for the module
+    for (x in c("Inp", "Set")) {
+      NameRegistry_df <- readVENameRegistry()
+      ExistingModuleEntries_ <-
+        NameRegistry_df[[x]]$MODULE == ModuleName &
+        NameRegistry_df[[x]]$PACKAGE == PackageName
+      NameRegistry_ls[[x]] <- NameRegistry_ls[[x]][!ExistingModuleEntries_]
+    }
+    #Process the Inp and Set specifications
+    ModuleSpecs_ls <- processModuleSpecs(getModuleSpecs(ModuleName, PackageName))
+    Inp_ls <-
+      lapply(ModuleSpecs_ls$Inp, function(x) {
+        x$PACKAGE <- PackageName
+        x$MODULE <- ModuleName
+        x
+      })
+    Set_ls <-
+      lapply(ModuleSpecs_ls$Set, function(x) {
+        x$PACKAGE <- PackageName
+        x$MODULE <- ModuleName
+        x
+      })
+    #Add the the module specifications to the registry
+    NameRegistry_ls$Inp <- c(NameRegistry_ls$Inp, Inp_ls)
+    NameRegistry_ls$Set <- c(NameRegistry_ls$Set, Set_ls)
+    #Save the revised name registry
+    writeLines(toJSON(NameRegistry_ls), NameRegistryFile)
+    TRUE
+  }
+
+
+#READ THE VISIONEVAL NAME REGISTRY
+#=================================
+#' Reads the VisionEval name registry.
+#'
+#' \code{readVENameRegistry} reads the VisionEval name registry and returns a
+#' list of data frames containing the Inp and Set specifications.
+#'
+#' The VisionEval name registry (VENameRegistry.json) keeps track of the
+#' dataset names created by all registered modules by reading in datasets
+#' specified in the module Inp specifications or by returning calculated
+#' datasets as specified in the module Set specifications. This function reads
+#' the VisionEval name registry and returns a list of data frames containing the
+#' registered Inp and Set specifications.
+#'
+#' @param NameRegistryDir a string identifying the path to the directory
+#' where the name registry file is located.
+#' @return A list having two components: Inp and Set. Each component is a data
+#' frame containing the respective Inp and Set specifications of registered
+#' modules.
+#' @export
+readVENameRegistry <-
+  function(NameRegistryDir = "..") {
+    #Check whether the name registry file exists
+    NameRegistryFile <- file.path(NameRegistryDir, "VENameRegistry.json")
+    if (!file.exists(NameRegistryFile)) {
+      stop("VENameRegistry.json file is not present in the identified directory.")
+    }
+    #Read in the name registry file
+    fromJSON(readLines(NameRegistryFile))
+  }
+
+
+#GET REGISTERED GET SPECIFICATIONS
+#=================================
+#' Returns Get specifications for registered datasets.
+#'
+#' \code{getRegisteredGetSpecs} returns properly formatted list of Get
+#' specifications for datasets in the VisionEval name registry.
+#'
+#' The VisionEval name registry (VENameRegistry.json) keeps track of the
+#' dataset names created by all registered modules by reading in datasets
+#' specified in the module Inp specifications or by returning calculated
+#' datasets as specified in the module Set specifications. This function
+#' reads in the name registry and returns properly formatted Get specifications
+#' for identified datasets.
+#'
+#' @param Names_ A character vector of the dataset names to get specifications
+#' for.
+#' @param Tables_ A character vector of the tables that the datasets are a part
+#' of.
+#' @param Groups_ A character vector of the groups that the tables are a part of.
+#' @param NameRegistryDir a string identifying the path to the directory
+#' where the name registry file is located.
+#' @return A list containing the properly formatted Get specifications for the
+#' identified datasets.
+#' @export
+getRegisteredGetSpecs <-
+  function(Names_, Tables_, Groups_, NameRegistryDir = "..") {
+    #Put Names_, Tables_, Groups_ into data frame
+    Datasets_df <-
+      data.frame(
+        NAME = Names_,
+        TABLE = Tables_,
+        GROUP = Groups_
+      )
+    #Check whether the name registry file exists
+    NameRegistryFile <- file.path(NameRegistryDir, "VENameRegistry.json")
+    if (!file.exists(NameRegistryFile)) {
+      stop("VENameRegistry.json file is not present in the identified directory.")
+    }
+    #Read in the name registry file
+    NameRegistry_df <- fromJSON(readLines(NameRegistryFile))
+    #Identify attributes to return
+    AttrNames_ <-
+      c("NAME", "TABLE", "GROUP", "TYPE", "UNITS", "PROHIBIT", "ISELEMENTOF")
+    #Define function to return records matching criteria
+    extractRecords <- function(Data_df) {
+      ToGetIdxNames_ <- apply(Datasets_df, 1, paste, collapse = "-")
+      DataIdxNames_ <- apply(Data_df[,c("NAME", "TABLE", "GROUP")], 1, paste, collapse = "-")
+      Data_df <- Data_df[DataIdxNames_ %in% ToGetIdxNames_, AttrNames_]
+    }
+    #Extract the specifications to be returned
+    Specs_df <-
+      rbind(extractRecords(NameRegistry_df$Inp),
+            extractRecords(NameRegistry_df$Set))
+    #Return data frame of identified Get specifications
+    Specs_df
+  }
+
