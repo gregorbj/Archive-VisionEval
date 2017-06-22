@@ -4,7 +4,7 @@
 \alias{readVENameRegistry}
 \title{Reads the VisionEval name registry.}
 \usage{
-readVENameRegistry(NameRegistryDir = "..")
+readVENameRegistry(NameRegistryDir = NULL)
 }
 \arguments{
 \item{NameRegistryDir}{a string identifying the path to the directory

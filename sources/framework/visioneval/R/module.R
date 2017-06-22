@@ -880,9 +880,13 @@ applyLinearModel <-
 #' name registry.
 #' @export
 writeVENameRegistry <-
-  function(ModuleName, PackageName, NameRegistryDir = "..") {
+  function(ModuleName, PackageName, NameRegistryDir = NULL) {
     #Check whether the name registry file exists
-    NameRegistryFile <- file.path(NameRegistryDir, "VENameRegistry.json")
+    if (is.null(NameRegistryDir)) {
+      NameRegistryFile <- "VENameRegistry.json"
+    } else {
+      NameRegistryFile <- file.path(NameRegistryDir, "VENameRegistry.json")
+    }
     if (!file.exists(NameRegistryFile)) {
       stop("VENameRegistry.json file is not present in the identified directory.")
     }
@@ -941,9 +945,13 @@ writeVENameRegistry <-
 #' modules.
 #' @export
 readVENameRegistry <-
-  function(NameRegistryDir = "..") {
+  function(NameRegistryDir = NULL) {
     #Check whether the name registry file exists
-    NameRegistryFile <- file.path(NameRegistryDir, "VENameRegistry.json")
+    if (is.null(NameRegistryDir)) {
+      NameRegistryFile <- "VENameRegistry.json"
+    } else {
+      NameRegistryFile <- file.path(NameRegistryDir, "VENameRegistry.json")
+    }
     if (!file.exists(NameRegistryFile)) {
       stop("VENameRegistry.json file is not present in the identified directory.")
     }
@@ -977,7 +985,7 @@ readVENameRegistry <-
 #' datasets.
 #' @export
 getRegisteredGetSpecs <-
-  function(Names_, Tables_, Groups_, NameRegistryDir = "..") {
+  function(Names_, Tables_, Groups_, NameRegistryDir = NULL) {
     #Put Names_, Tables_, Groups_ into data frame
     Datasets_df <-
       data.frame(
@@ -986,7 +994,11 @@ getRegisteredGetSpecs <-
         GROUP = Groups_
       )
     #Check whether the name registry file exists
-    NameRegistryFile <- file.path(NameRegistryDir, "VENameRegistry.json")
+    if (is.null(NameRegistryDir)) {
+      NameRegistryFile <- "VENameRegistry.json"
+    } else {
+      NameRegistryFile <- file.path(NameRegistryDir, "VENameRegistry.json")
+    }
     if (!file.exists(NameRegistryFile)) {
       stop("VENameRegistry.json file is not present in the identified directory.")
     }

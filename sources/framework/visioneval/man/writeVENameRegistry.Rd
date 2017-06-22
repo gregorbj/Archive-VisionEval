@@ -4,7 +4,7 @@
 \alias{writeVENameRegistry}
 \title{Writes module Inp and Set specifications to the VisionEval name registry.}
 \usage{
-writeVENameRegistry(ModuleName, PackageName, NameRegistryDir = "..")
+writeVENameRegistry(ModuleName, PackageName, NameRegistryDir = NULL)
 }
 \arguments{
 \item{ModuleName}{a string identifying the module name.}
@@ -27,5 +27,6 @@ The VisionEval name registry (VENameRegistry.json) keeps track of the
 dataset names created by all registered modules by reading in datasets
 specified in the module Inp specifications or by returning calculated
 datasets as specified in the module Set specifications. This functions adds
-the Inp and Set specifications for a module to the registry.
+the Inp and Set specifications for a module to the registry. It removes any
+existing entries for the module first.
 }

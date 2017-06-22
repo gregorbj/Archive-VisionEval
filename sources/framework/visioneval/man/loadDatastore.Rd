@@ -4,12 +4,15 @@
 \alias{loadDatastore}
 \title{Load saved datastore.}
 \usage{
-loadDatastore(FileToLoad, GeoFile, SaveDatastore = TRUE)
+loadDatastore(FileToLoad, Dir = "defs/", GeoFile, SaveDatastore = TRUE)
 }
 \arguments{
 \item{FileToLoad}{A string identifying the full path name to the saved
 datastore. Path name can either be relative to the working directory or
 absolute.}
+
+\item{Dir}{A string identifying the path of the geography definition file (GeoFile),
+default to 'defs' relative to the working directory}
 
 \item{GeoFile}{A string identifying the name of the geography definition file
 (see 'readGeography' function) that is consistent with the saved datastore.
