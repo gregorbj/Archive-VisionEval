@@ -59,6 +59,10 @@ for(Year in getYears()) {
             PackageName = "VELandUse",
             RunFor = "AllYears",
             RunYear = Year)
+  runModule(ModuleName = "CalculateUrbanMixMeasure",
+            PackageName = "VELandUse",
+            RunFor = "AllYears",
+            RunYear = Year)
   runModule(ModuleName = "AssignTransitService",
             PackageName = "VETransportSupply",
             RunFor = "AllYears",
