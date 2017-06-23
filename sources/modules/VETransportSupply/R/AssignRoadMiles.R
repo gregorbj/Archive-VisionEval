@@ -249,9 +249,9 @@ AssignRoadMiles <- function(L) {
 #module's Set specifications. It is also important to run this code if one or
 #more other modules in the package need the dataset(s) produced by this module.
 #
-# testModule(
-#   ModuleName = "AssignRoadMiles",
-#   LoadDatastore = TRUE,
-#   SaveDatastore = TRUE,
-#   DoRun = TRUE
-# )
+testModule(
+  ModuleName = "AssignRoadMiles",
+  LoadDatastore = TRUE,
+  SaveDatastore = TRUE,
+  DoRun = TRUE
+)
