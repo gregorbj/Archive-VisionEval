@@ -43,7 +43,7 @@ library(visioneval)
 #' This function estimates a binomial logit model for predicting whether a
 #' household is living in an urban mixed-use neighborhood.
 #'
-#' @param Data_df A data frame containing estimation data.
+#' @param EstData_df A data frame containing estimation data.
 #' @param StartTerms_ A character vector of the terms of the model to be
 #' tested in the model. The function estimates the model using these terms
 #' and then drops all terms whose p value is greater than 0.05.
@@ -85,16 +85,22 @@ estimateUrbanMixModel <- function(EstData_df, StartTerms_) {
 #Estimate the binomial logit model for urban mixed-use
 #-----------------------------------------------------
 #Create model estimation dataset
+NhtsHometype_ <- VE2001NHTS::Hh_df$Hometype
+HouseType_ <- rep("SF", length(NhtsHometype_))
+HouseType_[NhtsHometype_ == "Dorm"] <- "GQ"
+HouseType_[NhtsHometype_ %in% c("Duplex", "Multi-family", "Other")] <- "MF"
 Data_df <-
   data.frame(
     UrbanMix = VE2001NHTS::Hh_df$Urban,
-    LocalPopDensity = VE2001NHTS::Hh_df$Hbppopdn)
-Data_df <- Data_df[!is.na(Data_df$LocalPopDensity),]
+    LocalPopDensity = VE2001NHTS::Hh_df$Hbppopdn,
+    IsSF = as.numeric(HouseType_ == "SF"))
+Data_df <- Data_df[complete.cases(Data_df),]
+rm(NhtsHometype_, HouseType_)
 #Estimate the model
 UrbanMixModel_ls <-
   estimateUrbanMixModel(
     EstData_df = Data_df,
-    StartTerms_ = "LocalPopDensity"
+    StartTerms_ = c("LocalPopDensity", "IsSF")
   )
 #Test a search range for matching proportions
 UrbanMixModel_ls$SearchRange <- c(-10, 10)
@@ -153,7 +159,7 @@ devtools::use_data(UrbanMixModel_ls, overwrite = TRUE)
 #------------------------------
 CalculateUrbanMixMeasureSpecifications <- list(
   #Level of geography module is applied at
-  RunBy = "Bzone",
+  RunBy = "Region",
   #Specify new tables to be created by Inp if any
   #Specify new tables to be created by Set if any
   #Specify input data
@@ -185,6 +191,15 @@ CalculateUrbanMixMeasureSpecifications <- list(
       ISELEMENTOF = ""
     ),
     item(
+      NAME = "NumHh",
+      TABLE = "Bzone",
+      GROUP = "Year",
+      TYPE = "households",
+      UNITS = "HH",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = ""
+    ),
+    item(
       NAME =
         items(
           "UrbanPop",
@@ -193,7 +208,6 @@ CalculateUrbanMixMeasureSpecifications <- list(
       GROUP = "Year",
       TYPE = "people",
       UNITS = "PRSN",
-      NAVALUE = -1,
       PROHIBIT = c("NA", "<= 0"),
       ISELEMENTOF = ""
     ),
@@ -206,43 +220,49 @@ CalculateUrbanMixMeasureSpecifications <- list(
       GROUP = "Year",
       TYPE = "area",
       UNITS = "SQMI",
-      NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = ""
     ),
     item(
-      NAME = "Bzone",
+      NAME = "MixUseProp",
       TABLE = "Bzone",
       GROUP = "Year",
-      TYPE = "character",
-      UNITS = "ID",
-      NAVALUE = "NA",
-      PROHIBIT = "",
+      TYPE = "double",
+      UNITS = "proportion",
+      PROHIBIT = c("< 0", "> 1"),
       ISELEMENTOF = ""
     ),
     item(
-      NAME = "HhId",
-      TABLE = "Bzone",
+      NAME = "Bzone",
+      TABLE = "Household",
       GROUP = "Year",
       TYPE = "character",
       UNITS = "ID",
-      NAVALUE = "NA",
-      PROHIBIT = "",
+      PROHIBIT = "NA",
       ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "HouseType",
+      TABLE = "Household",
+      GROUP = "Year",
+      TYPE = "character",
+      UNITS = "dwelling type",
+      PROHIBIT = "",
+      ISELEMENTOF = c("SF", "MF", "GQ")
     )
   ),
   #Specify data to saved in the data store
   Set = items(
     item(
       NAME = "IsUrbanMixNbrhd",
-      TABLE = "Bzone",
+      TABLE = "Household",
       GROUP = "Year",
       TYPE = "integer",
       UNITS = "binary",
       NAVALUE = -1,
       PROHIBIT = c("NA"),
       ISELEMENTOF = c(0, 1),
-      SIZE = 1
+      SIZE = 0
     )
   )
 )
@@ -262,9 +282,9 @@ CalculateUrbanMixMeasureSpecifications <- list(
 #'  \item{Get}{module inputs to be read from the datastore}
 #'  \item{Set}{module outputs to be written to the datastore}
 #' }
-#' @source Calculate4DMeasures.R script.
-"Calculate4DMeasuresSpecifications"
-devtools::use_data(Calculate4DMeasuresSpecifications, overwrite = TRUE)
+#' @source CalculateUrbanMixMeasure.R script.
+"CalculateUrbanMixMeasureSpecifications"
+devtools::use_data(CalculateUrbanMixMeasureSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -274,80 +294,17 @@ devtools::use_data(Calculate4DMeasuresSpecifications, overwrite = TRUE)
 #diversity (i.e. mixing of land uses), design (i.e. multimodal network design),
 #and destination accessibility.
 
-#Function to sum values for block groups within specified distances
-#-----------------------------------------------------------------
-#' Sum values for block groups within specified distances
-#'
-#' \code{sumValsInDist} sums specified values for block groups whose centroids
-#' are located within a specified distance cutoff.
-#'
-#' This function sums for each block group, a set of block group values of
-#' all the block groups whose centroids are within the specified distance of
-#' the the block group.
-#'
-#' @param DistCutoff A numeric value in miles specifying the straight line
-#' distance in miles to use as the distance threshold.
-#' @param DataToSum_ A numeric vector of the block group values to sum
-#' corresponding to all Bzones.
-#' @param Lat_ A numeric vector of the latitudes of the block group centroids
-#' in the same order as DataToSum_.
-#' @param Lng_ A numeric vector of the longitudes of the block group centroids
-#' in the same order as DataToSum_.
-#' @return A numeric vector of the sums of the values in DataToSum_ for block
-#' groups within the DistanceCutoff of each Bzone.
-#' @import geosphere
-#' @import fields
-sumValsInDist <- function(DistCutoff, DataToSum_, Lat_, Lng_){
-  #Number of Bzones
-  NumBzone <- length(DataToSum_)
-  #Matrix centroid coordinates
-  Coord_mx <- cbind(lng = Lng_, lat = Lat_)
-  #Calculate longitude and latitude ranges corresponding to the maximum distance
-  BufferDist <- DistCutoff * 1609.34  #Maximum distance in meters
-  North <- 0
-  South <- -180
-  East <- 90
-  West <- -90
-  MinLng_ <- geosphere::destPoint(Coord_mx, West, BufferDist)[,1]
-  MaxLng_ <- geosphere::destPoint(Coord_mx, East, BufferDist)[,1]
-  MinLat_ <- geosphere::destPoint(Coord_mx, South, BufferDist)[,2]
-  MaxLat_ <- geosphere::destPoint(Coord_mx, North, BufferDist)[,2]
-  #Define function to sum values for Bzones whose centroids are within the
-  #specified distance cutoff of a Bzone specified by it's position in the inputs
-  sumValsInDist <- function(BzonePos) {
-    Idx_ <- which(
-      (Lat_ > MinLat_[BzonePos]) &
-      (Lat_ < MaxLat_[BzonePos]) &
-      (Lng_ > MinLng_[BzonePos]) &
-      (Lng_ < MaxLng_[BzonePos])
-    )
-    DestLngLat_df <-
-      data.frame(lng = Lng_[Idx_], lat = Lat_[Idx_])
-    OrigLngLat_df <-
-      data.frame(lng = Lng_[BzonePos], lat = Lat_[BzonePos])
-    Dist_ <-
-      fields::rdist.earth(DestLngLat_df, OrigLngLat_df, miles = TRUE, R = 6371)
-    Data_ <- DataToSum_[Idx_]
-    sum(Data_[Dist_ <= DistCutoff])
-  }
-  #Iterate through the Bzones and calculate the values
-  Sums_ <- numeric(NumBzone)
-  for (i in 1:NumBzone) {
-    Sums_[i] <- sumValsInDist(i)
-  }
-  #Return the result
-  Sums_
-}
 
-#Main module function that calculates 4D measures
-#------------------------------------------------
-#' Main module function that calculates 4D measures for each Bzone.
+#Main module function that calculates urban mix use measure for households
+#-------------------------------------------------------------------------
+#' Main module function that calculates the urban mix measure for each household.
 #'
-#' \code{Calculate4DMeasures} calculates 4D measures for each Bzone.
+#' \code{CalculateUrbanMixMeasure} calculates the urban mix measure for each
+#' household.
 #'
-#' This module calculates several 4D measures by Bzone including density,
-#' diversity (i.e. mixing of land uses), design (i.e. multimodal network design),
-#' and destination accessibility.
+#' This module calculates whether each household is located in an urban
+#' mixed-use neighborhood based on Bzone density and Bzone input proportion
+#' targets.
 #'
 #' @param L A list containing the components listed in the Get specifications
 #' for the module.
@@ -355,85 +312,47 @@ sumValsInDist <- function(DistCutoff, DataToSum_, Lat_, Lng_){
 #' specifications for the module.
 #' @import visioneval
 #' @export
-Calculate4DMeasures <- function(L) {
+CalculateUrbanMixMeasure <- function(L) {
   #Set up
   #------
   #Fix seed as synthesis involves sampling
   set.seed(L$G$Seed)
-  #Define a vector of Bzones
+  #Create Bzone name vector
   Bz <- L$Year$Bzone$Bzone
   #Create data frame of Bzone data
-  D_df <- data.frame(L$Year$Bzone)
-  D_df$Area <- D_df$UrbanArea + D_df$RuralArea
+  Bz_df <- data.frame(L$Year$Bzone)
+  #Create data frame of Household data
+  Hh_df <- data.frame(L$Year$Household)
+  Hh_df$IsSF <- with(Hh_df, as.numeric(HouseType == "SF"))
 
-  #Calculate density measures
-  #--------------------------
+  #Calculate urban mix-use probability
+  #-----------------------------------
   #Population density
-  D1B_ <- with(D_df, Pop / Area)
-  #Employment density
-  D1C_ <- with(D_df, TotEmp / Area)
-  #Activity density
-  D1D_ <- with(D_df, (TotEmp + NumHh) / Area)
+  Bz_df$LocalPopDensity <-
+    with(Bz_df, (UrbanPop + RuralPop) / (UrbanArea + RuralArea))
+  Bz_df$LocalPopDensity[is.na(Bz_df$LocalPopDensity)] <- 0
+  Hh_df$LocalPopDensity <-
+    Bz_df$LocalPopDensity[match(Hh_df$Bzone, Bz_df$Bzone)]
+  Hh_df$MixUseProp <-
+    Bz_df$MixUseProp[match(Hh_df$Bzone, Bz_df$Bzone)]
+  Data_df <- split(Hh_df[, c("LocalPopDensity", "IsSF", "MixUseProp")], Hh_df$Bzone)
+  #Predict urban mixed use measure
+  UrbanMix_ls <-
+    lapply(Data_df, function(x) {
+      if (any(is.na(x$MixUseProp))) {
+        applyBinomialModel(UrbanMixModel_ls, x)
+      } else {
+        applyBinomialModel(UrbanMixModel_ls, x, TargetProp = x$MixUseProp[1])
+      }
+    })
 
-  #Calculate diversity measures
-  #----------------------------
-  #Ratio of employment to households
-  D2A_JPHH_ <- with(D_df, TotEmp / NumHh)
-  #Ratio of workers to employment
-  D2A_WRKEMP_ <- with(D_df, NumWkr / TotEmp)
-  #Employment and household entropy
-  D_df$OthEmp <- with(D_df, TotEmp - RetEmp - SvcEmp)
-  D_df$TotAct <- with(D_df, TotEmp + NumHh)
-  calcEntropyTerm <- function(ActName) {
-    Act_ <- D_df[[ActName]]
-    ActRatio_ <- Act_ / D_df$TotAct
-    LogActRatio_ <- ActRatio_ * 0
-    LogActRatio_[Act_ != 0] <- log(Act_[Act_ != 0] / D_df$TotAct[Act_ != 0])
-    ActRatio_ * LogActRatio_
-  }
-  E_df <- data.frame(
-    Hh = calcEntropyTerm("NumHh"),
-    Ret = calcEntropyTerm("RetEmp"),
-    Svc = calcEntropyTerm("SvcEmp"),
-    Oth = calcEntropyTerm("OthEmp")
-  )
-  A_ <- rowSums(E_df)
-  N_ = apply(E_df, 1, function(x) sum(x != 0))
-  D2A_EPHHM_ <- -A_ / log(N_)
-  rm(E_df, A_, N_)
-
-  #Calculate destination accessibilty term
-  #---------------------------------------
-  #Calculate employment within 2 miles
-  EmpIn2Mi_ <-
-    sumValsInDist(DistCutoff = 2,
-                  DataToSum_ = D_df$TotEmp,
-                  Lat_ = D_df$Latitude ,
-                  Lng_ = D_df$Longitude)
-  #Calculate population within 5 miles
-  PopIn5Mi_ <-
-    sumValsInDist(DistCutoff = 5,
-                  DataToSum_ = D_df$Pop,
-                  Lat_ = D_df$Latitude ,
-                  Lng_ = D_df$Longitude)
-  #Calculate regional destination access measure using harmonic mean
-  D5_ <- 2 * EmpIn2Mi_ * PopIn5Mi_ / (EmpIn2Mi_ + PopIn5Mi_)
-
-  #Return list of results
-  #----------------------
-  #Initialize list
+  #Produce output list of results
+  #------------------------------
   Out_ls <- initDataList()
-  #Populate with results
-  Out_ls$Year$Bzone <- list(
-    D1B = D1B_,
-    D1C = D1C_,
-    D1D = D1D_,
-    D2A_JPHH = D2A_JPHH_,
-    D2A_WRKEMP = D2A_WRKEMP_,
-    D2A_EPHHM = D2A_EPHHM_,
-    D5 = D5_
-  )
-  #Return the results
+  Out_ls$Year$Household <-
+    list(
+      IsUrbanMixNbrhd = as.integer(do.call(c, UrbanMix_ls))
+    )
   Out_ls
 }
 
@@ -464,7 +383,7 @@ Calculate4DMeasures <- function(L) {
 #directory. All files in the defs directory must have the default names.
 #
 # Specs_ls <- testModule(
-#   ModuleName = "Calculate4DMeasures",
+#   ModuleName = "CalculateUrbanMixMeasure",
 #   LoadDatastore = TRUE,
 #   SaveDatastore = TRUE,
 #   DoRun = FALSE
@@ -501,7 +420,7 @@ Calculate4DMeasures <- function(L) {
 #more other modules in the package need the dataset(s) produced by this module.
 #
 # testModule(
-#   ModuleName = "Calculate4DMeasures",
+#   ModuleName = "CalculateUrbanMixMeasure",
 #   LoadDatastore = TRUE,
 #   SaveDatastore = TRUE,
 #   DoRun = TRUE

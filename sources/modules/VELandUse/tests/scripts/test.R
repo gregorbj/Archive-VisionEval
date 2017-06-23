@@ -33,3 +33,12 @@ testModule(
   SaveDatastore = TRUE,
   DoRun = TRUE
 )
+
+#Test CalculateUrbanMixMeasure module
+source("R/CalculateUrbanMixMeasure.R")
+testModule(
+  ModuleName = "CalculateUrbanMixMeasure",
+  LoadDatastore = TRUE,
+  SaveDatastore = TRUE,
+  DoRun = TRUE
+)

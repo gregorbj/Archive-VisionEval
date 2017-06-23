@@ -2,9 +2,11 @@
 
 export(AssignDevTypes)
 export(Calculate4DMeasures)
+export(CalculateUrbanMixMeasure)
 export(LocateEmployment)
 export(LocateHouseholds)
 import(fields)
 import(geosphere)
 import(visioneval)
 importFrom("stats", "runif")
+importFrom("stats", "as.formula", "binomial", "glm")
