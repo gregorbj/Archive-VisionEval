@@ -1,0 +1,23 @@
+Package: VEVehicleOwnership
+Type: Package
+Title: Model household vehicle ownership and adjust for car-sharing
+Version: 0.5
+Author: Brian Gregor [aut, cre],
+Maintainer: Brian Gregor <gregorb@or-analytics.com>
+Copyright: AASHTO
+URL: https://github.com/gregorbj/VisionEval/sources/modules/VEVehicleOwnership
+Description: This package contains modules which predict household vehicle
+    ownership and adjust ownership to account for car-sharing programs.
+License: file LICENSE
+LazyData: TRUE
+Depends: R (>= 3.1.0)
+Imports:
+    visioneval,
+    ordinal,
+    VE2001NHTS,
+    devtools
+Suggests:
+    knitr
+VignetteBuilder: knitr
+RoxygenNote: 6.0.1
+Remotes: cities-lab/VisionEval/sources/framework/visioneval@develop
