@@ -71,5 +71,9 @@ for(Year in getYears()) {
             PackageName = "VETransportSupply",
             RunFor = "AllYears",
             RunYear = Year)
+  runModule(ModuleName = "AssignVehicleOwnership",
+            PackageName = "VEVehicleOwnership",
+            RunFor = "AllYears",
+            RunYear = Year)
 }
 
