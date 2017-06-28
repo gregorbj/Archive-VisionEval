@@ -18,9 +18,10 @@ Imports:
     visioneval,
     devtools,
     geosphere,
-    fields
+    fields,
+    VE2001NHTS
 Suggests:
     knitr
 VignetteBuilder: knitr
 RoxygenNote: 6.0.1
-Remotes: gregorbj/VisionEval/sources/framework/visioneval@develop
+Remotes: gregorbj/VisionEval/sources/framework/visioneval@develop, gregorbj/VisionEval/sources/modules/VE2001NHTS@develop
