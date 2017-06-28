@@ -18,6 +18,7 @@ env:
   - TEST_DIR=sources/modules/VESimHouseholds
   - TEST_DIR=sources/modules/VESyntheticFirms
   - TEST_DIR=sources/modules/VETransportSupply
+  - TEST_DIR=sources/modules/VEVehicleOwnership
 
 script:
   - cd $TEST_DIR

@@ -43,6 +43,7 @@ install.packages("jsonlite")
 install.packages("shinyAce")
 install.packages("envDocument")
 install.packages("rhandsontable")
+install.packages("curl")
 
 devtools::install_github("tdhock/namedCapture")
 devtools::install_github("trestletech/shinyTree")
@@ -104,4 +105,4 @@ Ensure these operations complete successfully before finalizing commits to devel
 
 # Build Status 
 
-[![Travis-CI Build Status](https://travis-ci.org/cities-lab/VisionEval.svg?branch=develop)](https://travis-ci.org/cities-lab/VisionEval)
+[![Travis-CI Build Status](https://travis-ci.org/gregorbj/VisionEval.svg?branch=develop)](https://travis-ci.org/gregorbj/VisionEval)
