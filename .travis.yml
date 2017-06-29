@@ -33,7 +33,7 @@ script:
       Rscript -e 'devtools::check(".")';
       Rscript tests/scripts/test.R;
     elif [ $TYPE = "module" ]; then
-      R CMD INSTALL sources/framework/visioneval
+      R CMD INSTALL sources/framework/visioneval;
       Rscript -e 'devtools::install_deps(".")';
       Rscript -e 'devtools::check(".")';
       Rscript tests/scripts/test.R;
