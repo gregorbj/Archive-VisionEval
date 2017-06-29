@@ -27,15 +27,15 @@ env:
 
 script:
   - cd $TEST_DIR
-  - if [ test $TYPE = "framework" ]; then
+  - if [ $TYPE = "framework" ]; then
       Rscript -e 'devtools::install_deps(".")';
       Rscript -e 'devtools::check(".")';
-    elif [ test $TYPE = "module" ]; then
+    elif [ $TYPE = "module" ]; then
       Rscript -e 'devtools::install_deps(".")';
       Rscript -e 'devtools::check(".")';
       Rscript tests/scripts/test.R;
-    elif [ test $TYPE = "model" ]; then
+    elif [ $TYPE = "model" ]; then
       Rscript run_model.R;
-    elif [ test $TYPE = "gui" ]; then
+    elif [ $TYPE = "gui" ]; then
       Rscript -e 'library("shiny"); runApp("app.R")';
     fi
