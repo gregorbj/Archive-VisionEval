@@ -14,22 +14,21 @@ install:
   - Rscript -e 'devtools::install_bioc(c("BiocInstaller", "rhdf5"))'
 
 env:
-  - TYPE=framework TEST_DIR=sources/framework/visioneval
-  - TYPE=module    TEST_DIR=sources/modules/VE2001NHTS
-  - TYPE=module    TEST_DIR=sources/modules/VEAltModes
-  - TYPE=module    TEST_DIR=sources/modules/VELandUse
-  - TYPE=module    TEST_DIR=sources/modules/VESimHouseholds
-  - TYPE=module    TEST_DIR=sources/modules/VESyntheticFirms
-  - TYPE=module    TEST_DIR=sources/modules/VETransportSupply
-  - TYPE=module    TEST_DIR=sources/modules/VEVehicleOwnership
-  - TYPE=model     TEST_DIR=sources/models/VERPAT
-  - TYPE=model     TEST_DIR=sources/models/VERSPM/Test1
-  - TYPE=gui       TEST_DIR=sources/VEGUI
+  - TYPE=module TEST_DIR=sources/framework/visioneval
+  - TYPE=module TEST_DIR=sources/modules/VE2001NHTS
+  - TYPE=module TEST_DIR=sources/modules/VEAltModes
+  - TYPE=module TEST_DIR=sources/modules/VELandUse
+  - TYPE=module TEST_DIR=sources/modules/VESimHouseholds
+  - TYPE=module TEST_DIR=sources/modules/VESyntheticFirms
+  - TYPE=module TEST_DIR=sources/modules/VETransportSupply
+  - TYPE=module TEST_DIR=sources/modules/VEVehicleOwnership
+  - TYPE=model  TEST_DIR=sources/models/VERPAT
+  - TYPE=model  TEST_DIR=sources/models/VERSPM/Test1
+  - TYPE=gui    TEST_DIR=sources/VEGUI
 
 script:
-  - declare -a modules=("VE2001NHTS" "VEAltModes" "VELandUse" "VESimHouseholds" "VESyntheticFirms" "VETransportSupply" "VEVehicleOwnership")
   - |
-    if [ $TYPE = "framework" ]; then
+    if [ $TYPE = "module" ]; then
       cd $TEST_DIR;
       Rscript -e 'devtools::install_deps(".")';
       echo Run R package tests;
@@ -38,41 +37,20 @@ script:
       echo Run VisionEval tests;
       echo --------------------;
       Rscript -e "tryCatch( source('tests/scripts/test.R') )";
-    elif [ $TYPE = "module" ]; then
-      cd $TEST_DIR;
-      Rscript -e 'devtools::install_deps(".")';
-      echo Run R package tests;
-      Rscript -e 'devtools::check(".")';
-      echo --------------------;
-      echo Run VisionEval tests;
-      echo --------------------;
-      Rscript -e "tryCatch( source('tests/scripts/test.R') )";
-    elif [ $TYPE = "model" ]; then
+      
+    elif [ $TYPE = "model"] || [ $TYPE = "gui" ]; then
       echo Install required VisionEval packages;
       cd sources/framework/visioneval;
       Rscript -e 'devtools::install_deps(".")';
       R CMD INSTALL .;
       cd ../../..;
-      for $mod in "${modules[@]}" do 
-        cd sources/modules/$mod;
-        Rscript -e 'devtools::install_deps(".")';
-        R CMD INSTALL .;
-        cd ../../..;
-      done;
+      
       cd $TEST_DIR;
-      Rscript -e "tryCatch( source('run_model.R') )";
-    elif [ $TYPE = "gui" ]; then
-      echo Install required VisionEval packages;
-      cd sources/framework/visioneval;
-      Rscript -e 'devtools::install_deps(".")';
-      R CMD INSTALL .;
-      cd ../../..;
-      for $mod in "${modules[@]}" do 
-        cd sources/modules/$mod;
-        Rscript -e 'devtools::install_deps(".")';
-        R CMD INSTALL .;
-        cd ../../..;
-      done;
-      cd $TEST_DIR;
-      Rscript -e 'tryCatch( library("shiny"); runApp("app.R") )';
+      if [ $TYPE = "model" ]; then
+        Rscript -e "tryCatch( source('run_model.R') )";
+        
+      elif [ $TYPE = "gui" ]; then
+        Rscript -e 'tryCatch( library("shiny"); runApp("app.R") )';
+      fi
+      
     fi
