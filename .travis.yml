@@ -54,7 +54,7 @@ script:
       R CMD INSTALL .;
       cd ../../..;
       for $mod in "${modules[@]}" do 
-        cd "sources/modules/$mod";
+        cd sources/modules/$mod;
         Rscript -e 'devtools::install_deps(".")';
         R CMD INSTALL .;
         cd ../../..;
@@ -68,7 +68,7 @@ script:
       R CMD INSTALL .;
       cd ../../..;
       for $mod in "${modules[@]}" do 
-        cd "sources/modules/$mod";
+        cd sources/modules/$mod;
         Rscript -e 'devtools::install_deps(".")';
         R CMD INSTALL .;
         cd ../../..;
