@@ -15,6 +15,7 @@ install:
 
 env:
   - TYPE=framework TEST_DIR=sources/framework/visioneval
+  - TYPE=module    TEST_DIR=sources/modules/VE2001NHTS
   - TYPE=module    TEST_DIR=sources/modules/VEAltModes
   - TYPE=module    TEST_DIR=sources/modules/VELandUse
   - TYPE=module    TEST_DIR=sources/modules/VESimHouseholds

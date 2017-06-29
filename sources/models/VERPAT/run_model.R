@@ -7,7 +7,6 @@
 #Load libraries
 #--------------
 library(visioneval)
-#library(VESyntheticFirms)
 
 #Initialize model
 #----------------
