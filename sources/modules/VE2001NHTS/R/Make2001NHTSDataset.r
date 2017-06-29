@@ -44,80 +44,95 @@
 toProperName <- function(X){
           EndX <- nchar(X)
           paste(toupper(substring(X, 1, 1)), tolower(substring(X, 2, EndX)), sep="")
-     }
+}
 
-#Extract NHTS household data
-#---------------------------
-Hh_df <- read.csv(unzip("inst/extdata/HHPUB.zip"))
-names(Hh_df) <- toProperName(names(Hh_df))
-Hh_df$Houseid <- as.character(Hh_df$Houseid)
-FieldsToKeep_ <-
-  c("Houseid", "Age_p1", "Age_p2", "Age_p3", "Age_p4", "Age_p5", "Age_p6",
-    "Age_p7", "Age_p8", "Age_p9", "Age_p10", "Age_p11", "Age_p12", "Age_p13",
-    "Age_p14", "Census_d", "Census_r", "Drvrcnt", "Expflhhn", "Expfllhh",
-    "Flgfincm", "Hbhresdn", "Hbhur", "Hbppopdn", "Hhc_msa", "Hhfaminc",
-    "Hhincttl", "Hhnumbik", "Hhr_age", "Hhr_drvr", "Hhr_race", "Hhr_sex",
-    "Hhsize", "Hhvehcnt", "Hometype", "Hteempdn", "Hthresdn", "Hthur",
-    "Htppopdn", "Lif_cyc", "Msacat", "Msasize", "Numadlt", "Rail", "Ratio16v",
-    "Ratio16w", "Ratiowv", "Smplarea", "Smplfirm", "Urban", "Urbrur",
-    "Wrkcount", "Cnttdhh")
-Hh_df <- Hh_df[, FieldsToKeep_]
-#Keep on only household records 100% recording of travel day trips
-AllTripsHh_ <- Hh_df$Houseid[!is.na(Hh_df$Expfllhh)]
-Hh_df <- Hh_df[Hh_df$Houseid %in% AllTripsHh_,]
-rm(FieldsToKeep_)
+toVecFrom1DAry <- function(X_ar){
+  X_ <- as.vector(X_ar)
+  names(X_) <- names(X_ar)
+  X_
+}
 
-#Extract NHTS vehicle data
-#-------------------------
-Veh_df <- read.csv(unzip("inst/extdata/VEHPUB.zip"))
-names(Veh_df) <- toProperName(names(Veh_df))
-Veh_df$Houseid <- as.character(Veh_df$Houseid)
-Veh_df$Vehid <- as.character(Veh_df$Vehid)
-FieldsToKeep_ <-
-  c("Houseid", "Vehid", "Bestmile", "Best_edt", "Best_flg", "Best_out",
-    "Btucost", "Btutcost", "Btuyear",  "Eiadmpg", "Epatmpg", "Expflhhn",
-    "Expfllhh", "Fueltype", "Gscost", "Gstotcst", "Gsyrgal", "Hhsize",
-    "Hhvehcnt", "Ownunit", "Vehtype", "Vehyear", "Vehmiles" )
-Veh_df <- Veh_df[,FieldsToKeep_]
-#Keep only records for households with 100% recording of travel day trips
-Veh_df <- Veh_df[Veh_df$Houseid %in% AllTripsHh_,]
-rm(FieldsToKeep_)
-
-#Extract NHTS person data
+#Load NHTS household data
 #------------------------
-Per_df <- read.csv(unzip("inst/extdata/PERPUB.zip"))
-names(Per_df) <- toProperName(names(Per_df))
-Per_df$Houseid <- as.character(Per_df$Houseid)
-Per_df$Personid <- as.character(Per_df$Personid)
-FieldsToKeep_ <-
-  c("Houseid", "Personid", "Commdrvr", "Nbiketrp", "Nwalktrp", "Usepubtr",
-    "Wrkdrive", "Wrktrans", "Dtgas")
-Per_df <- Per_df[,FieldsToKeep_]
-# Keep only records for households with 100% recording of travel day trips
-Per_df <- Per_df[Per_df$Houseid %in% AllTripsHh_,]
-rm(FieldsToKeep_)
+#The following commented code was used to develop R dataset from the NHTS
+#HHPUB.csv file:
+# Hh_df <- read.csv("inst/extdata/HHPUB.csv", as.is = TRUE)
+# Keep_ <- c("HOUSEID", "AGE_P1", "AGE_P2", "AGE_P3", "AGE_P4", "AGE_P5", "AGE_P6",
+#   "AGE_P7", "AGE_P8", "AGE_P9", "AGE_P10", "AGE_P11", "AGE_P12", "AGE_P13",
+#   "AGE_P14", "CENSUS_D", "CENSUS_R", "DRVRCNT", "EXPFLHHN", "EXPFLLHH",
+#   "FLGFINCM", "HBHRESDN", "HBHUR", "HBPPOPDN", "HHC_MSA", "HHFAMINC",
+#   "HHINCTTL", "HHNUMBIK", "HHR_AGE", "HHR_DRVR", "HHR_RACE", "HHR_SEX",
+#   "HHSIZE", "HHVEHCNT", "HOMETYPE", "HTEEMPDN", "HTHRESDN", "HTHUR",
+#   "HTPPOPDN", "LIF_CYC", "MSACAT", "MSASIZE", "RAIL", "RATIO16V",
+#   "URBAN", "URBRUR", "WRKCOUNT", "CNTTDHH")
+# AllTripsHh_ <- Hh_df$HOUSEID[!is.na(Hh_df$EXPFLLHH)]
+# Hh_df <- Hh_df[Hh_df$HOUSEID %in% AllTripsHh_, Keep_]
+# save(Hh_df, file = "inst/extdata/Hh_df.rda", compress = TRUE)
 
-#Extract NHTS daily trip data
-#----------------------------
-Dt_df <- read.csv(unzip("inst/extdata/DAYPUB.zip"))
+#Load NHTS household dataset
+load("inst/extdata/Hh_df.rda")
+names(Hh_df) <- toProperName(names(Hh_df))
+Hh_df[Hh_df < 0] <- NA
+
+#Load NHTS vehicle data
+#----------------------
+#The following commented code was used to develop R dataset from the NHTS
+#VEHPUB.csv file:
+# Veh_df <- read.csv("inst/extdata/VEHPUB.csv", as.is = TRUE)
+# Keep_ <-
+#   c("HOUSEID", "VEHID", "BESTMILE", "EIADMPG", "GSCOST", "VEHTYPE", "VEHYEAR",
+#     "VEHMILES" )
+# Veh_df <-
+#   Veh_df[Veh_df$HOUSEID %in% AllTripsHh_, Keep_]
+# save(Veh_df, file = "inst/extdata/Veh_df.rda", compress = TRUE)
+
+#Load the NHTS vehicle dataset
+load("inst/extdata/Veh_df.rda")
+names(Veh_df) <- toProperName(names(Veh_df))
+Veh_df$Vehid <- as.character(Veh_df$Vehid)
+Veh_df[Veh_df < 0] <- NA
+
+#Load NHTS person data
+#---------------------
+#The following commented code was used to develop R dataset from the NHTS
+#PERPUB.csv file:
+# Per_df <- read.csv("inst/extdata/PERPUB.csv", as.is = TRUE)
+# Keep_ <-
+#   c("HOUSEID", "PERSONID", "COMMDRVR", "NBIKETRP", "NWALKTRP", "USEPUBTR",
+#     "WRKDRIVE", "WRKTRANS", "DTGAS")
+# Per_df <-
+#   Per_df[Per_df$HOUSEID %in% AllTripsHh_, Keep_]
+# save(Per_df, file = "inst/extdata/Per_df.rda", compress = TRUE)
+
+#Load the NHTS persons file
+load("inst/extdata/Per_df.rda")
+names(Per_df) <- toProperName(names(Per_df))
+Per_df$Personid <- as.character(Per_df$Personid)
+Per_df[Per_df < 0] <- NA
+
+#Load NHTS daily trip data
+#-------------------------
+# The following commented code was used to develop R dataset from the NHTS
+# DAYPUB.csv file:
+# Dt_df <- read.csv("inst/extdata/DAYPUB.csv", as.is = TRUE)
+# Keep_ <-
+#   c("HOUSEID", "VEHID", "PERSONID", "NUMONTRP", "TRPMILES", "TRPTRANS",
+#     "TRVL_MIN", "PSGR_FLG", "WHYFROM", "WHYTO")
+# Dt_df <-
+#   Dt_df[Dt_df$HOUSEID %in% AllTripsHh_, Keep_]
+# save(Dt_df, file = "inst/extdata/Dt_df.rda", compress = TRUE)
+
+#Load the NHTS daily trips file
+load("inst/extdata/Dt_df.rda")
 names(Dt_df) <- toProperName(names(Dt_df))
-Dt_df$Houseid <- as.character(Dt_df$Houseid)
 Dt_df$Vehid <- as.character(Dt_df$Vehid)
 Dt_df$Personid <- as.character(Dt_df$Personid)
-Dt_df$Tdcaseid <- as.character(Dt_df$Tdcaseid)
-FieldsToKeep_ <-
-  c("Houseid", "Vehid", "Personid", "Tdcaseid", "Tdtrpnum", "Trpnumsq",
-    "Endtime", "Numontrp", "Hh_ontd", "Trphhacc", "Trphhveh", "Trpmiles",
-    "Trptrans", "Trvl_min", "Psgr_flg", "Whytrp1s", "Awayhome", "Whyfrom",
-    "Whyto", "Whytrp01")
-Dt_df <- Dt_df[,FieldsToKeep_]
-# Keep only records for households with 100% recording of travel day trips
-Dt_df <- Dt_df[Dt_df$Houseid %in% AllTripsHh_,]
+Dt_df[Dt_df < 0] <- NA
 
 
-#===============================
-#CALCULATE HOUSEHOLD PERSON AGES
-#===============================
+#================
+#PROCESS DATASETS
+#================
 
 #Calculate the number of persons by age group and add summary to household data
 #------------------------------------------------------------------------------
@@ -125,10 +140,9 @@ AgeFields_ <-
   c("Age_p1", "Age_p2", "Age_p3", "Age_p4", "Age_p5", "Age_p6", "Age_p7",
     "Age_p8", "Age_p9", "Age_p10", "Age_p11", "Age_p12", "Age_p13", "Age_p14" )
 # Set up person age categories
-AgeBreaks <- c(0, 14, 19, 29, 54, 64, max(Hh_df[,AgeFields_]))
+AgeBreaks <- c(0, 14, 19, 29, 54, 64, max(Hh_df[,AgeFields_], na.rm = TRUE))
 # Tabulate persons per household by age category
 Ages_HhAg <- t(apply( Hh_df[,AgeFields_], 1, function(x) {
-  x[x < 0] <- NA
   table(cut(x, AgeBreaks, include.lowest=TRUE, right=FALSE))
 }))
 # Assign tabulations to age category variables
@@ -139,12 +153,133 @@ Hh_df$Age30to54 <- Ages_HhAg[,4]
 Hh_df$Age55to64 <- Ages_HhAg[,5]
 Hh_df$Age65Plus <- Ages_HhAg[,6]
 # Clean up
+Hh_df[AgeFields_] <- NULL
 rm( AgeFields_, AgeBreaks, Ages_HhAg )
 
+#Process household income data
+#-----------------------------
+#Define income groupings from NHTS code book
+#Assume top value of high income group to be 200K
+IncGrp_ls <-
+  list(
+    c(0, 4999),
+    c(5000, 9999),
+    c(10000, 14999),
+    c(15000, 19999),
+    c(20000, 24999),
+    c(25000, 29999),
+    c(30000, 34999),
+    c(35000, 39999),
+    c(40000, 44999),
+    c(45000, 49999),
+    c(50000, 54999),
+    c(55000, 59999),
+    c(60000, 64999),
+    c(65000, 69999),
+    c(70000, 74999),
+    c(75000, 79999),
+    c(80000, 99999),
+    c(100000, 199999)
+  )
+#Calculate midpoints in income ranges
+MidPtInc_ <- unlist(lapply(IncGrp_ls, mean))
+#Assign income values
+Hh_df$Income <- MidPtInc_[Hh_df$Hhincttl]
+rm(IncGrp_ls, MidPtInc_)
+#Assign income group variable
+IncBreaks_ <- c( 0, 20000, 40000, 60000, 80000, 100000, 150000 )
+Ig <- c( "0to20K", "20Kto40K", "40Kto60K", "60Kto80K", "80Kto100K",
+         "100KPlus" )
+Hh_df$IncGrp <- cut(Hh_df$Income, IncBreaks_, labels=Ig, include.lowest=TRUE)
+rm(IncBreaks_, Ig)
 
-#==========================
-#CALCULATE HOUSEHOLD TRAVEL
-#==========================
+#Create dummy variables for development type
+#-------------------------------------------
+Hh_df$UrbanDev <- (Hh_df$Hbhur == "U") * 1
+Hh_df$TownDev <- (Hh_df$Hbhur == "T") * 1
+Hh_df$SuburbanDev <- (Hh_df$Hbhur == "S") * 1
+Hh_df$RuralDev <- (Hh_df$Hbhur == "R") * 1
+Hh_df$SecondCityDev <- (Hh_df$Hbhur == "C") * 1
+
+#Calculate numbers of household autos and light trucks
+#-----------------------------------------------------
+#Classify vehicles as Passenger and LightTruck
+Veh_df$Type <- rep(NA, nrow(Veh_df))
+Veh_df$Type[Veh_df$Vehtype == 1] <- "Auto"
+Veh_df$Type[Veh_df$Vehtype %in% c(2, 3, 4)] <- "LightTruck"
+#Keep only the vehicles that are autos or light trucks
+Veh_df <- Veh_df[Veh_df$Type %in% c("Auto", "LightTruck"),]
+#Add auto and light-truck counts to household dataset
+NumAuto_Hh <-
+  toVecFrom1DAry(
+    tapply(Veh_df$Type,
+           Veh_df$Houseid,
+           function(x) sum(x == "Auto"),
+           simplify = TRUE))
+NumLightTruck_Hh <-
+  toVecFrom1DAry(
+    tapply(Veh_df$Type,
+           Veh_df$Houseid,
+           function(x) sum(x == "LightTruck"),
+           simplify = TRUE))
+Hh_df$NumAuto <- unname(NumAuto_Hh[Hh_df$Houseid])
+Hh_df$NumAuto[is.na(Hh_df$NumAuto)] <- 0
+Hh_df$NumLightTruck <- unname(NumLightTruck_Hh[Hh_df$Houseid])
+Hh_df$NumLightTruck[is.na(Hh_df$NumLightTruck)] <- 0
+rm(NumAuto_Hh, NumLightTruck_Hh)
+
+#Revise total vehicle count and compute ratio with driving age persons
+#---------------------------------------------------------------------
+#Make total vehicles (Hhvehcnt) equal to numbers of autos and light trucks
+Hh_df$NumVeh <- Hh_df$NumAuto + Hh_df$NumLightTruck
+#Calculate ratio of vehicles to driving age persons
+DrvAgePop_ <- with(Hh_df, Hhsize - Age0to14)
+VehPerDrvAgePop_ <- Hh_df$NumVeh / DrvAgePop_
+Hh_df$VehPerDrvAgePop <- VehPerDrvAgePop_
+rm(DrvAgePop_, VehPerDrvAgePop_)
+
+#Add total annual vehicle mileage data to household dataset
+#----------------------------------------------------------
+#Best annual mileage estimates were prepared for about 20,000 of the households
+HhBestmile_ <-
+  unlist(tapply(Veh_df$Bestmile, Veh_df$Houseid, function(x) {
+    if(all(!is.na(x))) sum(x)}))
+#Add to Hh_df (note use of match is much faster than indexing using names)
+Hh_df$Totmiles <- unname(HhBestmile_[match(Hh_df$Houseid, names(HhBestmile_))])
+rm(HhBestmile_)
+
+#Calculate household average Gscostmile weighted by vehicle mileage
+#------------------------------------------------------------------
+#Split vehicle dataset by household
+Veh_ls <- split(Veh_df, Veh_df$Houseid)
+#Calculate average MPG of household vehicles
+HhAveMpg_Hh <- unlist(lapply(Veh_ls, function(x) {
+  Mpg_ <- x$Eiadmpg
+  Miles_ <- x$Bestmile
+  Mpg_[is.na(Mpg_)] <- 0
+  Miles_[is.na(Miles_)] <- 0
+  Miles_[Mpg_ == 0] <- 0
+  Mpg_[Miles_ == 0] <- 0
+  sum(Mpg_ * Miles_) / sum(Miles_)
+}))
+#Add results to Hh_df
+Hh_df$AveMpg <- unname(HhAveMpg_Hh[match(Hh_df$Houseid, names(HhAveMpg_Hh))])
+#Calculate average gas cost (cents/gallon) for households
+Gscost_Hh <-
+  toVecFrom1DAry(
+    tapply(Veh_df$Gscost, Veh_df$Houseid, function(x) mean(x, na.rm=TRUE)))
+Hh_df$Gscost <- unname(Gscost_Hh[match(Hh_df$Houseid, names(Gscost_Hh))])
+#Calculate average gas cost per mile (cents/mile) of travel by household
+Hh_df$Gscostmile <- with(Hh_df, Gscost / AveMpg)
+#Calculate the gas cost per mile (Gscostmile2) for each vehicle (cents per mile)
+Veh_df$Gscostmile2 <- with(Veh_df, Gscost / Eiadmpg)
+#Average vehicle gas cost per mile by household
+Gscostmile2_Hh <-
+  toVecFrom1DAry(
+    tapply(Veh_df$Gscostmile2, Veh_df$Houseid, function(x) mean(x, na.rm=TRUE)))
+Hh_df$Gscostmile2 <-
+  unname(Gscostmile2_Hh[match(Hh_df$Houseid, names(Gscostmile2_Hh))])
+rm(Gscostmile2_Hh, Veh_ls, HhAveMpg_Hh, Gscost_Hh)
 
 #Tabulate daily vehicle travel from the day trip data and add to the household data
 #----------------------------------------------------------------------------------
@@ -167,8 +302,10 @@ WasRecorded_ <- Dt_df$Trpmiles > 0
 NotTooFast_ <- Dt_df$Trpmiles / Dt_df$Trvl_min < 1.5
 UseRecord_ <- WasNotPsgr_ & WasPrivateVeh_ & WasRecorded_ & NotTooFast_
 #Tabulate vehicle miles by household
-Dvmt_Hh <- tapply(Dt_df$Trpmiles[UseRecord_], Dt_df$Houseid[UseRecord_], sum)
-Hh_df$Dvmt <- Dvmt_Hh[match(Hh_df$Houseid, names(Dvmt_Hh))]
+Dvmt_Hh <-
+  toVecFrom1DAry(
+    tapply(Dt_df$Trpmiles[UseRecord_], Dt_df$Houseid[UseRecord_], sum))
+Hh_df$Dvmt <- unname(Dvmt_Hh[match(Hh_df$Houseid, names(Dvmt_Hh))])
 
 #Make a variable to identify home-to-home tours
 #----------------------------------------------
@@ -198,14 +335,15 @@ TourHhId_ <- substr(names(TourVmt_), 1, 9)
 #Sum up SOV tour mileage less than specified lengths by household
 calcTourVmtProp <- function(TourLen) {
   SovTour_ <-
-    tapply(TourVmt_[TourVmt_ <= TourLen & IsSovTour_],
-           TourHhId_[TourVmt_ <= TourLen & IsSovTour_], sum)
+    toVecFrom1DAry(
+      tapply(TourVmt_[TourVmt_ <= TourLen & IsSovTour_],
+           TourHhId_[TourVmt_ <= TourLen & IsSovTour_], sum))
   SovTour_Hh <- numeric(nrow(Hh_df))
   names(SovTour_Hh) <- Hh_df$Houseid
   SovTour_Hh[names(SovTour_)] <- SovTour_
   NaHhNames_ <- unique(substr(names(IsNaTourVmt_)[IsNaTourVmt_], 1, 9))
   SovTour_Hh[NaHhNames_] <- NA
-  SovTour_Hh / Hh_df$Dvmt
+  unname(SovTour_Hh) / Hh_df$Dvmt
 }
 #Calculate proportions of household DVMT in SOV categories and add to Hh_df
 Hh_df$PropSovDvmtLE2 <- calcTourVmtProp(2)
@@ -260,9 +398,10 @@ UseRecord_ <-
   WasNoVehHhTravel_ & WasPsgr_ & WasPrivateVeh_ & WasRecorded_ & NotTooFast_
 #Tabulate vehicle miles of passenger travel by zero vehicle households
 ZeroVehPassDvmt_Hh <-
-  tapply(Dt_df$Trpmiles[UseRecord_], Dt_df$Houseid[UseRecord_], sum)
+  toVecFrom1DAry(
+    tapply(Dt_df$Trpmiles[UseRecord_], Dt_df$Houseid[UseRecord_], sum))
 Hh_df$ZeroVehPassDvmt <-
-  ZeroVehPassDvmt_Hh[match(Hh_df$Houseid, names(ZeroVehPassDvmt_Hh))]
+  unname(ZeroVehPassDvmt_Hh[match(Hh_df$Houseid, names(ZeroVehPassDvmt_Hh))])
 #Clean up
 rm(WasPrivateVeh_, WasRecorded_, NotTooFast_, WasNoVehHhTravel_, WasPsgr_,
    UseRecord_, ZeroVehPassDvmt_Hh )
@@ -282,23 +421,9 @@ rm(WasWalkOrBikeTrp_, TrpMiles_, WalkBikeMiles_Hx, WalkBikeMiles_Hh)
 
 #Examine household day trip records that have no "usable" DVMT
 #-------------------------------------------------------------
-#After the previous step to attach DVMT to the household records, 8872 of the
-#60521 household records have NA values for DVMT. 3950 of the 8872 households
-#have no records in the day travel dataset. Since all of the households in this
-#household dataset are "100 percent households" (all household adults were
-#interviewed) then these might be households that took no trips on the travel
-#day. 55% of these have only elderly persons in the household. 61% have only one
-#person in the household and another 30% have only two persons. Based on these
-#consideration, it is assumed that the DVMT for these 3950 households is in fact
-#0.4622 of the remaining 4922 households that have NA values have all person
-#trips listed as passenger or as traveling on a non-personal mode. The DVMT for
-#these households is also identified as 0. That leaves 300 households having a
-#NA value for DVMT.
-
 #Identify the households having NA values for Dvmt
-#-------------------------------------------------
 NaHh_ <- Hh_df$Houseid[is.na(Hh_df$Dvmt)]
-# There are 8872 of them
+# There are 8899 of them
 length(NaHh_)
 
 #Evaluate households that have no day trip records (3950)
@@ -335,104 +460,13 @@ rm(NaHh_, DtHh_, NoDtHh_, OnlyElderly_Hh, NaHh2_, NotUseDt_df, NotUseDt_ls,
 
 #Make a variable which identifies households that did no travel
 #--------------------------------------------------------------
-#Notes:
-#Zero DVMT households are important for model estimation because:
-#- They affect the overall mean
-#- They tend to have significantly different characteristics than other households
-#- Their travel does not fit into a continuous travel distribution when
-#  transformed with a power function (see below)
 Hh_df$ZeroDvmt <- "N"
 Hh_df$ZeroDvmt[Hh_df$Dvmt == 0] <- "Y"
 Hh_df$ZeroDvmt[is.na(Hh_df$Dvmt)] <- NA
 Hh_df$ZeroDvmt <- as.factor(Hh_df$ZeroDvmt)
-table(Hh_df$ZeroDvmt, Hh_df$Urban)
 
-#Create dummy variables for land development type
-#------------------------------------------------
-Hh_df$Urban <- (Hh_df$Hthur == "U") * 1
-Hh_df$Town <- (Hh_df$Hthur == "T") * 1
-Hh_df$Suburban <- (Hh_df$Hthur == "S") * 1
-Hh_df$Rural <- (Hh_df$Hthur == "R") * 1
-Hh_df$City <- (Hh_df$Hthur == "C") * 1
-
-
-#====================
-#PROCESS VEHICLE DATA
-#====================
-
-#Correct auto ownership variable
-#-------------------------------
-# The NHTS datasets miscodes the Ratio16v variable (ratio of persons over 16 to
-# vehicles) for households having zero vehicles as 0 (it should be infinite).
-# The fouls up the model estimation. A variable of vehicles per persons of
-# driving age (reciprocal of Ratio16v) is created and the zero vehicle
-# households for this variable are properly coded.
-VehPerDrvAgePop_ <- 1 / Hh_df$Ratio16v
-VehPerDrvAgePop_[Hh_df$Hhvehcnt == 0] <- 0
-VehPerDrvAgePop_[is.infinite(VehPerDrvAgePop_)] <- NA
-Hh_df$VehPerDrvAgePop <- VehPerDrvAgePop_
-rm(VehPerDrvAgePop_)
-
-#Add gas cost variable from vehicle dataset
-#------------------------------------------
-#The average gas cost per vehicle mile (Gscostmile) is computed for each
-#household that has data for this variable. This is used in the household DVMT
-#model. About a third of the households have sufficient information to permit
-#gas costs to be calculated. Gscostmile is calculated both as a simple average
-#of the values for each vehicle and as an mileage weighted average.
-
-#Make a dataset of the necessary variables
-FieldsToKeep_ <- c("Houseid", "Vehid", "Vehtype", "Eiadmpg", "Gscost", "Bestmile")
-Veh_df <- Veh_df[, FieldsToKeep_]
-#Convert all negative values to NA values
-Veh_df[Veh_df < 0] <- NA
-#Classify vehicles as Passenger and LightTruck
-Veh_df$Type <- rep(NA, nrow(Veh_df))
-Veh_df$Type[Veh_df$Vehtype == 1] <- "Auto"
-Veh_df$Type[Veh_df$Vehtype %in% c(2, 3, 4)] <- "LightTruck"
-#Keep only the vehicles that are autos or light trucks
-Veh_df <- Veh_df[Veh_df$Type %in% c("Auto", "LightTruck"),]
-#Calculate household average Gscostmile weighted by vehicle mileage
-Veh_ls <- split(Veh_df, Veh_df$Houseid)
-HhAveMpg_Hh <- unlist(lapply(Veh_ls, function(x) {
-  Mpg_ <- x$Eiadmpg
-  Miles_ <- x$Bestmile
-  Mpg_[is.na(Mpg_)] <- 0
-  Miles_[is.na(Miles_)] <- 0
-  Miles_[Mpg_ == 0] <- 0
-  Mpg_[Miles_ == 0] <- 0
-  sum(Mpg_ * Miles_) / sum(Miles_)
-}))
-Hh_df$AveMpg <- HhAveMpg_Hh[match(Hh_df$Houseid, names(HhAveMpg_Hh))]
-Gscost_Hh <-
-  tapply(Veh_df$Gscost, Veh_df$Houseid, function(x) mean(x, na.rm=TRUE))
-Hh_df$Gscost <- Gscost_Hh[match(Hh_df$Houseid, names(Gscost_Hh))]
-Hh_df$Gscostmile <- Hh_df$Gscost / Hh_df$AveMpg
-#Calculate the gas cost per mile (Gscostmile2) for each vehicle (cents per mile)
-Veh_df$Gscostmile2 <- Veh_df$Gscost / Veh_df$Eiadmpg
-# Calculate household average Gscostmile and average of household vehicle Gscostmile
-# 20,488 households have averages thus calculated
-Gscostmile2_Hh <-
-  tapply(Veh_df$Gscostmile2, Veh_df$Houseid, function(x) mean(x, na.rm=TRUE))
-Hh_df$Gscostmile2 <- Gscostmile2_Hh[match(Hh_df$Houseid, names(Gscostmile2_Hh))]
-rm(FieldsToKeep_, Gscostmile2_Hh, Veh_ls, HhAveMpg_Hh, Gscost_Hh)
-
-#Add total annual vehicle mileage data to household dataset
-#----------------------------------------------------------
-#Notes:
-#Best annual mileage estimates were prepared for about 20,000 of the households
-HhBestmile_ <-
-  unlist(tapply(Veh_df$Bestmile, Veh_df$Houseid, function(x) {
-    if(all(!is.na(x))) sum(x)}))
-Hh_df$Totmiles <- HhBestmile_[match(Hh_df$Houseid, names(HhBestmile_))]
-
-
-#===================
-#PROCESS PERSON DATA
-#===================
-
-#Replace person values with NA where appropriate
-Per_df[Per_df < 0] <- NA
+#Add person travel data to the household records
+#-----------------------------------------------
 #Split the person data
 Per_ls <- split(Per_df, Per_df$Houseid)
 #Sum person data to the household level
@@ -455,11 +489,6 @@ Hh_df$Numwrkdrvr <- Numwrkdrvr_Hh[Hh_df$Houseid]
 #Clean up
 rm(Per_ls, Numcommdrvr_Hh, Nbiketrp_Hh, Nwalktrp_Hh, Usepubtr_Hh, Numwrkdrvr_Hh)
 
-
-#=======================================
-#ADD THE HIGHWAY AND TRANSIT SUPPLY DATA
-#=======================================
-
 #Add the highway supply data
 #---------------------------
 #Change Hhc_msa to character variable to link up highway data properly
@@ -469,19 +498,19 @@ Hwy2001_df <-
   read.csv("inst/extdata/HighwayStatistics2.csv",
            colClasses = c(rep("character", 2), rep("numeric", 8)))
 #Sum quantities by Msa Code
-RoadMi_Mc <- tapply(Hwy2001_df$RoadMiles, Hwy2001_df$MsaCode, sum)
-Pop_Mc <- tapply(Hwy2001_df$Population, Hwy2001_df$MsaCode, sum)
-FwyLnMi_Mc <- tapply(Hwy2001_df$FwyLaneMi, Hwy2001_df$MsaCode, sum)
-Area_Mc <- tapply(Hwy2001_df$Area, Hwy2001_df$MsaCode, sum)
+RoadMi_Mc <- toVecFrom1DAry(tapply(Hwy2001_df$RoadMiles, Hwy2001_df$MsaCode, sum))
+Pop_Mc <- toVecFrom1DAry(tapply(Hwy2001_df$Population, Hwy2001_df$MsaCode, sum))
+FwyLnMi_Mc <- toVecFrom1DAry(tapply(Hwy2001_df$FwyLaneMi, Hwy2001_df$MsaCode, sum))
+Area_Mc <- toVecFrom1DAry(tapply(Hwy2001_df$Area, Hwy2001_df$MsaCode, sum))
 # Calculate per capita quantities (per 1000s population)
 RoadMiCap_Mc <- RoadMi_Mc / Pop_Mc
 FwyLnMiCap_Mc <- FwyLnMi_Mc / Pop_Mc
 # Calculate urbanized area density
 MsaPopdn_Mc <- 1000 * Pop_Mc / Area_Mc
 # Add to household data set
-Hh_df$Roadmicap <- RoadMiCap_Mc[Hh_df$Hhc_msa]
-Hh_df$Fwylnmicap <- FwyLnMiCap_Mc[Hh_df$Hhc_msa]
-Hh_df$MsaPopdn <- MsaPopdn_Mc[Hh_df$Hhc_msa]
+Hh_df$RoadMiPC <- unname(RoadMiCap_Mc[Hh_df$Hhc_msa])
+Hh_df$FwyLnMiPC <- unname(FwyLnMiCap_Mc[Hh_df$Hhc_msa])
+Hh_df$MsaPopDen <- unname(MsaPopdn_Mc[Hh_df$Hhc_msa])
 # Clean up workspace
 rm(RoadMi_Mc, Pop_Mc, FwyLnMi_Mc, Area_Mc, RoadMiCap_Mc, FwyLnMiCap_Mc,
    MsaPopdn_Mc, Hwy2001_df)
@@ -498,7 +527,7 @@ Transit2001_df$UZAName <- as.character(Transit2001_df$UZAName)
 IsIdentifiedUZA_ <- !is.na(Transit2001_df$MSACode)
 BusEqRevMiPC_ <- Transit2001_df$BusEqRevMiPC[IsIdentifiedUZA_]
 names(BusEqRevMiPC_) <- Transit2001_df$MSACode[IsIdentifiedUZA_]
-Hh_df$BusEqRevMiPC <- BusEqRevMiPC_[Hh_df$Hhc_msa]
+Hh_df$BusEqRevMiPC <- unname(BusEqRevMiPC_[Hh_df$Hhc_msa])
 #Set West Palm Beach to be same as Miami because the areas are included
 #together in the NTD transit data
 Hh_df$BusEqRevMiPC[Hh_df$Hhc_msa == "8960"] <- BusEqRevMiPC_["4992"]
@@ -522,62 +551,26 @@ Hh_df$Flgfincm <-
   factor(Hh_df$Flgfincm,
          levels = c("-7", "-8", "-9", "1", "2"),
          labels = c("Refused", "Don't Know", "Not Ascertained", "Yes", "No"))
-Hh_df$Hbhresdn[Hh_df$Hbhresdn < 0] <- NA
-Hh_df$Hbhur[Hh_df$Hbhur == "-9"] <- NA
-Hh_df$Hbppopdn[Hh_df$Hbppopdn < 0] <- NA
-#Make a factor variable for family income
-Hh_df$Hhfamincc <- Hh_df$Hhfaminc
-Hh_df$Hhfamincc[Hh_df$Hhfaminc < 0] <- NA
-Hh_df$Hhfamincc <- factor(Hh_df$Hhfamincc)
-#Make a ratio variable for family income
-Hh_df$Hhfaminc[Hh_df$Hhfaminc < 0] <- NA
-MidPtValues_ <-
-  c(2500, 7500, 12500, 17500, 22500, 27500, 32500, 37500, 42500, 47500, 52500,
-    57500, 62500, 67500, 72500, 77500, 90000, 120000)
-Hh_df$Hhfaminc <- MidPtValues_[Hh_df$Hhfaminc]
-#Make a factor variable for total household income
-Hh_df$Hhincttlc <- Hh_df$Hhincttl
-Hh_df$Hhincttlc[Hh_df$Hhincttl < 0] <- NA
-Hh_df$Hhincttlc <- factor(Hh_df$Hhincttlc)
-#Make a ratio variable for total household income
-Hh_df$Hhincttl[ Hh_df$Hhincttl < 0 ] <- NA
-MidPtValues_ <-
-  c(2500, 7500, 12500, 17500, 22500, 27500, 32500, 37500, 42500, 47500, 52500,
-    57500, 62500, 67500, 72500, 77500, 90000, 120000)
-Hh_df$Hhincttl <- MidPtValues_[Hh_df$Hhincttl]
 Hh_df$Hhr_drvr <- factor(Hh_df$Hhr_drvr, labels = c("Yes", "No"))
 Hh_df$Hhr_race <- factor( Hh_df$Hhr_race )
 Hh_df$Hhr_sex <- factor( Hh_df$Hhr_sex, labels = c( "Male", "Female" ) )
-Hh_df$Hometype[Hh_df$Hometype < 0] <- NA
 Hh_df$Hometype <-
   factor(Hh_df$Hometype,
          labels = c("Single Family", "Duplex", "Attached", "Multi-family",
                     "Mobile Home", "Dorm", "Other"))
-Hh_df$Hteempdn[Hh_df$Hteempdn < 0] <- NA
-Hh_df$Hthresdn[Hh_df$Hthresdn < 0] <- NA
-Hh_df$Hthur[Hh_df$Hthur == "-9"] <- NA
-Hh_df$Htppopdn[Hh_df$Htppopdn < 0] <- NA
-Hh_df$Lif_cyc[Hh_df$Lif_cyc < 0] <- NA
 Hh_df$Lif_cyc <- factor(Hh_df$Lif_cyc)
 Hh_df$Msacat <- factor(Hh_df$Msacat)
 Hh_df$Msasize <- factor(Hh_df$Msasize)
 Hh_df$Rail <- factor(Hh_df$Rail)
-Hh_df$Smplarea <- factor(Hh_df$Smplarea)
-Hh_df$Smplfirm <- factor(Hh_df$Smplfirm)
 Hh_df$Urbrur <- factor(Hh_df$Urbrur)
 #Add large household size variable (useful in connection with life cycle variable)
-Hh_df$Largehh <- Hh_df$Hhsize * 0
-Hh_df$Largehh[Hh_df$Hhsize > 3] <- 1
-Hh_df$Largehh <- factor(Hh_df$Largehh, labels = c("Small", "Large"))
-#Remove unneeded variables
-VarsToRm_ <-
-  c("Age_p1", "Age_p2", "Age_p3", "Age_p4", "Age_p5", "Age_p6", "Age_p7",
-    "Age_p8", "Age_p9", "Age_p10", "Age_p11", "Age_p12", "Age_p13", "Age_p14")
-for (var in VarsToRm_) Hh_df[[var]] <- NULL
+Hh_df$LargeHh <- Hh_df$Hhsize * 0
+Hh_df$LargeHh[Hh_df$Hhsize > 3] <- 1
+Hh_df$LargeHh <- factor(Hh_df$LargeHh, labels = c("Small", "Large"))
 #Clean up workspace
-rm(Dt_df, Per_df, Veh_df, AllTripsHh_, Dvmt_Hh, HhBestmile_, HhWkTourVmt_,
-   IsVehicle_, MidPtValues_, NumVeh_Dt, var, VarsToRm_, WasNotPsgr_,
-   calcTourVmtProp, toProperName)
+rm(Dt_df, Per_df, Dvmt_Hh, HhWkTourVmt_, IsVehicle_, NumVeh_Dt, WasNotPsgr_,
+   calcTourVmtProp, toProperName, toVecFrom1DAry, BusEqRevMiPC_,
+   IsIdentifiedUZA_, Transit2001_df)
 
 
 #==========================
@@ -602,8 +595,8 @@ rm(Dt_df, Per_df, Veh_df, AllTripsHh_, Dvmt_Hh, HhBestmile_, HhWkTourVmt_,
 #'   \item{Hbhur}{Urban / Rural indicator - Block group}
 #'   \item{Hbppopdn}{Population per sq mile - Block group}
 #'   \item{Hhc_msa}{MSA / CMSA code for HH}
-#'   \item{Hhfaminc}{Total HH income last 12 months}
-#'   \item{Hhincttl}{Total income all HH members}
+#'   \item{Hhfaminc}{Total HH income last 12 months (category)}
+#'   \item{Hhincttl}{Total income all HH members (category)}
 #'   \item{Hhnumbik}{Number of full size bicycles in HH}
 #'   \item{Hhr_age}{Respondent age}
 #'   \item{Hhr_drvr}{Driver status of HH respondent}
@@ -619,13 +612,8 @@ rm(Dt_df, Per_df, Veh_df, AllTripsHh_, Dvmt_Hh, HhBestmile_, HhWkTourVmt_,
 #'   \item{Lif_cyc}{HH Life Cycle}
 #'   \item{Msacat}{MSA category}
 #'   \item{Msasize}{MSA size}
-#'   \item{Numadlt}{Number of adults in HH}
 #'   \item{Rail}{Rail (subway) category}
 #'   \item{Ratio16v}{Ratio - HH members (16+) to vehicles}
-#'   \item{Ratio16w}{Ratio - HH adults (16+) to workers}
-#'   \item{Ratiowv}{Ratio of HH workers to vehicles}
-#'   \item{Smplarea}{Add-on area where HH resides}
-#'   \item{Smplfirm}{Firm collecting the data}
 #'   \item{Urban}{Household in urbanized area}
 #'   \item{Urbrur}{Household in urban/rural area}
 #'   \item{Wrkcount}{Count of HH members with jobs}
@@ -636,6 +624,22 @@ rm(Dt_df, Per_df, Veh_df, AllTripsHh_, Dvmt_Hh, HhBestmile_, HhWkTourVmt_,
 #'   \item{Age30to54}{Number of persons age 30 to 54 in household}
 #'   \item{Age55to64}{Number of persons age 55 to 64 in household}
 #'   \item{Age65Plus}{Number of persons age 65 or older in household}
+#'   \item{Income}{Household income}
+#'   \item{IncGrp}{Household income group}
+#'   \item{UrbanDev}{Flag identifying whether household lived in an 'Urban' area}
+#'   \item{TownDev}{Flag identifying whether household lived in a 'Town' area}
+#'   \item{SuburbanDev}{Flag identifying whether household lived in a 'Suburban' area}
+#'   \item{RuralDev}{Flag identifying whether household lived in a 'Rural' area}
+#'   \item{SecondCityDev}{Flag identifying whether household lived in a 'Second City' area}
+#'   \item{NumAuto}{Number of automobiles owned}
+#'   \item{NumLightTruck}{Number of light trucks owned}
+#'   \item{NumVeh}{Number of vehicles (autos and light trucks) owned}
+#'   \item{VehPerDrvAgePop}{Ratio of household vehicles and driving-age persons}
+#'   \item{Totmiles}{Total annual household miles calculated from best estimate of annual vehicle miles 'BESTMILE'}
+#'   \item{AveMpg}{Average MPG of household vehicles}
+#'   \item{Gscost}{Average cost of gasoline per gallon}
+#'   \item{Gscostmile}{Average cost of gasoline per mile of household vehicle travel}
+#'   \item{Gscostmile2}{Average cost of gasoline per mile using EIA derived miles per equivalent-gallon}
 #'   \item{Dvmt}{Household vehicle miles of travel on survey day}
 #'   \item{PropSovDvmtLE2}{Proportion of DVMT in single-occupant vehicle tours less than or equal to 2 miles}
 #'   \item{PropSovDvmtLE5}{Proportion of DVMT in single-occupant vehicle tours less than or equal to 5 miles}
@@ -646,32 +650,47 @@ rm(Dt_df, Per_df, Veh_df, AllTripsHh_, Dvmt_Hh, HhBestmile_, HhWkTourVmt_,
 #'   \item{ZeroVehPassDvmt}{DVMT as passenger for zero-vehicle households}
 #'   \item{WalkBikeMiles}{Miles traveled by walking or bicycling}
 #'   \item{ZeroDvmt}{Flag identifying whether household had no DVMT on survey day}
-#'   \item{Town}{Flag identifying whether household lived in a 'Town' area}
-#'   \item{Suburban}{Flag identifying whether household lived in a 'Suburban' area}
-#'   \item{Rural}{Flag identifying whether household lived in a 'Rural' area}
-#'   \item{City}{Flag identifying whether household lived in a 'City' area}
-#'   \item{VehPerDrvAgePop}{Ratio of household vehicles and driving-age persons}
-#'   \item{AveMpg}{Average MPG of household vehicles}
-#'   \item{Gscost}{Average cost of gasoline per gallon}
-#'   \item{Gscostmile}{Average cost of gasoline per mile of household vehicle travel}
-#'   \item{Gscostmile2}{Average cost of gasoline per mile using EIA derived miles per equivalent-gallon}
-#'   \item{Totmiles}{Total annual household miles calculated from best estimate of annual vehicle miles 'BESTMILE'}
 #'   \item{Numcommdrvr}{Number of commercial drivers in household}
 #'   \item{Nbiketrp}{Number of bike trips on travel survey day}
 #'   \item{Nwalktrp}{Number of walk trips on travel survey day}
 #'   \item{Usepubtr}{Whether any household members used public transportation on travel survey day}
 #'   \item{Numwrkdrvr}{Number of persons whose work requires driving a vehicle}
-#'   \item{Roadmicap}{Ratio of urbanized area road miles to thousands of persons}
-#'   \item{Fwylnmicap}{Ratio of urbanized area freeway lane miles to thousands of persons}
-#'   \item{MsaPopdn}{Urbanized area population density in persons per square mile}
+#'   \item{RoadMiPC}{Ratio of urbanized area road miles to thousands of persons}
+#'   \item{FwyLnMiPC}{Ratio of urbanized area freeway lane miles to thousands of persons}
+#'   \item{MsaPopDen}{Urbanized area population density in persons per square mile}
 #'   \item{BusEqRevMiPC}{Annual bus equivalent transit revenue miles per capita}
-#'   \item{Hhfamincc}{Household family income category variable}
-#'   \item{Hhincttlc}{Total household income category variable}
-#'   \item{Largehh}{Flag identifying whether household size is large}
+#'   \item{LargeHh}{Flag identifying whether household size is large}
 #' }
 #' @source 2001 National Household Travel Survey, Highway Statistics (2001),
 #' National Transit Database (2002), and Make2001NHTSDataset.R script.
 "Hh_df"
 devtools::use_data(Hh_df, overwrite = TRUE)
 rm(Hh_df)
+
+
+#========================
+#SAVE THE VEHICLE DATASET
+#========================
+#' Vehicle dataset from the 2001 National Household Travel Survey
+#'
+#' A vehicle dataset containing the data used for estimating VisionEval
+#' vehicle models derived from the 2001 National Household Travel Survey.
+#'
+#' @format A data frame with 112697 rows and 10 variables
+#' \describe{
+#'   \item{Houseid}{Unique household ID}
+#'   \item{Vehid}{Unique ID for vehicle in household}
+#'   \item{Bestmile}{Best estimate of annual miles}
+#'   \item{Eiadmpg}{EIA derived miles per equivalent-gallon}
+#'   \item{Gscost}{Estimated Fuel cost (cents per gallon)}
+#'   \item{Vehtype}{Type of vehicle}
+#'   \item{Vehyear}{Vehicle year - derived}
+#'   \item{Vehmiles}{Miles vehicle driven last 12 months}
+#'   \item{Type}{Auto or light truck}
+#'   \item{Gscostmile2}{Estimated gas cost per mile of travel}
+#' }
+#' @source 2001 National Household Travel Survey and Make2001NHTSDataset.R script.
+"Veh_df"
+devtools::use_data(Veh_df, overwrite = TRUE)
+rm(Veh_df)
 
