@@ -58,7 +58,7 @@ script:
         Rscript -e 'devtools::install_deps(".")';
         R CMD INSTALL .;
         cd ../../..;
-      done 
+      done;
       cd $TEST_DIR;
       Rscript -e "tryCatch( source('run_model.R') )";
     elif [ $TYPE = "gui" ]; then
@@ -72,7 +72,7 @@ script:
         Rscript -e 'devtools::install_deps(".")';
         R CMD INSTALL .;
         cd ../../..;
-      done 
+      done;
       cd $TEST_DIR;
       Rscript -e 'tryCatch( library("shiny"); runApp("app.R") )';
     fi
