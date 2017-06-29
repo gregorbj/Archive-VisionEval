@@ -1,3 +1,5 @@
+library(rhdf5)
+
 #Test LocateHouseholds module
 source("R/LocateHouseholds.R")
 testModule(

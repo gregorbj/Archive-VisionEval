@@ -1,3 +1,5 @@
+library(rhdf5)
+
 #Test AssignVehicleOwnership module
 source("R/AssignVehicleOwnership.R")
 testModule(
