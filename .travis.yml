@@ -12,15 +12,18 @@ install:
   - Rscript -e 'devtools::install_bioc(c("BiocInstaller", "rhdf5"))'
 
 env:
-  - TEST_DIR=sources/framework/visioneval
-  - TEST_DIR=sources/modules/VEAltModes
-  - TEST_DIR=sources/modules/VELandUse
-  - TEST_DIR=sources/modules/VESimHouseholds
-  - TEST_DIR=sources/modules/VESyntheticFirms
-  - TEST_DIR=sources/modules/VETransportSupply
-  - TEST_DIR=sources/modules/VEVehicleOwnership
+  - TYPE=module TEST_DIR=sources/framework/visioneval
+  - TYPE=module TEST_DIR=sources/modules/VEAltModes
+  - TYPE=module TEST_DIR=sources/modules/VELandUse
+  - TYPE=module TEST_DIR=sources/modules/VESimHouseholds
+  - TYPE=module TEST_DIR=sources/modules/VESyntheticFirms
+  - TYPE=module TEST_DIR=sources/modules/VETransportSupply
+  - TYPE=module TEST_DIR=sources/modules/VEVehicleOwnership
+  - TYPE=model  TEST_DIR=sources/models/VERPAT
+  - TYPE=model  TEST_DIR=sources/models/VERSPM/test1
+  - TYPE=gui    TEST_DIR=sources/VEGUI
 
 script:
-  - cd $TEST_DIR
-  - Rscript -e 'devtools::install_deps(".")'
-  - Rscript -e 'devtools::check(".")'
+  - test $TYPE = module && cd $TEST_DIR && Rscript -e 'devtools::install_deps(".")' && Rscript -e 'devtools::check(".")' && Rscript tests/scripts/test.R
+  - test $TYPE = model  && cd $TEST_DIR && Rscript run_model.R
+  - test $TYPE = gui    && cd $TEST_DIR && Rscript -e 'library("shiny"); runApp("app.R")'
