@@ -31,6 +31,7 @@ script:
   - if [ $TYPE = "framework" ]; then
       Rscript -e 'devtools::install_deps(".")';
       Rscript -e 'devtools::check(".")';
+      Rscript tests/scripts/test.R;
     elif [ $TYPE = "module" ]; then
       Rscript -e 'devtools::install_deps(".")';
       Rscript -e 'devtools::check(".")';
