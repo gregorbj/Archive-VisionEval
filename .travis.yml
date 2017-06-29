@@ -27,47 +27,52 @@ env:
   - TYPE=gui       TEST_DIR=sources/VEGUI
 
 script:
+  - declare -a modules=("VE2001NHTS" "VEAltModes" "VELandUse" "VESimHouseholds" "VESyntheticFirms" "VETransportSupply" "VEVehicleOwnership")
   - |
     if [ $TYPE = "framework" ]; then
       cd $TEST_DIR;
       Rscript -e 'devtools::install_deps(".")';
       echo Run R package tests;
       Rscript -e 'devtools::check(".")';
-      echo ------------;
+      echo --------------------;
       echo Run VisionEval tests;
-      echo ------------;
+      echo --------------------;
       Rscript -e "tryCatch( source('tests/scripts/test.R') )";
     elif [ $TYPE = "module" ]; then
       cd $TEST_DIR;
       Rscript -e 'devtools::install_deps(".")';
       echo Run R package tests;
       Rscript -e 'devtools::check(".")';
-      echo ------------;
+      echo --------------------;
       echo Run VisionEval tests;
-      echo ------------;
+      echo --------------------;
       Rscript -e "tryCatch( source('tests/scripts/test.R') )";
     elif [ $TYPE = "model" ]; then
-      echo install required VisionEval packages;
-      R CMD INSTALL sources/framework/visioneval;
-      R CMD INSTALL sources/modules/VE2001NHTS;
-      R CMD INSTALL sources/modules/VEAltModes;
-      R CMD INSTALL sources/modules/VELandUse;
-      R CMD INSTALL sources/modules/VESimHouseholds;
-      R CMD INSTALL sources/modules/VESyntheticFirms;
-      R CMD INSTALL sources/modules/VETransportSupply;
-      R CMD INSTALL sources/modules/VEVehicleOwnership;
+      echo Install required VisionEval packages;
+      cd sources/framework/visioneval;
+      Rscript -e 'devtools::install_deps(".")';
+      R CMD INSTALL .;
+      cd ../../..;
+      for $mod in "${modules[@]}" do 
+        cd sources/modules/$mod;
+        Rscript -e 'devtools::install_deps(".")';
+        R CMD INSTALL .;
+        cd ../../..;
+      done
       cd $TEST_DIR;
       Rscript -e "tryCatch( source('run_model.R') )";
     elif [ $TYPE = "gui" ]; then
-      echo install required VisionEval packages;
-      R CMD INSTALL sources/framework/visioneval;
-      R CMD INSTALL sources/modules/VE2001NHTS;
-      R CMD INSTALL sources/modules/VEAltModes;
-      R CMD INSTALL sources/modules/VELandUse;
-      R CMD INSTALL sources/modules/VESimHouseholds;
-      R CMD INSTALL sources/modules/VESyntheticFirms;
-      R CMD INSTALL sources/modules/VETransportSupply;
-      R CMD INSTALL sources/modules/VEVehicleOwnership;
+      echo Install required VisionEval packages;
+      cd sources/framework/visioneval;
+      Rscript -e 'devtools::install_deps(".")';
+      R CMD INSTALL .;
+      cd ../../..;
+      for $mod in "${modules[@]}" do 
+        cd sources/modules/$mod;
+        Rscript -e 'devtools::install_deps(".")';
+        R CMD INSTALL .;
+        cd ../../..;
+      done
       cd $TEST_DIR;
       #need to navigate to VERPAT and run;
       #need to navigate to VERSPM and run;
