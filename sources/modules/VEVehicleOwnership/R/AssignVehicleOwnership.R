@@ -40,20 +40,20 @@ library(ordinal)
 #-------------------------------
 #Load selected data from VE2001NHTS package
 FieldsToKeep_ <-
-  c("Hhvehcnt", "Hhincttl", "Hbppopdn", "Hhsize", "Hometype", "Urban", "Fwylnmicap",
-    "Wrkcount", "Age0to14", "Age65Plus", "MsaPopdn", "BusEqRevMiPC", "Dvmt")
+  c("NumVeh", "Income", "Hbppopdn", "Hhsize", "Hometype", "UrbanDev", "FwyLnMiPC",
+    "Wrkcount", "Age0to14", "Age65Plus", "MsaPopDen", "BusEqRevMiPC", "Dvmt")
 Hh_df <- VE2001NHTS::Hh_df[, FieldsToKeep_]
 #Create additional data fields
 Hh_df$IsSF <- as.numeric(Hh_df$Hometype %in% c("Single Family", "Mobile Home"))
 Hh_df$HhSize <- Hh_df$Hhsize
 Hh_df$DrvAgePop <- Hh_df$HhSize - Hh_df$Age0to14
 Hh_df$OnlyElderly <- as.numeric(Hh_df$HhSize == Hh_df$Age65Plus)
-Hh_df$LogIncome <- log(Hh_df$Hhincttl)
+Hh_df$LogIncome <- log(Hh_df$Income)
 Hh_df$LogDensity <- log(Hh_df$Hbppopdn)
-Hh_df$ZeroVeh <- as.numeric(Hh_df$Hhvehcnt == 0)
-Hh_df$LowInc <- as.numeric(Hh_df$Hhincttl <= 20000)
+Hh_df$ZeroVeh <- as.numeric(Hh_df$NumVeh == 0)
+Hh_df$LowInc <- as.numeric(Hh_df$Income <= 20000)
 Hh_df$Workers <- Hh_df$Wrkcount
-Hh_df$IsUrbanMixNbrhd <- Hh_df$Urban
+Hh_df$IsUrbanMixNbrhd <- Hh_df$UrbanDev
 Hh_df$TranRevMiPC <- Hh_df$BusEqRevMiPC
 rm(FieldsToKeep_)
 
@@ -70,8 +70,8 @@ AutoOwnModels_ls <-
 #Make metropolitan household estimation dataset
 Terms_ <-
   c("IsSF", "IsUrbanMixNbrhd", "Workers", "DrvAgePop", "TranRevMiPC", "LogIncome",
-    "HhSize", "LogDensity", "OnlyElderly", "LowInc", "Hhvehcnt", "ZeroVeh", "Dvmt",
-    "Fwylnmicap")
+    "HhSize", "LogDensity", "OnlyElderly", "LowInc", "NumVeh", "ZeroVeh", "Dvmt",
+    "FwyLnMiPC")
 EstData_df <- Hh_df[!is.na(Hh_df$TranRevMiPC), Terms_]
 EstData_df <- EstData_df[complete.cases(EstData_df),]
 rm(Terms_)
@@ -90,7 +90,7 @@ AutoOwnModels_ls$Metro$Zero[c("residuals", "fitted.values",
                               "data")] <- NULL
 #Model number of vehicles of non-zero vehicle households
 EstData_df <- EstData_df[EstData_df$ZeroVeh == 0,]
-EstData_df$VehOrd <- EstData_df$Hhvehcnt
+EstData_df$VehOrd <- EstData_df$NumVeh
 EstData_df$VehOrd[EstData_df$VehOrd > 6] <- 6
 EstData_df$VehOrd <- ordered(EstData_df$VehOrd)
 AutoOwnModels_ls$Metro$Count <-
@@ -108,7 +108,7 @@ AutoOwnModels_ls$Metro$Count[c("fitted.values", "model", "y")] <- NULL
 #Make non-metropolitan household estimation dataset
 Terms_ <-
   c("IsSF", "Workers", "DrvAgePop", "LogIncome", "HhSize",
-    "LogDensity", "OnlyElderly", "LowInc", "Hhvehcnt", "ZeroVeh", "Dvmt")
+    "LogDensity", "OnlyElderly", "LowInc", "NumVeh", "ZeroVeh", "Dvmt")
 EstData_df <- Hh_df[is.na(Hh_df$TranRevMiPC), Terms_]
 EstData_df <- EstData_df[complete.cases(EstData_df),]
 rm(Terms_)
@@ -126,7 +126,7 @@ AutoOwnModels_ls$NonMetro$Zero[c("residuals", "fitted.values",
                               "data")] <- NULL
 #Model number of vehicles of non-zero vehicle households
 EstData_df <- EstData_df[EstData_df$ZeroVeh == 0,]
-EstData_df$VehOrd <- EstData_df$Hhvehcnt
+EstData_df$VehOrd <- EstData_df$NumVeh
 EstData_df$VehOrd[EstData_df$VehOrd > 6] <- 6
 EstData_df$VehOrd <- ordered(EstData_df$VehOrd)
 AutoOwnModels_ls$NonMetro$Count <-

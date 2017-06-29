@@ -91,7 +91,7 @@ HouseType_[NhtsHometype_ == "Dorm"] <- "GQ"
 HouseType_[NhtsHometype_ %in% c("Duplex", "Multi-family", "Other")] <- "MF"
 Data_df <-
   data.frame(
-    UrbanMix = VE2001NHTS::Hh_df$Urban,
+    UrbanMix = VE2001NHTS::Hh_df$UrbanDev,
     LocalPopDensity = VE2001NHTS::Hh_df$Hbppopdn,
     IsSF = as.numeric(HouseType_ == "SF"))
 Data_df <- Data_df[complete.cases(Data_df),]
