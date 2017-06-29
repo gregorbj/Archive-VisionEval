@@ -41,7 +41,7 @@ library(ordinal)
 #Load selected data from VE2001NHTS package
 FieldsToKeep_ <-
   c("NumVeh", "Income", "Hbppopdn", "Hhsize", "Hometype", "UrbanDev", "FwyLnMiPC",
-    "Wrkcount", "Age0to14", "Age65Plus", "MsaPopdn", "BusEqRevMiPC", "Dvmt")
+    "Wrkcount", "Age0to14", "Age65Plus", "MsaPopDen", "BusEqRevMiPC", "Dvmt")
 Hh_df <- VE2001NHTS::Hh_df[, FieldsToKeep_]
 #Create additional data fields
 Hh_df$IsSF <- as.numeric(Hh_df$Hometype %in% c("Single Family", "Mobile Home"))
