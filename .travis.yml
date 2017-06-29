@@ -8,7 +8,9 @@ cache: packages
 warnings_are_errors: false
 
 install:
-  - Rscript -e 'install.packages(c("devtools", "roxygen2", "stringr", "knitr"))'
+  - Rscript -e 'install.packages(c("devtools", "roxygen2", "stringr", "knitr", "data.table", "curl"))'
+  - Rscript -e 'install.packages(c("shiny", "shinyjs", "shinyFiles", "DT", "shinyBS", "future", "testit", "jsonlite", "shinyAce", "envDocument", "rhandsontable"))'
+  - Rscript -e 'devtools::install_github(c("tdhock/namedCapture", "trestletech/shinyTree"))'
   - Rscript -e 'devtools::install_bioc(c("BiocInstaller", "rhdf5"))'
 
 env:
@@ -24,9 +26,16 @@ env:
   - TYPE=gui       TEST_DIR=sources/VEGUI
 
 script:
-  - echo TYPE $TYPE TEST_DIR $TEST_DIR
   - cd $TEST_DIR
-  - test $TYPE = "framework" && Rscript -e 'devtools::install_deps(".")' && Rscript -e 'devtools::check(".")'
-  - test $TYPE = "module"    && Rscript -e 'devtools::install_deps(".")' && Rscript -e 'devtools::check(".")' && Rscript tests/scripts/test.R
-  - test $TYPE = "model"     && Rscript run_model.R
-  - test $TYPE = "gui"       && Rscript -e 'library("shiny"); runApp("app.R")'
+  - if [ test $TYPE = "framework" ]; then
+      Rscript -e 'devtools::install_deps(".")';
+      Rscript -e 'devtools::check(".")';
+    elif [ test $TYPE = "module" ]; then
+      Rscript -e 'devtools::install_deps(".")';
+      Rscript -e 'devtools::check(".")';
+      Rscript tests/scripts/test.R;
+    elif [ test $TYPE = "model" ]; then
+      Rscript run_model.R;
+    elif [ test $TYPE = "gui" ]; then
+      Rscript -e 'library("shiny"); runApp("app.R")';
+    fi
