@@ -17,8 +17,8 @@
   \item{Hbhur}{Urban / Rural indicator - Block group}
   \item{Hbppopdn}{Population per sq mile - Block group}
   \item{Hhc_msa}{MSA / CMSA code for HH}
-  \item{Hhfaminc}{Total HH income last 12 months}
-  \item{Hhincttl}{Total income all HH members}
+  \item{Hhfaminc}{Total HH income last 12 months (category)}
+  \item{Hhincttl}{Total income all HH members (category)}
   \item{Hhnumbik}{Number of full size bicycles in HH}
   \item{Hhr_age}{Respondent age}
   \item{Hhr_drvr}{Driver status of HH respondent}
@@ -34,13 +34,8 @@
   \item{Lif_cyc}{HH Life Cycle}
   \item{Msacat}{MSA category}
   \item{Msasize}{MSA size}
-  \item{Numadlt}{Number of adults in HH}
   \item{Rail}{Rail (subway) category}
   \item{Ratio16v}{Ratio - HH members (16+) to vehicles}
-  \item{Ratio16w}{Ratio - HH adults (16+) to workers}
-  \item{Ratiowv}{Ratio of HH workers to vehicles}
-  \item{Smplarea}{Add-on area where HH resides}
-  \item{Smplfirm}{Firm collecting the data}
   \item{Urban}{Household in urbanized area}
   \item{Urbrur}{Household in urban/rural area}
   \item{Wrkcount}{Count of HH members with jobs}
@@ -51,6 +46,22 @@
   \item{Age30to54}{Number of persons age 30 to 54 in household}
   \item{Age55to64}{Number of persons age 55 to 64 in household}
   \item{Age65Plus}{Number of persons age 65 or older in household}
+  \item{Income}{Household income}
+  \item{IncGrp}{Household income group}
+  \item{UrbanDev}{Flag identifying whether household lived in an 'Urban' area}
+  \item{TownDev}{Flag identifying whether household lived in a 'Town' area}
+  \item{SuburbanDev}{Flag identifying whether household lived in a 'Suburban' area}
+  \item{RuralDev}{Flag identifying whether household lived in a 'Rural' area}
+  \item{SecondCityDev}{Flag identifying whether household lived in a 'Second City' area}
+  \item{NumAuto}{Number of automobiles owned}
+  \item{NumLightTruck}{Number of light trucks owned}
+  \item{NumVeh}{Number of vehicles (autos and light trucks) owned}
+  \item{VehPerDrvAgePop}{Ratio of household vehicles and driving-age persons}
+  \item{Totmiles}{Total annual household miles calculated from best estimate of annual vehicle miles 'BESTMILE'}
+  \item{AveMpg}{Average MPG of household vehicles}
+  \item{Gscost}{Average cost of gasoline per gallon}
+  \item{Gscostmile}{Average cost of gasoline per mile of household vehicle travel}
+  \item{Gscostmile2}{Average cost of gasoline per mile using EIA derived miles per equivalent-gallon}
   \item{Dvmt}{Household vehicle miles of travel on survey day}
   \item{PropSovDvmtLE2}{Proportion of DVMT in single-occupant vehicle tours less than or equal to 2 miles}
   \item{PropSovDvmtLE5}{Proportion of DVMT in single-occupant vehicle tours less than or equal to 5 miles}
@@ -61,28 +72,16 @@
   \item{ZeroVehPassDvmt}{DVMT as passenger for zero-vehicle households}
   \item{WalkBikeMiles}{Miles traveled by walking or bicycling}
   \item{ZeroDvmt}{Flag identifying whether household had no DVMT on survey day}
-  \item{Town}{Flag identifying whether household lived in a 'Town' area}
-  \item{Suburban}{Flag identifying whether household lived in a 'Suburban' area}
-  \item{Rural}{Flag identifying whether household lived in a 'Rural' area}
-  \item{City}{Flag identifying whether household lived in a 'City' area}
-  \item{VehPerDrvAgePop}{Ratio of household vehicles and driving-age persons}
-  \item{AveMpg}{Average MPG of household vehicles}
-  \item{Gscost}{Average cost of gasoline per gallon}
-  \item{Gscostmile}{Average cost of gasoline per mile of household vehicle travel}
-  \item{Gscostmile2}{Average cost of gasoline per mile using EIA derived miles per equivalent-gallon}
-  \item{Totmiles}{Total annual household miles calculated from best estimate of annual vehicle miles 'BESTMILE'}
   \item{Numcommdrvr}{Number of commercial drivers in household}
   \item{Nbiketrp}{Number of bike trips on travel survey day}
   \item{Nwalktrp}{Number of walk trips on travel survey day}
   \item{Usepubtr}{Whether any household members used public transportation on travel survey day}
   \item{Numwrkdrvr}{Number of persons whose work requires driving a vehicle}
-  \item{Roadmicap}{Ratio of urbanized area road miles to thousands of persons}
-  \item{Fwylnmicap}{Ratio of urbanized area freeway lane miles to thousands of persons}
-  \item{MsaPopdn}{Urbanized area population density in persons per square mile}
+  \item{RoadMiPC}{Ratio of urbanized area road miles to thousands of persons}
+  \item{FwyLnMiPC}{Ratio of urbanized area freeway lane miles to thousands of persons}
+  \item{MsaPopDen}{Urbanized area population density in persons per square mile}
   \item{BusEqRevMiPC}{Annual bus equivalent transit revenue miles per capita}
-  \item{Hhfamincc}{Household family income category variable}
-  \item{Hhincttlc}{Total household income category variable}
-  \item{Largehh}{Flag identifying whether household size is large}
+  \item{LargeHh}{Flag identifying whether household size is large}
 }}
 \source{
 2001 National Household Travel Survey, Highway Statistics (2001),
