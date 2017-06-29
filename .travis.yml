@@ -28,7 +28,8 @@ env:
 
 script:
   - cd $TEST_DIR
-  - if [ $TYPE = "framework" ]; then
+  - |
+    if [ $TYPE = "framework" ]; then
       Rscript -e 'devtools::install_deps(".")';
       Rscript -e 'devtools::check(".")';
       Rscript tests/scripts/test.R;

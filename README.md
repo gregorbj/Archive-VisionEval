@@ -70,7 +70,7 @@ runGitHub("gregorbj/VisionEval", subdir="sources/VEGUI")
 The current release version of VisionEval is on the master branch.  The current development version is on
 the develop branch.  To download, install, and test the develop branch resources, do the following:
   1. Git clone (i.e. copy) the develop branch to your computer.  By default, Git will clone the master branch.  After cloning, switch to the develop branch.
-  2. Run the same R comands above, except reference the develop branch, for example:
+  2. Run the same R commands above, except reference the develop branch, for example:
 ```
 devtools::install_github("gregorbj/VisionEval/sources/framework/visioneval", ref="develop")
 
