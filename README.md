@@ -25,38 +25,21 @@ set_config( config( ssl_verifypeer = 0L ) )
   4. If working with an R install without write access to its library folder (like ODOT), first change your library location to a write accessible location.
   5. Run the following commands to download and install the required libraries and their dependencies:
 ```
-source("http://bioconductor.org/biocLite.R")
-biocLite()
-biocLite("rhdf5")
+install.packages(c("devtools", "roxygen2", "stringr", "knitr", "data.table", "curl"))
+install.packages(c("shiny", "shinyjs", "shinyFiles", "DT", "shinyBS", "future", "testit", "jsonlite", "shinyAce", "envDocument", "rhandsontable"))
+devtools::install_github(c("tdhock/namedCapture", "trestletech/shinyTree"))
+devtools::install_bioc(c("BiocInstaller", "rhdf5"))
 
-install.packages("devtools")
-install.packages("plyr")
-install.packages("shiny")
-install.packages("shinyjs")
-install.packages("shinyFiles")
-install.packages("data.table")
-install.packages("DT")
-install.packages("shinyBS")
-install.packages("future")
-install.packages("testit")
-install.packages("jsonlite")
-install.packages("shinyAce")
-install.packages("envDocument")
-install.packages("rhandsontable")
-install.packages("curl")
-
-devtools::install_github("tdhock/namedCapture")
-devtools::install_github("trestletech/shinyTree")
 ```
   6. Run the following commands to download and install the required VE framework package:
 ```
-devtools::install_github("gregorbj/VisionEval/sources/framework/visioneval", ref="master") #master branch
+devtools::install_github("gregorbj/VisionEval/sources/framework/visioneval")
 ```
-  7. Run the following commands to download and install the required VE modules:
+  7. Run the following commands to download and install the required VE modules for VERPAT:
 ```
 #the following modules are required for the pilot VERPAT; others are required for VERSPM
-devtools::install_github("gregorbj/VisionEval/sources/modules/VESyntheticFirms", ref="master")
-devtools::install_github("gregorbj/VisionEval/sources/modules/VESimHouseholds", ref="master")
+devtools::install_github("gregorbj/VisionEval/sources/modules/VESyntheticFirms")
+devtools::install_github("gregorbj/VisionEval/sources/modules/VESimHouseholds")
 ```
 
 ## Running the Pilot VE RPAT from within R
@@ -76,30 +59,26 @@ source("run_model.R")
 
 ```
 library("shiny")
-runGitHub("gregorbj/VisionEval", subdir="sources/VEGUI", ref="master") #master branch
+runGitHub("gregorbj/VisionEval", subdir="sources/VEGUI")
 ```
   3. The VE GUI should launch in your browser
   4. Click "Select Scenario Script" and navigate to the VERPAT run_model.R script in your local repository
   5. Click "Run" and then "Run Model Script" to run the VERPAT model
-
-For those new to R, we recommend installing [R Studio](http://www.rstudio.com).
 
 # Develop Branch
 
 The current release version of VisionEval is on the master branch.  The current development version is on
 the develop branch.  To download, install, and test the develop branch resources, do the following:
   1. Git clone (i.e. copy) the develop branch to your computer.  By default, Git will clone the master branch.  After cloning, switch to the develop branch.
-  2. Start R and run the following commands:
+  2. Run the same R comands above, except reference the develop branch, for example:
 ```
 devtools::install_github("gregorbj/VisionEval/sources/framework/visioneval", ref="develop")
 
-devtools::install_github("gregorbj/VisionEval/sources/modules/VESyntheticFirms", ref="develop")
-devtools::install_github("gregorbj/VisionEval/sources/modules/VESimHouseholds", ref="develop")
+#and
 
 runGitHub("gregorbj/VisionEval", subdir="sources/VEGUI", ref="develop")
 ```
-  3. Navigate to and run the VERPAT run_model.R script
-  4. Navigate to and run the VERSPM run_model.R script
+  3. Navigate to and run both VERPAT and VERSPM's run_model.R script 
 
 Ensure these operations complete successfully before finalizing commits to develop.
 
