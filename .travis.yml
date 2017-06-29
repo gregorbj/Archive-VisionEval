@@ -14,33 +14,66 @@ install:
   - Rscript -e 'devtools::install_bioc(c("BiocInstaller", "rhdf5"))'
 
 env:
-  - TYPE=module TEST_DIR=sources/framework/visioneval
-  - TYPE=module TEST_DIR=sources/modules/VE2001NHTS
-  - TYPE=module TEST_DIR=sources/modules/VEAltModes
-  - TYPE=module TEST_DIR=sources/modules/VELandUse
-  - TYPE=module TEST_DIR=sources/modules/VESimHouseholds
-  - TYPE=module TEST_DIR=sources/modules/VESyntheticFirms
-  - TYPE=module TEST_DIR=sources/modules/VETransportSupply
-  - TYPE=module TEST_DIR=sources/modules/VEVehicleOwnership
-  - TYPE=model  TEST_DIR=sources/models/VERPAT
-  - TYPE=model  TEST_DIR=sources/models/VERSPM/Test1
-  - TYPE=gui    TEST_DIR=sources/VEGUI
+  - TYPE=framework TEST_DIR=sources/framework/visioneval
+  
+  - TYPE=module    TEST_DIR=sources/modules/VE2001NHTS
+  - TYPE=module    TEST_DIR=sources/modules/VEAltModes
+  - TYPE=module    TEST_DIR=sources/modules/VELandUse
+  - TYPE=module    TEST_DIR=sources/modules/VESimHouseholds
+  - TYPE=module    TEST_DIR=sources/modules/VESyntheticFirms
+  - TYPE=module    TEST_DIR=sources/modules/VETransportSupply
+  - TYPE=module    TEST_DIR=sources/modules/VEVehicleOwnership
+  
+  - TYPE=model     TEST_DIR=sources/models/VERPAT
+  - TYPE=model     TEST_DIR=sources/models/VERSPM/Test1
+  
+  - TYPE=gui       TEST_DIR=sources/VEGUI
 
 script:
   - |
-    if [ $TYPE = "module" ]; then
+    if [ $TYPE = "module" ] || [ $TYPE = "framework" ] ; then
       cd $TEST_DIR;
       Rscript -e 'devtools::install_deps(".")';
-      echo Run R package tests;
       Rscript -e 'devtools::check(".")';
-      echo --------------------;
-      echo Run VisionEval tests;
-      echo --------------------;
       Rscript -e "tryCatch( source('tests/scripts/test.R') )";
       
-    elif [ $TYPE = "model"] || [ $TYPE = "gui" ]; then
-      echo Install required VisionEval packages;
+    elif [ $TYPE = "model" ] || [ $TYPE = "gui" ]; then
       cd sources/framework/visioneval;
+      Rscript -e 'devtools::install_deps(".")';
+      R CMD INSTALL .;
+      cd ../../..;
+      
+      cd sources/framework/VE2001NHTS;
+      Rscript -e 'devtools::install_deps(".")';
+      R CMD INSTALL .;
+      cd ../../..;
+      
+      cd sources/modules/VEAltModes;
+      Rscript -e 'devtools::install_deps(".")';
+      R CMD INSTALL .;
+      cd ../../..;
+      
+      cd sources/modules/VELandUse;
+      Rscript -e 'devtools::install_deps(".")';
+      R CMD INSTALL .;
+      cd ../../..;
+      
+      cd sources/modules/VESimHouseholds;
+      Rscript -e 'devtools::install_deps(".")';
+      R CMD INSTALL .;
+      cd ../../..;
+      
+      cd sources/modules/VESyntheticFirms;
+      Rscript -e 'devtools::install_deps(".")';
+      R CMD INSTALL .;
+      cd ../../..;
+      
+      cd sources/modules/VETransportSupply;
+      Rscript -e 'devtools::install_deps(".")';
+      R CMD INSTALL .;
+      cd ../../..;
+      
+      cd sources/modules/VEVehicleOwnership;
       Rscript -e 'devtools::install_deps(".")';
       R CMD INSTALL .;
       cd ../../..;
