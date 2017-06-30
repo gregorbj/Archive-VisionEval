@@ -8,9 +8,8 @@ cache: packages
 warnings_are_errors: false
 
 before_install:
-  - sudo apt-get install -y libnlopt-dev
-  
-  
+  - sudo apt-get install libnlopt-dev
+
 install:
   - Rscript -e 'install.packages(c("devtools", "roxygen2", "stringr", "knitr", "data.table", "curl"))'
   - Rscript -e 'install.packages(c("shiny", "shinyjs", "shinyFiles", "DT", "shinyBS", "future", "testit", "jsonlite", "shinyAce", "envDocument", "rhandsontable"))'
