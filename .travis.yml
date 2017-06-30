@@ -8,6 +8,7 @@ cache: packages
 warnings_are_errors: false
 
 before_install:
+  - sudo apt-get update
   - sudo apt-get install libnlopt-dev
 
 install:
