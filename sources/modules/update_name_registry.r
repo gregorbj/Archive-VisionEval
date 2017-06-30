@@ -12,3 +12,7 @@ writeVENameRegistry("Calculate4DMeasures", "VELandUse")
 writeVENameRegistry("CalculateUrbanMixMeasure", "VELandUse")
 writeVENameRegistry("AssignTransitService", "VETransportSupply")
 writeVENameRegistry("AssignRoadMiles", "VETransportSupply")
+writeVENameRegistry("AssignVehicleOwnership", "VEVehicleOwnership")
+writeVENameRegistry("CalculateHouseholdDVMT", "VETravelDemand")
+writeVENameRegistry("CalculateAltModeTrips", "VETravelDemand")
+
