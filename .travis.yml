@@ -10,7 +10,7 @@ r_binary_packages:
 warnings_are_errors: false
 
 install:
-  - Rscript -e 'install.packages(c("devtools", "roxygen2", "stringr", "knitr", "data.table", "curl", "nloptr"))'
+  - Rscript -e 'install.packages(c("devtools", "roxygen2", "stringr", "knitr", "data.table", "curl"))'
   - Rscript -e 'install.packages(c("shiny", "shinyjs", "shinyFiles", "DT", "shinyBS", "future", "testit", "jsonlite", "shinyAce", "envDocument", "rhandsontable"))'
   - Rscript -e 'devtools::install_github(c("tdhock/namedCapture", "trestletech/shinyTree"))'
   - Rscript -e 'devtools::install_bioc(c("BiocInstaller", "rhdf5"))'
