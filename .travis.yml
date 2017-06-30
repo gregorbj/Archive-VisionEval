@@ -3,12 +3,13 @@
 language: R
 sudo: false
 cache: packages
-r_binary_packages: 
-  - nloptr
 
 # Be strict when checking our package
 warnings_are_errors: false
 
+before_install:
+  - sudo apt-get install -y libnlopt-dev
+  
 install:
   - Rscript -e 'install.packages(c("devtools", "roxygen2", "stringr", "knitr", "data.table", "curl"))'
   - Rscript -e 'install.packages(c("shiny", "shinyjs", "shinyFiles", "DT", "shinyBS", "future", "testit", "jsonlite", "shinyAce", "envDocument", "rhandsontable"))'
