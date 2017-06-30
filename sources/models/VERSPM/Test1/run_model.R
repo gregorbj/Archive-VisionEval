@@ -75,5 +75,13 @@ for(Year in getYears()) {
             PackageName = "VEVehicleOwnership",
             RunFor = "AllYears",
             RunYear = Year)
+  runModule(ModuleName = "CalculateHouseholdDVMT",
+            PackageName = "VETravelDemand",
+            RunFor = "AllYears",
+            RunYear = Year)
+  runModule(ModuleName = "CalculateAltModeTrips",
+            PackageName = "VETravelDemand",
+            RunFor = "AllYears",
+            RunYear = Year)
 }
 
