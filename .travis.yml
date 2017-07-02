@@ -13,8 +13,9 @@ before_install:
   - sudo apt-get update
   - sudo apt-get -y install libnlopt-dev
 
-r_packages:
-  - devtools
+# specify an R package to start with
+env:
+  - TEST_DIR=sources/framework/visioneval
 
 # install and test framework, modules, models, GUI
 script:
@@ -84,6 +85,6 @@ script:
     cd ../../../..;
     
     cd sources/VEGUI;
-    Rscript -e 'install.packages(c("shiny", "shinyjs", "shinyFiles", "DT", "shinyBS", "future", "testit", "jsonlite", "shinyAce", "envDocument", "rhandsontable"))'
+    Rscript -e 'install.packages(c("shiny", "shinyjs", "shinyFiles", "data.table", "DT", "shinyBS", "future", "testit", "jsonlite", "shinyAce", "envDocument", "rhandsontable"))'
     Rscript -e 'devtools::install_github(c("tdhock/namedCapture", "trestletech/shinyTree"))'
     Rscript -e "tryCatch( library('shiny'); runApp('app.R') )";
