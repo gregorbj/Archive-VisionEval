@@ -1,26 +1,91 @@
 # R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
 
 language: R
-sudo: false
+sudo: true
+dist: trusty
 cache: packages
 
 # Be strict when checking our package
 warnings_are_errors: false
 
+# nloptr R package requires libnlopt-dev to be installed, which requires trusty ubuntu
+before_install:
+  - sudo apt-get update
+  - sudo apt-get -y install libnlopt-dev
+
+# start by installing devtools
 install:
   - Rscript -e 'install.packages(c("devtools", "roxygen2", "stringr", "knitr"))'
   - Rscript -e 'devtools::install_bioc(c("BiocInstaller", "rhdf5"))'
 
-env:
-  - TEST_DIR=sources/framework/visioneval
-  - TEST_DIR=sources/modules/VEAltModes
-  - TEST_DIR=sources/modules/VELandUse
-  - TEST_DIR=sources/modules/VESimHouseholds
-  - TEST_DIR=sources/modules/VESyntheticFirms
-  - TEST_DIR=sources/modules/VETransportSupply
-  - TEST_DIR=sources/modules/VEVehicleOwnership
-
+# install and test framework, modules, models, GUI
 script:
-  - cd $TEST_DIR
-  - Rscript -e 'devtools::install_deps(".")'
-  - Rscript -e 'devtools::check(".")'
+  - |
+    cd sources/framework/visioneval
+    Rscript -e 'devtools::install_deps(".")'
+    Rscript -e 'devtools::check(".")'
+    Rscript -e "tryCatch( source('tests/scripts/test.R') )"
+    R CMD INSTALL .
+    cd ../../..
+    
+    cd sources/modules/VE2001NHTS;
+    Rscript -e 'devtools::install_deps(".")'
+    Rscript -e 'devtools::check(".")'
+    Rscript -e "tryCatch( source('tests/scripts/test.R') )"
+    R CMD INSTALL .
+    cd ../../..
+    
+    cd sources/modules/VEAltModes;
+    Rscript -e 'devtools::install_deps(".")'
+    Rscript -e 'devtools::check(".")'
+    Rscript -e "tryCatch( source('tests/scripts/test.R') )"
+    R CMD INSTALL .
+    cd ../../..
+    
+    cd sources/modules/VELandUse;
+    Rscript -e 'devtools::install_deps(".")'
+    Rscript -e 'devtools::check(".")'
+    Rscript -e "tryCatch( source('tests/scripts/test.R') )"
+    R CMD INSTALL .
+    cd ../../..
+    
+    cd sources/modules/VESimHouseholds
+    Rscript -e 'devtools::install_deps(".")'
+    Rscript -e 'devtools::check(".")'
+    Rscript -e "tryCatch( source('tests/scripts/test.R') )"
+    R CMD INSTALL .
+    cd ../../..
+    
+    cd sources/modules/VESyntheticFirms
+    Rscript -e 'devtools::install_deps(".")'
+    Rscript -e 'devtools::check(".")'
+    Rscript -e "tryCatch( source('tests/scripts/test.R') )"
+    R CMD INSTALL .
+    cd ../../..
+    
+    cd sources/modules/VETransportSupply
+    Rscript -e 'devtools::install_deps(".")'
+    Rscript -e 'devtools::check(".")'
+    Rscript -e "tryCatch( source('tests/scripts/test.R') )"
+    R CMD INSTALL .
+    cd ../../..
+    
+    cd sources/modules/VEVehicleOwnership
+    Rscript -e 'devtools::install_deps(".")'
+    Rscript -e 'devtools::check(".")'
+    Rscript -e "tryCatch( source('tests/scripts/test.R') )"
+    R CMD INSTALL .
+    cd ../../..
+    
+    cd sources/models/VERPAT
+    Rscript -e "tryCatch( source('run_model.R') )"
+    cd ../../..
+    
+    cd sources/models/VERSPM/Test1
+    Rscript -e "tryCatch( source('run_model.R') )"
+    cd ../../../..
+    
+    cd sources/VEGUI
+    Rscript -e 'install.packages(c("shiny", "shinyjs", "shinyFiles", "data.table", "DT", "shinyBS", "future", "testit", "jsonlite", "shinyAce", "envDocument", "rhandsontable"))'
+    Rscript -e 'devtools::install_github(c("tdhock/namedCapture", "trestletech/shinyTree", "rstudio/webdriver", "rstudio/shinytest"))'
+    # Rscript -e "tryCatch( library('shiny'); runApp('app.R') )"
