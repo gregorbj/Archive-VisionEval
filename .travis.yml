@@ -3,6 +3,7 @@
 language: R
 sudo: true
 cache: packages
+dist: trusty
 
 # Be strict when checking our package
 warnings_are_errors: false
