@@ -12,31 +12,11 @@ library(rhandsontable)
 library(shinyAce)
 library(envDocument)
 library(rhdf5)
-
-#How to get script directory: http://stackoverflow.com/a/30306616/283973
-scriptDir <- getSrcDirectory(function(x)
-  x)
-
-#from https://gist.github.com/PeterVermont/a4a29d2c6b88e4ee012a869dedb5099c#file-futuretaskprocessor-r
-#source("http://gist.githubusercontent.com/PeterVermont/a4a29d2c6b88e4ee012a869dedb5099c/raw/642374e2c12d0d6aa473542225e12e6f5ae97cec/FutureTaskProcessor.R")
-source(file.path(scriptDir, "FutureTaskProcessor.R"))
-
-#https://github.com/tdhock/namedCapture
-if (!require(namedCapture)) {
-  if (!require(devtools)) {
-    install.packages("devtools")
-  }
-  devtools::install_github("tdhock/namedCapture")
-}
 library(namedCapture)
-
-if (!require(shinyTree)) {
-  if (!require(devtools)) {
-    install.packages("devtools")
-  }
-  devtools::install_github("trestletech/shinyTree")
-}
 library(shinyTree)
+
+scriptDir <- getSrcDirectory(function(x) x )
+source(file.path(scriptDir, "FutureTaskProcessor.R"))
 
 #DT options https://datatables.net/reference/option/dom
 # only display the table, and nothing else

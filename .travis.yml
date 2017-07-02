@@ -16,6 +16,7 @@ before_install:
 # start by installing devtools
 install:
   - Rscript -e 'install.packages("devtools")'
+  - Rscript -e 'devtools::install_bioc(c("BiocInstaller", "rhdf5"))'
 
 # install and test framework, modules, models, GUI
 script:
