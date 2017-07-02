@@ -13,9 +13,9 @@ before_install:
   - sudo apt-get update
   - sudo apt-get -y install libnlopt-dev
 
-# specify an R package to start with
-env:
-  - TEST_DIR=sources/framework/visioneval
+# start by installing devtools
+install:
+  - Rscript -e 'install.packages(devtools)'
 
 # install and test framework, modules, models, GUI
 script:
