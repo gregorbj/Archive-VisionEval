@@ -15,7 +15,7 @@ before_install:
 
 # start by installing devtools
 install:
-  - Rscript -e 'install.packages(devtools)'
+  - Rscript -e 'install.packages("devtools")'
 
 # install and test framework, modules, models, GUI
 script:
