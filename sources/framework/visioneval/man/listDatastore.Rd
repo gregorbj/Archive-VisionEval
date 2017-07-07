@@ -20,4 +20,3 @@ each table and dataset. The listing is stored in the global list as
 'G$Datastore'. This function is run whenever the structure or contents of the
 datastore is changed to always keep the listing in G$Datastore current.
 }
-

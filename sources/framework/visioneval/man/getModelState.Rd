@@ -4,13 +4,14 @@
 \alias{getModelState}
 \title{Get values from model state list.}
 \usage{
-getModelState(Names_ = "All", State_ls = ModelState_ls)
+getModelState(Names_ = "All", FileName = "ModelState.Rda")
 }
 \arguments{
 \item{Names_}{A string vector of the components to extract from the
 ModelState_ls list.}
 
-\item{State_ls}{The model state list which by default is ModelState_ls.}
+\item{FileName}{A string that is the file name of the model state file. The
+default value is ModelState.Rda.}
 }
 \value{
 A list containing the specified components from the model state file.
@@ -24,4 +25,3 @@ Key variables that are important for managing the model run are stored in a
 list (ModelState_ls) that is managed in the global environment. This
 function extracts named components of the list.
 }
-

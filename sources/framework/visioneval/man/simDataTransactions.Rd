@@ -44,4 +44,3 @@ warnings if a 'Set' specification will cause existing data in the working
 datastore to be overwritten. The function writes warning and error messages
 to the log and stops program execution if there are any errors.
 }
-

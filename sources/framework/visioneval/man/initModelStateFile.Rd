@@ -4,14 +4,24 @@
 \alias{initModelStateFile}
 \title{Initialize model state.}
 \usage{
-initModelStateFile(Dir = "defs", ParamFile = "run_parameters.json")
+initModelStateFile(Dir = "defs", ParamFile = "run_parameters.json",
+  DeflatorFile = "deflators.csv", UnitsFile = "units.csv")
 }
 \arguments{
 \item{Dir}{A string identifying the name of the directory where the global
-parameters file is located. The default value is "defs".}
+parameters, deflator, and default units files are located. The default value
+is defs.}
 
 \item{ParamFile}{A string identifying the name of the global parameters file.
-The default value is "parameters.json".}
+The default value is parameters.json.}
+
+\item{DeflatorFile}{A string identifying the name of the file which contains
+deflator values by year (e.g. consumer price index). The default value is
+deflators.csv.}
+
+\item{UnitsFile}{A string identifying the name of the file which contains
+default units for complex data types (e.g. currency, distance, speed, etc.).
+The default value is units.csv.}
 }
 \value{
 TRUE if the model state list is created and file is saved. It creates
@@ -27,4 +37,3 @@ This function creates the model state list and loads model run parameters
 recorded in the 'parameters.json' file into the model state list. It also
 saves the model state list in a file (ModelState.Rda).
 }
-

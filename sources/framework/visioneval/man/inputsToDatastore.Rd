@@ -30,4 +30,3 @@ This function takes a processed list of input datasets specified by a module
 created by the application of the 'processModuleInputs' function and writes
 the datasets in the list to the datastore.
 }
-

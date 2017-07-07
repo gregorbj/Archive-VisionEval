@@ -1,0 +1,37 @@
+=====================================
+Documentation for pums_households.csv
+=====================================
+
+File Structure
+--------------
+Each row is a PUMS household.
+Column names as follows:
+SERIALNO: Housing/Group Quarters Unit Serial Number
+PUMA5: 5% Public Use Microdata Area code
+HWEIGHT: Housing unit weight
+UNITTYPE: Type of housing unit
+    0 = Housing unit
+    1 = Institutional group quarters
+    2 = Noninstitutional group quarters
+PERSONS: Number of persons living in housing unit
+BLDGSZ: Size of Building
+    blank = group quarters
+    1 = mobile home
+    2 = detached one-family house
+    3 = attached one-family house
+    4 = building with 2 apartments
+    5 = building with 3 or 4 apartments
+    6 = building with 5 to 9 apartments
+    7 = building with 10 to 19 apartments
+    8 = building with 20 to 49 apartments
+    9 = building with 50 or more apartments
+    10 = boat, RV, van, etc.
+HINC: Household Total Income in 1999
+
+Source:
+-------
+Data included in this package is an extract of the 5-Percent Public Use Microdata Sample (PUMS) from the 2000 Census for the State of Oregon. The web address for the Census 2000 PUMS data is:
+https://www.census.gov/census2000/PUMS5.html
+The Oregon data was downloaded from:
+https://www2.census.gov/census_2000/datasets/PUMS/FivePercent/Oregon/
+The extract was produced by the Process_2000_PUMS.R script included in this package.

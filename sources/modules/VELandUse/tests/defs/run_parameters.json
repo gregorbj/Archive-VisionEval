@@ -1,0 +1,10 @@
+{
+  "Model": "VESimHouseholds Test",
+  "Scenario": "Test",
+  "Description": "Test of VESimHouseholds package modules",
+  "Region": "RVMPO",
+  "BaseYear": "2010",
+  "Years": ["2010", "2038"],
+  "DatastoreName": "datastore.h5",
+  "Seed": 1
+}

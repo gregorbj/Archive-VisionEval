@@ -33,4 +33,3 @@ the datastore, the input data is a vector, the data and index conform to each
 other and to the table length. On successful completion, the function calls
 'listDatastore' to update the datastore listing in the run environment.
 }
-

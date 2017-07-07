@@ -30,4 +30,3 @@ This function compares the specifications for a dataset identified in a
 module "Get" or "Set" are consistent with the attributes for that data in the
 datastore.
 }
-

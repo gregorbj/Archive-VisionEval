@@ -20,4 +20,3 @@ datastore. The list has 3 named components (Global, Year, and BaseYear). This
 is the standard structure for data being passed to and from a module and the
 datastore.
 }
-

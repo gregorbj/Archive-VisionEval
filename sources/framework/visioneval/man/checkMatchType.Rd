@@ -33,5 +33,9 @@ of information (e.g. if a double is coerced to an integer). A warning message
 is generated if the specified type is 'character' but the input data type is
 'integer', 'double' or 'logical' since these can be coerced correctly, but
 that may not be what is intended (e.g. zone names may be input as numbers).
+Note that some modules may use NA inputs as a flag to identify case when
+result does not need to match a target. In this case, R will read in the type
+of data as logical. In this case, the function sets the data type to be the
+same as the specification for the data type so the function not flag a
+data type error.
 }
-

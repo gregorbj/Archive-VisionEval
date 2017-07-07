@@ -7,11 +7,12 @@
 initTable(Table, Group, Length)
 }
 \arguments{
+\item{Table}{a string identifying the name of the table to initialize.}
+
 \item{Group}{a string representation of the name of the group the table is to
 be created in.}
 
-\item{Spec_ls}{a list containing the standard module 'Set' specifications
-described in the model system design documentation.}
+\item{Length}{a number identifying the table length.}
 }
 \value{
 The value TRUE is returned if the function is successful at creating
@@ -31,4 +32,3 @@ types. A table is initialized in the datastore by initializing a group whose
 name is the table name and assigning a 'LENGTH' attribute which specifies the
 length that all data vectors in the table must have.
 }
-

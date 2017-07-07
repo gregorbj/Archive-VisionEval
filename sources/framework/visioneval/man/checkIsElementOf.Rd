@@ -27,4 +27,3 @@ that are not in an allowed set of values.
 This function is used to check whether categorical data values are consistent
 with the defined set of allowed values.
 }
-

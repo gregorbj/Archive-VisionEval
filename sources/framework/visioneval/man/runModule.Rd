@@ -4,7 +4,7 @@
 \alias{runModule}
 \title{Run module.}
 \usage{
-runModule(ModuleName, PackageName, RunFor, RunYear = Year)
+runModule(ModuleName, PackageName, RunFor, RunYear)
 }
 \arguments{
 \item{ModuleName}{A string identifying the name of a module object.}
@@ -28,4 +28,3 @@ None. The function writes results to the specified locations in the
 \details{
 This function runs a module for  a specified year.
 }
-

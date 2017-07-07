@@ -7,7 +7,6 @@
 #Load libraries
 #--------------
 library(visioneval)
-#library(VESyntheticFirms)
 
 #Initialize model
 #----------------
@@ -28,10 +27,11 @@ for(Year in getYears()) {
   runModule(
     ModuleName = "CreateBaseSyntheticFirms",
     PackageName = "VESyntheticFirms",
-    RunFor = "BaseYear")
+    RunFor = "BaseYear",
+    RunYear = Year)
   runModule(
     ModuleName = "CreateFutureSyntheticFirms",
     PackageName = "VESyntheticFirms",
-    RunFor = "NotBaseYear")
+    RunFor = "NotBaseYear",
+    RunYear = Year)
 }
-

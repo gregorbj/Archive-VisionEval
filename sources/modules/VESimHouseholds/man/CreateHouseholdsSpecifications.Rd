@@ -4,7 +4,7 @@
 \name{CreateHouseholdsSpecifications}
 \alias{CreateHouseholdsSpecifications}
 \title{Specifications list for CreateHouseholds module}
-\format{A list containing 4 components:
+\format{A list containing 5 components:
 \describe{
  \item{RunBy}{the level of geography that the module is run at}
  \item{NewSetTable}{new table to be created for datasets specified in the
