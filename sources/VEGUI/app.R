@@ -22,7 +22,8 @@ source(file.path(scriptDir, "FutureTaskProcessor.R"))
 # only display the table, and nothing else
 options(DT.options = list(dom = 'tip', rownames = 'f'))
 
-#use of future in shiny: http://stackoverflow.com/questions/41610354/calling-a-shiny-javascript-callback-from-within-a-future
+#use of future in shiny
+#http://stackoverflow.com/questions/41610354/calling-a-shiny-javascript-callback-from-within-a-future
 plan(multiprocess) #tell "future" library to use multiprocessing
 
 if (interactive()) {
@@ -37,8 +38,7 @@ MODEL_STATE_FILE <- "MODEL_STATE_FILE"
 MODEL_MODULES <- "MODEL_MODULES"
 VE_LOG <- "VE_LOG"
 CAPTURED_SOURCE <- "CAPTURED_SOURCE"
-MODEL_STATE_LS <-
-  "ModelState_ls"
+MODEL_STATE_LS <- "ModelState_ls"
 SELECT_RUN_SCRIPT_BUTTON <- "SELECT_RUN_SCRIPT_BUTTON"
 COPY_MODEL_BUTTON <- "COPY_MODEL_BUTTON"
 RUN_MODEL_BUTTON <- "RUN_MODEL_BUTTON"
@@ -152,7 +152,8 @@ navlistPanel(
     title = "Settings",
     value = TAB_SETTINGS,
     h3("Model parameters"),
-    #shinyAce does not support setting height by lines and the updateAceEditor does not have a height parameter so not sure what to do...
+    #shinyAce does not support setting height by lines and the updateAceEditor does not 
+    #have a height parameter so not sure what to do...
     #https://github.com/trestletech/shinyAce/issues/4
     shinyAce::aceEditor(MODEL_PARAMETERS_FILE, height = (16 * 10), mode = "json"),
     fluidRow(column(
@@ -307,7 +308,8 @@ server <- function(input, output, session) {
   }
 
   #http://stackoverflow.com/questions/38064038/reading-an-rdata-file-into-shiny-application
-  # This function, borrowed from http://www.r-bloggers.com/safe-loading-of-rdata-files/, load the Rdata into a new environment to avoid side effects
+  # This function, borrowed from http://www.r-bloggers.com/safe-loading-of-rdata-files/, 
+  #load the Rdata into a new environment to avoid side effects
   LoadToEnvironment <-
     function(filePath, env = new.env(parent = emptyenv())) {
       debugConsole(paste0(
@@ -568,41 +570,26 @@ server <- function(input, output, session) {
       debugConsole("getScriptInfo entered")
       scriptInfo <- list()
       inFile = parseFilePaths(roots = volumeRoots, input[[SELECT_RUN_SCRIPT_BUTTON]])
-      scriptInfo$datapath <-
-        normalizePath(as.character(inFile$datapath))
+      scriptInfo$datapath <- normalizePath(as.character(inFile$datapath))
       scriptInfo$fileDirectory <- dirname(scriptInfo$datapath)
       scriptInfo$fileBase <- basename(scriptInfo$datapath)
-
+      debugConsole(paste("getScriptInfo:", scriptInfo$datapath))
+      
       #call the first few methods so can find out log file value and get the ModelState_ls global
       setwd(scriptInfo$fileDirectory)
       visioneval::initModelStateFile()
       visioneval::initLog()
       visioneval::writeLog("VE_GUI called visioneval::initModelStateFile() and visioneval::initLog()")
-      #the visioneval functions will create global variable 'ModelState_ls'
-      if (!exists("ModelState_ls", envir = .GlobalEnv)) {
-        stop(
-          "Something is wrong! Did not see global variable ModelState_ls after calling visioneval functions"
-        )
-      }
-      reactiveFilePaths[[VE_LOG]] <<-
-        file.path(scriptInfo$fileDirectory, ModelState_ls$LogFile)
-      debugConsole(
-        paste0(
-          "after visioneval::initModelStateFile() and visioneval::initLog() global variable ModelState_ls has size: ",
-          object.size(ModelState_ls)
-        )
-      )
-
-      reactiveFilePaths[[DATASTORE]] <<-
-        file.path(scriptInfo$fileDirectory, ModelState_ls$DatastoreName)
-
-      # #ModelState_ls is in out global environment which is different than the environment the visioneval functions that are called
-      # #asynchronously with future so this copy will never be updated so we therefore remove it to reduce confusion
-      # rm("ModelState_ls", envir = .GlobalEnv)
-      #
+      
       #Fome now on we will get the current ModelState by reading the object stored on disk
       reactiveFilePaths[[MODEL_STATE_FILE]] <<-
         file.path(scriptInfo$fileDirectory, "ModelState.Rda")
+      
+      reactiveFilePaths[[VE_LOG]] <<- 
+        file.path(scriptInfo$fileDirectory, getModelState()$LogFile)
+      reactiveFilePaths[[DATASTORE]] <<- 
+        file.path(scriptInfo$fileDirectory, getModelState()$DatastoreName)
+      
       defsDirectory <- file.path(scriptInfo$fileDirectory, "defs")
 
       reactiveFilePaths[[MODEL_PARAMETERS_FILE]] <<-
@@ -637,7 +624,7 @@ server <- function(input, output, session) {
     startAsyncTask(
       CAPTURED_SOURCE,
       future({
-        ModelState_ls #reference ModelState_ls so future will recognize it as a global
+        getModelState() #reference ModelState_ls so future will recognize it as a global
         getScriptOutput(datapath, isolate(reactiveFilePaths[[CAPTURED_SOURCE]]))
       }),
       callback = function(asyncResult) {
@@ -675,6 +662,7 @@ server <- function(input, output, session) {
     #From now on we will get the current ModelState by reading the object stored on disk
     #store the current ModelState in the global options
     #so that the process will use the same log file as the one we have already started tracking...
+    ModelState_ls = getModelState()
     options("visioneval.preExistingModelState" = ModelState_ls)
     debugConsole("getScriptOutput entered")
     setwd(dirname(datapath))
@@ -821,7 +809,11 @@ server <- function(input, output, session) {
       node <- leafList
     } else {
       #must be a leaf but shinyTree requires even these be lists
-      nodeString <- trimws(as.character(node))
+      if (!is.na(node)) {
+        nodeString <- trimws(as.character(node))
+      } else {
+        nodeString = ""
+      }
       if (nodeString == "") {
         nodeString <- "{empty}"
       }

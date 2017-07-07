@@ -70,6 +70,13 @@ script:
     R CMD INSTALL .
     cd ../../..
     
+    cd sources/modules/VETravelDemand
+    Rscript -e 'devtools::install_deps(".")'
+    Rscript -e 'devtools::check(".")'
+    Rscript -e "tryCatch( source('tests/scripts/test.R') )"
+    R CMD INSTALL .
+    cd ../../..
+    
     cd sources/modules/VEVehicleOwnership
     Rscript -e 'devtools::install_deps(".")'
     Rscript -e 'devtools::check(".")'
