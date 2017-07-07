@@ -25,8 +25,8 @@ set_config( config( ssl_verifypeer = 0L ) )
   4. If working with an R install without write access to its library folder (like ODOT), first change your library location to a write accessible location.
   5. Run the following commands to download and install the required libraries and their dependencies:
 ```
-install.packages(c("devtools", "roxygen2", "stringr", "knitr", "data.table", "curl"))
-install.packages(c("shiny", "shinyjs", "shinyFiles", "DT", "shinyBS", "future", "testit", "jsonlite", "shinyAce", "envDocument", "rhandsontable"))
+install.packages(c("devtools", "roxygen2", "stringr", "knitr"))
+install.packages(c("shiny", "shinyjs", "shinyFiles", "data.table", "DT", "shinyBS", "future", "testit", "jsonlite", "shinyAce", "envDocument", "rhandsontable"))
 devtools::install_github(c("tdhock/namedCapture", "trestletech/shinyTree"))
 devtools::install_bioc(c("BiocInstaller", "rhdf5"))
 ```
@@ -42,7 +42,7 @@ devtools::install_github("gregorbj/VisionEval/sources/modules/VESimHouseholds")
 ```
 
 ## Running the Pilot VE RPAT from within R
-  1. Git clone (i.e. copy) this repository to your computer.  By default, Git will clone the master branch.
+  1. Git clone (i.e. copy) this repository to your computer.
   2. Start R and run the following commands:
 
 ```
@@ -53,13 +53,12 @@ source("run_model.R")
 ```
 
 ## Running the Pilot VE GUI to run Pilot VE RPAT
-  1. Git Clone (i.e. copy) this repository to your computer.  By default, Git will clone the master branch.
+  1. Git Clone (i.e. copy) this repository to your computer.
   1. Start R and run the following commands:
 
 ```
 library("shiny")
-runGitHub("gregorbj/VisionEval", subdir="sources/VEGUI", ref="master") #master branch
-runGitHub("gregorbj/VisionEval", subdir="sources/VEGUI", ref="develop") #develop branch
+runGitHub("gregorbj/VisionEval", subdir="sources/VEGUI")
 ```
   3. The VE GUI should launch in your browser
   4. Click "Select Scenario Script" and navigate to the VERPAT run_model.R script in your local repository
@@ -73,9 +72,8 @@ the develop branch.  To download, install, and test the develop branch resources
   2. Run the same R commands above, except reference the develop branch, for example:
 ```
 devtools::install_github("gregorbj/VisionEval/sources/framework/visioneval", ref="develop")
-
-#and
-
+devtools::install_github("gregorbj/VisionEval/sources/modules/VESyntheticFirms", ref="develop")
+devtools::install_github("gregorbj/VisionEval/sources/modules/VESimHouseholds", ref="develop")
 runGitHub("gregorbj/VisionEval", subdir="sources/VEGUI", ref="develop")
 ```
   3. Navigate to and run both VERPAT and VERSPM's run_model.R script 
