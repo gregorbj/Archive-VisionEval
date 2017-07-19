@@ -31,4 +31,3 @@ This function reads the file containing geographic specifications for the
 model and checks the file entries to determine whether they are internally
 consistent. This function is called by the readGeography function.
 }
-

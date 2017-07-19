@@ -4,10 +4,13 @@
 \alias{writeLog}
 \title{Write to log.}
 \usage{
-writeLog(Msg = "")
+writeLog(Msg = "", Print = FALSE)
 }
 \arguments{
 \item{Msg}{A character string.}
+
+\item{Print}{logical (default: FALSE). If True Msg will be printed in
+additon to being added to log}
 }
 \value{
 TRUE if the message is written to the log uccessfully.
@@ -20,4 +23,3 @@ It appends the time and the message text to the run log.
 This function writes a message in the form of a string to the run log. It
 logs the time as well as the message to the run log.
 }
-

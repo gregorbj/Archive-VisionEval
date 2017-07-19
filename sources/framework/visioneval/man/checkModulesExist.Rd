@@ -25,4 +25,3 @@ are in the packages. If modules are all present, then the function returns
 TRUE, otherwise it identifies the missing packages and modules to the log and
 returns FALSE.
 }
-

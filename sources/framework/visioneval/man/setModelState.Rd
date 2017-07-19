@@ -4,8 +4,7 @@
 \alias{setModelState}
 \title{Update model state.}
 \usage{
-setModelState(ChangeState_ls, State_ls = ModelState_ls,
-  FileName = "ModelState.Rda")
+setModelState(ChangeState_ls, FileName = "ModelState.Rda")
 }
 \arguments{
 \item{ChangeState_ls}{A named list of components to change in ModelState_ls}
@@ -26,4 +25,3 @@ list (ModelState_ls) that is in the global workspace and saved in the
 'ModelState.Rda' file. This function updates  entries in the model state list
 with a supplied named list of values, and then saves the results in the file.
 }
-

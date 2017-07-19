@@ -4,18 +4,18 @@
 \alias{getFromDatastore}
 \title{Retrieve data identified in 'Get' specifications from datastore}
 \usage{
-getFromDatastore(ModuleSpec_ls, Geo = NULL, RunYear = Year)
+getFromDatastore(ModuleSpec_ls, RunYear, Geo = NULL)
 }
 \arguments{
 \item{ModuleSpec_ls}{a list of module specifications that is consistent with
 the VisionEval requirements}
 
+\item{RunYear}{a string identifying the model year being run. The default is
+the Year object in the global workspace.}
+
 \item{Geo}{a string identifying the name of the geographic area to get the
 data for. For example, if the module is specified to be run by Azone, then
 Geo would be the name of a particular Azone.}
-
-\item{RunYear}{a string identifying the model year being run. The default is
-the Year object in the global workspace.}
 }
 \value{
 A list containing all the data sets specified in the module's
@@ -31,4 +31,3 @@ a module's 'Get' specifications. If the module's specifications include the
 name of a geographic area, then the function will retrieve the data for that
 geographic area.
 }
-

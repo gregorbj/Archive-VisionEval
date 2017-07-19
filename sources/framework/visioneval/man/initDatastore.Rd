@@ -21,4 +21,3 @@ structure. The file is created in the working directory and is named
 initialized file is created. Groups are created in the file; one for each
 model run year and one named 'Global' for storing global values.
 }
-

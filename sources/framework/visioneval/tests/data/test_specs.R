@@ -1,3 +1,5 @@
+items <- item <- list
+
 TestSpec_ls <- list(
   #Level of geography module is applied at
   RunBy = "Region",
@@ -5,7 +7,7 @@ TestSpec_ls <- list(
   Inp = items(
     item(
       NAME =
-        items("Metropolitan",
+        items("Urban",
               "Town",
               "Rural"),
       FILE = "devtype_proportions.csv",
@@ -33,71 +35,47 @@ TestSpec_ls <- list(
       ISELEMENTOF = ""
     ),
     item(
-      NAME = "NumHh",
-      TABLE = "Azone",
-      GROUP = "Year",
-      TYPE = "integer",
-      UNITS = "persons",
-      PROHIBIT = c("NA", "<= 0"),
-      ISELEMENTOF = ""
-    ),
-    item(
-      NAME = "Marea",
-      TABLE = "Azone",
-      GROUP = "Year",
-      TYPE = "character",
-      UNITS = "none",
-      PROHIBIT = c("NA", "<= 0"),
-      ISELEMENTOF = ""
-    ),
-    item(
       NAME =
-        items("Metropolitan",
-              "Town",
-              "Rural"),
+        items("UrbanArea",
+              "TownArea",
+              "RuralArea"),
+      TABLE = "Bzone",
+      GROUP = "Year",
+      TYPE = "area",
+      UNITS = "SQFT.1e3",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "TotAnnIncome",
       TABLE = "Azone",
       GROUP = "Year",
-      TYPE = "integer",
-      UNITS = "persons",
-      PROHIBIT = c("NA", "< 0", "> 1"),
+      TYPE = "currency",
+      UNITS = "USD.2010.1e3",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "AnnualPerCapitaIncome",
+      TABLE = "Azone",
+      GROUP = "Year",
+      TYPE = "currency",
+      UNITS = "USD/PRSN/YR.2010",
+      PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = ""
     )
   ),
   #Specify data to saved in the data store
   Set = items(
     item(
-      NAME =
-        items("Bzone",
-              "Azone",
-              "Marea"),
-      TABLE = "Bzone",
+      NAME = "Income",
+      TABLE = "Household",
       GROUP = "Year",
-      TYPE = "character",
-      UNITS = "none",
-      NAVALUE = "NA",
-      PROHIBIT = "",
-      ISELEMENTOF = ""
-    ),
-    item(
-      NAME = "DevType",
-      TABLE = "Bzone",
-      GROUP = "Year",
-      TYPE = "character",
-      UNITS = "none",
-      NAVALUE = "NA",
-      PROHIBIT = "",
-      ISELEMENTOF = c("Metropolitan", "Town", "Rural")
-    ),
-    item(
-      NAME = "NumHh",
-      TABLE = "Bzone",
-      GROUP = "Year",
-      TYPE = "integer",
-      UNITS = "none",
+      TYPE = "currency",
+      UNITS = "USD.2010",
       NAVALUE = -1,
-      PROHIBIT = c("NA", "<= 0"),
-      ISELEMENTOF = "",
-      SIZE = 0
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = ""
     )
   )
 )

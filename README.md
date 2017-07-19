@@ -9,7 +9,7 @@ This repository is organized into two directories:
   - [VE modules](https://github.com/gregorbj/VisionEval/tree/master/sources/modules) such as VESimHouseholds and VESyntheticFirms
   - VE models such as the pilot version of [VERPAT](https://github.com/gregorbj/VisionEval/tree/master/sources/models/VERPAT)
   - [VE GUI](https://github.com/gregorbj/VisionEval/tree/master/sources/VEGUI) graphical user interface and scenario viewer / visualizer for running and viewing results of VE models
-- The **api** directory contains documentation of the model system. The [model system design](https://github.com/gregorbj/VisionEval/blob/master/api/model_system_design.md) document is the most complete at the present time. VisionEval framework functions are documented in a [network visualization](https://gregorbj.github.io/VisionEval/api/visioneval_functions.html) of the functions and their call relationships. Functions are represented by network nodes. Call relationships are represented by arrows which point from the calling function to the called function. Function details are shown at the bottom of the page when a function node is selected.
+- The **api** directory contains documentation of the model system. The [model system design](https://github.com/gregorbj/VisionEval/blob/master/api/model_system_design.md) document is the most complete at the present time. VisionEval framework functions are documented in a [network visualization](https://gregorbj.github.io/VisionEval/website/visioneval_functions.html) of the functions and their call relationships. Functions are represented by network nodes. Call relationships are represented by arrows which point from the calling function to the called function. Function details are shown at the bottom of the page when a function node is selected.
 
 # Getting Started
 
@@ -22,34 +22,19 @@ library(httr)
 set_config(use_proxy(url="proxynew.odot.state.or.us", port=8080)) 
 set_config( config( ssl_verifypeer = 0L ) )
 ```
-  4. Run the following commands to download and install the required libraries and their dependencies:
+  4. If working with an R install without write access to its library folder (like ODOT), first change your library location to a write accessible location.
+  5. Run the following commands to download and install the required libraries and their dependencies:
 ```
-source("http://bioconductor.org/biocLite.R")
-biocLite()
-biocLite("rhdf5")
-
-install.packages("devtools")
-install.packages("plyr")
-install.packages("shiny")
-install.packages("shinyjs")
-install.packages("shinyFiles")
-install.packages("data.table")
-install.packages("DT")
-install.packages("shinyBS")
-install.packages("future")
-install.packages("testit")
-install.packages("jsonlite")
-install.packages("rhandsontable")
-install.packages("shinyAce")
-install.packages("envDocument")
-install.packages("rhandsontable")
-
-devtools::install_github("tdhock/namedCapture")
-devtools::install_github("trestletech/shinyTree")
-
+install.packages(c("devtools", "roxygen2", "stringr", "knitr"))
+install.packages(c("shiny", "shinyjs", "shinyFiles", "data.table", "DT", "shinyBS", "future", "testit", "jsonlite", "shinyAce", "envDocument", "rhandsontable"))
+devtools::install_github(c("tdhock/namedCapture", "trestletech/shinyTree"))
+devtools::install_bioc(c("BiocInstaller", "rhdf5"))
+```
+  6. Run the following commands to download and install the required VE framework package:
+```
 devtools::install_github("gregorbj/VisionEval/sources/framework/visioneval")
 ```
-  5. Run the following commands to download and install the required VE modules:
+  7. Run the following commands to download and install the required VE modules for VERPAT:
 ```
 #the following modules are required for the pilot VERPAT; others are required for VERSPM
 devtools::install_github("gregorbj/VisionEval/sources/modules/VESyntheticFirms")
@@ -57,9 +42,8 @@ devtools::install_github("gregorbj/VisionEval/sources/modules/VESimHouseholds")
 ```
 
 ## Running the Pilot VE RPAT from within R
-  1. Git Clone (i.e. copy) this repository to your computer.
-  2. Start R
-  3. Run the following commands:
+  1. Git clone (i.e. copy) this repository to your computer.
+  2. Start R and run the following commands:
 
 ```
 #point to the location of the cloned repository, not the location of the auto-installed R packages
@@ -70,17 +54,32 @@ source("run_model.R")
 
 ## Running the Pilot VE GUI to run Pilot VE RPAT
   1. Git Clone (i.e. copy) this repository to your computer.
-  1. Start R
-  2. Run the following commands:
+  1. Start R and run the following commands:
 
 ```
 library("shiny")
-runGitHub("gregorbj/VisionEval", subdir="sources/VEGUI", ref="master") #master branch
-runGitHub("gregorbj/VisionEval", subdir="sources/VEGUI", ref="develop") #develop branch
+runGitHub("gregorbj/VisionEval", subdir="sources/VEGUI")
 ```
   3. The VE GUI should launch in your browser
   4. Click "Select Scenario Script" and navigate to the VERPAT run_model.R script in your local repository
   5. Click "Run" and then "Run Model Script" to run the VERPAT model
 
+# Develop Branch
 
-For those new to R, we recommend installing [R Studio](http://www.rstudio.com).
+The current release version of VisionEval is on the master branch.  The current development version is on
+the develop branch.  To download, install, and test the develop branch resources, do the following:
+  1. Git clone (i.e. copy) the develop branch to your computer.  By default, Git will clone the master branch.  After cloning, switch to the develop branch.
+  2. Run the same R commands above, except reference the develop branch, for example:
+```
+devtools::install_github("gregorbj/VisionEval/sources/framework/visioneval", ref="develop")
+devtools::install_github("gregorbj/VisionEval/sources/modules/VESyntheticFirms", ref="develop")
+devtools::install_github("gregorbj/VisionEval/sources/modules/VESimHouseholds", ref="develop")
+runGitHub("gregorbj/VisionEval", subdir="sources/VEGUI", ref="develop")
+```
+  3. Navigate to and run both VERPAT and VERSPM's run_model.R script 
+
+Ensure these operations complete successfully before finalizing commits to develop.
+
+# Build Status 
+
+[![Travis-CI Build Status](https://travis-ci.org/gregorbj/VisionEval.svg?branch=develop)](https://travis-ci.org/gregorbj/VisionEval)

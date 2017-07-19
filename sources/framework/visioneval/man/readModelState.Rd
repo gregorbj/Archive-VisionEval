@@ -25,4 +25,3 @@ The model state is stored in a list (ModelState_ls) that is also saved as a
 file (ModelState.Rda) whenever the list is updated. This function reads the
 contents of the ModelState.Rda file.
 }
-

@@ -44,4 +44,3 @@ geographic specifications file, the errors are written to the log file and
 execution stops. If no errors are found, the geographic specifications are
 added to the model state file.
 }
-

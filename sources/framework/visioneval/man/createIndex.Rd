@@ -30,4 +30,3 @@ example if the index field is 'Azone' in the 'Household' table, this function
 will return a function that when provided the name of a particular Azone,
 will return the positions corresponding to that Azone.
 }
-

@@ -1,0 +1,32 @@
+=============================================
+Documentation for 2015_Agency_information.csv
+=============================================
+
+File Structure
+--------------
+Each row is a record for a public transportation agency
+Column names as follows:
+AgencyID: The 5-digit transit agency identifier number
+PrimaryUZA: Urbanized area identifier number
+UZAName: Urbanized area name
+Population: Urbanized area population
+
+Source:
+-------
+Federal Transit Administration
+National Transit Database (https://www.transit.dot.gov)
+2015_Agency_information.xlsx
+https://www.transit.dot.gov/ntd/data-product/2015-annual-database-agency-information
+
+Notes:
+------
+The following data columns were extracted from 2015_Agency_information.xlsx file and renamed as follows:
+
+Original Name		Revised Name
+--------------          ------------
+5 Digit NTD ID          AgencyID
+Primary UZA             PrimaryUZA
+UZA Name                UZAName
+Population              Population
+
+Records are limited to agencies identified as being located in a urbanized area (UZA).

@@ -79,7 +79,7 @@ initializeModel <-
     } else {
       writeLog("option visioneval.keepExistingModelState TRUE so skipping initModelStateFile and initLog",
                Print=TRUE)
-      ModelState_ls <<- preExistingModelState
+      setModelState(preExistingModelState)
     }
 
     #Load existing model if specified and initialize geography
@@ -139,7 +139,7 @@ initializeModel <-
     for (i in 1:nrow(ModuleCalls_df)) {
       ModuleName <- ModuleCalls_df[i, "ModuleName"]
       PackageName <- ModuleCalls_df[i, "PackageName"]
-      Specs_ls <- getModuleSpecs(ModuleName, PackageName)
+      Specs_ls <- processModuleSpecs(getModuleSpecs(ModuleName, PackageName))
       Errors_ <- checkModuleSpecs(Specs_ls, ModuleName)
       if (length(Errors_) != 0) {
         Msg <-
@@ -161,9 +161,6 @@ initializeModel <-
 
     #Simulate model run
     #------------------
-    #Function call is disabled until simDataTransactions can handle situation
-    #where module calls for different years that don't cause table conflicts
-    #do not report non-existent conflicts.
     simDataTransactions(ModuleCalls_df)
 
     #Check and process module inputs
@@ -174,7 +171,7 @@ initializeModel <-
     for (i in 1:nrow(ModuleCalls_df)) {
       Module <- ModuleCalls_df$ModuleName[i]
       Package <- ModuleCalls_df$PackageName[i]
-      ModuleSpecs_ls <- getModuleSpecs(Module, Package)
+      ModuleSpecs_ls <- processModuleSpecs(getModuleSpecs(Module, Package))
       if (!is.null(ModuleSpecs_ls$Inp)) {
         ProcessedInputs_ls[[Module]] <-
           processModuleInputs(ModuleSpecs_ls, Module)
@@ -186,6 +183,7 @@ initializeModel <-
         x$Errors != 0
       })))
     if (HasErrors) {
+      writeLog(ProcessedInputs_ls$Errors)
       stop("Input files have errors. Check the log for details.")
     }
 
@@ -194,7 +192,7 @@ initializeModel <-
     for (i in 1:nrow(ModuleCalls_df)) {
       Module <- ModuleCalls_df$ModuleName[i]
       Package <- ModuleCalls_df$PackageName[i]
-      ModuleSpecs_ls <- getModuleSpecs(Module, Package)
+      ModuleSpecs_ls <- processModuleSpecs(getModuleSpecs(Module, Package))
       if (!is.null(ModuleSpecs_ls$Inp)) {
         inputsToDatastore(ProcessedInputs_ls[[Module]], ModuleSpecs_ls, Module)
       }
@@ -227,7 +225,7 @@ initializeModel <-
 #' @return None. The function writes results to the specified locations in the
 #'   datastore and prints a message to the console when the module is being run.
 #' @export
-runModule <- function(ModuleName, PackageName, RunFor, RunYear = Year) {
+runModule <- function(ModuleName, PackageName, RunFor, RunYear) {
   #Check whether the module should be run for the current run year
   #---------------------------------------------------------------
   BaseYear <- getModelState()$BaseYear
@@ -256,27 +254,27 @@ runModule <- function(ModuleName, PackageName, RunFor, RunYear = Year) {
   #----------
   if (M$Specs$RunBy == "Region") {
     #Get data from datastore
-    L <- getFromDatastore(M$Specs, Geo = NULL)
+    L <- getFromDatastore(M$Specs, RunYear = RunYear, Geo = NULL)
     #Run module and store results in datastore
     R <- M$Func(L)
-    setInDatastore(R, M$Specs, ModuleName, Geo = NULL)
+    setInDatastore(R, M$Specs, ModuleName, Year = RunYear, Geo = NULL)
   } else {
     GeoCategory <- M$Specs$RunBy
     Geo_ <- readFromTable(GeoCategory, GeoCategory, RunYear)
     #Run module for each geographic area
     for (Geo in Geo_) {
       #Get data from datastore for geographic area
-      L <- getFromDatastore(M$Specs, Geo = Geo)
+      L <- getFromDatastore(M$Specs, RunYear = RunYear, Geo = Geo)
       #Run model for geographic area and store results in datastore
       R <- M$Func(L)
-      setInDatastore(R, M$Specs, ModuleName, Geo = Geo)
+      setInDatastore(R, M$Specs, ModuleName, Year = RunYear, Geo = Geo)
     }
   }
   #Log and print ending message
   #----------------------------
   Msg <-
     paste0(Sys.time(), " -- Finish module '", ModuleName,
-           "' for year '", Year, "'.")
+           "' for year '", RunYear, "'.")
   writeLog(Msg)
   print(Msg)
 }
