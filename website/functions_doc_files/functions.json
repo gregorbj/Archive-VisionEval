@@ -201,15 +201,15 @@
   {
     "Name": "getUnits",
     "Group": "control",
-    "Description": "Retrieves the default model units for a complex data type.",
+    "Description": "Retrieves the default model units for a vector of complex data types.",
     "Arguments":
     [
       {
-        "Name": "Type",
-        "Description": "A string identifying the complex data type."
+        "Name": "Type_",
+        "Description": "A string identifying the complex data type(s)."
       }
     ],
-    "Return": "A string identifying the default units for the complex data type.",
+    "Return": "A string string vector identifying the complex data type(s) or NA if any of the type(s) are not defined.",
     "Calls":
     [
       "getModelState"
@@ -222,6 +222,10 @@
     "Description": "Creates a log (text file) that stores messages generated during a model run.",
     "Arguments": 
     [
+      {
+        "Name": "Suffix",
+        "Description": "A character string appended to the file name for the log file. For example, if the suffix is 'CreateHouseholds', the log file is named 'Log_CreateHouseholds.txt'. The default value is NULL in which case the suffix is the date and time."
+      }
     ],
     "Return": "TRUE if the log is created successfully. It creates a log file in the working directory and identifies the name of the log file in the model state file.",
     "Calls":
@@ -1347,6 +1351,10 @@
       {
         "Name": "SaveDatastore",
         "Description": "A logical value identifying whether the module outputs will be written to the datastore. If TRUE the module outputs are written to the datastore. If FALSE the outputs are not written to the datastore."
+      },
+      {
+        "Name": "DoRun",
+        "Description": "A logical value identifying whether the module should be run. If FALSE, the function will initialize a datastore, check specifications, and load inputs but will not run the module but will return the list of module specifications. That setting is useful for module development in order to create the all the data needed to assist with module programming. It is used in conjunction with the getFromDatastore function to create the dataset that will be provided by the framework. The default value for this parameter is TRUE. In that case, the module will be run and the results will checked for consistency with the Set specifications."
       }
     ],
     "Return": "None. The function writes out messages to the console and to the log as the testing proceeds. These messages include the time when each test starts and when it ends. When a key test fails, requiring a fix before other tests can be run, execution stops and an error message is written to the console. Detailed error messages are also written to the log.",
@@ -1432,7 +1440,8 @@
     "Return": "A vector containing messages identifying any errors that are found.",
     "Calls":
     [
-      "Types"
+      "Types",
+      "checkUnits"
     ]
   },
   
@@ -1539,10 +1548,12 @@
         "Description": "A string identifying the units of measure to convert the Values_ to."
       }
     ],
-    "Return": "A numeric vector of values corresponding the the input Values_. If the DataType is not one of the recognized types or if the FromUnits or ToUnits are not recognized, the input vector Values_ is returned. In this case, the Converted attribute of the returned values is FALSE. If the DataType is a recognized complex type or a compound type and the FromUnits and ToUnits are recognized, the returned values are in the units of the ToUnits. In this case the Converted attribute of the returned values is TRUE.",
+    "Return": "A list containing the converted values and additional information as follows: Values - a numeric vector containing the converted values; FromUnits - a string representation of the units converted from; ToUnits - a string representation of the units converted to. Errors - a string containing an error message or character(0) if no errors; Warnings - a string containing a warning message or character(0) if no warning.",
     "Calls":
     [
-      "Types"
+      "Types",
+      "checkUnits",
+      "getUnits"
     ]
   },
   
@@ -1594,6 +1605,101 @@
     "Calls":
     [
       "getModelState"
+    ]
+  },
+  
+  {
+    "Name": "checkUnits",
+    "Group": "control",
+    "Description": "Check measurement units for consistency with recognized units for stated type.",
+    "Arguments":
+    [
+      {
+        "Name": "DataType",
+        "Description": "A string which identifies the data type as specified in the TYPE attribute for a data set."
+      },
+      {
+        "Name": "Units",
+        "Description": "A string identifying the measurement units as specified in the UNITS attribute for a data set after processing with the parseUnitsSpec function."
+      }
+    ],
+    "Return": "A list which contains the following elements: DataType - a string identifying the data type; UnitType - a string identifying whether the units correspond to a 'simple' data type, a 'complex' data type, or a 'compound' data type; Units - a string identifying the units; Errors - a string containing an error message or character(0) if no error; and Elements - a list containing the elements of a compound units. Components of this list are: Types - the complex type of each element, Units - the units of each element; and Operators - the operators that separate the units.",
+    "Calls":
+    [
+      "Types"
+    ]
+  },
+  
+  {
+    "Name": "readVENameRegistry",
+    "Group": "developer",
+    "Description": "Reads the VisionEval name registry and returns a list of data frames containing the Inp and Set specifications.",
+    "Arguments":
+    [
+      {
+        "Name": "NameRegistryDir",
+        "Description": "A string identifying the path to the directory where the name registry file is located."
+      }
+    ],
+    "Return": "A list having two components: Inp and Set. Each component is a data frame containing the respective Inp and Set specifications of registered modules.",
+    "Calls":
+    [
+    ]
+  },
+  
+  {
+    "Name": "getRegisteredGetSpecs",
+    "Group": "developer",
+    "Description": "Returns a data frame of Get specifications for datasets in the VisionEval name registry.",
+    "Arguments":
+    [
+      {
+        "Name": "Names_",
+        "Description": "A character vector of the dataset names to get specifications for."
+      },
+      {
+        "Name": "Tables_",
+        "Description": "A character vector of the tables that the datasets are a part of."
+      },
+      {
+        "Name": "Groups_",
+        "Description": "A character vector of the groups that the tables are a part of."
+      },
+      {
+        "Name": "NameRegistryDir",
+        "Description": "A string identifying the path to the directory where the name registry file is located."
+      }
+    ],
+    "Return": "A list having two components: Inp and Set. Each component is a data frame containing the respective Inp and Set specifications of registered modules.",
+    "Calls":
+    [
+    ]
+  },
+  
+  {
+    "Name": "writeVENameRegistry",
+    "Group": "developer",
+    "Description": "Writes module Inp and Set specifications to the VisionEval name registry.",
+    "Arguments":
+    [
+      {
+        "Name": "ModuleName",
+        "Description": "A string identifying the module name."
+      },
+      {
+        "Name": "PackageName",
+        "Description": "A string identifying the package name."
+      },
+      {
+        "Name": "NameRegistryDir",
+        "Description": "A string identifying the path to the directory where the name registry file is located."
+      }
+    ],
+    "Return": "TRUE if successful. Has a side effect of updating the VisionEval name registry.",
+    "Calls":
+    [
+      "readVENameRegistry",
+      "processModuleSpecs"
     ]
   }
   
