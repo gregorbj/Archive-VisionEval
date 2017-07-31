@@ -1,6 +1,6 @@
 ## VisionEval Model System Design and Users Guide
 **Brian Gregor, Oregon Systems Analytics LLC**  
-**May 11, 2017**  
+**July 31, 2017**  
 **DRAFT**
 
 
@@ -81,8 +81,22 @@ The model system will run on any of the 3 major operating systems; Windows, Appl
 - **Preemptive Error Checking**  
 The model system will incorporate extensive data checking to identify errors in the model setup and inputs at the very beginning of the model run. Error messages will clearing identify the causes of the errors. The objective of early error checking is to avoid model runtime errors that waste model execution time and are difficult to debug.
 
-### 4. Model System Software Platform
-The VisionEval model system is built in the R software environment for statistical computing and graphics. There are several reasons for this choice:  
+### 4. Model System Software Design Approach
+The VisionEval software framework uses many of the ideas from the functional programming paradigm to create a modeling system that is modular and robust. The framework is implemented in the R programming language which is largely a functional programming language having a well developed system for managing packages of modules. This section describes how the VisionEval model system incorporates functional programming design ideas and the reason for using the R programming language for implementing those ideas.
+
+#### 4.1 Functional Programming Inspirations for System Design
+There are a number of programming paradigms for organizing software and implementing modular system designs. The VisionEval system design is most inspired by the functional programming paradigm. This section describes key characteristics of the functional design paradigm that influence the VisionEval model system design to achieve the design objectives.  
+
+The functional programming paradigm views computing as sequences of data transformations where a functions successively process a data stream with the outputs of one function becoming the inputs of the next. Functions are data processing machines with defined inputs and outputs. Given the same set of inputs, functions always produce the same set of outputs. Although functions have requirements for the data they process, they are not bound to the data in the same way as functions (methods) in the object-oriented programming paradigm. This characteristic of the functional paradigm fits well with the 'loose coupling' objective for the model system where model modules only interact with one another through the transfer of data mediated by the framework software. The design is for each module to act like a function with the framework software calling it, providing the data the module needs, and saving the data that the module produces.
+
+Another key characteristic of the functional programming paradigm is that functions should have no side effects. A function should only change the state of variables within it's scope and should have no effects on the system outside of its scope. The only way that a function interacts with the rest of the program is by returning the result of its calculations to whatever function called it. Such functions are called pure functions. This characteristic makes software more testable, reliable, and maintainable. It is key aspect of the VisionEval model system design. The system is designed so that modules act like pure functions. The only thing that they do is return the results of their calculations to the software framework. They do not make any changes to program variables outside their scope and they do not read from or write to files. This approach makes the framework very robust and modular because code within a module can be changed without affecting any other module.
+
+The framework software itself is also designed to minimize side effects in order to make it more robust and maintainable. Global state variables for a model run are kept to a minimum. Almost all model run state information is kept in the 'ModelState.Rda' file (Section 6.6). A common datastore holds all of the results of model computations. The only side effects in the framework code are reading model definition and input files, reading and writing to the common datastore, and writing to a log file.
+
+A third key characteristic of some functional programming languages is the extensive use of data typing. While compiled languages in general use data typing to check the properness of functions and expressions when a program is compiled, some functional programming languages like Haskell and Elm make extensive use of defining and checking different data types for function inputs and outputs. They also include a type notation system for documenting functions. This makes it easier to check and understand the code. An analogous approach is used in the VisionEval system design. Each module includes specifications for all data that it consumes and all data that it produces. This enables the framework software to check that modules will work properly together and enables a model to be checked thoroughly before it is run so to eliminate run time errors. It also clearly documents to others what data the module uses and what it produces.
+
+#### 4.2 Use of the R Software Environment to Implement the Model System
+The VisionEval model system is built in the R programming language for statistical computing and graphics. R is an open-source variant of the S programming language developed at Bell Labs that is more functional in nature than S. Although R was primarily developed to be an interactive programming environment for data analysis, the language has a full set of features that enables it to be used for all steps in the modeling process from data preparation and cleaning through model implementation and output visualization. The language is augmented by thousands of packages supporting data analysis, programming, and visualization. The interactive nature of the language, range of capabilities, and large number of supporting packages enabled the the GreenSTEP model to be developed in an agile manner in a relatively short period of time. At the time, no other programming language had this range of capabilities (although now Python does). The VisionEval model system uses the R language for the following reasons:   
 1) The existing code base for the GreenSTEP model and related models is written in R. Writing the VisionEval software framework in R enables this code base to be moved to the new framework with much less effort than would be required otherwise.  
 2) R is open-source software that is available on all major operating systems so the model system will be operating system independent.
 3) R has a very good and well tested package system for packaging modules that is well supported with documentation and build tools. The package system and development tools also include easy-to-use capabilities for documentation, including literate programming. This simplifies the development of the software framework and simplifies the process for module developers to produce complete and well documented modules.  
@@ -98,7 +112,7 @@ The VisionEval model system is composed of 3 layers:
 3) **Software Framework**: The software framework layer provides the functionality for controlling a model run, running modules, and interacting with the common datastore.   
 These layers are illustrated in Figure 1. Following sections describe the design and specifications for each layer.
 
-**Figure 1. Overview of RSPM Framework**  
+**Figure 1. Overview of VisionEval Model System**  
 ![Framework Diagram](img/framework_overview.png)
 
 A VisionEval model is built from a set of compatible modules, a set of specifications for the model and geography, a set of scenario input files, and a simple R script that initializes and runs the model. Following is a simple example of a model script:
@@ -138,6 +152,9 @@ for(Year in getYears()) {
 
 
 ```
+
+A full model run script is shown in Appendix A.   
+
 The script calls two functions that are defined by the software framework; *initializeModel* and *runModule*. The *initializeModel* function initializes the model environment and model datastore, checks that all necessary modules are installed, and checks whether all module data dependencies can be satisfied. The arguments of the *initializeModel* function identify where key model definition data are found. The *runModule* function, as the name suggests, runs a module. The arguments of the *runModule* function identify the name of the module to be run, the package the module is in, and whether the module should be run for all years, only the base year, or for all years except for the base year. This approach makes it easy for users to combine modules in a 'plug-and-play' fashion. One simply identifies the modules that will be run and the sequence that they will be run in. This is possible in large part for the following reasons:  
 1) The modules are loosely coupled. Modules only communicate to one another by passing information to and from the datastore.  
 2) The framework establishes standards for key shared aspects of modules including how data attributes are specified and how geography is represented.  
@@ -178,27 +195,28 @@ my_model
          
 ```
 
-The overall project directory, named *my_model* in this example, may have any name that is allowed by the operating system the model is being run on. One file is placed in this top level directory by the user, *run_model.R*. Three additional files, denoted in the diagram by angled brackets, are created in the course of checking and running the model.
+The overall project directory, named *my_model* in this example, may have any name that is allowed by the operating system the model is being run on. One file is placed in this top level directory by the user, "run_model.R". Three additional files, denoted in the diagram by angled brackets, are created in the course of checking and running the model.
 
-The *run_model.R* file, introduced in the previous section, initializes the model environment and datastore, checks that all necessary packages are installed, checks whether data dependencies can be satisfied, and then runs modules in a specified sequence. Data checks are performed before any modules are run to catch any errors prior to save time and the aggravation that occurs when a model run fails in midstream due to incorrect data inputs. Data checking in advance is possible because every module includes detailed specifications for its input and output data. All scenario input files are checked against specifications to determine whether the required data exist and are correct. In addition, the state of the datastore is 'simulated' in the order that each module will be run to determine whether the data each module needs will be available in the datastore. After the model has been initialized and all all data checks are satisfactory, the modules are executed in the sequence prescribed in the script. 
+The "run_model.R" file, introduced in the previous section, initializes the model environment and datastore, checks that all necessary packages are installed, checks whether data dependencies can be satisfied, and then runs modules in a specified sequence. Data checks are performed before any modules are run to catch any errors. This saves time and the aggravation that occurs when a model run fails in midstream due to incorrect data inputs or other errors due to incorrect model setup. Data checking in advance is possible because every module includes detailed specifications for its input and output data. All scenario input files are checked against specifications to determine whether the required data exist and are correct. In addition, the state of the datastore is 'simulated' in the order that each module will be run to determine whether the data each module needs will be available in the datastore. After the model has been initialized and all all data checks are satisfactory, the modules are executed in the sequence prescribed in the script. 
 
-The *ModelState.Rda* file is a R binary file that contains a list that holds key variables used in managing the model run. The file is created when the model run is initialized and is updated whenever the state of the datastore changes. Framework functions read this file when necessary to validate data and to determine that datastore read and write operations can be completed successfully.
+The "ModelState.Rda" file is a R binary file that contains a list that holds key variables used in managing the model run. The file is created when the model run is initialized and is updated whenever the state of the datastore changes. Framework functions read this file when necessary to validate data and to determine that datastore read and write operations can be completed successfully. This file is described in more detail in section 6.6.
 
-The *logXXXX.txt* file is a text file that is created when the model is initialized. This log file is used to record model run progress and any error or warning messages. The 'XXXX' part of the name is the date and time when the log file is created.
+The "logXXXX.txt" file is a text file that is created when the model is initialized. This log file is used to record model run progress and any error or warning messages. The 'XXXX' part of the name is the date and time when the log file is created.
 
-The *datastore.h5* file is an hdf5 formatted file that contains the central datastore for the model. It's structure is described in detail below. Users may use a different name for this file by specifying the name to be used in *parameters.json* file (see below). 
+The "datastore.h5" file is an hdf5 formatted file that contains the central datastore for the model. Its structure is described in detail below. Users may use a different name for this file by specifying the name to be used in "parameters.json" file (see below). 
 
-The *defs* directory contains all of the definition files needed to support the model run. Five files are required to be present in this directory: *run_parameters.json*, *model_parameters.json*, *geography.csv*, *deflators.csv*, and *units.csv*.   
+The "defs" directory contains all of the definition files needed to support the model run. Five files are required to be present in this directory: "run_parameters.json", "model_parameters.json", "geography.csv", "deflators.csv", and "units.csv".   
 
-The *run_parameters.json* file contains parameters that define key attributes of the model run and relationships to other model runs. The file is a [JSON-formatted](http://www.json.org/) text file. The JSON format is used for several reasons. First, it provides much flexibility in how parameters may be structured. For example a parameter could be a single value or an array of values. Second, the JSON format is well documented and is very easy to learn how to use. It uses standard punctuation for formatting and, unlike XML, doesn't require learning a [markup language](https://en.wikipedia.org/wiki/Markup_language). Third, files are ordinary text files that can be easily read and edited by a number of different text editors available on all major operating systems. There are also a number of commercial and open source tools that simplify the process of editing and checking JSON-formatted files.  
+The "run_parameters.json" file contains parameters that define key attributes of the model run and relationships to other model runs. The file is a [JSON-formatted](http://www.json.org/) text file. The JSON format is used for several reasons. First, it provides much flexibility in how parameters may be structured. For example a parameter could be a single value or an array of values. Second, the JSON format is well documented and is very easy to learn how to use. It uses standard punctuation for formatting and, unlike XML, doesn't require learning a [markup language](https://en.wikipedia.org/wiki/Markup_language). Third, files are ordinary text files that can be easily read and edited by a number of different text editors available on all major operating systems. There are also a number of commercial and open source tools that simplify the process of editing and checking JSON-formatted files.  
 
-The *parameters.json* file specifies the following parameters:  
+The "parameters.json" file specifies the following parameters:  
 
 - **Model** The name of the model. Example: "Oregon-GreenSTEP".  
 
 - **Scenario** The name of the scenario. Example: "High-Gas-Price".  
 
 - **Description** A short description of the scenario. Example: "Assume tripling of gas prices".   
+
 - **Region** The name of the region being modeled. Example: "Oregon".  
 
 - **BaseYear** The base year for the model. Example: "2015".  
@@ -215,16 +233,15 @@ The *parameters.json* file specifies the following parameters:
   
 - **Seed** This is a number that modules use as a random seed to make model runs reproducible.  
 
+The "model_parameters.json" can contain global parameters for a particular model configuration that may be used by multiple modules. For example, a model configuration to be a GreenSTEP model may require some parameters that are not required by a model configuration for an RSPM model. For example, the GreenSTEP model uses a parameter that is the total base year DVMT by light-duty vehicles to calibrate a factor used to compute commercial service vehicle travel. Parameters in this file should not include parameters that are specific to a module or data that would more properly be model inputs. While this file is available to establish global model parameters, it should be used sparingly in order enhance transferrability of modules between different models.
 
-The *model_parameters.json* can contain global parameters for a particular model configuration that may be used by multiple modules. For example, a model configuration to be a GreenSTEP model may require some parameters that are not required by a model configuration for an RSPM model. For example, the GreenSTEP model uses a parameter that is the total base year DVMT by light-duty vehicles to calibrate a factor used to compute commercial service vehicle travel. Parameters in this file should not include parameters that are specific to a module or data that would more properly be model inputs. While this file is available to establish global model parameters, it should be used sparingly in order enhance transferrability of modules between different models.
+The "geography.csv" file describes all of the geographic relationships for the model and the names of geographic entities in a [CSV-formatted](https://en.wikipedia.org/wiki/Comma-separated_values) text file. The CSV format, like the JSON format is a plain text file. It is used rather than the JSON format because the geographic relationships are best described in table form and the CSV format is made for tabular data. In addition, a number of different open source and commercial spreadsheet and GIS programs can export tabular data in a CSV-formatted files. The structure of the model system geography is described in detail in Section 6.2 below.  
 
-The *geography.csv* file describes all of the geographic relationships for the model and the names of geographic entities in a [CSV-formatted](https://en.wikipedia.org/wiki/Comma-separated_values) text file. The CSV format, like the JSON format is a plain text file. It is used rather than the JSON format because the geographic relationships are best described in table form and the CSV format is made for tabular data. In addition, a number of different open source and commercial spreadsheet and GIS programs can export tabular data in a CSV-formatted files. The structure of the model system geography is described in detail in Section 6.2 below.  
+The "units.csv" file describes the default units to be used for storing complex data types in the model. The VisionEval model system keeps track of the types and units of measure of all data that is processed. The model system recognizes 4 primitive data types, a number of complex data types (e.g. currency, distance), and a compound data type. The primitive data types are data types recognized by the R language: 'double', 'integer', 'character', and 'logical'. The complex data types such as 'distance' and 'time' define types of data that have defined measurement units and factors for converting between units. The compound data type combines two or more complex data types whose units are defined in an expression (e.g. MI/HR). The *units.csv* describes the default units used to store complex data types in the datastore. The file structure and an example are described in more detail in Section 6.3 below.
 
-The *units.csv* file describes the default units to be used for storing complex data types in the model. The VisionEval model system keeps track of the types and units of measure of all data that is processed. The model system recognizes 4 primitive data types, a number of complex data types (e.g. currency, distance), and a compound data type. The primitive data types are data types recognized by the R language: 'double', 'integer', 'character', and 'logical'. The complex data types such as 'distance' and 'time' define types of data that are related and may be converted between related measurement units. The compound data type combines two or more complex data types in an expression (e.g. MI/HR). The *units.csv* describes the default units used to store complex data types in the datastore. The file structure and an example are described in more detail in Section 6.3 below.
+The "deflators.csv" defines the annual deflator values, such as the consumer price index, that are used to convert currency values between different years for currency demonination. The file structure and an example are described in more detail in Section 6.4 below.
 
-The *deflators.csv* defines the annual deflator values, such as the consumer price index, that are used to convert currency values between different years for currency demonination. The file structure and an example are described in more detail in Section 6.4 below.
-
-The *inputs* directory contains all of the input files for a scenario. All input files are CSV-formatted text files. Each module specifies what input files it needs and names and types of data to be included in the needed files. There are several requirements for the structure of input files. These requirements are described in section 6.5 below.
+The "inputs" directory contains all of the input files for a scenario. All input files are CSV-formatted text files. Each module specifies what input files it needs and names and types of data to be included in the needed files. There are several requirements for the structure of input files. These requirements are described in section 6.5 below.
 
 #### 6.2. Model Geography
 
@@ -241,7 +258,7 @@ Azones are large subdivisions of the region containing populations that are simi
 
 
 - **Bzones**  
-Bzones are subdivisions of Azones that are similar in size to Census Tracts and Census Block Groups. The districts used in RSPM models are examples of Bzones. Bzones are used to represent neighborhood characteristics and policies that may be applied differently by neighborhood, for example in the RSPM:  
+Bzones are subdivisions of Azones that are similar in size to Census Block Groups. The districts used in RSPM models are examples of Bzones. Bzones are used to represent neighborhood characteristics and policies that may be applied differently by neighborhood, for example in the RSPM:  
   - District population density is a variable used in several submodels;  
   - An inventory of housing units by type by district is a land use input; and,  
   - Carsharing inputs are specified by district.  
@@ -257,17 +274,17 @@ Czones are subdivisions of Bzones that describe more detailed land use character
 Mareas are associated with urbanized portions of metropolitan areas. Mareas are used to specify and model urbanized area transportation characteristics such as overall transportation supply (transit, highways) and congestion. A Marea does not exist in a strict hierarchical relationship with Azones and Bzones because the Marea boundary is likely to change over time as the urbanized area population grows. While a Marea will be associated with one or more Azones and Bzones, its boundary may be located inside or outside the boundaries of the Azones and Bzones it is associated with. Czones are used to represent the geographic extent of the Marea and land use characteristics of portions of it. Changes in the urbanized area boundary are modeled as changes in Czone designations.
 
 
-Geographical relationships for a model are described in the "geography.csv" file contained in the "defs" directory. This file tabulates the names of each geographic unit (except for Region) and the relationships between them. Each row shows a unique relationship. Where a unit of geography is not explictly defined (i.e. it will be simulated), "NA" values are placed in the table. Appendix A shows examples of the "geography.csv" file where only Azones are specified and where Azones and Bzones are specified. It should be noted that there are no naming conventions for individual zones. The user is free to choose what conventions they will use.
+Geographical relationships for a model are described in the "geography.csv" file contained in the "defs" directory. This file tabulates the names of each geographic unit (except for Region) and the relationships between them. Each row shows a unique relationship. Where a unit of geography is not explictly defined (i.e. it will be simulated), "NA" values are placed in the table. Appendix B shows examples of the "geography.csv" file where only Azones are specified and where Azones and Bzones are specified. It should be noted that there are no naming conventions for individual zones. The user is free to choose what conventions they will use.
 
-#### 6.3. Default Units
+#### 6.3. Data Types, Units, and Currency Deflators
 
-The *units.csv* file declares the default units used to store complex data types in the datastore. The VisionEval model system keeps track of the types and units of measure of all data that is processed. This is important for managing data in the datastore and for enabling modules to share data correctly. The model system recognizes 4 primitive data types, a number of complex data types, and a compound data type. The primitive data types are data types recognized by the R language. They include 'double', 'integer', 'character', and 'logical'. In the case of primitive data types, module developers can specify any units of measure that adequately describe the dataset. For example, a 'character' type is used to store the housing choices of households (i.e. SF = single family, MF = multifamily, GQ = group quarters). 
+A key feature of the VisionEval model system that enables modules to be bound together into models is a data specifications system. All datasets that a module requires as inputs and datasets that that a module produces must be specified according to requirements. Section 8 describes these specifications in more detail. This section provides an introduction to the TYPE and UNITS specification requirements to provide context for understanding the "units.csv" file in the "defs" directory.
 
-The complex data types define types of data that are related and may be converted between related measurement units. For example, for the 'currency' data type the framework will convert currency values (e.g. dollars) between different years that the currency is denominated in. As another example, the 'mass' data type is used to measure the quantity of emissions that is often measured using different units such as grams, pounds, and metric tons. Although different modules may specify different measurement units for a complex data type, data of that data type needs to be stored in the datastore consistently with one measurement unit to avoid confusion and incorrect calculations that result from that confusion. The *units.csv* describes the default units used in the datastore.
+The TYPE attribute for a dataset identifies the data type. The UNITS specification identifies the units of measure. The TYPE and UNITS specifications are related. The TYPE attribute affects the values that may be specified for UNITS attribute and how the framework processes the units values. The model system recognizes 3 categories of data types: 'primitive', 'complex', 'compound'. The 'primitive' category includes the 4 data types recognized by the R language: double, integer, character, and logical. A dataset that is specified as one of these types has no limitations on how the units of measure are specified. The 'complex' category currently includes 10 data types: currency, distance, area, mass, volume, time, people, vehicles, trips, and households. A dataset that is one of these types is limited to specified unit values. For example, the allowed units for the 'distance' type are MI, FT, KM, and M (for mile, foot, kilometer, and meter). The 'compound' category is composed of the compound data type. For compound data, units are represented as an expression involving the units of complex data types. For example, a dataset of vehicle speeds can be specified as having a TYPE that 'compound' and UNITS that are 'MI/HR'. The type is compound because it is made up of two complex types; distance and time. The units are an expression containing distance and time units and the '/' operator. The '*' (multiplication) operator may also be used in the units expression for a compound data type. Appendix C documents all the types and units in more detail. 
 
-A few of the complex data types only have one specified units. For example, the 'people' data type only has the PRSN units and the 'trips' datatype only has the TRIP units. These data types are specified because they are useful in specifying 'compound' data types. Compound data types are combinations of complex data types whose units are represented as expressions involving complex data types. For example, speed is represented as a combination of 'distance' and 'time' data types: 'MI/HR' is the speed in miles per hour. Compound data types allow a more expressive representation of units and more complex unit conversions. For example, if vehicle emissions rates could be expressed as 'GM/MI' (grams per mile) and travel is calculated as 'MI/PRSN/DAY' (miles per person per day), their product would be 'GM/PRSN/DAY'. If what is desired is 'MT/PRSN/YEAR' (metric tons per person per year), the visioneval framework will convert both the mass and year units appropriately.
+Although the complex and compound data types limit what values the units attributes may have, specifying these types enables the framework software to take care of unit conversions between modules and the datastore. For example, say that a model datastore contains a dataset for Bzone population density having units of persons per square mile. In this case the TYPE attribute for the data would be 'compound' and the UNITS would be 'PRSN/SQMI'. If a module which calculates household vehicle travel needs population density measured in persons per acre, the module would specify the UNITS as 'PRSN/ACRE' and the framework would take care of converting the density values from the units used in the datastore to the units requested by the module. This simplifies matters for module developers and reduces the likelihood of errors due to data conversions. 
 
-The default units file (units.csv) in the 'defs' directory declares the default units to use for storing complex data types in the datastore. This file has two fields named 'Type' and 'Units'. A row is required for each complex data type recognized by the VisionEval system. The listing to date of complex types and the default units in the demonstration models are as follows:
+Although the units specified by a module for a complex data type may be any of the recognized units (e.g. for distance - MI, FT, KM and M), this flexibility does not apply to the datastore. Complex data is stored in the datastore in predefined ways to limit potential confusion and simplify unit conversions. The default units file (units.csv) in the "defs" directory declares the default units to use for storing complex data types in the datastore. This file has two fields named 'Type' and 'Units'. A row is required for each complex data type recognized by the VisionEval system. The listing to date of complex types and the default units in the demonstration models are as follows:
 
 |Type      |Units|
 |----------|-----|
@@ -282,13 +299,25 @@ The default units file (units.csv) in the 'defs' directory declares the default 
 |trips     |TRIP |
 |households|HH   |
 
+For 'currency' data it's not sufficient to convert values to different units, it's also necessary to convert values between years since the value of money changes over time due to inflation. For example, if household income is a variable in a household travel model that was estimated using data from 2000, then when that model is applied to forecast travel in other years, the income data for the forecast years must be deflated to reflect the value in the model estimation year (2000). The software framework takes care of this process if a proper series of deflators are provided and if the units include the currency year (as described below). That information is used to convert currency to and from base year currency values (what is kept in the datastore).
+
+The deflator series is defined for the model in the "deflators.csv" file in the "defs" directory. This file has 2 columns, 'Year' which contains an annual series of years, and 'Value' which contains corresponding deflator values (e.g. consumer price index). The earliest year in the deflator series must be sufficient to cover all of the years specified for modules which use currency data. The latest year must be sufficient to cover the base year and any later years that the model may be run for (excluding future forecast years of course). For example, the 'PredictIncome' module in the 'VESimHouseholds' package was estimated from 2000 Census PUMS data. Those data include household income for the previous year (1999). Therefore the "deflators.csv" file must include deflator values going back to 1999. If the base year for the model is 2010, the deflator series must go up to 2010; and if a later year such as 2015 is to be modeled, the deflator series must go up to that year.
+
+Modules must include the currency year for datasets to be retrieved from the datastore and to be saved to the datastore. This is done by adding a period and 4-digit year to the UNITS attribute. For example, the UNITS specification for year 2000 dollars would be 'USD.2000'. Note, however, that this convention does not apply to specifications for currency data that is read in from input file. In those cases, the year is specified in the input file. This is explained in Section 6.4.
+
+The UNITS value may also specify a multiplier option for complex and compound data types. This capability exists because modules may use data that is represented in thousands or millions when numbers are very large. For example total income and total VMT are often reported in this way. A multiplier option is added to a units name by adding a period and then the multiplier expressed in scientific notion where the leading digit must be a 1 (e.g. 1e3 for thousands). For currency units, the multiplier option must follow the year notation. For example, 2010 dollars expressed in millions would be expressed as 'USD.2010.1e6'. Miles traveled expressed in millions would be 'MI.1e6'.
 
 #### 6.4. Model Inputs
 The *inputs* directory contains all of the model inputs for a scenario. A model input file is a table that relates one or more input fields to geographic units and years. Because of the tabular nature of the data, all input files are CSV-formatted text files.  
 
 At present, two types of input files are accommodated. These files differ with respect to whether the specified attribute values vary by 'forecast' year. For example, a file containing input assumptions about the cost of fuel, road use taxes, etc. would have values that vary  by 'forecast' year. In contrast, the files used to specify the characteristics of vehicles of different powertrain types have values that vary by vehicle model year, not 'forecast' year. The structure of these two types of input files, and how their values are organized in the datastore, differ.
 
-All input files that have values which vary by 'forecast' year have at least three columns; two mandatory columns that specify geography ("Geo") and year ("Year"), and one or more data columns. Each row specifies a unique geographic unit and year combination. For example, if a model that has 10 Azones is being run for 2 'forecast' years, then an a table of inputs specified at the Azone level would contain 20 rows (in addition to the header row). The software framework checks these files to make sure that they contain values for all the required combinations of geography and year.
+All input files that have values which vary by 'forecast' year have at least three columns; two mandatory columns that specify geography ("Geo") and year ("Year"), and one or more data columns. Each row specifies a unique geographic unit and year combination. For example, if a model that has 10 Azones is being run for 2 'forecast' years, then an a table of inputs specified at the Azone level would contain 20 rows (in addition to the header row). The software framework checks these files to make sure that they contain values for all the required combinations of geography and year. 
+
+By convention, input file names which include inputs that vary by level of geography, include the level of geography in the input file name. File names should be descriptive. Following are some examples:  
+- azone_hh_pop_by_age.csv  
+- azone_hhsize_targets.csv  
+- bzone_dwelling_units.csv
 
 Input files that do not vary by 'forecast' year do not have any required columns.
 
@@ -298,7 +327,7 @@ The name of an input file and the names of all the columns except for the "Geo" 
 - The units of the data in each column (e.g. MI, USD); and,  
 - Acceptable values for the data in each column.  
 
-The module section describes these specifications in more detail below. Appendix B shows examples of the two types of input files.  
+The module section describes these specifications in more detail below. Appendix D shows examples of the two types of input files.  
 
 The field names of the input file (other than the "Geo" and "Year" fields) can encode year and unit multiplier information in addition to the name of the data item. This is done by breaking the name into elements with periods (.) separating the elements as follows:  
 
@@ -306,30 +335,30 @@ For 'currency' data type: **Name.Year.Multiplier**
 For all other data types: **Name.Multiplier**
 
 Where: 
-**Name** is the dataset name. This must be the same as specified in the module that us using the input data.  
+**Name** is the dataset name. This must be the same as specified in the module that calls for the input data.  
 **Year** is the four-digit representation of the year that the currency values are denominated for. For example if a currency dataset is in 2010 dollars, the Year value would be 2010'. The field name for a currency field must include a Year element.
-**Multiplier** is an optional element which identifies the units multiplier. It must be expressed in scientific notation (e.g. 1e3) where the leading digit must be 1. This capability exists to make it easier for users to provide data inputs that may be more conviently represented with a smaller number of digits and an exponent. For example, annual VMT data for a state or metropolitan area is often represented in thousands or millions.
+**Multiplier** is an optional element which identifies the units multiplier. It must be expressed in scientific notation (e.g. 1e3) where the leading digit must be 1. This capability exists to make it easier for users to provide data inputs that may be more conviently represented with a smaller number of digits and an exponent. For example, annual VMT data for a metropolitan area or state is often represented in thousands or millions.
 
 The the VisionEval framework uses the year and multiplier information to convert the data to be stored in the datastore. All currency values are stored in base year currency units and all values are stored without exponents.
 
 #### 6.5. The Datastore
-Currently GreenSTEP/RSPM and related models store data in R binary files (rda files). The largest of these files are the simulated household files which store all of the information for all simulated households in an Azone (e.g. counties in GreenSTEP). All the data for households in the Azone are stored in a data frame where each row corresponds to a record of an individual household and the columns are household attributes. Vehicle data for households are stored as lists in the data frame. This approach has had some advantages:  
-- Storage and retrieval are part of the language: one line of code to store a data frame, and one line of code to retrieve;  
+Currently GreenSTEP/RSPM and related models store data in R binary files (rda files). The largest of these files are the simulated household files which store all of the information for all simulated households in an Azone (e.g. counties in GreenSTEP). All the data for households in the Azone are stored in a data frame where each row corresponds to a record of an individual household and the columns are household attributes. Vehicle data for households are stored as lists in the data frame. This approach had some benefits:  
+- Storage and retrieval are part of the R language: one line of code to store a data frame, and one line of code to retrieve;  
 - It is easy to apply models to data frames; and  
 - Vehicle data can be stored as lists within a household data frame, eliminating the need to join tables.  
 
 The simplicity of this approach helped with getting GreenSTEP from a concept into an operational model quickly. However, several limitations have emerged as GreenSTEP and related models have been used in various applications including:  
-- Requiring large amounts of computer memory when modeling Azones that have large populations. This necessitates either expanding computer memory or limiting the size of Azones;  
+- Large amounts of computer memory are required when modeling Azones that have large populations. This necessitates either expanding computer memory or limiting the size of Azones;  
 - It is not easy to produce summary statistics from the simulated household files for a region; and  
 - The number of non-household data files has proliferated in order to store various aggregations for use in the model and for later summarization.
 
 The VisionEval model system uses the HDF5 file format for storing model data, rather than using R binary files. The HDF5 file format was developed by the National Center for Supercomputing Applications (NCSA) at the University of Illinois and other contributors to handle extremely large and complex data collections. For example, it is used to store data from particle simulations and climate models. It also is the basis for the new open matrix standard for transportation modeling, [OMX](https://github.com/osPlanning/omx).  
 
-The HDF5 format was chosen over SQL databases because it reads and writes data faster than SQL alternatives that were tested. It also provides random data access in a way that is analogous to how data in R data structures can be indexed. Large complex data sets can be randomly accessed by organizing datasets in a hierarchy of groups and by accessing portions of datasets by using indexing. In addition, metadata can be stored as attributes of any data group or data item. Preliminary tests indicate that the aggregate time for reading data from an HFD5 file, applying a model, and writing the result back to the HDF5 file is competitive with the aggregate time for doing these things using R binary files.
+The HDF5 format was chosen over SQL databases because it reads and writes data faster than SQL alternatives that were tested. It also provides random data access in a way that is analogous to how data in R data structures can be indexed. Large complex data sets can be randomly accessed by organizing datasets in a hierarchy of groups and by accessing portions of datasets by using indexing. In addition, metadata can be stored as attributes of any data group or data item. Testing showed that the aggregate time for reading data from an HFD5 file, applying a model, and writing the result back to the HDF5 file was competitive with the aggregate time for doing these things using R binary files.
 
-An HDF5 file is composed of groups and datasets. Groups provide the overall structure for organizing data, just as file system provides the structure for organizing files on a computer disk. A `/` indicates the root group. Subgroups are created with names. So for example, data for the year 2050 could be stored in a `/2050` group. Household data for the year 2050 could be stored in a `/2050/Household` group. Some groups, like the *Household* group just mentioned, are used to store tabular data in the same way that the existing model stores tabular data in data frames. Just like a data frame, each component (dataset) can store a different type of data than other components, but all datasets must have the same length. The framework enforces the equal length requirement by storing a *LENGTH* attribute with the table group and using this attribute when initializing a new dataset to include in the table. The software framework stores information about the data type contained in a dataset as well as other key attributes that are identified in module specifications. Datasets in tables are accessed by supplying the name of the dataset and the full path name to the table where the dataset is stored (e.g. `/2050/Household/Income` for a household income dataset for the year 2050). Indexes may be used to read and write portions of a dataset. The software framework includes a function that calculates indexes for different geographical units.
+An HDF5 file is organized in groups and datasets. Groups provide the overall structure for organizing data, just as file system provides the structure for organizing files on a computer disk. A `/` indicates the root group. Subgroups are created with names. So for example, data for the year 2050 could be stored in a `/2050` group. Household data for the year 2050 is stored in a `/2050/Household` group. Some groups, like the *Household* group just mentioned, are used to store tabular data in the same way that the existing model stores tabular data in data frames. Just like a data frame, each component (dataset) can store a different type of data than other components, but all datasets must have the same length. The framework enforces the equal length requirement by storing a *LENGTH* attribute with the table group and using this attribute when initializing a new dataset to include in the table. The software framework stores information about the data type contained in a dataset as well as other key attributes that are identified in module specifications. Datasets in tables are accessed by supplying the name of the dataset and the full path name to the table where the dataset is stored (e.g. `/2050/Household/Income` for a household income dataset for the year 2050). Indexes may be used to read and write portions of a dataset. The software framework includes a function that calculates indexes for different geographical units.
 
-The structure of the datastore to implement existing models (GreenSTEP, RSPM, EERPAT, RPAT) is shown in the following diagram which is organized like a directory tree. The first level of the tree denotes groups that are collections of tables. There are two types of groups at this level: the 'Global' group, and 'forecast year' groups (e.g. 2010, 2050). The 'Global' group is used to store data that is not organized by forecast year and that applies to the entire model region. The vehicle characteristics datasets used in the GreenSTEP, RSPM, and EERPAT models are examples. These data are organized by vehicle model year rather than forecast year. The 'forecast year' groups store datasets that are organized by forecast year. For example, regional cost inputs vary by forecast year. The second level of the tree denotes groups that represent data tables. These groups hold collections of datasets (vectors of data) that hold different types of data but all have the same lengths. Tables in the *Global* group are organized by 'topic' (e.g. HEV vehicle characteristics, EV vehicle characteristics). Tables in 'forecast year' groups include tables for each level of geography as well as 'Households' and 'Vehicles' tables which store attributes of the simulated households and the vehicles they own.
+The structure of the datastore to implement existing models (GreenSTEP, RSPM, EERPAT, RPAT) is shown in the following diagram which is organized like a directory tree. The first level of the tree denotes groups that are collections of tables. There are two types of groups at this level: the 'Global' group, and 'Year' groups (e.g. 2010, 2050). The 'Global' group is used to store data that is not organized by forecast year. The vehicle characteristics datasets used in the GreenSTEP, RSPM, and EERPAT models are examples. These data are organized by vehicle model year rather than forecast year. The 'Year' groups store datasets that are organized by forecast year. For example, regional cost inputs vary by forecast year. The second level of the tree denotes groups that represent data tables. These groups hold collections of datasets (vectors of data) that hold different types of data but all have the same lengths. Tables in the *Global* group are organized by 'topic' (e.g. HEV vehicle characteristics, EV vehicle characteristics). Tables in 'forecast year' groups include tables for each level of geography as well as 'Households' and 'Vehicles' tables which store attributes of the simulated households and the vehicles they own.
 
 ```    
 |____Global
@@ -375,6 +404,28 @@ The structure of the datastore to implement existing models (GreenSTEP, RSPM, EE
 
 This structure is adequate to store all of the data that are used by the GreenSTEP/RSPM models and their offshoots. It can also be easily expanded to serve new modeling capabilites. For example if a module is added to model building stock, a 'Buildings' table could be added to each 'forecast year' group. In addition, since HDF5 files can store matrix data as well as vector data, if a future module makes use of a distance matrix, that matrix could be added to either the 'Global' group or the 'forecast years' groups.  
 
+#### 6.6 The Model State File  
+The model state file, "ModelState.Rda", maintains a record of all of the model run parameters and an inventory of the contents of the datastore. The software framework functions use this information to control the model run and to perform checks on module and data validity. The model state file contains a list which has the following components:  
+- Model: The name of the model  
+- Scenario: The name of the scenario  
+- Description: A description of the scenario  
+- Region: The name of the region being modeled  
+- BaseYear: The model base year  
+- Years: A list of years the model is being run for  
+- DatastoreName: The file name for the datastore  
+- Seed: The value to be used for the random seed  
+- LastChanged: The date and time of the last change to the model state  
+- Deflators: A data frame of deflator values by year  
+- Units: A data frame of default units for complex data types  
+- LogFile: The file name of the log file  
+- Datastore: A data frame containing an inventory of the contents of the datastore  
+- Geo_df: A data frame containing the geographic definitions for the model  
+- BzoneSpecified: A logical value identifying whether Bzones are specified for the model  
+- CzoneSpecified: A logical value identifying whether Czones are specified for the model  
+- ModuleCalls_df: A data frame identifying the sequence of 'runModule' function calls and arguments  
+
+The Datastore component is updated every time the data is written to the datastore. This enables framework functions to 'know' the contents of the datastore without having to access the datastore. The Datastore component keeps track of all groups and datasets in the datastore and their attributes such as the length of tables and the specifications of datasets.
+
 ### 7. Overview of Module and Software Framework Layer Interactions
 Modules are the heart of the VisionEval model system. Modules contain all of the code and parameters to implement submodels that are the building blocks of models. Modules are distributed in standard R packages. A module contains the following components:  
 - Data specifications for data that is to be loaded from input files, data that is to be loaded from the datastore, and data that is to be saved to the datastore;  
@@ -386,37 +437,44 @@ Modules are the heart of the VisionEval model system. Modules contain all of the
 The software framework provides all of the functionality for managing a model run. This includes: 
 - Checking module specifications for consistency with standards;
 - Checking input files for compliance with module specifications;
-- Processing input files to load the data into the datastore;
-- Checking data dependencies (i.e. modules will have the data they need when they call for it);
+- Processing input files to load the input data into the datastore;
+- Simulating the data transactions in a model run to check whether the datastore will contains the data each module needs when the module needs it;
 - Loading module packages;  
-- "Running" modules in accordance with the "run_model.R" script;  
+- 'Running' modules in accordance with the 'run_model.R' script;  
 - Fetching from the datastore, data that is required by a module;  
 - Saving to the datastore, data that a module produces and specifies is to be saved; and,  
 - Converting measurement units and currency years when necessary.
 
-When the software framework "runs" a module it does several things. First, it loads the module data specifications and the main module function which performs the submodel calculations. Then it loads any scenario input file data that the module specifies into the datastore. After that, it checks and loads all the data from the datastore that the module specifies. It puts this data into an input list and then it calls the main module function with this input list as the argument to the function call. The return value of the function call is assigned to an output list. After the module function has completed execution, the framework software writes the data in the output list to the datastore according to the module specifications.
+When the software framework "runs" a module it does several things. First, it reads the module data specifications and the main module function which performs the submodel calculations. Then it reads in all the datasets from the datastore that the module specifies. It also reads in the contents of the model state file. It puts these datasets into an input list and then it calls the main module function with this input list as the argument to the function call. This list, which by convention is called 'L', contains 4 components: Global, Year, BaseYear, and G. The Global, Year, and BaseYear components contain lists which are composed of table components which are in turn composed of dataset components. The Global component relates to the 'global' group in the datastore. The Year component relates to the the group in the datastore for the model run year. For example, if the model run year is 2040, the Year component will contain data that is read from the '2040' group in the datastore. The BaseYear component relates to the group in the datastore which represents the base year for the model. For example if the model base year is 2010, the BaseYear component will contain data that is read from the '2010' group in the datastore. The list contains a BaseYear component as well as a Year component because modules may need to compute changes in a dataset between the base year and the model run year. Each of these components will contain a component for each table in the the module requests data from. The table component is also a list which then contains components for all the requested datasets. For example, if a module needs the household income ('Income') and household size ('HhSize') datasets from the 'Household' table in the model run year (e.g. 2040), the Year component of 'L' will contain a 'Household' component which will contain an 'Income' component and a 'HhSize' component.
+
+The 'G' component of 'L' contains the model state list which contains all the information described in Section 6.6.
+
+When the module executes, it return a list containing all of the information that the module specifies is to be written to the datastore. By convention, this list is called 'R'. This list also has Global, Year, and BaseYear components which are structured in the same way that 'L' is structured. The table and dataset components of the list also include some attributes (metadata) which are described in Section 8.
 
 ### 8. Modules  
-All modules are made available in the form of R packages that meet framework specifications. A package may contain more than one module. The package organization follows the standard organization of R packages. The structure is shown in the following diagram. The components are described below in the order that they are presented in the diagram.
+All modules are made available in the form of standard R packages that meet framework specifications. A package may contain more than one module. The package organization follows the standard organization of R packages. The structure is shown in the following diagram. The components are described below in the order that they are presented in the diagram. The file names are examples.
 
 ```
-my_package
+VESimHouseholds
 |   DESCRIPTION
 |   NAMESPACE
+|   LICENSE
 |     
 |
 |____R
-|    |   MyGoodModule.R  
-|    |   MyEvenBetterModule.R
+|    |   CreateHouseholds.R  
+|    |   PredictWorkers.R
+|    |   CreateEstimationDatasets.R
 |    |   ...
 |
 |
 |____inst  
+|    |    NOTICE
 |    |____extdata  
-|         |   parameter_input_data_1.csv
-|         |   parameter_input_data_1.txt
-|         |   parameter_input_data_2.csv
-|         |   parameter_input_data_2.txt
+|         |   pums_households.csv
+|         |   pums_households.txt
+|         |   pums_persons.csv
+|         |   pums_persons.txt
 |         |   ...
 |         
 |
@@ -429,8 +487,8 @@ my_package
 |    |    |   deflators.csv  
 |    |
 |    |____inputs
-|    |    |   inputs1.csv
-|    |    |   inputs2.csv
+|    |    |   azone_hh_pop_by_age.csv
+|    |    |   azone_gq_pop_by_age.csv
 |    |    |   ...
 |    |
 |    |----scripts
@@ -439,37 +497,38 @@ my_package
 |
 |
 |____vignettes
-|    |   my_package.Rmd
-|    |   MyGoodModule.Rmd
-|    |   MyEvenBetterModule.Rmd
+|    |   VESimHouseholds.Rmd
+|    |   CreateHouseholds.Rmd
+|    |   PredictWorkers.Rmd
 |    |   ...
 |
 |
 |____data
-|    |   MyGoodModuleSpecifications.rda
-|    |   MyEvenBetterModuleSpecifications.rda
-|    |   parameters1.rda
-|    |   parameters2.rda
+|    |   Hh_df.rda
+|    |   CreateHouseholdsSpecifications.rda
+|    |   HtProb_HtAp.rda
+|    |   PredictWorkersSpecifications.rda
+|    |   PropHhWkr_HtAg.rda
 |    |   ...
 |
 |
 |____man
-     |   Function1.Rd
-     |   Data1.Rd
+     |   CreateHouseholds.Rd
+     |   PredictWorkers.Rd
      |   ...
 
 ```
 
-The *DESCRIPTION* and *NAMESPACE* files are standard files required by the R package system. There are good sources available for describing the required contents of these files ([R Packages](http://r-pkgs.had.co.nz/)), so that will not be done here. Most of the entries in these files can be produced automatically from annotations in the R scripts that will be described next, using freely available tools such as [devtools](https://github.com/hadley/devtools) and [RStudio](https://www.rstudio.com/).
+The *DESCRIPTION* and *NAMESPACE* files are standard files required by the R package system. There are good sources available for describing the required contents of these files ([R Packages](http://r-pkgs.had.co.nz/)), so that will not be done here. Most of the entries in these files can be produced automatically from annotations in the R scripts that will be described next, using freely available tools such as [devtools](https://github.com/hadley/devtools) and [RStudio](https://www.rstudio.com/). The *LICENSE* file contains the text for the Apache 2 license which is the open source license that should be used for VisionEval packages.
 
 #### 8.1. The R Directory
 The *R* directory is where all the R scripts are placed which define the modules that are included in the package. Each module is defined by a single R script which has the name of the module (and the .R file extension). A module script does three things:  
 1) It defines all of the parameters that are used by the submodel that the module implements. This can be done through simple declarations or through the application of more sophisticated statistical parameter estimation methods.  
 2) It defines all the specifications for data that the module depends on.  
 3) It defines all of the functions that implement the submodel.  
-  Each of these actions is described below. An example of the CreateHouseholds module script from the VESimHouseholds package is included in Appendix C.  
+  Each of these actions is described below. An example of the CreateHouseholds module script from the VESimHouseholds package is included in Appendix E.  
 
-The **parameter definition** section of the module script does several things. First, if any of the data to be used in parameter calculations is contained in files (placed in the 'inst/extdata' directory), the script describes specifications for the data to be read from those files. This is done to assure that the parameters are calculated from correct data. All specification data input files are CSV-formatted text files. The data specifications for each file are organized in a list. A separate specification list is provided for each file that is to be read in. The specifications for a file identify the require data columns and the required attributes of those data. Following is an example:
+The **parameter definition** section of the module script does several things. First, if any of the data to be used in parameter calculations is contained in files (placed in the 'inst/extdata' directory), the script describes specifications for the data to be read from those files. This is done to assure that the parameters are calculated from correct data. All parameter estimation data input files are CSV-formatted text files located in the "inst/extdata" directory. The data specifications for each file are organized in a list. A separate specification list is provided for each file that is to be read in. The specifications for a file identify the require data columns and the required attributes of those data. Following is an example:
 
 ```
 PumsHhInp_ls <- items(
@@ -505,12 +564,14 @@ PumsHhInp_ls <- items(
 )
 ```
 The meanings of these specifications are as follows:  
-- **NAME** This is the name(s) of the data column. The name must be a character string (i.e. surrounded by quotation marks). If multiple columns of the file have the same specifications except for their names, they can listed as in the first item in the example. This method avoids a lot of redundant data entry. Note that the order of specifications does not need to be the same as the order of the columns in the file. Also note that it is OK if the file contains columns that are not specified, as long as it contains all of the columns that are specified. Columns that are not listed are ignored.  
-- **TYPE** This the data type of the data contained in the column. Allowable types are the 4 primitive types (integer, double, character, and logical), the complex types listed in section 6.4, or 'compound'. The type must be a character string.  
-- **PROHIBIT** This is a character vector which identifies all prohibited data conditions. For example, the specification for the "PERSONS" data column in the example above is c("NA", "< 0"). This means that there cannot be any values that are undefined (NA) or less than or equal to 0. The symbols that may be used in a PROHIBIT specification are: NA, ==, !=, <, <=, >, >= (i.e. undefined, equal to, not equal to, less than, less than or equal to, greater than, greater than or equal to). Note that prohibited conditions must be represented as character strings. The absence of prohibited conditions is represented by an empty character string (i.e. "").  
-- **ISELEMENTOF** This is a vector which specifies the set of allowed values. It is used when the input values must be elements of a set of discrete values. The vector describing the set must be of the same type as is specified for the input data. The absence of a specification for this is represented by an empty character string.  
-- **UNLIKELY** This is a vector of conditions that while not prohibited, are not likely to occur. While conditions identified in the PROHIBIT and ISELEMENTOF specifications will produce an error if they are not met (thereby stopping the calculation of parameters), the conditions identified in the UNLIKELY specification will only produce a warning message.  
+- **NAME** This is the name(s) of the data column in the file. The name must be a character string (i.e. surrounded by quotation marks). If multiple columns of the file have the same specifications except for their names, they can listed as in the first item in the example. This method avoids a lot of redundant data entry. Note that the order of specifications does not need to be the same as the order of the columns in the file. Also note that it is OK if the file contains columns that are not specified, as long as it contains all of the columns that are specified. Columns that are not listed are ignored.  
+- **TYPE** This the data type of the data contained in the column. Allowable types are the 4 primitive types recognized by the R language (integer, double, character, and logical), the complex types listed in section 6.4, or 'compound'. The type must be a character string.  
+- **PROHIBIT** This is a character vector which identifies all prohibited data conditions. For example, the specification for the "PERSONS" data column in the example above is c("NA", "< 0"). This means that there cannot be any values that are undefined (NA) or less than or equal to 0. The symbols that may be used in a PROHIBIT specification are: NA, ==, !=, <, <=, >, >= (i.e. undefined, equal to, not equal to, less than, less than or equal to, greater than, greater than or equal to). Note that prohibited conditions must be represented as character strings. If there is more than one prohibited condition, as in the example, the conditions must be entered as an R vector using the 'c()' function, as shown in the example. The absence of prohibited conditions is represented by an empty character string (i.e. "").  
+- **ISELEMENTOF** This is a vector which specifies the set of allowed values. It is used when the input values must be elements of a set of discrete values. The vector describing the set must be of the same type as is specified for the input data. Vectors of elements are entered using the 'c()' function. The absence of a specification for this is represented by an empty character string.  
+- **UNLIKELY** This is a vector of conditions that while not prohibited, are not likely to occur. While conditions identified in the PROHIBIT and ISELEMENTOF specifications will produce an error if they are not met (thereby stopping the calculation of parameters), the conditions identified in the UNLIKELY specification will only produce a warning message. Vectors of conditions are entered using the 'c()' function. 
 - **TOTAL** This specifies a required total value for the column of data. This is useful if the data represents proportions or percentages and must add up to 1 or 100. The absence of a specification for this is represented by an empty character string.
+
+Note that if more than one module uses the same dataset(s) for parameter estimation, it may be convenient for all data preparation to be carried out by one script which produces one or more R data frames which are saved to the data directory and loaded as needed by module scripts. That is what is done in the VESimHouseholds package. The CreateEstimationDatasets.R script creates and saves the Hh_df dataset which is used in estimating all the models in the package.
 
 The second thing the parameters section of the module script does is define any functions that may be needed to calculate submodel parameters. These functions can be as complex as required to carry out the calculations, but they must be well documented. Function documentation is done using [Roxygen syntax](http://r-pkgs.had.co.nz/man.html).
 
@@ -520,36 +581,39 @@ The last thing the parameters section does is save the parameters. The example s
 
 The **data specifications** section of the module script provides specifications for the data that is to be read or saved and how it is to be indexed. These specifications are declared in a list that has the following 6 main components:  
 - **RunBy** specifies of the level of geography that the model is to be run at. For example, the congestion submodel in the GreenSTEP and RSPM models runs at the Marea level. This specification is used by the software framework to determine how to index data that is read from the datastore and data that is written to the datastore. Acceptable values are "Region", "Azone", "Bzone", "Czone", and "Marea". 
-- **NewInpTable** specified any new tables that need to be created in the datastore to accommodate input data. The following specifications are required for each new input table that is to be created:  
+- **NewInpTable** specifies any new tables that need to be created in the datastore to accommodate input data. The following specifications are required for each new input table that is to be created:  
   - TABLE: the name of the table that is to be created; and,
-  - GROUP: the type of group the table is to be put into. There are 3 group types: Global, BaseYear, and Year. If 'Global', the table is created in the global group of the datastore. If 'BaseYear' the table is created in the year group for the base year and only in that year group. For example, if the model base year is 2010, the table will be created in the '2010' group. If 'Year', the table will be created in the group for every run year. For example, if the run years are 2010 and 2040, the table will be created in both the '2010' group and the '2040' group.  
-- 
+  - GROUP: the type of group the table is to be put into. There are 3 group types: Global, BaseYear, and Year. If 'Global', the table is created in the global group of the datastore. If 'BaseYear' the table is created in the year group for the base year and only in that year group. For example, if the model base year is 2010, the table will be created in the '2010' group. If 'Year', the table will be created in the group for every model run year. For example, if the run years are 2010 and 2040, the table will be created in both the '2010' group and the '2040' group.  
+- **NewSetTable** specifies any new tables that need to be created in the datastore to accommodate outputs from the module identified in the 'Set' specifications (see below). The specifications for new 'Set' tables take the same form as the specifications for new input tables. The 'CreateHouseholds' module example in Appendix E includes specifications for creating a new 'Household' table in the datastore.
 - **Inp** specifies the scenario input files that need to be read, the data fields that need to be read from the input files, and the attributes of the data fields. The *Inp* component is a list where each component of that list describes a data field. The following specifications are required for each data field:  
   -  NAME: the name of a data item in the input table;  
   -  FILE: the name of the file that contains the table;  
   -  TABLE: the name of the datastore table the item is to be put into;  
-  -  TYPE: the data type (i.e. double, integer, character, logical);  
+  -  GROUP: the type of group where the table is located in the datastore (i.e. Global, Year, BaseYear);
+  -  TYPE: the data type (e.g. double, distance, compound);  
   -  UNITS: the measurement units for the data;  
   -  NAVALUE: the value used to represent NA in the datastore;  
-  -  SIZE: the maximum number of characters (or 0 for numeric data);  
+  -  SIZE: the maximum number of characters for strings (or 0 for numeric data);  
   -  PROHIBIT: data conditions that are prohibited or "" if not applicable;  
   -  ISELEMENTOF: allowed categorical data values or "" if not applicable;  
   -  UNLIKELY: data conditions that are unlikely or "" if not applicable; and,  
   -  TOTAL: the total for all values (e.g. 1) or "" if not applicable.
   
-  Most of these elements are the same, and have the same meanings, as described above for the specifications of parameter files. The ones that are new to the *Inp* component include: **FILE**, the name of the input file; **TABLE**, the name of the table in the datastore where the data is to be placed; **UNITS**, a description of the measurement units (e.g. miles per gallon); **NAVALUE**, the value to be used to denote NA values in the datastore for the dataset, and **SIZE**, the maximum number of characters to store in each entry for character type data.  
+  The values that may be entered for the TYPE and UNITS attributes are described in Section 6.3. It should be noted that the UNITS attribute must not include 'year' (for 'currency' type) or 'multiplier' information. That information is part of the input file field names instead (where relevant). This is explained in more detail in Section 6.4.  
 - **Get** specifies what data items that need to be retrieved from the datastore and what characteristics those data need to have. The *Get* component is a list where each component of that list describes data that is to be retrieved from the datastore. The following specifications are required for each dataset:  
   -  NAME: the name of the dataset to be loaded;  
   -  TABLE: the name of the table that the dataset is a part of;  
+  -  GROUP: the type of group where the table is located in the datastore (i.e. Global, Year, BaseYear);  
   -  TYPE: the data type (i.e. double, integer, character, logical);  
   -  UNITS: the measurement units for the data;  
   -  PROHIBIT: data conditions that are prohibited or "" if not applicable;  
   -  ISELEMENTOF: allowed categorical data values or "" if not applicable.  
   
-  These elements have the same meanings as described above.  
+  These elements have the same meanings as described above. Unlike the 'Inp' specifications, the 'Get' specifications for UNITS must include 'year' information for 'currency' types. This is necessary in order for the framework to convert the currency data being requested from the datastore to the year denomination that the module needs. The UNITS attribute may also include a multiplier specification if the module needs the values to be modified in that way. For example, if the module needs VMT in thousands of miles, the UNITS specification would be 'MI.1e3'. Section 6.3 provides more information on how 'year' and 'multiplier' options are added to a UNITS specification.  
 - **Set** specifies the attributes of data that is to be saved in the datastore. The following need to be specified for every dataset that is to be saved in the datastore:  
   -  NAME: the name of the data item that is to be saved;  
   -  TABLE: the name of the table that the dataset is a part of;  
+  -  GROUP: the type of group where the table is located in the datastore (i.e. Global, Year, BaseYear);  
   -  TYPE: the data type (i.e. double, integer, character, logical);  
   -  UNITS: the measurement units for the data;  
   -  NAVALUE: the value used to represent NA in the datastore;  
@@ -557,57 +621,70 @@ The **data specifications** section of the module script provides specifications
   -  ISELEMENTOF: allowed categorical data values or "" if not applicable;  
   -  SIZE: the maximum number of characters (or 0 for numeric data).  
 
-  These elements have the same meanings as described above.  
+  These elements have the same meanings as described above. As with the 'Get' specifications for UNITS, 'year' information must be included for 'currency' types. This is necessary in order for the framework to convert the currency data being produced by the module to the base year denomination that the datastore will contain. The UNITS attribute must also include a multiplier specification if the module outputs are multiplied values such as thousands or millions. For example, if the module produces VMT in thousands of miles, the UNITS specification must be 'MI.1e3'. Section 6.3 provides more information on how 'year' and 'multiplier' options are added to a UNITS specification.
   
-The name of the data specifications list must be the concatenation of the name of the module and "Specifications". For example, if the module name is *CreateHouseholds*, then the data specifications list must be named *CreateHouseholdsSpecifications*. This naming convention is very important because it is what the software framework uses to extract the specifications from the package that the module is in. The scripts in Appendices C, D, and E show examples of data specifications and naming for 3 demonstation modules.
+  It should be noted that it may not be possible to prespecify the SIZE attribute for a dataset. For example, if a unique household ID is assigned, the SIZE attribute will depend on the number of households and so must be calculated when the module is run. In such a circumstance, the SIZE attribute is omitted and the module function must calculate it and include the calculated value as an attribute of the output dataset. This is shown in the example in Appendix E and is explained below.
 
-The **function definitions** section of the module script is used to define all functions that will be used to implement the submodel. One of these functions is the main function that is called by the software framework to run the module. This function must have the same name as the module name. For example, the main function of the *CreateHouseholds* module will be named *CreateHouseholds* as well. This function must be written to accept one argument, a list, which by convention is named L. This list contains all of the datasets identified in the *Get* component of the module data specifications. Each dataset in the list is named by the *NAME* attribute in the specifications. The main function returns a list which contains all of the datasets identified in the *Set* component of the module data specifications and named with the *NAME* attribute in the specifications. 
+The name of the data specifications list must be the concatenation of the name of the module and "Specifications". For example, if the module name is *CreateHouseholds*, then the data specifications list must be named *CreateHouseholdsSpecifications*. This naming convention is very important because it is what the software framework uses to extract the specifications from the package that the module is in.
 
-The main function may call other functions as necessary to carry out computations. The main function is responsible for passing to those functions all data they need as inputs. The main function is also responsible for passing any datasets specified in the *Set* specifications back to the software framework. The following code example from the demonstration module in Appendix E shows how this can be done by  1) passing the input list, *L*, to the first of two functions that are called by the main function, 2) concatenating the input list with the list of datasets returned by that function to make a new input list, 3) passing the new input list to the second function, 4) concatenating the new input list with the datasets returned by that function, and finally 5) selecting the datasets from the final list to return to the software framework.  
+The **function definitions** section of the module script is used to define all functions that will be used to implement the submodel. One of these functions is the main function that is called by the software framework to run the module. This function must have the same name as the module name. For example, the main function of the 'CreateHouseholds' module is named 'CreateHouseholds' as well. This function must be written to accept one argument, a list, which by convention is named L. This list contains all of the datasets identified in the 'Get' component of the module data specifications. The structure of this list is described in Section 7. The main function returns a list which contains all of the datasets identified in the 'Set' component of the module data specifications and structured as described in Section 7. The software framework function includes a function, 'initDataList', to initialize an outputs list having the proper structure with 'Global', 'Year', and 'BaseYear' components. It is up to the developer to The example 'CreateHouseholds.R' script (Appendix E) shows how the module outputs list is populated with 'table' components and 'dataset' components within 'table' components. For example the following code creates a list component to store datasets that will be put into the 'Household' table (for each model run year group), and then assigns the 'HhId' (household ID) dataset to that list. 
 
-```  
-CreateBzoneDev <- function(L) {
-  #Calculate Bzone densities and distances and combine with the input list
-  L <- c(L, calcBzoneDistDen(L))
-  #Calculate Bzone building types and combine with the input list
-  L <- c(L, calcBuildingTypes(L))
-  #Return a list of values to be saved in the datastore
-  L[c("DistFromCtr", "PopDen", "SfdNum", "MfdNum")]
-}
-```  
-The only data that needs to be passed to these functions are the data that are specified in the module's *Get* specifications and intermediate calculations produced by one function to be consumed by another function. Submodel parameters do not need to be passed to module functions because they are saved in the package and are therefore part of the namespace of the module functions.
+```
+Out_ls$Year$Household <- list()
+Out_ls$Year$Household$HhId <- paste("HH", 1:NumHh, sep = "-")
+#NumHh is the number of households
+```
+
+In this example, the SIZE attribute of the 'HhId' dataset will not have been specified in the module 'Set' specifications for the dataset because the maximum number of characters depends on the number of households ('NumHh' in the example). Because the SIZE attribute was not prespecified, it must be specified in the module code. Following is an example of how this is done:
+
+```
+attributes(Out_ls$Year$Household$HhId)$SIZE <- max(nchar(Out_ls$Year$Household$HhId))
+```
+
+If a new table is being created by a module, as in the case of the example in Appendix E it is required that the module code assign a length attribute to the output list component for the table that is being created. Following is an example:
+
+```
+attributes(Out_ls$Year$Household)$LENGTH <- NumHh
+#NumHh is the number of households
+```
+
+The main function may call other functions as necessary to carry out computations. The main function is responsible for passing to those functions all data they need as inputs. The main function is also responsible for passing any datasets specified in the 'Set' specifications back to the software framework which only recognizes the main function.
 
 All functions must be properly documented using Roxygen syntax.
 
+The last portion of the module script is optional. This part of the script is there to help module developers during module development. All portions of the example script are commented out. This is necessary when the package is built because it will cause errors during package building. More on support for module testing is 
 #### 8.2. The inst/extdata Directory
-By convention, the *inst/extdata* directory is the standard place to put external (raw) data files as opposed to R datasets which are placed in the *data* directory. All the files that are used to calculate model parameters are placed in this directory. Parameter data files must be CSV-formatted text files where the first line of the file is a header of column names. The data included in each parameter file must be consistent with the data specifications described in the R script for the module that uses those data. Each parameter data file should be accompanied by a text file which documents the data contained in the file. This text file should have the same name as the parameter data file but the file extension should be ".txt". The text file should include notes on the file structure, document data sources, and provide any other notes on the data that are important for users to know. 
+By convention, the 'inst/extdata' directory is the standard place to put external (raw) data files as opposed to R datasets which are placed in the 'data' directory. All the files that are used to calculate model parameters are placed in this directory. Parameter data files must be CSV-formatted text files where the first line of the file is a header of column names. The data included in each parameter file must be consistent with the data specifications described in the R script for the module that uses those data. Each parameter data file should be accompanied by a text file which documents the data contained in the file. This text file should have the same name as the parameter data file but the file extension should be ".txt". The text file should include notes on the file structure, document data sources, and provide any other notes on the data that are important for users to know. 
 
 #### 8.3. The tests Directory
-The *tests* directory contains an R script to run and data to be used in the tests. The test data is included in a directory named *data*. The test script (*tests.R*) should test every module included in the package by loading test data from the data directory, creating a list (L) containing the input data specified in the module's *Get* specifications, calling the module's main function with the input data, retrieving the results, and testing whether the results match the module's *Set* specifications. The software framework includes a function, *testModule* that compares module outputs against module specifications and identifies any outputs that do not match the specifications.
-
-At the present time, model system requirements for module testing are rudimentary. Every module needs to contain a *tests.R* script and test data to demonstrate that the modules will run successfully and produce outputs that are consistent with module specifications. Additional requirements will be added to enable module testing to be automated during the module build process.
+The 'tests' directory contains an R script to run and data to be used to test all the modules in a package. The software framework includes a 'testModule' function that module developers can use to assist module development and testing. The testing script is named 'test.R'. Appendix F includes an example of a test script. Test data mirrors the setup for running a model. A 'defs' directory includes all the files described in Section 6.1. An 'inputs' directory includes all the input files specified by the modules. A datastore file, 'datastore.h5', must be present which contains all the data items identified in the module 'Get' specifications that will not be provided by the input files. The 'VERSPM' directory in the VisionEval GitHub repository includes a test datastore for the Rogue Valley MPO (RVMPO) test area.  
 
 #### 8.4. The vignettes Directory  
 Whereas package help files provide basic documentation of package functions and datasets, vignettes provide a vehicle for longer-form documentation of packages and the modules included in packages. Vignettes enable literate programming, where R code is embedded within  a vignette source file and evaluated when that document is compiled into it's final form. R code embedded in a vignette source file can be used to produce tables and graphs that are embedded in the document. This makes vignettes very useful for documenting how submodels are designed and how their parameters are estimated. 
 
 Source files for producing vignettes are composed in R Markdown format text files (Rmd extension). When the package is built, the source files are evaluated and final versions are produced in HTML or PDF formats. The process for preparing vignettes in packages is [well documented.](http://r-pkgs.had.co.nz/vignettes.html)
 
-There is no limit to the number of vignettes that are included in a package, and module developers are encouraged include vignettes that throughly document the submodels that the package implements, but some standard vignettes are required to be included in a package. One vignette is must be included which describes the package as a whole. This vignette identifies the modules included in the package, provides a brief description of each module, any provides any other information about the package and what is included in it. A vignette must be included to document each module contained in the package as well. Appendix F shows a rudimentary example of a source file for a module vignette.
+There is no limit to the number of vignettes that are included in a package, and module developers are encouraged include vignettes that throughly document the submodels that the package implements, but some standard vignettes are required to be included in a package. One vignette is must be included which describes the package as a whole. This vignette identifies the modules included in the package, provides a brief description of each module, any provides any other information about the package and what is included in it. A vignette must be included to document each module contained in the package as well. Appendix F shows an example of a source file for a package vignette and Appendix G shows an example source file for a module vignette.
 
 #### 8.5. The data and man Directories
-The *data* and *man* directories and the files within them are created automatically. The *data* directory contains R binary files for all of the module parameters and specifications. These are created by the save commands in the module scripts. The *man* directory contains the documentation files for the functions and data that are defined by the module scripts. These documentation files are created from the documentation annotations (in Roxygen format) included in the module scripts.
+The 'data' and 'man' directories and the files within them are created automatically when a package is built (i.e. when the sources are compiled into a version that can be used by the R language environment). The 'data' directory contains R binary files for all of the module parameters and specifications. These are created by the save commands in the module scripts. The 'man' directory contains the documentation files for the functions and data that are defined by the module scripts. These documentation files are created from the documentation annotations (in Roxygen format) included in the module scripts.
 
 ### 9. Software Framework 
-The software framework for the VisionEval model system is implemented by a set of functions contained in the **visioneval** package. Although several dozen functions are included in the package, only two need to be used in the "run_model.R" script: *initializeModel*, and *runModule*.
 
-The *initializeModel* function prepares the model for running modules. This includes:  
-1) Creating a file that contains global parameters for the model run and variables used to keep track of the state of the datastore and other aspects of the model run;  
+The software framework for the VisionEval model system is implemented by a set of functions contained in the **visioneval** package. Although several dozen functions are included in the package, model users and module developers only need to use a small number of them. A visual overview of the functiononly two need to be used in the 'run_model.R' script: 'initializeModel', and 'runModule'.
+
+The 'initializeModel' function prepares the model for running modules. This includes:  
+1) Creating the "ModelState.Rda" file that contains global parameters for the model run and variables used to keep track of the state of the datastore and other aspects of the model run (Section 6.6);  
 2) Creating a log file that is used to record model status messages such as warning and error messages;
 3) Creating and initializing the model datastore;
 4) Processing the model geography definition file and setting up the appropriate geographic tables in the datastore;
-5) Checking whether all the specified module packages are installed;
-6) Checking whether all the scenario input files identified by the specified modules are present in the *inputs* directory and whether all the data in those files conforms to the relevant module specifications; and,
-7) Checking whether the data each module needs from the the datastore will exist when the module is run, and whether the data meets the module's requirements.
+5) Checking whether all the specified module packages are installed and that all module specifications are correct;
+6) Parsing the "run_model.R" script and simulating the model run to confirm that the datastore will contain the data that each module needs when it is called and that the data specifications are consistent with the module 'Get' specifications;
+7) Checking whether all the scenario input files identified by the specified modules are present, and that the data are consistent with specifications; and,
+8) Loading all the data in the input files into the datastore.
+
+If any error in the model setup or run script are found
+
 
 The file that is created in the first step is named **ModelState.Rda**. The file contains a list that is used by the model run script and various framework functions. The components of the list and a summary of how they are used is as follows:  
 - **BaseYear**:  
