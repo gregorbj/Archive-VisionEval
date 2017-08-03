@@ -6,7 +6,7 @@ The RSPM framework is intended to become a large open collaborative project for 
 
 This open collaborative approach increases the importance of coding style guidelines. The purpose of this memo is to describe the coding style guidelines for packages built for the RSPM framework. For the most part, these guidelines follow [Google's R Style Guide](https://google-styleguide.googlecode.com/svn/trunk/Rguide.xml) fairly closely. They also draw from [Hadley Wickham's recommended style guidelines](http://r-pkgs.had.co.nz/r.html). While those guidelines are similar, they differ with respect to object naming and function documentation. Rather than duplicate all of Google's and Wickham's guidelines and examples, this memo summarizes the guidelines except where there are significant differences with the two. In addition, the following guidelines establish a system for naming objects so that it is possible to understand the basic structure of the objects from their names.
 
-###File Names  
+### File Names  
 Punctuation in names should be limited to underscores and hyphens. Avoid using capital letters because the Windows file system ignores letter case but other file systems do not. Don't use spaces in names.
 
 The names for R scripts should identify the purpose of the script. The file extension should be ".R". For example:
@@ -16,7 +16,7 @@ A binary R files should be named using the object name that will be created when
 `PopGrowth_UaYr.RData`  
 See the next section for an explanation of the object name in this example. 
 
-###Object Names  
+### Object Names  
 Google and Wickham recommend different styles for object names. Google recommends using periods (`.`) or camel case (e.g. `CamelCase`) to distinguish 'words' in a name, whereas Wickham recommends using underscores (`_`) or camel case. Wickham recommends against using periods because periods are often used to denote S3 methods (e.g. `print.lm`). Object naming for the RSPM framework should only use camel case to distinguish words in a name. Periods should only be used to denote S3 methods. Underscores should only be used to describe object structure as described below. 
 
 Names should be concise and descriptive. Nouns should be used in the names of objects that are not functions. The first letter of the name should be capitalized. For example:  
@@ -48,8 +48,8 @@ Often several objects used in model calculations have one or more dimensions tha
 
 Furthermore, it is strongly encouraged, that naming vectors be defined in the code to associate dimension names with each of these vectors. For example:  
 ```
-Pr <- c("Work", "Shopping", "School", "Other")  #Trip purposes
-Zn <- c("101", "102", "201", "202", "203", "301", "302")  #Model Zones
+Pr <- c("Work", "Shopping", "School", "Other")  # Trip purposes
+Zn <- c("101", "102", "201", "202", "203", "301", "302")  # Model Zones
 ```
 Doing this not only makes it easier for everyone to understand the code, it also makes it easier to name the dimensions of objects consistently and to make sure that objects conform to one another. For example:  
 ```
@@ -67,7 +67,7 @@ Since the columns of data frames and data tables hold various types of data whic
 
 It should be noted that this object naming approach differs from the approach previously used by ODOT in the GreenSTEP and RSPM models. While the approach used previously also used two character abbreviations to denote dimensions, it also used periods in the naming system to distinguish between various data structures. The use of periods has been dropped and replaced with underscores and abbreviations to avoid conflicting with the use of the period to denote S3 methods.  
 
-###Line Length and Indentation  
+### Line Length and Indentation  
 
 Lines should not exceed 80 characters in length. Lines that are longer in length should be split. 
 
@@ -95,7 +95,7 @@ Only spaces (not tabs) should be used for indentation.
 
 Indentation will be taken care of automatically when RStudio is used to write code and when the global options are set appropriately.  
 
-###Spacing  
+### Spacing  
 
 Spaces should be placed around all infix operators with the following exceptions:  
 - Don't put spaces around the `:` operator  
@@ -119,7 +119,7 @@ Trips.ZnZn <- sweep(TripProb.ZnZn, TripRates.Zn, 1, "*")
 Trips.ZnZn[, 5] <- 0
 ```
 
-###Statements, Code Blocks, and Curly Braces  
+### Statements, Code Blocks, and Curly Braces  
 
 Although it is possible to put more than one statement on a line by using a semicolon to separate the statements, don't do this. Statements should be separated using line breaks and semicolons should not be used.
 
@@ -141,7 +141,7 @@ if (HousingType == "SingleFamily" & Tenure == "Owner") {
 }
 ```
 
-###Assignment  
+### Assignment  
 
 Use the `<-` operator to assign values. The `=` operator should be reserved for associating values with function arguments in function calls. For example:  
 ```
@@ -149,7 +149,7 @@ kMegajoulesPerGallon <- 121
 rep(c("a", "b", "c"), each=3)
 ```
 
-###Comments and Function Documentation  
+### Comments and Function Documentation  
 
 Comment lines should start with a `#` and a space:  
 ```
