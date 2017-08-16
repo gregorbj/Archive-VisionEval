@@ -1293,7 +1293,7 @@
   
   {
     "Name": "checkModuleOutputs",
-    "Group": "developer",
+    "Group": "control",
     "Description": "Checks output list produced by a module for consistency with the module's specifications.",
     "Arguments":
     [
@@ -1678,7 +1678,7 @@
   
   {
     "Name": "writeVENameRegistry",
-    "Group": "developer",
+    "Group": "control",
     "Description": "Writes module Inp and Set specifications to the VisionEval name registry.",
     "Arguments":
     [
