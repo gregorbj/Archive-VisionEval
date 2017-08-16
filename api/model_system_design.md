@@ -769,6 +769,8 @@ If the DoRun argument is TRUE, the module will be run and there will be no retur
 ##### 9.2.2. Functions to Assist Specification Writing
 As was explained above in Sections 4.1 and 8.1, the VisionEval model system uses data specifications to help assure that modules can work properly with one another. The data specifications are saved as attributes for each dataset that are saved to the datastore by a module. The specifications are checked for consistency for each dataset a module requests to be retrieved from the datastore. A couple of functions assist a module developer with identifying datasets that registered modules produce and for retrieving 'Get' specifications for the datasets the developer's module will use.
 
+The 'item' and 'items' functions are used to organize specifications in the module script. They are aliases of the R language 'list' function.  
+
 The 'readVENameRegistry' function returns a list containing the specifications for all datasets that registered modules save to the datastore. This list contains two components. The components are data frames containing the specifications for all datasets identified in the 'Inp' and 'Set' of registered modules. Each data frame row lists the specifications for a dataset as well as the module which produces the dataset and the package the module is in. This function is useful to developers for:  
 - Avoiding dataset naming conflicts with other modules; and,  
 - Identifying datasets produced by other modules that can be used in module calculations.  
@@ -783,9 +785,43 @@ The 'getRegisteredGetSpecs' function helps the module developer to write 'Get' s
 
 At the present time, the function returns a data frame which contains the 'Get' specifications for each requested dataset. It is up to the module developer to put the information into the proper form in the module script. In the future, the function will be modified to return the 'Get' specifications in list form that may be copied into a module script.  
 
-### Appendix A: geography.csv file examples  
-**Figure A1. Example of geography.csv file that only specifies Azones**  
-![Azone](img/azone_geo_file.png)  
+##### 9.2.3. Utility Functions for Implementing Modules  
+Many submodels of the GreenSTEP and RSPM models are linear or binomial logit models. Several of the binary logit model implementations adjust the constant to match specified input proportions. For example, the light truck model enables model users to specify a future light truck proportion and the model will adjust the constant to match that proportion. Likewise, several linear models adjust a dispersion parameter to match a specified population mean. This is done for example in the household income model to match future per capita income projections. The adjustments are made with the use of a binary search algorithm. The following three functions simplify the implementation of those models in the VisionEval model system.  
+
+The 'applyLinearModel' function applies a linear model and optionally adjusts the model to match a target mean value. It has the following arguments:  
+- **Model_ls** A list which contains the following components: 1) Type - which has a value of 'linear'; 2) Formula - a string representation of the model equation; 3) PrepFun - a function which prepares the input data frame for the model application. If no preparation, this element of the list should not be present or should be set equal to NULL; 4) SearchRange - a two-element numeric vector which specifies the acceptable search range to use when determining the dispersion factor. 5) OutFun a function that is applied to transform the results of applying the linear model. For example to untransform a power-transformed variable. If no transformation is necessary, this element of the list should not be present or should be set equal to NULL.  
+- **Data_df** A data frame containing the data required for applying the model.  
+- **TargetMean** A number identifying a target mean value to be achieved or NULL if there is no target.  
+- **CheckTargetSearchRange** A logical identifying whether the function is to only check whether the specified 'SearchRange' for the model will produce acceptable values (i.e. no NA or NaN values). If FALSE (the default), the function will run the model and will not check the target search range.   
+
+It is important to note that the 'Model_ls' argument is a list that must contain the components listed above. Also, the 'CheckTargetSearchRange' argument must NOT be set equal TRUE in the call in the module function. Setting it equal to TRUE is only useful during model estimation to help set the target search range values.  
+
+The function returns a  vector of numeric values for each record of the input data frame if the model is being run, or if the function is run to only check the target search range, a summary of predicted values when the model is run with dispersion set at the high value of the search range.
+
+The 'applyBinomialModel' function applies a binomial model and optionally adjusts the model to match a target proportion. It has the following arguments which are similar to those of the 'applyLinearModel' function:  
+- **Model_ls** A list which contains the following components: 1) Type - which has a value of 'binomial'; 2) Formula - a string representation of the model equation; 3) Choices - a two-element vector listing the choice set. The first element is the choice that the binary logit model equation predicts the odds of; 4) PrepFun - a function which prepares the input data frame for the model application. If no preparation, this element of the list should not be present or should be set equal to NULL; 5) SearchRange - a two-element numeric vector which specifies the acceptable search range to use when determining the factor for adjusting the model constant.  
+- **Data_df** A data frame containing the data required for applying the model.  
+- **TargetProp** A number identifying a target proportion for the default choice to be achieved for the input data or NULL if there is no target proportion to be achieved.  
+- **CheckTargetSearchRange** A logical identifying whether the function is to only check whether the specified 'SearchRange' for the model will produce acceptable values (i.e. no NA or NaN values). If FALSE (the default), the function will run the model and will not check the target search range.  
+
+The function returns a vector of choice values for each record of the input data frame if the model is being run, or if the function is run to only check the target search range, a two-element vector identifying if the search range produces NA or NaN values.  
+
+The third function, 'binarySearch', is called by the 'applyLinearModel' function if the value of the 'TargetMean' argument is not NULL, and called by the 'applyBinomialModel' function if the value of the 'TargetProp' argument is not NULL. Module developers may find this function to be useful in their own module implementation code. The arguments of the function are:  
+- **Function** A function which returns a value which is compared to the Target argument. The function must take as its first argument a value which from the SearchRange_. It must return a value that may be compared to the Target value.  
+- **SearchRange_** A two element numeric vector which has the lowest and highest values of the parameter range within which the search will be carried out.
+- **...** One or more optional arguments for the Function.  
+- **Target** A numeric value that is compared with the return value of the 'Function'.  
+- **MaxIter** An integer specifying the maximum number of iterations for the search to attempt in order to match the 'Target' within the specified 'Tolerance'.  
+- **Tolerance** A numeric value specifying the proportional difference between the 'Target' and the return value of the Function to determine when the search is complete.  
+
+The function returns a value within the 'SearchRange_' for the function parameter which matches the target value.
+
+Developers can refer to the source code for the 'applyLinearModel' and 'applyBinomialModel' functions to help understand how to use this function.
+
+### Appendix A: Example of a Model Run Script  
+```
+
+```
 
 **Figure A2. Example of geography.csv file that specifies Azones and Bzones**   
 ![Azone Bzone](img/azone_bzone_geo_file.png)  
