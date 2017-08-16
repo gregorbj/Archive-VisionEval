@@ -50,7 +50,7 @@ var nodes = new vis.DataSet([
 {"id":49,"label":"item","group":"developer"},
 {"id":50,"label":"items","group":"developer"},
 {"id":51,"label":"processEstimationInputs","group":"developer"},
-{"id":52,"label":"checkModuleOutputs","group":"developer"},
+{"id":52,"label":"checkModuleOutputs","group":"control"},
 {"id":53,"label":"testModule","group":"developer"},
 {"id":54,"label":"parseUnitsSpec","group":"control"},
 {"id":55,"label":"expandSpec","group":"control"},
@@ -65,5 +65,5 @@ var nodes = new vis.DataSet([
 {"id":64,"label":"checkUnits","group":"control"},
 {"id":65,"label":"readVENameRegistry","group":"developer"},
 {"id":66,"label":"getRegisteredGetSpecs","group":"developer"},
-{"id":67,"label":"writeVENameRegistry","group":"developer"}
+{"id":67,"label":"writeVENameRegistry","group":"control"}
 ]);
