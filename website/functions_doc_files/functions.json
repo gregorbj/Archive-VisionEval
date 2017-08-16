@@ -1670,7 +1670,7 @@
         "Description": "A string identifying the path to the directory where the name registry file is located."
       }
     ],
-    "Return": "A list having two components: Inp and Set. Each component is a data frame containing the respective Inp and Set specifications of registered modules.",
+    "Return": "A data frame containing the Get specifications for the identified datasets.",
     "Calls":
     [
     ]
