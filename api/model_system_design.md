@@ -1,6 +1,6 @@
 ## VisionEval Model System Design and Users Guide
 **Brian Gregor, Oregon Systems Analytics LLC**  
-**July 31, 2017**  
+**August 16, 2017**  
 **DRAFT**
 
 
@@ -753,7 +753,7 @@ The 'testModule' function is an essential tool for testing that the module will 
 - Checks whether the outputs of the module are consistent with the module 'Set' specifications.
 
 The function arguments are as follows:
-- **ModuleName A string identifying the module name.  
+- **ModuleName** A string identifying the module name.  
 - **ParamDir** A string identifying the location of the directory where the run parameters, model parameters, and geography definition files are located. The default value is defs. This directory should be located in the tests directory.
 - **RunParamFile** A string identifying the name of the run parameters file. The default value is run_parameters.json.
 - **GeoFile** A string identifying the name of the file which contains geography definitions.
@@ -767,10 +767,21 @@ but will return the list of module specifications. That setting is useful for mo
 If the DoRun argument is TRUE, the module will be run and there will be no return value. If that argument is FALSE, the return value of the function is a list containing the module specifications. That setting is useful for module development in order to create the all the data needed to assist with module programming. It is used in conjunction with the 'getFromDatastore' function to create the dataset that will be provided by the framework. The example module script in Appendix E shows how this aspect of the 'testModule' function can be used by module developers to make the development of their code easier. The function also writes out messages to the console and to the log as the testing proceeds. These messages include the time when each test starts and when it ends. When a key test fails, requiring a fix before other tests can be run, execution stops and an error message is written to the console. Detailed error messages are also written to the log.
 
 ##### 9.2.2. Functions to Assist Specification Writing
-As was explained above in Sections 4.1 and 8.1, the VisionEval model system uses data specifications to 
+As was explained above in Sections 4.1 and 8.1, the VisionEval model system uses data specifications to help assure that modules can work properly with one another. The data specifications are saved as attributes for each dataset that are saved to the datastore by a module. The specifications are checked for consistency for each dataset a module requests to be retrieved from the datastore. A couple of functions assist a module developer with identifying datasets that registered modules produce and for retrieving 'Get' specifications for the datasets the developer's module will use.
 
+The 'readVENameRegistry' function returns a list containing the specifications for all datasets that registered modules save to the datastore. This list contains two components. The components are data frames containing the specifications for all datasets identified in the 'Inp' and 'Set' of registered modules. Each data frame row lists the specifications for a dataset as well as the module which produces the dataset and the package the module is in. This function is useful to developers for:  
+- Avoiding dataset naming conflicts with other modules; and,  
+- Identifying datasets produced by other modules that can be used in module calculations.  
 
-Details for these functions and all of the other functions in the in the software framework are included in the *visioneval* package.  
+At the present time, the 'readVENameRegistry' function has fairly rudimentary functionality. The only argument, 'NameRegistryDir', allows the user to specify the local directory where the name registry is located. In the future, the function will read the registry from the remote repository where VisionEval modules are stored. Also, the function will also be modified to enable the module developer to search for datasets based on keywords, module names, package names, and keywords.
+
+The 'getRegisteredGetSpecs' function helps the module developer to write 'Get' specifications that are consistent with the specifications of registered datasets. This function returns a data frame containing the 'Get' specifications for specified datasets. The function arguments are as follows:  
+- **Names_** A character vector of the dataset names to get specifications for.  
+- **Tables_** A character vector of the tables that the datasets are a part of.  
+- **Groups_** A character vector of the groups that the tables are a part of.  
+- **NameRegistryDir** A string identifying the path to the directory where the name registry file is located.  
+
+At the present time, the function returns a data frame which contains the 'Get' specifications for each requested dataset. It is up to the module developer to put the information into the proper form in the module script. In the future, the function will be modified to return the 'Get' specifications in list form that may be copied into a module script.  
 
 ### Appendix A: geography.csv file examples  
 **Figure A1. Example of geography.csv file that only specifies Azones**  
