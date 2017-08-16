@@ -96,8 +96,8 @@ The framework software itself is also designed to minimize side effects in order
 A third key characteristic of some functional programming languages is the extensive use of data typing. While compiled languages in general use data typing to check the properness of functions and expressions when a program is compiled, some functional programming languages like Haskell and Elm make extensive use of defining and checking different data types for function inputs and outputs. They also include a type notation system for documenting functions. This makes it easier to check and understand the code. An analogous approach is used in the VisionEval system design. Each module includes specifications for all data that it consumes and all data that it produces. This enables the framework software to check that modules will work properly together and enables a model to be checked thoroughly before it is run so to eliminate run time errors. It also clearly documents to others what data the module uses and what it produces.
 
 #### 4.2 Use of the R Software Environment to Implement the Model System
-The VisionEval model system is built in the R programming language for statistical computing and graphics. R is an open-source variant of the S programming language developed at Bell Labs that is more functional in nature than S. Although R was primarily developed to be an interactive programming environment for data analysis, the language has a full set of features that enables it to be used for all steps in the modeling process from data preparation and cleaning through model implementation and output visualization. The language is augmented by thousands of packages supporting data analysis, programming, and visualization. The interactive nature of the language, range of capabilities, and large number of supporting packages enabled the the GreenSTEP model to be developed in an agile manner in a relatively short period of time. At the time, no other programming language had this range of capabilities (although now Python does). The VisionEval model system uses the R language for the following reasons:   
-1) The existing code base for the GreenSTEP model and related models is written in R. Writing the VisionEval software framework in R enables this code base to be moved to the new framework with much less effort than would be required otherwise.  
+The VisionEval model system is built in the R programming language for statistical computing and graphics. R is an open-source variant of the S programming language developed at Bell Labs but is more functional in nature than S. Although R was primarily developed to be an interactive programming environment for data analysis, the language has a full set of features that enables it to be used for all steps in the modeling process from data preparation and cleaning through model implementation and output visualization. The language is augmented by thousands of packages supporting data analysis, programming, and visualization. The interactive nature of the language, range of capabilities, and large number of supporting packages enabled the the GreenSTEP model to be developed in an agile manner in a relatively short period of time. At the time, no other programming language had this range of capabilities and the large number of supporting packages. The VisionEval model system uses the R language for the following reasons:   
+1) The existing code base for the GreenSTEP model and related models is written in R. Writing the VisionEval software framework in R enables this code base to be moved to the new framework with much less effort than would be required if it had to be rewritten in another programming language.  
 2) R is open-source software that is available on all major operating systems so the model system will be operating system independent.
 3) R has a very good and well tested package system for packaging modules that is well supported with documentation and build tools. The package system and development tools also include easy-to-use capabilities for documentation, including literate programming. This simplifies the development of the software framework and simplifies the process for module developers to produce complete and well documented modules.  
 4) R has the most extensive set of statistical and other data analysis packages available. Because of this, almost any type of model can be estimated using R and therefore, modules can contain not only full documentation of model estimation, but also scripts that allow model estimation to be replicated and rerun using regional data.  
@@ -107,7 +107,7 @@ The VisionEval model system is built in the R programming language for statistic
 
 ### 5. Model System Layers
 The VisionEval model system is composed of 3 layers:  
-1) **Model**: The model layer defines the structure of the model and organizes all of the modules into a coherent model. The model layer includes a module run script, model definition files, model input files, and common datastore.  
+1) **Model**: The model layer defines the structure of the model and organizes all of the modules into a coherent model. The model layer includes a module run script, model definition files, model input files, and common datastore.   
 2) **Modules**: The module layer is the core of a model. Modules contain all of the code and parameters to implement submodels which are the building blocks of models.  
 3) **Software Framework**: The software framework layer provides the functionality for controlling a model run, running modules, and interacting with the common datastore.   
 These layers are illustrated in Figure 1. Following sections describe the design and specifications for each layer.
@@ -209,7 +209,7 @@ The "defs" directory contains all of the definition files needed to support the 
 
 The "run_parameters.json" file contains parameters that define key attributes of the model run and relationships to other model runs. The file is a [JSON-formatted](http://www.json.org/) text file. The JSON format is used for several reasons. First, it provides much flexibility in how parameters may be structured. For example a parameter could be a single value or an array of values. Second, the JSON format is well documented and is very easy to learn how to use. It uses standard punctuation for formatting and, unlike XML, doesn't require learning a [markup language](https://en.wikipedia.org/wiki/Markup_language). Third, files are ordinary text files that can be easily read and edited by a number of different text editors available on all major operating systems. There are also a number of commercial and open source tools that simplify the process of editing and checking JSON-formatted files.  
 
-The "parameters.json" file specifies the following parameters:  
+The "run_parameters.json" file specifies the following parameters:  
 
 - **Model** The name of the model. Example: "Oregon-GreenSTEP".  
 
@@ -670,90 +670,104 @@ There is no limit to the number of vignettes that are included in a package, and
 The 'data' and 'man' directories and the files within them are created automatically when a package is built (i.e. when the sources are compiled into a version that can be used by the R language environment). The 'data' directory contains R binary files for all of the module parameters and specifications. These are created by the save commands in the module scripts. The 'man' directory contains the documentation files for the functions and data that are defined by the module scripts. These documentation files are created from the documentation annotations (in Roxygen format) included in the module scripts.
 
 ### 9. Software Framework 
+The software framework for the VisionEval model system is implemented by a set of functions contained in the **visioneval** package. The package contains contains standard documentation for all of the functions. Additional documentation which shows the calling relationships between functions is available in a [interactive visualization](https://gregorbj.github.io/VisionEval/website/visioneval_functions.html) in the project repository. This visualization shows the names of the functions as nodes in a network graph with arrows connecting the nodes showing the functions that are called by each function (arrows point from the calling function to the called function). The nodes are colored to show different types of functionality. Functions that are used to create models from modules are colored blue. There are three such functions. Functions that are used in the creation of modules are colored green. There are a dozen of these functions. There are several dozen functions which manage various aspects of the software frame and interactions with the datastore. The latter functions are colored red and the rest are colored yellow. These functions are not intended to be used by module developers or model users. Clicking on a function in the visualization highlights the function and all the arrows connected to it. It also provides summary information about the function including a description of what it does, descriptions of all the function arguments, and a description of the function's return value. Sections 9.1 and 9.2 describe the functions that are the applications programming interfaces (API) for model users and module developers respectively. Readers should refer to the visualization and documentation in the visioneval package if the desire to learn more about functions that are not part of the API.
 
-The software framework for the VisionEval model system is implemented by a set of functions contained in the **visioneval** package. Although several dozen functions are included in the package, model users and module developers only need to use a small number of them. A visual overview of the functiononly two need to be used in the 'run_model.R' script: 'initializeModel', and 'runModule'.
+#### 9.1. API for Model Users  
+Three functions are part of the API for model users: 'initializeModel', 'runModule', and 'getYears'. These are explained below in turn.
 
 The 'initializeModel' function prepares the model for running modules. This includes:  
 1) Creating the "ModelState.Rda" file that contains global parameters for the model run and variables used to keep track of the state of the datastore and other aspects of the model run (Section 6.6);  
-2) Creating a log file that is used to record model status messages such as warning and error messages;
-3) Creating and initializing the model datastore;
-4) Processing the model geography definition file and setting up the appropriate geographic tables in the datastore;
-5) Checking whether all the specified module packages are installed and that all module specifications are correct;
-6) Parsing the "run_model.R" script and simulating the model run to confirm that the datastore will contain the data that each module needs when it is called and that the data specifications are consistent with the module 'Get' specifications;
-7) Checking whether all the scenario input files identified by the specified modules are present, and that the data are consistent with specifications; and,
+2) Creating a log file that is used to record model status messages such as warning and error messages;  
+3) Creating and initializing the model datastore;  
+4) Processing the model geography definition file and setting up the appropriate geographic tables in the datastore;  
+5) Checking whether all the specified module packages are installed and that all module specifications are correct;  
+6) Parsing the "run_model.R" script and simulating the model run to confirm that the datastore will contain the data that each module needs when it is called and that the data specifications are consistent with the module 'Get' specifications;  
+7) Checking whether all the scenario input files identified by the specified modules are present, and that the data are consistent with specifications; and,  
 8) Loading all the data in the input files into the datastore.
 
-If any error in the model setup or run script are found
+If any errors are found during the model initialization process, an error message will be displayed in the console and the initialization process will terminate. Detailed error messages in the log will identify the specific causes of errors. If the initialization proceeds without errors, the user can be assured that the model will run without errors. Following is a typical 'initializeModel' function call in a model run script.  
 
-
-The file that is created in the first step is named **ModelState.Rda**. The file contains a list that is used by the model run script and various framework functions. The components of the list and a summary of how they are used is as follows:  
-- **BaseYear**:  
-A string value identifying the base year for the model (e.g. "2010"). This is used by modules that calculate future values as a function of changes from base year values.  
-- **BzoneSpecified**:  
-A logical value identifying whether Bzones have been specified in the geographic definitions file. This is used by functions that validate geographic specifications.
-- **CzoneSpecified**:  
-A logical value identifying whether Czones have been specified in the geographic definitions file. This is used by functions that validate geographic specifications.
-- **Datastore**:  
-A data frame containing the status of the datastore (identifying, tables, datasets, and dataset attributes). This inventory of the datastore status is updated every time the datastore is modified by adding a group or a dataset. It is used by functions that check whether the data needed by a module are present and meet specifications.  
-- **Description**:  
-A string containing a description of the scenario. This is used to annotate data summaries that are tabulated from the datastore.  
-- **Geo_df**:  
-A data frame containing the contents of the "geography.csv" file. This is used set up geographic tables in the datastore.  
-- **LogFile**:  
-A string containing the name of the log file for the model run. This is used by the logging function to identify the file that is to be written to.         
-- **Scenario**:  
-A string identifying the name of the scenario. This is used to annotate data summaries that are tabulated from the datastore.  
-- **Years**:  
-A string vector identifying the 'forecast' years that the model will be run for. This is used to control the model run and to check whether input files are complete.    
-
-The *initializeModel* function is invoked as follows:
-```
-initializeModel(Dir = "defs", ParamFile = "parameters.json", GeoFile = "geo.csv")
-```
-where the function arguments are:  
-- **Dir** which identifies the directory where model parameters are located. The default location is "defs".  
-- **ParamFile** which identifies the name of the file that contains global parameters. The default name is "parameters.json".  
-- **GeoFile** which identifies the name of the file that contains the geographic relationships. The default name is "geo.csv".  
-
-Complete documentation of the *initializeModel* function is include in the *visioneval* package.
-
-As the name suggests, the *runModule* function runs a module. It is invoked as follows:  
-```
-runModule(ModuleName, PackageName, Year, IgnoreInp_ = NULL, IgnoreSet_ = NULL)
 ```  
-where the function arguments are:  
-- **ModuleName** is the name of the module provided as a character string (e.g. "CreateHouseholds").  
-- **PackageName** is the name of the package where the module is situated provided as a character string (e.g. "vedemo1").  
-- **Year** is the 'forecast' year provided as a character string (e.g. "2010").  
-- **IgnoreInp_** is a character vector of the names of specified scenario inputs to be ignored (i.e. not loaded). The default value is NULL. This is described in more detail below.  
-- **IgnoreSet_** is a character vector of the names of specified scenario outputs to be ignored (i.e. not saved to datastore). The default value is NULL. This is described in more detail below.
+initializeModel(
+  ParamDir = "defs",
+  RunParamFile = "run_parameters.json",
+  GeoFile = "geo.csv",
+  ModelParamFile = "model_parameters.json",
+  LoadDatastore = FALSE,
+  DatastoreName = NULL,
+  SaveDatastore = TRUE
+  )
+```    
 
-The *IgnoreInp_* and *IgnoreSet_* parameters are advanced features that will not be used in most instances. What these functions enable advanced users to do is substitute outputs from other modules for specified inputs and/or outputs of the subject module. If other module outputs are substituted, it is necessary to suppress the redundant inputs and/or outputs of the subject module. *IgnoreInp_* allows users to specify fields in scenario input files that are not to be loaded in the datastore. The reason for this capability is that a user may want to substitute the outputs of another module for scenario inputs that are specified by the subject module. As an example, a module might be run that assigns households in a metropolitan area to dwelling units of different types (e.g. single family, multifamily). This module might require users to provide as scenario inputs, the number of dwelling units of each type in each Bzone. A model user may instead want to use another module which forecasts the dwelling unit supply by Bzone to provide this information. In that case, the user would want to suppress the loading of the input data. Users should not use this feature unless they thoroughly understand the workings of the subject module because substitutions might not be consistent with the theory, design, and/or estimation procedures of the subject module.    
+The function arguments and their meanings are as follows:  
+- **ParamDir** A string identifying the relative or absolute path to the directory where the parameter and geography definition files are located. The default value is "defs".  
+- **RunParamFile** A string identifying the name of a JSON-formatted text file that contains parameters needed to identify and manage the model run. The default value is "run_parameters.json".  
+- **GeoFile** A string identifying the name of a text file in comma-separated values format that contains the geographic specifications for the model. The default value is "geo.csv".  
+- **ModelParamFile** A string identifying the name of a JSON-formatted text file that contains global model parameters that are important to a model and may be shared by several modules.  
+- **LoadDatastore** A logical identifying whether an existing datastore should be loaded.  
+- **DatastoreName** A string identifying the full path name of a datastore to load or NULL if an existing datastore in the working directory is to be loaded.  
+- **SaveDatastore** A string identifying whether if an existing datastore in the working directory should be saved rather than removed.  
 
-The *runModule* function runs the named module within the *runModule* function environment. This is a significant improvement over how functions that implement the submodels in the current GreenSTEP (RSPM, EERPAT, RPAT) are run. In these models, functions are run in the the global environment. As a consequence, the global environment collects objects that increase the potential for name conflicts if care is not taken to keep it clean. By running modules within the *runModule* function environment, no changes are made to the global environment and all objects that are created in the process vanish when the *runModule* function completes the work of running the module.    
+As the name suggests, the 'runModule' function runs a module. Following is an example of how it is invoked:  
+```
+runModule(ModuleName = "CreateHouseholds", 
+          PackageName = "VESimHouseholds",
+          RunFor = "AllYears",
+          RunYear = Year)
+```  
 
-The *runModule* function does the following things when running a module:  
-1) Loads the namespace for the package.  
-2) Assigns the main module function to a local function that the *runModule* function will call to carry out the module calculations. As a result of how R manages namespaces, the namespace of the local function is the module package so it will operate just like the main module function.  
-3) Assigns the module specifications list to a local list.  
-4) Processes all of the scenario inputs specified in the module specifications, adding them to the datastore.  
-5) If the *RunBy* specification is not "Region", it calculates indices that will be used to read and write data by geographic area. 
-6) The data specified in the *Get* specifications for the module are read and combined into a list (L).  
-7) The local copy of the main module function is called with the input list (L) as the argument. The return value of the function is assigned to a list (R).  
-8) Writes data from the outputs list (R) to the datastore according to the module's *Set* specifications.
-9) Unloads the namespace for the package.
+The function arguments and their meanings are as follows:  
+- **ModuleName** A string identifying the name of a module object.  
+- **PackageName** A string identifying the name of the package the module is a part of.  
+- **RunFor** A string identifying whether to run the module for all years (AllYears), only the base year (BaseYear), or for all years except the base year (NotBaseYear).
+- **RunYear** A string identifying the run year.
 
-While model builders only need to be familiar with the *initializeModel* and *runModule* functions, module developers need to use a few additional framework functions. These include:  
-- **items** & **item**  
-These functions are aliases for the R *list* function that improve the readability of specifications lists.  
-- **writeLog**  
-This function can be used to write a message to the log file.  
-- **processEstimationInputs**  
-This function is used to check and load data files that are used in the estimation of submodel parameters.  
-- **testModule**  
-This function is used in the package test script, *tests.R*, to run a module and check whether the results match specifications. It returns the results and a list of errors.  
-- **hasErrors**  
-This function is used to print out a message that list all of the module errors that are found through the application of the *testModule* function.
+The *runModule* function runs the named module within the *runModule* function environment. This is a significant improvement over how functions that implement the submodels in the current GreenSTEP (RSPM, EERPAT, RPAT) are run. In these models, functions are run in the the global environment. As a consequence, the global environment collects objects that increase the potential for name conflicts if care is not taken to keep it clean. By running modules within the *runModule* function environment, no changes are made to the global environment and all objects that are created in the process vanish when the *runModule* function completes the work of running the module.   
+
+Modules can be run for multiple years by running them in a loop which iterates through all of the years identified in the 
+'Years' parameter specified in the "run_parameters.json" file (Section 6.1). Section 5 shows an example of using such a loop. Rather than hard code the model run years in the loop, the user can use the 'getYears' function to query and return the vector of years.
+
+#### 9.2. API for Module Developers
+The VisionEval API for module developers currently includes 10 functions. These are presented below in 3 groups:  
+- Key module script functions;  
+- Functions to help developers write specifications that are consistent with other modules; and,  
+- Functions that developers may use to simplify model implementation.  
+
+##### 9.2.1. Key Module Script Functions  
+Four functions are almost always used in module scripts.
+
+Module specifications are written as nested R lists that are structured in a particular way (Section 8). Rather than use the 'list' function to define the list structure, two alias functions - 'item' and 'items' - are used to define the structure. An example of how these functions are used is shown in Appendix E. Although modules will run if the 'list' function is used instead, it is highly recommended that 'item' and 'items' be used to maintain a consistent style for all modules.
+
+The 'processEstimationInputs' function must be used if a module includes procedures for estimating model parameter(s) from regional data (Section 8). This function is used to check that the data supplied to calculate the regional parameter(s) are consistent with specifications. The function arguments are as follows:  
+- **Inp_ls** A list that describes the specifications for the estimation file. This list must meet the framework standards for specification description.  
+- **FileName** A string identifying the file name. This is the file name without any path information. The file must located in the "inst/extdata" directory of the package.  
+- **ModuleName** A string identifying the name of the module the estimation data is being used in.
+
+The function returns a data frame containing the estimation inputs if all the supplied specifications are met. If any of the specifications are not met, an error is thrown and details regarding the specification error(s) are written to the console.
+
+The 'testModule' function is an essential tool for testing that the module will work correctly in the VisionEval model system. The test module function tests a module with a test setup that mimics a model run. A test datastore needs to be present unless no data from other modules is needed (i.e. all data used by the module is supplied by input data). All inputs required by the module must be present, and all the standard model definitions files included in the "defs" directory (Section 6.1) must be present as well. When this function is invoked, the following tests are done on a module:  
+- Checks whether module specifications are proper;  
+- Checks whether test module inputs are consistent with the module 'Inp' specifications and that they can be loaded into a test datastore;  
+- Checks whether the test datastore with the loaded inputs contains all the data needed for the module to run;
+- Checks whether the module will run without error; and,  
+- Checks whether the outputs of the module are consistent with the module 'Set' specifications.
+
+The function arguments are as follows:
+- **ModuleName A string identifying the module name.  
+- **ParamDir** A string identifying the location of the directory where the run parameters, model parameters, and geography definition files are located. The default value is defs. This directory should be located in the tests directory.
+- **RunParamFile** A string identifying the name of the run parameters file. The default value is run_parameters.json.
+- **GeoFile** A string identifying the name of the file which contains geography definitions.
+- **ModelParamFile** A string identifying the name of the file which contains model parameters. The default value is model_parameters.json.
+- **LoadDatastore** A logical value identifying whether to load an existing datastore. If TRUE, it loads the datastore whose name is identified in the run_parameters.json file. If FALSE it initializes a new datastore.
+- **SaveDatastore** A logical value identifying whether the module outputs will be written to the datastore. If TRUE the module outputs are written to the datastore. If FALSE the outputs are not written to the datastore.
+- **DoRun** A logical value identifying whether the module should be run. If FALSE, the function will initialize a datastore, check specifications, and load inputs but will not run the module. If TRUE, the module will be run and results will be checked for consistency with the module's 'Set' specifications.
+
+but will return the list of module specifications. That setting is useful for module development in order to create the all the data needed to assist with module programming. It is used in conjunction with the getFromDatastore function to create the dataset that will be provided by the framework. The default value for this parameter is TRUE. In that case, the module will be run and the results will checked for consistency with the Set specifications.
+
+If the DoRun argument is TRUE, the module will be run and there will be no return value. If that argument is FALSE, the return value of the function is a list containing the module specifications. That setting is useful for module development in order to create the all the data needed to assist with module programming. It is used in conjunction with the 'getFromDatastore' function to create the dataset that will be provided by the framework. The example module script in Appendix E shows how this aspect of the 'testModule' function can be used by module developers to make the development of their code easier. The function also writes out messages to the console and to the log as the testing proceeds. These messages include the time when each test starts and when it ends. When a key test fails, requiring a fix before other tests can be run, execution stops and an error message is written to the console. Detailed error messages are also written to the log.
+
+##### 9.2.2. Functions to Assist Specification Writing
+As was explained above in Sections 4.1 and 8.1, the VisionEval model system uses data specifications to 
 
 
 Details for these functions and all of the other functions in the in the software framework are included in the *visioneval* package.  
