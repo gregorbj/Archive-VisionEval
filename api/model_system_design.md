@@ -818,215 +818,401 @@ The function returns a value within the 'SearchRange_' for the function paramete
 
 Developers can refer to the source code for the 'applyLinearModel' and 'applyBinomialModel' functions to help understand how to use this function.
 
-### Appendix A: Example of a Model Run Script  
+### Appendix A: Example Model Run Script  
 ```
+#===========
+#run_model.R
+#===========
 
-```
+#This script demonstrates the VisionEval framework for the RSPM model.
+
+#Load libraries
+#--------------
+library(visioneval)
+
+#Initialize model
+#----------------
+initializeModel(
+  ParamDir = "defs",
+  RunParamFile = "run_parameters.json",
+  GeoFile = "geo.csv",
+  ModelParamFile = "model_parameters.json",
+  LoadDatastore = FALSE,
+  DatastoreName = NULL,
+  SaveDatastore = TRUE
+  )  
+
+#Run all demo module for all years
+#---------------------------------
+for(Year in getYears()) {
+  runModule(ModuleName = "CreateHouseholds", 
+            PackageName = "VESimHouseholds",
+            RunFor = "AllYears",
+            RunYear = Year)
+  runModule(ModuleName = "PredictWorkers", 
+            PackageName = "VESimHouseholds",
+            RunFor = "AllYears",
+            RunYear = Year)
+  runModule(ModuleName = "AssignLifeCycle", 
+            PackageName = "VESimHouseholds",
+            RunFor = "AllYears",
+            RunYear = Year)
+  runModule(ModuleName = "PredictIncome", 
+            PackageName = "VESimHouseholds",
+            RunFor = "AllYears",
+            RunYear = Year)
+  runModule(ModuleName = "PredictHousing", 
+            PackageName = "VESimHouseholds",
+            RunFor = "AllYears",
+            RunYear = Year)
+  runModule(ModuleName = "LocateHouseholds",
+            PackageName = "VELandUse",
+            RunFor = "AllYears",
+            RunYear = Year)
+  runModule(ModuleName = "LocateEmployment",
+            PackageName = "VELandUse",
+            RunFor = "AllYears",
+            RunYear = Year)
+  runModule(ModuleName = "AssignDevTypes",
+            PackageName = "VELandUse",
+            RunFor = "AllYears",
+            RunYear = Year)
+  runModule(ModuleName = "Calculate4DMeasures",
+            PackageName = "VELandUse",
+            RunFor = "AllYears",
+            RunYear = Year)
+  runModule(ModuleName = "CalculateUrbanMixMeasure",
+            PackageName = "VELandUse",
+            RunFor = "AllYears",
+            RunYear = Year)
+  runModule(ModuleName = "AssignTransitService",
+            PackageName = "VETransportSupply",
+            RunFor = "AllYears",
+            RunYear = Year)
+  runModule(ModuleName = "AssignRoadMiles",
+            PackageName = "VETransportSupply",
+            RunFor = "AllYears",
+            RunYear = Year)
+  runModule(ModuleName = "AssignVehicleOwnership",
+            PackageName = "VEVehicleOwnership",
+            RunFor = "AllYears",
+            RunYear = Year)
+  runModule(ModuleName = "CalculateHouseholdDVMT",
+            PackageName = "VETravelDemand",
+            RunFor = "AllYears",
+            RunYear = Year)
+  runModule(ModuleName = "CalculateAltModeTrips",
+            PackageName = "VETravelDemand",
+            RunFor = "AllYears",
+            RunYear = Year)
+}
+```  
+
+### Appendix B: Geography Specification File (geography.csv) Examples  
+**Figure A1. Example of a geography.csv file that only specifies Azones**  
+![Azone](img/azone_geo_file.png)  
 
 **Figure A2. Example of geography.csv file that specifies Azones and Bzones**   
 ![Azone Bzone](img/azone_bzone_geo_file.png)  
 
-### Appendix B: scenario input file examples  
-**Figure B1. Example of input file to be loaded into 'Global' group** 
-*NOTE: Heavy lines denote rows that are hidden to shorten the display*
+### Appendix C: Recognized Data Types and Units  
+Recognized Data Types and Units are defined in the 'Types' function. The definition also includes the factors for converting between units. This function definition is listed below:
+
+```
+function(){
+  list(
+    double = list(units = NA, mode = "double"),
+    integer = list(units = NA, mode = "integer"),
+    character = list(units = NA, mode = "character"),
+    logical = list(units = NA, mode = "logical"),
+    compound = list(units = NA, mode = "double"),
+    currency = list(
+      units = list(
+        USD = c(USD = 1)
+        ),
+      mode = "double"),
+    distance = list(
+      units = list(
+        MI = c(MI = 1, FT = 5280, KM = 1.60934, M = 1609.34),
+        FT = c(MI = 0.000189394, FT = 1, KM = 0.0003048, M = 0.3048),
+        KM = c(MI = 0.621371, FT = 3280.84, KM = 1, M = 1000),
+        M = c(MI = 0.000621371, FT = 3.28084, KM = 0.001, M = 1)),
+      mode = "double"),
+    area = list(
+      units = list(
+        SQMI = c(SQMI = 1, ACRE = 640, SQFT = 2.788e+7, SQM = 2.59e+6, HA = 258.999, SQKM = 2.58999 ),
+        ACRE = c(SQMI = 0.0015625, ACRE = 1, SQFT = 43560, SQM = 4046.86, HA = 0.404686, SQKM = 0.00404686),
+        SQFT = c(SQMI = 3.587e-8, ACRE = 2.2957e-5, SQFT = 1, SQM = 0.092903, HA = 9.2903e-6, SQKM = 9.2903e-8),
+        SQM = c(SQMI = 3.861e-7, ACRE = 0.000247105, SQFT = 10.7639, SQM = 1, HA = 1e-4, SQKM = 1e-6),
+        HA = c(SQMI = 0.00386102, ACRE = 2.47105, SQFT = 107639, SQM = 0.00386102, HA = 1, SQKM = 0.01),
+        SQKM = c(SQMI = 0.386102, ACRE = 247.105, SQFT = 1.076e+7, SQM = 1e+6, HA = 100, SQKM = 1)),
+      mode = "double"
+    ),
+    mass = list(
+      units = list(
+        LB = c(LB = 1, TON = 0.0005, MT = 0.000453592, KG = 0.453592, GM = 453.592),
+        TON = c(LB = 2000, TON = 1, MT = 0.907185, KG = 907.185, GM = 907185),
+        MT = c(LB = 2204.62, TON = 1.10231, MT = 1, KG = 1000, M = 1e+6),
+        KG = c(LB = 2.20462, TON = 0.00110231, MT = 0.001, KG = 1, GM = 1000),
+        GM = c(LB = 0.00220462, TON = 1.1023e-6, MT = 1e-6, KG = 0.001, GM = 1)),
+      mode = "double"
+    ),
+    volume = list(
+      units = list(
+        GAL = c(GAL = 1, L = 3.78541),
+        L = c(GAL = 0.264172, L = 1)),
+      mode = "double"
+    ),
+    time = list(
+      units = list(
+        YR = c(YR = 1, DAY = 365, HR = 8760, MIN = 525600, SEC = 3.154e+7),
+        DAY = c(YR = 0.00273973, DAY = 1, HR = 24, MIN = 1440, SEC = 86400),
+        HR = c(YR = 0.000114155, DAY = 0.0416667, HR = 1, MIN = 60, SEC = 3600),
+        MIN = c(YR = 1.9026e-6, DAY = 0.000694444, HR = 0.0166667, MIN = 1, SEC = 60),
+        SEC = c(YR = 3.171e-8, DAY = 1.1574e-5, HR = 0.000277778, MIN = 0.0166667, SEC = 1)),
+      mode = "double"
+    ),
+    people = list(
+      units = list(
+        PRSN = c(PRSN = 1)
+      ),
+      mode = "integer"
+    ),
+    vehicles = list(
+      units = list(
+        VEH = c(VEH = 1)
+      ),
+      mode = "integer"
+    ),
+    trips = list(
+      units = list(
+        TRIP = c(TRIP = 1)
+      ),
+      mode = "integer"
+    ),
+    households = list(
+      units = list(
+        HH = c(HH = 1)
+      ),
+      mode = "integer"
+    ),
+    employment = list(
+      units = list(
+        JOB = c(JOB = 1)
+      ),
+      mode = "integer"
+    ),
+    activity = list(
+      units = list(
+        HHJOB = c(HHJOB = 1)
+      )
+    )
+  )
+```  
+
+### Appendix D: Scenario Input File Examples  
+**Figure B1. Example of input file to be loaded into 'Global' group**  
+*NOTE: Heavy lines denote rows that are hidden to shorten the display*  
 ![Global Input](img/global_input_file.png)  
 
 **Figure B2. Example of input file to be loaded into 'forecast year' group**  
 ![Forecast Year Input](img/forecast_year_input_file.png)  
 
-### Appendix C: example module script from vedemo1 package  
+### Appendix E: Example Module Script from the VESimHouseholds Package
 ```
 #==================
 #CreateHouseholds.R
 #==================
+#This module creates simulated households for a model using inputs of population
+#by age group for each Azone and year.
 
-#This demonstration module creates simulated households for a model where
-#geography is minimally specified, i.e. where only Azones and Mareas are
-#specified. Simulated households are created using a household size distribution
-#for the model area and Azone populations. The module creates a dataset of
-#household sizes. A 'Households' table is initialized and populated with the
-#household size dataset. Azone locations and household IDs are also added to the
-#Household table.
+# Copyright [2017] [AASHTO]
+# Based in part on works previously copyrighted by the Oregon Department of
+# Transportation and made available under the Apache License, Version 2.0 and
+# compatible open-source licenses.
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 library(visioneval)
-
 
 #=============================================
 #SECTION 1: ESTIMATE AND SAVE MODEL PARAMETERS
 #=============================================
-#Functions and statements in this section of the script define all of the
-#parameters used by the module. Parameters are module inputs that are constant
-#for all model runs. Parameters can be put in whatever form that the module
-#developer determines works best (e.g. vector, matrix, array, data frame, list,
-#etc.). Parameters may be defined in several ways including: 1. By statements
-#included in this section (e.g. HhSize <- 2.5); 2. By reading in a data file
-#from the "inst/extdata" directory; and, 3. By applying a function which
-#estimates the parameters using data in the "inst/extdata" directory.
-
-#Each parameter object is saved so that it will be in the namespace of module
-#functions. Parameter objects are exported to make it easier for users to
-#inspect the parameters being used by a module. Every parameter object must
-#also be documented properly (using roxygen2 format). The code below shows
-#how to document and save a parameter object.
-
-#This module demo shows how a function can be used to estimate parameters. When
-#this approach is used, all input data for parameter estimation must be placed
-#in the "inst/extdata" directory of the package. The function is written to load
-#the data into a suitable data structure that is then used to estimate the
-#needed parameters. This approach enables model builders to substitute regional
-#data for the default data that comes with the package. The source of the
-#default data is documented in the "inst/extdata" directory. The module vignette
-#describes how regional data can be substituted for default data. When the
-#package is built, the module will include regionally estimated parameters. The
-#example below is a trivial one which reads in a file of numbers of households
-#by household size and calculates he proportions of households by household
-#size. Most of the function is error checking. Functions that calculate
-#parameters should not be exported.
-
-#Describe specifications for data that is to be used in estimating parameters
-#----------------------------------------------------------------------------
-#Household size data
-HouseholdSizesInp_ls <- items(
-  item(
-    NAME = "Size",
-    TYPE = "integer",
-    PROHIBIT = c("NA", "<= 0", "> 7"),
-    ISELEMENTOF = "",
-    UNLIKELY = "",
-    TOTAL = NA
-  ),
-  item(
-    NAME = "Number",
-    TYPE = "integer",
-    PROHIBIT = c("NA", "< 0"),
-    ISELEMENTOF = "",
-    UNLIKELY = "",
-    TOTAL = NA
-  )
-)
+#This model has just one parameter object, a matrix of the probability that a
+#person in each age group is in one of several hundred household types.
+#Each household type is denoted by the number of persons in each age group in
+#the household. The rows of the matrix correspond to the household types.
+#The columns of the matrix correspond to the 6 age groups. Each column of the
+#matrix sums to 1. The process selects the most frequently observed households.
+#The default is to select the most frequent households which account for 99% of
+#all households.
 
 #Define a function to estimate household size proportion parameters
 #------------------------------------------------------------------
 #' Calculate proportions of households by household size
 #'
-#' \code{calcHhSizeProp} calculates the proportions of households by household
-#' size from the number of households by household size.
+#' \code{calcHhAgeTypes} creates a matrix of household types and age
+#' probabilities.
 #'
-#' This function produces a data frame listing the proportions of households
-#' by household size from a data frame that lists the numbers of households by
-#' household size. The rows of the data frame are put in order of ascending
-#' household size.
+#' This function produces a matrix of probabilities that a person in one of six
+#' age groups is in one of many household types where each household type is
+#' determined by the number of persons in each age category.
 #'
-#' @param HouseholdSizesInp_ls A list containing the specifications for
-#' the estimation data contained in "household_sizes.csv".
-#' @return A data frame having two columns names "Size" and "Proportion" that
-#' contains data on the proportions of households in households having sizes
-#' between 1 and 7 persons per household.
-calcHhSizeProp <- function(Inp_ls = HouseholdSizesInp_ls) {
-  #Check and load household size estimation data
-  HhSizes_df <- processEstimationInputs(Inp_ls,
-                                        "household_sizes.csv",
-                                        "CreateHouseholds")
-  #Put the rows in order of household size
-  HhSizes_df <- HhSizes_df[order(HhSizes_df$Size),]
-  #Calculate proportions of households by size
-  Proportion <- HhSizes_df$Number / sum(HhSizes_df$Number)
-  #Return a data frame containing household size proportions
-  data.frame(Size = HhSizes_df$Size, Proportion = Proportion)
+#' @param Threshold A number between 0 and 1 identifying the percentile
+#' cutoff for determining the most prevalent households.
+#' @return A matrix where the rows are the household types and the columns are
+#' the age categories and the values are the number of persons.
+#' @export
+calcHhAgeTypes <- function(Threshold = 0.99) {
+  load("data/Hh_df.rda")
+  Hh_df <- Hh_df[Hh_df$HhType == "Reg",]
+  Ag <-
+    c("Age0to14",
+      "Age15to19",
+      "Age20to29",
+      "Age30to54",
+      "Age55to64",
+      "Age65Plus")
+  #Create vector of household type names
+  HhType_ <-
+    apply(Hh_df[, Ag], 1, function(x)
+      paste(x, collapse = "-"))
+  #Expand the HH types using HH weights and select most prevalent households
+  ExpHhType_ <- rep(HhType_, Hh_df$HhWeight)
+  #Define function to identify most prevalent households
+  idMostPrevalent <- function(Types_, Cutoff) {
+    TypeTab_ <- rev(sort(tapply(Types_, Types_, length)))
+    TypeProp_ <- cumsum(TypeTab_ / sum(TypeTab_))
+    names(TypeProp_[TypeProp_ <= Cutoff])
+  }
+  #Select most prevalent households
+  SelHhTypes_ <- idMostPrevalent(ExpHhType_, Threshold)
+  SelHh_df <- Hh_df[HhType_ %in% SelHhTypes_, ]
+  SelHhType_ <-
+    apply(SelHh_df[, Ag], 1, function(x)
+      paste(x, collapse = "-"))
+  #Apply household weights to persons by age
+  WtHhPop_df <- sweep(SelHh_df[, Ag], 1, SelHh_df$HhWeight, "*")
+  #Tabulate persons by age group by household type
+  AgeTab_ls <- lapply(WtHhPop_df, function(x) {
+    tapply(x, SelHhType_, function(x)
+      sum(as.numeric(x)))
+  })
+  AgeTab_HtAp <- do.call(cbind, AgeTab_ls)
+  #Calculate and return matrix of probabilities
+  sweep(AgeTab_HtAp, 2, colSums(AgeTab_HtAp), "/")
 }
 
 #Create and save household size proportions parameters
 #-----------------------------------------------------
-HhSizeProp_df = calcHhSizeProp()
+HtProb_HtAp <- calcHhAgeTypes()
 #' Household size proportions
 #'
 #' A dataset containing the proportions of households by household size.
 #'
-#' @format A data frame with 7 rows and 2 variables:
-#' \describe{
-#'  \item{Size}{household size}
-#'  \item{Proportion}{proportion of households in household size category}
-#' }
+#' @format A matrix having 950 rows (for Oregon data) and 6 colums:
 #' @source CreateHouseholds.R script.
-"HhSizeProp_df"
-devtools::use_data(HhSizeProp_df, overwrite = TRUE)
+"HtProb_HtAp"
+devtools::use_data(HtProb_HtAp, overwrite = TRUE)
+rm(calcHhAgeTypes)
 
 
 #================================================
 #SECTION 2: DEFINE THE MODULE DATA SPECIFICATIONS
 #================================================
-#This section creates a list of data specifications for input files, data to be
-#loaded from the datastore, and outputs to be saved to the datastore. It also
-#identifies the level of geography that is iterated over. For example, a
-#congestion module could be applied by Marea. The name that is given to this
-#list is the name of the module concatenated with "Specifications". In this
-#case, the name is "CreateHouseholdsSpecifications".
-#
-#The specifications list is saved and exported so that it will be in the
-#namespace of the package and can be read by visioneval functions. The
-#specifications list must be documented properly (using roxygen2 format) In
-#order for it to be exported. The code below shows how to properly define,
-#document, and save a module specifications list.
-
-#The components of the specifications list are as follows:
-
-#RunBy: This is the level of geography that the module is to be applied at.
-#Acceptable values are "Region", "Azone", "Bzone", "Czone", and "Marea".
-
-#Inp: A list of scenario inputs that are to be read from files and loaded into
-#the datastore. The following need to be specified for every data item (i.e.
-#column in a table):
-#  NAME: the name of a data item in the input table;
-#  FILE: the name of the file that contains the table;
-#  TABLE: the name of the datastore table the item is to be put into;
-#  TYPE: the data type (i.e. double, integer, character, logical);
-#  UNITS: the measurement units for the data;
-#  NAVALUE: the value used to represent NA in the datastore;
-#  SIZE: the maximum number of characters (or 0 for numeric data)
-#  PROHIBIT: data conditions that are prohibited or "" if not applicable;
-#  ISELEMENTOF: allowed categorical data values or "" if not applicable;
-#  UNLIKELY: data conditions that are unlikely or "" if not applicable;
-#  TOTAL: the total for all values (e.g. 1) or NA if not applicable.
-
-#Get: Identifies data to be loaded from the datastore. The
-#following need to be specified for every data item:
-#  NAME: the name of the dataset to be loaded;
-#  TABLE: the name of the table that the dataset is a part of;
-#  TYPE: the data type (i.e. double, integer, character, logical);
-#  UNITS: the measurement units for the data;
-#  PROHIBIT: data conditions that are prohibited or "" if not applicable;
-#  ISELEMENTOF: allowed categorical data values or "" if not applicable.
-
-#Set: Identifies data that is produced by the module that is to be saved in the
-#datastore. The following need to be specified for every data item:
-#  NAME: the name of the data item that is to be saved;
-#  TABLE: the name of the table that the dataset is a part of;
-#  TYPE: the data type (i.e. double, integer, character, logical);
-#  UNITS: the measurement units for the data;
-#  NAVALUE: the value used to represent NA in the datastore;
-#  PROHIBIT: data conditions that are prohibited or "" if not applicable;
-#  ISELEMENTOF: allowed categorical data values or "" if not applicable;
-#  SIZE: the maximum number of characters (or 0 for numeric data).
 
 #Define the data specifications
 #------------------------------
 CreateHouseholdsSpecifications <- list(
   #Level of geography module is applied at
   RunBy = "Region",
+  #Specify new tables to be created by Inp if any
+  #Specify new tables to be created by Set if any
+  NewSetTable = items(
+    item(
+      TABLE = "Household",
+      GROUP = "Year"
+    )
+  ),
   #Specify input data
   Inp = items(
     item(
-      NAME = "Population",
-      FILE = "azone_population.csv",
+      NAME =
+        items("Age0to14",
+              "Age15to19",
+              "Age20to29",
+              "Age30to54",
+              "Age55to64",
+              "Age65Plus"),
+      FILE = "azone_hh_pop_by_age.csv",
       TABLE = "Azone",
-      TYPE = "integer",
-      UNITS = "persons",
+      GROUP = "Year",
+      TYPE = "people",
+      UNITS = "PRSN",
       NAVALUE = -1,
       SIZE = 0,
-      PROHIBIT = c("NA", "<= 0"),
+      PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
       UNLIKELY = "",
-      TOTAL = NA
+      TOTAL = ""
+    ),
+    item(
+      NAME = "AveHhSize",
+      FILE = "azone_hhsize_targets.csv",
+      TABLE = "Azone",
+      GROUP = "Year",
+      TYPE = "compound",
+      UNITS = "PRSN/HH",
+      NAVALUE = -1,
+      SIZE = 0,
+      PROHIBIT = c("< 0"),
+      ISELEMENTOF = "",
+      UNLIKELY = "",
+      TOTAL = ""
+    ),
+    item(
+      NAME = "Prop1PerHh",
+      FILE = "azone_hhsize_targets.csv",
+      TABLE = "Azone",
+      GROUP = "Year",
+      TYPE = "double",
+      UNITS = "proportion of households",
+      NAVALUE = -1,
+      SIZE = 0,
+      PROHIBIT = c("< 0"),
+      ISELEMENTOF = "",
+      UNLIKELY = "",
+      TOTAL = ""
+    ),
+    item(
+      NAME =
+        items("GrpAge0to14",
+              "GrpAge15to19",
+              "GrpAge20to29",
+              "GrpAge30to54",
+              "GrpAge55to64",
+              "GrpAge65Plus"),
+      FILE = "azone_gq_pop_by_age.csv",
+      TABLE = "Azone",
+      GROUP = "Year",
+      TYPE = "people",
+      UNITS = "PRSN",
+      NAVALUE = -1,
+      SIZE = 0,
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      UNLIKELY = "",
+      TOTAL = ""
     )
   ),
   #Specify data to be loaded from data store
@@ -1034,17 +1220,58 @@ CreateHouseholdsSpecifications <- list(
     item(
       NAME = "Azone",
       TABLE = "Azone",
+      GROUP = "Year",
       TYPE = "character",
-      UNITS = "none",
+      UNITS = "ID",
       PROHIBIT = "",
       ISELEMENTOF = ""
     ),
     item(
-      NAME = "Population",
+      NAME =
+        items("Age0to14",
+              "Age15to19",
+              "Age20to29",
+              "Age30to54",
+              "Age55to64",
+              "Age65Plus"),
       TABLE = "Azone",
-      TYPE = "integer",
-      UNITS = "persons",
-      PROHIBIT = c("NA", "<= 0"),
+      GROUP = "Year",
+      TYPE = "people",
+      UNITS = "PRSN",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "AveHhSize",
+      TABLE = "Azone",
+      GROUP = "Year",
+      TYPE = "compound",
+      UNITS = "PRSN/HH",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "Prop1PerHh",
+      TABLE = "Azone",
+      GROUP = "Year",
+      TYPE = "double",
+      UNITS = "proportion of households",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME =
+        items("GrpAge0to14",
+              "GrpAge15to19",
+              "GrpAge20to29",
+              "GrpAge30to54",
+              "GrpAge55to64",
+              "GrpAge65Plus"),
+      TABLE = "Azone",
+      GROUP = "Year",
+      TYPE = "people",
+      UNITS = "PRSN",
+      PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = ""
     )
   ),
@@ -1053,27 +1280,22 @@ CreateHouseholdsSpecifications <- list(
     item(
       NAME = "NumHh",
       TABLE = "Azone",
-      TYPE = "integer",
-      UNITS = "households",
+      GROUP = "Year",
+      TYPE = "households",
+      UNITS = "HH",
       NAVALUE = -1,
-      PROHIBIT = c("NA", "<= 0"),
+      PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
       SIZE = 0
     ),
     item(
-      NAME = "HhId",
+      NAME =
+        items("HhId",
+              "Azone"),
       TABLE = "Household",
+      GROUP = "Year",
       TYPE = "character",
-      UNITS = "none",
-      NAVALUE = "NA",
-      PROHIBIT = "",
-      ISELEMENTOF = ""
-    ),
-    item(
-      NAME = "Azone",
-      TABLE = "Household",
-      TYPE = "character",
-      UNITS = "none",
+      UNITS = "ID",
       NAVALUE = "NA",
       PROHIBIT = "",
       ISELEMENTOF = ""
@@ -1081,12 +1303,40 @@ CreateHouseholdsSpecifications <- list(
     item(
       NAME = "HhSize",
       TABLE = "Household",
-      TYPE = "integer",
-      UNITS = "persons",
+      GROUP = "Year",
+      TYPE = "people",
+      UNITS = "PRSN",
       NAVALUE = -1,
       PROHIBIT = c("NA", "<= 0"),
       ISELEMENTOF = "",
       SIZE = 0
+    ),
+    item(
+      NAME =
+        items("Age0to14",
+              "Age15to19",
+              "Age20to29",
+              "Age30to54",
+              "Age55to64",
+              "Age65Plus"),
+      TABLE = "Household",
+      GROUP = "Year",
+      TYPE = "people",
+      UNITS = "PRSN",
+      NAVALUE = -1,
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      SIZE = 0
+    ),
+    item(
+      NAME = "HhType",
+      TABLE = "Household",
+      GROUP = "Year",
+      TYPE = "character",
+      UNITS = "ID",
+      NAVALUE = "NA",
+      PROHIBIT = "",
+      ISELEMENTOF = ""
     )
   )
 )
@@ -1097,9 +1347,11 @@ CreateHouseholdsSpecifications <- list(
 #'
 #' A list containing specifications for the CreateHouseholds module.
 #'
-#' @format A list containing 4 components:
+#' @format A list containing 5 components:
 #' \describe{
 #'  \item{RunBy}{the level of geography that the module is run at}
+#'  \item{NewSetTable}{new table to be created for datasets specified in the
+#'  'Set' specifications}
 #'  \item{Inp}{scenario input data to be loaded into the datastore for this
 #'  module}
 #'  \item{Get}{module inputs to be read from the datastore}
@@ -1108,1101 +1360,487 @@ CreateHouseholdsSpecifications <- list(
 #' @source CreateHouseholds.R script.
 "CreateHouseholdsSpecifications"
 devtools::use_data(CreateHouseholdsSpecifications, overwrite = TRUE)
+rm(CreateHouseholdsSpecifications)
 
 
 #=======================================================
 #SECTION 3: DEFINE FUNCTIONS THAT IMPLEMENT THE SUBMODEL
 #=======================================================
-#Functions defined in this section of the script implement the submodel. One of
-#these functions is the main function that is called by the software framework.
-#That function may call other functions. The main function is assigned the
-#same name as the module. In this case it is "CreateHouseholds". The main
-#function returns a list containing all the data that are to be saved in the
-#datastore. Those data must conform with the module specifications.
+#This function creates households for the entire model region. A household table
+#is created and this is populated with the household size and persons by age
+#characteristics of all the households.
 
-#This module only has a main function, CreateHouseholds. This function
-#creates household-level datasets for household size (HhSize),
-#household ID (HhId), and Azone (Azone). It uses a dataframe of household size
-#proportions and Azone populations in carrying out the calculations.
+#Function that creates set of households for an Azone
+#----------------------------------------------------
+#' Create simulated households for an Azone
+#'
+#' \code{createHhByAge} creates a set of simulated households for an Azone that
+#' reasonably represents a population census or forecast of persons in each of 6
+#' age categories.
+#'
+#' This function creates a set of simulated households for an Azone that
+#' reasonably represents the population census or forecast of persons in each of
+#' 6 age categories: 0 to 14, 15 to 19, 20 to 29, 30 to 54, 55 to 64, and 65
+#' plus. The function uses a matrix of probabilities that a person in each age
+#' group might be present in each of 524 household types. This matrix
+#' (HtProb_HtAp) is estimated by the calcHhAgeTypes function which is described
+#' above. Household types are distinguished by the number of persons in each age
+#' category in the household. The function fits the distribution of households
+#' by type by iteratively applying the probability matrix to the population,
+#' reconciling households allocated by type based on the population assigned,
+#' recomputing the assigned population, calculating the difference between the
+#' assigned population by age and the input population by age, recalculating the
+#' probabilities, and assigning the population difference. This process
+#' continues until the difference between the assigned population and the input
+#' population by age group is less than 0.1%. After the households are
+#' synthesized, the size of each household is calculated.
+#'
+#' @param Prsn_Ap A named vector containing the number of persons in each age
+#'   category.
+#' @param MaxIter An integer specifying the maximum number of iterations the
+#' algorithm should use to balance and reconcile the population allocation to
+#' household types.
+#' @param TargetHhSize A double specifying a household size target value or NA
+#' if there is no target.
+#' @param TargetProp1PerHh A double specifying a target for the proportion of
+#' households that are one-person households or NA if there is no target.
+#' @return A list containing 7 components. Each component is a vector where each
+#'   element of a vector corresponds to a simulated household. The components
+#'   are as follows:
+#' Age0to14 - number of persons age 0 to 14 in the household
+#' Age15to19 - number of persons age 15 to 19 in the household
+#' Age20to29 - number of persons age 20 to 29 in the household
+#' Age30to54 - number of persons age 30 to 54 in the household
+#' Age 55to64 - number of persons age 55 to 64 in the household
+#' Age65Plus - number of persons 65 or older in the household
+#' HhSize - total number of persons in the household
+#' @export
+createHhByAge <-
+  function(Prsn_Ap,
+           MaxIter = 100,
+           TargetHhSize = NA,
+           TargetProp1PerHh = NA) {
+    #Dimension names
+    Ap <- colnames(HtProb_HtAp)
+    Ht <- rownames(HtProb_HtAp)
+    #Place persons by age into household types by multiplying person vector
+    #by probabilities
+    Prsn_HtAp <- sweep(HtProb_HtAp, 2, Prsn_Ap, "*")
+    #Make table of factors to convert persons into households and vice verse
+    PrsnFactors_Ht_Ap <-
+      lapply(strsplit(Ht, "-"), function(x)
+        as.numeric(x))
+    PrsnFactors_HtAp <- do.call(rbind, PrsnFactors_Ht_Ap)
+    dimnames(PrsnFactors_HtAp) <- dimnames(Prsn_HtAp)
+    rm(PrsnFactors_Ht_Ap)
+    # Calculate household size for each household type
+    HsldSize_Ht <- rowSums( PrsnFactors_HtAp )
+    #Initial calculation of persons by age for each housing type
+    #-----------------------------------------------------------
+    #Convert population into households. Each row of Hsld_HtAp contains an
+    #estimate of the number of household of the type given the number of persons
+    #assigned to the household type
+    Hsld_HtAp <- Prsn_HtAp / PrsnFactors_HtAp
+    Hsld_HtAp[is.na(Hsld_HtAp)] <- 0
+    MaxHh_Ht <- apply(Hsld_HtAp, 1, max)
+    #Iterate until "balanced" set of households is created
+    #-----------------------------------------------------
+    MaxDiff_ <- numeric(MaxIter)
+    HsldSize_ <- numeric(MaxIter)
+    for (i in 1:MaxIter) {
+      #Resolve differences in household type estimates. For each household type
+      #if there is more than one estimate of the number of households, take the
+      #mean value of the estimates that are non-zero to determine the number of
+      #households of the type.
+      ResolveHh_HtAp <- t(apply(Hsld_HtAp, 1, function(x) {
+        if (sum(x > 0) > 1) {
+          x[x > 0] <- mean(x[x > 0])
+        }
+        x
+      }))
+      # Exit if the difference between the maximum estimate for each
+      # household type is not too different than the resolved estimate
+      # for each household type
+      ResolveHh_Ht <- apply(ResolveHh_HtAp, 1, max)
+      Diff_Ht <- abs(MaxHh_Ht - ResolveHh_Ht)
+      PropDiff_Ht <- Diff_Ht / ResolveHh_Ht
+      if (all(PropDiff_Ht < 0.001)) break
+      MaxDiff_[i] <- max(PropDiff_Ht)
+      # Adjust household proportions to match household size target if exists
+      if (!is.na(TargetHhSize)) {
+        # Calculate average household size and ratio with target household size
+        AveHsldSize <-
+          sum(ResolveHh_Ht * HsldSize_Ht) / sum(ResolveHh_Ht)
+        HsldSize_[i] <- AveHsldSize
+        HsldSizeAdj <- TargetHhSize / AveHsldSize
+        # Calculate household adjustment factors and adjust households
+        HsldAdjFactor_Ht <-
+          HsldSize_Ht * 0 + 1 # Start with a vector of ones
+        HsldAdjFactor_Ht[HsldSize_Ht > TargetHhSize] <- HsldSizeAdj
+        ResolveHh_HtAp <-
+          sweep(ResolveHh_HtAp, 1, HsldAdjFactor_Ht, "*")
+      }
+      # Adjust proportion of 1-person households to match target if there is one
+      if (!is.na(TargetProp1PerHh)) {
+        Hsld_Ht <- round(apply(ResolveHh_HtAp, 1, max))
+        NumHh_Sz <- tapply(Hsld_Ht, HsldSize_Ht, sum)
+        NumHh <- sum(NumHh_Sz)
+        Add1PerHh <- (TargetProp1PerHh * NumHh) - NumHh_Sz[1]
+        Is1PerHh_Ht <- HsldSize_Ht == 1
+        Add1PerHh_Ht <-
+          Add1PerHh * Hsld_Ht[Is1PerHh_Ht] / sum(Hsld_Ht[Is1PerHh_Ht])
+        RmOthHh_Ht <-
+          -Add1PerHh * Hsld_Ht[!Is1PerHh_Ht] / sum(Hsld_Ht[!Is1PerHh_Ht])
+        ResolveHh_HtAp[Is1PerHh_Ht] <-
+          ResolveHh_HtAp[Is1PerHh_Ht] + Add1PerHh_Ht
+        ResolveHh_HtAp[!Is1PerHh_Ht] <-
+          ResolveHh_HtAp[!Is1PerHh_Ht] + RmOthHh_Ht
+      }
+      #Calculate the number of persons by age group consistent with the resolved
+      #numbers of households of each household type
+      ResolvePrsn_HtAp <- ResolveHh_HtAp * PrsnFactors_HtAp
+      #Convert the resolved persons tabulation into probabilities
+      PrsnProb_HtAp <-
+        sweep(ResolvePrsn_HtAp, 2, colSums(ResolvePrsn_HtAp), "/")
+      #Calculate the difference in the number of persons by age category
+      PrsnDiff_Ap <- Prsn_Ap - colSums(ResolvePrsn_HtAp)
+      #Allocate extra persons to households based on probabilities
+      AddPrsn_HtAp <- sweep(PrsnProb_HtAp, 2, PrsnDiff_Ap, "*")
+      #Add the reallocated persons to the resolved persons matrix
+      Prsn_HtAp <- ResolvePrsn_HtAp + AddPrsn_HtAp
+      # Recalculate number of households by type
+      Hsld_HtAp <- Prsn_HtAp/PrsnFactors_HtAp
+      Hsld_HtAp[is.na(Hsld_HtAp)] <- 0
+      # Calculate the maximum households by each type for convergence check
+      MaxHh_Ht <- apply(ResolveHh_HtAp, 1, max)
+    }
+    #Calculate number of households by household type
+    Hsld_Ht <- round(apply(ResolveHh_HtAp, 1, max))
+    #Calculate persons by age group and household type
+    Prsn_HtAp <- sweep(PrsnFactors_HtAp, 1, Hsld_Ht, "*")
+    #Convert into a matrix of households
+    Hsld_Hh <- rep(names(Hsld_Ht), Hsld_Ht)
+    Hsld_Hh_Ap <- strsplit(Hsld_Hh, "-")
+    Hsld_Hh_Ap <- lapply(Hsld_Hh_Ap, function(x) as.numeric(x))
+    Hsld_df <- data.frame(do.call(rbind, Hsld_Hh_Ap))
+    names(Hsld_df) <- Ap
+    Hsld_df$HhSize <- rowSums(Hsld_df)
+    Hsld_df$HhType <-
+      apply(Hsld_df[, Ap], 1, function(x) paste(x, collapse = "-"))
+    #Randomly order the rows of the matrix and convert into a list of
+    #corresponding vectors by age group
+    RandomSort <-
+      sample(1:nrow(Hsld_df), nrow(Hsld_df), replace = FALSE)
+    Hsld_ls <- as.list(Hsld_df[RandomSort, ])
+    # Return a list of corresponding age group vectors
+    Hsld_ls
+  }
 
-#Function that creates simulated households
-#------------------------------------------
-#' Creates a set of simulated households
+#Function that creates group quarters population for an Azone
+#------------------------------------------------------------
+#' Create group quarters population for an Azone
+#'
+#' \code{createGroupQtrHhByAge} creates the quarters 'households' for an Azone
+#' where each 'household' is a single person in group quarters.
+#'
+#' This function creates a set of simulated 'households' living in group
+#' quaters in an Azone. Each group quarters 'household' is a single person in
+#' each of 6 age categories: 0 to 14, 15 to 19, 20 to 29, 30 to 54, 55 to 64,
+#' and 65 plus.
+#'
+#' @param GrpPrsn_Ag A named vector containing the number of persons in each age
+#'   category.
+#' @return A list containing 7 components. Each component is a vector where each
+#'   element of a vector corresponds to a simulated household. The components
+#'   are as follows:
+#' Age0to14 - number of persons age 0 to 14 in the household
+#' Age15to19 - number of persons age 15 to 19 in the household
+#' Age20to29 - number of persons age 20 to 29 in the household
+#' Age30to54 - number of persons age 30 to 54 in the household
+#' Age 55to64 - number of persons age 55 to 64 in the household
+#' Age65Plus - number of persons 65 or older in the household
+#' HhSize - total number of persons in the household
+#' @export
+createGrpHhByAge <-
+  function(GrpPrsn_Ag) {
+    if (sum(GrpPrsn_Ag > 0)) {
+      GrpHh_df <-
+        data.frame(
+          Age0to14 = as.integer(rep(c(1,0,0,0,0,0), GrpPrsn_Ag)),
+          Age15to19 = as.integer(rep(c(0,1,0,0,0,0), GrpPrsn_Ag)),
+          Age20to29 = as.integer(rep(c(0,0,1,0,0,0), GrpPrsn_Ag)),
+          Age30to54 = as.integer(rep(c(0,0,0,1,0,0), GrpPrsn_Ag)),
+          Age55to64 = as.integer(rep(c(0,0,0,0,1,0), GrpPrsn_Ag)),
+          Age65Plus = as.integer(rep(c(0,0,0,0,0,1), GrpPrsn_Ag)),
+          HhSize = as.integer(rep(c(1,1,1,1,1,1), GrpPrsn_Ag)),
+          HhType = rep("Grp", sum(GrpPrsn_Ag)),
+          stringsAsFactors = FALSE)
+      RandomSort <-
+        sample(1:nrow(GrpHh_df), nrow(GrpHh_df), replace = FALSE)
+      GrpHh_ls <- as.list(GrpHh_df[RandomSort, ])
+    } else {
+      GrpHh_ls <-
+        list(
+          Age0to14 = integer(0),
+          Age15to19 = integer(0),
+          Age20to29 = integer(0),
+          Age30to54 = integer(0),
+          Age55to64 = integer(0),
+          Age65Plus = integer(0),
+          HhSize = integer(0),
+          HhType = character(0))
+    }
+    GrpHh_ls
+  }
+
+#Main module function that creates simulated households
+#------------------------------------------------------
+#' Main module function to create simulated households
 #'
 #' \code{CreateHouseholds} creates a set of simulated households that each have
-#' a unique household ID, an Azone to which it is assigned, and a household
-#' size (number of people in the household).
+#' a unique household ID, an Azone to which it is assigned, household
+#' size (number of people in the household), and numbers of persons in each of
+#' 6 age categories.
 #'
-#' This function creates a set of simulated households where each household is
-#' assigned a household size, an Azone, and a unique ID. These data items are
-#' vectors that are to be stored in the "Household" table. Since this table does
-#' not exist, the function calculates a LENGTH value for the table and returns
-#' that as well. The framework uses this information to initialize the
-#' Households table. The function also computes the maximum numbers of
-#' characters in the HhId and Azone datasets and assigns these to a SIZE vector.
-#' This is necessary so that the framework can initialize these datasets in the
-#' datastore. All the results are returned in a list.
+#' This function creates a set of simulated households for the model region
+#' where each household is assigned a household size, an Azone, a unique ID, and
+#' numbers of persons in each of 6 age categories. The function calls the
+#' createHhByAge and createGrpHhByAge functions for each Azone to create
+#' simulated households containing persons by age category from a vector of
+#' persons by age category for the Azone. The list of vectors produced by the
+#' Create Households function are to be stored in the "Household" table. Since
+#' this table does not exist, the function calculates a LENGTH value for the
+#' table and returns that as well. The framework uses this information to
+#' initialize the Households table. The function also computes the maximum
+#' numbers of characters in the HhId and Azone datasets and assigns these to a
+#' SIZE vector. This is necessary so that the framework can initialize these
+#' datasets in the datastore. All the results are returned in a list.
 #'
-#' @param L A list containing the following components:
-#' Azone: A character vector of Azone names read from the Azone table.
-#' Population: A numeric vector of the number of people in each Azone read from
-#' the Azone table.
-#' @return A list containing the following components:
-#' HhSize: An integer vector of the calculated sizes of the simulated households
-#' that is to be assigned to the Household table.
-#' Azone: A character vector of the names of the Azones the simulated households
-#' are assigned to that is to be assigned to the Household table.
-#' HhId: A character vector identifying the unique ID for each household that is
-#' to be assigned to the Household table.
-#' NumHh: An integer vector identifying the number of households assigned to
-#' each Azone that is to be assigned to the Azone table.
+#' @param L A list containing the components listed in the Get specifications
+#' for the module.
+#' @return A list containing the components specified in the Set
+#' specifications for the module along with:
 #' LENGTH: A named integer vector having a single named element, "Household",
 #' which identifies the length (number of rows) of the Household table to be
 #' created in the datastore.
 #' SIZE: A named integer vector having two elements. The first element, "Azone",
 #' identifies the size of the longest Azone name. The second element, "HhId",
 #' identifies the size of the longest HhId.
+#' @import visioneval
 #' @export
-#CreateHouseholds <- function(L, P = CreateHouseholdsParameters) {
 CreateHouseholds <- function(L) {
-  #Calculate average household size
-  #AveHhSize <- sum(P$HhSizeProp_df$Size * P$HhSizeProp_df$Proportion)
-  AveHhSize <- sum(HhSizeProp_df$Size * HhSizeProp_df$Proportion)
-  #Define function to simulate households by size in a population
-  SimHh <- function(Pop, AveHhSize) {
-    InitNumHh <- ceiling(Pop / AveHhSize) + 100
-    #InitHh_ <-
-    #  sample(P$HhSizeProp_df$Size, InitNumHh, replace = TRUE,
-    #         prob = P$HhSizeProp_df$Proportion)
-    InitHh_ <-
-      sample(HhSizeProp_df$Size, InitNumHh, replace = TRUE,
-             prob = HhSizeProp_df$Proportion)
-    Error_ <- abs(cumsum(InitHh_) - Pop)
-    Hh_ <- InitHh_[1:(which(Error_ == min(Error_)))[1]]
-    if (sum(Hh_) < Pop) {
-      Hh_ <- c(Hh_, Pop - sum(Hh_))
-    }
-    if (sum(Hh_) > Pop) {
-      PopDiff <- sum(Hh_) - Pop
-      Hh_ <- Hh_[-which(Hh_ == PopDiff)[1]]
-    }
-    Hh_
+  #Define dimension name vectors
+  Ap <-
+    c("Age0to14", "Age15to19", "Age20to29", "Age30to54", "Age55to64", "Age65Plus")
+  Ag <- paste0("Grp", Ap)
+  Az <- L$Year$Azone$Azone
+  #fix seed as synthesis involves sampling
+  set.seed(L$G$Seed)
+  #Initialize output list
+  Out_ls <- initDataList()
+  Out_ls$Year$Azone$NumHh <- numeric(0)
+  Out_ls$Year$Household <-
+    list(
+      Azone = character(0),
+      HhId = character(0),
+      HhSize = integer(0),
+      HhType = character(0),
+      Age0to14 = integer(0),
+      Age15to19 = integer(0),
+      Age20to29 = integer(0),
+      Age30to54 = integer(0),
+      Age55to64 = integer(0),
+      Age65Plus = integer(0)
+    )
+  #Make matrix of regular household persons by Azone and age group
+  Prsn_AzAp <-
+    as.matrix(data.frame(L$Year$Azone, stringsAsFactors = FALSE)[,Ap])
+  rownames(Prsn_AzAp) <- Az
+  #Make vector of average household size target by Azone
+  TargetHhSize_Az <- L$Year$Azone$AveHhSize
+  names(TargetHhSize_Az) <- Az
+  #Make vector of target proportion of 1-person households
+  TargetProp1PerHh_Az <- L$Year$Azone$Prop1PerHh
+  names(TargetProp1PerHh_Az) <- Az
+  #Make matrix of group population households by Azone and age group
+  Prsn_AzAg <-
+    as.matrix(data.frame(L$Year$Azone, stringsAsFactors = FALSE)[,Ag])
+  rownames(Prsn_AzAg) <- Az
+  #Simulate households for each Azone and add to output list
+  for (az in Az) {
+    RegHh_ls <-
+      createHhByAge(Prsn_AzAp[az,],
+                    MaxIter=100,
+                    TargetHhSize = TargetHhSize_Az[az],
+                    TargetProp1PerHh = TargetProp1PerHh_Az[az])
+    GrpHh_ls <-
+      createGrpHhByAge(Prsn_AzAg[az,])
+    NumHh <-
+      length(RegHh_ls[[1]]) + length(GrpHh_ls[[1]])
+    Out_ls$Year$Household$Azone <-
+      c(Out_ls$Year$Household$Azone, rep(az, NumHh))
+    Out_ls$Year$Household$HhId <-
+      c(Out_ls$Year$Household$HhId, paste(rep(az, NumHh), 1:NumHh, sep = "-"))
+    Out_ls$Year$Household$HhSize <-
+      c(Out_ls$Year$Household$HhSize, RegHh_ls$HhSize, GrpHh_ls$HhSize)
+    Out_ls$Year$Household$HhType <-
+      c(Out_ls$Year$Household$HhType, RegHh_ls$HhType, GrpHh_ls$HhType)
+    Out_ls$Year$Household$Age0to14 <-
+      c(Out_ls$Year$Household$Age0to14, RegHh_ls$Age0to14, GrpHh_ls$Age0to14)
+    Out_ls$Year$Household$Age15to19 <-
+      c(Out_ls$Year$Household$Age15to19, RegHh_ls$Age15to19, GrpHh_ls$Age15to19)
+    Out_ls$Year$Household$Age20to29 <-
+      c(Out_ls$Year$Household$Age20to29, RegHh_ls$Age20to29, GrpHh_ls$Age20to29)
+    Out_ls$Year$Household$Age30to54 <-
+      c(Out_ls$Year$Household$Age30to54, RegHh_ls$Age30to54, GrpHh_ls$Age30to54)
+    Out_ls$Year$Household$Age55to64 <-
+      c(Out_ls$Year$Household$Age55to64, RegHh_ls$Age55to64, GrpHh_ls$Age55to64)
+    Out_ls$Year$Household$Age65Plus <-
+      c(Out_ls$Year$Household$Age65Plus, RegHh_ls$Age65Plus, GrpHh_ls$Age65Plus)
+    Out_ls$Year$Azone$NumHh <-
+      c(Out_ls$Year$Azone$NumHh, NumHh)
   }
-  #Create household sizes of households for all Azones and put in list
-  HhSize_ls <- list()
-  for (i in 1:length(L$Azone)) {
-    Az <- L$Azone[i]
-    Pop <- L$Population[i]
-    HhSize_ls[[Az]] <- SimHh(Pop, AveHhSize)
-  }
-  #Create vector of household IDs
-  HhId_ <- unlist(sapply(names(HhSize_ls),
-                         function(x) paste(x, 1:length(HhSize_ls[[x]]), sep = "")),
-                  use.names = FALSE)
+  Out_ls$Year$Household$HhSize <- as.integer(Out_ls$Year$Household$HhSize)
+  Out_ls$Year$Household$Age0to14 <- as.integer(Out_ls$Year$Household$Age0to14)
+  Out_ls$Year$Household$Age15to19 <- as.integer(Out_ls$Year$Household$Age15to19)
+  Out_ls$Year$Household$Age20to29 <- as.integer(Out_ls$Year$Household$Age20to29)
+  Out_ls$Year$Household$Age30to54 <- as.integer(Out_ls$Year$Household$Age30to54)
+  Out_ls$Year$Household$Age55to64 <- as.integer(Out_ls$Year$Household$Age55to64)
+  Out_ls$Year$Household$Age65Plus <- as.integer(Out_ls$Year$Household$Age65Plus)
+  Out_ls$Year$Azone$NumHh <- as.integer(Out_ls$Year$Azone$NumHh)
   #Calculate LENGTH attribute for Household table
-  LENGTH <- numeric(0)
-  LENGTH["Household"] <- sum(sapply(HhSize_ls, length))
-  #Calculate SIZE attributes for 'Azone' and 'HhId'
-  SIZE <- numeric(0)
-  SIZE["Azone"] <- max(nchar(L$Azone))
-  SIZE["HhId"] <- max(nchar(HhId_))
-  #Return a list of values to be saved in the datastore
-  list(
-    HhSize = unlist(HhSize_ls, use.names = FALSE),
-    Azone = rep(L$Azone, unlist(lapply(HhSize_ls, length))),
-    HhId = HhId_,
-    NumHh = unlist(lapply(HhSize_ls, length), use.names = FALSE),
-    LENGTH = LENGTH,
-    SIZE = SIZE
-    )
+  attributes(Out_ls$Year$Household)$LENGTH <-
+    length(Out_ls$Year$Household$HhId)
+  #Calculate SIZE attributes for 'Household$Azone' and 'Household$HhId'
+  attributes(Out_ls$Year$Household$Azone)$SIZE <-
+    max(nchar(Out_ls$Year$Household$Azone))
+  attributes(Out_ls$Year$Household$HhId)$SIZE <-
+    max(nchar(Out_ls$Year$Household$HhId))
+  attributes(Out_ls$Year$Household$HhType)$SIZE <-
+    max(nchar(Out_ls$Year$Household$HhType))
+  #Return the list
+  Out_ls
 }
-```
-### Appendix D: example module script from vedemo1 package  
-```
-#==============
-#CreateBzones.R
-#==============
-
-#This demonstration module creates simulated Bzones that have a specified
-#numbers of households and development types (Metropolitan, Town, Rural). The 
-#module determines the number of Bzones in each Azone and assigns a unique ID
-#and a development type to each. It also calculates the number of households 
-#in each Bzone such that the proportion of households in each Azone assigned 
-#to each development type matches assumed input proportions. It also assigns 
-#the respective Mareas to the simulated Bzones. A Bzone table is created and
-#populated with unique IDs, development types, Mareas, Azones, and numbers of
-#households.
-
-library(visioneval)
 
 
-#=============================================
-#SECTION 1: ESTIMATE AND SAVE MODEL PARAMETERS
-#=============================================
-#Functions and statements in this section of the script define all of the
-#parameters used by the module. Parameters are module inputs that are constant
-#for all model runs. Parameters can be put in whatever form that the module
-#developer determines works best (e.g. vector, matrix, array, data frame, list,
-#etc.). Parameters may be defined in several ways including: 1. By statements
-#included in this section (e.g. HhSize <- 2.5); 2. By reading in a data file
-#from the "inst/extdata" directory; and, 3. By applying a function which
-#estimates the parameters using data in the "inst/extdata" directory.
+#====================
+#SECTION 4: TEST CODE
+#====================
+#The following code is useful for testing and module function development. The
+#first part initializes a datastore, loads inputs, and checks that the datastore
+#contains the data needed to run the module. The second part produces a list of
+#the data the module function will be provided by the framework when it is run.
+#This is useful to have when developing the module function. The third part
+#runs the whole module to check that everything runs correctly and that the
+#module outputs are consistent with specifications. Note that if a module
+#requires data produced by another module, the test code for the other module
+#must be run first so that the datastore contains the requisite data. Also note
+#that it is important that all of the test code is commented out when the
+#the package is built.
 
-#Each parameter object is saved so that it will be in the namespace of module
-#functions. Parameter objects are exported to make it easier for users to
-#inspect the parameters being used by a module. Every parameter object must
-#also be documented properly (using roxygen2 format). The code below shows
-#how to document and save a parameter object.
-
-#In this demo module, only one parameter is defined: the average number of
-#households per block group. This shows how model parameters can be defined by
-#simple assignment statements.
-
-#Create & save a parameter for the average number of households per block group
-#------------------------------------------------------------------------------
-AveHhPerBlockGroup <- 400
-#' Average households per block group
-#'
-#' A number representing the average number of households per census block.
-#'
-#' @format A number:
-#' \describe{
-#'  \item{AveHhPerBlockGroup}{average households per census block group}
-#' }
-#' @source CreateBzones.R script.
-"AveHhPerBlockGroup"
-devtools::use_data(AveHhPerBlockGroup, overwrite = TRUE)
-
-
-#================================================
-#SECTION 2: DEFINE THE MODULE DATA SPECIFICATIONS
-#================================================
-#This section creates a list of data specifications for input files, data to be
-#loaded from the datastore, and outputs to be saved to the datastore. It also
-#identifies the level of geography that is iterated over. For example, a
-#congestion module could be applied by Marea. The name that is given to this
-#list is the name of the module concatenated with "Specifications". In this
-#case, the name is "CreateHouseholdsSpecifications".
-#
-#The specifications list is saved and exported so that it will be in the
-#namespace of the package and can be read by visioneval functions. The
-#specifications list must be documented properly (using roxygen2 format) In
-#order for it to be exported. The code below shows how to properly define,
-#document, and save a module specifications list.
-
-#The components of the specifications list are as follows:
-
-#RunBy: This is the level of geography that the module is to be applied at.
-#Acceptable values are "Region", "Azone", "Bzone", "Czone", and "Marea".
-
-#Inp: A list of scenario inputs that are to be read from files and loaded into
-#the datastore. The following need to be specified for every data item (i.e.
-#column in a table):
-#  NAME: the name of a data item in the input table;
-#  FILE: the name of the file that contains the table;
-#  TABLE: the name of the datastore table the item is to be put into;
-#  TYPE: the data type (i.e. double, integer, character, logical);
-#  UNITS: the measurement units for the data;
-#  NAVALUE: the value used to represent NA in the datastore;
-#  SIZE: the maximum number of characters (or 0 for numeric data)
-#  PROHIBIT: data conditions that are prohibited or "" if not applicable;
-#  ISELEMENTOF: allowed categorical data values or "" if not applicable;
-#  UNLIKELY: data conditions that are unlikely or "" if not applicable;
-#  TOTAL: the total for all values (e.g. 1) or NA if not applicable.
-
-#Get: Identifies data to be loaded from the datastore. The
-#following need to be specified for every data item:
-#  NAME: the name of the dataset to be loaded;
-#  TABLE: the name of the table that the dataset is a part of;
-#  TYPE: the data type (i.e. double, integer, character, logical);
-#  UNITS: the measurement units for the data;
-#  PROHIBIT: data conditions that are prohibited or "" if not applicable;
-#  ISELEMENTOF: allowed categorical data values or "" if not applicable.
-
-#Set: Identifies data that is produced by the module that is to be saved in the
-#datastore. The following need to be specified for every data item:
-#  NAME: the name of the data item that is to be saved;
-#  TABLE: the name of the table that the dataset is a part of;
-#  TYPE: the data type (i.e. double, integer, character, logical);
-#  UNITS: the measurement units for the data;
-#  NAVALUE: the value used to represent NA in the datastore;
-#  PROHIBIT: data conditions that are prohibited or "" if not applicable;
-#  ISELEMENTOF: allowed categorical data values or "" if not applicable;
-#  SIZE: the maximum number of characters (or 0 for numeric data).
-
-#Define the data specifications
-#------------------------------
-CreateBzonesSpecifications <- list(
-  #Level of geography module is applied at
-  RunBy = "Region",
-  #Specify input data
-  Inp = items(
-    item(
-      NAME = "Metropolitan",
-      FILE = "devtype_proportions.csv",
-      TABLE = "Azone",
-      TYPE = "double",
-      UNITS = "none",
-      NAVALUE = -1,
-      SIZE = 0,
-      PROHIBIT = c("NA", "< 0", "> 1"),
-      ISELEMENTOF = "",
-      UNLIKELY = "",
-      TOTAL = NA
-    ),
-    item(
-      NAME = "Town",
-      FILE = "devtype_proportions.csv",
-      TABLE = "Azone",
-      TYPE = "double",
-      UNITS = "none",
-      NAVALUE = -1,
-      SIZE = 0,
-      PROHIBIT = c("NA", "< 0", "> 1"),
-      ISELEMENTOF = "",
-      UNLIKELY = "",
-      TOTAL = NA
-    ),
-    item(
-      NAME = "Rural",
-      FILE = "devtype_proportions.csv",
-      TABLE = "Azone",
-      TYPE = "double",
-      UNITS = "none",
-      NAVALUE = -1,
-      SIZE = 0,
-      PROHIBIT = c("NA", "< 0", "> 1"),
-      ISELEMENTOF = "",
-      UNLIKELY = "",
-      TOTAL = NA
-    )
-  ),
-  #Specify data to be loaded from data store
-  Get = items(
-    item(
-      NAME = "Azone",
-      TABLE = "Azone",
-      TYPE = "character",
-      UNITS = "none",
-      PROHIBIT = "",
-      ISELEMENTOF = ""
-    ),
-    item(
-      NAME = "NumHh",
-      TABLE = "Azone",
-      TYPE = "integer",
-      UNITS = "persons",
-      PROHIBIT = c("NA", "<= 0"),
-      ISELEMENTOF = ""
-    ),
-    item(
-      NAME = "Marea",
-      TABLE = "Azone",
-      TYPE = "character",
-      UNITS = "none",
-      PROHIBIT = c("NA", "<= 0"),
-      ISELEMENTOF = ""
-    ),
-    item(
-      NAME = "Metropolitan",
-      TABLE = "Azone",
-      TYPE = "double",
-      UNITS = "none",
-      PROHIBIT = c("NA", "< 0", "> 1"),
-      ISELEMENTOF = ""
-    ),
-    item(
-      NAME = "Town",
-      TABLE = "Azone",
-      TYPE = "integer",
-      UNITS = "persons",
-      PROHIBIT = c("NA", "< 0", "> 1"),
-      ISELEMENTOF = ""
-    ),
-    item(
-      NAME = "Rural",
-      TABLE = "Azone",
-      TYPE = "integer",
-      UNITS = "persons",
-      PROHIBIT = c("NA", "< 0", "> 1"),
-      ISELEMENTOF = ""
-    )
-  ),
-  #Specify data to saved in the data store
-  Set = items(
-    item(
-      NAME = "Bzone",
-      TABLE = "Bzone",
-      TYPE = "character",
-      UNITS = "none",
-      NAVALUE = "NA",
-      PROHIBIT = "",
-      ISELEMENTOF = ""
-    ),
-    item(
-      NAME = "Azone",
-      TABLE = "Bzone",
-      TYPE = "character",
-      UNITS = "none",
-      NAVALUE = "NA",
-      PROHIBIT = "",
-      ISELEMENTOF = ""
-    ),
-    item(
-      NAME = "Marea",
-      TABLE = "Bzone",
-      TYPE = "character",
-      UNITS = "none",
-      NAVALUE = "NA",
-      PROHIBIT = "",
-      ISELEMENTOF = ""
-    ),
-    item(
-      NAME = "DevType",
-      TABLE = "Bzone",
-      TYPE = "character",
-      UNITS = "none",
-      NAVALUE = "NA",
-      PROHIBIT = "",
-      ISELEMENTOF = c("Metropolitan", "Town", "Rural")
-    ),
-    item(
-      NAME = "NumHh",
-      TABLE = "Bzone",
-      TYPE = "integer",
-      UNITS = "none",
-      NAVALUE = -1,
-      PROHIBIT = c("NA", "<= 0"),
-      ISELEMENTOF = "",
-      SIZE = 0
-    )
-  )
-)
-
-#Save the data specifications list
-#---------------------------------
-#' Specifications list for CreateBzones module
-#'
-#' A list containing specifications for the CreateHouseholds module.
-#'
-#' @format A list containing 4 components:
-#' \describe{
-#'  \item{RunBy}{the level of geography that the module is run at}
-#'  \item{Inp}{scenario input data to be loaded into the datastore for this
-#'  module}
-#'  \item{Get}{module inputs to be read from the datastore}
-#'  \item{Set}{module outputs to be written to the datastore}
-#' }
-#' @source CreateHouseholds.R script.
-"CreateBzonesSpecifications"
-devtools::use_data(CreateBzonesSpecifications, overwrite = TRUE)
-
-
-#=======================================================
-#SECTION 3: DEFINE FUNCTIONS THAT IMPLEMENT THE SUBMODEL
-#=======================================================
-#Functions defined in this section of the script implement the submodel. One of
-#these functions is the main function that is called by the software framework.
-#That function may call other functions. The main function is assigned the
-#same name as the module. In this case it is "CreateBzones". The main
-#function returns a list containing all the data that are to be saved in the
-#datastore. Those data must conform with the module specifications.
-
-#This module only has a main function, CreateBzones. This function creates
-#simulated Bzones and assigns development types, Azones, Mareas,
-#unique Bzone IDs, and numbers of households.
-
-#Function that creates simulated Bzones
-#------------------------------------------
-#' Creates a set of simulated Bzones
-#'
-#' \code{CreateBzones} creates a set of simulated Bzones and assigns
-#' development types, Azones, Mareas, unique Bzone IDs, and numbers of
-#' households.
-#'
-#' This function creates a set of simulated Bzones and assigns attributes
-#' including the Azone that the Bzone is situated in, the Marea that the Bzone
-#' is situated in, the number of households in the Bzone, and the development
-#' type (i.e. Metropolitan, Town, Rural) of the Bzone. These data items are
-#' vectors that are to be stored in the "Bzone" table. Since this table does not
-#' exist, the function calculates a LENGTH value for the table and returns that
-#' as well. The framework uses this information to initialize the Bzone table.
-#' The function also computes the maximum numbers of characters in the Bzone,
-#' Azone, Marea, and DevType datasets and assigns these to a SIZE vector. This
-#' is necessary so that the framework can initialize these datasets in the
-#' datastore. All results are returned in a list.
-#'
-#' @param L A list containing the following components that have been read
-#' from the datastore:
-#' Azone: A character vector of Azone names read from the Azone table.
-#' NumHh: A numeric vector of the number of people in each Azone read from the
-#' Azone table.
-#' Marea: A character vector of Marea names read from the Azone table.
-#' Metropolitan: A numeric vector of the proportion of households that are of
-#' the Metropolitan development type in each Azone read from the Azone table.
-#' Town: A numeric vector of the proportion of households that are of the Town
-#' development type in each Azone read from the Azone table.
-#' Rural: A numeric vector of the proportion of households that are of the
-#' Rural development type in each Azone read from the Azone table.
-#' @return A list containing the following components:
-#' Bzone: A character vector of the names of the Bzones that is to be assigned
-#' to the Bzone table.
-#' Azone: A character vector of the names of the Azones associated with each
-#' Bzone that is to be assigned to the Bzone table.
-#' Marea: A character vector of the names of the Mareas associated with each
-#' Bzone that is to be assigned to the Bzone table.
-#' DevType: A character vector identifying the development type of each Bzone
-#' that is to be assigned to the Bzone table.
-#' NumHh: An integer vector identifying the number of households assigned to
-#' each Bzone that is to be assigned to the Bzone table.
-#' LENGTH: A named integer vector having a single named element, "Bzone",
-#' which identifies the length (number of rows) of the Bzone table to be
-#' created in the datastore.
-#' SIZE: a named numeric vector having four elements. The first element,
-#' "Azone", identifies the size of the longest Azone name. The second element,
-#' "Bzone", identifies the size of the longest Bzone name. The third element,
-#' "Marea", identifies the size of the longest Marea name. The fourth element,
-#' "DevType", identifies the size of the longest DevType name.
-#' @export
-CreateBzones <- function(L) {
-  #Make vector of Azone names
-  Az <- L$Azone
-  #Make matrix of development type proportions by Azone
-  Dt <- c("Metropolitan", "Town", "Rural")
-  DevTypeProp_AzDt <- cbind(L$Metropolitan, L$Town, L$Rural)
-  rownames(DevTypeProp_AzDt) <- Az
-  colnames(DevTypeProp_AzDt) <- Dt
-  #Define function to assign & tabulate number of households by development type
-  tabulateNumHhByDevType <- function(NumHh, Prob) {
-    DevType_Hh <- sample(Dt, NumHh_Az[az], replace = TRUE,
-                           prob = DevTypeProp_AzDt[az,])
-    DevTypeHh_Dt <- table(DevType_Hh)[Dt]
-    names(DevTypeHh_Dt) <- Dt
-    DevTypeHh_Dt[is.na(DevTypeHh_Dt)] <- 0
-    DevTypeHh_Dt
-  }
-  #Assign the number of households to be in each Azone development type
-  NumHh_Az <- L$NumHh
-  names(NumHh_Az) <- Az
-  DevTypeHh_AzDt <- DevTypeProp_AzDt * 0
-  for(az in Az) {
-    DevTypeHh_AzDt[az,] <- tabulateNumHhByDevType(NumHh_Az[az],
-                                                  DevTypeProp_AzDt[az,])
-  }
-  #Calculate number of block groups and number of households per block group
-  #for each Azone and development type
-  NumBlkGrp_AzDt <- round(DevTypeHh_AzDt / AveHhPerBlockGroup)
-  storage.mode(NumBlkGrp_AzDt) <- "integer"
-  NumBlkGrp_Az <- rowSums(NumBlkGrp_AzDt)
-  HhPerBlockGroup_AzDt <- ceiling(DevTypeHh_AzDt / NumBlkGrp_AzDt)
-  HhPerBlockGroup_AzDt[is.na(HhPerBlockGroup_AzDt)] <- 0
-  storage.mode(HhPerBlockGroup_AzDt) <- "integer"
-  #Create simulated block groups and associate with metropolitan areas
-  Marea_Az <- L$Marea
-  names(Marea_Az) <- L$Azone
-  Bzone_df <- expand.grid(dimnames(t(NumBlkGrp_AzDt)), stringsAsFactors = FALSE)
-  names(Bzone_df) <- c("DevType", "Azone")
-  Bzone_df$NumZones <- as.vector(t(NumBlkGrp_AzDt))
-  Bzone_df$NumHh <- as.vector(t(HhPerBlockGroup_AzDt))
-  Bzone_df$Marea <- Marea_Az[Bzone_df$Azone]
-  Bzone_df <- Bzone_df[Bzone_df$NumZones != 0,]
-  #Calculate values to write out of the module
-  Bz <- unlist(sapply(names(NumBlkGrp_Az),
-                      function(x) paste(x, 1:NumBlkGrp_Az[x], sep = "")),
-               use.names = FALSE)
-  Azone_Bz <- rep(names(NumBlkGrp_Az), NumBlkGrp_Az)
-  Marea_Bz <- rep(Bzone_df$Marea, Bzone_df$NumZones)
-  NumHh_Bz <- rep(Bzone_df$NumHh, Bzone_df$NumZones)
-  DevType_Bz <- rep(Bzone_df$DevType, Bzone_df$NumZones)
-  #Calculate the total number of Bzones. Necessary for calculating a LENGTH
-  #attribute used for initializing Bzone table
-  LENGTH <- numeric(0)
-  LENGTH["Bzone"] <- length(Bz)
-  #Calculate and assign SIZE attributes for 'Bzone', 'Marea', and 'DevType'
-  #Necessary for initializing datasets in Bzone table
-  SIZE <- numeric(0)
-  SIZE["Bzone"] <- max(nchar(Bz))
-  SIZE["Azone"] <- max(nchar(Azone_Bz))
-  SIZE["Marea"] <- max(nchar(Marea_Bz))
-  SIZE["DevType"] <- max(nchar(DevType_Bz))
-  #Return a list of values to be saved in the datastore
-  list(Bzone = Bz,
-       Azone = Azone_Bz,
-       Marea = Marea_Bz,
-       NumHh = NumHh_Bz,
-       DevType = DevType_Bz,
-       LENGTH = LENGTH,
-       SIZE = SIZE)
-}
-```
-### Appendix E: example module script from vedemo1 package    
-```
-#================
-#CreateBzoneDev.R
-#================
-
-#This demonstration module creates several Bzone development characteristics
-#given the development type of each Bzone (i.e. Metropolitan, Town, Rural) and
-#the number of households in each Bzone. The created Bzone characteristics
-#include average population density (persons per square mile), and numbers of
-#single family detached and multi-family dwellings. For 'metropolitan' type
-#Bzones, the module also simulates the distance of the Bzone to the urban area
-#core. The latter is calculated in conjunction with the calculation of
-#population density so the quantities will be consistent (i.e. density decreases
-#with distance from the core).
-
-library(visioneval)
-
-#=============================================
-#SECTION 1: ESTIMATE AND SAVE MODEL PARAMETERS
-#=============================================
-#Functions and statements in this section of the script define all of the
-#parameters used by the module. Parameters are module inputs that are constant
-#for all model runs. Parameters can be put in whatever form that the module
-#developer determines works best (e.g. vector, matrix, array, data frame, list,
-#etc.). Parameters may be defined in several ways including: 1. By statements
-#included in this section (e.g. HhSize <- 2.5); 2. By reading in a data file
-#from the "inst/extdata" directory; and, 3. By applying a function which
-#estimates the parameters using data in the "inst/extdata" directory.
-
-#Each parameter object is saved so that it will be in the namespace of module
-#functions. Parameter objects are exported to make it easier for users to
-#inspect the parameters being used by a module. Every parameter object must
-#also be documented properly (using roxygen2 format). The code below shows
-#how to document and save a parameter object.
-
-#In this demonstration module, parameters are created by reading in data files
-#that are stored in the "inst/extdata" directory. These are all comma-separated
-#values (csv) formatted text files. This will be the most common form for these
-#files because they are easily edited and easily read into R. Documentation for
-#each file is included with the file. The corresponding documentation file has
-#the same name as the data file, but the file extension is 'txt'. One or more of
-#these files may be altered using regional data to customize the module for the
-#region.
-
-#Describe specifications for data that is to be used in estimating the model
-#---------------------------------------------------------------------------
-#Data on the proportion of population by distance from urban area core
-PopByDistanceInp_ls <- items(
-  item(
-    NAME = "Distance",
-    TYPE = "integer",
-    PROHIBIT = c("NA", "< 0"),
-    ISELEMENTOF = "",
-    UNLIKELY = "",
-    TOTAL = NA
-  ),
-  item(
-    NAME = "PopProp",
-    TYPE = "double",
-    PROHIBIT = c("NA", "> 1"),
-    ISELEMENTOF = "",
-    UNLIKELY = "",
-    TOTAL = NA
-  )
-)
-#Data on population density by distance from urban area core
-PopDenByDistanceInp_ls <- items(
-  item(
-    NAME = "Distance",
-    TYPE = "integer",
-    PROHIBIT = c("NA", "< 0"),
-    ISELEMENTOF = "",
-    UNLIKELY = "",
-    TOTAL = NA
-  ),
-  item(
-    NAME = "PopDensity",
-    TYPE = "double",
-    PROHIBIT = c("NA", "< 0"),
-    ISELEMENTOF = "",
-    UNLIKELY = "",
-    TOTAL = NA
-  )
-)
-#Data on miscellaneous parameters
-MiscDevParametersInp_ls <- items(
-  item(
-    NAME = "Parameter",
-    TYPE = "Character",
-    PROHIBIT = c("NA"),
-    ISELEMENTOF = "",
-    UNLIKELY = "",
-    TOTAL = NA
-  ),
-  item(
-    NAME = "Value",
-    TYPE = "double",
-    PROHIBIT = c("NA", "<= 0"),
-    ISELEMENTOF = "",
-    UNLIKELY = "",
-    TOTAL = NA
-  )
-)
-
-#Read in, check and save population by distance parameters
-#---------------------------------------------------------
-PopByDistance_df <- processEstimationInputs(PopByDistanceInp_ls,
-                                            "pop_by_distance.csv",
-                                            "CreateBzoneDev")
-#' Population proportions by distance
-#'
-#' A dataset containing the proportions of urbanized area population by distance
-#' from the urban center rounded to nearest whole mile.
-#'
-#' @format A data frame with 40 rows and 2 variables:
-#' \describe{
-#'  \item{Distance}{distance from urban center, in miles}
-#'  \item{PopProp}{proportion of urbanized area population}
-#' }
-#' @source CreateBzonesDev.R script.
-"PopByDistance_df"
-devtools::use_data(PopByDistance_df, overwrite = TRUE)
-
-#Read in, check and save population density by distance parameters
+#1) Test code to set up datastore and return module specifications
 #-----------------------------------------------------------------
-PopDenByDistance_df <- processEstimationInputs(PopDenByDistanceInp_ls,
-                                               "pop_density_by_distance.csv",
-                                               "CreateBzoneDev")
-#' Population density by distance
-#'
-#' A dataset containing the average census block group population density by
-#' distance from the urban center rounded to nearest whole mile.
-#'
-#' @format A data frame with 40 rows and 2 variables:
-#' \describe{
-#'  \item{Distance}{distance from urban center, in miles}
-#'  \item{PopDensity}{population density, in persons per square mile}
-#' }
-#' @source CreateBzonesDev.R script.
-"PopDenByDistance_df"
-devtools::use_data(PopDenByDistance_df, overwrite = TRUE)
-
-#Read in, check and save miscellaneous parameters
-#------------------------------------------------
-MiscDevParameters_df <- processEstimationInputs(MiscDevParametersInp_ls,
-                                                "misc_dev_parameters.csv",
-                                                "CreateBzoneDev")
-#' Miscellaneous Bzone development model parameters
-#'
-#' A dataset containing parameters for average household size, average town
-#' population density, and average rural population density.
-#'
-#' @format A data frame with 3 rows and 2 variables:
-#' \describe{
-#'  \item{Parameter}{name of the parameter}
-#'  \item{Value}{value of the parameter}
-#' }
-#' @source CreateBzonesDev.R script.
-"MiscDevParameters_df"
-devtools::use_data(MiscDevParameters_df, overwrite = TRUE)
-
-
-
-#================================================
-#SECTION 2: DEFINE THE MODULE DATA SPECIFICATIONS
-#================================================
-#This section creates a list of data specifications for input files, data to be
-#loaded from the datastore, and outputs to be saved to the datastore. It also
-#identifies the level of geography that is iterated over. For example, a
-#congestion module could be applied by Marea. The name that is given to this
-#list is the name of the module concatenated with "Specifications". In this
-#case, the name is "CreateBzoneDevSpecifications".
+#The following commented-out code can be run to initialize a datastore, load
+#inputs, and check that the datastore contains the data needed to run the
+#module. It return the processed module specifications which can be used in
+#conjunction with the getFromDatastore function to fetch the list of data needed
+#by the module. Note that the following code assumes that all the data required
+#to set up a datastore are in the defs and inputs directories in the tests
+#directory. All files in the defs directory must have the default names.
 #
-#The specifications list is saved and exported so that it will be in the
-#namespace of the package and can be read by visioneval functions. The
-#specifications list must be documented properly (using roxygen2 format) In
-#order for it to be exported. The code below shows how to properly define,
-#document, and save a module specifications list.
+# Specs_ls <- testModule(
+#   ModuleName = "CreateHouseholds",
+#   LoadDatastore = FALSE,
+#   SaveDatastore = TRUE,
+#   DoRun = FALSE
+# )
+#
+#2) Test code to create a list of module inputs to use in module function
+#------------------------------------------------------------------------
+#The following commented-out code can be run to create a list of module inputs
+#that may be used in the development of module functions. Note that the data
+#will be returned for the first year in the run years specified in the
+#run_parameters.json file. Also note that if the RunBy specification is not
+#Region, the code will by default return the data for the first geographic area
+#in the datastore.
+#
+# setwd("tests")
+# Year <- getYears()[1]
+# if (Specs_ls$RunBy == "Region") {
+#   L <- getFromDatastore(Specs_ls, RunYear = Year, Geo = NULL)
+# } else {
+#   GeoCategory <- Specs_ls$RunBy
+#   Geo_ <- readFromTable(GeoCategory, GeoCategory, Year)
+#   L <- getFromDatastore(Specs_ls, RunYear = Year, Geo = Geo_[1])
+#   rm(GeoCategory, Geo_)
+# }
+# rm(Year)
+# setwd("..")
+#
+#3) Test code to run full module tests
+#-------------------------------------
+#Run the following commented-out code after the module functions have been
+#written to test all aspects of the module including whether the module can be
+#run and whether the module will produce results that are consistent with the
+#module's Set specifications. It is also important to run this code if one or
+#more other modules in the package need the dataset(s) produced by this module.
+#
+# testModule(
+#   ModuleName = "CreateHouseholds",
+#   LoadDatastore = FALSE,
+#   SaveDatastore = TRUE,
+#   DoRun = TRUE
+# )
+```  
 
-#The components of the specifications list are as follows:
-
-#RunBy: This is the level of geography that the module is to be applied at.
-#Acceptable values are "Region", "Azone", "Bzone", "Czone", and "Marea".
-
-#Inp: A list of scenario inputs that are to be read from files and loaded into
-#the datastore. The following need to be specified for every data item (i.e.
-#column in a table):
-#  NAME: the name of a data item in the input table;
-#  FILE: the name of the file that contains the table;
-#  TABLE: the name of the datastore table the item is to be put into;
-#  TYPE: the data type (i.e. double, integer, character, logical);
-#  UNITS: the measurement units for the data;
-#  NAVALUE: the value used to represent NA in the datastore;
-#  SIZE: the maximum number of characters (or 0 for numeric data)
-#  PROHIBIT: data conditions that are prohibited or "" if not applicable;
-#  ISELEMENTOF: allowed categorical data values or "" if not applicable;
-#  UNLIKELY: data conditions that are unlikely or "" if not applicable;
-#  TOTAL: the total for all values (e.g. 1) or NA if not applicable.
-
-#Get: Identifies data to be loaded from the datastore. The
-#following need to be specified for every data item:
-#  NAME: the name of the dataset to be loaded;
-#  TABLE: the name of the table that the dataset is a part of;
-#  TYPE: the data type (i.e. double, integer, character, logical);
-#  UNITS: the measurement units for the data;
-#  PROHIBIT: data conditions that are prohibited or "" if not applicable;
-#  ISELEMENTOF: allowed categorical data values or "" if not applicable.
-
-#Set: Identifies data that is produced by the module that is to be saved in the
-#datastore. The following need to be specified for every data item:
-#  NAME: the name of the data item that is to be saved;
-#  TABLE: the name of the table that the dataset is a part of;
-#  TYPE: the data type (i.e. double, integer, character, logical);
-#  UNITS: the measurement units for the data;
-#  NAVALUE: the value used to represent NA in the datastore;
-#  PROHIBIT: data conditions that are prohibited or "" if not applicable;
-#  ISELEMENTOF: allowed categorical data values or "" if not applicable;
-#  SIZE: the maximum number of characters (or 0 for numeric data).
-
-#Define the data specifications
-#------------------------------
-CreateBzoneDevSpecifications <- list(
-  #Level of geography module is applied at
-  RunBy = "Marea",
-  #Specify input data
-  Inp = items(
-    item(
-      NAME = "Area",
-      FILE = "marea_area.csv",
-      TABLE = "Marea",
-      TYPE = "double",
-      UNITS = "square miles",
-      NAVALUE = -1,
-      SIZE = 0,
-      PROHIBIT = c("< 0"),
-      ISELEMENTOF = "",
-      UNLIKELY = "",
-      TOTAL = NA
-    )
-  ),
-  #Specify data to be loaded from data store
-  Get = items(
-    item(
-      NAME = "Marea",
-      TABLE = "Marea",
-      TYPE = "character",
-      UNITS = "none",
-      PROHIBIT = "",
-      ISELEMENTOF = ""
-    ),
-    item(
-      NAME = "Area",
-      TABLE = "Marea",
-      TYPE = "double",
-      UNITS = "square miles",
-      PROHIBIT = "",
-      ISELEMENTOF = ""
-    ),
-    item(
-      NAME = "Bzone",
-      TABLE = "Bzone",
-      TYPE = "character",
-      UNITS = "none",
-      PROHIBIT = "",
-      ISELEMENTOF = ""
-    ),
-    item(
-      NAME = "DevType",
-      TABLE = "Bzone",
-      TYPE = "character",
-      UNITS = "none",
-      PROHIBIT = "",
-      ISELEMENTOF = ""
-    ),
-    item(
-      NAME = "NumHh",
-      TABLE = "Bzone",
-      TYPE = "integer",
-      UNITS = "none",
-      PROHIBIT = c("NA", "<= 0"),
-      ISELEMENTOF = ""
-    )
-  ),
-  #Specify data to saved in the data store
-  Set = items(
-    item(
-      NAME = "DistFromCtr",
-      TABLE = "Bzone",
-      TYPE = "double",
-      UNITS = "miles",
-      NAVALUE = -1,
-      PROHIBIT = c("< 0"),
-      ISELEMENTOF = "",
-      SIZE = 0
-    ),
-    item(
-      NAME = "PopDen",
-      TABLE = "Bzone",
-      TYPE = "double",
-      UNITS = "persons per square mile",
-      NAVALUE = -1,
-      PROHIBIT = c("NA", "<= 0"),
-      ISELEMENTOF = "",
-      SIZE = 0
-    ),
-    item(
-      NAME = "SfdNum",
-      TABLE = "Bzone",
-      TYPE = "integer",
-      UNITS = "dwelling units",
-      NAVALUE = -1,
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = "",
-      SIZE = 0
-    ),
-    item(
-      NAME = "MfdNum",
-      TABLE = "Bzone",
-      TYPE = "integer",
-      UNITS = "dwelling units",
-      NAVALUE = -1,
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = "",
-      SIZE = 0
-    )
-  )
+### Appendix F: Example Test Script from the VESimHouseholds Package  
+```
+#Test CreateHouseholds module
+source("R/CreateHouseholds.R")
+testModule(
+  ModuleName = "CreateHouseholds",
+  LoadDatastore = FALSE,
+  SaveDatastore = TRUE,
+  DoRun = TRUE
 )
 
-#Save the data specifications list
-#---------------------------------
-#' Specifications list for CreateBzoneDev module
-#'
-#' A list containing specifications for the CreateHouseholds module.
-#'
-#' @format A list containing 4 components:
-#' \describe{
-#'  \item{RunBy}{the level of geography that the module is run at}
-#'  \item{Inp}{scenario input data to be loaded into the datastore for this
-#'  module}
-#'  \item{Get}{module inputs to be read from the datastore}
-#'  \item{Set}{module outputs to be written to the datastore}
-#' }
-#' @source CreateHouseholds.R script.
-"CreateBzoneDevSpecifications"
-devtools::use_data(CreateBzoneDevSpecifications, overwrite = TRUE)
+#Test PredictWorkers module
+source("R/PredictWorkers.R")
+testModule(
+  ModuleName = "PredictWorkers",
+  LoadDatastore = TRUE,
+  SaveDatastore = TRUE,
+  DoRun = TRUE
+)
 
+#Test AssignLifeCycle module
+source("R/AssignLifeCycle.R")
+testModule(
+  ModuleName = "AssignLifeCycle",
+  LoadDatastore = TRUE,
+  SaveDatastore = TRUE,
+  DoRun = TRUE
+)
 
-#=======================================================
-#SECTION 3: DEFINE FUNCTIONS THAT IMPLEMENT THE SUBMODEL
-#=======================================================
-#Functions defined in this section of the script implement the submodel. One of
-#these functions is the main function that is called by the software framework.
-#That function may call other functions. The main function is assigned the
-#same name as the module. In this case it is "CreateBzoneDev". The main
-#function returns a list containing all the data that are to be saved in the
-#datastore. Those data must conform with the module specifications.
+#Test PredictIncome module
+source("R/PredictIncome.R")
+testModule(
+  ModuleName = "PredictIncome",
+  LoadDatastore = TRUE,
+  SaveDatastore = TRUE,
+  DoRun = TRUE
+)
 
-#This module contains two functions in addition to the main function. The first
-#function, calcBzoneDistDen, assigns a population density to each Bzone.
-#It also assigns a distance from the urban core to 'metropolitan' type Bzones.
-#The second function, calcBuildingTypes, calculates the number of single-family
-#detached dwelling units and the number of multi-family dwelling units in each
-#Bzone.
+#Test PredictHousing module
+source("R/PredictHousing.R")
+testModule(
+  ModuleName = "PredictHousing",
+  LoadDatastore = TRUE,
+  SaveDatastore = TRUE,
+  DoRun = TRUE
+)
+```  
 
-#Note that since the calcBzoneDistDen and calcBuildingTypes functions are
-#defined outside of the main function (CreateBzoneDev), these functions don't
-#have access to variables within the scope of the main function and therefore
-#all their necessary inputs must be passed to them. This is done by passing
-#a list, L, that contains all of the inputs.
+### Appendix G: Example Vignette Source File 
 
-#Function that simulates Bzone population density and distance from center
-#-------------------------------------------------------------------------
-#' Simulate Bzone density and distance characteristics
-#'
-#' \code{calcBzoneDistDen} simulates the population density of all Bzones
-#' and distance from the urban core for Bzones whose DevType is "Metropolitan".
-#'
-#' The Bzone population density and distance from the urban core for
-#' metropolitan Bzones are simulated using population, population density, and
-#' distance distributions compiled by the U.S. Census Bureau.
-#'
-#' @param L A list containing the following components that have been read
-#' from the datastore:
-#' Bzone: A character vector of Bzone names read from the Bzone table.
-#' DevType: A character vector identifying the development type of each Bzone
-#' read from the Bzone table.
-#' NumHh: A integer vector of the number of households in each Bzone read from
-#' the Bzone table.
-#' Area: A number identifying the geographic area of the metropolitan area read
-#' from the Marea table.
-#' @return A list containing the following components:
-#' DistFromCtr: A numeric vector of the distance of each Bzone from the urban
-#' area center.
-#' PopDen: A numeric vector of the population density of each Bzone.
-#' @export
-calcBzoneDistDen <- function(L) {
-  #Read miscellaneous parameters
-  MiscParameters_ <- MiscDevParameters_df$Value
-  names(MiscParameters_) <- MiscDevParameters_df$Parameter
-  AveHhSize <- MiscParameters_["AveHhSize"]
-  AveTownDensity <- MiscParameters_["AveTownDensity"]
-  AveRuralDensity <- MiscParameters_["AveRuralDensity"]
-  #Create vectors to store density and distance results
-  Bz <- L$Bzone
-  PopDen_Bz <- numeric(length(Bz))
-  DistFromCtr_Bz <- numeric(length(Bz)) * NA
-  #Calculate the average density of towns and rural areas
-  PopDen_Bz[L$DevType == "Town"] <- AveTownDensity
-  PopDen_Bz[L$DevType == "Rural"] <- AveRuralDensity
-  #Metropolitan density and distance if any DevType is 'Metropolitan'
-  if (any(L$DevType == "Metropolitan")) {
-    #Calculate urbanized area density scale
-    UrbDenGrad_ <-
-      PopDenByDistance_df$PopDensity[which(PopDenByDistance_df$PopDensity >= 1000)]
-    DistIndex_ <- 1:length(UrbDenGrad_)
-    UrbPopProp_ <- PopByDistance_df$PopProp[DistIndex_]
-    UrbPopProp_ <- UrbPopProp_ / sum(UrbPopProp_)
-    #Calculate adjusted density gradient
-    harmonicMean <- function( Probs., Values. ) {
-      1 / sum( Probs. / Values. )
-    }
-    NumMetroHh <- sum(L$NumHh[L$DevType == "Metropolitan"])
-    AveMetroDenTarget <- AveHhSize * NumMetroHh / L$Area
-    AveMetroDen <- harmonicMean(UrbPopProp_, UrbDenGrad_)
-    DenAdj <- AveMetroDenTarget / AveMetroDen
-    UrbAdjDenGrad_ <- UrbDenGrad_ * DenAdj
-    #Calculate adjusted distances
-    UrbRadius <- sqrt(L$Area / pi)
-    DistAdj <- UrbRadius / PopByDistance_df$Distance[tail(DistIndex_, 1)]
-    UrbAdjDist_ <- DistAdj * PopByDistance_df$Distance[DistIndex_]
-    #Choose distance and density for each metropolitan Bzone
-    NumMetroBzones <- sum(L$DevType == "Metropolitan")
-    MetroBzoneIdx_ <- sample(DistIndex_, NumMetroBzones, replace = TRUE,
-                             prob = UrbPopProp_)
-    MetroBzoneDen_ <- UrbAdjDenGrad_[MetroBzoneIdx_]
-    MetroBzoneDist_ <- UrbAdjDist_[MetroBzoneIdx_]
-    #Assign density and distance values to Bzones
-    DistFromCtr_Bz[L$DevType == "Metropolitan"] <- MetroBzoneDist_
-    PopDen_Bz[L$DevType == "Metropolitan"] <- MetroBzoneDen_
-  }
-  #Return the results in a list
-  list(
-    DistFromCtr = DistFromCtr_Bz,
-    PopDen = PopDen_Bz
-  )
-}
-
-#Function which estimates building type split based on population density
-#------------------------------------------------------------------------
-#' Simulate Bzone dwelling types.
-#'
-#' \code{calcBuildingTypes} calculates the number of single-family dwellings and
-#' the number of multifamily dwelling units in each Bzone.
-#'
-#' This function calculates the number of single-family detached dwellings and
-#' multifamily dwellings in each Bzone. This is done using a toy model which
-#' relates the proportion of multifamily dwellings to population density. The
-#' results are the numbers of single-family detached dwellings and multifamily
-#' detached dwellings in each Bzone.
-#'
-#' @param L A list containing the following components that have been either
-#' read from the datastore or produced by the application of the
-#' calcBzoneDistDen function:
-#' PopDen: A numeric vector of the population density of each Bzone produced by
-#' the calcBzoneDistDen function.
-#' NumHh: An integer vector of the number of households in each Bzone read from
-#' the Bzone table.
-#' @return A list containing the following components:
-#' SfdNum: An integer vector of the number of households living in single-family
-#' dwellings in each Bzone.
-#' MfdNum: An integer vector of the number of households living in multifamily
-#' dwellings in each Bzone.
-#' @export
-calcBuildingTypes <- function(L) {
-  #Read miscellaneous parameters
-  MiscParameters_ <- MiscDevParameters_df$Value
-  names(MiscParameters_) <- MiscDevParameters_df$Parameter
-  HhDen_Bz <- L$PopDen / MiscParameters_["AveHhSize"]
-  MfProp_Bz <- (HhDen_Bz - 500) / 8000
-  MfProp_Bz[MfProp_Bz < 0] <- 0
-  MfProp_Bz[MfProp_Bz > 1] <- 1
-  SfProp_Bz <- 1 - MfProp_Bz
-  SfdNum_Bz <- round(L$NumHh * SfProp_Bz)
-  storage.mode(SfdNum_Bz) <- "integer"
-  MfdNum_Bz <- L$NumHh - SfdNum_Bz
-  storage.mode(MfdNum_Bz) <- "integer"
-  #Return the results in a list
-  list(
-    SfdNum = SfdNum_Bz,
-    MfdNum = MfdNum_Bz
-  )
-}
-
-#The main function, CreateBzoneDev
-#---------------------------------
-#' Calculate Bzone development characteristics
-#'
-#' \code{CreateBzoneDev} is the main function of the CreateBzoneDev module that
-#' calls the calcBzoneDistDen and calcBuildingTypes functions to calculate
-#' Bzone development characteristics.
-#'
-#' This is the main function for the CreateBzoneDev module. It is a wrapper for
-#' the calcBzoneDistDen and calcBuildingTypes functions which do all of the
-#' work of calculating Bzone development characteristics including distance from
-#' the urban area center, population density, number of households in single-
-#' family dwellings, and number of households in multifamily dwellings.
-#'
-#' @param L A list containing the following components that have been read from
-#' the datastore:
-#' Bzone: A character vector of Bzone names read from the Bzone table.
-#' DevType: A character vector identifying the development type of each Bzone
-#' read from the Bzone table.
-#' NumHh: A integer vector of the number of households in each Bzone read from
-#' the Bzone table.
-#' Area: A number identifying the geographic area of the metropolitan area read
-#' from the Marea table.
-#' @return A list containing the following components:
-#' DistFromCtr: A numeric vector of the distance of each Bzone from the urban
-#' area center.
-#' PopDen: A numeric vector of the population density of each Bzone.
-#' SfdNum: An integer vector of the number of households living in single-family
-#' dwellings in each Bzone.
-#' MfdNum: An integer vector of the number of households living in multifamily
-#' dwellings in each Bzone.
-#' @export
-CreateBzoneDev <- function(L) {
-  #Calculate Bzone densities and distances and combine with the input list
-  L <- c(L, calcBzoneDistDen(L))
-  #Calculate Bzone building types and combine with the input list
-  L <- c(L, calcBuildingTypes(L))
-  #Return a list of values to be saved in the datastore
-  L[c("DistFromCtr", "PopDen", "SfdNum", "MfdNum")]
-}
-```
-### Appendix F: example vignette source file 
-```
----
-title: "Using the CreateHouseholds Module"
-author: "Brian Gregor"
-date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Using the CreateHouseholds Module}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
----
-
-The **CreateHouseholds** module creates a set of households reflecting a household size distribution that is representable for the region. The module creates a "Household" table and populates it with several attributes including *HhId* (unique household ID), *Azone* (Azone household is located in), and *HhSize* (number of people in the household. The module also tabulates the number of households in each Azone and adds the counts to the Azone table as *NumHh*. The model is run in the framework with the following command:  
-
-```{r, eval=FALSE}  
-runModule(ModuleName = "CreateHouseholds", PackageName = "vedemo1",  
-             Year = XXXX, IgnoreInp_ = NULL, IgnoreSet_ = NULL) 
-```
-```
-where the a four-digit year value is substituted for `XXXX`. Most often the Year argument will be input programmatically. The IgnoreInp_ and IgnoreSet_ arguments will ignore any specified 'input' and/or 'set' specifications identified by the specification names. This option is provided to allow knowledgeable users to substitute for specified inputs and/or outputs. It should only be used with extreme caution.
-
-The *CreateHouseholds* module must be run before the *CreateBzones* and *CreateBzoneDev* modules are run. The module is run for the entire model area at once (the RunBy component is assigned the value "Region"). This is done because the full set of households must be created in order to determine how many rows the *Households* table will have. This needs to be determined in order to initialize the table.
-
-The *CreateHouseholds* module depends on one scenario input that is provided at the Azone level. The input file must be named "azone_population.csv" and must be located in the "inputs" directory of the model run setup. An example is included in the "tests/data" directory of this package. The structure of the file is as follows:
-
-```{r, echo=FALSE, results='asis'}
-AzonePop_df <- read.csv("../tests/data/azone_population.csv", as.is = TRUE)
-pander::pandoc.table(AzonePop_df)
-```
-```   
-The column names for the file must be as shown. Rows need to exist for all Azones and all years for which the model will be run. The data in the *Population* column must be integer values and and thousands separators may not be used.
-
-This module uses one model parameter file (*household_sizes.csv*) that is located in the "inst/extdata" directory of this package. The accompanying *household_sizes.txt* file describes the source and structure of that file. A substitute for that file (with the same name and structure) may be used instead to modify the module so that it is more representative of the region and/or base year for the model deployment. If you wish to do this, you must obtain the source package. Then modify the *household_sizes.csv* file, making certain that the modifications are consistent with the specifications described in the *household_sizes.txt* file. Then build the package to create a binary version. The best way to do this is using the RStudio IDE for R development along with the *devtools* package. RStudio is free and it along with *devtools* has everything you need to easily create a binary package from a source package. The `devtools::build(binary = TRUE)` will take care of things. For more information about R packages, I recommend referring to Hadley Wickham's book, *R Packages*, and/or to his [website](http://r-pkgs.had.co.nz/).
-
-```
+TO BE DONE
