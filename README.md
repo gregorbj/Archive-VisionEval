@@ -5,6 +5,6 @@
 
 VisionEval is a model system and supporting software framework for building collaborative disaggregate strategic planning models.  
 
-# Getting Started
+## Documentation
 
 https://github.com/gregorbj/VisionEval/wiki
