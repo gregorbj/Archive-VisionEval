@@ -39,16 +39,20 @@ library(visioneval)
 #------------------------------
 LocateHouseholdsSpecifications <- list(
   #Level of geography module is applied at
-  RunBy = "Azone",
+  RunBy = "Region",
   #Specify new tables to be created by Inp if any
   #Specify new tables to be created by Set if any
   #Specify input data
   Inp = items(
     item(
-      NAME = "Weights",
-      FILE = "bzone_location_weights.csv",
+      NAME = items(
+        "HhPropIncQ1",
+        "HhPropIncQ2",
+        "HhPropIncQ3",
+        "HhPropIncQ4"),
+      FILE = "bzone_hh_inc_qrtl_prop.csv",
       TABLE = "Bzone",
-      GROUP = "Year",
+      GROUP = "BaseYear",
       TYPE = "double",
       UNITS = "NA",
       NAVALUE = -1,
@@ -84,9 +88,14 @@ LocateHouseholdsSpecifications <- list(
       ISELEMENTOF = ""
     ),
     item(
-      NAME = "Weights",
+      NAME =
+        items(
+          "HhPropIncQ1",
+          "HhPropIncQ2",
+          "HhPropIncQ3",
+          "HhPropIncQ4"),
       TABLE = "Bzone",
-      GROUP = "Year",
+      GROUP = "BaseYear",
       TYPE = "double",
       UNITS = "NA",
       NAVALUE = -1,
@@ -501,12 +510,12 @@ LocateHouseholds <- function(L) {
 #to set up a datastore are in the defs and inputs directories in the tests
 #directory. All files in the defs directory must have the default names.
 #
-# Specs_ls <- testModule(
-#   ModuleName = "LocateHouseholds",
-#   LoadDatastore = TRUE,
-#   SaveDatastore = TRUE,
-#   DoRun = FALSE
-# )
+Specs_ls <- testModule(
+  ModuleName = "LocateHouseholds",
+  LoadDatastore = TRUE,
+  SaveDatastore = TRUE,
+  DoRun = FALSE
+)
 #
 #2) Test code to create a list of module inputs to use in module function
 #------------------------------------------------------------------------
@@ -517,18 +526,18 @@ LocateHouseholds <- function(L) {
 #Region, the code will by default return the data for the first geographic area
 #in the datastore.
 #
-# setwd("tests")
-# Year <- getYears()[1]
-# if (Specs_ls$RunBy == "Region") {
-#   L <- getFromDatastore(Specs_ls, RunYear = Year, Geo = NULL)
-# } else {
-#   GeoCategory <- Specs_ls$RunBy
-#   Geo_ <- readFromTable(GeoCategory, GeoCategory, Year)
-#   L <- getFromDatastore(Specs_ls, RunYear = Year, Geo = Geo_[1])
-#   rm(GeoCategory, Geo_)
-# }
-# rm(Year)
-# setwd("..")
+setwd("tests")
+Year <- getYears()[1]
+if (Specs_ls$RunBy == "Region") {
+  L <- getFromDatastore(Specs_ls, RunYear = Year, Geo = NULL)
+} else {
+  GeoCategory <- Specs_ls$RunBy
+  Geo_ <- readFromTable(GeoCategory, GeoCategory, Year)
+  L <- getFromDatastore(Specs_ls, RunYear = Year, Geo = Geo_[1])
+  rm(GeoCategory, Geo_)
+}
+rm(Year)
+setwd("..")
 #
 #3) Test code to run full module tests
 #-------------------------------------
