@@ -151,12 +151,21 @@ readModelState <- function(Names_ = "All", FileName = "ModelState.Rda") {
 #' \code{getYears} reads the Years component from the the model state file.
 #'
 #' This is a convenience function to make it easier to retrieve the Years
-#' component of the model state file.
+#' component of the model state file. If the Years component includes the base
+#' year then order the Years component so that it is first. This ordering is
+#' important because some modules calculate future year values by pivoting off
+#' of base year values so the base year must be run first.
 #'
 #' @return A character vector of the model run years.
 #' @export
 getYears <- function() {
-  unlist(getModelState("Years"))
+  BaseYear <- unlist(getModelState("BaseYear"))
+  Years <- unlist(getModelState("Years"))
+  if (BaseYear %in% Years) {
+    c(BaseYear, Years[!Years %in% BaseYear])
+  } else {
+    Years
+  }
 }
 
 
