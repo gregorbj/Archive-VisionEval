@@ -647,6 +647,7 @@ setInDatastore <-
 #' @export
 inputsToDatastore <-
   function(Inputs_ls, ModuleSpec_ls, ModuleName) {
+    G <- getModelState()
     #Make sure the inputs are error free
     if (length(Inputs_ls$Errors) != 0) {
       Msg <-
@@ -681,15 +682,56 @@ inputsToDatastore <-
     #Write Global group tables to datastore
     if (length(Data_ls[["Global"]]) > 0) {
       for (Table in names(Data_ls[["Global"]])) {
-        for (Name in names(Data_ls[["Global"]][[Table]])) {
-          Data_ <- Data_ls[[Group]][[Table]][[Name]]
-          Spec_ls <- findSpec(InpSpec_ls, Name, Table, Group)
+        if (Table %in% c("Azone", "Bzone", "Czone", "Marea")) {
+          Data_df <-
+            data.frame(Data_ls[["Global"]][[Table]], stringsAsFactors = FALSE)
+          Units_ls <- lapply(Data_df, function(x) unname(attributes(x)$UNITS))
+          SortData_df <- sortGeoTable(Data_df, Table, "Global")
+          FieldsToSave_ <-
+            names(SortData_df)[!(names(SortData_df) %in% "Geo")]
+          for (Name in FieldsToSave_) {
+            Spec_ls <- findSpec(InpSpec_ls, Name, Table, "Global")
+            Spec_ls$MODULE <- ModuleName
+            #Modify units spec to reflect units consistent with defaults for
+            #datastore
+            Spec_ls$UNITS <- Units_ls[[Name]]
+            writeToTable(SortData_df[[Name]], Spec_ls, "Global")
+            rm(Spec_ls)
+          }
+          rm(SortData_df, FieldsToSave_, Data_df, Units_ls)
+        } else {
+          for (Name in names(Data_ls[["Global"]][[Table]])) {
+            Data_ <- Data_ls[["Global"]][[Table]][[Name]]
+            Spec_ls <- findSpec(InpSpec_ls, Name, Table, "Global")
+            Spec_ls$MODULE <- ModuleName
+            #Modify units spec to reflect units consistent with defaults for
+            #datastore
+            Spec_ls$UNITS <- attributes(Data_)$UNITS
+            writeToTable(Data_, Spec_ls, "Global")
+          }
+        }
+      }
+    }
+    #Write BaseYear group tables to datastore
+    if (length(Data_ls[["BaseYear"]]) > 0) {
+      for (Table in names(Data_ls[["BaseYear"]])) {
+        Data_df <-
+          data.frame(Data_ls[["BaseYear"]][[Table]], stringsAsFactors = FALSE)
+        Units_ls <- lapply(Data_df, function(x) unname(attributes(x)$UNITS))
+        Year <- G$BaseYear
+        SortData_df <- sortGeoTable(Data_df, Table, Year)
+        FieldsToSave_ <-
+          names(SortData_df)[!(names(SortData_df) %in% "Geo")]
+        for (Name in FieldsToSave_) {
+          Spec_ls <- findSpec(InpSpec_ls, Name, Table, "BaseYear")
           Spec_ls$MODULE <- ModuleName
           #Modify units spec to reflect units consistent with defaults for
           #datastore
-          Spec_ls$UNITS <- attributes(Data_)$UNITS
-          writeToTable(Data_, Spec_ls, Group)
+          Spec_ls$UNITS <- Units_ls[[Name]]
+          writeToTable(SortData_df[[Name]], Spec_ls, Year)
+          rm(Spec_ls)
         }
+        rm(Year, SortData_df, FieldsToSave_, Data_df, Units_ls)
       }
     }
     #Write Year group tables to datastore
