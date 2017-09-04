@@ -36,11 +36,3 @@ testModule(
   DoRun = TRUE
 )
 
-#Test PredictHousing module
-source("R/PredictHousing.R")
-testModule(
-  ModuleName = "PredictHousing",
-  LoadDatastore = TRUE,
-  SaveDatastore = TRUE,
-  DoRun = TRUE
-)
