@@ -1,16 +1,14 @@
 Package,Module,Description,Status,Completion,Notes
-VESyntheticFirms,CreateBaseSyntheticFirms,Creates base year synthetic firms by NAICS and number of jobs,I,,"VERPAT model, likely for RSPM in future"
-VESyntheticFirms,CreateFutureSyntheticFirms,Creates future year synthetic firms by NAICS and number of jobs,I,,"VERPAT model, likely for RSPM in future"
+VESyntheticFirms,CreateBaseSyntheticFirms,Creates base year synthetic firms by NAICS and number of jobs,I,,VERPAT model
+VESyntheticFirms,CreateFutureSyntheticFirms,Creates future year synthetic firms by NAICS and number of jobs,I,,VERPAT model
 VESimHouseholds,CreateHouseholds,Creates households with number of persons by age group,EIT,July,
 VESimHouseholds,PredictWorkers,Assigns number of workers by age group to households,EIT,July,
 VESimHouseholds,AssignLifeCycle,Assigns household lifecycle category,EIT,July,
 VESimHouseholds,PredictIncome,Predict total household income,EIT,July,
-VESimHouseholds,PredictHousing,"Predict household housing (single-family, multifamily)",EIT,July,
 VESimHouseholds,AssignDrivers,Assign number of drivers in household,,August,
-VELandUse,CalibrateHouseholdAttraction,Calculate Bzone attraction factors (to reflect spatial income distribution),,August,
-VELandUse,LocateHouseholds,Places each household in a Bzone,EIT,July,
+VELandUse,PredictHousing,"Predict household housing (single-family, multifamily, group quarters) and place each household in a Bzone",EIT,July,Combines functionality of PredictHousing module which used to be in the VESimHouseholds package and the LocateHouseholds module. It eliminates the need for the CalibrateHouseholdAttraction module.
 VELandUse,LocateEmployment,"Allocate number of jobs by Bzone and type (total, retail, service) ",EIT,July,
-VELandUse,AssignDevTypes,"Assign development type to household (urban, rural)",EIT,July,Future change to implement place types
+VELandUse,AssignDevTypes,"Assign development type to household (urban, rural)",EIT,July,
 VELandUse,Calculate4DMeasures,"Calculate Bzone density, diversity, design, and accessibility measures",EIT,July,
 VELandUse,CalculateUrbanMixMeasure,Assign urban mixed use attribute to households,EIT,July,
 VETransportSupply,AssignTransitService,Calculates transit revenue miles per capita for region and Bzone transit service level,EIT,July,
