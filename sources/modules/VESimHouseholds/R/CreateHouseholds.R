@@ -46,14 +46,16 @@ library(visioneval)
 #' age groups is in one of many household types where each household type is
 #' determined by the number of persons in each age category.
 #'
+#' @param HhData_df A dataframe of household estimation data as produced by the
+#' CreateEstimationDatasets.R script.
 #' @param Threshold A number between 0 and 1 identifying the percentile
 #' cutoff for determining the most prevalent households.
 #' @return A matrix where the rows are the household types and the columns are
 #' the age categories and the values are the number of persons.
+#' @include CreateEstimationDatasets.R
 #' @export
-calcHhAgeTypes <- function(Threshold = 0.99) {
-  load("data/Hh_df.rda")
-  Hh_df <- Hh_df[Hh_df$HhType == "Reg",]
+calcHhAgeTypes <- function(HhData_df, Threshold = 0.99) {
+  Hh_df <- HhData_df[HhData_df$HhType == "Reg",]
   Ag <-
     c("Age0to14",
       "Age15to19",
@@ -93,7 +95,8 @@ calcHhAgeTypes <- function(Threshold = 0.99) {
 
 #Create and save household size proportions parameters
 #-----------------------------------------------------
-HtProb_HtAp <- calcHhAgeTypes()
+load("data/Hh_df.rda")
+HtProb_HtAp <- calcHhAgeTypes(Hh_df)
 #' Household size proportions
 #'
 #' A dataset containing the proportions of households by household size.
@@ -102,7 +105,7 @@ HtProb_HtAp <- calcHhAgeTypes()
 #' @source CreateHouseholds.R script.
 "HtProb_HtAp"
 devtools::use_data(HtProb_HtAp, overwrite = TRUE)
-rm(calcHhAgeTypes)
+rm(calcHhAgeTypes, Hh_df)
 
 
 #================================================
