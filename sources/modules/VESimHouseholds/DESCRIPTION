@@ -26,3 +26,9 @@ Suggests:
 VignetteBuilder: knitr
 RoxygenNote: 6.0.1
 Remotes: gregorbj/VisionEval/sources/framework/visioneval@develop
+Collate: 
+    'AssignLifeCycle.R'
+    'CreateEstimationDatasets.R'
+    'CreateHouseholds.R'
+    'PredictWorkers.R'
+    'PredictIncome.R'
