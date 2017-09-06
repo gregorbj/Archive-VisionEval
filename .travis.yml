@@ -9,6 +9,7 @@ cache: packages
 warnings_are_errors: false
 
 # nloptr R package requires libnlopt-dev to be installed, which requires trusty ubuntu
+# phantomjs required for shinytest for VEGUI testing
 before_install:
   - sudo apt-get update
   - sudo apt-get -y install libnlopt-dev
@@ -25,7 +26,7 @@ before_install:
 
 # start by installing devtools
 install:
-  - Rscript -e 'install.packages(c("devtools", "roxygen2", "stringr", "knitr"))'
+  - Rscript -e 'install.packages(c("curl","devtools", "roxygen2", "stringr", "knitr"))'
   - Rscript -e 'devtools::install_bioc(c("BiocInstaller", "rhdf5"))'
 
 # install and test framework, modules, models, GUI
