@@ -1154,7 +1154,7 @@ server <- function(input, output, session) {
         " class(DF): ",
         paste0(collapse = ", ", class(DF))
       ))
-      rhandsontable(DF, useTypes = TRUE,)
+      rhandsontable(DF, useTypes = TRUE)
     })
 
   getOutputINPUTS_TREE_SELECTED_TEXT <- reactive({
