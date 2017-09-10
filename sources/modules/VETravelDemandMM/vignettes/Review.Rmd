@@ -1,0 +1,75 @@
+---
+title: "VETravelDemandMM Module Contribution Review"
+author: "Liming Wang"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{VETravelDemandMM Module Contribution Review}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+This vignette documents responses to [VisionEval Contribution Review Criteria](https://github.com/gregorbj/VisionEval/wiki/Contribution-Review-Criteria) for the VETravelDemandMM module.
+
+## Contribution Review Criteria
+
+> 1. Does it contain all the elements that are required by the VisionEval [system specifications](https://github.com/gregorbj/VisionEval/blob/master/api/model_system_design.md)?
+
+As a module for VisionEval and a standard R package, this package/module conforms to the recommendations in [Section 8 Module](https://github.com/gregorbj/VisionEval/blob/master/api/model_system_design.md#8-modules), in term of both required elements and the directories and files layout. The only directory included in the package but not appearing in the recommendation is `data-raw`. Here we follow Hadley Wickham's recommendation in his [R packages](http://r-pkgs.had.co.nz/data.html#data-data): "Often, the data you include in `data/` is a cleaned up version of raw data you’ve gathered from elsewhere. I highly recommend taking the time to include the code used to do this in the source version of your package [... and] put this code in `data-raw/`". The scripts in `data-raw` are code used to estimate all models and save estimation results into the `data` directory.
+
+
+> 2. Why is it better, and/or different than [existing modules](https://github.com/gregorbj/VisionEval/tree/master/sources/modules)? Does it do good science and provide documentation justifying this claim? Is it consistent with good practice in strategic modeling? How might it overlap with existing modules?
+
+The primary objectives of the module is to better represent multi-modal travel for in models for strategic planning and to update models with the latest and best data available. In addition to these two primary objectives, the module uses rigorous selection and benchmark of different model structures in choosing model structure and takes advantage of R infrastructure and new packages. Justification and objectives can be found in these project reports:
+
+- [SPR 788 Project Report for Task 2 Model Design and Estimation Report](https://cities-lab.github.io/SPR788/Task2_Report.html)
+- [SPR 788 Project Report for Task 3 VETravelDemand (VisionEval Travel Demand) Implementation](https://cities-lab.github.io/SPR788/Task3_Report.html)
+- [SPR 788 Project Report for Task 4 Model Testing](https://cities-lab.github.io/SPR788/Task4_Report.html)
+- [Development of a Multi-modal Travel Demand Module for the Regional Strategic Planning Model (manuscript under review)](https://www.dropbox.com/s/y594fz44achoqkq/jtlu_rspm.pdf?dl=0)
+
+> 3. Is the module documentation complete? Does it include documentation of model estimation, algorithms, and instructions for using? 
+
+There are documents of the module in various form:
+
+1. manual for each of the R functions in the module;
+1. vignettes (including this document) that provide a long form document of the package;
+1. code and comments for estimation scripts
+1. Project reports and manuscripts under review, linked in the Introduction vignette
+
+> 4. If the module allows the estimation of regional parameters, does it provide default data, does it have clear documentation of what the estimation data needs to be and how it is to be formatted, and does it include proper data specifications to ensure that the user’s input data are correct?
+
+This module provides default model parameters estimated with US nationwide data, and it is also possible to re-estimate model paramters with region-specific data. The main estimation data are drawn from two external data package ([NHTS2009](https://github.com/cities-lab/NHTS2009) and [SLD](https://github.com/cities-lab/SLD), documented therein) and `data-raw/LoadDataforEstimation.R` joins data from different data sources and creates a single household data frame for estimation. `data-raw/LoadDataforEstimation.R` provides code and comments needed to replace the estimation data with region specific data.
+
+Since the model estimation does not use VisionEval specification, there is little check on data quality except for a few informational print out in the script.
+
+> 5. Is it based on geographic definitions that are consistent with the model system definitions?
+
+The module uses two geographies: Bzone (block-group) and Marea (region/UZA), which are consistent with the model system definitions.
+
+> 6. Does the module compute quickly enough and provide documentation justifying this claim?                        
+
+The tests running all 6 models in the module using Rogue Valley data take between 1 minute to 1 minutes and 30 seconds across different builds on Travis CI (See https://travis-ci.org/cities-lab/VETravelDemandMM/builds), on average 10 - 15 seconds per model, which is almost the same as the GreenSTEP/RSPM VETravelDemand module (https://travis-ci.org/gregorbj/VisionEval/builds).
+
+> 7. Does it includes all source files and data?  If a contributed module does not include all source data, it should include a minimal example data file for testing and so it is clear what data structure is needed to run the module.  It should also include clear instructions on how to fetch the data and/or a clear explanation of why non-included data is confidential and contact information for data owners. 
+
+Except for the confidential residential block group information for households in NHTS, all data and code are included in the package or in other open source (data) packages (NHTS2009 and SLD).
+
+> 8. Does the module only call R code and packages that work on all operating systems? If the code includes any non-R code (e.g. FORTRAN, C++) will that code compile on all operating systems?
+
+The module only includes R code and should work on all operating systems.
+
+> 9. Is it licensed with the VisionEval [license](https//github.com/gregorbj/VisionEval/blob/master/LICENSE) that allows the code to be freely distributed and modified and includes attribution so that the ‘provenance’ of the code can be tracked?
+
+The package is licensed with the same Apache 2.0 license as VisionEval. A LICENSE file is added to the package directory.
+
+> 10. Does it only interact with the computing environment by returning a properly structured list to the framework (i.e. it does not modify the global environment, does not read or write files, and only calls framework functions that are allowed)?
+
+Primary functions of the module are implemented in `R/Predict*.R`. The development of the package follows the VisionEval system design guide and the template module and only calls framework functions and a few internal helper functions. The module does not modify the global environment or read/write files when running as a VisionEval module.
+
+> 11. Does it include regression tests to enable checking that consistent results will be returned when updates are made to the framework and/or R programming environment?
+
+`checkModuleOutputs` provided by `testModule` checks outputs against specification of each model in automated tests of the package.
+
+> 12. Does it include [sufficient test coverage](Automated-Testing) and test data? Does it pass the [‘testModule’](https://github.com/gregorbj/VisionEval/blob/master/api/functions_summary.md#testmodule) test which validates that it will run correctly in the model system?
+
+Automated tests including `devtools.check()`, installation testing, and test runs of models in the module with `visioneval::testModule()` are in place with [Travis-CI](https://travis-ci.org/cities-lab/VETravelDemandMM). All tests pass in the current and recent builds.
