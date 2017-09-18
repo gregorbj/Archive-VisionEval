@@ -81,7 +81,9 @@ myFileTypes <- list(
   `comma separated values` = "csv",
   `tab separated values` = "tsv"
 )
+
 volumeRoots = getVolumes("")
+# volumeRoots = c("VERPAT"=file.path(getwd(),"..","models","VERPAT"))
 
 # Define UI for application
 ui <- fluidPage(

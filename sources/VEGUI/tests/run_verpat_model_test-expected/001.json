@@ -1,0 +1,32 @@
+{
+  "input": {
+    "DATASTORE_TABLE_CLOSE_BUTTON": [0],
+    "GEO_CSV_FILE_cell_clicked": {},
+    "GEO_CSV_FILE_rows_all": [1],
+    "GEO_CSV_FILE_rows_current": [1],
+    "GEO_CSV_FILE_search": [""],
+    "GEO_CSV_FILE_state": {},
+    "innerWidth": [992],
+    "MODEL_PARAMETERS_FILE": ["[\n  {\n    \"NAME\": \"EmploymentGrowth\",\n    \"VALUE\": \"1.5\",\n    \"TYPE\": \"double\",\n    \"UNITS\": \"multiplier\",\n    \"PROHIBIT\": \"\",\n    \"ISELEMENTOF\": \"\"\n  }\n]"],
+    "navlist": ["TAB_SETTINGS"],
+    "REVERT_MODEL_PARAMETERS_FILE": [0],
+    "REVERT_RUN_PARAMETERS_FILE": [0],
+    "RUN_MODEL_BUTTON": [0],
+    "RUN_PARAMETERS_FILE": ["{\n  \"Model\": [\"RPAT\"],\n  \"Scenario\": [\"RPAT Pilot\"],\n  \"Description\": [\"Pilot RPAT module in VisionEval\"],\n  \"Region\": [\"Multnomah County Oregon\"],\n  \"BaseYear\": [\"2005\"],\n  \"Years\": [\"2005\", \"2010\"],\n  \"DatastoreName\": [\"datastore.h5\"],\n  \"Seed\": [1],\n  \"RunTypes\": [\"E\", \"ELESNP\"]\n}"],
+    "SAVE_MODEL_PARAMETERS_FILE": [0],
+    "SAVE_RUN_PARAMETERS_FILE": [0],
+    "SELECT_RUN_SCRIPT_BUTTON": {
+      "files": {
+        "0": [
+          [""],
+          ["run_model.R"]
+        ]
+      },
+      "root": ["VERPAT"]
+    }
+  },
+  "output": {
+    "GEO_CSV_FILE": ["{\"x\":{\"filter\":\"none\",\"data\":[[\"1\"],[\"All\"],[null],[null],[\"MAll\"]],\"container\":\"<table class=\\\"display\\\">\\n  <thead>\\n    <tr>\\n      <th> <\\/th>\\n      <th>Azone<\\/th>\\n      <th>Bzone<\\/th>\\n      <th>Czone<\\/th>\\n      <th>Marea<\\/th>\\n    <\\/tr>\\n  <\\/thead>\\n<\\/table>\",\"options\":{\"dom\":\"tip\",\"rownames\":\"f\",\"order\":[],\"autoWidth\":false,\"orderClasses\":false,\"columnDefs\":[{\"orderable\":false,\"targets\":0}]},\"selection\":{\"mode\":\"none\",\"selected\":null,\"target\":\"row\"}},\"evals\":[],\"jsHooks\":[],\"deps\":[{\"name\":\"dt-core\",\"version\":\"1.10.12\",\"src\":{\"href\":\"dt-core-1.10.12\"},\"meta\":null,\"script\":\"js/jquery.dataTables.min.js\",\"stylesheet\":[\"css/jquery.dataTables.min.css\",\"css/jquery.dataTables.extra.css\"],\"head\":null,\"attachment\":null,\"package\":null,\"all_files\":false}]}"]
+  },
+  "export": {}
+}
