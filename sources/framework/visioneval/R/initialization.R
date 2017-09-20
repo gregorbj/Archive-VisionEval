@@ -1145,9 +1145,11 @@ simDataTransactions <- function(ModuleCalls_df) {
 
   #Add the working datastore inventory to the datastores list
   #----------------------------------------------------------
-  Dstores_ls[["Global"]][[G$DatastoreName]] <- G$Datastore
+  Dstores_ls[["Global"]][[G$DatastoreName]] <-
+    G$Datastore[grep("Global", G$Datastore$group),]
   for (Year in RunYears_) {
-    Dstores_ls[[Year]][[G$DatastoreName]] <- G$Datastore
+    Dstores_ls[[Year]][[G$DatastoreName]] <-
+      G$Datastore[grep(Year, G$Datastore$group),]
   }
 
   #Function to get datastore inventory corresponding to datastore reference
