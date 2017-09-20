@@ -53,7 +53,7 @@ initModelStateFile <-
   }
   TRUE
 }
-#initModelStateFile(Dir = "tests/defs")
+#initModelStateFile(Dir = "defs")
 
 #GET MODEL STATE VALUES
 #======================
@@ -237,6 +237,7 @@ initLog <- function(Suffix = NULL) {
   setModelState(list(LogFile = LogFile))
   TRUE
 }
+#initLog()
 
 
 #WRITE TO LOG
