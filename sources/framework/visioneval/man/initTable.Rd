@@ -23,7 +23,7 @@ The value TRUE is returned if the function is successful at creating
   written to the log.
 }
 \description{
-\code{initDatastoreTable} initializes a table in the datastore.
+\code{initTable} initializes a table in the datastore.
 }
 \details{
 A table in the datastore is a directory which contains one or more R binary
