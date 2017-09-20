@@ -5,6 +5,6 @@
   "Region": "RVMPO",
   "BaseYear": "2010",
   "Years": ["2010", "2038"],
-  "DatastoreName": "datastore.h5",
+  "DatastoreName": "Datastore",
   "Seed": 1
 }
