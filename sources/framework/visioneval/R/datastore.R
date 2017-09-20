@@ -28,7 +28,7 @@ listDatastore <- function() {
   G <- getModelState()
   load(file.path(G$DatastoreName, "DatastoreListing.Rda"))
   DatastoreListing_df <-
-    data.frame(DatastoreListing_ls[1:3])
+    data.frame(DatastoreListing_ls[1:3], stringsAsFactors = FALSE)
   DatastoreListing_df$attributes <- DatastoreListing_ls$attributes
   setModelState(list(Datastore = DatastoreListing_df))
   TRUE
@@ -66,6 +66,7 @@ listDatastore <- function() {
 #' elements of the DatastoreListing_ls.
 #' @return a list having the same structure as DatastoreListing_ls with the
 #' data in DataListing_ls added to it.
+#' @export
 addListing <-
   function(DatastoreListing_ls, DataListing_ls) {
     for (i in 1:3) {
@@ -150,7 +151,7 @@ initDatastore <- function() {
 #=============================
 #' Initialize table in datastore.
 #'
-#' \code{initDatastoreTable} initializes a table in the datastore.
+#' \code{initTable} initializes a table in the datastore.
 #'
 #' A table in the datastore is a directory which contains one or more R binary
 #' files. Each file is a dataset that is a vector or list. The length of each
@@ -173,6 +174,7 @@ initDatastore <- function() {
 #'   inventory in the model state file. The function stops if the group in which
 #'   the table is to be placed does not exist in the datastore and a message is
 #'   written to the log.
+#' @export
 initTable <- function(Table, Group, Length) {
   G <- getModelState()
   DatastoreName <- G$DatastoreName
@@ -233,7 +235,7 @@ initDataset <- function(Spec_ls, Group) {
   Length <- G$Datastore$attributes[G$Datastore$groupname == Table][[1]]$LENGTH
   #Create an initialized dataset
   Dataset <-
-    switch(Spec_ls$TYPE,
+    switch(Types()[[Spec_ls$TYPE]]$mode,
            character = character(Length),
            double = numeric(Length),
            integer = integer(Length),
@@ -246,7 +248,7 @@ initDataset <- function(Spec_ls, Group) {
   load(file.path(G$DatastoreName, "DatastoreListing.Rda"))
   DatastoreListing_ls <-
     addListing(DatastoreListing_ls,
-               list(group = Table,
+               list(group = paste0("/", Table),
                     name = Spec_ls$NAME,
                     groupname = paste(Table, Spec_ls$NAME, sep = "/"),
                     attributes = Spec_ls
@@ -289,7 +291,11 @@ readFromTable <- function(Name, Table, Group, DstoreLoc = NULL, Index = NULL) {
   getModelListing <- function(DstoreRef) {
     SplitRef_ <- unlist(strsplit(DstoreRef, "/"))
     RefHead <- paste(SplitRef_[-length(SplitRef_)], collapse = "/")
-    ModelStateFile <- paste(RefHead, "ModelState.Rda", sep = "/")
+    if (RefHead == "") {
+      ModelStateFile <- "ModelState.Rda"
+    } else {
+      ModelStateFile <- paste(RefHead, "ModelState.Rda", sep = "/")
+    }
     readModelState(FileName = ModelStateFile)
   }
   if (is.null(DstoreLoc)) {
@@ -310,8 +316,8 @@ readFromTable <- function(Name, Table, Group, DstoreLoc = NULL, Index = NULL) {
   #Load the dataset
   load(DatasetPath)
   #Convert NA values
-  NAValue <- as.vector(attributes(Dataset)$NAVALUE)
-  Dataset[Dataset == NAValue] <- NA
+  # NAValue <- as.vector(attributes(Dataset)$NAVALUE)
+  # Dataset[Dataset == NAValue] <- NA
   #If there is an Index, check, and use to subset the dataset
   if (!is.null(Index)) {
     TableAttr_ <-
@@ -370,7 +376,7 @@ writeToTable <- function(Data_, Spec_ls, Group, Index = NULL) {
   #Read in the saved dataset
   Dataset <- readFromTable(Name, Table, Group)
   #Convert NA values
-  Data_[is.na(Data_)] <- Spec_ls$NAVALUE
+  # Data_[is.na(Data_)] <- Spec_ls$NAVALUE
   #Modify the loaded dataset
   if (is.null(Index)) {
     Dataset <- Data_
