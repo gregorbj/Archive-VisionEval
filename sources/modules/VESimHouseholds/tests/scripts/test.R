@@ -1,4 +1,5 @@
 library(rhdf5)
+library(filesstrings)
 
 #Test CreateHouseholds module
 source("R/CreateHouseholds.R")
@@ -35,4 +36,8 @@ testModule(
   SaveDatastore = TRUE,
   DoRun = TRUE
 )
+
+#Create a zip archive of the completed datastore
+tar("tests/Datastore.tar", "tests/Datastore")
+dir.remove("tests/Datastore")
 
