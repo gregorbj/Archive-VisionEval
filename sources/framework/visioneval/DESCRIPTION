@@ -26,5 +26,6 @@ Depends: R (>= 2.10)
 Imports:
     jsonlite,
     stringr,
-    filesstrings
+    filesstrings,
+    rhdf5
 RoxygenNote: 6.0.1
