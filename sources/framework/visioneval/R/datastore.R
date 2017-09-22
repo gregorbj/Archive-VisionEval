@@ -2,104 +2,88 @@
 #datastore.R
 #===========
 
-#Functions for interacting with an HDF5 datastore, including listing contents,
-#initializing tables and datasets, writing datasets, and reading datasets. All
-#of the functions except for the createIndex function call functions in the
-#rhdf5 package.
+#Functions for interacting with the datastore. There are 6 core functions which
+#enable interaction with alternative datastore structures: initDatastore,
+#initTable, initDataset, readFromTable, writeToTable, listDatastore. At present,
+#two alternatives are supported: an HDF5 file datastore and a datastore that
+#uses R data files. The names of these key functions has appended a suffix
+#corresponding to the datastore type which is declared in the model run
+#parameters. The initializeModel then make the appropriate assignments to the
+#the basic function names depending on the declared datastore type. In addition
+#to these core functions which depend on the datastore, there are several
+#functions which call the core functions to move data to and from the datastore
+#in order to run modules.
 
+
+###############################################################################
+#                                                                             #
+#              IMPLEMENTATION OF DATASTORE USING RDATA FILES                  #
+#                                                                             #
+###############################################################################
 
 #LIST DATASTORE CONTENTS
 #=======================
-#' List datastore contents.
+#' List datastore contents for an RData (RD) type datastore.
 #'
-#' \code{listDatastore} lists the contents of a datastore.
+#' \code{listDatastoreRD} lists the contents of an RData (RD) type datastore.
 #'
-#' This function lists the contents of a datastore including identifying all
-#' groups, tables, and datasets. It also lists the attributes associated with
-#' each table and dataset. The listing is stored in the model state file
-#' (ModelState.Rda) as the "Datastore" component. This function is run whenever
-#' new groups, tables, or datasets are created in the datastore to always keep
-#' the listing in the model state file current.
+#' This function lists the contents of a datastore for an RData (RD) type
+#' datastore.
 #'
+#' @param DataListing_ls a list containing named elements describing a new data
+#' item being added to the datastore listing and the model state file. The list
+#' components are:
+#' group - the name of the group (path) the item is being added to;
+#' name - the name of the data item (directory or dataset);
+#' groupname - the full path to the data item;
+#' attributes - a list containing the named attributes of the data item.
 #' @return TRUE if the listing is successfully read from the datastore and
 #' written to the model state file.
 #' @export
-listDatastore <- function() {
+listDatastoreRD <- function(DataListing_ls = NULL) {
+  #Load the model state file and the datastore listing file
   G <- getModelState()
-  load(file.path(G$DatastoreName, "DatastoreListing.Rda"))
-  DatastoreListing_df <-
-    data.frame(DatastoreListing_ls[1:3], stringsAsFactors = FALSE)
-  DatastoreListing_df$attributes <- DatastoreListing_ls$attributes
-  setModelState(list(Datastore = DatastoreListing_df))
-  TRUE
-}
-
-
-#ADD TO THE DATASTORE CONTENTS LISTING
-#=====================================
-#' Add to the datastore contents listing
-#'
-#' \code{addListing} adds the information for a new datastore component
-#' (i.e. table collection, table, dataset) to the list which keeps track of
-#' datastore contents.
-#'
-#' A list (DatastoreListing_ls) stored in the 'DatastoreListing.Rda' file keeps
-#' track of the contents of the datastore. This list has 4 named components as
-#' follows:
-#' 1) group - an ordered vector of the names of directory paths where the
-#' respective components are located. The directory paths use the forward slash
-#' (/) to separate directories. The root directory of the datastore is
-#' represented by a leading forward slash.
-#' 2) name - a vector of names of the datastore component corresponding the
-#' group names.
-#' 3) groupname - a vector of the complete path names to each datastore
-#' component in the datastore. This is a concatenation of the 'group' and 'name'
-#' parts.
-#' 4) attributes - list of the attributes of each datastore component where
-#' each element is a list.
-#' This listing is updated whenever a new component is added to the datastore.
-#' The information for that component is concatenated to end of each of the
-#' elements of the datastore listing.
-#'
-#' @param DatastoreListing_ls a list having the elements described.
-#' @param DataListing_ls a list having four elements that correspond to the
-#' elements of the DatastoreListing_ls.
-#' @return a list having the same structure as DatastoreListing_ls with the
-#' data in DataListing_ls added to it.
-#' @export
-addListing <-
-  function(DatastoreListing_ls, DataListing_ls) {
+  #Load the datastore listing
+  DatastoreListing_ls <-
+    readRDS(file.path(G$DatastoreName, "DatastoreListing.Rda"))
+  #Update the datastore listing if required
+  if (!is.null(DataListing_ls)) {
     for (i in 1:3) {
       DatastoreListing_ls[[i]] <-
         c(DatastoreListing_ls[[i]], DataListing_ls[[i]])
     }
     DatastoreListing_ls[[4]] <-
       c(DatastoreListing_ls[[4]], list(DataListing_ls[[4]]))
-    DatastoreListing_ls
   }
+  #Resave the datastore listing
+  saveRDS(DatastoreListing_ls,
+          file = file.path(G$DatastoreName, "DatastoreListing.Rda"))
+  #Update the model state
+  DatastoreListing_df <-
+    data.frame(DatastoreListing_ls[1:3], stringsAsFactors = FALSE)
+  DatastoreListing_df$attributes <- DatastoreListing_ls$attributes
+  setModelState(list(Datastore = DatastoreListing_df))
+  #Return TRUE if successful
+  TRUE
+}
 
 
 #INITIALIZE DATASTORE
 #====================
-#' Initialize Datastore.
+#' Initialize Datastore for an RData (RD) type datastore.
 #'
-#' \code{initDatastore} creates datastore with starting structure.
+#' \code{initDatastoreRD} creates datastore with starting structure for an RData
+#' (RD) type datastore.
 #'
 #' This function creates the datastore for the model run with the initial
-#' structure. The datastore is a nested set of directories and files. The
-#' top directory that is named according to the 'DatastoreName' property in the
-#' 'run_parameters.json' file. The function creates this directory and several
-#' subdirectories including one named 'Global' and one for each year identified
-#' in the 'Years' property of the 'run_parameters.json' file. If the datastore
-#' directory already exists, the function will remove it and all of its contents
-#' before recreating it.
+#' structure for an RData (RD) type datastore.
 #'
 #' @return TRUE if datastore initialization is successful. Calls the
 #' listDatastore function which adds a listing of the datastore contents to the
 #' model state file.
 #' @export
 #' @import filesstrings
-initDatastore <- function() {
+initDatastoreRD <- function() {
   G <- getModelState()
   DatastoreName <- G$DatastoreName
   #If datastore exists, delete
@@ -116,53 +100,38 @@ initDatastore <- function() {
       groupname = "",
       attributes = list(NA)
     )
+  saveRDS(DatastoreListing_ls,
+          file = file.path(DatastoreName, "DatastoreListing.Rda"))
   #Create global group which stores data that is constant for all geography and
   #all years
   dir.create(file.path(DatastoreName, "Global"))
-  DatastoreListing_ls <-
-    addListing(DatastoreListing_ls,
-               list(group = "/",
-                    name = "Global",
-                    groupname = "Global",
-                    attributes = list(NA)
-                    ))
+  listDatastore(
+    list(group = "/", name = "Global", groupname = "Global",
+         attributes = list(NA))
+  )
   #Create groups for years
   Years <- getYears()
   for (year in Years) {
     YearGroup <- year
     dir.create(file.path(DatastoreName, YearGroup))
-    DatastoreListing_ls <-
-      addListing(DatastoreListing_ls,
-                 list(group = "/",
-                      name = YearGroup,
-                      groupname = YearGroup,
-                      attributes = list(NA)
-                 ))
+    listDatastore(
+      list(group = "/", name = YearGroup, groupname = YearGroup,
+           attributes = list(NA))
+    )
   }
-  #Save the DatastoreListing_df and update the model state file
-  save(DatastoreListing_ls,
-       file = file.path(DatastoreName, "DatastoreListing.Rda"))
-  listDatastore()
+  #Return TRUE if successful
   TRUE
 }
 #initDatastore()
 
+
 #INITIALIZE TABLE IN DATASTORE
 #=============================
-#' Initialize table in datastore.
+#' Initialize table in an RData (RD) type datastore.
 #'
-#' \code{initTable} initializes a table in the datastore.
+#' \code{initTableRD} initializes a table in an RData (RD) type datastore.
 #'
-#' A table in the datastore is a directory which contains one or more R binary
-#' files. Each file is a dataset that is a vector or list. The length of each
-#' vector or list must be the same. Thus a table is much like an R data frame
-#' which is a list containing equal length vectors that may have different
-#' types. If the dataset is a list, then it is like a list column in a
-#' dataframe. A table is initialized in the datastore by creating a directory
-#' whose name is the table name. The DatastoreListing_ls is updated to include
-#' the 'group', 'name', 'groupname', and 'attributes' information for the table.
-#' The 'attributes' listing for the table includes one element (LENGTH) that is
-#' the length that each dataset in the table must have.
+#' This function initializes a table in an RData (RD) type datastore.
 #'
 #' @param Table a string identifying the name of the table to initialize.
 #' @param Group a string representation of the name of the top-level
@@ -175,39 +144,31 @@ initDatastore <- function() {
 #'   the table is to be placed does not exist in the datastore and a message is
 #'   written to the log.
 #' @export
-initTable <- function(Table, Group, Length) {
+initTableRD <- function(Table, Group, Length) {
   G <- getModelState()
   DatastoreName <- G$DatastoreName
   #Create a directory for the table
   dir.create(file.path(DatastoreName, Group, Table))
-  #Update the DatastoreListing
-  load(file.path(DatastoreName, "DatastoreListing.Rda"))
-  DatastoreListing_ls <-
-    addListing(DatastoreListing_ls,
-               list(group = paste0("/", Group),
-                    name = Table,
-                    groupname = paste(Group, Table, sep = "/"),
-                    attributes = list(LENGTH = Length)
-               ))
-  #Save the DatastoreListing_df and update the model state file
-  save(DatastoreListing_ls,
-       file = file.path(DatastoreName, "DatastoreListing.Rda"))
-  listDatastore()
+  #Update the datastore listing and model state
+  listDatastore(
+    list(group = paste0("/", Group), name = Table,
+         groupname = paste(Group, Table, sep = "/"),
+         attributes = list(LENGTH = Length)
+    )
+  )
+  #Return true is successful
+  TRUE
 }
 #initTable("Azone", "2010", 3)
 
 #INITIALIZE A DATASET IN A TABLE
 #===============================
-#' Initialize dataset in datastore table.
+#' Initialize dataset in an RData (RD) type datastore table.
 #'
-#' \code{initDataset} initializes a dataset in a table.
+#' \code{initDatasetRD} initializes a dataset in an RData (RD) type datastore
+#' table.
 #'
-#' This function initializes a dataset which must be done before data can be
-#' stored. The function writes an empty vector to the table directory specified
-#' in the 'TABLE' element of the 'Spec_ls' argument. The type of the vector is
-#' determined by the 'TYPE' element of the 'Spec_ls' argument. The vector is
-#' saved to the table directory with the prefix of the file name being the
-#' 'NAME' property of the 'Spec_ls' argument and the suffix being '.Rda'.
+#' This function initializes a dataset in an RData (RD) type datastore table.
 #'
 #' @param Spec_ls a list containing the standard module specifications
 #'   described in the model system design documentation.
@@ -217,7 +178,7 @@ initTable <- function(Table, Group, Length) {
 #' @return TRUE if dataset is successfully initialized. If the identified table
 #' does not exist, the function throws an error.
 #' @export
-initDataset <- function(Spec_ls, Group) {
+initDatasetRD <- function(Spec_ls, Group) {
   G <- getModelState()
   Table <- paste(Group, Spec_ls$TABLE, sep = "/")
   Name <- Spec_ls$NAME
@@ -244,19 +205,14 @@ initDataset <- function(Spec_ls, Group) {
   #Save the initialized dataset
   DatasetName <- paste(Spec_ls$NAME, "Rda", sep = ".")
   save(Dataset, file = file.path(G$DatastoreName, Table, DatasetName))
-  #Update the DatastoreListing
-  load(file.path(G$DatastoreName, "DatastoreListing.Rda"))
-  DatastoreListing_ls <-
-    addListing(DatastoreListing_ls,
-               list(group = paste0("/", Table),
-                    name = Spec_ls$NAME,
-                    groupname = paste(Table, Spec_ls$NAME, sep = "/"),
-                    attributes = Spec_ls
-               ))
-  #Save the DatastoreListing_df and update the model state file
-  save(DatastoreListing_ls,
-       file = file.path(G$DatastoreName, "DatastoreListing.Rda"))
-  listDatastore()
+  #Update the datastore listing and model state
+  listDatastore(
+    list(group = paste0("/", Table), name = Spec_ls$NAME,
+         groupname = paste(Table, Spec_ls$NAME, sep = "/"),
+         attributes = Spec_ls
+    )
+  )
+  #Return TRUE if successful
   TRUE
 }
 #source("data/test_spec.R")
@@ -267,12 +223,10 @@ initDataset <- function(Spec_ls, Group) {
 #===============
 #' Read from table.
 #'
-#' \code{readFromTable} reads a dataset from a table.
+#' \code{readFromTableRD} reads a dataset from an RData (RD) type datastore
+#' table.
 #'
-#' This function reads datasets from a table. Indexed reads are permitted. The
-#' function checks whether the table and dataset exist and whether all specified
-#' indices are within the length of the table. The function converts any values
-#' equal to the NAVALUE attribute to NA.
+#' This function reads a dataset from an RData (RD) type datastore table.
 #'
 #' @param Name A string identifying the name of the dataset to be read from.
 #' @param Table A string identifying the complete name of the table where the
@@ -287,7 +241,7 @@ initDataset <- function(Spec_ls, Group) {
 #' @return A vector of the same type stored in the datastore and specified in
 #'   the TYPE attribute.
 #' @export
-readFromTable <- function(Name, Table, Group, DstoreLoc = NULL, Index = NULL) {
+readFromTableRD <- function(Name, Table, Group, DstoreLoc = NULL, Index = NULL) {
   getModelListing <- function(DstoreRef) {
     SplitRef_ <- unlist(strsplit(DstoreRef, "/"))
     RefHead <- paste(SplitRef_[-length(SplitRef_)], collapse = "/")
@@ -348,11 +302,12 @@ readFromTable <- function(Name, Table, Group, DstoreLoc = NULL, Index = NULL) {
 #==============
 #' Write to table.
 #'
-#' \code{writeToTable} writes data to table and initializes dataset if needed.
+#' \code{writeToTableRD} writes data to an RData (RD) type datastore table and
+#' initializes dataset if needed.
 #'
-#' This function writes a dataset file to a table directory. It initializes the
-#' dataset if the dataset does not exist. Enables data to be written to specific
-#' location indexes in the dataset.
+#' This function writes a dataset file to an RData (RD) type datastore table. It
+#' initializes the dataset if the dataset does not exist. Enables data to be
+#' written to specific location indexes in the dataset.
 #'
 #' @param Data_ A vector of data to be written.
 #' @param Spec_ls a list containing the standard module 'Set' specifications
@@ -363,7 +318,7 @@ readFromTable <- function(Name, Table, Group, DstoreLoc = NULL, Index = NULL) {
 #'   written to.
 #' @return TRUE if data is sucessfully written.
 #' @export
-writeToTable <- function(Data_, Spec_ls, Group, Index = NULL) {
+writeToTableRD <- function(Data_, Spec_ls, Group, Index = NULL) {
   G <- getModelState()
   Name <- Spec_ls$NAME
   Table <- Spec_ls$TABLE
@@ -390,7 +345,7 @@ writeToTable <- function(Data_, Spec_ls, Group, Index = NULL) {
       writeLog(Message)
       stop(Message)
     } else {
-      Dataset[Index] <- Data_[Index]
+      Dataset[Index] <- Data_
     }
   }
   #Save the dataset
@@ -413,6 +368,64 @@ writeToTable <- function(Data_, Spec_ls, Group, Index = NULL) {
 #NewVals_ <- c("A1", "A1", "A1", "A1", "A2", "A2", "A2", "A3", "A3", "A3")
 #writeToTable(NewVals_, TestSpec_ls, "2010")
 #readFromTable("Azone", "Bzone", "2010")
+
+
+###############################################################################
+#                                                                             #
+#              IMPLEMENTATION OF DATASTORE USING HDF5 FILES                   #
+#                                                                             #
+###############################################################################
+
+
+
+
+
+
+
+###############################################################################
+#                                                                             #
+#                 COMMON DATASTORE INTERACTION FUNCTIONS                      #
+#                                                                             #
+###############################################################################
+
+#ASSIGN DATASTORE INTERACTION FUNCTIONS
+#======================================
+#' Assign datastore interaction functions
+#'
+#' \code{assignDatastoreFunctions} assigns the values of the functions for
+#' interacting with the datastore to the functions for the declared datastore
+#' type.
+#'
+#' The visioneval framework can work with different types of datastores. For
+#' example a datastore which stores datasets in an HDF5 file or a datastore
+#' which stores datasets as RData files in a directory hierarchy. This function
+#' reads the 'DatastoreType' parameter from the model state file and then
+#' assigns the common datastore interaction functions the values of the
+#' functions for the declared datastore type.
+#'
+#' @param DstoreType A string identifying the datastore type.
+#' @return None. The function assigns datastore interactions functions to the
+#' first position of the search path.
+#' @export
+assignDatastoreFunctions <- function(DstoreType) {
+  AllowedDstoreTypes_ <- c("RD", "H5")
+  DstoreFuncs_ <-
+    c("initDatastore", "initTable", "initDataset", "readFromTable",
+      "writeToTable", "listDatastore")
+  if (DstoreType %in% AllowedDstoreTypes_) {
+    for(DstoreFunc in DstoreFuncs_) {
+      assign(DstoreFunc, get(paste0(DstoreFunc, DstoreType)), pos = 1)
+    }
+  } else {
+    Msg <-
+      paste0("Specified 'DatastoreType' in the 'run_parameters.json' file - ",
+             DstoreType, " - is not a recognized type. ",
+             "Recognized datastore types are: ",
+             paste(AllowedDstoreTypes_, collapse = ", "), ".")
+    stop(Msg)
+  }
+}
+
 
 #CREATE A DATASTORE INDEX
 #========================
@@ -445,6 +458,9 @@ createIndex <- function(Name, Table, Group) {
 #AzoneIndex <- createIndex("Azone", "Bzone", "2010")
 #Az <- c("A1", "A2", "A3")
 #for (az in Az) print(readFromTable("Bzone", "Bzone", "2010", Index = AzoneIndex(az)))
+#TestSpec_ls$NAME <- "TestIndexWrite"
+#for (i in 1:length(Az)) writeToTable(paste("C", i), TestSpec_ls, "2010", Index = AzoneIndex(Az[i]))
+#readFromTable("TestIndexWrite", "Bzone", "2010")
 
 
 #INITIALIZE DATA LIST
