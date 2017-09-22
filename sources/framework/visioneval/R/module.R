@@ -337,6 +337,10 @@ testModule <-
     writeLog(Msg, Print = TRUE)
     rm(Msg)
 
+    #Assign the correct datastore interaction functions
+    #--------------------------------------------------
+    assignDatastoreFunctions(readModelState()$DatastoreType)
+
     #Load datastore if specified or initialize new datastore
     #-------------------------------------------------------
     if (LoadDatastore) {
