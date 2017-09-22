@@ -82,6 +82,10 @@ initializeModel <-
       setModelState(preExistingModelState)
     }
 
+    #Assign the correct datastore interaction functions
+    #--------------------------------------------------
+    assignDatastoreFunctions(readModelState()$DatastoreType)
+
     #Load existing model if specified and initialize geography
     #---------------------------------------------------------
     if (LoadDatastore) {
