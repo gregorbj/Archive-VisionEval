@@ -6,5 +6,6 @@
   "BaseYear": "2010",
   "Years": ["2010", "2038"],
   "DatastoreName": "Datastore",
+  "DatastoreType": "RD",
   "Seed": 1
 }
