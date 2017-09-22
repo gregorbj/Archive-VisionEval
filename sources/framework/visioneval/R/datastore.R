@@ -221,7 +221,7 @@ initDatasetRD <- function(Spec_ls, Group) {
 
 #READ FROM TABLE
 #===============
-#' Read from table.
+#' Read from an RData (RD) type datastore table.
 #'
 #' \code{readFromTableRD} reads a dataset from an RData (RD) type datastore
 #' table.
@@ -300,7 +300,7 @@ readFromTableRD <- function(Name, Table, Group, DstoreLoc = NULL, Index = NULL) 
 
 #WRITE TO TABLE
 #==============
-#' Write to table.
+#' Write to an RData (RD) type datastore table.
 #'
 #' \code{writeToTableRD} writes data to an RData (RD) type datastore table and
 #' initializes dataset if needed.
@@ -376,10 +376,303 @@ writeToTableRD <- function(Data_, Spec_ls, Group, Index = NULL) {
 #                                                                             #
 ###############################################################################
 
+#LIST DATASTORE CONTENTS
+#=======================
+#' List datastore contents for an HDF5 (H5) type datastore.
+#'
+#' \code{listDatastoreH5} lists the contents of an HDF5 (H5) type datastore.
+#'
+#' This function lists the contents of a datastore for an HDF5 (H5) type
+#' datastore.
+#'
+#' @return TRUE if the listing is successfully read from the datastore and
+#' written to the model state file.
+#' @export
+#' @import rhdf5
+listDatastoreH5 <- function() {
+  G <- getModelState()
+  H5File <- H5Fopen(G$DatastoreName)
+  DS_df <- h5ls(H5File, all = TRUE)
+  DS_df$groupname <- paste(DS_df$group, DS_df$name, sep = "/")
+  DS_df$groupname <- gsub("^/+", "", DS_df$groupname)
+  DS_df <-
+    DS_df[, c("group", "name", "groupname", "otype", "num_attrs", "dclass", "dtype")]
+  Attr_ls <- list()
+  for (i in 1:nrow(DS_df)) {
+    if (DS_df$num_attrs[i] == 0) {
+      Attr_ls[[i]] <- NA
+    } else {
+      Item <- paste(DS_df$group[i], DS_df$name[i], sep = "/")
+      #Attr_ls[[i]] <- unlist(h5readAttributes(H5File, Item))
+      Attr_ls[[i]] <- h5readAttributes(H5File, Item)
+    }
+  }
+  DS_df$attributes <- Attr_ls
+  H5Fclose(H5File)
+  AttrToWrite_ <- c("group", "name", "groupname", "attributes")
+  setModelState(list(Datastore = DS_df[, AttrToWrite_]))
+  TRUE
+}
 
 
+#INITIALIZE DATASTORE
+#====================
+#' Initialize Datastore for an HDF5 (H5) type datastore.
+#'
+#' \code{initDatastoreH5} creates datastore with starting structure for an HDF5
+#' (H5) type datastore.
+#'
+#' This function creates the datastore for the model run with the initial
+#' structure for an HDF5 (H5) type datastore.
+#'
+#' @return TRUE if datastore initialization is successful. Calls the
+#' listDatastore function which adds a listing of the datastore contents to the
+#' model state file.
+#' @export
+#' @import rhdf5
+initDatastoreH5 <- function() {
+  G <- getModelState()
+  #If data store exists, delete
+  DatastoreName <- G$DatastoreName
+  if (file.exists(DatastoreName)) {
+    file.remove(DatastoreName)
+  }
+  #Create data store file
+  H5File <- H5Fcreate(DatastoreName)
+  #Create global group which stores data that is constant for all geography and
+  #all years
+  h5createGroup(H5File, "Global")
+  #Create groups for years
+  for (year in as.character(G$Years)) {
+    YearGroup <- year
+    h5createGroup(H5File, YearGroup)
+  }
+  H5Fclose(H5File)
+  listDatastore()
+  TRUE
+}
 
 
+#INITIALIZE TABLE IN DATASTORE
+#=============================
+#' Initialize table in an HDF5 (H5) type datastore.
+#'
+#' \code{initTableH5} initializes a table in an HDF5 (H5) type datastore.
+#'
+#' This function initializes a table in an HDF5 (H5) type datastore.
+#'
+#' @param Table a string identifying the name of the table to initialize.
+#' @param Group a string representation of the name of the group the table is to
+#' be created in.
+#' @param Length a number identifying the table length.
+#' @return The value TRUE is returned if the function is successful at creating
+#'   the table. In addition, the listDatastore function is run to update the
+#'   inventory in the model state file. The function stops if the group in which
+#'   the table is to be placed does not exist in the datastore and a message is
+#'   written to the log.
+#' @export
+#' @import rhdf5
+initTableH5 <- function(Table, Group, Length) {
+  G <- getModelState()
+  NewTable <- paste(Group, Table, sep = "/")
+  H5File <- H5Fopen(G$DatastoreName)
+  h5createGroup(H5File, NewTable)
+  H5Group <- H5Gopen(H5File, NewTable)
+  h5writeAttribute(Length, H5Group, "LENGTH")
+  H5Gclose(H5Group)
+  H5Fclose(H5File)
+  listDatastore()
+  TRUE
+}
+
+
+#INITIALIZE A DATASET IN A TABLE
+#===============================
+#' Initialize dataset in an HDF5 (H5) type datastore table.
+#'
+#' \code{initDatasetH5} initializes a dataset in an HDF5 (H5) type datastore
+#' table.
+#'
+#' This function initializes a dataset in an HDF5 (H5) type datastore table.
+#'
+#' @param Spec_ls a list containing the standard module 'Set' specifications
+#'   described in the model system design documentation.
+#' @param Group a string representation of the name of the group the table is to
+#' be created in.
+#' @return TRUE if dataset is successfully initialized. If the dataset already
+#' exists the function throws an error and writes an error message to the log.
+#' Updates the model state file.
+#' @export
+#' @import rhdf5
+initDatasetH5 <- function(Spec_ls, Group) {
+  G <- getModelState()
+  Table <- paste(Group, Spec_ls$TABLE, sep = "/")
+  Name <- Spec_ls$NAME
+  DatasetName <- paste(Table, Name, sep = "/")
+  #Read SIZE specification or throw error if doesn't exist
+  if (!is.null(Spec_ls$SIZE)) {
+    Size <- Spec_ls$SIZE
+  } else {
+    Message <- paste0("SIZE specification for dataset (", Name,
+                      ") is not present.")
+    writeLog(Message)
+    stop(Message)
+  }
+  #Create the dataset
+  Length <- unlist(h5readAttributes(G$DatastoreName, Table))["LENGTH"]
+  Chunk <- ifelse(Length > 1000, 100, 1)
+  StorageMode <- Types()[[Spec_ls$TYPE]]$mode
+  H5File <- H5Fopen(G$DatastoreName)
+  h5createDataset(
+    H5File, DatasetName, dims = Length,
+    storage.mode = StorageMode, size = Size + 1,
+    chunk = Chunk, level = 7
+  )
+  H5Data <- H5Dopen(H5File, DatasetName)
+  h5writeAttribute(Spec_ls$MODULE, H5Data, "MODULE")
+  h5writeAttribute(Spec_ls$NAVALUE, H5Data, "NAVALUE")
+  h5writeAttribute(Spec_ls$UNITS, H5Data, "UNITS")
+  h5writeAttribute(Size, H5Data, "SIZE")
+  h5writeAttribute(Spec_ls$TYPE, H5Data, "TYPE")
+  if (!is.null(Spec_ls$PROHIBIT)) {
+    h5writeAttribute(Spec_ls$PROHIBIT, H5Data, "PROHIBIT")
+  }
+  if (!is.null(Spec_ls$ISELEMENTOF)) {
+    h5writeAttribute(Spec_ls$ISELEMENTOF, H5Data, "ISELEMENTOF")
+  }
+  H5Dclose(H5Data)
+  H5Fclose(H5File)
+  #Update datastore inventory
+  listDatastore()
+  TRUE
+}
+
+
+#READ FROM TABLE
+#===============
+#' Read from an HDF5 (H5) type datastore table.
+#'
+#' \code{readFromTableH5} reads a dataset from an HDF5 (H5) type datastore
+#' table.
+#'
+#' This function reads a dataset from an HDF5 (H5) type datastore table.
+#'
+#' @param Name A string identifying the name of the dataset to be read from.
+#' @param Table A string identifying the complete name of the table where the
+#'   dataset is located.
+#' @param Group a string representation of the name of the datastore group the
+#' data is to be read from.
+#' @param File a string representation of the file path of the datastore
+#' @param Index A numeric vector identifying the positions the data is to be
+#'   written to. NULL if the entire dataset is to be read.
+#' @return A vector of the same type stored in the datastore and specified in
+#'   the TYPE attribute.
+#' @export
+#' @import rhdf5
+readFromTableH5 <- function(Name, Table, Group, File = "datastore.h5", Index = NULL) {
+  getModelListing <- function(DstoreRef) {
+    SplitRef_ <- unlist(strsplit(DstoreRef, "/"))
+    RefHead <- paste(SplitRef_[-length(SplitRef_)], collapse = "/")
+    if (RefHead == "") {
+      ModelStateFile <- "ModelState.Rda"
+    } else {
+      ModelStateFile <- paste(RefHead, "ModelState.Rda", sep = "/")
+    }
+    readModelState(FileName = ModelStateFile)
+  }
+  G <- getModelListing(DstoreRef = File)
+  #Check that dataset exists to read from
+  DatasetExists <- checkDataset(Name, Table, Group, G$Datastore)
+  if (DatasetExists) {
+    DatasetName <- file.path(Group, Table, Name)
+  } else {
+    Message <-
+      paste("Dataset", Name, "in table", Table, "in group", Group, "doesn't exist.")
+    stop(Message)
+  }
+  #If there is an Index, check that it is in bounds
+  if (!is.null(Index)) {
+    TableAttr_ <-
+      unlist(G$Datastore$attributes[G$Datastore$groupname == file.path(Group, Table)])
+    AllowedLength <- TableAttr_["LENGTH"]
+    if (any(Index > AllowedLength)) {
+      Message <-
+        paste0(
+          "One or more specified indicies for reading data from ",
+          Table, " exceed ", AllowedLength
+        )
+      writeLog(Message)
+      stop(Message)
+    }
+  }
+  #Read data
+  if (is.null(Index)) {
+    Data_ <- h5read(G$DatastoreName, DatasetName, read.attributes = TRUE)
+  } else {
+    Data_ <-
+      h5read(G$DatastoreName, DatasetName, index = list(Index), read.attributes = TRUE)
+  }
+  #Convert NA values
+  NAValue <- as.vector(attributes(Data_)$NAVALUE)
+  Data_[Data_ == NAValue] <- NA
+  #Report out results
+  Message <- paste0("Read data ", DatasetName)
+  writeLog(Message)
+  as.vector(Data_)
+}
+
+
+#WRITE TO TABLE
+#==============
+#' Write to an RData (RD) type datastore table.
+#'
+#' \code{writeToTableRD} writes data to an RData (RD) type datastore table and
+#' initializes dataset if needed.
+#'
+#' This function writes a dataset file to an RData (RD) type datastore table. It
+#' initializes the dataset if the dataset does not exist. Enables data to be
+#' written to specific location indexes in the dataset.
+#'
+#' @param Data_ A vector of data to be written.
+#' @param Spec_ls a list containing the standard module 'Set' specifications
+#'   described in the model system design documentation.
+#' @param Group a string representation of the name of the datastore group the
+#' data is to be written to.
+#' @param Index A numeric vector identifying the positions the data is to be
+#'   written to.
+#' @return TRUE if data is sucessfully written. Updates model state file.
+#' @export
+#' @import rhdf5
+writeToTableH5 <- function(Data_, Spec_ls, Group, Index = NULL) {
+  G <- getModelState()
+  Name <- Spec_ls$NAME
+  Table <- Spec_ls$TABLE
+  #Check that dataset exists to write to and attempt to create if not
+  DatasetExists <- checkDataset(Name, Table, Group, G$Datastore)
+  if (!DatasetExists) {
+    initDataset(Spec_ls, Group)
+    G <- getModelState()
+  }
+  #Write the dataset
+  if (is.null(Data_)) {
+    Message <-
+      paste0(
+        "writeToTable passed NULL Data_ "
+      )
+    writeLog(Message)
+    stop(Message)
+  }
+  Data_[is.na(Data_)] <- Spec_ls$NAVALUE
+  DatasetName <- file.path(Group, Table, Name)
+  if (is.null(Index)) {
+    h5write(Data_, file = G$DatastoreName, name = DatasetName)
+  } else {
+    h5write(Data_, file = G$DatastoreName, name = DatasetName, index = list(Index))
+  }
+  #Update datastore inventory
+  listDatastore()
+  TRUE
+}
 
 
 ###############################################################################
