@@ -906,7 +906,8 @@ writeVENameRegistry <-
       NameRegistry_ls[[x]] <- NameRegistry_ls[[x]][!ExistingModuleEntries_]
     }
     #Process the Inp and Set specifications
-    ModuleSpecs_ls <- processModuleSpecs(getModuleSpecs(ModuleName, PackageName))
+    ModuleSpecs_ls <-
+      processModuleSpecs(getModuleSpecs(ModuleName, PackageName))
     Inp_ls <-
       lapply(ModuleSpecs_ls$Inp, function(x) {
         x$PACKAGE <- PackageName
