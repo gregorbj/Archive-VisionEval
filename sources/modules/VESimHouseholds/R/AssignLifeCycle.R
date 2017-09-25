@@ -111,7 +111,8 @@ AssignLifeCycleSpecifications <- list(
       NAVALUE = -1,
       PROHIBIT = "",
       ISELEMENTOF = c("00", "01", "02", "03", "04", "09", "10"),
-      SIZE = 2
+      SIZE = 2,
+      DESCRIPTION = "Household life cycle as defined by 2009 NHTS LIF_CYC variable"
     )
   )
 )
