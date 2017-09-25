@@ -1,0 +1,30 @@
+Test
+Test of VESimHouseholds package modules
+2017-09-25_11:55:22
+
+2017-09-25 11:55:22 : Testing AssignLifeCycle. 
+
+2017-09-25 11:55:22 : Attempting to load datastore. 
+
+2017-09-25 11:55:23 : Datastore loaded. 
+
+2017-09-25 11:55:23 : Attempting to load and check specifications. 
+
+2017-09-25 11:55:23 : Module specifications successfully loaded and checked. 
+
+2017-09-25 11:55:23 : No inputs to process. 
+
+2017-09-25 11:55:23 : Checking whether datastore contains all datasets in Get specifications. 
+
+2017-09-25 11:55:23 : Datastore contains all datasets identified in module Get specifications. 
+
+2017-09-25 11:55:23 : Running module and checking whether outputs meet Set specifications. 
+
+2017-09-25 11:55:23 : Also saving module outputs to datastore. 
+
+2017-09-25 11:55:26 : Module run successfully and outputs meet Set specifications. 
+
+2017-09-25 11:55:26 : Module outputs saved to datastore. 
+
+2017-09-25 11:55:26 : Congratulations. Module AssignLifeCycle passed all tests. 
+

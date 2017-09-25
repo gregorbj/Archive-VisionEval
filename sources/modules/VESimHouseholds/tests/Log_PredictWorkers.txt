@@ -1,0 +1,30 @@
+Test
+Test of VESimHouseholds package modules
+2017-09-25_11:55:05
+
+2017-09-25 11:55:06 : Testing PredictWorkers. 
+
+2017-09-25 11:55:06 : Attempting to load datastore. 
+
+2017-09-25 11:55:06 : Datastore loaded. 
+
+2017-09-25 11:55:06 : Attempting to load and check specifications. 
+
+2017-09-25 11:55:06 : Module specifications successfully loaded and checked. 
+
+2017-09-25 11:55:06 : No inputs to process. 
+
+2017-09-25 11:55:06 : Checking whether datastore contains all datasets in Get specifications. 
+
+2017-09-25 11:55:06 : Datastore contains all datasets identified in module Get specifications. 
+
+2017-09-25 11:55:06 : Running module and checking whether outputs meet Set specifications. 
+
+2017-09-25 11:55:06 : Also saving module outputs to datastore. 
+
+2017-09-25 11:55:21 : Module run successfully and outputs meet Set specifications. 
+
+2017-09-25 11:55:21 : Module outputs saved to datastore. 
+
+2017-09-25 11:55:21 : Congratulations. Module PredictWorkers passed all tests. 
+
