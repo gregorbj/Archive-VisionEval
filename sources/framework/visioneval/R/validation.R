@@ -957,7 +957,9 @@ SpecRequirements <- function(){
         TYPE = list(ValueType = "character",
                     ValuesAllowed = "[0-9a-zA-Z_]"),
         UNITS = list(ValueType = "character",
-                     ValuesAllowed = "[0-9a-zA-Z_]")
+                     ValuesAllowed = "[0-9a-zA-Z_]"),
+        DESCRIPTION = list(ValueType = "character",
+                           ValuesAllowed = "[0-9a-zA-Z_]")
       ),
     Get =
       list(
@@ -983,7 +985,9 @@ SpecRequirements <- function(){
         TYPE = list(ValueType = "character",
                     ValuesAllowed = "[0-9a-zA-Z_]"),
         UNITS = list(ValueType = "character",
-                     ValuesAllowed = "[0-9a-zA-Z_]")
+                     ValuesAllowed = "[0-9a-zA-Z_]"),
+        DESCRIPTION = list(ValueType = "character",
+                           ValuesAllowed = "[0-9a-zA-Z_]")
       )
   )
 }
@@ -1029,22 +1033,38 @@ checkSpec <- function(Spec_ls, SpecGroup, SpecNum) {
         Name <- paste0(ReqName, " ")
       }
       Errors_ <- character(0)
-      if (typeof(Spec) != Req_ls$ValueType) {
+      if (length(Spec) == 0) {
         Msg <-
-          paste0("The type of the ", Name, "attribute of the ", SpecGroup,
-                 " specification number ", SpecNum, " is incorrect. ",
-                 "The attribute must be a ", Req_ls$ValueType, " type.")
+          paste0("Value of the ", Name, " attribute of the ", SpecGroup,
+                 " specification number ", SpecNum, " is missing. ",
+                 "The attribute must have a value.")
         Errors_ <- c(Errors_, Msg)
+      } else {
+        if (is.na(Spec)) {
+          Msg <-
+            paste0("Value of the ", Name, " attribute of the ", SpecGroup,
+                   " specification number ", SpecNum, " is NA. ",
+                   "The attribute must have a value.")
+          Errors_ <- c(Errors_, Msg)
+        } else {
+          if (typeof(Spec) != Req_ls$ValueType) {
+            Msg <-
+              paste0("The type of the ", Name, " attribute of the ", SpecGroup,
+                     " specification number ", SpecNum, " is incorrect. ",
+                     "The attribute must be a ", Req_ls$ValueType, " type.")
+            Errors_ <- c(Errors_, Msg)
+          }
+          if (!any(str_detect(Spec, Req_ls$ValuesAllowed))) {
+            Msg <-
+              paste0("The value of the ", Name, "attribute of the ", SpecGroup,
+                     " specification number ", SpecNum, " is incorrect. ",
+                     "The attribute value must be one of the following: ",
+                     paste(Req_ls$ValuesAllowed, collapse = ", "), ".")
+            Errors_ <- c(Errors_, Msg)
+          }
+        }
+        Errors_
       }
-      if (!any(str_detect(Spec, Req_ls$ValuesAllowed))) {
-        Msg <-
-          paste0("The value of the ", Name, "attribute of the ", SpecGroup,
-                 " specification number ", SpecNum, " is incorrect. ",
-                 "The attribute value must be one of the following: ",
-                 paste(Req_ls$ValuesAllowed, collapse = ", "), ".")
-        Errors_ <- c(Errors_, Msg)
-      }
-      Errors_
     }
   #Check a specification
   if (SpecGroup == "RunBy") {
