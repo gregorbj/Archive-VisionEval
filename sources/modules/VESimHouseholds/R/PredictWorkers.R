@@ -192,7 +192,13 @@ PredictWorkersSpecifications <- list(
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
-      SIZE = 0
+      SIZE = 0,
+      DESCRIPTION =
+        items("Workers in 15 to 19 year old age group",
+              "Workers in 20 to 29 year old age group",
+              "Workers in 30 to 54 year old age group",
+              "Workers in 55 to 64 year old age group",
+              "Workers in 65 or older age group")
     ),
     item(
       NAME = "Workers",
@@ -203,7 +209,8 @@ PredictWorkersSpecifications <- list(
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
-      SIZE = 0
+      SIZE = 0,
+      DESCRIPTION = "Total workers"
     ),
     item(
       NAME = "NumWkr",
@@ -214,7 +221,8 @@ PredictWorkersSpecifications <- list(
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
-      SIZE = 0
+      SIZE = 0,
+      DESCRIPTION = "Number of workers residing in the zone"
     )
   )
 )
