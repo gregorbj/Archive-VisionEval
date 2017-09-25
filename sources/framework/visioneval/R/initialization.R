@@ -1017,10 +1017,12 @@ getModuleSpecs <- function(ModuleName, PackageName) {
 expandSpec <- function(SpecToExpand_ls) {
   SpecToExpand_ls <- parseUnitsSpec(SpecToExpand_ls)
   Names_ <- unlist(SpecToExpand_ls$NAME)
+  Descriptions_ <- unlist(SpecToExpand_ls$DESCRIPTION)
   Expanded_ls <- list()
   for (i in 1:length(Names_)) {
     Temp_ls <- SpecToExpand_ls
     Temp_ls$NAME <- Names_[i]
+    Temp_ls$DESCRIPTION <- Descriptions_[i]
     Expanded_ls <- c(Expanded_ls, list(Temp_ls))
   }
   Expanded_ls
@@ -1047,7 +1049,7 @@ expandSpec <- function(SpecToExpand_ls) {
 #' @export
 processModuleSpecs <- function(Spec_ls) {
   #Define a function to process a component of a specifications list
-  processComponent <- function(Component_ls, ComponentGroup) {
+  processComponent <- function(Component_ls) {
     Result_ls <- list()
     for (i in 1:length(Component_ls)) {
       Temp_ls <- Component_ls[[i]]
@@ -1258,7 +1260,8 @@ simDataTransactions <- function(ModuleCalls_df) {
       RunFor <- ModuleCalls_df$RunFor[i]
       if (RunFor == "BaseYear" & Year != "BaseYear") break()
       if (RunFor == "NotBaseYear" & Year == "BaseYear") break()
-      ModuleSpecs_ls <- processModuleSpecs(getModuleSpecs(Module, Package))
+      ModuleSpecs_ls <-
+        processModuleSpecs(getModuleSpecs(Module, Package))
 
       #Add 'Inp' table references to the working datastore inventory
       #-------------------------------------------------------------
