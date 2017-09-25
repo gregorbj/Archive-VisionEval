@@ -258,7 +258,10 @@ PredictIncomeSpecifications <- list(
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
       UNLIKELY = "",
-      TOTAL = ""
+      TOTAL = "",
+      DESCRIPTION =
+        list("Average annual per capita income of households (non-group quarters)",
+             "Average annual per capita income of group quarters population")
     )
   ),
   #Specify data to be loaded from data store
@@ -340,7 +343,8 @@ PredictIncomeSpecifications <- list(
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
-      SIZE = 0
+      SIZE = 0,
+      DESCRIPTION = "Total annual household (non-qroup & group quarters) income"
     )
   )
 )
