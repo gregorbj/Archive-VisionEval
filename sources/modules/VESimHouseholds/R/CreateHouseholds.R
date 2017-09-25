@@ -145,7 +145,15 @@ CreateHouseholdsSpecifications <- list(
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
       UNLIKELY = "",
-      TOTAL = ""
+      TOTAL = "",
+      DESCRIPTION =
+        items(
+          "Household (non-group quarters) population in 0 to 14 year old age group",
+          "Household (non-group quarters) population in 15 to 19 year old age group",
+          "Household (non-group quarters) population in 20 to 29 year old age group",
+          "Household (non-group quarters) population in 30 to 54 year old age group",
+          "Household (non-group quarters) population in 55 to 64 year old age group",
+          "Household (non-group quarters) population in 65 or older age group")
     ),
     item(
       NAME = "AveHhSize",
@@ -159,7 +167,8 @@ CreateHouseholdsSpecifications <- list(
       PROHIBIT = c("< 0"),
       ISELEMENTOF = "",
       UNLIKELY = "",
-      TOTAL = ""
+      TOTAL = "",
+      DESCRIPTION = "Average household size of households (non-group quarters)"
     ),
     item(
       NAME = "Prop1PerHh",
@@ -173,7 +182,8 @@ CreateHouseholdsSpecifications <- list(
       PROHIBIT = c("< 0"),
       ISELEMENTOF = "",
       UNLIKELY = "",
-      TOTAL = ""
+      TOTAL = "",
+      DESCRIPTION = "Proportion of households (non-group quarters) having only one person"
     ),
     item(
       NAME =
@@ -193,7 +203,14 @@ CreateHouseholdsSpecifications <- list(
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
       UNLIKELY = "",
-      TOTAL = ""
+      TOTAL = "",
+      DESCRIPTION =
+        items("Group quarters population in 0 to 14 year old age group",
+              "Group quarters population in 15 to 19 year old age group",
+              "Group quarters population in 20 to 29 year old age group",
+              "Group quarters population in 30 to 54 year old age group",
+              "Group quarters population in 55 to 64 year old age group",
+              "Group quarters population in 65 or older age group")
     )
   ),
   #Specify data to be loaded from data store
@@ -267,7 +284,8 @@ CreateHouseholdsSpecifications <- list(
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
-      SIZE = 0
+      SIZE = 0,
+      DESCRIPTION = "Number of households (non-group quarters)"
     ),
     item(
       NAME =
@@ -279,7 +297,10 @@ CreateHouseholdsSpecifications <- list(
       UNITS = "ID",
       NAVALUE = "NA",
       PROHIBIT = "",
-      ISELEMENTOF = ""
+      ISELEMENTOF = "",
+      DESCRIPTION =
+        items("Unique household ID",
+              "Azone ID")
     ),
     item(
       NAME = "HhSize",
@@ -290,7 +311,8 @@ CreateHouseholdsSpecifications <- list(
       NAVALUE = -1,
       PROHIBIT = c("NA", "<= 0"),
       ISELEMENTOF = "",
-      SIZE = 0
+      SIZE = 0,
+      DESCRIPTION = "Number of persons"
     ),
     item(
       NAME =
@@ -307,7 +329,14 @@ CreateHouseholdsSpecifications <- list(
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
-      SIZE = 0
+      SIZE = 0,
+      DESCRIPTION =
+        list("Persons in 0 to 14 year old age group",
+             "Persons in 15 to 19 year old age group",
+             "Persons in 20 to 29 year old age group",
+             "Persons in 30 to 54 year old age group",
+             "Persons in 55 to 64 year old age group",
+             "Persons in 65 or older age group")
     ),
     item(
       NAME = "HhType",
@@ -317,7 +346,8 @@ CreateHouseholdsSpecifications <- list(
       UNITS = "ID",
       NAVALUE = "NA",
       PROHIBIT = "",
-      ISELEMENTOF = ""
+      ISELEMENTOF = "",
+      DESCRIPTION = "Coded household age composition (e.g. 2-1-0-2-0-0) or Grp for group quarters"
     )
   )
 )
