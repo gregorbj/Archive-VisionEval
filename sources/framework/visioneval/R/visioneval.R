@@ -143,7 +143,8 @@ initializeModel <-
     for (i in 1:nrow(ModuleCalls_df)) {
       ModuleName <- ModuleCalls_df[i, "ModuleName"]
       PackageName <- ModuleCalls_df[i, "PackageName"]
-      Specs_ls <- processModuleSpecs(getModuleSpecs(ModuleName, PackageName))
+      Specs_ls <-
+        processModuleSpecs(getModuleSpecs(ModuleName, PackageName))
       Errors_ <- checkModuleSpecs(Specs_ls, ModuleName)
       if (length(Errors_) != 0) {
         Msg <-
@@ -175,7 +176,8 @@ initializeModel <-
     for (i in 1:nrow(ModuleCalls_df)) {
       Module <- ModuleCalls_df$ModuleName[i]
       Package <- ModuleCalls_df$PackageName[i]
-      ModuleSpecs_ls <- processModuleSpecs(getModuleSpecs(Module, Package))
+      ModuleSpecs_ls <-
+        processModuleSpecs(getModuleSpecs(Module, Package))
       if (!is.null(ModuleSpecs_ls$Inp)) {
         ProcessedInputs_ls[[Module]] <-
           processModuleInputs(ModuleSpecs_ls, Module)
@@ -196,7 +198,8 @@ initializeModel <-
     for (i in 1:nrow(ModuleCalls_df)) {
       Module <- ModuleCalls_df$ModuleName[i]
       Package <- ModuleCalls_df$PackageName[i]
-      ModuleSpecs_ls <- processModuleSpecs(getModuleSpecs(Module, Package))
+      ModuleSpecs_ls <-
+        processModuleSpecs(getModuleSpecs(Module, Package))
       if (!is.null(ModuleSpecs_ls$Inp)) {
         inputsToDatastore(ProcessedInputs_ls[[Module]], ModuleSpecs_ls, Module)
       }
