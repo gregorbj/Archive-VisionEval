@@ -309,7 +309,8 @@ AssignVehicleOwnershipSpecifications <- list(
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
-      SIZE = 0
+      SIZE = 0,
+      DESCRIPTION = "Number of automobiles and light trucks owned or leased by the household"
     )
   )
 )

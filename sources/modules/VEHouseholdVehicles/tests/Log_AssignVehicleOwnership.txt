@@ -1,0 +1,30 @@
+Test
+Test of VESimHouseholds package modules
+2017-09-25_14:35:08
+
+2017-09-25 14:35:08 : Testing AssignVehicleOwnership. 
+
+2017-09-25 14:35:08 : Attempting to load datastore. 
+
+2017-09-25 14:35:09 : Datastore loaded. 
+
+2017-09-25 14:35:09 : Attempting to load and check specifications. 
+
+2017-09-25 14:35:09 : Module specifications successfully loaded and checked. 
+
+2017-09-25 14:35:09 : No inputs to process. 
+
+2017-09-25 14:35:09 : Checking whether datastore contains all datasets in Get specifications. 
+
+2017-09-25 14:35:10 : Datastore contains all datasets identified in module Get specifications. 
+
+2017-09-25 14:35:10 : Running module and checking whether outputs meet Set specifications. 
+
+2017-09-25 14:35:10 : Also saving module outputs to datastore. 
+
+2017-09-25 14:35:23 : Module run successfully and outputs meet Set specifications. 
+
+2017-09-25 14:35:23 : Module outputs saved to datastore. 
+
+2017-09-25 14:35:23 : Congratulations. Module AssignVehicleOwnership passed all tests. 
+
