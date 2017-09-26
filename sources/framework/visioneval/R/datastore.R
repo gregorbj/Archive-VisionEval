@@ -474,7 +474,7 @@ initDatastoreH5 <- function() {
     h5createGroup(H5File, YearGroup)
   }
   H5Fclose(H5File)
-  listDatastore()
+  listDatastoreH5()
   TRUE
 }
 
@@ -507,7 +507,7 @@ initTableH5 <- function(Table, Group, Length) {
   h5writeAttribute(Length, H5Group, "LENGTH")
   H5Gclose(H5Group)
   H5Fclose(H5File)
-  listDatastore()
+  listDatastoreH5()
   TRUE
 }
 
@@ -566,10 +566,13 @@ initDatasetH5 <- function(Spec_ls, Group) {
   if (!is.null(Spec_ls$ISELEMENTOF)) {
     h5writeAttribute(Spec_ls$ISELEMENTOF, H5Data, "ISELEMENTOF")
   }
+  if (!is.null(Spec_ls$DESCRIPTION)) {
+    h5writeAttribute(Spec_ls$DESCRIPTION, H5Data, "DESCRIPTION")
+  }
   H5Dclose(H5Data)
   H5Fclose(H5File)
   #Update datastore inventory
-  listDatastore()
+  listDatastoreH5()
   TRUE
 }
 
@@ -676,7 +679,7 @@ writeToTableH5 <- function(Data_, Spec_ls, Group, Index = NULL) {
   #Check that dataset exists to write to and attempt to create if not
   DatasetExists <- checkDataset(Name, Table, Group, G$Datastore)
   if (!DatasetExists) {
-    initDataset(Spec_ls, Group)
+    initDatasetH5(Spec_ls, Group)
     G <- getModelState()
   }
   #Write the dataset
@@ -696,7 +699,7 @@ writeToTableH5 <- function(Data_, Spec_ls, Group, Index = NULL) {
     h5write(Data_, file = G$DatastoreName, name = DatasetName, index = list(Index))
   }
   #Update datastore inventory
-  listDatastore()
+  listDatastoreH5()
   TRUE
 }
 
