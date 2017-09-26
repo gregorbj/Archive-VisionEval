@@ -176,7 +176,8 @@ CalculateUrbanMixMeasureSpecifications <- list(
       PROHIBIT = c("< 0", "> 1"),
       ISELEMENTOF = "",
       UNLIKELY = "",
-      TOTAL = ""
+      TOTAL = "",
+      DESCRIPTION = "Target for proportion of households located in mixed-use neighborhoods in zone (or NA if no target)"
     )
   ),
   #Specify data to be loaded from data store
@@ -262,7 +263,8 @@ CalculateUrbanMixMeasureSpecifications <- list(
       NAVALUE = -1,
       PROHIBIT = c("NA"),
       ISELEMENTOF = c(0, 1),
-      SIZE = 0
+      SIZE = 0,
+      DESCRIPTION = "Flag identifying whether household is (1) or is not (0) in urban mixed-use neighborhood"
     )
   )
 )

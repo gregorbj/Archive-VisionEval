@@ -1,4 +1,12 @@
 library(rhdf5)
+library(filesstrings)
+
+#Load datastore from VESimHouseholds package
+file.copy("../VESimHouseholds/tests/Datastore.tar", "tests/Datastore.tar")
+setwd("tests")
+untar("Datastore.tar")
+file.remove("Datastore.tar")
+setwd("..")
 
 #Test PredictHousing module
 source("R/PredictHousing.R")
@@ -44,3 +52,9 @@ testModule(
   SaveDatastore = TRUE,
   DoRun = TRUE
 )
+
+#Finish up
+setwd("tests")
+tar("Datastore.tar", "Datastore")
+dir.remove("Datastore")
+setwd("..")

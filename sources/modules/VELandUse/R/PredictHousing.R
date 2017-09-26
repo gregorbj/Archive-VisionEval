@@ -224,7 +224,13 @@ PredictHousingSpecifications <- list(
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
       UNLIKELY = "",
-      TOTAL = ""
+      TOTAL = "",
+      DESCRIPTION =
+        items(
+          "Number of single family dwelling units (PUMS codes 01 - 03) in zone",
+          "Number of multi-family dwelling units (PUMS codes 04 - 09) in zone",
+          "Number of qroup quarters population accommodations in zone"
+        )
     ),
     item(
       NAME = items(
@@ -242,7 +248,14 @@ PredictHousingSpecifications <- list(
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
       UNLIKELY = "",
-      TOTAL = ""
+      TOTAL = "",
+      DESCRIPTION =
+        items(
+          "Proportion of Bzone households (non-group quarters) in 1st quartile of Azone household income",
+          "Proportion of Bzone households (non-group quarters) in 2nd quartile of Azone household income",
+          "Proportion of Bzone households (non-group quarters) in 3rd quartile of Azone household income",
+          "Proportion of Bzone households (non-group quarters) in 4th quartile of Azone household income"
+        )
     )
   ),
   #Specify data to be loaded from data store
@@ -388,7 +401,8 @@ PredictHousingSpecifications <- list(
       NAVALUE = -1,
       PROHIBIT = "",
       ISELEMENTOF = c("SF", "MF", "GQ"),
-      SIZE = 2
+      SIZE = 2,
+      DESCRIPTION = "Type of dwelling unit in which the household resides (SF = single family, MF = multi-family, GQ = group quarters"
     ),
     item(
       NAME = "Bzone",
@@ -398,7 +412,8 @@ PredictHousingSpecifications <- list(
       UNITS = "ID",
       NAVALUE = "NA",
       PROHIBIT = "NA",
-      ISELEMENTOF = ""
+      ISELEMENTOF = "",
+      DESCRIPTION = "ID of Bzone in which household resides"
     ),
     item(
       NAME =
@@ -413,7 +428,13 @@ PredictHousingSpecifications <- list(
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
-      SIZE = 0
+      SIZE = 0,
+      DESCRIPTION =
+        items(
+          "Number of households living in single family dwelling units in zone",
+          "Number of households living in multi-family dwelling units in zone",
+          "Number of persons living in group quarters in zone"
+        )
     ),
     item(
       NAME = "Pop",
@@ -424,7 +445,8 @@ PredictHousingSpecifications <- list(
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
-      SIZE = 0
+      SIZE = 0,
+      DESCRIPTION = "Population residing in zone"
     ),
     item(
       NAME = "NumHh",
@@ -435,7 +457,8 @@ PredictHousingSpecifications <- list(
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
-      SIZE = 0
+      SIZE = 0,
+      DESCRIPTION = "Number of households (non-group and group quarters) residing in zone"
     ),
     item(
       NAME = "NumWkr",
@@ -446,7 +469,8 @@ PredictHousingSpecifications <- list(
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
-      SIZE = 0
+      SIZE = 0,
+      DESCRIPTION = "Number of workers residing in zone"
     )
   )
 )

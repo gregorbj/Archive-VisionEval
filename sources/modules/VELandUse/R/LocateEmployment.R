@@ -59,7 +59,13 @@ LocateEmploymentSpecifications <- list(
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
       UNLIKELY = "",
-      TOTAL = ""
+      TOTAL = "",
+      DESCRIPTION =
+        items(
+          "Total number of jobs in zone",
+          "Number of jobs in retail sector in zone",
+          "Number of jobs in service sector in zone"
+        )
     )
   ),
   #Specify data to be loaded from data store
@@ -109,7 +115,13 @@ LocateEmploymentSpecifications <- list(
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
-      SIZE = 0
+      SIZE = 0,
+      DESCRIPTION =
+        items(
+          "Total number of jobs in zone",
+          "Number of jobs in retail sector in zone",
+          "Number of jobs in service sector in zone"
+        )
     ),
     item(
       NAME =
@@ -123,7 +135,13 @@ LocateEmploymentSpecifications <- list(
       NAVALUE = -999999,
       PROHIBIT = c("NA"),
       ISELEMENTOF = "",
-      SIZE = 0
+      SIZE = 0,
+      DESCRIPTION =
+        items(
+          "Difference between modeled TotEmp and input TotEmp in zone",
+          "Difference between modeled RetEmp and input RetEmp in zone",
+          "Difference between modeled SvcEmp and input SvcEmp in zone"
+        )
     )
   )
 )

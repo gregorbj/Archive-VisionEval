@@ -61,7 +61,13 @@ AssignDevTypesSpecifications <- list(
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
       UNLIKELY = "",
-      TOTAL = ""
+      TOTAL = "",
+      DESCRIPTION =
+        items(
+          "Proportion of single family dwelling units located within the urban portion of the zone",
+          "Proportion of multi-family dwelling units located within the urban portion of the zone",
+          "Proportion of group quarters accommodations located within the urban portion of the zone"
+        )
     )
   ),
   #Specify data to be loaded from data store
@@ -136,7 +142,8 @@ AssignDevTypesSpecifications <- list(
       NAVALUE = "NA",
       PROHIBIT = "NA",
       ISELEMENTOF = c("Urban", "Rural"),
-      SIZE = 5
+      SIZE = 5,
+      DESCRIPTION = "Development type (Urban or Rural) of the place where the household resides"
     ),
     item(
       NAME = "UrbanPop",
@@ -147,7 +154,8 @@ AssignDevTypesSpecifications <- list(
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
-      SIZE = 0
+      SIZE = 0,
+      DESCRIPTION = "Population in the Urban development type portion of the zone"
     ),
     item(
       NAME = "RuralPop",
@@ -158,7 +166,8 @@ AssignDevTypesSpecifications <- list(
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
-      SIZE = 0
+      SIZE = 0,
+      DESCRIPTION = "Population in the Rural development type portion of the zone"
     )
   )
 )

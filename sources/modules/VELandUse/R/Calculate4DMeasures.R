@@ -59,7 +59,12 @@ Calculate4DMeasuresSpecifications <- list(
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
       UNLIKELY = "",
-      TOTAL = ""
+      TOTAL = "",
+      DESCRIPTION =
+        items(
+          "Area that is Urban and unprotected (i.e. developable) within the zone",
+          "Area that is Rural and unprotected (i.e. developable) within the zone"
+        )
     ),
     item(
       NAME =
@@ -76,7 +81,12 @@ Calculate4DMeasuresSpecifications <- list(
       PROHIBIT = "NA",
       ISELEMENTOF = "",
       UNLIKELY = "",
-      TOTAL = ""
+      TOTAL = "",
+      DESCRIPTION =
+        items(
+          "Latitude in decimal degrees of the centroid of the zone",
+          "Longitude in decimal degrees of the centroid of the zone"
+        )
     ),
     item(
       NAME = "D3apo",
@@ -90,7 +100,8 @@ Calculate4DMeasuresSpecifications <- list(
       PROHIBIT = "NA",
       ISELEMENTOF = "",
       UNLIKELY = "",
-      TOTAL = ""
+      TOTAL = "",
+      DESCRIPTION = "Network density in terms of facility miles of pedestrian-oriented links per square mile (Ref: EPA 2010 Smart Location Database)"
     ),
     item(
       NAME = "D3bpo4",
@@ -104,7 +115,8 @@ Calculate4DMeasuresSpecifications <- list(
       PROHIBIT = "NA",
       ISELEMENTOF = "",
       UNLIKELY = "",
-      TOTAL = ""
+      TOTAL = "",
+      DESCRIPTION = "Intersection density in terms of pedestrian-oriented intersections having four or more legs per square mile (Ref: EPA 2010 Smart Location Database)"
     ),
     item(
       NAME = "D3bmm4",
@@ -118,7 +130,8 @@ Calculate4DMeasuresSpecifications <- list(
       PROHIBIT = "NA",
       ISELEMENTOF = "",
       UNLIKELY = "",
-      TOTAL = ""
+      TOTAL = "",
+      DESCRIPTION = "Intersection density in terms of multi-modal intersections having four or more legs per square mile (Ref: EPA 2010 Smart Location Database)"
     )
   ),
   #Specify data to be loaded from data store
@@ -212,7 +225,8 @@ Calculate4DMeasuresSpecifications <- list(
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
-      SIZE = 0
+      SIZE = 0,
+      DESCRIPTION = "Gross population density (people/acre) on unprotected (i.e. developable) land in zone (Ref: EPA 2010 Smart Location Database)"
     ),
     item(
       NAME = "D1C",
@@ -223,7 +237,8 @@ Calculate4DMeasuresSpecifications <- list(
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
-      SIZE = 0
+      SIZE = 0,
+      DESCRIPTION = "Gross employment density (jobs/acre) on unprotected land (i.e. developable) land in zone (Ref: EPA 2010 Smart Location Database)"
     ),
     item(
       NAME = "D1D",
@@ -234,7 +249,8 @@ Calculate4DMeasuresSpecifications <- list(
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
-      SIZE = 0
+      SIZE = 0,
+      DESCRIPTION = "Gross activity density (employment + households) on unprotected land in zone (Ref: EPA 2010 Smart Location Database)"
     ),
     item(
       NAME = "D2A_JPHH",
@@ -245,7 +261,8 @@ Calculate4DMeasuresSpecifications <- list(
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
-      SIZE = 0
+      SIZE = 0,
+      DESCRIPTION = "Ratio of jobs to households in zone (Ref: EPA 2010 Smart Location Database)"
     ),
     item(
       NAME = "D2A_WRKEMP",
@@ -256,7 +273,8 @@ Calculate4DMeasuresSpecifications <- list(
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
-      SIZE = 0
+      SIZE = 0,
+      DESCRIPTION = "Ratio of workers to jobs in zone (Ref: EPA 2010 Smart Location Database)"
     ),
     item(
       NAME = "D2A_EPHHM",
@@ -267,7 +285,8 @@ Calculate4DMeasuresSpecifications <- list(
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
-      SIZE = 0
+      SIZE = 0,
+      DESCRIPTION = "Employment and household entropy measure for zone considering numbers of households, retail jobs, service jobs, and other jobs (Ref: EPA 2010 Smart Location Database)"
     ),
     item(
       NAME = "D5",
@@ -278,7 +297,8 @@ Calculate4DMeasuresSpecifications <- list(
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
-      SIZE = 0
+      SIZE = 0,
+      DESCRIPTION = "Destination accessibility of zone calculated as harmonic mean of jobs within 2 miles and population within 5 miles"
     )
   )
 )
