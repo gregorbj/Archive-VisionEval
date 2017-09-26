@@ -205,7 +205,13 @@ CalculateHouseholdDVMTSpecifications <- list(
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
-      SIZE = 0
+      SIZE = 0,
+      DESCRIPTION =
+        items(
+          "Average daily vehicle miles traveled by the household in autos or light trucks",
+          "95th percentile daily vehicle miles traveled by the household in autos or light trucks",
+          "Maximum daily vehicle miles traveled by the household in autos or light trucks"
+        )
     )
   )
 )
@@ -294,6 +300,8 @@ CalculateHouseholdDVMT <- function(L) {
   AveDvmt_[!IsUr_] <-
     as.vector(eval(parse(text = DvmtModel_ls$NonMetro$Ave),
                    envir = Hh_df[!IsUr_,])) ^ (1 / DvmtModel_ls$NonMetro$Pow)
+  #Limit the household DVMT to be no greater than 99th percentile for the population
+  AveDvmt_[AveDvmt_ > quantile(AveDvmt_, 0.99)] <- quantile(AveDvmt_, 0.99)
 
   #Apply the 95th percentile and maximum DVMT models
   #-------------------------------------------------
