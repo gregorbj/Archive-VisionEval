@@ -289,7 +289,18 @@ AssignTransitServiceSpecifications <- list(
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
       UNLIKELY = "",
-      TOTAL = ""
+      TOTAL = "",
+      DESCRIPTION =
+        list(
+          "Annual revenue-miles of demand-responsive public transit service",
+          "Annual revenue-miles of van-pool and similar public transit service",
+          "Annual revenue-miles of standard bus public transit service",
+          "Annual revenue-miles of rapid-bus and commuter bus public transit service",
+          "Annual revenue-miles of monorail and automated guideway public transit service",
+          "Annual revenue-miles of streetcar and trolleybus public transit service",
+          "Annual revenue-miles of light rail and heavy rail public transit service",
+          "Annual revenue-miles of commuter rail, hybrid rail, cable car, and aerial tramway public transit service"
+        )
     ),
     item(
       NAME = "D4c",
@@ -303,7 +314,8 @@ AssignTransitServiceSpecifications <- list(
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
       UNLIKELY = "",
-      TOTAL = ""
+      TOTAL = "",
+      DESCRIPTION = "Aggregate frequency of transit service within 0.25 miles of block group boundary per hour during evening peak period (Ref: EPA 2010 Smart Location Database)"
     )
   ),
   #Specify data to be loaded from data store
@@ -365,7 +377,8 @@ AssignTransitServiceSpecifications <- list(
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
-      SIZE = 0
+      SIZE = 0,
+      DESCRIPTION = "Ratio of bus-equivalent revenue-miles (i.e. revenue-miles at the same productivity - passenger miles per revenue mile - as standard bus) to urbanized area population"
     )
   )
 )

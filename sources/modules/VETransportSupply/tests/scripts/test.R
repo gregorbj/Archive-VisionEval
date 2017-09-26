@@ -1,4 +1,12 @@
 library(rhdf5)
+library(filesstrings)
+
+#Load datastore from VELandUse package
+file.copy("../VELandUse/tests/Datastore.tar", "tests/Datastore.tar")
+setwd("tests")
+untar("Datastore.tar")
+file.remove("Datastore.tar")
+setwd("..")
 
 #Test AssignTransitService module
 source("R/AssignTransitService.R")
@@ -17,3 +25,9 @@ testModule(
   SaveDatastore = TRUE,
   DoRun = TRUE
 )
+
+#Finish up
+setwd("tests")
+tar("Datastore.tar", "Datastore")
+dir.remove("Datastore")
+setwd("..")

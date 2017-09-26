@@ -58,7 +58,11 @@ AssignRoadMilesSpecifications <- list(
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
       UNLIKELY = "",
-      TOTAL = ""
+      TOTAL = "",
+      DESCRIPTION =
+        items(
+          "Lane-miles of roadways functionally classified as freeways or expressways in the urbanized portion of the metropolitan area",
+          "Lane-miles of roadways functionally classified as arterials (but not freeways or expressways) in the urbanized portion of the metropolitan area")
     )
   ),
   #Specify data to be loaded from data store
@@ -114,7 +118,8 @@ AssignRoadMilesSpecifications <- list(
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
-      SIZE = 0
+      SIZE = 0,
+      DESCRIPTION = "Ratio of urbanized area freeway and expressway lane-miles to urbanized area population"
     )
   )
 )
