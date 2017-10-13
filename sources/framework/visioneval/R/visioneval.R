@@ -129,44 +129,87 @@ initializeModel <-
       loadModelParameters(ModelParamFile = ModelParamFile)
     }
 
-    #Parse script to make table of all the module calls & check whether present
-    #--------------------------------------------------------------------------
+    #Parse script to make table of all the module calls, check and combine specs
+    #---------------------------------------------------------------------------
+    #Parse script and make data frame of modules that are called directly
     parseModelScript(FilePath = "run_model.R")
     ModuleCalls_df <- unique(getModelState()$ModuleCalls_df)
-    #Check that all module packages are installed and all modules are present
-    ModuleCheck <-
-      checkModulesExist(ModuleCalls_df = ModuleCalls_df)
-
-    #Check whether the specifications for all modules are proper
-    #-----------------------------------------------------------
-    HasSpecErrors <- FALSE
+    #Get list of installed packages
+    InstalledPkgs_ <- rownames(installed.packages())
+    #Iterate through each module call and check availability and specifications
+    #create combined list of all specifications
+    Errors_ <- character(0)
+    AllSpecs_ls <- list()
     for (i in 1:nrow(ModuleCalls_df)) {
-      ModuleName <- ModuleCalls_df[i, "ModuleName"]
-      PackageName <- ModuleCalls_df[i, "PackageName"]
+      AllSpecs_ls[[i]] <- list()
+      ModuleName <- ModuleCalls_df$ModuleName[i]
+      AllSpecs_ls[[i]]$ModuleName <- ModuleName
+      PackageName <- ModuleCalls_df$PackageName[i]
+      AllSpecs_ls[[i]]$PackageName <- PackageName
+      AllSpecs_ls[[i]]$RunFor <- ModuleCalls_df$RunFor[i]
+      #Check module availability
+      Err <- checkModuleExists(ModuleName, PackageName, InstalledPkgs_)
+      if (length(Err) > 0) {
+        Errors_ <- c(Errors_, Err)
+        next()
+      }
+      #Load and check the module specifications
       Specs_ls <-
         processModuleSpecs(getModuleSpecs(ModuleName, PackageName))
-      Errors_ <- checkModuleSpecs(Specs_ls, ModuleName)
-      if (length(Errors_) != 0) {
-        Msg <-
-          paste0("Specifications for module '", ModuleName,
-                 "' have the following errors.")
-        writeLog(Msg)
-        writeLog(Errors_)
-        HasSpecErrors <- TRUE
-        rm(Msg)
+      Err <- checkModuleSpecs(Specs_ls, ModuleName)
+      if (length(Err) > 0) {
+        Errors_ <- c(Errors_, Err)
+        next()
+      } else {
+        AllSpecs_ls[[i]]$Specs <- Specs_ls
       }
-      rm(ModuleName, PackageName, Specs_ls, Errors_)
+      #If the 'Call' spec is not null, check the called module
+      if (!is.null(Specs_ls$Call)) {
+        #If it is a list of module calls
+        if (is.list(Specs_ls$Call)) {
+        #Iterate through module calls
+          for (j in 1:length(Specs_ls$Call)) {
+            Call_ <- unlist(strsplit(Specs_ls$Call, "::"))
+            #Check module availability
+            Err <-
+              checkModuleExists(
+                Call_[2],
+                Call_[1],
+                InstalledPkgs_,
+                c(Module = ModuleName, Package = PackageName))
+            if (length(Err) > 0) {
+              Errors_ <- c(Errors_, Err)
+              next()
+            }
+            #Load and check the module specifications and add Get specs if
+            #there are no specification errors
+            CallSpecs_ls <-
+              processModuleSpecs(getModuleSpecs(Call_[2], Call_[1]))
+            Err <- checkModuleSpecs(CallSpecs_ls, Call_[2])
+            if (length(Err) > 0) {
+              Errors_ <- c(Errors_, Err)
+              next()
+            } else {
+              AllSpecs_ls[[i]]$Specs$Get <-
+                c(AllSpecs_ls[[i]]$Specs$Get <- Specs_ls$Get)
+            }
+          }
+        }
+      }
     }
-    if (HasSpecErrors) {
+    #If any errors, print to log and stop execution
+    if (length(Errors_) > 0) {
       Msg <-
-        paste0("One or more modules has specification errors. ",
-               "Check log for detailed descriptions.")
+        paste0("There are one or more errors in the module calls: ",
+               "package not installed, or module not present in package, ",
+               "or errors in module specifications. ",
+               "Check the log for details.")
       stop(Msg)
     }
 
     #Simulate model run
     #------------------
-    simDataTransactions(ModuleCalls_df)
+    simDataTransactions(AllSpecs_ls)
 
     #Check and process module inputs
     #-------------------------------
@@ -253,17 +296,36 @@ runModule <- function(ModuleName, PackageName, RunFor, RunYear) {
   #---------------------------
   Function <- paste0(PackageName, "::", ModuleName)
   Specs <- paste0(PackageName, "::", ModuleName, "Specifications")
-  #requireNamespace(PackageName)
   M <- list()
   M$Func <- eval(parse(text = Function))
   M$Specs <- processModuleSpecs(eval(parse(text = Specs)))
+  #Load any modules identified by 'Call' spec if any
+  if (!is.null(M$Specs$Call)) {
+    Call <- list()
+    for (Alias in names(M$Specs$Call)) {
+      Function <- M$Specs$Call[[Alias]]
+      Specs <- paste0(M$Specs$Call[[Alias]], "Specifications")
+      Call$Func[[Alias]] <- eval(parse(text = Function))
+      Call$Specs[[Alias]] <- processModuleSpecs(eval(parse(text = Specs)))
+    }
+  }
   #Run module
   #----------
   if (M$Specs$RunBy == "Region") {
     #Get data from datastore
     L <- getFromDatastore(M$Specs, RunYear = RunYear, Geo = NULL)
+    if (exists("Call")) {
+      for (Alias in names(Call)) {
+        L[[Alias]] <-
+          getFromDatastore(Call$Specs[[Alias]], RunYear = RunYear, Geo = NULL)
+      }
+    }
     #Run module and store results in datastore
-    R <- M$Func(L)
+    if (exists("Call")) {
+      R <- M$Func(L, Call$Func)
+    } else {
+      R <- M$Func(L)
+    }
     setInDatastore(R, M$Specs, ModuleName, Year = RunYear, Geo = NULL)
   } else {
     GeoCategory <- M$Specs$RunBy
@@ -272,8 +334,18 @@ runModule <- function(ModuleName, PackageName, RunFor, RunYear) {
     for (Geo in Geo_) {
       #Get data from datastore for geographic area
       L <- getFromDatastore(M$Specs, RunYear = RunYear, Geo = Geo)
+      if (exists("Call")) {
+        for (Alias in names(Call)) {
+          L[[Alias]] <-
+            getFromDatastore(Call$Specs[[Alias]], RunYear = RunYear, Geo = Geo)
+        }
+      }
       #Run model for geographic area and store results in datastore
-      R <- M$Func(L)
+      if (exists("Call")) {
+        R <- M$Func(L, Call$Func)
+      } else {
+        R <- M$Func(L)
+      }
       setInDatastore(R, M$Specs, ModuleName, Year = RunYear, Geo = Geo)
     }
   }

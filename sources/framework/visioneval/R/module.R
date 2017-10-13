@@ -461,8 +461,12 @@ testModule <-
     #Run the module and check that results meet specifications
     #---------------------------------------------------------
     #The module is run only if the DoRun argument is TRUE. Otherwise the
-    #datastore is initialized, specifications are checked, and inputs are
-    #loaded only.
+    #datastore is initialized, specifications are checked, and a list is
+    #returned which contains the specifications list, the data list from the
+    #datastore meeting specifications, and a functions list containing any
+    #called module functions.
+
+    #Run the module if DoRun is TRUE
     if (DoRun) {
       writeLog(
         "Running module and checking whether outputs meet Set specifications.",
@@ -471,14 +475,40 @@ testModule <-
       if (SaveDatastore) {
         writeLog("Also saving module outputs to datastore.", Print = TRUE)
       }
+      #Load the module function
       Func <- get(ModuleName)
+      #Load any modules identified by 'Call' spec if any
+      if (!is.null(Specs_ls$Call)) {
+        Call <- list(
+          Func = list(),
+          Specs = list()
+        )
+        for (Alias in names(Specs_ls$Call)) {
+          Function <- Specs_ls$Call[[Alias]]
+          Specs <- paste0(Specs_ls$Call[[Alias]], "Specifications")
+          Call$Func[[Alias]] <- eval(parse(text = Function))
+          Call$Specs[[Alias]] <- processModuleSpecs(eval(parse(text = Specs)))
+        }
+      }
+      #Run module for each year
       for (Year in getYears()) {
         ResultsCheck_ <- character(0)
+        #If RunBy is 'Region', this code is run
         if (Specs_ls$RunBy == "Region") {
           #Get data from datastore
           L <- getFromDatastore(Specs_ls, RunYear = Year, Geo = NULL)
+          if (exists("Call")) {
+            for (Alias in names(Call$Specs)) {
+              L[[Alias]] <-
+                getFromDatastore(Call$Specs[[Alias]], RunYear = Year, Geo = NULL)
+            }
+          }
           #Run module
-          R <- Func(L)
+          if (exists("Call")) {
+            R <- Func(L, Call$Func)
+          } else {
+            R <- Func(L)
+          }
           #Check results
           Check_ <-
             checkModuleOutputs(
@@ -490,6 +520,7 @@ testModule <-
           if (SaveDatastore & length(Check_) == 0) {
             setInDatastore(R, Specs_ls, ModuleName, Year, Geo = NULL)
           }
+        #Otherwise the following code is run
         } else {
           GeoCategory <- Specs_ls$RunBy
           Geo_ <- readFromTable(GeoCategory, GeoCategory, Year)
@@ -497,8 +528,18 @@ testModule <-
           for (Geo in Geo_) {
             #Get data from datastore for geographic area
             L <- getFromDatastore(Specs_ls, RunYear = Year, Geo = Geo)
+            if (exists("Call")) {
+              for (Alias in names(Call$Specs)) {
+                L[[Alias]] <-
+                  getFromDatastore(Call$Specs[[Alias]], RunYear = Year, Geo = Geo)
+              }
+            }
             #Run model for geographic area
-            R <- Func(L)
+            if (exists("Call")) {
+              R <- Func(L, Call$Func)
+            } else {
+              R <- Func(L)
+            }
             #Check results
             Check_ <-
               checkModuleOutputs(
@@ -534,8 +575,36 @@ testModule <-
       Msg <- paste0("Congratulations. Module ", ModuleName, " passed all tests.")
       writeLog(Msg, Print = TRUE)
       rm(Msg)
+
+      #Return the specifications, data list, and functions list if DoRun is FALSE
     } else {
-      return(Specs_ls)
+      #Load any modules identified by 'Call' spec if any
+      if (!is.null(Specs_ls$Call)) {
+        Call <- list(
+          Func = list(),
+          Specs = list()
+        )
+        for (Alias in names(Specs_ls$Call)) {
+          Function <- Specs_ls$Call[[Alias]]
+          Specs <- paste0(Specs_ls$Call[[Alias]], "Specifications")
+          Call$Func[[Alias]] <- eval(parse(text = Function))
+          Call$Specs[[Alias]] <- processModuleSpecs(eval(parse(text = Specs)))
+        }
+      }
+      #Get data from datastore
+      L <- getFromDatastore(Specs_ls, RunYear = Year, Geo = NULL)
+      if (exists("Call")) {
+        for (Alias in names(Call$Specs)) {
+          L[[Alias]] <-
+            getFromDatastore(Call$Specs[[Alias]], RunYear = Year, Geo = NULL)
+        }
+      }
+      #Return the specifications, data list, and called functions
+      if (exists("Call")) {
+        return(list(Specs_ls = Specs_ls, L = L, M = Call$Func))
+      } else {
+        return(list(Specs_ls = Specs_ls, L = L))
+      }
     }
   }
 

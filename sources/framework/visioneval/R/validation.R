@@ -1195,6 +1195,64 @@ checkModuleSpecs <- function(Specs_ls, ModuleName) {
     }
     rm(Err_)
   }
+  #Check Call specifications
+  #-------------------------
+  if (!is.null(Specs_ls$Call)) {
+    if (!is.list(Specs_ls$Call)) {
+      #If it is not a list check that the value is not something other than TRUE
+      if (Specs_ls$Call != TRUE) {
+        Msg <-
+          paste0(
+            "'Call' specification for module '", ModuleName,
+            "' is incorrect. If it is not NULL, its value must be TRUE ",
+            "or be a list which identifies the the modules to be called."
+          )
+        Errors_ <- c(Errors_, Msg)
+      } else {
+      #If the value is TRUE, check that there is not an 'Inp' specification
+        if (!is.null(Specs_ls$Inp)) {
+          Msg <-
+            paste0(
+              "Inconsistency between 'Call' and 'Inp' specifications for module '",
+              ModuleName, "'. The 'Call' specification is TRUE, ",
+              "identifying this as a module to be called by other ",
+              "modules rather than a module that is run by the 'runModule' function. ",
+              "Modules that are called by other modules must not have 'Inp' ",
+              "specifications because no inputs are processed for modules ",
+              "that are called by other modules."
+            )
+        }
+      }
+    } else {
+    #If it is a list, check that the module calls are correctly formatted
+      for (name in names(Specs_ls$Call)) {
+        Value <- Specs_ls$Call[[name]]
+        if (!is.character(Value)) {
+          Msg <-
+            paste0(
+              "'Call' specification for module '", ModuleName,
+              "' is incorrect. The value for '", name, "' is not a string."
+            )
+          Errors_ <- c(Errors_, Msg)
+        } else {
+          Value_ <- unlist(strsplit(Value, "::"))
+          if (length(Value_ != 2)) {
+            Msg <-
+              paste0(
+                "'Call' specification for module '", ModuleName,
+                "' is incorrect. The value for '", name,
+                "' is not formatted correctly. ",
+                "It must be formatted like PackageName::ModuleName ",
+                "where 'PackageName' is the name of a package and ",
+                "'ModuleName' is the name of a module."
+              )
+            Errors_ <- c(Errors_, Msg)
+          }
+        }
+      }
+
+    }
+  }
 
   #Return errors
   #-------------

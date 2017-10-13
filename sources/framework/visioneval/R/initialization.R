@@ -875,88 +875,76 @@ parseModelScript <-
 
 #CHECK MODULE AVAILABILITY
 #=========================
-#' Check whether required modules are present.
+#' Check whether a module required to run a model is present
 #'
-#' \code{checkModulesExist}Function checks whether all required module
-#' packages are installed and whether listed modules are present in the
-#' packages.
+#' \code{checkModuleExists}Function checks whether a module required to run a
+#' model is present.
 #'
-#' This function takes a listing of module calls and checks whether all of the
-#' listed packages are installed on the computer and whether the named modules
-#' are in the packages. If modules are all present, then the function returns
-#' TRUE, otherwise it identifies the missing packages and modules to the log and
-#' returns FALSE.
+#' This function takes a specified module and package, checks whether the
+#' package has been installed and whether the module is in the package. The
+#' function returns an error message is the package is not installed or if
+#' the module is not present in the package. If the module has been called by
+#' another module the value of the 'CalledBy' argument will be used to identify
+#' the calling module as well so that the user understands where the call is
+#' coming from.
 #'
-#' @param ModuleCalls_df A listing of modules called in the 'run_model.R' script
-#' as created by the 'parseModelScript' function.
+#' @param ModuleName A string identifying the module name.
+#' @param PackageName A string identifying the package name.
+#' @param InstalledPkgs_ A string vector identifying the names of packages that
+#' are installed.
+#' @param CalledBy A string vector having two named elements. The value of the
+#' 'Module' element is the name of the calling module. The value of the
+#' 'Package' element is the name of the package that the calling module is in.
 #' @return TRUE if all packages and modules are present and FALSE if not.
 #' @export
-checkModulesExist <- function(ModuleCalls_df) {
-  #Get listing of installed packages
-  InstalledPkg_mx <- installed.packages()
-  #Check whether all packages are installed
-  NeededPkg_ <- unique(ModuleCalls_df$PackageName)
-  NeededPkgExist_ <- NeededPkg_ %in% rownames(InstalledPkg_mx)
-  MissingPkg_ <- NeededPkg_[!NeededPkgExist_]
-  #If not all are present then return FALSE and write error to log
-  if (!all(NeededPkgExist_)) {
-    Message <-
-      paste0("Required packages (",
-             paste(MissingPkg_, collapse = ", "),
-             ") must be installed before the model may be run.")
-    writeLog(Message)
-    return(FALSE)
-    #Otherwise check that all named modules are present in the packages
-  } else {
-    ModuleCalls_ls_df <- split(ModuleCalls_df, ModuleCalls_df$PackageName)
-    ModuleCheck_ls <-
-      lapply(ModuleCalls_ls_df, function(x) {
-        PkgName <- x$PackageName[1]
-      PkgData_ <- data(package=PkgName)$results[,"Item"]
-        PkgModules_ <- PkgData_[grep("Specifications", PkgData_)]
-        PkgModules_ <- gsub("Specifications", "", PkgModules_)
-        Calls_ <- x$ModuleName
-        HasModule_ <- Calls_ %in% PkgModules_
-        names(HasModule_) <- Calls_
-        HasModule_
-      })
-    MissingModule_ls <- lapply(ModuleCheck_ls, function(x) names(x)[!x])
-    HasMissing <- any(unlist(lapply(MissingModule_ls, length)) > 0)
-    #If not all modules are present then return FALSE and write error to log
-    if (HasMissing) {
-      for (i in 1:length(MissingModule_ls)) {
-        Pkg <- names(MissingModule_ls)[i]
-        Module_ <- MissingModule_ls[[i]]
-        Message <-
-          paste0("Required modules (",
-                 paste(Module_, collapse = ", "),
-                 ") are missing from package ",
-                 Pkg)
-        writeLog(Message)
-      }
-      Msg <-
-        paste0("One or more modules are missing from the specified packages. ",
-               "This must be corrected before model can be run. ",
-               "Details can be found in the log.")
-      stop(Msg)
-    #Otherwise return TRUE because all packages and modules are accounted for
-    } else {
-      return(TRUE)
+checkModuleExists <-
+  function(ModuleName,
+           PackageName,
+           InstalledPkgs_ = rownames(installed.packages()),
+           CalledBy = NA) {
+    ErrorMsg <- character(0)
+    PackageMissing <- FALSE
+    ModuleMissing <- FALSE
+    #Check whether the package is installed and module is present in package
+    PackageMissing <- !(PackageName %in% InstalledPkgs_)
+    if (!PackageMissing) {
+      PkgData_ <- data(package=PackageName)$results[,"Item"]
+      PkgModules_ <- PkgData_[grep("Specifications", PkgData_)]
+      PkgModules_ <- gsub("Specifications", "", PkgModules_)
+      ModuleMissing <- !(ModuleName %in% PkgModules_)
     }
+    #Compose error messages if any
+    if (PackageMissing) {
+      if (all(is.na(CalledBy))) {
+        ErrorMsg <-
+          paste0("Error in runModule call for module ", ModuleName,
+                 " in package ", PackageName, ". Package ", PackageName,
+                 " is not installed.")
+      } else {
+        ErrorMsg <-
+          paste0("Error in runModule call for module ", CalledBy["Module"],
+                 " in package ", CalledBy["Package"], ". This module calls Module ",
+                 ModuleName, " in package ", PackageName, ". Package ", PackageName,
+                 " is not installed.")
+      }
+    }
+    if (ModuleMissing) {
+      if (all(is.na(CalledBy))) {
+        ErrorMsg <-
+          paste0("Error in runModule call for module ", ModuleName,
+                 " in package ", PackageName, ". Module ", ModuleName,
+                 " is not present in package.")
+      } else {
+        ErrorMsg <-
+          paste0("Error in runModule call for module ", CalledBy["Module"],
+                 " in package ", CalledBy["Package"], ". This module calls Module ",
+                 ModuleName, " in package ", PackageName, ". Module ", ModuleName,
+                 " is not present in package.")
+      }
+    }
+    #Return the error message
+    ErrorMsg
   }
-}
-#Test code
-#---------
-# #Define temporary writeLog function
-# writeLog <- print
-# #Test call for packages that don't exist
-# checkModulesExist(read.csv("tests/data/module_call_test1_df.csv", as.is = TRUE))
-# #Test call for modules that don't exist in package
-# checkModulesExist(read.csv("tests/data/module_call_test2_df.csv", as.is = TRUE))
-# #Test call where there are no missing packages or modules
-# checkModulesExist(read.csv("tests/data/module_call_test3_df.csv", as.is = TRUE))
-# #Remove temporary writeLog function
-# rm(writeLog)
 
 
 #GET MODULE SPECIFICATIONS
@@ -1075,6 +1063,9 @@ processModuleSpecs <- function(Spec_ls) {
   if (!is.null(Spec_ls$Set)) {
     Out_ls$Set <- processComponent(Spec_ls$Set)
   }
+  if (!is.null(Spec_ls$Call)) {
+    Out_ls$Call <- Spec_ls$Call
+  }
   Out_ls
 }
 
@@ -1110,13 +1101,21 @@ processModuleSpecs <- function(Spec_ls) {
 #' datastore to be overwritten. The function writes warning and error messages
 #' to the log and stops program execution if there are any errors.
 #'
-#' @param ModuleCalls_df A data frame of module calls as produced by the
-#' 'parseModelScript' function.
+#' @param AllSpecs_ls A list containing the processed specifications of all of
+#' the modules run by model script in the order that the modules are called with
+#' duplicated module calls removed. Information about each module call is a
+#' component of the list in the order of the module calls. Each component is
+#' composed of 3 components: 'ModuleName' contains the name of the module,
+#' 'PackageName' contains the name of the package the module is in, and
+#' 'Specs' contains the processed specifications of the module. The 'Get'
+#' specification component includes the 'Get' specifications of all modules
+#' that are called by the module.
+#'
 #' @return There is no return value. The function has the side effect of
 #' writing messages to the log and stops program execution if there are any
 #' errors.
 #' @export
-simDataTransactions <- function(ModuleCalls_df) {
+simDataTransactions <- function(AllSpecs_ls) {
   G <- getModelState()
 
   #Initialize errors and warnings vectors
@@ -1254,10 +1253,10 @@ simDataTransactions <- function(ModuleCalls_df) {
   #-----------------------------------------------------------
   for (Year in RunYears_) {
     #Iterate through module calls
-    for (i in 1:nrow(ModuleCalls_df)) {
-      Module <- ModuleCalls_df$ModuleName[i]
-      Package <- ModuleCalls_df$PackageName[i]
-      RunFor <- ModuleCalls_df$RunFor[i]
+    for (i in 1:length(AllSpecs_ls)) {
+      Module <- AllSpecs_ls[[i]]$ModuleName
+      Package <- AllSpecs_ls[[i]]$PackageName
+      RunFor <- AllSpecs_ls[[i]]$RunFor
       if (RunFor == "BaseYear" & Year != "BaseYear") break()
       if (RunFor == "NotBaseYear" & Year == "BaseYear") break()
       ModuleSpecs_ls <-
