@@ -802,7 +802,7 @@ applyBinomialModel <-
     #Define function to calculate probabilities
     calcProbs <- function(x) {
       Results_ <- x + eval(parse(text = Model_ls$Formula), envir = Data_df)
-      if (!is.na(Model_ls$RepeatVar)) {
+      if (!is.null(Model_ls$RepeatVar)) {
         Results_ <- rep(Results_, Data_df[[Model_ls$RepeatVar]])
       }
       Odds_ <- exp(Results_)
