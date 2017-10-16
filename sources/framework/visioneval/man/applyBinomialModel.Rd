@@ -18,7 +18,11 @@ application. If no preparation, this element of the list should not be
 present or should be set equal to NULL;
 'SearchRange' a two-element numeric vector which specifies the acceptable
 search range to use when determining the factor for adjusting the model
-constant.}
+constant.
+'RepeatVar' a string which identifies the name of a field to use for
+repeated draws of the model. This is used in the case where for example the
+input data is households and the output is vehicles and the repeat variable
+is the number of vehicles in the household.}
 
 \item{Data_df}{a data frame containing the data required for applying the
 model.}

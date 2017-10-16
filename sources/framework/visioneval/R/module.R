@@ -765,6 +765,10 @@ makeModelFormulaString <- function (EstimatedModel) {
 #' 'SearchRange' a two-element numeric vector which specifies the acceptable
 #' search range to use when determining the factor for adjusting the model
 #' constant.
+#' 'RepeatVar' a string which identifies the name of a field to use for
+#' repeated draws of the model. This is used in the case where for example the
+#' input data is households and the output is vehicles and the repeat variable
+#' is the number of vehicles in the household.
 #' @param Data_df a data frame containing the data required for applying the
 #' model.
 #' @param TargetProp a number identifying a target proportion for the default
@@ -798,6 +802,9 @@ applyBinomialModel <-
     #Define function to calculate probabilities
     calcProbs <- function(x) {
       Results_ <- x + eval(parse(text = Model_ls$Formula), envir = Data_df)
+      if (!is.na(Model_ls$RepeatVar)) {
+        Results_ <- rep(Results_, Data_df[[Model_ls$RepeatVar]])
+      }
       Odds_ <- exp(Results_)
       Odds_ / (1 + Odds_)
     }
