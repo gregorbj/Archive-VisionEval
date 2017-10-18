@@ -11,7 +11,7 @@ VEGUI is a [Shiny](https://www.rstudio.com/products/shiny/) based application. I
 
 <!-- ![output](../www/vegui_outputs.png "output") -->
 
-** Relation between input and output **
+## Relation between input and output
 
 | Input | Output |
 | :---- | :---- |
@@ -26,7 +26,7 @@ VEGUI is a [Shiny](https://www.rstudio.com/products/shiny/) based application. I
 |`EDIT_INPUT_FILE_LAST_CLICK`	| `EDIT_INPUT_FILE_LAST_CLICK` |
 |`DATASTORE_TABLE_row_last_clicked`	| `DATASTORE_TABLE_row_last_clicked` |
 
-** Reactive variables **
+## Reactive variables
 
 | Variable | Sub-Variable | Data Type |
 | :------- | :----------- | :-------- |
@@ -43,7 +43,7 @@ VEGUI is a [Shiny](https://www.rstudio.com/products/shiny/) based application. I
 | `reactiveFileReaders_ls`	| `MODEL_STATE_FILE`	| `list` |
 
 
-** Output and trigger functions/variables **
+## Output and trigger functions/variables
 
 | Output | Trigger Function | Trigger Variable |
 | :----- | :--------------- | :--------------- |
@@ -68,7 +68,7 @@ VEGUI is a [Shiny](https://www.rstudio.com/products/shiny/) based application. I
 |`VE_LOG`	| `DT::renderDataTable`	| `reactiveFileReaders_ls[[VE_LOG]]()` |
 |`DEBUG_CONSOLE_OUTPUT`	| `DT::renderDataTable`	| `otherReactiveValues_rv[[DEBUG_CONSOLE_OUTPUT]]` |
 
-** Observe **
+## Observe
 
 | Trigger Variable | Expression | Comment |
 | :--------------- | :--------- | :------ |
@@ -81,7 +81,7 @@ VEGUI is a [Shiny](https://www.rstudio.com/products/shiny/) based application. I
 | `reactiveFileReaders_ls[[RUN_PARAMETERS_FILE]]()`	| `observe({ shinyAce::updateAceEditor( session, MODEL_PARAMETERS_FILE, value = jsonlite::toJSON(reactiveFileReaders_ls[[MODEL_PARAMETERS_FILE]](), pretty = TRUE) ) shinyAce::updateAceEditor( session, RUN_PARAMETERS_FILE, value = jsonlite::toJSON(reactiveFileReaders_ls[[RUN_PARAMETERS_FILE]](), pretty = TRUE) ) })` | Updates the run and model parameters when triggered |
 
 
-** Observe Event **
+## Observe Event
 
 | Label | Event Expression | Comment |
 | :---- | :--------------- | :------ |
@@ -95,7 +95,7 @@ VEGUI is a [Shiny](https://www.rstudio.com/products/shiny/) based application. I
 | `EDIT_INPUT_FILE_LAST_CLICK`	| `input[[EDIT_INPUT_FILE_LAST_CLICK]]` | Allows editing and saving of input files when clicked on it |
 | `DATASTORE_TABLE_row_last_clicked`	| `input$DATASTORE_TABLE_row_last_clicked` | Reads hdf5 table into variables |
 
-** Reactive Event **
+## Reactive Event
 
 | Label | Event Expression | Comment |
 | :---- | :--------------- | :------ |
