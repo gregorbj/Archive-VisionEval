@@ -5,7 +5,7 @@ See [Getting Started](https://github.com/gregorbj/VisionEval/blob/master/README.
 
 VisionEval GUI (VEGUI) is an application built in R that supports VisionEval. It provides a useful interface for running a limited selection of VisionEval based models. It also offers various features like changing the input parameters to the models and visualizing the results of the model run.
 
-VEGUI is a [Shiny](https://www.rstudio.com/products/shiny/) based application. It runs on a local server (where the application is initiated). The structural components of VEGUI is shown below
+VEGUI is a [Shiny](https://www.rstudio.com/products/shiny/) based application. It runs on a local server (where the application is initiated). The structural components of VEGUI is shown below.
 
 <!-- ![input](../www/vegui_inputs.png "input") -->
 
