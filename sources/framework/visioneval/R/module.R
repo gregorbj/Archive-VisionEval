@@ -478,7 +478,7 @@ testModule <-
       #Load the module function
       Func <- get(ModuleName)
       #Load any modules identified by 'Call' spec if any
-      if (!is.null(Specs_ls$Call)) {
+      if (is.list(Specs_ls$Call)) {
         Call <- list(
           Func = list(),
           Specs = list()
@@ -639,6 +639,9 @@ testModule <-
 #' @param ... one or more optional arguments for the 'Function'.
 #' @param Target a numeric value that is compared with the return value of the
 #' 'Function'.
+#' @param DoWtAve a logical indicating whether successive weighted averaging is
+#' to be done. This is useful for getting stable results for stochastic
+#' calculations.
 #' @param MaxIter an integer specifying the maximum number of iterations
 #' to all the search to attempt.
 #' @param Tolerance a numeric value specifying the proportional difference
@@ -652,6 +655,7 @@ binarySearch <-
            SearchRange_,
            ...,
            Target = 0,
+           DoWtAve = TRUE,
            MaxIter = 100,
            Tolerance = 0.0001) {
     #Initialize vectors of low, middle and high values
@@ -701,12 +705,17 @@ binarySearch <-
       WtMid_ <- c(WtMid_, calcWtAve(Mid_))
       #Break out of loop if change in weighted mean of midpoint is less than tolerance
       if (length(Mid_) > 10) {
-        Chg <- diff(tail(Mid_, 4)) / tail(Mid_, 3)
+        Chg <- abs(diff(tail(Mid_, 4)) / tail(Mid_, 3))
         if (all(Chg < Tolerance)) break()
       }
     }
     #Return the weighted average of the midpoint value
-    tail(WtMid_, 1)
+    if (DoWtAve) {
+      Result <- tail(WtMid_, 1)
+    } else {
+      Result <- tail(Mid_, 1)
+    }
+    Result
   }
 
 
