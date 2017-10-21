@@ -402,7 +402,7 @@ checkDataConsistency <- function(DatasetName, Data_, DstoreAttr_) {
   }
   #Check if any values in UNLIKELY
   if (!is.null(DstoreAttr_$UNLIKELY)) {
-    if (DstoreAttr_$UNLIKELY != "") {
+    if (DstoreAttr_$UNLIKELY[1] != "") {
       Message <- checkMatchConditions(
         Data_, DstoreAttr_$UNLIKELY, DatasetName, "UNLIKELY")
       Warnings_ <- c(Warnings_, Message)
@@ -1236,7 +1236,7 @@ checkModuleSpecs <- function(Specs_ls, ModuleName) {
           Errors_ <- c(Errors_, Msg)
         } else {
           Value_ <- unlist(strsplit(Value, "::"))
-          if (length(Value_ != 2)) {
+          if (length(Value_) != 2) {
             Msg <-
               paste0(
                 "'Call' specification for module '", ModuleName,
