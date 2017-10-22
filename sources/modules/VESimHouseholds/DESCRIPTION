@@ -1,8 +1,8 @@
 Package: VESimHouseholds
 Type: Package
 Title: Create Simulated Households with Attributes for VE
-Version: 0.8
-Date: 09/25/17
+Version: 0.9
+Date: 10/22/17
 Author: Brian Gregor [aut, cre],
 Maintainer: Brian Gregor <gregorb@or-analytics.com>
 Copyright: AASHTO
@@ -27,8 +27,8 @@ VignetteBuilder: knitr
 RoxygenNote: 6.0.1
 Remotes: gregorbj/VisionEval/sources/framework/visioneval@develop
 Collate: 
-    'AssignLifeCycle.R'
     'CreateEstimationDatasets.R'
     'CreateHouseholds.R'
     'PredictWorkers.R'
     'PredictIncome.R'
+    'AssignLifeCycle.R'
