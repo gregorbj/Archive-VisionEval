@@ -1,8 +1,8 @@
 Package: VELandUse
 Type: Package
 Title: Create Land Use Attributes for VE
-Version: 0.7
-Date: 09/04/17
+Version: 0.9
+Date: 10/22/17
 Author: Brian Gregor [aut, cre],
 Maintainer: Brian Gregor <gregorb@or-analytics.com>
 Copyright: AASHTO
@@ -10,8 +10,9 @@ URL: https://github.com/gregorbj/VisionEval/sources/modules/VELandUse
 Description: This package contains several modules which establish land use 
     characteristics of Bzones including employment by type, density, diversity,
     network design, and accessibility. Modules also identify the housing type
-    and Bzone location of each household and whether each household is located 
-    in an urbanized area or rural area.
+    and Bzone location of each household, create a Worker table and assign each
+    worker to a Bzone job location, and identify whether each household is 
+    located in an urbanized area or rural area.
 License: file LICENSE
 LazyData: TRUE
 Depends: R (>= 3.1.0)

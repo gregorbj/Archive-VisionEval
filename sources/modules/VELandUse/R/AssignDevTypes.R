@@ -82,6 +82,15 @@ AssignDevTypesSpecifications <- list(
       ISELEMENTOF = ""
     ),
     item(
+      NAME = "Marea",
+      TABLE = "Bzone",
+      GROUP = "Year",
+      TYPE = "character",
+      UNITS = "ID",
+      PROHIBIT = "",
+      ISELEMENTOF = ""
+    ),
+    item(
       NAME =
         items(
           "PropUrbanSFDU",
@@ -108,7 +117,7 @@ AssignDevTypesSpecifications <- list(
       TABLE = "Household",
       GROUP = "Year",
       TYPE = "character",
-      UNITS = "dwelling type",
+      UNITS = "category",
       PROHIBIT = "",
       ISELEMENTOF = c("SF", "MF", "GQ")
     ),
@@ -138,12 +147,23 @@ AssignDevTypesSpecifications <- list(
       TABLE = "Household",
       GROUP = "Year",
       TYPE = "character",
-      UNITS = "development type",
+      UNITS = "category",
       NAVALUE = "NA",
       PROHIBIT = "NA",
       ISELEMENTOF = c("Urban", "Rural"),
       SIZE = 5,
       DESCRIPTION = "Development type (Urban or Rural) of the place where the household resides"
+    ),
+    item(
+      NAME = "Marea",
+      TABLE = "Household",
+      GROUP = "Year",
+      TYPE = "character",
+      UNITS = "ID",
+      NAVALUE = "NA",
+      PROHIBIT = "NA",
+      ISELEMENTOF = "",
+      DESCRIPTION = "Name of metropolitan area (Marea) that household is in or NA if none"
     ),
     item(
       NAME = "UrbanPop",
@@ -199,6 +219,14 @@ devtools::use_data(AssignDevTypesSpecifications, overwrite = TRUE)
 #housing units of the housing type in the Bzone that are located in the urban
 #area.
 
+# TestDat_ <- testModule(
+#   ModuleName = "AssignDevTypes",
+#   LoadDatastore = TRUE,
+#   SaveDatastore = TRUE,
+#   DoRun = FALSE
+# )
+# L <- TestDat_$L
+
 #Main module function that assigns a development type to each household
 #----------------------------------------------------------------------
 #' Main module function to assign a development type to each household.
@@ -243,6 +271,10 @@ AssignDevTypes <- function(L) {
   #Sample to identify development type
   DevType_ <- rep("Rural", NumHh)
   DevType_[runif(NumHh) <= UrbanProb_] <- "Urban"
+  #Identify Marea
+  Marea_ <-
+    L$Year$Bzone$Marea[(match(L$Year$Household$Bzone, L$Year$Bzone$Bzone))]
+  Marea_[DevType_ == "Rural"] <- "None"
 
   #Calculate urban and rural population by Bzone
   #---------------------------------------------
@@ -255,8 +287,10 @@ AssignDevTypes <- function(L) {
   #Return list of results
   #----------------------
   Out_ls <- initDataList()
-  Out_ls$Year$Household <-
-    list(DevType = DevType_)
+  Out_ls$Year$Household$DevType <- DevType_
+  Out_ls$Year$Household$Marea <- Marea_
+  attributes(Out_ls$Year$Household$Marea)$SIZE <-
+    max(nchar(Marea_[!is.na(Marea_)]))
   Out_ls$Year$Bzone <-
     list(
       UrbanPop = unname(Pop_BzDt[,"Urban"]),
@@ -265,72 +299,28 @@ AssignDevTypes <- function(L) {
   Out_ls
 }
 
-
-#====================
-#SECTION 4: TEST CODE
-#====================
-#The following code is useful for testing and module function development. The
-#first part initializes a datastore, loads inputs, and checks that the datastore
-#contains the data needed to run the module. The second part produces a list of
-#the data the module function will be provided by the framework when it is run.
-#This is useful to have when developing the module function. The third part
-#runs the whole module to check that everything runs correctly and that the
-#module outputs are consistent with specifications. Note that if a module
-#requires data produced by another module, the test code for the other module
-#must be run first so that the datastore contains the requisite data. Also note
-#that it is important that all of the test code is commented out when the
-#the package is built.
-
-#1) Test code to set up datastore and return module specifications
-#-----------------------------------------------------------------
-#The following commented-out code can be run to initialize a datastore, load
-#inputs, and check that the datastore contains the data needed to run the
-#module. It return the processed module specifications which can be used in
-#conjunction with the getFromDatastore function to fetch the list of data needed
-#by the module. Note that the following code assumes that all the data required
-#to set up a datastore are in the defs and inputs directories in the tests
-#directory. All files in the defs directory must have the default names.
-#
-# Specs_ls <- testModule(
+#================================
+#Code to aid development and test
+#================================
+#Test code to check specifications, loading inputs, and whether datastore
+#contains data needed to run module. Return input list (L) to use for developing
+#module functions
+#-------------------------------------------------------------------------------
+# TestDat_ <- testModule(
 #   ModuleName = "AssignDevTypes",
 #   LoadDatastore = TRUE,
 #   SaveDatastore = TRUE,
 #   DoRun = FALSE
 # )
-#
-#2) Test code to create a list of module inputs to use in module function
-#------------------------------------------------------------------------
-#The following commented-out code can be run to create a list of module inputs
-#that may be used in the development of module functions. Note that the data
-#will be returned for the first year in the run years specified in the
-#run_parameters.json file. Also note that if the RunBy specification is not
-#Region, the code will by default return the data for the first geographic area
-#in the datastore.
-#
-# setwd("tests")
-# Year <- getYears()[1]
-# if (Specs_ls$RunBy == "Region") {
-#   L <- getFromDatastore(Specs_ls, RunYear = Year, Geo = NULL)
-# } else {
-#   GeoCategory <- Specs_ls$RunBy
-#   Geo_ <- readFromTable(GeoCategory, GeoCategory, Year)
-#   L <- getFromDatastore(Specs_ls, RunYear = Year, Geo = Geo_[1])
-#   rm(GeoCategory, Geo_)
-# }
-# rm(Year)
-# setwd("..")
-#
-#3) Test code to run full module tests
-#-------------------------------------
-#Run the following commented-out code after the module functions have been
-#written to test all aspects of the module including whether the module can be
-#run and whether the module will produce results that are consistent with the
-#module's Set specifications. It is also important to run this code if one or
-#more other modules in the package need the dataset(s) produced by this module.
-#
-# testModule(
+# L <- TestDat_$L
+
+#Test code to check everything including running the module and checking whether
+#the outputs are consistent with the 'Set' specifications
+#-------------------------------------------------------------------------------
+# TestDat_ <- testModule(
 #   ModuleName = "AssignDevTypes",
 #   LoadDatastore = TRUE,
 #   SaveDatastore = TRUE,
 #   DoRun = TRUE
 # )
+
