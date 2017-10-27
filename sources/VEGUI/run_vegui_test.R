@@ -19,7 +19,7 @@ library(shinyFiles)
 #SECTION 2: DEFINE CONSTANTS AND DEFINITIONS OF FUNCTIONS
 #==========================================================
 # TRUE: Create expected results, FALSE: Compare current results to expected results
-createExpectedResults <- TRUE
+createExpectedResults <- FALSE
 
 tests_dir <- file.path(".","tests") # Test directory containing test scripts and expected output
 tests_dir <- normalizePath(tests_dir)
@@ -27,7 +27,7 @@ tests_dir <- normalizePath(tests_dir)
 ### Modify the volumeroots to point to PROJECT run_model script
 myapp <- readLines("app.R")
 
-# Function to replace the volumeroots command with the model directory in the application script
+# Function to replace the volumeroots command in the app.R script with the model directory
 replaceVolumeroots <- function(mystr,modelname,first=TRUE){
   if(first){
     mystr <- gsub("volumeRoots = getVolumes.*",paste0("volumeRoots = c(\"",modelname,"\"=file.path(getwd(),\"..\",\"models\",\"",modelname,"\"))"),mystr)
@@ -38,8 +38,8 @@ replaceVolumeroots <- function(mystr,modelname,first=TRUE){
 }
 
 # Rename
-file.rename("app.R","app.R.tmp")
-write(sapply(myapp,replaceVolumeroots),"app.R")
+file.copy("app.R","app.R.tmp")
+# write(sapply(myapp,replaceVolumeroots),"app.R")
 
 #============================================
 #SECTION 3: RUN THE TESTS
