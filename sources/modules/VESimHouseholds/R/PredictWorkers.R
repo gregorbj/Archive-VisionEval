@@ -52,14 +52,16 @@ library(visioneval)
 #' noninstitutionalized group quarters population. These names correspond to
 #' values in the HhType dataset in the Household table of the datastore.
 #'
+#' @param HhData_df A dataframe of household estimation data as produced by the
+#' CreateEstimationDatasets.R script.
 #' @return A matrix of the proportions of persons who are workers by household
 #' type and age group. Where the row names are the household type (HhType)
 #' names and the column names are the age group names.
+#' @include CreateEstimationDatasets.R CreateHouseholds.R
 #' @export
-calcWorkerProportions <- function() {
-  load("data/Hh_df.rda")
-  GQ_df <- Hh_df[Hh_df$HhType == "Grp",]
-  Hh_df <- Hh_df[Hh_df$HhType == "Reg",]
+calcWorkerProportions <- function(HhData_df) {
+  GQ_df <- HhData_df[HhData_df$HhType == "Grp",]
+  Hh_df <- HhData_df[HhData_df$HhType == "Reg",]
   load("data/HtProb_HtAp.rda")
   Ag <-
     c("Age0to14",
@@ -102,7 +104,8 @@ calcWorkerProportions <- function() {
 
 #Create and save household and group quarters worker proportions
 #---------------------------------------------------------------
-PropHhWkr_HtAg <- calcWorkerProportions()
+load("data/Hh_df.rda")
+PropHhWkr_HtAg <- calcWorkerProportions(Hh_df)
 #' Worker proportions
 #'
 #' A dataset that contains proportion of workers by age group by household
@@ -114,7 +117,7 @@ PropHhWkr_HtAg <- calcWorkerProportions()
 #' @source PredictWorkers.R script.
 "PropHhWkr_HtAg"
 devtools::use_data(PropHhWkr_HtAg, overwrite = TRUE)
-rm(calcWorkerProportions)
+rm(calcWorkerProportions, Hh_df)
 
 
 #================================================

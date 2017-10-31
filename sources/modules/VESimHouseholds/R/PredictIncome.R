@@ -64,6 +64,7 @@ library(car)
 #' OutFun: a function that transforms the result of applying the linear model.
 #' Summary: the summary of the linear model estimation results.
 #' @import visioneval car
+#' @include CreateEstimationDatasets.R CreateHouseholds.R PredictWorkers.R
 #' @export
 estimateIncomeModel <- function(Data_df, StartTerms_) {
   #Calculate income power transformation

@@ -9,13 +9,24 @@ cache: packages
 warnings_are_errors: false
 
 # nloptr R package requires libnlopt-dev to be installed, which requires trusty ubuntu
+# phantomjs required for shinytest for VEGUI testing
 before_install:
   - sudo apt-get update
   - sudo apt-get -y install libnlopt-dev
+  - "export PHANTOMJS_VERSION=2.1.1"
+  - "phantomjs --version"
+  - "export PATH=$PWD/travis_phantomjs/phantomjs-$PHANTOMJS_VERSION-linux-x86_64/bin:$PATH"
+  - "hash -r"
+  - "phantomjs --version"
+  - "if [ $(phantomjs --version) != $PHANTOMJS_VERSION ]; then rm -rf $PWD/travis_phantomjs; mkdir -p $PWD/travis_phantomjs; fi"
+  - "if [ $(phantomjs --version) != $PHANTOMJS_VERSION ]; then wget https://github.com/Medium/phantomjs/releases/download/v$PHANTOMJS_VERSION/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 -O $PWD/travis_phantomjs/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2; fi"
+  - "if [ $(phantomjs --version) != $PHANTOMJS_VERSION ]; then tar -xvf $PWD/travis_phantomjs/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 -C $PWD/travis_phantomjs; fi"
+  - "if [ $(phantomjs --version) != $PHANTOMJS_VERSION ]; then hash -r; fi"
+  - "phantomjs --version"
 
 # start by installing devtools
 install:
-  - Rscript -e 'install.packages(c("devtools", "roxygen2", "stringr", "knitr"))'
+  - Rscript -e 'install.packages(c("curl","devtools", "roxygen2", "stringr", "knitr"))'
   - Rscript -e 'devtools::install_bioc(c("BiocInstaller", "rhdf5"))'
 
 # install and test framework, modules, models, GUI
@@ -88,4 +99,4 @@ script:
     cd sources/VEGUI
     Rscript -e 'install.packages(c("shiny", "shinyjs", "shinyFiles", "data.table", "DT", "shinyBS", "future", "testit", "jsonlite", "shinyAce", "envDocument", "rhandsontable"))'
     Rscript -e 'devtools::install_github(c("tdhock/namedCapture", "trestletech/shinyTree", "rstudio/webdriver", "rstudio/shinytest"))'
-    # Rscript -e "tryCatch( library('shiny'); runApp('app.R') )"
+    Rscript -e "tryCatch( source('run_vegui_test.R') )"

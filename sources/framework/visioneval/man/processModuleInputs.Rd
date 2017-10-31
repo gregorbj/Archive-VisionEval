@@ -30,11 +30,14 @@ organized in the standard format for data exchange with the datastore.
 This function processes the input files identified in a module's 'Inp'
 specifications in preparation for saving the data in the datastore. Several
 processes are carried out. The existence of each specified input file is
-checked. Files that are not global, are checked to determine that they have
-'Year' and 'Geo' columns. The entries in the 'Year' and 'Geo' columns are
-checked to make sure they are complete and there are no duplicates. The data
-in each column are checked against specifications to determine conformance.
-The function returns a list which contains a list of error messages and a
-list of the data inputs. The function also writes error messages and warnings
-to the log file.
+checked. Any file whose corresponding 'GROUP' specification is 'Year', is
+checked to determine that it has 'Year' and 'Geo' columns. The entries in the
+'Year' and 'Geo' columns are checked to make sure they are complete and there
+are no duplicates. Any file whose 'GROUP' specification is 'Global' or
+'BaseYear' and whose 'TABLE' specification is a geographic specification
+other than 'Region' is checked to determine if it has a 'Geo' column and the
+entries are checked for completeness. The data in each column are checked
+against specifications to determine conformance. The function returns a list
+which contains a list of error messages and a list of the data inputs. The
+function also writes error messages and warnings to the log file.
 }

@@ -14,5 +14,8 @@ A character vector of the model run years.
 }
 \details{
 This is a convenience function to make it easier to retrieve the Years
-component of the model state file.
+component of the model state file. If the Years component includes the base
+year then order the Years component so that it is first. This ordering is
+important because some modules calculate future year values by pivoting off
+of base year values so the base year must be run first.
 }

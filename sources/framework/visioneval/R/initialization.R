@@ -151,12 +151,21 @@ readModelState <- function(Names_ = "All", FileName = "ModelState.Rda") {
 #' \code{getYears} reads the Years component from the the model state file.
 #'
 #' This is a convenience function to make it easier to retrieve the Years
-#' component of the model state file.
+#' component of the model state file. If the Years component includes the base
+#' year then order the Years component so that it is first. This ordering is
+#' important because some modules calculate future year values by pivoting off
+#' of base year values so the base year must be run first.
 #'
 #' @return A character vector of the model run years.
 #' @export
 getYears <- function() {
-  unlist(getModelState("Years"))
+  BaseYear <- unlist(getModelState("BaseYear"))
+  Years <- unlist(getModelState("Years"))
+  if (BaseYear %in% Years) {
+    c(BaseYear, Years[!Years %in% BaseYear])
+  } else {
+    Years
+  }
 }
 
 
@@ -273,7 +282,7 @@ writeLog <- function(Msg = "", Print = FALSE) {
 #'   datastore. Path name can either be relative to the working directory or
 #'   absolute.
 #' @param Dir A string identifying the path of the geography definition file (GeoFile),
-#'   default to 'defs' relative to the working directory  
+#'   default to 'defs' relative to the working directory
 #' @param GeoFile A string identifying the name of the geography definition file
 #'   (see 'readGeography' function) that is consistent with the saved datastore.
 #'   The geography definition file must be located in the 'defs' directory.
@@ -561,81 +570,82 @@ initDatastoreGeography <- function() {
                          SIZE = max(nchar(Czones_)))
   }
   #Initialize geography tables and zone datasets
-  for (Year in G$Years) {
-    initTable(Table = "Region", Group = Year, Length = 1)
-    initTable(Table = "Azone", Group = Year, Length = length(Azones_))
-    initDataset(AzoneSpec_ls, Group = Year)
-    initTable(Table = "Marea", Group = Year, Length = length(Mareas_))
-    initDataset(MareaSpec_ls, Group = Year)
+  GroupNames <- c("Global", G$Years)
+  for (GroupName in GroupNames) {
+    initTable(Table = "Region", Group = GroupName, Length = 1)
+    initTable(Table = "Azone", Group = GroupName, Length = length(Azones_))
+    initDataset(AzoneSpec_ls, Group = GroupName)
+    initTable(Table = "Marea", Group = GroupName, Length = length(Mareas_))
+    initDataset(MareaSpec_ls, Group = GroupName)
     if(G$BzoneSpecified) {
-      initTable(Table = "Bzone", Group = Year, Length = length(Bzones_))
-      initDataset(BzoneSpec_ls, Group = Year)
+      initTable(Table = "Bzone", Group = GroupName, Length = length(Bzones_))
+      initDataset(BzoneSpec_ls, Group = GroupName)
     }
     if(G$CzoneSpecified) {
-      initTable(Table = "Czone", Group = Year, Length = length(Czones_))
-      initDataset(CzoneSpec_ls, Group = Year)
+      initTable(Table = "Czone", Group = GroupName, Length = length(Czones_))
+      initDataset(CzoneSpec_ls, Group = GroupName)
     }
   }
-  rm(Year)
+  rm(GroupName)
   #Add zone names to zone tables
-  for (Year in G$Years) {
+  for (GroupName in GroupNames) {
     if (!G$BzoneSpecified & !G$CzoneSpecified) {
       #Write to Azone table
-      writeToTable(G$Geo_df$Azone, AzoneSpec_ls, Group = Year, Index = NULL)
+      writeToTable(G$Geo_df$Azone, AzoneSpec_ls, Group = GroupName, Index = NULL)
       MareaSpec_ls$TABLE = "Azone"
       MareaSpec_ls$LENGTH = nrow(G$Geo_df)
-      writeToTable(G$Geo_df$Marea, MareaSpec_ls, Group = Year, Index = NULL)
+      writeToTable(G$Geo_df$Marea, MareaSpec_ls, Group = GroupName, Index = NULL)
       #Write to Marea table
       MareaSpec_ls$TABLE = "Marea"
       MareaSpec_ls$LENGTH = length(Mareas_)
-      writeToTable(Mareas_, MareaSpec_ls, Group = Year, Index = NULL)
+      writeToTable(Mareas_, MareaSpec_ls, Group = GroupName, Index = NULL)
     }
     if (G$BzoneSpecified & !G$CzoneSpecified) {
       #Write to Bzone table
-      writeToTable(G$Geo_df$Bzone, BzoneSpec_ls, Group = Year, Index = NULL)
+      writeToTable(G$Geo_df$Bzone, BzoneSpec_ls, Group = GroupName, Index = NULL)
       AzoneSpec_ls$TABLE = "Bzone"
       AzoneSpec_ls$LENGTH = nrow(G$Geo_df)
-      writeToTable(G$Geo_df$Azone, AzoneSpec_ls, Group = Year, Index = NULL)
+      writeToTable(G$Geo_df$Azone, AzoneSpec_ls, Group = GroupName, Index = NULL)
       MareaSpec_ls$TABLE = "Bzone"
       MareaSpec_ls$LENGTH = nrow(G$Geo_df)
-      writeToTable(G$Geo_df$Marea, MareaSpec_ls, Group = Year, Index = NULL)
+      writeToTable(G$Geo_df$Marea, MareaSpec_ls, Group = GroupName, Index = NULL)
       #Write to Azone table
       AzoneSpec_ls$TABLE = "Azone"
       AzoneSpec_ls$LENGTH = length(Azones_)
-      writeToTable(Azones_, AzoneSpec_ls, Group = Year, Index = NULL)
+      writeToTable(Azones_, AzoneSpec_ls, Group = GroupName, Index = NULL)
       #Write to Marea table
       MareaSpec_ls$TABLE = "Marea"
       MareaSpec_ls$LENGTH = length(Mareas_)
-      writeToTable(Mareas_, MareaSpec_ls, Group = Year, Index = NULL)
+      writeToTable(Mareas_, MareaSpec_ls, Group = GroupName, Index = NULL)
     }
     if (G$CzoneSpecified) {
       #Write to Czone table
-      writeToTable(G$Geo_df$Czone, CzoneSpec_ls, Group = Year, Index = NULL)
+      writeToTable(G$Geo_df$Czone, CzoneSpec_ls, Group = GroupName, Index = NULL)
       BzoneSpec_ls$TABLE = "Czone"
       BzoneSpec_ls$LENGTH = nrow(G$Geo_df)
-      writeToTable(G$Geo_df$Bzone, BzoneSpec_ls, Group = Year, Index = NULL)
+      writeToTable(G$Geo_df$Bzone, BzoneSpec_ls, Group = GroupName, Index = NULL)
       AzoneSpec_ls$TABLE = "Czone"
       AzoneSpec_ls$LENGTH = nrow(G$Geo_df)
-      writeToTable(G$Geo_df$Azone, AzoneSpec_ls, Group = Year, Index = NULL)
+      writeToTable(G$Geo_df$Azone, AzoneSpec_ls, Group = GroupName, Index = NULL)
       MareaSpec_ls$TABLE = "Czone"
       MareaSpec_ls$LENGTH = nrow(G$Geo_df)
-      writeToTable(G$Geo_df$Marea, MareaSpec_ls, Group = Year, Index = NULL)
+      writeToTable(G$Geo_df$Marea, MareaSpec_ls, Group = GroupName, Index = NULL)
       #Write to Bzone table
       Geo_df <- G$Geo_df[!duplicated(G$Geo_df$Bzone), c("Azone", "Bzone")]
       BzoneSpec_ls$TABLE = "Bzone"
       BzoneSpec_ls$LENGTH = nrow(Geo_df)
-      writeToTable(Geo_df$Bzone, BzoneSpec_ls, Group = Year, Index = NULL)
+      writeToTable(Geo_df$Bzone, BzoneSpec_ls, Group = GroupName, Index = NULL)
       AzoneSpec_ls$TABLE = "Bzone"
       AzoneSpec_ls$LENGTH = nrow(Geo_df)
-      writeToTable(Geo_df$Azone, AzoneSpec_ls, Group = Year, Index = NULL)
+      writeToTable(Geo_df$Azone, AzoneSpec_ls, Group = GroupName, Index = NULL)
       #Write to Azone table
       AzoneSpec_ls$TABLE = "Azone"
       AzoneSpec_ls$LENGTH = length(Azones_)
-      writeToTable(Azones_, AzoneSpec_ls, Group = Year, Index = NULL)
+      writeToTable(Azones_, AzoneSpec_ls, Group = GroupName, Index = NULL)
       #Write to Marea table
       MareaSpec_ls$TABLE = "Marea"
       MareaSpec_ls$LENGTH = length(Mareas_)
-      writeToTable(Mareas_, MareaSpec_ls, Group = Year, Index = NULL)
+      writeToTable(Mareas_, MareaSpec_ls, Group = GroupName, Index = NULL)
     }
   }
   #Write to log that complete

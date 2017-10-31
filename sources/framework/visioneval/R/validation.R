@@ -1492,13 +1492,16 @@ parseInputFieldNames <-
 #' This function processes the input files identified in a module's 'Inp'
 #' specifications in preparation for saving the data in the datastore. Several
 #' processes are carried out. The existence of each specified input file is
-#' checked. Files that are not global, are checked to determine that they have
-#' 'Year' and 'Geo' columns. The entries in the 'Year' and 'Geo' columns are
-#' checked to make sure they are complete and there are no duplicates. The data
-#' in each column are checked against specifications to determine conformance.
-#' The function returns a list which contains a list of error messages and a
-#' list of the data inputs. The function also writes error messages and warnings
-#' to the log file.
+#' checked. Any file whose corresponding 'GROUP' specification is 'Year', is
+#' checked to determine that it has 'Year' and 'Geo' columns. The entries in the
+#' 'Year' and 'Geo' columns are checked to make sure they are complete and there
+#' are no duplicates. Any file whose 'GROUP' specification is 'Global' or
+#' 'BaseYear' and whose 'TABLE' specification is a geographic specification
+#' other than 'Region' is checked to determine if it has a 'Geo' column and the
+#' entries are checked for completeness. The data in each column are checked
+#' against specifications to determine conformance. The function returns a list
+#' which contains a list of error messages and a list of the data inputs. The
+#' function also writes error messages and warnings to the log file.
 #'
 #' @param ModuleSpec_ls a list of module specifications that is consistent with
 #' the VisionEval requirements.
@@ -1634,6 +1637,56 @@ processModuleInputs <-
             FileErr_ <- c(FileErr_, Msg)
           }
           next()
+        }
+      }
+      #If Group is BaseYear or Global, and if Table is Azone, Bzone, Czone, or
+      #Marea, check that geography is complete and correct
+      if (Group %in% c("BaseYear", "Global") &
+          Table %in% c("Azone", "Bzone", "Czone", "Marea")) {
+        #Check that there is a 'Geo' field
+        HasGeoField <- "Geo" %in% names(Data_df)
+        if (!HasGeoField) {
+          Msg <-
+            paste0(
+              "Input file error for module '", ModuleName,
+              "' for input file '", File, "'. ",
+              "'Table' specification is ", Table,
+              " but the input file is missing required 'Geo' field."
+            )
+          FileErr_ <- c(FileErr_, Msg)
+          next()
+        }
+        #Check that the 'Geo' field is complete and not duplicated
+        GeoDuplicated <- any(duplicated(Data_df$Geo))
+        GeoIncomplete <- any(!(G$Geo_df[[Table]] %in% Data_df$Geo))
+        if (GeoDuplicated | GeoIncomplete) {
+          if (GeoDuplicated) {
+            DupGeo_ <- unique(Data_df$Geo[GeoDuplicated])
+            Msg <-
+              paste0(
+                "Input file error for module '", ModuleName,
+                "' for input file '", File, "'. ",
+                "Has duplicate inputs for the following geographic areas: ",
+                paste(DupGeo_)
+              )
+            FileErr_ <- c(FileErr_, Msg)
+            rm(DupGeo_)
+          }
+          if (GeoIncomplete) {
+            IncompleteGeo_ <- G$Geo_df[[Table]][GeoIncomplete]
+            Msg <-
+              paste0(
+                "Input file error for module '", ModuleName,
+                "' for input file '", File, "'.",
+                "Is missing inputs for the following geographic areas: ",
+                paste(IncompleteGeo_)
+              )
+            FileErr_ <- c(FileErr_, Msg)
+            rm(IncompleteGeo_)
+          }
+          next()
+        } else {
+          Data_ls[[Group]][[Table]]$Geo <- Data_df$Geo
         }
       }
       #Check and load data into list

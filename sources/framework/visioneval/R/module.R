@@ -428,12 +428,12 @@ testModule <-
       }
       if (Spec_ls$GROUP == "BaseYear") {
         Present <-
-          checkDataset(Spec_ls$NAME, Spec_ls$TABLE, Year, G$Datastore)
+          checkDataset(Spec_ls$NAME, Spec_ls$TABLE, G$BaseYear, G$Datastore)
         if (!Present) Missing_ <- c(Missing_, attributes(Present))
       }
       if (Spec_ls$GROUP == "Global") {
         Present <-
-          checkDataset(Spec_ls$NAME, Spec_ls$TABLE, Year, G$Datastore)
+          checkDataset(Spec_ls$NAME, Spec_ls$TABLE, "Global", G$Datastore)
         if (!Present) Missing_ <- c(Missing_, attributes(Present))
       }
     }

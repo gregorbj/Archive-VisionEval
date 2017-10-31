@@ -1,9 +1,9 @@
 library(rhdf5)
 
-#Test LocateHouseholds module
-source("R/LocateHouseholds.R")
+#Test PredictHousing module
+source("R/PredictHousing.R")
 testModule(
-  ModuleName = "LocateHouseholds",
+  ModuleName = "PredictHousing",
   LoadDatastore = TRUE,
   SaveDatastore = TRUE,
   DoRun = TRUE

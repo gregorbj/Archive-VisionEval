@@ -40,10 +40,6 @@ for(Year in getYears()) {
             RunFor = "AllYears",
             RunYear = Year)
   runModule(ModuleName = "PredictHousing", 
-            PackageName = "VESimHouseholds",
-            RunFor = "AllYears",
-            RunYear = Year)
-  runModule(ModuleName = "LocateHouseholds",
             PackageName = "VELandUse",
             RunFor = "AllYears",
             RunYear = Year)
