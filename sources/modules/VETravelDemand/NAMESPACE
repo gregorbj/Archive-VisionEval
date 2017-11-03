@@ -3,4 +3,4 @@
 export(CalculateAltModeTrips)
 export(CalculateHouseholdDVMT)
 import(visioneval)
-importFrom("stats", "ppois")
+importFrom("stats", "ppois", "quantile")
