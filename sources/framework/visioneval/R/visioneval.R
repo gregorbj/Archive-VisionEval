@@ -300,24 +300,28 @@ runModule <- function(ModuleName, PackageName, RunFor, RunYear) {
   M$Func <- eval(parse(text = Function))
   M$Specs <- processModuleSpecs(eval(parse(text = Specs)))
   #Load any modules identified by 'Call' spec if any
-  if (!is.null(M$Specs$Call)) {
-    Call <- list()
+  if (is.list(M$Specs$Call)) {
+    Call <- list(
+      Func = list(),
+      Specs = list()
+    )
     for (Alias in names(M$Specs$Call)) {
       Function <- M$Specs$Call[[Alias]]
       Specs <- paste0(M$Specs$Call[[Alias]], "Specifications")
       Call$Func[[Alias]] <- eval(parse(text = Function))
       Call$Specs[[Alias]] <- processModuleSpecs(eval(parse(text = Specs)))
+      Call$Specs[[Alias]]$RunBy <- M$Specs$RunBy
     }
   }
   #Run module
   #----------
   if (M$Specs$RunBy == "Region") {
     #Get data from datastore
-    L <- getFromDatastore(M$Specs, RunYear = RunYear, Geo = NULL)
+    L <- getFromDatastore(M$Specs, RunYear = Year)
     if (exists("Call")) {
-      for (Alias in names(Call)) {
+      for (Alias in names(Call$Specs)) {
         L[[Alias]] <-
-          getFromDatastore(Call$Specs[[Alias]], RunYear = RunYear, Geo = NULL)
+          getFromDatastore(Call$Specs[[Alias]], RunYear = Year)
       }
     }
     #Run module and store results in datastore
@@ -328,16 +332,26 @@ runModule <- function(ModuleName, PackageName, RunFor, RunYear) {
     }
     setInDatastore(R, M$Specs, ModuleName, Year = RunYear, Geo = NULL)
   } else {
+    #Identify the units of geography to iterate over
     GeoCategory <- M$Specs$RunBy
-    Geo_ <- readFromTable(GeoCategory, GeoCategory, RunYear)
+    #Create the geographic index list
+    GeoIndex_ls <- createGeoIndexList(c(M$Specs$Get, M$Specs$Set), GeoCategory, Year)
+    if (exists("Call")) {
+      for (Alias in names(Call$Specs)) {
+        GeoIndex_ls[[Alias]] <-
+          createGeoIndexList(Call$Specs[[Alias]]$Get, GeoCategory, Year)
+      }
+    }
     #Run module for each geographic area
+    Geo_ <- readFromTable(GeoCategory, GeoCategory, RunYear)
     for (Geo in Geo_) {
       #Get data from datastore for geographic area
-      L <- getFromDatastore(M$Specs, RunYear = RunYear, Geo = Geo)
+      L <-
+        getFromDatastore(M$Specs_ls, RunYear, Geo, GeoIndex_ls)
       if (exists("Call")) {
-        for (Alias in names(Call)) {
+        for (Alias in names(Call$Specs)) {
           L[[Alias]] <-
-            getFromDatastore(Call$Specs[[Alias]], RunYear = RunYear, Geo = Geo)
+            getFromDatastore(Call$Specs[[Alias]], RunYear = Year, Geo, GeoIndex_ls = GeoIndex_ls[[Alias]])
         }
       }
       #Run model for geographic area and store results in datastore
@@ -346,7 +360,7 @@ runModule <- function(ModuleName, PackageName, RunFor, RunYear) {
       } else {
         R <- M$Func(L)
       }
-      setInDatastore(R, M$Specs, ModuleName, Year = RunYear, Geo = Geo)
+      setInDatastore(R, M$Specs, ModuleName, RunYear, Geo, GeoIndex_ls)
     }
   }
   #Log and print ending message
