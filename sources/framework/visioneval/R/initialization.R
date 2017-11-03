@@ -534,8 +534,7 @@ initDatastoreGeography <- function() {
                        NAVALUE = "NA",
                        PROHIBIT = "",
                        ISELEMENTOF = "",
-                       SIZE = max(nchar(Mareas_)),
-                       LENGTH = length(Mareas_))
+                       SIZE = max(nchar(Mareas_)))
   Azones_ <- unique(G$Geo_df$Azone)
   AzoneSpec_ls <- list(MODULE = "visioneval",
                        NAME = "Azone",
@@ -575,16 +574,12 @@ initDatastoreGeography <- function() {
   for (GroupName in GroupNames) {
     initTable(Table = "Region", Group = GroupName, Length = 1)
     initTable(Table = "Azone", Group = GroupName, Length = length(Azones_))
-    initDataset(AzoneSpec_ls, Group = GroupName)
     initTable(Table = "Marea", Group = GroupName, Length = length(Mareas_))
-    initDataset(MareaSpec_ls, Group = GroupName)
     if(G$BzoneSpecified) {
       initTable(Table = "Bzone", Group = GroupName, Length = length(Bzones_))
-      initDataset(BzoneSpec_ls, Group = GroupName)
     }
     if(G$CzoneSpecified) {
       initTable(Table = "Czone", Group = GroupName, Length = length(Czones_))
-      initDataset(CzoneSpec_ls, Group = GroupName)
     }
   }
   rm(GroupName)
@@ -594,58 +589,54 @@ initDatastoreGeography <- function() {
       #Write to Azone table
       writeToTable(G$Geo_df$Azone, AzoneSpec_ls, Group = GroupName, Index = NULL)
       MareaSpec_ls$TABLE = "Azone"
-      MareaSpec_ls$LENGTH = nrow(G$Geo_df)
       writeToTable(G$Geo_df$Marea, MareaSpec_ls, Group = GroupName, Index = NULL)
       #Write to Marea table
       MareaSpec_ls$TABLE = "Marea"
-      MareaSpec_ls$LENGTH = length(Mareas_)
       writeToTable(Mareas_, MareaSpec_ls, Group = GroupName, Index = NULL)
     }
     if (G$BzoneSpecified & !G$CzoneSpecified) {
       #Write to Bzone table
       writeToTable(G$Geo_df$Bzone, BzoneSpec_ls, Group = GroupName, Index = NULL)
       AzoneSpec_ls$TABLE = "Bzone"
-      AzoneSpec_ls$LENGTH = nrow(G$Geo_df)
       writeToTable(G$Geo_df$Azone, AzoneSpec_ls, Group = GroupName, Index = NULL)
       MareaSpec_ls$TABLE = "Bzone"
-      MareaSpec_ls$LENGTH = nrow(G$Geo_df)
       writeToTable(G$Geo_df$Marea, MareaSpec_ls, Group = GroupName, Index = NULL)
       #Write to Azone table
+      AzoneGeo_df <- G$Geo_df[!duplicated(G$Geo_df$Azone),]
       AzoneSpec_ls$TABLE = "Azone"
-      AzoneSpec_ls$LENGTH = length(Azones_)
-      writeToTable(Azones_, AzoneSpec_ls, Group = GroupName, Index = NULL)
+      writeToTable(AzoneGeo_df$Azone, AzoneSpec_ls, Group = GroupName, Index = NULL)
+      MareaSpec_ls$TABLE = "Azone"
+      writeToTable(AzoneGeo_df$Marea, MareaSpec_ls, Group = GroupName, Index = NULL)
+      rm(AzoneGeo_df)
       #Write to Marea table
       MareaSpec_ls$TABLE = "Marea"
-      MareaSpec_ls$LENGTH = length(Mareas_)
       writeToTable(Mareas_, MareaSpec_ls, Group = GroupName, Index = NULL)
     }
     if (G$CzoneSpecified) {
       #Write to Czone table
       writeToTable(G$Geo_df$Czone, CzoneSpec_ls, Group = GroupName, Index = NULL)
       BzoneSpec_ls$TABLE = "Czone"
-      BzoneSpec_ls$LENGTH = nrow(G$Geo_df)
       writeToTable(G$Geo_df$Bzone, BzoneSpec_ls, Group = GroupName, Index = NULL)
       AzoneSpec_ls$TABLE = "Czone"
-      AzoneSpec_ls$LENGTH = nrow(G$Geo_df)
       writeToTable(G$Geo_df$Azone, AzoneSpec_ls, Group = GroupName, Index = NULL)
       MareaSpec_ls$TABLE = "Czone"
-      MareaSpec_ls$LENGTH = nrow(G$Geo_df)
       writeToTable(G$Geo_df$Marea, MareaSpec_ls, Group = GroupName, Index = NULL)
       #Write to Bzone table
-      Geo_df <- G$Geo_df[!duplicated(G$Geo_df$Bzone), c("Azone", "Bzone")]
+      BzoneGeo_df <- G$Geo_df[!duplicated(G$Geo_df$Bzone), c("Azone", "Bzone")]
       BzoneSpec_ls$TABLE = "Bzone"
-      BzoneSpec_ls$LENGTH = nrow(Geo_df)
-      writeToTable(Geo_df$Bzone, BzoneSpec_ls, Group = GroupName, Index = NULL)
+      writeToTable(BzoneGeo_df$Bzone, BzoneSpec_ls, Group = GroupName, Index = NULL)
       AzoneSpec_ls$TABLE = "Bzone"
-      AzoneSpec_ls$LENGTH = nrow(Geo_df)
-      writeToTable(Geo_df$Azone, AzoneSpec_ls, Group = GroupName, Index = NULL)
+      writeToTable(BzoneGeo_df$Azone, AzoneSpec_ls, Group = GroupName, Index = NULL)
+      rm(BzoneGeo_df)
       #Write to Azone table
+      AzoneGeo_df <- G$Geo_df[!duplicated(G$Geo_df$Azone),]
       AzoneSpec_ls$TABLE = "Azone"
-      AzoneSpec_ls$LENGTH = length(Azones_)
-      writeToTable(Azones_, AzoneSpec_ls, Group = GroupName, Index = NULL)
+      writeToTable(AzoneGeo_df$Azone, AzoneSpec_ls, Group = GroupName, Index = NULL)
+      MareaSpec_ls$TABLE = "Azone"
+      writeToTable(AzoneGeo_df$Marea, MareaSpec_ls, Group = GroupName, Index = NULL)
+      rm(AzoneGeo_df)
       #Write to Marea table
       MareaSpec_ls$TABLE = "Marea"
-      MareaSpec_ls$LENGTH = length(Mareas_)
       writeToTable(Mareas_, MareaSpec_ls, Group = GroupName, Index = NULL)
     }
   }
@@ -654,6 +645,146 @@ initDatastoreGeography <- function() {
   writeLog(Message)
   TRUE
 }
+
+
+# initDatastoreGeography <- function() {
+#   G <- getModelState()
+#   #Make lists of zone specifications
+#   Mareas_ <- unique(G$Geo_df$Marea)
+#   MareaSpec_ls <- list(MODULE = "visioneval",
+#                        NAME = "Marea",
+#                        TABLE = "Marea",
+#                        TYPE = "character",
+#                        UNITS = "",
+#                        NAVALUE = "NA",
+#                        PROHIBIT = "",
+#                        ISELEMENTOF = "",
+#                        SIZE = max(nchar(Mareas_)),
+#                        LENGTH = length(Mareas_))
+#   Azones_ <- unique(G$Geo_df$Azone)
+#   AzoneSpec_ls <- list(MODULE = "visioneval",
+#                        NAME = "Azone",
+#                        TABLE = "Azone",
+#                        TYPE = "character",
+#                        UNITS = "",
+#                        NAVALUE = "NA",
+#                        PROHIBIT = "",
+#                        ISELEMENTOF = "",
+#                        SIZE = max(nchar(Azones_)))
+#   if(G$BzoneSpecified) {
+#     Bzones_ <- unique(G$Geo_df$Bzone)
+#     BzoneSpec_ls <- list(MODULE = "visioneval",
+#                          NAME = "Bzone",
+#                          TABLE = "Bzone",
+#                          TYPE = "character",
+#                          UNITS = "",
+#                          NAVALUE = "NA",
+#                          PROHIBIT = "",
+#                          ISELEMENTOF = "",
+#                          SIZE = max(nchar(Bzones_)))
+#   }
+#   if(G$CzoneSpecified) {
+#     Czones_ <- unique(G$Geo_df$Czone)
+#     CzoneSpec_ls <- list(MODULE = "visioneval",
+#                          NAME = "Czone",
+#                          TABLE = "Czone",
+#                          TYPE = "character",
+#                          UNITS = "",
+#                          NAVALUE = "NA",
+#                          PROHIBIT = "",
+#                          ISELEMENTOF = "",
+#                          SIZE = max(nchar(Czones_)))
+#   }
+#   #Initialize geography tables and zone datasets
+#   GroupNames <- c("Global", G$Years)
+#   for (GroupName in GroupNames) {
+#     initTable(Table = "Region", Group = GroupName, Length = 1)
+#     initTable(Table = "Azone", Group = GroupName, Length = length(Azones_))
+#     initDataset(AzoneSpec_ls, Group = GroupName)
+#     initTable(Table = "Marea", Group = GroupName, Length = length(Mareas_))
+#     initDataset(MareaSpec_ls, Group = GroupName)
+#     if(G$BzoneSpecified) {
+#       initTable(Table = "Bzone", Group = GroupName, Length = length(Bzones_))
+#       initDataset(BzoneSpec_ls, Group = GroupName)
+#     }
+#     if(G$CzoneSpecified) {
+#       initTable(Table = "Czone", Group = GroupName, Length = length(Czones_))
+#       initDataset(CzoneSpec_ls, Group = GroupName)
+#     }
+#   }
+#   rm(GroupName)
+#   #Add zone names to zone tables
+#   for (GroupName in GroupNames) {
+#     if (!G$BzoneSpecified & !G$CzoneSpecified) {
+#       #Write to Azone table
+#       writeToTable(G$Geo_df$Azone, AzoneSpec_ls, Group = GroupName, Index = NULL)
+#       MareaSpec_ls$TABLE = "Azone"
+#       MareaSpec_ls$LENGTH = nrow(G$Geo_df)
+#       writeToTable(G$Geo_df$Marea, MareaSpec_ls, Group = GroupName, Index = NULL)
+#       #Write to Marea table
+#       MareaSpec_ls$TABLE = "Marea"
+#       MareaSpec_ls$LENGTH = length(Mareas_)
+#       writeToTable(Mareas_, MareaSpec_ls, Group = GroupName, Index = NULL)
+#     }
+#     if (G$BzoneSpecified & !G$CzoneSpecified) {
+#       #Write to Bzone table
+#       writeToTable(G$Geo_df$Bzone, BzoneSpec_ls, Group = GroupName, Index = NULL)
+#       AzoneSpec_ls$TABLE = "Bzone"
+#       AzoneSpec_ls$LENGTH = nrow(G$Geo_df)
+#       writeToTable(G$Geo_df$Azone, AzoneSpec_ls, Group = GroupName, Index = NULL)
+#       MareaSpec_ls$TABLE = "Bzone"
+#       MareaSpec_ls$LENGTH = nrow(G$Geo_df)
+#       writeToTable(G$Geo_df$Marea, MareaSpec_ls, Group = GroupName, Index = NULL)
+#       #Write to Azone table
+#       AzoneSpec_ls$TABLE = "Azone"
+#       AzoneSpec_ls$LENGTH = length(Azones_)
+#       writeToTable(Azones_, AzoneSpec_ls, Group = GroupName, Index = NULL)
+#       AzoneGeo_df <- G$Geo_df[!duplicated(G$Geo_df$Azone),]
+#
+#       writeToTable(AzoneGeo_df$Marea[match(Azones_, AzoneGeo_df$Azone)],
+#                    MareaSpec_ls, Group = GroupName, Index = NULL)
+#       rm(AzoneGeo_df)
+#       #Write to Marea table
+#       MareaSpec_ls$TABLE = "Marea"
+#       MareaSpec_ls$LENGTH = length(Mareas_)
+#       writeToTable(Mareas_, MareaSpec_ls, Group = GroupName, Index = NULL)
+#     }
+#     if (G$CzoneSpecified) {
+#       #Write to Czone table
+#       writeToTable(G$Geo_df$Czone, CzoneSpec_ls, Group = GroupName, Index = NULL)
+#       BzoneSpec_ls$TABLE = "Czone"
+#       BzoneSpec_ls$LENGTH = nrow(G$Geo_df)
+#       writeToTable(G$Geo_df$Bzone, BzoneSpec_ls, Group = GroupName, Index = NULL)
+#       AzoneSpec_ls$TABLE = "Czone"
+#       AzoneSpec_ls$LENGTH = nrow(G$Geo_df)
+#       writeToTable(G$Geo_df$Azone, AzoneSpec_ls, Group = GroupName, Index = NULL)
+#       MareaSpec_ls$TABLE = "Czone"
+#       MareaSpec_ls$LENGTH = nrow(G$Geo_df)
+#       writeToTable(G$Geo_df$Marea, MareaSpec_ls, Group = GroupName, Index = NULL)
+#       #Write to Bzone table
+#       Geo_df <- G$Geo_df[!duplicated(G$Geo_df$Bzone), c("Azone", "Bzone")]
+#       BzoneSpec_ls$TABLE = "Bzone"
+#       BzoneSpec_ls$LENGTH = nrow(Geo_df)
+#       writeToTable(Geo_df$Bzone, BzoneSpec_ls, Group = GroupName, Index = NULL)
+#       AzoneSpec_ls$TABLE = "Bzone"
+#       AzoneSpec_ls$LENGTH = nrow(Geo_df)
+#       writeToTable(Geo_df$Azone, AzoneSpec_ls, Group = GroupName, Index = NULL)
+#       #Write to Azone table
+#       AzoneSpec_ls$TABLE = "Azone"
+#       AzoneSpec_ls$LENGTH = length(Azones_)
+#       writeToTable(Azones_, AzoneSpec_ls, Group = GroupName, Index = NULL)
+#       #Write to Marea table
+#       MareaSpec_ls$TABLE = "Marea"
+#       MareaSpec_ls$LENGTH = length(Mareas_)
+#       writeToTable(Mareas_, MareaSpec_ls, Group = GroupName, Index = NULL)
+#     }
+#   }
+#   #Write to log that complete
+#   Message <- "Geography sucessfully added to datastore."
+#   writeLog(Message)
+#   TRUE
+# }
+
 
 
 #LOAD MODEL PARAMETERS
