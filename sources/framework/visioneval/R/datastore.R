@@ -749,6 +749,71 @@ assignDatastoreFunctions <- function(DstoreType) {
 }
 
 
+#CREATE A DATASTORE INDEX LIST
+#=============================
+#' Create a list of geographic indices for all tables in a datastore.
+#'
+#' \code{createGeoIndexList} creates a list containing the geographic indices
+#' for tables in the operating datastore for identified tables.
+#'
+#' This function takes a 'Get' or 'Set' specifications list for a module and the
+#' 'RunBy' specification and returns a list which has a component for each table
+#' identified in the specifications. Each component includes all geographic
+#' datasets for the table.
+#'
+#' @param Specs_ls A 'Get' or 'Set' specifications list for a module.
+#' @param RunBy The value of the RunBy specification for a module.
+#' @param RunYear A string identifying the model year that is being run.
+#' @return A list that contains a component for each table identified in the
+#' specifications in which each component includes all the geographic datasets
+#' for the table represented by the component.
+#' @export
+createGeoIndexList <-
+  function(Specs_ls, RunBy, RunYear) {
+    G <- getModelState()
+    #Make data frame of all tables and groups
+    TablesToIndex_df <-
+      do.call(
+        rbind,
+        lapply(Specs_ls, function(x) {
+          data.frame(Table = x$TABLE, Group = x$GROUP, stringsAsFactors = FALSE)
+        })
+      )
+    #Replace Group name with appropriate year if necessary
+    TablesToIndex_df$Group[TablesToIndex_df$Group == "Year"] <- RunYear
+    TablesToIndex_df$Group[TablesToIndex_df$Group == "BaseYear"] <- G$BaseYear
+    #Remove duplicates
+    TablesToIndex_df <- unique(TablesToIndex_df)
+    #Don't create and index for any global tables that are not geographic
+    DoCreateIndex_ <-
+      !(
+        TablesToIndex_df$Group == "Global" &
+          !(TablesToIndex_df$Table %in% c("Marea", "Azone", "Bzone", "Czone"))
+        )
+    TablesToIndex_df <- TablesToIndex_df[DoCreateIndex_,]
+    #Turn data frame in list by group
+    TablesToIndex_ls <- split(TablesToIndex_df$Table, TablesToIndex_df$Group)
+    TablesToIndex_ls <- lapply(TablesToIndex_ls, function(x) {
+      if (!(RunBy %in% x)) x <- c(RunBy, x)
+      x
+    })
+    #Iterate through groups and tables and create indexes
+    Index_ls <- list()
+    for (nm in names(TablesToIndex_ls)) {
+      Index_ls[[nm]] <- list()
+      for(tab in TablesToIndex_ls[[nm]]) {
+        Index_ls[[nm]][[tab]] <- list()
+        if (tab == "Marea") {
+          Index_ls[[nm]]$Marea$Marea <- readFromTable("Marea", "Marea", nm)
+        } else {
+          Index_ls[[nm]][[tab]]$Marea <- readFromTable("Marea", tab, nm)
+          Index_ls[[nm]][[tab]]$Azone <- readFromTable("Azone", tab, nm)
+        }
+      }
+    }
+    Index_ls
+  }
+
 #CREATE A DATASTORE INDEX
 #========================
 #' Create datastore index.
@@ -762,21 +827,64 @@ assignDatastoreFunctions <- function(DstoreType) {
 #' will return a function that when provided the name of a particular Azone,
 #' will return the positions corresponding to that Azone.
 #'
-#' @param Name A string identifying the dataset the index is being created
-#'   for.
-#' @param Table A string identifying the name of the table the index is
-#'   being created for.
-#' @param Group A string identifying the group the table is located in.
+#' @param Table A string identifying the name of the table the index is being
+#'   created for.
+#' @param Group A string identifying the name of the group where the table is
+#' located in the datastore.
+#' @param RunBy A string identifying the level of geography the module is being
+#'   run at (e.g. Azone).
+#' @param Geo A string identifying the geographic unit to create the index for
+#'   (e.g. the name of a particular Azone).
+#' @param GeoIndex_ls a list of geographic indices used to determine the
+#'   positions to extract from a dataset corresponding to the specified
+#'   geography.
 #' @return A function that creates a vector of positions corresponding to the
 #'   location of the supplied value in the index field.
 #' @export
-createIndex <- function(Name, Table, Group) {
-  ValsToIndexBy <-
-    readFromTable(Name, Table, Group)
-  return(function(IndexVal) {
-    which(ValsToIndexBy == IndexVal)
-  })
+createGeoIndex <- function(Table, Group, RunBy, Geo, GeoIndex_ls) {
+  if (Table == "Marea") {
+    #Identify the Marea from the 'RunBy' table
+    GeoIdxNames_ <- GeoIndex_ls[[Group]][[RunBy]][[RunBy]]
+    Marea <-
+      GeoIndex_ls[[Group]][[RunBy]]$Marea[GeoIdxNames_ == Geo]
+    GeoIdxNames_ <- GeoIndex_ls[[Group]]$Marea$Marea
+    Idx_ <- which(GeoIdxNames_ == Marea)
+  } else {
+    #Get the index from the table
+    GeoIdxNames_ <- GeoIndex_ls[[Group]][[Table]][[RunBy]]
+    Idx_ <- which(GeoIdxNames_ == Geo)
+  }
+  Idx_
 }
+
+# #CREATE A DATASTORE INDEX
+# #========================
+# #' Create datastore index.
+# #'
+# #' \code{createIndex} creates an index for reading or writing module data to the
+# #' datastore.
+# #'
+# #' This function creates indexing functions which return an index to positions
+# #' in datasets that correspond to positions in an index field of a table. For
+# #' example if the index field is 'Azone' in the 'Household' table, this function
+# #' will return a function that when provided the name of a particular Azone,
+# #' will return the positions corresponding to that Azone.
+# #'
+# #' @param Name A string identifying the dataset the index is being created
+# #'   for.
+# #' @param Table A string identifying the name of the table the index is
+# #'   being created for.
+# #' @param Group A string identifying the group the table is located in.
+# #' @return A function that creates a vector of positions corresponding to the
+# #'   location of the supplied value in the index field.
+# #' @export
+# createIndex <- function(Name, Table, Group) {
+#   ValsToIndexBy <-
+#     readFromTable(Name, Table, Group)
+#   return(function(IndexVal) {
+#     which(ValsToIndexBy == IndexVal)
+#   })
+# }
 #AzoneIndex <- createIndex("Azone", "Bzone", "2010")
 #Az <- c("A1", "A2", "A3")
 #for (az in Az) print(readFromTable("Bzone", "Bzone", "2010", Index = AzoneIndex(az)))
@@ -826,10 +934,12 @@ initDataList <- function() {
 #' @param Geo a string identifying the name of the geographic area to get the
 #' data for. For example, if the module is specified to be run by Azone, then
 #' Geo would be the name of a particular Azone.
+#' @param GeoIndex_ls a list of geographic indices used to determine the
+#' positions to extract from a dataset corresponding to the specified geography.
 #' @return A list containing all the data sets specified in the module's
 #' 'Get' specifications for the identified geographic area.
 #' @export
-getFromDatastore <- function(ModuleSpec_ls, RunYear, Geo = NULL) {
+getFromDatastore <- function(ModuleSpec_ls, RunYear, Geo = NULL, GeoIndex_ls = NULL) {
   GetSpec_ls <- ModuleSpec_ls$Get
   #Make a list to hold the retrieved data
   L <- initDataList()
@@ -876,9 +986,12 @@ getFromDatastore <- function(ModuleSpec_ls, RunYear, Geo = NULL) {
       #   list(LENGTH = getTableLength(Table, DstoreGroup, G$Datastore))
     }
     #Make an index to the data
-    if (!is.null(Geo)) {
-      idxFun <- createIndex(ModuleSpec_ls$RunBy, Table, DstoreGroup)
-      Index <- idxFun(Geo)
+    DoCreateIndex <-
+      !is.null(Geo) &
+      !(Group == "Global" & !(Table %in% c("Marea", "Azone", "Bzone", "Czone")))
+    if (DoCreateIndex) {
+      Index <-
+        createGeoIndex(Table, DstoreGroup, ModuleSpec_ls$RunBy, Geo, GeoIndex_ls)
     } else {
       Index <- NULL
     }
@@ -919,7 +1032,7 @@ getFromDatastore <- function(ModuleSpec_ls, RunYear, Geo = NULL) {
           )
           Conversion_ls <-
           convertUnits(Data_, Type,
-                       getDatasetAttr(Name, Table, RunYear, G$Datastore)$UNITS,
+                       getDatasetAttr(Name, Table, AttrGroup, G$Datastore)$UNITS,
                        Spec_ls$UNITS)
           Data_ <- Conversion_ls$Values
           rm(AttrGroup, Conversion_ls)
@@ -959,6 +1072,8 @@ getFromDatastore <- function(ModuleSpec_ls, RunYear, Geo = NULL) {
 #' the VisionEval requirements
 #' @param ModuleName a string identifying the name of the module (used to document
 #' the module creating the data in the datastore)
+#' @param GeoIndex_ls a list of geographic indices used to determine the
+#' positions to extract from a dataset corresponding to the specified geography.
 #' @param Year a string identifying the model run year
 #' @param Geo a string identifying the name of the geographic area to get the
 #' data for. For example, if the module is specified to be run by Azone, then
@@ -967,7 +1082,7 @@ getFromDatastore <- function(ModuleSpec_ls, RunYear, Geo = NULL) {
 #' the datastore.
 #' @export
 setInDatastore <-
-  function(Data_ls, ModuleSpec_ls, ModuleName, Year, Geo = NULL) {
+  function(Data_ls, ModuleSpec_ls, ModuleName, Year, Geo = NULL, GeoIndex_ls = NULL) {
     #Get the model state
     G <- getModelState()
     #Make any specified tables
@@ -1001,9 +1116,12 @@ setInDatastore <-
       if (Group == "Global") DstoreGroup <- "Global"
       if (Group == "Year") DstoreGroup <- Year
       #Make an index to the data
-      if (!is.null(Geo)) {
-        idxFun <- createIndex(ModuleSpec_ls$RunBy, Table, DstoreGroup)
-        Index <- idxFun(Geo)
+      DoCreateIndex <-
+        !is.null(Geo) &
+        !(Group == "Global" & !(Table %in% c("Marea", "Azone", "Bzone", "Czone")))
+      if (DoCreateIndex) {
+        Index <-
+          createGeoIndex(Table, DstoreGroup, ModuleSpec_ls$RunBy, Geo, GeoIndex_ls)
       } else {
         Index <- NULL
       }
@@ -1095,7 +1213,7 @@ inputsToDatastore <-
       for (i in 1:length(TableSpec_ls)) {
         Table <- TableSpec_ls[[i]]$TABLE
         Group <- TableSpec_ls[[i]]$GROUP
-        if (Group != "Region") {
+        if (Group != "Global") {
           Msg <-
             paste0(
               "NewInpTable specification error for module '", ModuleName, "'. ",
