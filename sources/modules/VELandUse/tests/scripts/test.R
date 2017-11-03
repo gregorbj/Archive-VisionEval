@@ -26,15 +26,6 @@ testModule(
   DoRun = TRUE
 )
 
-#Test LocateWorkerJobs module
-source("R/LocateWorkerJobs.R")
-testModule(
-  ModuleName = "LocateWorkerJobs",
-  LoadDatastore = TRUE,
-  SaveDatastore = TRUE,
-  DoRun = TRUE
-)
-
 #Test AssignDevTypes module
 source("R/AssignDevTypes.R")
 testModule(
