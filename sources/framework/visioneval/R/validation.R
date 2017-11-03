@@ -583,6 +583,14 @@ Types <- function(){
         SEC = c(YR = 3.171e-8, DAY = 1.1574e-5, HR = 0.000277778, MIN = 0.0166667, SEC = 1)),
       mode = "double"
     ),
+    energy = list(
+      units = list(
+        KWH = c(KWH = 1, MJ = 3.6, GGE = 0.02967846),
+        MJ = c(KWH = 0.277778, MJ = 1, GGE = 0.008244023),
+        GGE = c(KWH = 33.69447, MJ = 121.3, GGE = 1)
+      ),
+      mode = "double"
+    ),
     people = list(
       units = list(
         PRSN = c(PRSN = 1)
