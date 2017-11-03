@@ -27,30 +27,346 @@ library(visioneval)
 #=============================================
 #SECTION 1: ESTIMATE AND SAVE MODEL PARAMETERS
 #=============================================
+#The estimation of household DVMT models is a five-step process. In the first
+#step, binomial logit models are estimated to predict the likelihood that there
+#is household DVMT on the travel day. Separate models are estimated for
+#metropolitan and non-metropolitan households. In the second step, linear
+#regression models are estimated which predict power-transformed DVMT for
+#households that have DVMT on the travel day. DVMT is power transformed to
+#normalize. The linear models and power transformations are estimated separately
+#for metropolitan and non-metropolitan households. In the third step, dispersion
+#factors are estimated for adding variance to the linear models so that the
+#variance of the results equals the observed variance. In the fourth step, the
+#binomial and linear models are applied stochastically to simulate day-to-day
+#variation in DVMT over 1000 days. These sumulated results are used to calculate
+#the average DVMT of each household and DVMT by various percentiles. In the
+#fifth step, linear models are estimated to predict average DVMT and several
+#percentiles of DVMT using the simulated values. As with the other models,
+#separate models are estimated for metropolitan and non-metropolitan households.
 
-#Load average DVMT model from GreenSTEP
-load("inst/extdata/DvmtModel_ls.RData")
-#Save the model
+#Set up data and functions to estimate models
+#--------------------------------------------
+#Load NHTS household data
+Hh_df <- VE2001NHTS::Hh_df
+#Identify records used for estimating metropolitan area models
+IsMetro_ <- Hh_df$Msacat %in% c("1", "2")
+#Add variables to Hh_df
+Hh_df$Dvmt <- Hh_df$PvtVehDvmt + Hh_df$ShrVehDvmt
+Hh_df$LogIncome <- log(Hh_df$Income)
+Hh_df$ZeroVeh <- as.numeric(Hh_df$NumVeh == 0)
+Hh_df$OneVeh <- as.numeric(Hh_df$NumVeh == 1)
+Hh_df$DrvAgePop <- Hh_df$Hhsize - Hh_df$Age0to14
+Hh_df$Workers <- Hh_df$Wrkcount
+
+#Define functions used in estimations
+#------------------------------------
+#Function to make a model formula
+makeFormula <-
+  function(DepVar, IndepVars_) {
+    FormulaString <-
+      paste(DepVar, "~", paste(IndepVars_, collapse = "+"))
+    as.formula(FormulaString)
+  }
+#Function to find a power transform that minimizes skewness of distribution
+findPower <- function(Dvmt_) {
+  skewness <- function (x, na.rm = FALSE, type = 3)
+  {
+    if (any(ina <- is.na(x))) {
+      if (na.rm)
+        x <- x[!ina]
+      else return(NA)
+    }
+    if (!(type %in% (1:3)))
+      stop("Invalid 'type' argument.")
+    n <- length(x)
+    x <- x - mean(x)
+    y <- sqrt(n) * sum(x^3)/(sum(x^2)^(3/2))
+    if (type == 2) {
+      if (n < 3)
+        stop("Need at least 3 complete observations.")
+      y <- y * sqrt(n * (n - 1))/(n - 2)
+    }
+    else if (type == 3)
+      y <- y * ((1 - 1/n))^(3/2)
+    y
+  }
+  PowSeq_ <- seq(0.01, 0.99, 0.01)
+  Dvmt_ <- Dvmt_[Dvmt_ != 0]
+  Skew_ <- sapply(PowSeq_, function(x) skewness(Dvmt_ ^ x))
+  PowSeq_[which(abs(Skew_) == min(abs(Skew_)))]
+}
+#Function to calculate dispersion factor to match observed variation
+calcDispersonFactor <- function(ObsVals_, EstVals_) {
+  ObsSd <- sd(ObsVals_)
+  EstSd <- sd(EstVals_)
+  N <- length(ObsVals_)
+  testSd <- function(SD) {
+    RevEstVals_ <- EstVals_ + rnorm(N, 0, SD)
+    ObsSd - sd(RevEstVals_)
+  }
+  binarySearch(testSd, SearchRange_ = sort(c(ObsSd, EstSd)))
+}
+#Simulate household DVMT
+simulateDvmt <- function(PowDvmt_, ZeroDvmtProb_, SD, Pow) {
+  N <- length(PowDvmt_)
+  DvmtFlag_ <- as.numeric(runif(N) > ZeroDvmtProb_)
+  PowDvmt_ <- (PowDvmt_ + rnorm(length(PowDvmt_), 0, SD))
+  PowDvmt_[PowDvmt_ < 0] <- 0
+  Dvmt_ <- PowDvmt_ ^ (1 / Pow)
+  DvmtFlag_ * Dvmt_
+}
+
+#Estimate binomial logit model for zero DVMT probability
+#-------------------------------------------------------
+#Estimate metropolitan model
+IndepVars_ <-
+  c("DrvAgePop", "LogIncome", "Hbppopdn", "BusEqRevMiPC", "NumVeh",  "ZeroVeh",
+    "UrbanDev", "Workers", "Age0to14")
+TestHh_df <- Hh_df[IsMetro_, c("ZeroDvmt", IndepVars_)]
+TestHh_df <- TestHh_df[complete.cases(TestHh_df),]
+MetroZeroDvmt_GLM <-
+  glm(makeFormula("ZeroDvmt", IndepVars_), family=binomial, data = TestHh_df)
+# summary(MetroZeroDvmt_GLM)
+rm(IndepVars_, TestHh_df)
+#Estimate nonmetropolitan model
+IndepVars_ <-
+  c("DrvAgePop", "LogIncome", "Hbppopdn", "NumVeh", "ZeroVeh", "Workers",
+    "Age0to14")
+TestHh_df <- Hh_df[!IsMetro_, c("ZeroDvmt", IndepVars_)]
+TestHh_df <- TestHh_df[complete.cases(TestHh_df),]
+NonMetroZeroDvmt_GLM <-
+  glm(makeFormula("ZeroDvmt", IndepVars_), family=binomial, data = TestHh_df)
+# summary(NonMetroZeroDvmt_GLM)
+rm(IndepVars_, TestHh_df)
+
+#Estimate linear model of DVMT for households that have DVMT
+#-----------------------------------------------------------
+#Find metropolitan and non-metropolitan DVMT power transforms
+MetroPow <- findPower(Hh_df$Dvmt[IsMetro_])
+NonMetroPow <- findPower(Hh_df$Dvmt[!IsMetro_])
+#Estimate metropolitan model
+IndepVars_ <-
+  c("DrvAgePop", "LogIncome", "Hbppopdn", "NumVeh", "ZeroVeh", "OneVeh",
+    "Workers", "UrbanDev", "Age0to14")
+TestHh_df <- Hh_df[IsMetro_ & Hh_df$ZeroDvmt == "N", c("Dvmt", IndepVars_)]
+TestHh_df$PowDvmt <- TestHh_df$Dvmt ^ MetroPow
+TestHh_df <- TestHh_df[complete.cases(TestHh_df),]
+MetroPowDvmt_LM <-
+  lm(makeFormula("PowDvmt", IndepVars_), data = TestHh_df)
+# summary(MetroPowDvmt_LM)
+rm(IndepVars_, TestHh_df)
+#Estimate non-metropolitan model
+IndepVars_ <-
+  c("DrvAgePop", "LogIncome", "Hbppopdn", "NumVeh", "ZeroVeh", "OneVeh",
+    "Workers", "Age0to14")
+TestHh_df <- Hh_df[!IsMetro_ & Hh_df$ZeroDvmt == "N", c("Dvmt", IndepVars_)]
+TestHh_df$PowDvmt <- TestHh_df$Dvmt ^ NonMetroPow
+TestHh_df <- TestHh_df[complete.cases(TestHh_df),]
+NonMetroPowDvmt_LM <-
+  lm(makeFormula("PowDvmt", IndepVars_), data = TestHh_df)
+# summary(NonMetroPowDvmt_LM)
+rm(IndepVars_, TestHh_df)
+
+#Estimate disperson factor to match observed distribution of Metropolitan DVMT
+#-----------------------------------------------------------------------------
+#Prepare metropolitan household data frame
+IndepVars_ <-
+  c("DrvAgePop", "LogIncome", "Hbppopdn", "NumVeh", "ZeroVeh", "OneVeh",
+    "Workers", "UrbanDev", "Age0to14")
+TestHh_df <- Hh_df[IsMetro_ & Hh_df$ZeroDvmt == "N", c("Dvmt", IndepVars_)]
+TestHh_df$PowDvmt <- TestHh_df$Dvmt ^ MetroPow
+TestHh_df <- TestHh_df[complete.cases(TestHh_df),]
+#Calculate metropolitan observed and estimated power-transformed DVMT
+ObsPowDvmt_ <- TestHh_df$Dvmt ^ MetroPow
+EstPowDvmt_ <- predict(MetroPowDvmt_LM, newdata = TestHh_df)
+#Calculate metropolitan dispersion factor
+MetroSD <- calcDispersonFactor(ObsPowDvmt_, EstPowDvmt_)
+#Test metropolitan dispersion factor
+# RevEstPowDvmt_ <- EstPowDvmt_ + rnorm(length(EstPowDvmt_), 0, MetroSD)
+# plot(density(ObsPowDvmt_))
+# lines(density(RevEstPowDvmt_), col = "red")
+# mean(TestHh_df$Dvmt)
+# mean(RevEstPowDvmt_[RevEstPowDvmt_ > 0] ^ (1 / MetroPow))
+rm(IndepVars_, TestHh_df, ObsPowDvmt_, EstPowDvmt_)
+#Prepare nonmetropolitan household data frame
+IndepVars_ <-
+  c("DrvAgePop", "LogIncome", "Hbppopdn", "NumVeh", "ZeroVeh", "OneVeh",
+    "Workers", "Age0to14")
+TestHh_df <- Hh_df[!IsMetro_ & Hh_df$ZeroDvmt == "N", c("Dvmt", IndepVars_)]
+TestHh_df$PowDvmt <- TestHh_df$Dvmt ^ NonMetroPow
+TestHh_df <- TestHh_df[complete.cases(TestHh_df),]
+#Calculate metropolitan observed and estimated power-transformed DVMT
+ObsPowDvmt_ <- TestHh_df$Dvmt ^ NonMetroPow
+EstPowDvmt_ <- predict(NonMetroPowDvmt_LM, newdata = TestHh_df)
+#Calculate metropolitan dispersion factor
+NonMetroSD <- calcDispersonFactor(ObsPowDvmt_, EstPowDvmt_)
+#Test metropolitan dispersion factor
+# RevEstPowDvmt_ <- EstPowDvmt_ + rnorm(length(EstPowDvmt_), 0, NonMetroSD)
+# plot(density(ObsPowDvmt_))
+# lines(density(RevEstPowDvmt_), col = "red")
+# mean(TestHh_df$Dvmt)
+# mean(RevEstPowDvmt_[RevEstPowDvmt_ > 0] ^ (1 / NonMetroPow))
+rm(IndepVars_, TestHh_df, ObsPowDvmt_, EstPowDvmt_)
+
+#Simulate household DVMT over many days
+#--------------------------------------
+#Simulate 1000 days of DVMT for metropolitan households
+Vars_ <-
+  c("Houseid", "DrvAgePop", "LogIncome", "Hbppopdn", "BusEqRevMiPC", "NumVeh",
+    "ZeroVeh", "OneVeh", "Workers", "UrbanDev", "Age0to14", "Dvmt")
+TestHh_df <- Hh_df[IsMetro_, Vars_]
+TestHh_df <- TestHh_df[complete.cases(TestHh_df),]
+ZeroDvmtProb_ <-
+  predict(MetroZeroDvmt_GLM, newdata = TestHh_df, type = "response")
+EstPowDvmt_ <- predict(MetroPowDvmt_LM, newdata = TestHh_df)
+MetroHhDvmt_HhX <- matrix(0, nrow = length(EstPowDvmt_), ncol = 1000)
+rownames(MetroHhDvmt_HhX) <- TestHh_df$Houseid
+for (i in 1:1000) {
+  MetroHhDvmt_HhX[,i] <-
+    simulateDvmt(EstPowDvmt_, ZeroDvmtProb_, MetroSD, MetroPow)
+}
+rm(Vars_, TestHh_df, ZeroDvmtProb_, EstPowDvmt_, i)
+#Simulate 1000 days of DVMT for non-metropolitan households
+Vars_ <-
+  c("Houseid", "DrvAgePop", "LogIncome", "Hbppopdn", "NumVeh", "ZeroVeh",
+    "OneVeh", "Workers", "Age0to14", "Dvmt")
+TestHh_df <- Hh_df[!IsMetro_, Vars_]
+TestHh_df <- TestHh_df[complete.cases(TestHh_df),]
+ZeroDvmtProb_ <-
+  predict(NonMetroZeroDvmt_GLM, newdata = TestHh_df, type = "response")
+EstPowDvmt_ <- predict(NonMetroPowDvmt_LM, newdata = TestHh_df)
+NonMetroHhDvmt_HhX <- matrix(0, nrow = length(EstPowDvmt_), ncol = 1000)
+rownames(NonMetroHhDvmt_HhX) <- TestHh_df$Houseid
+for (i in 1:1000) {
+  NonMetroHhDvmt_HhX[,i] <-
+    simulateDvmt(EstPowDvmt_, ZeroDvmtProb_, NonMetroSD, NonMetroPow)
+}
+rm(Vars_, TestHh_df, ZeroDvmtProb_, EstPowDvmt_, i, MetroPowDvmt_LM,
+   MetroSD, MetroZeroDvmt_GLM, NonMetroPowDvmt_LM, NonMetroSD,
+   NonMetroZeroDvmt_GLM)
+
+#Calculate mean and quantile values
+#----------------------------------
+QuantBreaks_ <- c(seq(0, 0.95, 0.05), 0.99)
+MetroDvmtQuants_HhX <-
+  t(apply(MetroHhDvmt_HhX, 1, function(x) {
+    quantile(x, QuantBreaks_)
+  }))
+MetroAveDvmt_Hh <- rowMeans(MetroHhDvmt_HhX)
+NonMetroDvmtQuants_HhX <-
+  t(apply(NonMetroHhDvmt_HhX, 1, function(x) {
+    quantile(x, QuantBreaks_)
+  }))
+NonMetroAveDvmt_Hh <- rowMeans(NonMetroHhDvmt_HhX)
+rm(MetroHhDvmt_HhX, NonMetroHhDvmt_HhX)
+
+#Estimate linear models of average DVMT
+#--------------------------------------
+#Estimate metropolitan household model
+IndepVars_ <-
+  c("DrvAgePop", "LogIncome", "Hbppopdn", "NumVeh", "ZeroVeh", "OneVeh",
+    "Workers", "UrbanDev", "Age0to14")
+TestHh_df <- Hh_df[IsMetro_, c("Houseid", IndepVars_)]
+TestHh_df <- TestHh_df[complete.cases(TestHh_df),]
+TestHh_df$Dvmt <- MetroAveDvmt_Hh[TestHh_df$Houseid]
+TestHh_df$PowDvmt <- TestHh_df$Dvmt ^ MetroPow
+MetroAveDvmt_LM <-
+  lm(makeFormula("PowDvmt", IndepVars_), data = TestHh_df)
+# summary(MetroAveDvmt_LM)
+# plot(density(TestHh_df$PowDvmt))
+# lines(density(predict(MetroAveDvmt_LM, newdata = TestHh_df)), col="red")
+# plot(TestHh_df$PowDvmt, predict(MetroAveDvmt_LM, newdata = TestHh_df))
+rm(IndepVars_, TestHh_df)
+#Estimate non-metropolitan household model
+IndepVars_ <-
+  c("DrvAgePop", "LogIncome", "Hbppopdn", "NumVeh", "ZeroVeh", "OneVeh",
+    "Workers", "Age0to14")
+TestHh_df <- Hh_df[!IsMetro_, c("Houseid", IndepVars_)]
+TestHh_df <- TestHh_df[complete.cases(TestHh_df),]
+TestHh_df$Dvmt <- NonMetroAveDvmt_Hh[TestHh_df$Houseid]
+TestHh_df$PowDvmt <- TestHh_df$Dvmt ^ NonMetroPow
+NonMetroAveDvmt_LM <-
+  lm(makeFormula("PowDvmt", IndepVars_), data = TestHh_df)
+# summary(NonMetroAveDvmt_LM)
+# plot(density(TestHh_df$PowDvmt))
+# lines(density(predict(NonMetroAveDvmt_LM, newdata = TestHh_df)), col="red")
+# plot(TestHh_df$PowDvmt, predict(NonMetroAveDvmt_LM, newdata = TestHh_df))
+rm(IndepVars_, TestHh_df)
+
+#Estimate linear models of DVMT percentiles as function of average DVMT
+#----------------------------------------------------------------------
+#Estimate metropolitan percentile DVMT models
+TestHh_df <- data.frame(Dvmt = MetroAveDvmt_Hh)
+TestHh_df$DvmtSq <- TestHh_df$Dvmt ^ 2
+TestHh_df$DvmtCu <- TestHh_df$Dvmt ^ 3
+MetroPctlMdl_ls <- list()
+for (Pctl in as.character(c(seq(5, 95, 5), 99))) {
+  TestHh_df[["PctlDvmt"]] <- MetroDvmtQuants_HhX[,paste0(Pctl, "%")]
+  MetroPctlMdl_ls[[paste0("Pctl", Pctl)]] <-
+    makeModelFormulaString(
+      lm(PctlDvmt ~ Dvmt + DvmtSq + DvmtCu, data = TestHh_df))
+}
+rm(TestHh_df, Pctl)
+#Estimate non-metropolitan percentile DVMT models
+TestHh_df <- data.frame(Dvmt = NonMetroAveDvmt_Hh)
+TestHh_df$DvmtSq <- TestHh_df$Dvmt ^ 2
+TestHh_df$DvmtCu <- TestHh_df$Dvmt ^ 3
+NonMetroPctlMdl_ls <- list()
+for (Pctl in as.character(c(seq(5, 95, 5), 99))) {
+  TestHh_df[["PctlDvmt"]] <- NonMetroDvmtQuants_HhX[,paste0(Pctl, "%")]
+  NonMetroPctlMdl_ls[[paste0("Pctl", Pctl)]] <-
+    makeModelFormulaString(
+      lm(PctlDvmt ~ Dvmt + DvmtSq + DvmtCu, data = TestHh_df))
+}
+rm(TestHh_df, Pctl)
+
+#Save the models
+#---------------
+#Make a list of all models to be saved
+DvmtModel_ls <- list(Metro = list(), NonMetro = list())
+DvmtModel_ls$Metro$Pow <- MetroPow
+DvmtModel_ls$Metro$Ave <- makeModelFormulaString(MetroAveDvmt_LM)
+for (nm in names(MetroPctlMdl_ls)) {
+  DvmtModel_ls$Metro[[nm]] <- MetroPctlMdl_ls[[nm]]
+}
+rm(nm)
+DvmtModel_ls$NonMetro$Pow <- NonMetroPow
+DvmtModel_ls$NonMetro$Ave <- makeModelFormulaString(NonMetroAveDvmt_LM)
+for (nm in names(NonMetroPctlMdl_ls)) {
+  DvmtModel_ls$NonMetro[[nm]] <- NonMetroPctlMdl_ls[[nm]]
+}
+rm(nm)
+#Save the models
 #' Daily vehicle miles traveled (DVMT) models
 #'
-#' A list of components describing the average daily vehicle miles traveled
-#' models for metropolitan and non-metropolitan areas. The models are linear
-#' models which predict average DVMT, 95th percentile DVMT, and maximum DVMT.
+#' A list of components used to predict the average and several pecentiles
+#' (85th, 95th, 99th, 100th) of daily vehicle miles traveled for households.
 #' The models are linear regression models. The average DVMT model predicts
 #' average DVMT as a power transform. The 'Pow' component contains the power
-#' term for untransforming the model results. The 95th percentile and maximum
-#' DVMT models predict the households 95th percentile and maximum daily travel
-#' as a function of the household's average DVMT.
+#' term for untransforming the model results. The percentile DVMT models
+#' predict the household DVMT at variou percentiles as a function of the
+#' household's average DVMT.
 #'
 #' @format A list having 'Metro' and 'NonMetro' components. Each component has
 #' the following components:
 #' Pow: factor to untransform the results of the average DVMT model;
 #' Ave: the formula for the average DVMT model;
+#' Pctl85: the formula for the 85th percentile DVMT model;
 #' Pctl95: the formula for the 95th percentile DVMT model;
-#' Max: the formula for the maximum DVMT model.
-#' @source GreenSTEP version 3.6 model.
+#' Pctl99: the formula for the 99th percentile DVMT model;
+#' Pctl100: the formula for the 100th percentile DVMT model.
+#' @source CalculateHouseholdDVMT.R
 "DvmtModel_ls"
 devtools::use_data(DvmtModel_ls, overwrite = TRUE)
+
+#Clean Up
+#--------
+rm(
+  Hh_df, MetroDvmtQuants_HhX, NonMetroDvmtQuants_HhX, IsMetro_, MetroAveDvmt_Hh,
+  MetroAveDvmt_LM, MetroPctlMdl_ls, MetroPow, NonMetroAveDvmt_Hh,
+  NonMetroAveDvmt_LM, NonMetroPctlMdl_ls, NonMetroPow, calcDispersonFactor,
+  findPower, makeFormula, simulateDvmt
+  )
 
 
 #================================================
@@ -131,13 +447,16 @@ CalculateHouseholdDVMTSpecifications <- list(
       ISELEMENTOF = ""
     ),
     item(
-      NAME =
-        items("Age0to14",
-              "Age15to19",
-              "Age20to29",
-              "Age30to54",
-              "Age55to64",
-              "Age65Plus"),
+      NAME = "Age0to14",
+      TABLE = "Household",
+      GROUP = "Year",
+      TYPE = "people",
+      UNITS = "PRSN",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "Workers",
       TABLE = "Household",
       GROUP = "Year",
       TYPE = "people",
@@ -150,7 +469,7 @@ CalculateHouseholdDVMTSpecifications <- list(
       TABLE = "Household",
       GROUP = "Year",
       TYPE = "character",
-      UNITS = "development type",
+      UNITS = "category",
       PROHIBIT = "NA",
       ISELEMENTOF = c("Urban", "Rural")
     ),
@@ -194,10 +513,7 @@ CalculateHouseholdDVMTSpecifications <- list(
   #Specify data to saved in the data store
   Set = items(
     item(
-      NAME =
-        items("Dvmt",
-              "Dvmt95th",
-              "DvmtMax"),
+      NAME = "Dvmt",
       TABLE = "Household",
       GROUP = "Year",
       TYPE = "distance",
@@ -206,14 +522,10 @@ CalculateHouseholdDVMTSpecifications <- list(
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
       SIZE = 0,
-      DESCRIPTION =
-        items(
-          "Average daily vehicle miles traveled by the household in autos or light trucks",
-          "95th percentile daily vehicle miles traveled by the household in autos or light trucks",
-          "Maximum daily vehicle miles traveled by the household in autos or light trucks"
-        )
+      DESCRIPTION = "Average daily vehicle miles traveled by the household in autos or light trucks"
     )
-  )
+  ),
+  Call = TRUE
 )
 
 #Save the data specifications list
@@ -280,14 +592,14 @@ CalculateHouseholdDVMT <- function(L) {
     L$Year$Marea$FwyLaneMiPC[match(L$Year$Bzone$Marea, L$Year$Marea$Marea)]
   Hh_df$Fwylnmicap <-
     FwyLaneMiPC_Bz[match(L$Year$Household$Bzone, L$Year$Bzone$Bzone)]
-  Hh_df$Hhvehcnt <- Hh_df$Vehicles
-  Hh_df$Urban <- Hh_df$IsUrbanMixNbrhd
+  Hh_df$NumVeh <- Hh_df$Vehicles
+  Hh_df$ZeroVeh <- as.numeric(Hh_df$Vehicles == 0)
+  Hh_df$OneVeh <- as.numeric(Hh_df$Vehicles == 1)
+  Hh_df$UrbanDev <- Hh_df$IsUrbanMixNbrhd
   Hh_df$DrvAgePop <- Hh_df$HhSize - Hh_df$Age0to14
   Hh_df$LogIncome <- log1p(Hh_df$Income)
   Hh_df$Hbppopdn <-
     L$Year$Bzone$D1B[match(L$Year$Household$Bzone, L$Year$Bzone$Bzone)]
-  Hh_df$LowVehOwnership <-
-    as.numeric(with(Hh_df, Vehicles / DrvAgePop < 0.25))
   Hh_df$Intercept <- 1
 
   #Apply the average DVMT model
@@ -303,8 +615,8 @@ CalculateHouseholdDVMT <- function(L) {
   #Limit the household DVMT to be no greater than 99th percentile for the population
   AveDvmt_[AveDvmt_ > quantile(AveDvmt_, 0.99)] <- quantile(AveDvmt_, 0.99)
 
-  #Apply the 95th percentile and maximum DVMT models
-  #-------------------------------------------------
+  #Apply the 95th percentile model
+  #-------------------------------
   Hh_df$Dvmt <- AveDvmt_
   Hh_df$DvmtSq <- AveDvmt_ ^ 2
   Hh_df$DvmtCu <- AveDvmt_ ^ 3
@@ -315,13 +627,6 @@ CalculateHouseholdDVMT <- function(L) {
   Dvmt95th_[!IsUr_] <-
     as.vector(eval(parse(text = DvmtModel_ls$NonMetro$Pctl95),
                    envir = Hh_df[!IsUr_,]))
-  DvmtMax_ <- numeric(NumHh)
-  DvmtMax_[IsUr_] <-
-    as.vector(eval(parse(text = DvmtModel_ls$Metro$Max),
-                   envir = Hh_df[IsUr_,]))
-  DvmtMax_[!IsUr_] <-
-    as.vector(eval(parse(text = DvmtModel_ls$NonMetro$Max),
-                   envir = Hh_df[!IsUr_,]))
 
   #Return the results
   #------------------
@@ -330,77 +635,34 @@ CalculateHouseholdDVMT <- function(L) {
   Out_ls$Year$Household <-
     list(
       Dvmt = AveDvmt_,
-      Dvmt95th = Dvmt95th_,
-      DvmtMax = DvmtMax_)
+      Dvmt95th = Dvmt95th_)
   #Return the outputs list
   Out_ls
 }
 
 
-#====================
-#SECTION 4: TEST CODE
-#====================
-#The following code is useful for testing and module function development. The
-#first part initializes a datastore, loads inputs, and checks that the datastore
-#contains the data needed to run the module. The second part produces a list of
-#the data the module function will be provided by the framework when it is run.
-#This is useful to have when developing the module function. The third part
-#runs the whole module to check that everything runs correctly and that the
-#module outputs are consistent with specifications. Note that if a module
-#requires data produced by another module, the test code for the other module
-#must be run first so that the datastore contains the requisite data. Also note
-#that it is important that all of the test code is commented out when the
-#the package is built.
-
-#1) Test code to set up datastore and return module specifications
-#-----------------------------------------------------------------
-#The following commented-out code can be run to initialize a datastore, load
-#inputs, and check that the datastore contains the data needed to run the
-#module. It return the processed module specifications which can be used in
-#conjunction with the getFromDatastore function to fetch the list of data needed
-#by the module. Note that the following code assumes that all the data required
-#to set up a datastore are in the defs and inputs directories in the tests
-#directory. All files in the defs directory must have the default names.
-#
-# Specs_ls <- testModule(
+#================================
+#Code to aid development and test
+#================================
+#Test code to check specifications, loading inputs, and whether datastore
+#contains data needed to run module. Return input list (L) to use for developing
+#module functions
+#-------------------------------------------------------------------------------
+# TestDat_ <- testModule(
 #   ModuleName = "CalculateHouseholdDVMT",
 #   LoadDatastore = TRUE,
 #   SaveDatastore = TRUE,
 #   DoRun = FALSE
 # )
-#
-#2) Test code to create a list of module inputs to use in module function
-#------------------------------------------------------------------------
-#The following commented-out code can be run to create a list of module inputs
-#that may be used in the development of module functions. Note that the data
-#will be returned for the first year in the run years specified in the
-#run_parameters.json file. Also note that if the RunBy specification is not
-#Region, the code will by default return the data for the first geographic area
-#in the datastore.
-#
-# setwd("tests")
-# Year <- getYears()[1]
-# if (Specs_ls$RunBy == "Region") {
-#   L <- getFromDatastore(Specs_ls, RunYear = Year, Geo = NULL)
-# } else {
-#   GeoCategory <- Specs_ls$RunBy
-#   Geo_ <- readFromTable(GeoCategory, GeoCategory, Year)
-#   L <- getFromDatastore(Specs_ls, RunYear = Year, Geo = Geo_[1])
-#   rm(GeoCategory, Geo_)
-# }
-# rm(Year)
-# setwd("..")
-#
-#3) Test code to run full module tests
-#-------------------------------------
-#Run the following commented-out code after the module functions have been
-#written to test all aspects of the module including whether the module can be
-#run and whether the module will produce results that are consistent with the
-#module's Set specifications. It is also important to run this code if one or
-#more other modules in the package need the dataset(s) produced by this module.
-#
-# testModule(
-#   ModuleName = "CalculateHouseholdDVMT",
+# L <- TestDat_$L
+# R <- CalculateHouseholdDVMT(L)
+
+
+#Test code to check everything including running the module and checking whether
+#the outputs are consistent with the 'Set' specifications
+#-------------------------------------------------------------------------------
+# TestDat_ <- testModule(
+#   ModuleName = "AssignVehicleAge",
 #   LoadDatastore = TRUE,
 #   SaveDatastore = TRUE,
 #   DoRun = TRUE
