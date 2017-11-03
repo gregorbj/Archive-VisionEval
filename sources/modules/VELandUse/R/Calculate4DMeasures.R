@@ -67,28 +67,6 @@ Calculate4DMeasuresSpecifications <- list(
         )
     ),
     item(
-      NAME =
-        items(
-          "Latitude",
-          "Longitude"),
-      FILE = "bzone_lat_lon.csv",
-      TABLE = "Bzone",
-      GROUP = "Year",
-      TYPE = "double",
-      UNITS = "NA",
-      NAVALUE = -9999,
-      SIZE = 0,
-      PROHIBIT = "NA",
-      ISELEMENTOF = "",
-      UNLIKELY = "",
-      TOTAL = "",
-      DESCRIPTION =
-        items(
-          "Latitude in decimal degrees of the centroid of the zone",
-          "Longitude in decimal degrees of the centroid of the zone"
-        )
-    ),
-    item(
       NAME = "D3apo",
       FILE = "bzone_network_design.csv",
       TABLE = "Bzone",
@@ -435,8 +413,10 @@ Calculate4DMeasures <- function(L) {
   #----------------------------
   #Ratio of employment to households
   D2A_JPHH_ <- with(D_df, TotEmp / NumHh)
+  D2A_JPHH_[is.na(D2A_JPHH_) | is.infinite(D2A_JPHH_)] <- 0
   #Ratio of workers to employment
   D2A_WRKEMP_ <- with(D_df, NumWkr / TotEmp)
+  D2A_WRKEMP_[is.na(D2A_WRKEMP_) | is.infinite(D2A_WRKEMP_)] <- 0
   #Employment and household entropy
   D_df$OthEmp <- with(D_df, TotEmp - RetEmp - SvcEmp)
   D_df$TotAct <- with(D_df, TotEmp + NumHh)
