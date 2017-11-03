@@ -4,7 +4,8 @@
 \alias{setInDatastore}
 \title{Save the data sets returned by a module in the datastore}
 \usage{
-setInDatastore(Data_ls, ModuleSpec_ls, ModuleName, Year, Geo = NULL)
+setInDatastore(Data_ls, ModuleSpec_ls, ModuleName, Year, Geo = NULL,
+  GeoIndex_ls = NULL)
 }
 \arguments{
 \item{Data_ls}{a list containing the data to be saved. The list is organized
@@ -21,6 +22,9 @@ the module creating the data in the datastore)}
 \item{Geo}{a string identifying the name of the geographic area to get the
 data for. For example, if the module is specified to be run by Azone, then
 Geo would be the name of a particular Azone.}
+
+\item{GeoIndex_ls}{a list of geographic indices used to determine the
+positions to extract from a dataset corresponding to the specified geography.}
 }
 \value{
 A logical value which is TRUE if the data are successfully saved to

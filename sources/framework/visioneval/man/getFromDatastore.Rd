@@ -4,7 +4,7 @@
 \alias{getFromDatastore}
 \title{Retrieve data identified in 'Get' specifications from datastore}
 \usage{
-getFromDatastore(ModuleSpec_ls, RunYear, Geo = NULL)
+getFromDatastore(ModuleSpec_ls, RunYear, Geo = NULL, GeoIndex_ls = NULL)
 }
 \arguments{
 \item{ModuleSpec_ls}{a list of module specifications that is consistent with
@@ -16,6 +16,9 @@ the Year object in the global workspace.}
 \item{Geo}{a string identifying the name of the geographic area to get the
 data for. For example, if the module is specified to be run by Azone, then
 Geo would be the name of a particular Azone.}
+
+\item{GeoIndex_ls}{a list of geographic indices used to determine the
+positions to extract from a dataset corresponding to the specified geography.}
 }
 \value{
 A list containing all the data sets specified in the module's
