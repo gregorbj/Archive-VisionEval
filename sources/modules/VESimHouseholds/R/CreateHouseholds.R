@@ -299,7 +299,8 @@ CreateHouseholdsSpecifications <- list(
     item(
       NAME =
         items("HhId",
-              "Azone"),
+              "Azone",
+              "Marea"),
       TABLE = "Household",
       GROUP = "Year",
       TYPE = "character",
@@ -309,7 +310,8 @@ CreateHouseholdsSpecifications <- list(
       ISELEMENTOF = "",
       DESCRIPTION =
         items("Unique household ID",
-              "Azone ID")
+              "Azone ID",
+              "Marea ID")
     ),
     item(
       NAME = "HhSize",
@@ -662,6 +664,7 @@ CreateHouseholds <- function(L) {
   Out_ls$Year$Household <-
     list(
       Azone = character(0),
+      Marea = character(0),
       HhId = character(0),
       HhSize = integer(0),
       HhType = character(0),
@@ -697,8 +700,11 @@ CreateHouseholds <- function(L) {
       createGrpHhByAge(Prsn_AzAg[az,])
     NumHh <-
       length(RegHh_ls[[1]]) + length(GrpHh_ls[[1]])
+    Marea <- L$Year$Azone$Marea[L$Year$Azone$Azone == az]
     Out_ls$Year$Household$Azone <-
       c(Out_ls$Year$Household$Azone, rep(az, NumHh))
+    Out_ls$Year$Household$Marea <-
+      c(Out_ls$Year$Household$Marea, rep(Marea, NumHh))
     Out_ls$Year$Household$HhId <-
       c(Out_ls$Year$Household$HhId, paste(rep(az, NumHh), 1:NumHh, sep = "-"))
     Out_ls$Year$Household$HhSize <-
@@ -734,6 +740,8 @@ CreateHouseholds <- function(L) {
   #Calculate SIZE attributes for 'Household$Azone' and 'Household$HhId'
   attributes(Out_ls$Year$Household$Azone)$SIZE <-
     max(nchar(Out_ls$Year$Household$Azone))
+  attributes(Out_ls$Year$Household$Marea)$SIZE <-
+    max(nchar(Out_ls$Year$Household$Marea))
   attributes(Out_ls$Year$Household$HhId)$SIZE <-
     max(nchar(Out_ls$Year$Household$HhId))
   attributes(Out_ls$Year$Household$HhType)$SIZE <-
