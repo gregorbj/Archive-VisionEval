@@ -1,108 +1,32 @@
 Test
 Test of VESimHouseholds package modules
-2017-10-21_15:51:41
+2017-11-03_13:06:16
 
-2017-10-21 15:51:41 : Testing LocateEmployment. 
+2017-11-03 13:06:16 : Testing LocateEmployment. 
 
-2017-10-21 15:51:41 : Attempting to load datastore. 
+2017-11-03 13:06:16 : Attempting to load datastore. 
 
-2017-10-21 15:51:41 : Datastore loaded. 
+2017-11-03 13:06:16 : Datastore loaded. 
 
-2017-10-21 15:51:41 : Attempting to load and check specifications. 
+2017-11-03 13:06:16 : Attempting to load and check specifications. 
 
-2017-10-21 15:51:42 : Module specifications successfully loaded and checked. 
+2017-11-03 13:06:16 : Module specifications successfully loaded and checked. 
 
-2017-10-21 15:51:42 : Attempting to process, check and load module inputs. 
+2017-11-03 13:06:16 : Attempting to process, check and load module inputs. 
 
-2017-10-21 15:51:43 : Module inputs successfully checked and loaded into datastore. 
+2017-11-03 13:06:23 : Module inputs successfully checked and loaded into datastore. 
 
-2017-10-21 15:51:43 : Checking whether datastore contains all datasets in Get specifications. 
+2017-11-03 13:06:24 : Checking whether datastore contains all datasets in Get specifications. 
 
-2017-10-21 15:51:43 : Datastore contains all datasets identified in module Get specifications. 
+2017-11-03 13:06:24 : Datastore contains all datasets identified in module Get specifications. 
 
-Test
-Test of VESimHouseholds package modules
-2017-10-21_15:51:44
+2017-11-03 13:06:24 : Running module and checking whether outputs meet Set specifications. 
 
-2017-10-21 15:51:44 : Testing LocateEmployment. 
+2017-11-03 13:06:24 : Also saving module outputs to datastore. 
 
-2017-10-21 15:51:44 : Attempting to load datastore. 
+2017-11-03 13:06:37 : Module run successfully and outputs meet Set specifications. 
 
-2017-10-21 15:51:44 : Datastore loaded. 
+2017-11-03 13:06:37 : Module outputs saved to datastore. 
 
-2017-10-21 15:51:44 : Attempting to load and check specifications. 
-
-2017-10-21 15:51:45 : Module specifications successfully loaded and checked. 
-
-2017-10-21 15:51:45 : Attempting to process, check and load module inputs. 
-
-2017-10-21 15:51:45 : Module inputs successfully checked and loaded into datastore. 
-
-2017-10-21 15:51:45 : Checking whether datastore contains all datasets in Get specifications. 
-
-2017-10-21 15:51:46 : Datastore contains all datasets identified in module Get specifications. 
-
-2017-10-21 15:51:46 : Running module and checking whether outputs meet Set specifications. 
-
-2017-10-21 15:51:46 : Also saving module outputs to datastore. 
-
-2017-10-21 15:51:53 : Module run successfully and outputs meet Set specifications. 
-
-2017-10-21 15:51:54 : Module outputs saved to datastore. 
-
-2017-10-21 15:51:54 : Congratulations. Module LocateEmployment passed all tests. 
-
-Test
-Test of VESimHouseholds package modules
-2017-10-22_09:25:53
-
-2017-10-22 09:25:53 : Testing LocateEmployment. 
-
-2017-10-22 09:25:53 : Attempting to load datastore. 
-
-2017-10-22 09:25:53 : Datastore loaded. 
-
-2017-10-22 09:25:53 : Attempting to load and check specifications. 
-
-2017-10-22 09:25:53 : Module specifications successfully loaded and checked. 
-
-2017-10-22 09:25:53 : Attempting to process, check and load module inputs. 
-
-2017-10-22 09:26:01 : Module inputs successfully checked and loaded into datastore. 
-
-2017-10-22 09:26:01 : Checking whether datastore contains all datasets in Get specifications. 
-
-2017-10-22 09:26:01 : Datastore contains all datasets identified in module Get specifications. 
-
-Test
-Test of VESimHouseholds package modules
-2017-10-22_09:26:01
-
-2017-10-22 09:26:02 : Testing LocateEmployment. 
-
-2017-10-22 09:26:02 : Attempting to load datastore. 
-
-2017-10-22 09:26:02 : Datastore loaded. 
-
-2017-10-22 09:26:02 : Attempting to load and check specifications. 
-
-2017-10-22 09:26:03 : Module specifications successfully loaded and checked. 
-
-2017-10-22 09:26:03 : Attempting to process, check and load module inputs. 
-
-2017-10-22 09:26:03 : Module inputs successfully checked and loaded into datastore. 
-
-2017-10-22 09:26:03 : Checking whether datastore contains all datasets in Get specifications. 
-
-2017-10-22 09:26:03 : Datastore contains all datasets identified in module Get specifications. 
-
-2017-10-22 09:26:03 : Running module and checking whether outputs meet Set specifications. 
-
-2017-10-22 09:26:03 : Also saving module outputs to datastore. 
-
-2017-10-22 09:26:06 : Module run successfully and outputs meet Set specifications. 
-
-2017-10-22 09:26:07 : Module outputs saved to datastore. 
-
-2017-10-22 09:26:07 : Congratulations. Module LocateEmployment passed all tests. 
+2017-11-03 13:06:37 : Congratulations. Module LocateEmployment passed all tests. 
 
