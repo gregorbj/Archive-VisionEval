@@ -347,7 +347,7 @@ runModule <- function(ModuleName, PackageName, RunFor, RunYear) {
     for (Geo in Geo_) {
       #Get data from datastore for geographic area
       L <-
-        getFromDatastore(M$Specs_ls, RunYear, Geo, GeoIndex_ls)
+        getFromDatastore(M$Specs, RunYear, Geo, GeoIndex_ls)
       if (exists("Call")) {
         for (Alias in names(Call$Specs)) {
           L[[Alias]] <-
