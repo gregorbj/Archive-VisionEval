@@ -169,7 +169,7 @@ initializeModel <-
         if (is.list(Specs_ls$Call)) {
         #Iterate through module calls
           for (j in 1:length(Specs_ls$Call)) {
-            Call_ <- unlist(strsplit(Specs_ls$Call, "::"))
+            Call_ <- unlist(strsplit(Specs_ls$Call[[j]], "::"))
             #Check module availability
             Err <-
               checkModuleExists(
