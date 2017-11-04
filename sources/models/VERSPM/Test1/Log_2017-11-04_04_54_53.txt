@@ -1,0 +1,184 @@
+Test
+Test of VESimHouseholds package modules
+2017-11-04_04:54:53
+
+2017-11-04 04:54:53 : 2017-11-04 04:54:53 -- Initializing Model. 
+
+2017-11-04 04:54:53 : Geographical indices successfully read. 
+
+2017-11-04 04:55:05 : Geography sucessfully added to datastore. 
+
+2017-11-04 04:55:05 : Loading model parameters file. 
+
+2017-11-04 04:55:19 : Parsing model script 
+
+2017-11-04 04:55:19 : Success parsing model script 
+
+2017-11-04 04:55:23 : Simulating model run. 
+
+2017-11-04 04:55:23 : Model run simulation had one or more warnings. Datasets will be be overwritten when the model runs. Check that this is what it intended.  
+
+2017-11-04 04:55:23 : Module 'LocateEmployment' will overwrite dataset 'TotEmp' in table 'Bzone'. 
+
+2017-11-04 04:55:23 : Module 'LocateEmployment' will overwrite dataset 'RetEmp' in table 'Bzone'. 
+
+2017-11-04 04:55:23 : Module 'LocateEmployment' will overwrite dataset 'SvcEmp' in table 'Bzone'. 
+
+2017-11-04 04:55:23 : Module 'AssignDevTypes' will overwrite dataset 'Marea' in table 'Household'. 
+
+2017-11-04 04:55:23 : Module 'LocateEmployment' will overwrite dataset 'TotEmp' in table 'Bzone'. 
+
+2017-11-04 04:55:23 : Module 'LocateEmployment' will overwrite dataset 'RetEmp' in table 'Bzone'. 
+
+2017-11-04 04:55:23 : Module 'LocateEmployment' will overwrite dataset 'SvcEmp' in table 'Bzone'. 
+
+2017-11-04 04:55:23 : Module 'AssignDevTypes' will overwrite dataset 'Marea' in table 'Household'. 
+
+2017-11-04 04:55:23 : Model run simulation completed without identifying any errors. 
+
+2017-11-04 04:56:35 : 2017-11-04 04:56:35 -- Model successfully initialized. 
+
+2017-11-04 04:56:35 : 2017-11-04 04:56:35 -- Starting module 'CreateHouseholds' for year '2010'. 
+
+2017-11-04 04:56:53 : 2017-11-04 04:56:53 -- Finish module 'CreateHouseholds' for year '2010'. 
+
+2017-11-04 04:56:53 : 2017-11-04 04:56:53 -- Starting module 'PredictWorkers' for year '2010'. 
+
+2017-11-04 04:57:04 : 2017-11-04 04:57:03 -- Finish module 'PredictWorkers' for year '2010'. 
+
+2017-11-04 04:57:04 : 2017-11-04 04:57:04 -- Starting module 'AssignLifeCycle' for year '2010'. 
+
+2017-11-04 04:57:05 : 2017-11-04 04:57:05 -- Finish module 'AssignLifeCycle' for year '2010'. 
+
+2017-11-04 04:57:05 : 2017-11-04 04:57:05 -- Starting module 'PredictIncome' for year '2010'. 
+
+2017-11-04 04:57:16 : 2017-11-04 04:57:15 -- Finish module 'PredictIncome' for year '2010'. 
+
+2017-11-04 04:57:16 : 2017-11-04 04:57:16 -- Starting module 'PredictHousing' for year '2010'. 
+
+2017-11-04 04:57:30 : 2017-11-04 04:57:30 -- Finish module 'PredictHousing' for year '2010'. 
+
+2017-11-04 04:57:30 : 2017-11-04 04:57:30 -- Starting module 'LocateEmployment' for year '2010'. 
+
+2017-11-04 04:57:39 : 2017-11-04 04:57:37 -- Finish module 'LocateEmployment' for year '2010'. 
+
+2017-11-04 04:57:39 : 2017-11-04 04:57:39 -- Starting module 'AssignDevTypes' for year '2010'. 
+
+2017-11-04 04:57:44 : 2017-11-04 04:57:43 -- Finish module 'AssignDevTypes' for year '2010'. 
+
+2017-11-04 04:57:44 : 2017-11-04 04:57:44 -- Starting module 'Calculate4DMeasures' for year '2010'. 
+
+2017-11-04 04:57:51 : 2017-11-04 04:57:50 -- Finish module 'Calculate4DMeasures' for year '2010'. 
+
+2017-11-04 04:57:51 : 2017-11-04 04:57:51 -- Starting module 'CalculateUrbanMixMeasure' for year '2010'. 
+
+2017-11-04 04:57:52 : 2017-11-04 04:57:52 -- Finish module 'CalculateUrbanMixMeasure' for year '2010'. 
+
+2017-11-04 04:57:52 : 2017-11-04 04:57:52 -- Starting module 'AssignTransitService' for year '2010'. 
+
+2017-11-04 04:57:53 : 2017-11-04 04:57:53 -- Finish module 'AssignTransitService' for year '2010'. 
+
+2017-11-04 04:57:53 : 2017-11-04 04:57:53 -- Starting module 'AssignRoadMiles' for year '2010'. 
+
+2017-11-04 04:57:53 : 2017-11-04 04:57:53 -- Finish module 'AssignRoadMiles' for year '2010'. 
+
+2017-11-04 04:57:54 : 2017-11-04 04:57:54 -- Starting module 'AssignVehicleOwnership' for year '2010'. 
+
+2017-11-04 04:57:58 : 2017-11-04 04:57:58 -- Finish module 'AssignVehicleOwnership' for year '2010'. 
+
+2017-11-04 04:57:58 : 2017-11-04 04:57:58 -- Starting module 'AssignVehicleType' for year '2010'. 
+
+2017-11-04 04:58:09 : 2017-11-04 04:58:08 -- Finish module 'AssignVehicleType' for year '2010'. 
+
+2017-11-04 04:58:09 : 2017-11-04 04:58:09 -- Starting module 'CreateVehicleTable' for year '2010'. 
+
+2017-11-04 04:58:15 : 2017-11-04 04:58:13 -- Finish module 'CreateVehicleTable' for year '2010'. 
+
+2017-11-04 04:58:15 : 2017-11-04 04:58:15 -- Starting module 'AssignVehicleAge' for year '2010'. 
+
+2017-11-04 04:58:21 : 2017-11-04 04:58:20 -- Finish module 'AssignVehicleAge' for year '2010'. 
+
+2017-11-04 04:58:21 : 2017-11-04 04:58:21 -- Starting module 'AssignVehiclePowertrain' for year '2010'. 
+
+2017-11-04 04:58:29 : 2017-11-04 04:58:28 -- Finish module 'AssignVehiclePowertrain' for year '2010'. 
+
+2017-11-04 04:58:29 : 2017-11-04 04:58:29 -- Starting module 'CalculateHouseholdDVMT' for year '2010'. 
+
+2017-11-04 04:58:30 : 2017-11-04 04:58:30 -- Finish module 'CalculateHouseholdDVMT' for year '2010'. 
+
+2017-11-04 04:58:30 : 2017-11-04 04:58:30 -- Starting module 'CalculateAltModeTrips' for year '2010'. 
+
+2017-11-04 04:58:35 : 2017-11-04 04:58:34 -- Finish module 'CalculateAltModeTrips' for year '2010'. 
+
+2017-11-04 04:58:35 : 2017-11-04 04:58:35 -- Starting module 'CreateHouseholds' for year '2038'. 
+
+2017-11-04 04:58:56 : 2017-11-04 04:58:55 -- Finish module 'CreateHouseholds' for year '2038'. 
+
+2017-11-04 04:58:57 : 2017-11-04 04:58:57 -- Starting module 'PredictWorkers' for year '2038'. 
+
+2017-11-04 04:59:07 : 2017-11-04 04:59:07 -- Finish module 'PredictWorkers' for year '2038'. 
+
+2017-11-04 04:59:07 : 2017-11-04 04:59:07 -- Starting module 'AssignLifeCycle' for year '2038'. 
+
+2017-11-04 04:59:12 : 2017-11-04 04:59:10 -- Finish module 'AssignLifeCycle' for year '2038'. 
+
+2017-11-04 04:59:12 : 2017-11-04 04:59:12 -- Starting module 'PredictIncome' for year '2038'. 
+
+2017-11-04 04:59:23 : 2017-11-04 04:59:23 -- Finish module 'PredictIncome' for year '2038'. 
+
+2017-11-04 04:59:23 : 2017-11-04 04:59:23 -- Starting module 'PredictHousing' for year '2038'. 
+
+2017-11-04 04:59:42 : 2017-11-04 04:59:41 -- Finish module 'PredictHousing' for year '2038'. 
+
+2017-11-04 04:59:42 : 2017-11-04 04:59:42 -- Starting module 'LocateEmployment' for year '2038'. 
+
+2017-11-04 04:59:51 : 2017-11-04 04:59:49 -- Finish module 'LocateEmployment' for year '2038'. 
+
+2017-11-04 04:59:52 : 2017-11-04 04:59:51 -- Starting module 'AssignDevTypes' for year '2038'. 
+
+2017-11-04 04:59:56 : 2017-11-04 04:59:55 -- Finish module 'AssignDevTypes' for year '2038'. 
+
+2017-11-04 04:59:56 : 2017-11-04 04:59:56 -- Starting module 'Calculate4DMeasures' for year '2038'. 
+
+2017-11-04 05:00:06 : 2017-11-04 05:00:04 -- Finish module 'Calculate4DMeasures' for year '2038'. 
+
+2017-11-04 05:00:06 : 2017-11-04 05:00:06 -- Starting module 'CalculateUrbanMixMeasure' for year '2038'. 
+
+2017-11-04 05:00:07 : 2017-11-04 05:00:07 -- Finish module 'CalculateUrbanMixMeasure' for year '2038'. 
+
+2017-11-04 05:00:07 : 2017-11-04 05:00:07 -- Starting module 'AssignTransitService' for year '2038'. 
+
+2017-11-04 05:00:08 : 2017-11-04 05:00:08 -- Finish module 'AssignTransitService' for year '2038'. 
+
+2017-11-04 05:00:08 : 2017-11-04 05:00:08 -- Starting module 'AssignRoadMiles' for year '2038'. 
+
+2017-11-04 05:00:10 : 2017-11-04 05:00:10 -- Finish module 'AssignRoadMiles' for year '2038'. 
+
+2017-11-04 05:00:10 : 2017-11-04 05:00:10 -- Starting module 'AssignVehicleOwnership' for year '2038'. 
+
+2017-11-04 05:00:16 : 2017-11-04 05:00:15 -- Finish module 'AssignVehicleOwnership' for year '2038'. 
+
+2017-11-04 05:00:16 : 2017-11-04 05:00:16 -- Starting module 'AssignVehicleType' for year '2038'. 
+
+2017-11-04 05:00:27 : 2017-11-04 05:00:27 -- Finish module 'AssignVehicleType' for year '2038'. 
+
+2017-11-04 05:00:27 : 2017-11-04 05:00:27 -- Starting module 'CreateVehicleTable' for year '2038'. 
+
+2017-11-04 05:00:36 : 2017-11-04 05:00:34 -- Finish module 'CreateVehicleTable' for year '2038'. 
+
+2017-11-04 05:00:37 : 2017-11-04 05:00:37 -- Starting module 'AssignVehicleAge' for year '2038'. 
+
+2017-11-04 05:00:43 : 2017-11-04 05:00:42 -- Finish module 'AssignVehicleAge' for year '2038'. 
+
+2017-11-04 05:00:43 : 2017-11-04 05:00:43 -- Starting module 'AssignVehiclePowertrain' for year '2038'. 
+
+2017-11-04 05:00:54 : 2017-11-04 05:00:53 -- Finish module 'AssignVehiclePowertrain' for year '2038'. 
+
+2017-11-04 05:00:54 : 2017-11-04 05:00:54 -- Starting module 'CalculateHouseholdDVMT' for year '2038'. 
+
+2017-11-04 05:00:56 : 2017-11-04 05:00:55 -- Finish module 'CalculateHouseholdDVMT' for year '2038'. 
+
+2017-11-04 05:00:56 : 2017-11-04 05:00:56 -- Starting module 'CalculateAltModeTrips' for year '2038'. 
+
+2017-11-04 05:01:01 : 2017-11-04 05:01:00 -- Finish module 'CalculateAltModeTrips' for year '2038'. 
+
