@@ -1,7 +1,7 @@
 {
-  "Model": "VESimHouseholds Test",
+  "Model": "VERSPM Test",
   "Scenario": "Test",
-  "Description": "Test of VESimHouseholds package modules",
+  "Description": "Test of VESimHouseholds, VELandUse, VETransportSupply, VEHouseholdVehicles, and VEHouseholdTravel package modules",
   "Region": "RVMPO",
   "BaseYear": "2010",
   "Years": ["2010", "2038"],
