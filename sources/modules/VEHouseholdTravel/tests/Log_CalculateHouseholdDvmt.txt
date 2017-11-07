@@ -1,0 +1,30 @@
+Test
+Test of VESimHouseholds package modules
+2017-11-07_10:19:38
+
+2017-11-07 10:19:38 : Testing CalculateHouseholdDvmt. 
+
+2017-11-07 10:19:38 : Attempting to load datastore. 
+
+2017-11-07 10:19:39 : Datastore loaded. 
+
+2017-11-07 10:19:39 : Attempting to load and check specifications. 
+
+2017-11-07 10:19:40 : Module specifications successfully loaded and checked. 
+
+2017-11-07 10:19:40 : No inputs to process. 
+
+2017-11-07 10:19:40 : Checking whether datastore contains all datasets in Get specifications. 
+
+2017-11-07 10:19:40 : Datastore contains all datasets identified in module Get specifications. 
+
+2017-11-07 10:19:40 : Running module and checking whether outputs meet Set specifications. 
+
+2017-11-07 10:19:40 : Also saving module outputs to datastore. 
+
+2017-11-07 10:19:44 : Module run successfully and outputs meet Set specifications. 
+
+2017-11-07 10:19:44 : Module outputs saved to datastore. 
+
+2017-11-07 10:19:44 : Congratulations. Module CalculateHouseholdDvmt passed all tests. 
+
