@@ -5,6 +5,7 @@ area,SQMI
 mass,LB
 volume,GAL
 time,DAY
+energy,MJ
 people,PRSN
 vehicles,VEH
 trips,TRIP
