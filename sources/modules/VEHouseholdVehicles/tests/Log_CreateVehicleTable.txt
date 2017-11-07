@@ -1,30 +1,30 @@
 Test
 Test of VESimHouseholds package modules
-2017-11-03_13:56:31
+2017-11-04_16:05:29
 
-2017-11-03 13:56:31 : Testing CreateVehicleTable. 
+2017-11-04 16:05:29 : Testing CreateVehicleTable. 
 
-2017-11-03 13:56:31 : Attempting to load datastore. 
+2017-11-04 16:05:29 : Attempting to load datastore. 
 
-2017-11-03 13:56:32 : Datastore loaded. 
+2017-11-04 16:05:29 : Datastore loaded. 
 
-2017-11-03 13:56:32 : Attempting to load and check specifications. 
+2017-11-04 16:05:29 : Attempting to load and check specifications. 
 
-2017-11-03 13:56:32 : Module specifications successfully loaded and checked. 
+2017-11-04 16:05:29 : Module specifications successfully loaded and checked. 
 
-2017-11-03 13:56:32 : No inputs to process. 
+2017-11-04 16:05:29 : No inputs to process. 
 
-2017-11-03 13:56:32 : Checking whether datastore contains all datasets in Get specifications. 
+2017-11-04 16:05:29 : Checking whether datastore contains all datasets in Get specifications. 
 
-2017-11-03 13:56:32 : Datastore contains all datasets identified in module Get specifications. 
+2017-11-04 16:05:29 : Datastore contains all datasets identified in module Get specifications. 
 
-2017-11-03 13:56:32 : Running module and checking whether outputs meet Set specifications. 
+2017-11-04 16:05:29 : Running module and checking whether outputs meet Set specifications. 
 
-2017-11-03 13:56:32 : Also saving module outputs to datastore. 
+2017-11-04 16:05:29 : Also saving module outputs to datastore. 
 
-2017-11-03 13:56:46 : Module run successfully and outputs meet Set specifications. 
+2017-11-04 16:05:43 : Module run successfully and outputs meet Set specifications. 
 
-2017-11-03 13:56:46 : Module outputs saved to datastore. 
+2017-11-04 16:05:43 : Module outputs saved to datastore. 
 
-2017-11-03 13:56:46 : Congratulations. Module CreateVehicleTable passed all tests. 
+2017-11-04 16:05:43 : Congratulations. Module CreateVehicleTable passed all tests. 
 

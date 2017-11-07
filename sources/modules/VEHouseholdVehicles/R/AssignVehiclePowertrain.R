@@ -403,7 +403,7 @@ AssignVehiclePowertrainSpecifications <- list(
   ),
   #Specify call status of module
   Call = items(
-    CalcDvmt = "VETravelDemand::CalculateHouseholdDVMT"
+    CalcDvmt = "VETravelDemand::CalculateHouseholdDvmt"
   )
 )
 

@@ -1,32 +1,32 @@
 Test
 Test of VESimHouseholds package modules
-2017-11-03_13:57:00
+2017-11-04_16:09:07
 
-2017-11-03 13:57:00 : Testing AssignVehiclePowertrain. 
+2017-11-04 16:09:07 : Testing AssignVehiclePowertrain. 
 
-2017-11-03 13:57:00 : Attempting to load datastore. 
+2017-11-04 16:09:07 : Attempting to load datastore. 
 
-2017-11-03 13:57:00 : Datastore loaded. 
+2017-11-04 16:09:08 : Datastore loaded. 
 
-2017-11-03 13:57:00 : Attempting to load and check specifications. 
+2017-11-04 16:09:08 : Attempting to load and check specifications. 
 
-2017-11-03 13:57:00 : Module specifications successfully loaded and checked. 
+2017-11-04 16:09:08 : Module specifications successfully loaded and checked. 
 
-2017-11-03 13:57:00 : Attempting to process, check and load module inputs. 
+2017-11-04 16:09:08 : Attempting to process, check and load module inputs. 
 
-2017-11-03 13:57:31 : Module inputs successfully checked and loaded into datastore. 
+2017-11-04 16:09:39 : Module inputs successfully checked and loaded into datastore. 
 
-2017-11-03 13:57:31 : Checking whether datastore contains all datasets in Get specifications. 
+2017-11-04 16:09:40 : Checking whether datastore contains all datasets in Get specifications. 
 
-2017-11-03 13:57:31 : Datastore contains all datasets identified in module Get specifications. 
+2017-11-04 16:09:40 : Datastore contains all datasets identified in module Get specifications. 
 
-2017-11-03 13:57:31 : Running module and checking whether outputs meet Set specifications. 
+2017-11-04 16:09:40 : Running module and checking whether outputs meet Set specifications. 
 
-2017-11-03 13:57:31 : Also saving module outputs to datastore. 
+2017-11-04 16:09:40 : Also saving module outputs to datastore. 
 
-2017-11-03 13:57:48 : Module run successfully and outputs meet Set specifications. 
+2017-11-04 16:09:57 : Module run successfully and outputs meet Set specifications. 
 
-2017-11-03 13:57:48 : Module outputs saved to datastore. 
+2017-11-04 16:09:57 : Module outputs saved to datastore. 
 
-2017-11-03 13:57:48 : Congratulations. Module AssignVehiclePowertrain passed all tests. 
+2017-11-04 16:09:57 : Congratulations. Module AssignVehiclePowertrain passed all tests. 
 
