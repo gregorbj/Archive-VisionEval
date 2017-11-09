@@ -204,6 +204,7 @@ initializeModel <-
                "package not installed, or module not present in package, ",
                "or errors in module specifications. ",
                "Check the log for details.")
+      writeLog(Errors_)
       stop(Msg)
     }
 
