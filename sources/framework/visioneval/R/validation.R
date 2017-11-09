@@ -1677,8 +1677,8 @@ processModuleInputs <-
       if (is.null(Data_ls[[Group]][[Table]])) {
         Data_ls[[Group]][[Table]] <- list()
       }
-      #If Group is Year, check that Geo and Year fields are correct
-      if (Group  == "Year") {
+      #If Group is Year and Table is not Region, check Geo and Year fields
+      if (Group  == "Year" & Table != "Region") {
         #Check that there are 'Year' and 'Geo' fields
         HasYearField <- "Year" %in% names(Data_df)
         HasGeoField <- "Geo" %in% names(Data_df)
@@ -1773,6 +1773,54 @@ processModuleInputs <-
           next()
         } else {
           Data_ls[[Group]][[Table]]$Geo <- Data_df$Geo
+        }
+      }
+      #If Group is Year and Table is Region, check years are complete
+      if (Group  == "Year" & Table == "Region") {
+        #Check that there is a 'Year' field
+        HasYearField <- "Year" %in% names(Data_df)
+        if (!HasYearField) {
+          Msg <-
+            paste0(
+              "Input file error for module '", ModuleName,
+              "' for input file '", File, "'. ",
+              "'Table' specification is ", Table,
+              " but the input file is missing required 'Year' field."
+            )
+          FileErr_ <- c(FileErr_, Msg)
+          next()
+        }
+        #Check that the 'Year' field is complete and not duplicated
+        YearDuplicated <- any(duplicated(Data_df$Year))
+        YearIncomplete <- any(!(G$Years %in% Data_df$Year))
+        if (YearDuplicated | YearIncomplete) {
+          if (YearDuplicated) {
+            DupYear_ <- unique(Data_df$Year[YearDuplicated])
+            Msg <-
+              paste0(
+                "Input file error for module '", ModuleName,
+                "' for input file '", File, "'. ",
+                "Has duplicate inputs for the following years: ",
+                paste(DupYear_)
+              )
+            FileErr_ <- c(FileErr_, Msg)
+            rm(DupYear_)
+          }
+          if (YearIncomplete) {
+            IncompleteYear_ <- G$Years[YearIncomplete]
+            Msg <-
+              paste0(
+                "Input file error for module '", ModuleName,
+                "' for input file '", File, "'.",
+                "Is missing inputs for the following years: ",
+                paste(IncompleteYear_)
+              )
+            FileErr_ <- c(FileErr_, Msg)
+            rm(IncompleteYear_)
+          }
+          next()
+        } else {
+          Data_ls[[Group]][[Table]]$Year <- Data_df$Year
         }
       }
       #Check and load data into list
