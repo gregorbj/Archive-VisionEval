@@ -274,7 +274,6 @@ AssignDevTypes <- function(L) {
   #Identify Marea
   Marea_ <-
     L$Year$Bzone$Marea[(match(L$Year$Household$Bzone, L$Year$Bzone$Bzone))]
-  Marea_[DevType_ == "Rural"] <- "None"
 
   #Calculate urban and rural population by Bzone
   #---------------------------------------------
