@@ -1,5 +1,5 @@
 #========================
-#CalculateHouseholdDVMT.R
+#CalculateHouseholdDvmt.R
 #========================
 #This module models household average daily vehicle miles traveled as a function
 #of household characteristics, vehicle ownership, and attributes of the
