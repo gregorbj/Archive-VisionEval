@@ -1288,7 +1288,11 @@ inputsToDatastore <-
         Units_ls <- lapply(Data_df, function(x) unname(attributes(x)$UNITS))
         for (Year in unique(as.character(Data_df$Year))) {
           YrData_df <- Data_df[Data_df$Year == Year,]
-          SortData_df <- sortGeoTable(YrData_df, Table, Year)
+          if (Table != "Region") {
+            SortData_df <- sortGeoTable(YrData_df, Table, Year)
+          } else {
+            SortData_df <- YrData_df
+          }
           FieldsToSave_ <-
             names(SortData_df)[!(names(SortData_df) %in% c("Year", "Geo"))]
           for (Name in FieldsToSave_) {
