@@ -1,32 +1,32 @@
 Test
 Test of VESimHouseholds package modules
-2017-11-03_13:45:36
+2017-11-08_07:25:50
 
-2017-11-03 13:45:36 : Testing AssignTransitService. 
+2017-11-08 07:25:50 : Testing AssignTransitService. 
 
-2017-11-03 13:45:36 : Attempting to load datastore. 
+2017-11-08 07:25:50 : Attempting to load datastore. 
 
-2017-11-03 13:45:36 : Datastore loaded. 
+2017-11-08 07:25:50 : Datastore loaded. 
 
-2017-11-03 13:45:36 : Attempting to load and check specifications. 
+2017-11-08 07:25:50 : Attempting to load and check specifications. 
 
-2017-11-03 13:45:37 : Module specifications successfully loaded and checked. 
+2017-11-08 07:25:50 : Module specifications successfully loaded and checked. 
 
-2017-11-03 13:45:37 : Attempting to process, check and load module inputs. 
+2017-11-08 07:25:50 : Attempting to process, check and load module inputs. 
 
-2017-11-03 13:45:50 : Module inputs successfully checked and loaded into datastore. 
+2017-11-08 07:26:13 : Module inputs successfully checked and loaded into datastore. 
 
-2017-11-03 13:45:50 : Checking whether datastore contains all datasets in Get specifications. 
+2017-11-08 07:26:13 : Checking whether datastore contains all datasets in Get specifications. 
 
-2017-11-03 13:45:52 : Datastore contains all datasets identified in module Get specifications. 
+2017-11-08 07:26:13 : Datastore contains all datasets identified in module Get specifications. 
 
-2017-11-03 13:45:52 : Running module and checking whether outputs meet Set specifications. 
+2017-11-08 07:26:13 : Running module and checking whether outputs meet Set specifications. 
 
-2017-11-03 13:45:52 : Also saving module outputs to datastore. 
+2017-11-08 07:26:13 : Also saving module outputs to datastore. 
 
-2017-11-03 13:45:53 : Module run successfully and outputs meet Set specifications. 
+2017-11-08 07:26:15 : Module run successfully and outputs meet Set specifications. 
 
-2017-11-03 13:45:53 : Module outputs saved to datastore. 
+2017-11-08 07:26:15 : Module outputs saved to datastore. 
 
-2017-11-03 13:45:53 : Congratulations. Module AssignTransitService passed all tests. 
+2017-11-08 07:26:15 : Congratulations. Module AssignTransitService passed all tests. 
 
