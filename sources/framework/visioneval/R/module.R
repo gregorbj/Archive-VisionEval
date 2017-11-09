@@ -306,6 +306,9 @@ checkModuleOutputs <-
 #'   dataset that will be provided by the framework. The default value for this
 #'   parameter is TRUE. In that case, the module will be run and the results
 #'   will checked for consistency with the Set specifications.
+#' @param RunFor A string identifying what years the module is to be tested for.
+#'   The value must be the same as the value that is used when the module is run
+#'   in a module. Allowed values are 'AllYears', 'BaseYear', and 'NotBaseYear'.
 #' @return If DoRun is FALSE, the return value is a list containing the module
 #'   specifications. If DoRun is TRUE, there is no return value. The function
 #'   writes out messages to the console and to the log as the testing proceeds.
@@ -322,7 +325,8 @@ testModule <-
            ModelParamFile = "model_parameters.json",
            LoadDatastore = FALSE,
            SaveDatastore = TRUE,
-           DoRun = TRUE) {
+           DoRun = TRUE,
+           RunFor = "AllYears") {
 
     #Set working directory to tests and return to main module directory on exit
     #--------------------------------------------------------------------------
@@ -492,7 +496,10 @@ testModule <-
         }
       }
       #Run module for each year
-      for (Year in getYears()) {
+      if (RunFor == "AllYears") Years <- getYears()
+      if (RunFor == "BaseYear") Years <- G$BaseYear
+      if (RunFor == "NotBaseYear") Years <- getYears()[!getYears() %in% G$BaseYear]
+      for (Year in Years) {
         ResultsCheck_ <- character(0)
         #If RunBy is 'Region', this code is run
         if (Specs_ls$RunBy == "Region") {
