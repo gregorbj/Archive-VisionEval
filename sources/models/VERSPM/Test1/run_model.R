@@ -67,5 +67,10 @@ for(Year in getYears()) {
                 RunFor = "AllYears", RunYear = Year)
   runModule("DivertSovTravel", "VEHouseholdTravel", 
                 RunFor = "AllYears", RunYear = Year)
+  runModule("CalculateBaseCommercialDvmt", "VECommercialTravel", 
+                RunFor = "BaseYear", RunYear = Year)
+  runModule("CalculateFutureCommercialDvmt", "VECommercialTravel", 
+                RunFor = "NotBaseYear", RunYear = Year)
+  runModule("SplitLDComDvmt", "VECommercialTravel", 
+                RunFor = "AllYears", RunYear = Year)
 }
-
