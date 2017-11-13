@@ -1,11 +1,12 @@
 {
-  "Model": "RPAT",
-  "Scenario": "RPAT Pilot",
-  "Description": "Pilot RPAT module in VisionEval",
-  "Region": "Multnomah County Oregon",
-  "BaseYear": "2005",
+  "Model": ["RPAT"],
+  "Scenario": ["RPAT Pilot"],
+  "Description": ["Pilot RPAT module in VisionEval"],
+  "Region": ["Multnomah County Oregon"],
+  "BaseYear": ["2005"],
   "Years": ["2005", "2010"],
-  "DatastoreName": "datastore.h5",
-  "Seed": 1,
-  "RunTypes": ["E","ELESNP"]
+  "DatastoreName": ["datastore.h5"],
+  "DatastoreType": ["H5"],
+  "Seed": [1],
+  "RunTypes": ["E", "ELESNP"]
 }
