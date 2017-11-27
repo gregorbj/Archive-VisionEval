@@ -4,7 +4,7 @@
 \name{CreateBaseSyntheticFirmsSpecifications}
 \alias{CreateBaseSyntheticFirmsSpecifications}
 \title{Specifications list for CreateBaseSyntheticFirms module}
-\format{A list containing 4 components:
+\format{A list containing 6 components:
 \describe{
  \item{RunBy}{the level of geography that the module is run at}
  \item{NewInpTable}{new table to be created for datasets specified in the
@@ -26,4 +26,3 @@ CreateBaseSyntheticFirmsSpecifications
 A list containing specifications for the CreateBaseSyntheticFirms module.
 }
 \keyword{datasets}
-

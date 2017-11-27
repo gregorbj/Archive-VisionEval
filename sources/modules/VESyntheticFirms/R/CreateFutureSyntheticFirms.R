@@ -216,6 +216,7 @@ devtools::use_data(CreateFutureSyntheticFirmsSpecifications, overwrite = TRUE)
 #'
 #' @param L A list
 #' @return A list
+#' @import visioneval stats
 #' @export
 CreateFutureSyntheticFirms <- function(L) {
   #Load the employment growth factor

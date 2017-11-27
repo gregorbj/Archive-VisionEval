@@ -15,4 +15,3 @@ A list
 \description{
 \code{CreateFutureSyntheticFirms} creates a set of simulated businesses
 }
-

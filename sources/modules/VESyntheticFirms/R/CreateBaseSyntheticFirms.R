@@ -39,7 +39,8 @@ library(visioneval)
 #  PROHIBIT: data conditions that are prohibited or "" if not applicable;
 #  ISELEMENTOF: allowed categorical data values or "" if not applicable;
 #  UNLIKELY: data conditions that are unlikely or "" if not applicable;
-#  TOTAL: the total for all values (e.g. 1) or "" if not applicable.
+#  TOTAL: the total for all values (e.g. 1) or "" if not applicable;
+#  DESCRIPTION: the description of each data item.
 
 #Get: Identifies data to be loaded from the datastore. The
 #following need to be specified for every data item:
@@ -286,7 +287,7 @@ CreateBaseSyntheticFirmsSpecifications <- list(
 #'
 #' A list containing specifications for the CreateBaseSyntheticFirms module.
 #'
-#' @format A list containing 4 components:
+#' @format A list containing 6 components:
 #' \describe{
 #'  \item{RunBy}{the level of geography that the module is run at}
 #'  \item{NewInpTable}{new table to be created for datasets specified in the
@@ -321,16 +322,16 @@ devtools::use_data(CreateBaseSyntheticFirmsSpecifications, overwrite = TRUE)
 #'  to a long table with rows for each combination of industry and employee size, expand
 #'  the list out so there is a row per business
 #'
-#' @param L A list
+#' @param Biz_IsEs A list of business by industry and employee size
 #' @return A list
 #' @import reshape
 #' @export
-createBiz = function(Biz.IsEs) {
-  BizList.IsEs <- melt(Biz.IsEs[, -c(1, 3:4, 13)], id.vars = c("naics"))
-  names(BizList.IsEs)[which(names(BizList.IsEs) == "variable")] <- "esizecat"
-  names(BizList.IsEs)[which(names(BizList.IsEs) == "value")] <- "numbus"
-  BizList.IsEs <- BizList.IsEs[rep(seq_len(nrow(BizList.IsEs)), BizList.IsEs$numbus), ]
-  list(BizList.IsEs[sample(1:nrow(BizList.IsEs), nrow(BizList.IsEs), replace = FALSE), ])
+createBiz <- function(Biz_IsEs) {
+  Biz_IsEs <- melt(Biz_IsEs[, -c(1, 3:4, 13)], id.vars = c("naics"))
+  names(BizList_IsEs)[which(names(BizList_IsEs) == "variable")] <- "esizecat"
+  names(BizList_IsEs)[which(names(BizList_IsEs) == "value")] <- "numbus"
+  BizList_IsEs <- BizList_IsEs[rep(seq_len(nrow(BizList_IsEs)), BizList_IsEs$numbus), ]
+  list(BizList_IsEs[sample(1:nrow(BizList_IsEs), nrow(BizList_IsEs), replace = FALSE), ])
 }
 
 #This module has a main function, CreateBaseSyntheticFirms. This function creates SynBiz.IsEs.
@@ -343,6 +344,7 @@ createBiz = function(Biz.IsEs) {
 #'
 #' @param L A list
 #' @return A list
+#' @import visioneval stats
 #' @export
 CreateBaseSyntheticFirms <- function(L) {
   #Convert employment data into data frame
