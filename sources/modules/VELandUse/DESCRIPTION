@@ -21,6 +21,7 @@ Imports:
     devtools,
     geosphere,
     fields,
+    stats,
     VE2001NHTS,
     VESimHouseholds
 Suggests:

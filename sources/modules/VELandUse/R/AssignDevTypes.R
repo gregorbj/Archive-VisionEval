@@ -241,7 +241,7 @@ devtools::use_data(AssignDevTypesSpecifications, overwrite = TRUE)
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
-#' @import visioneval
+#' @import visioneval stats
 #' @export
 AssignDevTypes <- function(L) {
   #Set up

@@ -10,3 +10,4 @@ vehicle_distance,VMT
 passenger_distance,PMT
 payload_distance,TONMI
 people,PRSN
+households,HH

@@ -83,8 +83,8 @@ CalculateFuturePlaceTypesSpecifications <- list(
               "Emp"),
       TABLE = "Bzone",
       GROUP = "Year",
-      TYPE = "people",
-      UNITS = "PRSN",
+      TYPE = "double",
+      UNITS = "NA",
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = ""

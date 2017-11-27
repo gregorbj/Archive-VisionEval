@@ -55,7 +55,7 @@ library(visioneval)
 #' PrepFun: a function that prepares inputs to be applied in the binomial model,
 #' OutFun: a function that transforms the result of applying the binomial model.
 #' Summary: the summary of the binomial model estimation results.
-#' @import visioneval
+#' @import visioneval stats
 #Define function to estimate the income model
 estimateHousingModel <- function(Data_df, StartTerms_) {
   #Define function to prepare inputs for estimating model
@@ -608,7 +608,7 @@ ipf <-
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
-#' @import visioneval
+#' @import visioneval stats
 #' @export
 PredictHousing <- function(L) {
   #Set up

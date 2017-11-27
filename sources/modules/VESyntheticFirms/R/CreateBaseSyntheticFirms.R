@@ -327,7 +327,7 @@ devtools::use_data(CreateBaseSyntheticFirmsSpecifications, overwrite = TRUE)
 #' @import reshape
 #' @export
 createBiz <- function(Biz_IsEs) {
-  Biz_IsEs <- melt(Biz_IsEs[, -c(1, 3:4, 13)], id.vars = c("naics"))
+  BizList_IsEs <- melt(Biz_IsEs[, -c(1, 3:4, 13)], id.vars = c("naics"))
   names(BizList_IsEs)[which(names(BizList_IsEs) == "variable")] <- "esizecat"
   names(BizList_IsEs)[which(names(BizList_IsEs) == "value")] <- "numbus"
   BizList_IsEs <- BizList_IsEs[rep(seq_len(nrow(BizList_IsEs)), BizList_IsEs$numbus), ]

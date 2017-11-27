@@ -53,7 +53,7 @@ library(visioneval)
 #' PrepFun: a function that prepares inputs to be applied in the binomial model,
 #' OutFun: a function that transforms the result of applying the binomial model.
 #' Summary: the summary of the binomial model estimation results.
-#' @import visioneval
+#' @import visioneval stats
 estimateUrbanMixModel <- function(EstData_df, StartTerms_) {
   #Define function to prepare inputs for estimating model
   prepIndepVar <-
