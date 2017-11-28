@@ -54,6 +54,7 @@ DATASTORE_TABLE_CLOSE_BUTTON <- "DATASTORE_TABLE_CLOSE_BUTTON"
 DATASTORE_TABLE_EXPORT_BUTTON <- "DATASTORE_TABLE_EXPORT_BUTTON"
 DATASTORE_TABLE_IDENTIFIER <- "DATASTORE_TABLE_IDENTIFIER"
 DATASTORE_TABLE_VIEW_BUTTON_PREFIX <- "datastore_view"
+DATASTORE_TYPE <- "DATASTORE_TYPE"
 DEBUG_CONSOLE_OUTPUT <- "DEBUG_CONSOLE_OUTPUT"
 EDIT_INPUT_FILE_ID <- "EDIT_INPUT_FILE_ID"
 EDIT_INPUT_FILE_LAST_CLICK <- "EDIT_INPUT_FILE_LAST_CLICK"
@@ -101,7 +102,7 @@ myFileTypes_ls <- list(
 )
 
 # Get the volumes of local drive
-volumeRoots = getVolumes("")
+volumeRoots = c("VERPAT"=file.path(getwd(),"..","models","VERPAT"))
 
 #============================================
 #SECTION 3: DEFINE THE UI FOR APPLICATION
@@ -472,13 +473,33 @@ server <- function(input, output, session) {
     if (!file.exists(filePath)) {
       returnValue_dt <- NULL
       } else {
-        table_dt <- data.table::data.table(rhdf5::h5ls(filePath))
-        table_dt <- table_dt[otype == "H5I_GROUP", .(Group = group, Name = name)]
-        returnValue_dt <- table_dt
+        G <- getModelState()
+        if(G$DatastoreType == "H5"){
+          table_dt <- data.table::data.table(rhdf5::h5ls(filePath))
+          table_dt <- table_dt[otype == "H5I_GROUP", .(Group = group, Name = name)]
+          returnValue_dt <- table_dt[!Name %in% getYears()]
+        } else {
+          table_dt <- data.table::data.table(G$Datastore)
+          if(nrow(table_dt) > 0){
+            table_attributes_ls <- table_dt[,attributes]
+            table_groups_present <- sapply(table_attributes_ls, function(x) "LENGTH" %in% names(x))
+            table_dt <- table_dt[table_groups_present,.(Group = group,Name = name)]
+            returnValue_dt <- table_dt[!Name %in% getYears()]
+          } else {
+            returnValue_dt <- NULL
+          }
+        }
       }
       return(returnValue_dt)
     }
   ) #end DATASTORE
+
+  registerReactiveFileHandler(DATASTORE_TYPE, readFunc = function() {
+    G <- getModelState()
+    return(G$DatastoreType)
+  }
+  ) #end DATASTORE_TYPE
+
 
   registerReactiveFileHandler(CAPTURED_SOURCE, readFunc = function(filePath) {
     debugConsole(paste0("registerReactiveFileHandler for CAPTURED_SOURCE called to load ",
@@ -538,11 +559,13 @@ server <- function(input, output, session) {
     visioneval::initLog()
     visioneval::writeLog("VE_GUI called visioneval::initModelStateFile() and visioneval::initLog()")
 
-      #Fome now on we will get the current ModelState by reading the object stored on disk
+      #From now on we will get the current ModelState by reading the object stored on disk
     reactiveFilePaths_rv[[MODEL_STATE_FILE]] <<- file.path(scriptInfo_ls$fileDirectory, "ModelState.Rda")
 
     reactiveFilePaths_rv[[VE_LOG]] <<- file.path(scriptInfo_ls$fileDirectory, getModelState()$LogFile)
     reactiveFilePaths_rv[[DATASTORE]] <<- file.path(scriptInfo_ls$fileDirectory, getModelState()$DatastoreName)
+
+    reactiveFilePaths_rv[[DATASTORE_TYPE]] <<- getModelState()$DatastoreType
 
     defsDirectory <- file.path(scriptInfo_ls$fileDirectory, "defs")
 
@@ -946,16 +969,37 @@ server <- function(input, output, session) {
     selection <- input$DATASTORE_TABLE_row_last_clicked
     print(paste0("input$DATASTORE_TABLE_row_last_clicked: ", selection))
     if (!is.null(selection)) {
-      row <- as.integer(selection)
-      hdf5PathTable <- reactiveFileReaders_ls[[DATASTORE]]()
-      hdf5Row <- hdf5PathTable[row]
-      otherReactiveValues_rv[[DATASTORE_TABLE_IDENTIFIER]] <- paste0(hdf5Row$Group, "/",
-                                                                     hdf5Row$Name)
+      if(reactiveFilePaths_rv[[DATASTORE_TYPE]] == "H5"){
+        row <- as.integer(selection)
+        hdf5PathTable <- reactiveFileReaders_ls[[DATASTORE]]()
+        hdf5Row <- hdf5PathTable[row]
+        otherReactiveValues_rv[[DATASTORE_TABLE_IDENTIFIER]] <- paste0(hdf5Row$Group, "/",
+                                                                       hdf5Row$Name)
 
-      fileContent <- rhdf5::h5read(reactiveFilePaths_rv[[DATASTORE]],
-                                   otherReactiveValues_rv[[DATASTORE_TABLE_IDENTIFIER]])
-      hdf5DataTable <- data.table::as.data.table(fileContent)
-      otherReactiveValues_rv[[VIEW_DATASTORE_TABLE]] <- hdf5DataTable
+        fileContent <- rhdf5::h5read(reactiveFilePaths_rv[[DATASTORE]],
+                                     otherReactiveValues_rv[[DATASTORE_TABLE_IDENTIFIER]])
+        hdf5DataTable <- data.table::as.data.table(fileContent)
+        otherReactiveValues_rv[[VIEW_DATASTORE_TABLE]] <- hdf5DataTable
+      } else {
+        row <- as.integer(selection)
+        filepaths <- data.table::data.table(getModelState()$Datastore)
+        rdPathTable <- reactiveFileReaders_ls[[DATASTORE]]()
+        rdRow <- rdPathTable[row]
+        otherReactiveValues_rv[[DATASTORE_TABLE_IDENTIFIER]] <- paste0(rdRow$Group, "/",
+                                                                       rdRow$Name)
+
+        filepaths <- filepaths[group %in% otherReactiveValues_rv[[DATASTORE_TABLE_IDENTIFIER]]]
+        if(nrow(filepaths) > 0){
+          table_dt <- filepaths[,.(list(readFromTableRD(Name = name, Table = basename(group), Group = basename(dirname(group))))),by=.(name)]
+          table_dt_names <- table_dt$name
+          table_dt <- data.table::as.data.table(table_dt$V1)
+          setnames(table_dt, old = colnames(table_dt), new = table_dt_names)
+          otherReactiveValues_rv[[VIEW_DATASTORE_TABLE]] <- table_dt
+        } else {
+          otherReactiveValues_rv[[DATASTORE_TABLE_IDENTIFIER]] <- ""
+          otherReactiveValues_rv[[VIEW_DATASTORE_TABLE]] <- FALSE
+        }
+      }
     } else {
       otherReactiveValues_rv[[DATASTORE_TABLE_IDENTIFIER]] <- ""
       otherReactiveValues_rv[[VIEW_DATASTORE_TABLE]] <- FALSE
