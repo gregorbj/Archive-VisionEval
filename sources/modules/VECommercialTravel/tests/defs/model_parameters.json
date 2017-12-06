@@ -1,0 +1,27 @@
+[
+  {"NAME": "TranAdjFactor",
+   "VALUE": "1.15",
+   "TYPE": "double",
+   "UNITS": "none"
+  },
+  {"NAME": "BaseCostPerMile",
+   "VALUE": "0.04",
+   "TYPE": "double",
+   "UNITS": "base cost year dollars per mile"
+  },
+  {"NAME": "BudgetProp",
+   "VALUE": "0.1",
+   "TYPE": "double",
+   "UNITS": "none"
+  },
+  {"NAME": "LDCommToHhDvmtRatio",
+   "VALUE": "0.05",
+   "TYPE": "double",
+   "UNITS": "none"
+  },
+  {"NAME": "ValueOfTime",
+   "VALUE": "16",
+   "TYPE": "double",
+   "UNITS": "base cost year dollars per hour"
+  }
+]

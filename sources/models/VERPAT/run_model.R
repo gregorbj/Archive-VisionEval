@@ -22,9 +22,44 @@ initializeModel(
 
 #Run all demo module for all years
 #---------------------------------
-BaseYear <- getModelState()$BaseYear
 for(Year in getYears()) {
   runModule(
+    ModuleName = "CreateHouseholds",
+    PackageName = "VESimHouseholds",
+    RunFor = "BaseYear",
+    RunYear = Year
+  )
+  runModule(
+    ModuleName = "PredictWorkers",
+    PackageName = "VESimHouseholds",
+    RunFor = "BaseYear",
+    RunYear = Year
+  )
+  runModule(
+    ModuleName = "PredictIncome",
+    PackageName = "VESimHouseholds",
+    RunFor = "BaseYear",
+    RunYear = Year
+  )
+  runModule(
+    ModuleName = "CreateHouseholds",
+    PackageName = "VESimHouseholds",
+    RunFor = "NotBaseYear",
+    RunYear = Year
+  )
+  runModule(
+    ModuleName = "PredictWorkers",
+    PackageName = "VESimHouseholds",
+    RunFor = "NotBaseYear",
+    RunYear = Year
+  )
+  runModule(
+    ModuleName = "PredictIncome",
+    PackageName = "VESimHouseholds",
+    RunFor = "NotBaseYear",
+    RunYear = Year
+  )
+   runModule(
     ModuleName = "CreateBaseSyntheticFirms",
     PackageName = "VESyntheticFirms",
     RunFor = "BaseYear",
@@ -32,6 +67,16 @@ for(Year in getYears()) {
   runModule(
     ModuleName = "CreateFutureSyntheticFirms",
     PackageName = "VESyntheticFirms",
+    RunFor = "NotBaseYear",
+    RunYear = Year)
+  runModule(
+    ModuleName = "CalculateBasePlaceTypes",
+    PackageName = "VELandUse",
+    RunFor = "BaseYear",
+    RunYear = Year)
+  runModule(
+    ModuleName = "CalculateFuturePlaceTypes",
+    PackageName = "VELandUse",
     RunFor = "NotBaseYear",
     RunYear = Year)
 }

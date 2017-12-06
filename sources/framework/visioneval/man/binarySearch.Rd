@@ -4,8 +4,8 @@
 \alias{binarySearch}
 \title{Binary search function to find a parameter which achieves a target value.}
 \usage{
-binarySearch(Function, SearchRange_, ..., Target = 0, MaxIter = 100,
-  Tolerance = 1e-04)
+binarySearch(Function, SearchRange_, ..., Target = 0, DoWtAve = TRUE,
+  MaxIter = 100, Tolerance = 1e-04)
 }
 \arguments{
 \item{Function}{a function which returns a value which is compared to the
@@ -21,6 +21,10 @@ out.}
 
 \item{Target}{a numeric value that is compared with the return value of the
 'Function'.}
+
+\item{DoWtAve}{a logical indicating whether successive weighted averaging is
+to be done. This is useful for getting stable results for stochastic
+calculations.}
 
 \item{MaxIter}{an integer specifying the maximum number of iterations
 to all the search to attempt.}

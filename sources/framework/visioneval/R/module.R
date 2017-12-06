@@ -306,6 +306,9 @@ checkModuleOutputs <-
 #'   dataset that will be provided by the framework. The default value for this
 #'   parameter is TRUE. In that case, the module will be run and the results
 #'   will checked for consistency with the Set specifications.
+#' @param RunFor A string identifying what years the module is to be tested for.
+#'   The value must be the same as the value that is used when the module is run
+#'   in a module. Allowed values are 'AllYears', 'BaseYear', and 'NotBaseYear'.
 #' @return If DoRun is FALSE, the return value is a list containing the module
 #'   specifications. If DoRun is TRUE, there is no return value. The function
 #'   writes out messages to the console and to the log as the testing proceeds.
@@ -322,7 +325,8 @@ testModule <-
            ModelParamFile = "model_parameters.json",
            LoadDatastore = FALSE,
            SaveDatastore = TRUE,
-           DoRun = TRUE) {
+           DoRun = TRUE,
+           RunFor = "AllYears") {
 
     #Set working directory to tests and return to main module directory on exit
     #--------------------------------------------------------------------------
@@ -336,6 +340,10 @@ testModule <-
     initLog(ModuleName)
     writeLog(Msg, Print = TRUE)
     rm(Msg)
+
+    #Assign the correct datastore interaction functions
+    #--------------------------------------------------
+    assignDatastoreFunctions(readModelState()$DatastoreType)
 
     #Load datastore if specified or initialize new datastore
     #-------------------------------------------------------
@@ -457,8 +465,12 @@ testModule <-
     #Run the module and check that results meet specifications
     #---------------------------------------------------------
     #The module is run only if the DoRun argument is TRUE. Otherwise the
-    #datastore is initialized, specifications are checked, and inputs are
-    #loaded only.
+    #datastore is initialized, specifications are checked, and a list is
+    #returned which contains the specifications list, the data list from the
+    #datastore meeting specifications, and a functions list containing any
+    #called module functions.
+
+    #Run the module if DoRun is TRUE
     if (DoRun) {
       writeLog(
         "Running module and checking whether outputs meet Set specifications.",
@@ -467,14 +479,44 @@ testModule <-
       if (SaveDatastore) {
         writeLog("Also saving module outputs to datastore.", Print = TRUE)
       }
+      #Load the module function
       Func <- get(ModuleName)
-      for (Year in getYears()) {
+      #Load any modules identified by 'Call' spec if any
+      if (is.list(Specs_ls$Call)) {
+        Call <- list(
+          Func = list(),
+          Specs = list()
+        )
+        for (Alias in names(Specs_ls$Call)) {
+          Function <- Specs_ls$Call[[Alias]]
+          Specs <- paste0(Specs_ls$Call[[Alias]], "Specifications")
+          Call$Func[[Alias]] <- eval(parse(text = Function))
+          Call$Specs[[Alias]] <- processModuleSpecs(eval(parse(text = Specs)))
+          Call$Specs[[Alias]]$RunBy <- Specs_ls$RunBy
+        }
+      }
+      #Run module for each year
+      if (RunFor == "AllYears") Years <- getYears()
+      if (RunFor == "BaseYear") Years <- G$BaseYear
+      if (RunFor == "NotBaseYear") Years <- getYears()[!getYears() %in% G$BaseYear]
+      for (Year in Years) {
         ResultsCheck_ <- character(0)
+        #If RunBy is 'Region', this code is run
         if (Specs_ls$RunBy == "Region") {
           #Get data from datastore
-          L <- getFromDatastore(Specs_ls, RunYear = Year, Geo = NULL)
+          L <- getFromDatastore(Specs_ls, RunYear = Year)
+          if (exists("Call")) {
+            for (Alias in names(Call$Specs)) {
+              L[[Alias]] <-
+                getFromDatastore(Call$Specs[[Alias]], RunYear = Year)
+            }
+          }
           #Run module
-          R <- Func(L)
+          if (exists("Call")) {
+            R <- Func(L, Call$Func)
+          } else {
+            R <- Func(L)
+          }
           #Check results
           Check_ <-
             checkModuleOutputs(
@@ -486,15 +528,36 @@ testModule <-
           if (SaveDatastore & length(Check_) == 0) {
             setInDatastore(R, Specs_ls, ModuleName, Year, Geo = NULL)
           }
+        #Otherwise the following code is run
         } else {
+          #Identify the units of geography to iterate over
           GeoCategory <- Specs_ls$RunBy
-          Geo_ <- readFromTable(GeoCategory, GeoCategory, Year)
+          #Create the geographic index list
+          GeoIndex_ls <- createGeoIndexList(c(Specs_ls$Get, Specs_ls$Set), GeoCategory, Year)
+          if (exists("Call")) {
+            for (Alias in names(Call$Specs)) {
+              GeoIndex_ls[[Alias]] <-
+                createGeoIndexList(Call$Specs[[Alias]]$Get, GeoCategory, Year)
+            }
+          }
           #Run module for each geographic area
+          Geo_ <- readFromTable(GeoCategory, GeoCategory, Year)
           for (Geo in Geo_) {
             #Get data from datastore for geographic area
-            L <- getFromDatastore(Specs_ls, RunYear = Year, Geo = Geo)
+            L <-
+              getFromDatastore(Specs_ls, RunYear = Year, Geo = Geo, GeoIndex_ls = GeoIndex_ls)
+            if (exists("Call")) {
+              for (Alias in names(Call$Specs)) {
+                L[[Alias]] <-
+                  getFromDatastore(Call$Specs[[Alias]], RunYear = Year, Geo = Geo, GeoIndex_ls = GeoIndex_ls[[Alias]])
+              }
+            }
             #Run model for geographic area
-            R <- Func(L)
+            if (exists("Call")) {
+              R <- Func(L, Call$Func)
+            } else {
+              R <- Func(L)
+            }
             #Check results
             Check_ <-
               checkModuleOutputs(
@@ -504,7 +567,7 @@ testModule <-
             ResultsCheck_ <- c(ResultsCheck_, Check_)
             #Save results if SaveDatastore and no errors found
             if (SaveDatastore & length(Check_) == 0) {
-              setInDatastore(R, Specs_ls, ModuleName, Year, Geo = Geo)
+              setInDatastore(R, Specs_ls, ModuleName, Year, Geo = Geo, GeoIndex_ls = GeoIndex_ls)
             }
           }
         }
@@ -530,8 +593,36 @@ testModule <-
       Msg <- paste0("Congratulations. Module ", ModuleName, " passed all tests.")
       writeLog(Msg, Print = TRUE)
       rm(Msg)
+
+      #Return the specifications, data list, and functions list if DoRun is FALSE
     } else {
-      return(Specs_ls)
+      #Load any modules identified by 'Call' spec if any
+      if (!is.null(Specs_ls$Call)) {
+        Call <- list(
+          Func = list(),
+          Specs = list()
+        )
+        for (Alias in names(Specs_ls$Call)) {
+          Function <- Specs_ls$Call[[Alias]]
+          Specs <- paste0(Specs_ls$Call[[Alias]], "Specifications")
+          Call$Func[[Alias]] <- eval(parse(text = Function))
+          Call$Specs[[Alias]] <- processModuleSpecs(eval(parse(text = Specs)))
+        }
+      }
+      #Get data from datastore
+      L <- getFromDatastore(Specs_ls, RunYear = Year, Geo = NULL)
+      if (exists("Call")) {
+        for (Alias in names(Call$Specs)) {
+          L[[Alias]] <-
+            getFromDatastore(Call$Specs[[Alias]], RunYear = Year, Geo = NULL)
+        }
+      }
+      #Return the specifications, data list, and called functions
+      if (exists("Call")) {
+        return(list(Specs_ls = Specs_ls, L = L, M = Call$Func))
+      } else {
+        return(list(Specs_ls = Specs_ls, L = L))
+      }
     }
   }
 
@@ -566,6 +657,9 @@ testModule <-
 #' @param ... one or more optional arguments for the 'Function'.
 #' @param Target a numeric value that is compared with the return value of the
 #' 'Function'.
+#' @param DoWtAve a logical indicating whether successive weighted averaging is
+#' to be done. This is useful for getting stable results for stochastic
+#' calculations.
 #' @param MaxIter an integer specifying the maximum number of iterations
 #' to all the search to attempt.
 #' @param Tolerance a numeric value specifying the proportional difference
@@ -579,6 +673,7 @@ binarySearch <-
            SearchRange_,
            ...,
            Target = 0,
+           DoWtAve = TRUE,
            MaxIter = 100,
            Tolerance = 0.0001) {
     #Initialize vectors of low, middle and high values
@@ -628,12 +723,17 @@ binarySearch <-
       WtMid_ <- c(WtMid_, calcWtAve(Mid_))
       #Break out of loop if change in weighted mean of midpoint is less than tolerance
       if (length(Mid_) > 10) {
-        Chg <- diff(tail(Mid_, 4)) / tail(Mid_, 3)
+        Chg <- abs(diff(tail(Mid_, 4)) / tail(Mid_, 3))
         if (all(Chg < Tolerance)) break()
       }
     }
     #Return the weighted average of the midpoint value
-    tail(WtMid_, 1)
+    if (DoWtAve) {
+      Result <- tail(WtMid_, 1)
+    } else {
+      Result <- tail(Mid_, 1)
+    }
+    Result
   }
 
 
@@ -692,6 +792,10 @@ makeModelFormulaString <- function (EstimatedModel) {
 #' 'SearchRange' a two-element numeric vector which specifies the acceptable
 #' search range to use when determining the factor for adjusting the model
 #' constant.
+#' 'RepeatVar' a string which identifies the name of a field to use for
+#' repeated draws of the model. This is used in the case where for example the
+#' input data is households and the output is vehicles and the repeat variable
+#' is the number of vehicles in the household.
 #' @param Data_df a data frame containing the data required for applying the
 #' model.
 #' @param TargetProp a number identifying a target proportion for the default
@@ -725,6 +829,9 @@ applyBinomialModel <-
     #Define function to calculate probabilities
     calcProbs <- function(x) {
       Results_ <- x + eval(parse(text = Model_ls$Formula), envir = Data_df)
+      if (!is.null(Model_ls$RepeatVar)) {
+        Results_ <- rep(Results_, Data_df[[Model_ls$RepeatVar]])
+      }
       Odds_ <- exp(Results_)
       Odds_ / (1 + Odds_)
     }
@@ -902,7 +1009,8 @@ writeVENameRegistry <-
       NameRegistry_ls[[x]] <- NameRegistry_ls[[x]][!ExistingModuleEntries_]
     }
     #Process the Inp and Set specifications
-    ModuleSpecs_ls <- processModuleSpecs(getModuleSpecs(ModuleName, PackageName))
+    ModuleSpecs_ls <-
+      processModuleSpecs(getModuleSpecs(ModuleName, PackageName))
     Inp_ls <-
       lapply(ModuleSpecs_ls$Inp, function(x) {
         x$PACKAGE <- PackageName

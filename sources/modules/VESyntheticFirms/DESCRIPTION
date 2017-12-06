@@ -1,4 +1,5 @@
 Package: VESyntheticFirms
+TYPE: Package
 Title: VisionEval Synthetic Firms module for RPAT
 Version: 0.3
 Date: 2017-02-17
@@ -7,19 +8,19 @@ Maintainer: Ben Stabler <ben.stabler@rsginc.com>, Peter Andrews <peter.andrews@r
 Copyright: RSG
 URL: https://github.com/gregorbj/VisionEval/sources/modules/VESyntheticFirms
 Description: VisionEval Synthetic Firms module
-License: Apache 2
-LazyData: true
-Depends:
-    R (>= 3.3.2)
+License: file LICENSE
+LazyData: TRUE
+Depends: R (>= 3.3.2)
 Imports:
     visioneval,
+    devtools,
+    stats,
     reshape
-Suggests:
-    knitr
+Suggests: knitr
 VignetteBuilder: knitr
 Encoding: UTF-8
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1
 Collate:
     'CreateBaseSyntheticFirms.R'
     'CreateFutureSyntheticFirms.R'
-Remotes: gregorbj/VisionEval/sources/framework/visioneval@develop
+Remotes: gregorbj/VisionEval/sources/framework/visioneval@storagetest

@@ -7,7 +7,7 @@
 testModule(ModuleName, ParamDir = "defs",
   RunParamFile = "run_parameters.json", GeoFile = "geo.csv",
   ModelParamFile = "model_parameters.json", LoadDatastore = FALSE,
-  SaveDatastore = TRUE, DoRun = TRUE)
+  SaveDatastore = TRUE, DoRun = TRUE, RunFor = "AllYears")
 }
 \arguments{
 \item{ModuleName}{A string identifying the module name.}
@@ -43,6 +43,10 @@ used in conjunction with the getFromDatastore function to create the
 dataset that will be provided by the framework. The default value for this
 parameter is TRUE. In that case, the module will be run and the results
 will checked for consistency with the Set specifications.}
+
+\item{RunFor}{A string identifying what years the module is to be tested for.
+The value must be the same as the value that is used when the module is run
+in a module. Allowed values are 'AllYears', 'BaseYear', and 'NotBaseYear'.}
 }
 \value{
 If DoRun is FALSE, the return value is a list containing the module

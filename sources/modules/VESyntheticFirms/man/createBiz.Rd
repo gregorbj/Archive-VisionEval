@@ -4,10 +4,10 @@
 \alias{createBiz}
 \title{Create biz table}
 \usage{
-createBiz(Biz.IsEs)
+createBiz(Biz_IsEs)
 }
 \arguments{
-\item{L}{A list}
+\item{Biz_IsEs}{A list of business by industry and employee size}
 }
 \value{
 A list
@@ -17,4 +17,3 @@ A list
  to a long table with rows for each combination of industry and employee size, expand
  the list out so there is a row per business
 }
-

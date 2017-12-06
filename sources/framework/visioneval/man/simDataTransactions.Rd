@@ -4,11 +4,18 @@
 \alias{simDataTransactions}
 \title{Create simulation of datastore transactions.}
 \usage{
-simDataTransactions(ModuleCalls_df)
+simDataTransactions(AllSpecs_ls)
 }
 \arguments{
-\item{ModuleCalls_df}{A data frame of module calls as produced by the
-'parseModelScript' function.}
+\item{AllSpecs_ls}{A list containing the processed specifications of all of
+the modules run by model script in the order that the modules are called with
+duplicated module calls removed. Information about each module call is a
+component of the list in the order of the module calls. Each component is
+composed of 3 components: 'ModuleName' contains the name of the module,
+'PackageName' contains the name of the package the module is in, and
+'Specs' contains the processed specifications of the module. The 'Get'
+specification component includes the 'Get' specifications of all modules
+that are called by the module.}
 }
 \value{
 There is no return value. The function has the side effect of

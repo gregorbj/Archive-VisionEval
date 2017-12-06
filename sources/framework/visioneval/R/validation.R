@@ -402,7 +402,7 @@ checkDataConsistency <- function(DatasetName, Data_, DstoreAttr_) {
   }
   #Check if any values in UNLIKELY
   if (!is.null(DstoreAttr_$UNLIKELY)) {
-    if (DstoreAttr_$UNLIKELY != "") {
+    if (DstoreAttr_$UNLIKELY[1] != "") {
       Message <- checkMatchConditions(
         Data_, DstoreAttr_$UNLIKELY, DatasetName, "UNLIKELY")
       Warnings_ <- c(Warnings_, Message)
@@ -581,6 +581,14 @@ Types <- function(){
         HR = c(YR = 0.000114155, DAY = 0.0416667, HR = 1, MIN = 60, SEC = 3600),
         MIN = c(YR = 1.9026e-6, DAY = 0.000694444, HR = 0.0166667, MIN = 1, SEC = 60),
         SEC = c(YR = 3.171e-8, DAY = 1.1574e-5, HR = 0.000277778, MIN = 0.0166667, SEC = 1)),
+      mode = "double"
+    ),
+    energy = list(
+      units = list(
+        KWH = c(KWH = 1, MJ = 3.6, GGE = 0.02967846),
+        MJ = c(KWH = 0.277778, MJ = 1, GGE = 0.008244023),
+        GGE = c(KWH = 33.69447, MJ = 121.3, GGE = 1)
+      ),
       mode = "double"
     ),
     people = list(
@@ -957,7 +965,9 @@ SpecRequirements <- function(){
         TYPE = list(ValueType = "character",
                     ValuesAllowed = "[0-9a-zA-Z_]"),
         UNITS = list(ValueType = "character",
-                     ValuesAllowed = "[0-9a-zA-Z_]")
+                     ValuesAllowed = "[0-9a-zA-Z_]"),
+        DESCRIPTION = list(ValueType = "character",
+                           ValuesAllowed = "[0-9a-zA-Z_]")
       ),
     Get =
       list(
@@ -983,7 +993,9 @@ SpecRequirements <- function(){
         TYPE = list(ValueType = "character",
                     ValuesAllowed = "[0-9a-zA-Z_]"),
         UNITS = list(ValueType = "character",
-                     ValuesAllowed = "[0-9a-zA-Z_]")
+                     ValuesAllowed = "[0-9a-zA-Z_]"),
+        DESCRIPTION = list(ValueType = "character",
+                           ValuesAllowed = "[0-9a-zA-Z_]")
       )
   )
 }
@@ -1029,22 +1041,38 @@ checkSpec <- function(Spec_ls, SpecGroup, SpecNum) {
         Name <- paste0(ReqName, " ")
       }
       Errors_ <- character(0)
-      if (typeof(Spec) != Req_ls$ValueType) {
+      if (length(Spec) == 0) {
         Msg <-
-          paste0("The type of the ", Name, "attribute of the ", SpecGroup,
-                 " specification number ", SpecNum, " is incorrect. ",
-                 "The attribute must be a ", Req_ls$ValueType, " type.")
+          paste0("Value of the ", Name, " attribute of the ", SpecGroup,
+                 " specification number ", SpecNum, " is missing. ",
+                 "The attribute must have a value.")
         Errors_ <- c(Errors_, Msg)
+      } else {
+        if (is.na(Spec)) {
+          Msg <-
+            paste0("Value of the ", Name, " attribute of the ", SpecGroup,
+                   " specification number ", SpecNum, " is NA. ",
+                   "The attribute must have a value.")
+          Errors_ <- c(Errors_, Msg)
+        } else {
+          if (typeof(Spec) != Req_ls$ValueType) {
+            Msg <-
+              paste0("The type of the ", Name, " attribute of the ", SpecGroup,
+                     " specification number ", SpecNum, " is incorrect. ",
+                     "The attribute must be a ", Req_ls$ValueType, " type.")
+            Errors_ <- c(Errors_, Msg)
+          }
+          if (!any(str_detect(Spec, Req_ls$ValuesAllowed))) {
+            Msg <-
+              paste0("The value of the ", Name, "attribute of the ", SpecGroup,
+                     " specification number ", SpecNum, " is incorrect. ",
+                     "The attribute value must be one of the following: ",
+                     paste(Req_ls$ValuesAllowed, collapse = ", "), ".")
+            Errors_ <- c(Errors_, Msg)
+          }
+        }
+        Errors_
       }
-      if (!any(str_detect(Spec, Req_ls$ValuesAllowed))) {
-        Msg <-
-          paste0("The value of the ", Name, "attribute of the ", SpecGroup,
-                 " specification number ", SpecNum, " is incorrect. ",
-                 "The attribute value must be one of the following: ",
-                 paste(Req_ls$ValuesAllowed, collapse = ", "), ".")
-        Errors_ <- c(Errors_, Msg)
-      }
-      Errors_
     }
   #Check a specification
   if (SpecGroup == "RunBy") {
@@ -1174,6 +1202,64 @@ checkModuleSpecs <- function(Specs_ls, ModuleName) {
       Errors_<- c(Errors_, Msg, Err_)
     }
     rm(Err_)
+  }
+  #Check Call specifications
+  #-------------------------
+  if (!is.null(Specs_ls$Call)) {
+    if (!is.list(Specs_ls$Call)) {
+      #If it is not a list check that the value is not something other than TRUE
+      if (Specs_ls$Call != TRUE) {
+        Msg <-
+          paste0(
+            "'Call' specification for module '", ModuleName,
+            "' is incorrect. If it is not NULL, its value must be TRUE ",
+            "or be a list which identifies the the modules to be called."
+          )
+        Errors_ <- c(Errors_, Msg)
+      } else {
+      #If the value is TRUE, check that there is not an 'Inp' specification
+        if (!is.null(Specs_ls$Inp)) {
+          Msg <-
+            paste0(
+              "Inconsistency between 'Call' and 'Inp' specifications for module '",
+              ModuleName, "'. The 'Call' specification is TRUE, ",
+              "identifying this as a module to be called by other ",
+              "modules rather than a module that is run by the 'runModule' function. ",
+              "Modules that are called by other modules must not have 'Inp' ",
+              "specifications because no inputs are processed for modules ",
+              "that are called by other modules."
+            )
+        }
+      }
+    } else {
+    #If it is a list, check that the module calls are correctly formatted
+      for (name in names(Specs_ls$Call)) {
+        Value <- Specs_ls$Call[[name]]
+        if (!is.character(Value)) {
+          Msg <-
+            paste0(
+              "'Call' specification for module '", ModuleName,
+              "' is incorrect. The value for '", name, "' is not a string."
+            )
+          Errors_ <- c(Errors_, Msg)
+        } else {
+          Value_ <- unlist(strsplit(Value, "::"))
+          if (length(Value_) != 2) {
+            Msg <-
+              paste0(
+                "'Call' specification for module '", ModuleName,
+                "' is incorrect. The value for '", name,
+                "' is not formatted correctly. ",
+                "It must be formatted like PackageName::ModuleName ",
+                "where 'PackageName' is the name of a package and ",
+                "'ModuleName' is the name of a module."
+              )
+            Errors_ <- c(Errors_, Msg)
+          }
+        }
+      }
+
+    }
   }
 
   #Return errors
@@ -1591,8 +1677,8 @@ processModuleInputs <-
       if (is.null(Data_ls[[Group]][[Table]])) {
         Data_ls[[Group]][[Table]] <- list()
       }
-      #If Group is Year, check that Geo and Year fields are correct
-      if (Group  == "Year") {
+      #If Group is Year and Table is not Region, check Geo and Year fields
+      if (Group  == "Year" & Table != "Region") {
         #Check that there are 'Year' and 'Geo' fields
         HasYearField <- "Year" %in% names(Data_df)
         HasGeoField <- "Geo" %in% names(Data_df)
@@ -1687,6 +1773,54 @@ processModuleInputs <-
           next()
         } else {
           Data_ls[[Group]][[Table]]$Geo <- Data_df$Geo
+        }
+      }
+      #If Group is Year and Table is Region, check years are complete
+      if (Group  == "Year" & Table == "Region") {
+        #Check that there is a 'Year' field
+        HasYearField <- "Year" %in% names(Data_df)
+        if (!HasYearField) {
+          Msg <-
+            paste0(
+              "Input file error for module '", ModuleName,
+              "' for input file '", File, "'. ",
+              "'Table' specification is ", Table,
+              " but the input file is missing required 'Year' field."
+            )
+          FileErr_ <- c(FileErr_, Msg)
+          next()
+        }
+        #Check that the 'Year' field is complete and not duplicated
+        YearDuplicated <- any(duplicated(Data_df$Year))
+        YearIncomplete <- any(!(G$Years %in% Data_df$Year))
+        if (YearDuplicated | YearIncomplete) {
+          if (YearDuplicated) {
+            DupYear_ <- unique(Data_df$Year[YearDuplicated])
+            Msg <-
+              paste0(
+                "Input file error for module '", ModuleName,
+                "' for input file '", File, "'. ",
+                "Has duplicate inputs for the following years: ",
+                paste(DupYear_)
+              )
+            FileErr_ <- c(FileErr_, Msg)
+            rm(DupYear_)
+          }
+          if (YearIncomplete) {
+            IncompleteYear_ <- G$Years[YearIncomplete]
+            Msg <-
+              paste0(
+                "Input file error for module '", ModuleName,
+                "' for input file '", File, "'.",
+                "Is missing inputs for the following years: ",
+                paste(IncompleteYear_)
+              )
+            FileErr_ <- c(FileErr_, Msg)
+            rm(IncompleteYear_)
+          }
+          next()
+        } else {
+          Data_ls[[Group]][[Table]]$Year <- Data_df$Year
         }
       }
       #Check and load data into list

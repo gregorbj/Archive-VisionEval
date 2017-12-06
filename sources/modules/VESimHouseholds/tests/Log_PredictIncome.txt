@@ -1,0 +1,32 @@
+Test
+Test of VESimHouseholds package modules
+2017-11-03_11:17:09
+
+2017-11-03 11:17:09 : Testing PredictIncome. 
+
+2017-11-03 11:17:09 : Attempting to load datastore. 
+
+2017-11-03 11:17:09 : Datastore loaded. 
+
+2017-11-03 11:17:09 : Attempting to load and check specifications. 
+
+2017-11-03 11:17:09 : Module specifications successfully loaded and checked. 
+
+2017-11-03 11:17:09 : Attempting to process, check and load module inputs. 
+
+2017-11-03 11:17:15 : Module inputs successfully checked and loaded into datastore. 
+
+2017-11-03 11:17:15 : Checking whether datastore contains all datasets in Get specifications. 
+
+2017-11-03 11:17:15 : Datastore contains all datasets identified in module Get specifications. 
+
+2017-11-03 11:17:15 : Running module and checking whether outputs meet Set specifications. 
+
+2017-11-03 11:17:15 : Also saving module outputs to datastore. 
+
+2017-11-03 11:17:33 : Module run successfully and outputs meet Set specifications. 
+
+2017-11-03 11:17:33 : Module outputs saved to datastore. 
+
+2017-11-03 11:17:33 : Congratulations. Module PredictIncome passed all tests. 
+

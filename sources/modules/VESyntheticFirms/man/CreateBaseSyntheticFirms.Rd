@@ -15,4 +15,3 @@ A list
 \description{
 \code{CreateBaseSyntheticFirms} creates a set of simulated businesses
 }
-

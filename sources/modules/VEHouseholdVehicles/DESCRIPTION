@@ -1,0 +1,26 @@
+Package: VEHouseholdVehicles
+Type: Package
+Title: Model household vehicles
+Version: 0.7
+Date: 11/03/17
+Author: Brian Gregor [aut, cre],
+Maintainer: Brian Gregor <gregorb@or-analytics.com>
+Copyright: AASHTO
+URL: https://github.com/gregorbj/VisionEval/sources/modules/VEVehicleOwnership
+Description: This package contains modules which predict household vehicle
+    ownership, including the number own, body types, ages, powertrains,
+    and autonomous vehicles. It also predicts use of shared vehicles and adjusts
+    ownership to account for such use.
+License: file LICENSE
+LazyData: TRUE
+Depends: R (>= 3.1.0)
+Imports:
+    visioneval,
+    ordinal,
+    devtools,
+    VE2001NHTS
+Suggests:
+    knitr
+VignetteBuilder: knitr
+RoxygenNote: 6.0.1
+Remotes: gregorbj/VisionEval/sources/framework/visioneval@storagetest, gregorbj/VisionEval/sources/modules/VE2001NHTS@storagetest

@@ -3,7 +3,13 @@
 #==================
 #This module places employment in Bzones based on input assumptions of
 #employment by type and Bzone. The model adjusts the employment numbers to
-#balance with the number of workers in the region.
+#balance with the number of workers in the region. The module assigns workers
+#to jobs as a function of the number of jobs in each Bzone and the inverse of
+#distance between residence and employment Bzones. An iterative proportional
+#fitting process is used to allocate the number of workers between each pair of
+#Bzones. A worker table is created and workers are assigned randomly to
+#employment Bzones based on the balanced matrix of number of workers by
+#residence and employment Bzones.
 
 # Copyright [2017] [AASHTO]
 # Based in part on works previously copyrighted by the Oregon Department of
@@ -23,12 +29,14 @@
 # limitations under the License.
 
 library(visioneval)
+library(fields)
 
 #=============================================
 #SECTION 1: ESTIMATE AND SAVE MODEL PARAMETERS
 #=============================================
 #This module has no parameters. Employment is allocated to Bzones based on
-#inputs and balancing with number of regional workers.
+#inputs, balancing with number of regional workers, and balancing workers by
+#residence and job location as a function of the inverse of distance.
 
 
 #================================================
@@ -42,6 +50,12 @@ LocateEmploymentSpecifications <- list(
   RunBy = "Region",
   #Specify new tables to be created by Inp if any
   #Specify new tables to be created by Set if any
+  NewSetTable = items(
+    item(
+      TABLE = "Worker",
+      GROUP = "Year"
+    )
+  ),
   #Specify input data
   Inp = items(
     item(
@@ -59,7 +73,35 @@ LocateEmploymentSpecifications <- list(
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
       UNLIKELY = "",
-      TOTAL = ""
+      TOTAL = "",
+      DESCRIPTION =
+        items(
+          "Total number of jobs in zone",
+          "Number of jobs in retail sector in zone",
+          "Number of jobs in service sector in zone"
+        )
+    ),
+    item(
+      NAME =
+        items(
+          "Latitude",
+          "Longitude"),
+      FILE = "bzone_lat_lon.csv",
+      TABLE = "Bzone",
+      GROUP = "Year",
+      TYPE = "double",
+      UNITS = "NA",
+      NAVALUE = -9999,
+      SIZE = 0,
+      PROHIBIT = "NA",
+      ISELEMENTOF = "",
+      UNLIKELY = "",
+      TOTAL = "",
+      DESCRIPTION =
+        items(
+          "Latitude in decimal degrees of the centroid of the zone",
+          "Longitude in decimal degrees of the centroid of the zone"
+        )
     )
   ),
   #Specify data to be loaded from data store
@@ -93,6 +135,46 @@ LocateEmploymentSpecifications <- list(
       UNITS = "PRSN",
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "Workers",
+      TABLE = "Household",
+      GROUP = "Year",
+      TYPE = "people",
+      UNITS = "PRSN",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "HhId",
+      TABLE = "Household",
+      GROUP = "Year",
+      TYPE = "character",
+      UNITS = "ID",
+      PROHIBIT = "",
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "Bzone",
+      TABLE = "Household",
+      GROUP = "Year",
+      TYPE = "character",
+      UNITS = "ID",
+      PROHIBIT = "",
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME =
+        items(
+          "Latitude",
+          "Longitude"),
+      TABLE = "Bzone",
+      GROUP = "Year",
+      TYPE = "double",
+      UNITS = "NA",
+      NAVALUE = -9999,
+      PROHIBIT = "NA",
+      ISELEMENTOF = ""
     )
   ),
   #Specify data to saved in the data store
@@ -109,21 +191,42 @@ LocateEmploymentSpecifications <- list(
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
-      SIZE = 0
+      SIZE = 0,
+      DESCRIPTION =
+        items(
+          "Total number of jobs in zone",
+          "Number of jobs in retail sector in zone",
+          "Number of jobs in service sector in zone"
+        )
     ),
     item(
       NAME =
-        items("TotEmpAdj",
-              "RetEmpAdj",
-              "SvcEmpAdj"),
-      TABLE = "Bzone",
+        items("HhId",
+              "WkrId",
+              "Bzone"),
+      TABLE = "Worker",
       GROUP = "Year",
-      TYPE = "people",
-      UNITS = "PRSN",
-      NAVALUE = -999999,
-      PROHIBIT = c("NA"),
+      TYPE = "character",
+      UNITS = "ID",
+      NAVALUE = -1,
+      PROHIBIT = "NA",
       ISELEMENTOF = "",
-      SIZE = 0
+      DESCRIPTION =
+        items("Unique household ID",
+              "Unique worker ID",
+              "Bzone ID of worker job location")
+    ),
+    item(
+      NAME = "DistanceToWork",
+      TABLE = "Worker",
+      GROUP = "Year",
+      TYPE = "distance",
+      UNITS = "MI",
+      NAVALUE = -1,
+      PROHIBIT = c("NA", "<= 0"),
+      ISELEMENTOF = "",
+      SIZE = 0,
+      DESCRIPTION = "Distance from home to work assuming location at Bzone centroid and 'Manhattan' distance"
     )
   )
 )
@@ -172,26 +275,26 @@ devtools::use_data(LocateEmploymentSpecifications, overwrite = TRUE)
 #' the total amount of employment for the region equals the total number of
 #' workers for the region.
 #'
-#' @param EmpTarget An number identifying the total number of jobs so that each
-#' worker has a job.
-#' @param Emp_Bz A named numeric vector identifying the employment of the type
-#' in each Bzone.
-#' @return A list having two components:
-#' BalancedEmp_Bz A named numeric vector giving the employment by Bzone which
-#' matches workers, and
-#' AdjEmp_Bz A named numeric vector giving the amount of adjustment that was
-#' made to the original employment in each Bzone.
-adjustEmployment <- function(EmpTarget, Emp_Bz) {
-  EmpProbs_Bz <- Emp_Bz / sum(Emp_Bz)
-  RevEmp_Bz <- Emp_Bz * 0
-  RevEmp_ <-
-    sample(names(Emp_Bz), EmpTarget, replace = TRUE, prob = EmpProbs_Bz)
-  RevEmp_Bx <- table(RevEmp_)
-  RevEmp_Bz[names(RevEmp_Bx)] <- RevEmp_Bx
-  list(
-    BalancedEmp_Bz = RevEmp_Bz,
-    AdjEmp_Bz = RevEmp_Bz - Emp_Bz
-  )
+#' @param EmpTarget An number identifying the total number of jobs to be
+#' matched.
+#' @param Emp_ A numeric vector identifying the employment in each Bzone.
+#' @param Names A character vector identifying names corresponding to the
+#' Emp_ argument vector if any.
+#' @return A integer vector of the number of jobs by Bzone which sums to the
+#' total. The positions correspond to the positions of the input vector of jobs
+#' by Bzone.
+#' @export
+adjustEmployment <- function(EmpTarget, Emp_, Names = NULL) {
+  EmpProbs_ <- Emp_ / sum(Emp_)
+  EmpBase_ <- floor(Emp_)
+  EmpDiff <- EmpTarget - sum(EmpBase_)
+  EmpAdd_ <- Emp_ * 0
+  EmpDiff_Tbl <-
+    table(sample(1:(length(Emp_)), abs(EmpDiff), replace = TRUE, prob = EmpProbs_))
+  EmpAdd_[as.numeric(names(EmpDiff_Tbl))] <- EmpDiff_Tbl
+  RevEmp_ <- EmpBase_ + (sign(EmpDiff) * EmpAdd_)
+  if (!is.null(Names)) names(RevEmp_) <- Names
+  RevEmp_
 }
 
 #Main module function that assigns employment by type to Bzones
@@ -215,6 +318,7 @@ LocateEmployment <- function(L) {
   #------
   #Fix seed as synthesis involves sampling
   set.seed(L$G$Seed)
+  Bz <- L$Year$Bzone$Bzone
 
   #Balance employment and workers
   #------------------------------
@@ -224,120 +328,109 @@ LocateEmployment <- function(L) {
   TotEmp <- sum(L$Year$Bzone$TotEmp)
   #Calculate the difference between total workers and total employment
   TotEmpDiff <- TotWkr - TotEmp
-  #Calculate adjusted total employment by Bzone
+  #Make initial adjustment of total employment by Bzone
   TotEmp_Bz <- L$Year$Bzone$TotEmp
   names(TotEmp_Bz) <- L$Year$Bzone$Bzone
-  TotEmp_ls <-
-    adjustEmployment(
-      EmpTarget = TotWkr,
-      Emp_Bz = TotEmp_Bz
-    )
-  #Calculate adjusted retail employment by Bzone
-  RetEmp_Bz <- L$Year$Bzone$RetEmp
-  names(RetEmp_Bz) <- L$Year$Bzone$Bzone
-  RetEmpRatio_Bz <- RetEmp_Bz / TotEmp_Bz
-  RetEmp_ls <- list(
-    BalancedEmp_Bz = round(TotEmp_ls$BalancedEmp_Bz * RetEmpRatio_Bz),
-    AdjEmp_Bz = round(TotEmp_ls$AdjEmp_Bz * RetEmpRatio_Bz)
-  )
-  rm(RetEmp_Bz,  RetEmpRatio_Bz)
-  #Calculate adjusted service employment by Bzone
-  SvcEmp_Bz <- L$Year$Bzone$SvcEmp
-  names(SvcEmp_Bz) <- L$Year$Bzone$Bzone
-  SvcEmpRatio_Bz <- SvcEmp_Bz / TotEmp_Bz
-  SvcEmp_ls <- list(
-    BalancedEmp_Bz = round(TotEmp_ls$BalancedEmp_Bz * SvcEmpRatio_Bz),
-    AdjEmp_Bz = round(TotEmp_ls$AdjEmp_Bz * SvcEmpRatio_Bz)
-  )
-  rm(SvcEmp_Bz,  SvcEmpRatio_Bz)
+  TotEmp_Bz <- adjustEmployment(EmpTarget = TotWkr, Emp_ = TotEmp_Bz, Names = Bz)
+
+  #Balance work productions and attractions
+  #----------------------------------------
+  #Calculate distances between Bzones
+  LngLat_df <-
+    data.frame(
+      lng = L$Year$Bzone$Longitude,
+      lat = L$Year$Bzone$Latitude)
+  Dist_BzBz <- rdist.earth(LngLat_df, LngLat_df, miles = TRUE, R = 6371)
+  diag(Dist_BzBz) <- apply(Dist_BzBz, 1, function(x) min(x[x != 0]))
+  rownames(Dist_BzBz) <- Bz
+  colnames(Dist_BzBz) <- Bz
+  #Tabulate workers by residence Bzone
+  Wkr_Bz <- tapply(L$Year$Household$Workers, L$Year$Household$Bzone, sum)[Bz]
+  Wkr_Bz[is.na(Wkr_Bz)] <- 0
+  #Allocate workers by origin and destination using IPF
+  WkrOD_BzBz <-
+    ipf(1 / Dist_BzBz, list(Wkr_Bz, TotEmp_Bz), list(1, 2))$Units_ar
+  rownames(WkrOD_BzBz) <- Bz
+  colnames(WkrOD_BzBz) <- Bz
+  #Resolve fractional workers
+  for (i in 1:nrow(WkrOD_BzBz)) {
+    WkrOD_BzBz[i,] <- adjustEmployment(Wkr_Bz[i], WkrOD_BzBz[i,])
+  }
+
+  #Final adjustments to employment by Bzone
+  #----------------------------------------
+  #Total employment by Bzone
+  TotEmp_Bz <- colSums(WkrOD_BzBz)
+  #Calculate retail and service employment by Bzone
+  RetEmp_Bz <-
+    round(TotEmp_Bz * (L$Year$Bzone$RetEmp / L$Year$Bzone$TotEmp))
+  SvcEmp_Bz <-
+    round(TotEmp_Bz * L$Year$Bzone$SvcEmp / L$Year$Bzone$TotEmp)
+
+  #Create worker table
+  #-------------------
+  #Identify households having workers
+  Use <- L$Year$Household$Workers != 0
+  #Create IDs for worker table
+  HhId_ <- with(L$Year$Household, rep(HhId[Use], Workers[Use]))
+  WkrId_ <-
+    with(L$Year$Household,
+         paste(
+           rep(HhId[Use], Workers[Use]),
+           unlist(sapply(Workers[Use], function(x) 1:x)),
+           sep = "-"))
+  #Identify worker job location Bzone
+  ResBzone_ <- with(L$Year$Household, rep(Bzone[Use], Workers[Use]))
+  WrkBzone_ <- character(TotWkr)
+  for (bz in Bz) {
+    WrkBzone_[ResBzone_ == bz] <- sample(rep(Bz, WkrOD_BzBz[bz,]))
+  }
+  #Identify distance to work
+  DistToWork_ <- Dist_BzBz[cbind(ResBzone_, WrkBzone_)]
 
   #Return list of results
   #----------------------
   #Initialize output list
   Out_ls <- initDataList()
-  Out_ls$Year$Bzone <-
-    list(TotEmp = integer(0),
-         RetEmp = integer(0),
-         SvcEmp = integer(0),
-         TotEmpAdj = integer(0),
-         RetEmpAdj = integer(0),
-         SvcEmpAdj = integer(0))
-  #Add the revised employment by Bzone
-  Out_ls$Year$Bzone$TotEmp <- as.integer(unname(TotEmp_ls$BalancedEmp_Bz))
-  Out_ls$Year$Bzone$RetEmp <- as.integer(unname(RetEmp_ls$BalancedEmp_Bz))
-  Out_ls$Year$Bzone$SvcEmp <- as.integer(unname(SvcEmp_ls$BalancedEmp_Bz))
-  #Add the employment adjustments by Bzone
-  Out_ls$Year$Bzone$TotEmpAdj <- as.integer(unname(TotEmp_ls$AdjEmp_Bz))
-  Out_ls$Year$Bzone$RetEmpAdj <- as.integer(unname(RetEmp_ls$AdjEmp_Bz))
-  Out_ls$Year$Bzone$SvcEmpAdj <- as.integer(unname(SvcEmp_ls$AdjEmp_Bz))
+  #Add the employment by Bzone
+  Out_ls$Year$Bzone$TotEmp <- as.integer(unname(TotEmp_Bz))
+  Out_ls$Year$Bzone$RetEmp <- as.integer(unname(RetEmp_Bz))
+  Out_ls$Year$Bzone$SvcEmp <- as.integer(unname(SvcEmp_Bz))
+  #Create the worker table
+  Out_ls$Year$Worker <- list()
+  attributes(Out_ls$Year$Worker)$LENGTH <- sum(L$Year$Household$Workers)
+  #Add the worker datasets
+  Out_ls$Year$Worker$HhId <- HhId_
+  attributes(Out_ls$Year$Worker$HhId)$SIZE <- max(nchar(HhId_))
+  Out_ls$Year$Worker$WkrId <- WkrId_
+  attributes(Out_ls$Year$Worker$WkrId)$SIZE <- max(nchar(WkrId_))
+  Out_ls$Year$Worker$Bzone <- WrkBzone_
+  attributes(Out_ls$Year$Worker$Bzone)$SIZE <- max(nchar(WrkBzone_))
+  Out_ls$Year$Worker$DistanceToWork <- DistToWork_
   #Return the outputs list
   Out_ls
 }
 
 
-#====================
-#SECTION 4: TEST CODE
-#====================
-#The following code is useful for testing and module function development. The
-#first part initializes a datastore, loads inputs, and checks that the datastore
-#contains the data needed to run the module. The second part produces a list of
-#the data the module function will be provided by the framework when it is run.
-#This is useful to have when developing the module function. The third part
-#runs the whole module to check that everything runs correctly and that the
-#module outputs are consistent with specifications. Note that if a module
-#requires data produced by another module, the test code for the other module
-#must be run first so that the datastore contains the requisite data. Also note
-#that it is important that all of the test code is commented out when the
-#the package is built.
-
-#1) Test code to set up datastore and return module specifications
-#-----------------------------------------------------------------
-#The following commented-out code can be run to initialize a datastore, load
-#inputs, and check that the datastore contains the data needed to run the
-#module. It return the processed module specifications which can be used in
-#conjunction with the getFromDatastore function to fetch the list of data needed
-#by the module. Note that the following code assumes that all the data required
-#to set up a datastore are in the defs and inputs directories in the tests
-#directory. All files in the defs directory must have the default names.
-#
-# Specs_ls <- testModule(
+#================================
+#Code to aid development and test
+#================================
+#Test code to check specifications, loading inputs, and whether datastore
+#contains data needed to run module. Return input list (L) to use for developing
+#module functions
+#-------------------------------------------------------------------------------
+# TestDat_ <- testModule(
 #   ModuleName = "LocateEmployment",
 #   LoadDatastore = TRUE,
 #   SaveDatastore = TRUE,
 #   DoRun = FALSE
 # )
-#
-#2) Test code to create a list of module inputs to use in module function
-#------------------------------------------------------------------------
-#The following commented-out code can be run to create a list of module inputs
-#that may be used in the development of module functions. Note that the data
-#will be returned for the first year in the run years specified in the
-#run_parameters.json file. Also note that if the RunBy specification is not
-#Region, the code will by default return the data for the first geographic area
-#in the datastore.
-#
-# setwd("tests")
-# Year <- getYears()[1]
-# if (Specs_ls$RunBy == "Region") {
-#   L <- getFromDatastore(Specs_ls, RunYear = Year, Geo = NULL)
-# } else {
-#   GeoCategory <- Specs_ls$RunBy
-#   Geo_ <- readFromTable(GeoCategory, GeoCategory, Year)
-#   L <- getFromDatastore(Specs_ls, RunYear = Year, Geo = Geo_[1])
-#   rm(GeoCategory, Geo_)
-# }
-# rm(Year)
-# setwd("..")
-#
-#3) Test code to run full module tests
-#-------------------------------------
-#Run the following commented-out code after the module functions have been
-#written to test all aspects of the module including whether the module can be
-#run and whether the module will produce results that are consistent with the
-#module's Set specifications. It is also important to run this code if one or
-#more other modules in the package need the dataset(s) produced by this module.
-#
-# testModule(
+# L <- TestDat_$L
+
+#Test code to check everything including running the module and checking whether
+#the outputs are consistent with the 'Set' specifications
+#-------------------------------------------------------------------------------
+# TestDat_ <- testModule(
 #   ModuleName = "LocateEmployment",
 #   LoadDatastore = TRUE,
 #   SaveDatastore = TRUE,

@@ -2,6 +2,7 @@ Package: VETransportSupply
 Type: Package
 Title: Create Transportation System Attributes for VE
 Version: 0.5
+Date: 11/03/2017
 Author: Brian Gregor [aut, cre],
 Maintainer: Brian Gregor <gregorb@or-analytics.com>
 Copyright: AASHTO
@@ -20,4 +21,4 @@ Suggests:
     knitr
 VignetteBuilder: knitr
 RoxygenNote: 6.0.1
-Remotes: gregorbj/VisionEval/sources/framework/visioneval@develop
+Remotes: gregorbj/VisionEval/sources/framework/visioneval@storagetest
