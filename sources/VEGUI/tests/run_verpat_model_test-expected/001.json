@@ -12,7 +12,7 @@
     "REVERT_MODEL_PARAMETERS_FILE": [0],
     "REVERT_RUN_PARAMETERS_FILE": [0],
     "RUN_MODEL_BUTTON": [0],
-    "RUN_PARAMETERS_FILE": ["{\n  \"Model\": [\"RPAT\"],\n  \"Scenario\": [\"RPAT Pilot\"],\n  \"Description\": [\"Pilot RPAT module in VisionEval\"],\n  \"Region\": [\"Multnomah County Oregon\"],\n  \"BaseYear\": [\"2005\"],\n  \"Years\": [\"2005\", \"2010\"],\n  \"DatastoreName\": [\"datastore.h5\"],\n  \"DatastoreType\": [\"H5\"],\n  \"Seed\": [1],\n  \"RunTypes\": [\"E\", \"ELESNP\"]\n}"],
+    "RUN_PARAMETERS_FILE": ["{\n  \"Model\": [\"RPAT\"],\n  \"Scenario\": [\"RPAT Pilot\"],\n  \"Description\": [\"Pilot RPAT module in VisionEval\"],\n  \"Region\": [\"Multnomah County Oregon\"],\n  \"BaseYear\": [\"2005\"],\n  \"Years\": [\"2005\", \"2035\"],\n  \"DatastoreName\": [\"Datastore\"],\n  \"DatastoreType\": [\"RD\"],\n  \"Seed\": [1],\n  \"RunTypes\": [\"E\", \"ELESNP\"]\n}"],
     "SAVE_MODEL_PARAMETERS_FILE": [0],
     "SAVE_RUN_PARAMETERS_FILE": [0],
     "SELECT_RUN_SCRIPT_BUTTON": {

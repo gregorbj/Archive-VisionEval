@@ -74,21 +74,26 @@ script:
     R CMD INSTALL .
     cd ../../..
     
-    # VETravelDemand not in storagetest branch
-    # cd sources/modules/VETravelDemand
-    # Rscript -e 'devtools::install_deps(".")'
-    # Rscript -e 'devtools::check(".")'
-    # Rscript -e "tryCatch( source('tests/scripts/test.R') )"
-    # R CMD INSTALL .
-    # cd ../../..
+    cd sources/modules/VECommercialTravel
+    Rscript -e 'devtools::install_deps(".")'
+    Rscript -e 'devtools::check(".")'
+    Rscript -e "tryCatch( source('tests/scripts/test.R') )"
+    R CMD INSTALL .
+    cd ../../..
     
-    # VEVehicleOwnership not in storagetest branch
-    # cd sources/modules/VEVehicleOwnership
-    # Rscript -e 'devtools::install_deps(".")'
-    # Rscript -e 'devtools::check(".")'
-    # Rscript -e "tryCatch( source('tests/scripts/test.R') )"
-    # R CMD INSTALL .
-    # cd ../../..
+    cd sources/modules/VEHouseholdTravel
+    Rscript -e 'devtools::install_deps(".")'
+    Rscript -e 'devtools::check(".")'
+    Rscript -e "tryCatch( source('tests/scripts/test.R') )"
+    R CMD INSTALL .
+    cd ../../..
+    
+    cd sources/modules/VEHouseholdVehicles
+    Rscript -e 'devtools::install_deps(".")'
+    Rscript -e 'devtools::check(".")'
+    Rscript -e "tryCatch( source('tests/scripts/test.R') )"
+    R CMD INSTALL .
+    cd ../../..
     
     cd sources/models/VERPAT
     Rscript -e "tryCatch( source('run_model.R') )"
@@ -100,7 +105,6 @@ script:
     
     cd sources/VEGUI
     Rscript -e 'install.packages(c("shiny", "shinyjs", "shinyFiles", "data.table", "DT", "shinyBS", "future", "testit", "jsonlite", "shinyAce", "envDocument", "rhandsontable"))'
-    Rscript -e 'devtools::install_github(c("tdhock/namedCapture", "trestletech/shinyTree", "rstudio/webdriver", "rstudio/shinytest"))'
-    Rscript -e "tryCatch( source('run_vegui_test.R') )"
-    
+    Rscript -e 'devtools::install_github(c("tdhock/namedCapture", "trestletech/shinyTree", "rstudio/webdriver", "rstudio/shinytest", "r-lib/processx"))'
+    Rscript -e "tryCatch( source('run_vegui_test.R') )"    
     cd ../..

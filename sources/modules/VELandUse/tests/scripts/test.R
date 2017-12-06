@@ -1,6 +1,10 @@
 library(rhdf5)
 library(filesstrings)
 
+##################################################
+## Section 1. Tests for modules used in VERSPM
+##################################################
+
 #Load datastore from VESimHouseholds package
 file.copy("../VESimHouseholds/tests/Datastore.tar", "tests/Datastore.tar")
 setwd("tests")
@@ -58,3 +62,53 @@ setwd("tests")
 tar("Datastore.tar", "Datastore")
 dir.remove("Datastore")
 setwd("..")
+
+##################################################
+## Section 2. Tests for modules used in VERPAT
+##################################################
+
+# Set the working directory to tests folder and load the output from
+# previous module runs
+setwd("tests")
+# Copy and save the results from previous module tests
+zip("ModelState.zip","ModelState.Rda")
+file.remove("ModelState.Rda")
+tar("defs.tar","defs")
+dir.remove("defs")
+untar("Datastore_VERPAT.tar")
+unzip("ModelState_VERPAT.zip")
+setwd("..")
+
+#Test CalculateBasePlaceTypes module
+source("R/CalculateBasePlaceTypes.R")
+testModule(
+  ModuleName = "CalculateBasePlaceTypes",
+  LoadDatastore = TRUE,
+  SaveDatastore = TRUE,
+  DoRun = TRUE,
+  RunFor = "BaseYear"
+)
+
+#Test CalculateFuturePlaceTypes module
+source("R/CalculateFuturePlaceTypes.R")
+testModule(
+  ModuleName = "CalculateFuturePlaceTypes",
+  LoadDatastore = TRUE,
+  SaveDatastore = TRUE,
+  DoRun = TRUE,
+  RunFor = "NotBaseYear"
+)
+
+#Finish up
+setwd("tests")
+tar("Datastore_VERPAT.tar", c("Datastore", "defs"))
+dir.remove("Datastore")
+dir.remove("defs")
+zip("ModelState_VERPAT.zip","ModelState.Rda")
+file.remove("ModelState.Rda")
+unzip("ModelState.zip")
+file.remove("ModelState.zip")
+untar("defs.tar")
+file.remove("defs.tar")
+setwd("..")
+
