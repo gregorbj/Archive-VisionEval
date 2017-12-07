@@ -42,7 +42,7 @@ script:
     R CMD INSTALL .
     cd ../../..
     
-    cd sources/modules/VE2001NHTS;
+    cd sources/modules/VE2001NHTS
     Rscript -e 'devtools::install_deps(".")'
     Rscript -e 'devtools::check(".")'
     Rscript -e "tryCatch( source('tests/scripts/test.R') )"
@@ -56,7 +56,7 @@ script:
     R CMD INSTALL .
     cd ../../..
     
-    cd sources/modules/VELandUse;
+    cd sources/modules/VELandUse
     Rscript -e 'devtools::install_deps(".")'
     Rscript -e 'devtools::check(".")'
     Rscript -e "tryCatch( source('tests/scripts/test.R') )"
