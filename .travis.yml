@@ -1,6 +1,9 @@
 # R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
 
-language: R
+language: r
+r:
+  # Test current version of R
+  - release
 sudo: true
 dist: trusty
 cache: packages
@@ -95,16 +98,16 @@ script:
     R CMD INSTALL .
     cd ../../..
     
-    # cd sources/models/VERPAT
-    # Rscript -e "tryCatch( source('run_model.R') )"
-    # cd ../../..
+    cd sources/models/VERPAT
+    Rscript -e "tryCatch( source('run_model.R') )"
+    cd ../../..
     
-    # cd sources/models/VERSPM/Test1
-    # Rscript -e "tryCatch( source('run_model.R') )"
-    # cd ../../../..
+    cd sources/models/VERSPM/Test1
+    Rscript -e "tryCatch( source('run_model.R') )"
+    cd ../../../..
     
     cd sources/VEGUI
     Rscript -e 'install.packages(c("shiny", "shinyjs", "shinyFiles", "data.table", "DT", "shinyBS", "future", "testit", "jsonlite", "shinyAce", "envDocument", "rhandsontable"))'
-    Rscript -e 'devtools::install_github(c("tdhock/namedCapture", "trestletech/shinyTree", "rstudio/webdriver", "rstudio/shinytest", "r-lib/processx"))'
+    Rscript -e 'devtools::install_github(c("tdhock/namedCapture", "trestletech/shinyTree", "rstudio/webdriver", "rstudio/shinytest"))'
     Rscript -e "tryCatch( source('run_vegui_test.R') )"    
     cd ../..
