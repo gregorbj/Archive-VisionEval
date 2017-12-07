@@ -48,15 +48,15 @@ script:
     Rscript -e "tryCatch( source('tests/scripts/test.R') )"
     R CMD INSTALL .
     cd ../../..
-       
-    cd sources/modules/VELandUse;
+        
+    cd sources/modules/VESimHouseholds
     Rscript -e 'devtools::install_deps(".")'
     Rscript -e 'devtools::check(".")'
     Rscript -e "tryCatch( source('tests/scripts/test.R') )"
     R CMD INSTALL .
     cd ../../..
     
-    cd sources/modules/VESimHouseholds
+    cd sources/modules/VELandUse;
     Rscript -e 'devtools::install_deps(".")'
     Rscript -e 'devtools::check(".")'
     Rscript -e "tryCatch( source('tests/scripts/test.R') )"
