@@ -10,6 +10,8 @@ VELandUse,LocateEmployment,"Allocate number of jobs by Bzone and type (total, re
 VELandUse,AssignDevTypes,"Assign development type to household (urban, rural)",EIT,July,
 VELandUse,Calculate4DMeasures,"Calculate Bzone density, diversity, design, and accessibility measures",EIT,July,
 VELandUse,CalculateUrbanMixMeasure,Assign urban mixed use attribute to households,EIT,July,
+VELandUse,CalculateBasePlaceTypes,Assign households and firms to the place types (bzones) for the base year,IT,December,VERPAT model
+VELandUse,CalculateFuturePlaceTypes,Assign households and firms to the place types (bzones) for the years that are not base year,IT,December,VERPAT model
 VETransportSupply,AssignTransitService,Calculates transit revenue miles per capita for region and Bzone transit service level,EIT,July,
 VETransportSupply,AssignRoadMiles,Calculates regional per capita lane-miles for freeways and for arterials,EIT,July,
 VETransportSupply,CalculateCongestion,"Models roadway speeds, delay, and congestion costs",,November,
