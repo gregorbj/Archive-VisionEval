@@ -26,7 +26,7 @@ before_install:
 
 # start by installing devtools
 install:
-  - Rscript -e 'install.packages(c("curl","devtools", "roxygen2", "stringr", "knitr"))'
+  - Rscript -e 'install.packages(c("curl","devtools", "roxygen2", "stringr", "knitr", "data.table", "ordinal", "geosphere", "fields", "car", "pbkrtest", "quantreg", "reshape"))'
   - Rscript -e 'devtools::install_bioc(c("BiocInstaller", "rhdf5"))'
 
 # install and test framework, modules, models, GUI
@@ -88,23 +88,23 @@ script:
     R CMD INSTALL .
     cd ../../..
     
-    cd sources/modules/VEHouseholdVehicles
-    Rscript -e 'devtools::install_deps(".")'
-    Rscript -e 'devtools::check(".")'
-    Rscript -e "tryCatch( source('tests/scripts/test.R') )"
-    R CMD INSTALL .
-    cd ../../..
+    # cd sources/modules/VEHouseholdVehicles
+    # Rscript -e 'devtools::install_deps(".")'
+    # Rscript -e 'devtools::check(".")'
+    # Rscript -e "tryCatch( source('tests/scripts/test.R') )"
+    # R CMD INSTALL .
+    # cd ../../..
     
-    cd sources/models/VERPAT
-    Rscript -e "tryCatch( source('run_model.R') )"
-    cd ../../..
+    # cd sources/models/VERPAT
+    # Rscript -e "tryCatch( source('run_model.R') )"
+    # cd ../../..
     
-    cd sources/models/VERSPM/Test1
-    Rscript -e "tryCatch( source('run_model.R') )"
-    cd ../../../..
+    # cd sources/models/VERSPM/Test1
+    # Rscript -e "tryCatch( source('run_model.R') )"
+    # cd ../../../..
     
-    cd sources/VEGUI
-    Rscript -e 'install.packages(c("shiny", "shinyjs", "shinyFiles", "data.table", "DT", "shinyBS", "future", "testit", "jsonlite", "shinyAce", "envDocument", "rhandsontable"))'
-    Rscript -e 'devtools::install_github(c("tdhock/namedCapture", "trestletech/shinyTree", "rstudio/webdriver", "rstudio/shinytest"))'
-    Rscript -e "tryCatch( source('run_vegui_test.R') )"    
-    cd ../..
+    # cd sources/VEGUI
+    # Rscript -e 'install.packages(c("shiny", "shinyjs", "shinyFiles", "data.table", "DT", "shinyBS", "future", "testit", "jsonlite", "shinyAce", "envDocument", "rhandsontable"))'
+    # Rscript -e 'devtools::install_github(c("tdhock/namedCapture", "trestletech/shinyTree", "rstudio/webdriver", "rstudio/shinytest"))'
+    # Rscript -e "tryCatch( source('run_vegui_test.R') )"    
+    # cd ../..
