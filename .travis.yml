@@ -98,14 +98,14 @@ script:
     R CMD INSTALL .
     cd ../../..
     
-    # cd sources/models/VERPAT
-    # Rscript -e "tryCatch( source('run_model.R') )"
-    # cd ../../..
+    cd sources/models/VERPAT
+    Rscript -e "tryCatch( source('run_model.R') )"
+    cd ../../..
     
-    # cd sources/models/VERSPM/Test1
-    # Rscript -e "tryCatch( source('run_model.R') )"
-    # cd ../../../..
+    cd sources/models/VERSPM/Test1
+    Rscript -e "tryCatch( source('run_model.R') )"
+    cd ../../../..
     
-    # cd sources/VEGUI
-    # Rscript -e "tryCatch( source('run_vegui_test.R') )"    
-    # cd ../..
+    cd sources/VEGUI
+    Rscript -e "tryCatch( source('run_vegui_test.R') )"    
+    cd ../..
