@@ -17,6 +17,8 @@ Depends: R (>= 3.1.0)
 Imports:
     visioneval,
     ordinal,
+    reshape2,
+    stats,
     devtools,
     VE2001NHTS
 Suggests:
