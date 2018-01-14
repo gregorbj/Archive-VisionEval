@@ -26,33 +26,6 @@ testModule(
   DoRun = TRUE
 )
 
-#Test AssignVehicleDvmtSplit module
-source("R/AssignVehicleDvmtSplit.R")
-testModule(
-  ModuleName = "AssignVehicleDvmtSplit",
-  LoadDatastore = TRUE,
-  SaveDatastore = TRUE,
-  DoRun = TRUE
-)
-
-#Test AssignVehicleDvmt module
-source("R/AssignVehicleDvmt.R")
-testModule(
-  ModuleName = "AssignVehicleDvmt",
-  LoadDatastore = TRUE,
-  SaveDatastore = TRUE,
-  DoRun = TRUE
-)
-
-#Test CalculateVehicleEnergySplit module
-source("R/CalculateVehicleEnergySplit.R")
-testModule(
-  ModuleName = "CalculateVehicleEnergySplit",
-  LoadDatastore = TRUE,
-  SaveDatastore = TRUE,
-  DoRun = TRUE
-)
-
 #Test DivertSovTravel module
 source("R/DivertSovTravel.R")
 testModule(
