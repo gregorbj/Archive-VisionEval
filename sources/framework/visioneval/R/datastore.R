@@ -314,7 +314,8 @@ readFromTableRD <- function(Name, Table, Group, DstoreLoc = NULL, Index = NULL) 
   Message <- paste0("Read data ", file.path(Group, Table, Name))
   #writeLog(Message)
   #Apply the attributes and return
-  attributes(Dataset) <- Attr_ls
+  # attributes(Dataset) <- Attr_ls
+  attributes(Dataset) <- NULL
   Dataset #as.vector(Dataset)
 }
 #readFromTableRD("Azone", "Azone", "2010")
