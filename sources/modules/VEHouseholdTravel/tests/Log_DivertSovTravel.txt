@@ -1,32 +1,32 @@
 Test
 Test of VESimHouseholds package modules
-2017-11-08_07:49:34
+2017-12-20_11:54:11
 
-2017-11-08 07:49:34 : Testing DivertSovTravel. 
+2017-12-20 11:54:11 : Testing DivertSovTravel. 
 
-2017-11-08 07:49:34 : Attempting to load datastore. 
+2017-12-20 11:54:11 : Attempting to load datastore. 
 
-2017-11-08 07:49:34 : Datastore loaded. 
+2017-12-20 11:54:12 : Datastore loaded. 
 
-2017-11-08 07:49:34 : Attempting to load and check specifications. 
+2017-12-20 11:54:12 : Attempting to load and check specifications. 
 
-2017-11-08 07:49:35 : Module specifications successfully loaded and checked. 
+2017-12-20 11:54:12 : Module specifications successfully loaded and checked. 
 
-2017-11-08 07:49:35 : Attempting to process, check and load module inputs. 
+2017-12-20 11:54:12 : Attempting to process, check and load module inputs. 
 
-2017-11-08 07:49:36 : Module inputs successfully checked and loaded into datastore. 
+2017-12-20 11:54:15 : Module inputs successfully checked and loaded into datastore. 
 
-2017-11-08 07:49:36 : Checking whether datastore contains all datasets in Get specifications. 
+2017-12-20 11:54:15 : Checking whether datastore contains all datasets in Get specifications. 
 
-2017-11-08 07:49:36 : Datastore contains all datasets identified in module Get specifications. 
+2017-12-20 11:54:15 : Datastore contains all datasets identified in module Get specifications. 
 
-2017-11-08 07:49:36 : Running module and checking whether outputs meet Set specifications. 
+2017-12-20 11:54:15 : Running module and checking whether outputs meet Set specifications. 
 
-2017-11-08 07:49:36 : Also saving module outputs to datastore. 
+2017-12-20 11:54:15 : Also saving module outputs to datastore. 
 
-2017-11-08 07:49:46 : Module run successfully and outputs meet Set specifications. 
+2017-12-20 11:54:25 : Module run successfully and outputs meet Set specifications. 
 
-2017-11-08 07:49:46 : Module outputs saved to datastore. 
+2017-12-20 11:54:25 : Module outputs saved to datastore. 
 
-2017-11-08 07:49:46 : Congratulations. Module DivertSovTravel passed all tests. 
+2017-12-20 11:54:27 : Congratulations. Module DivertSovTravel passed all tests. 
 
