@@ -34,6 +34,68 @@ item <- list
 items <- list
 
 
+#ADD ERROR MESSAGE TO RESULTS LIST
+#=================================
+#' Add an error message to the results list
+#'
+#' \code{addErrorMsg} adds an error message to the Errors component of the
+#' module results list that is passed back to the framework.
+#'
+#' This function is a convenience function for module developers for passing
+#' error messages back to the framework. The preferred method for handling
+#' errors in module execution is for the module to handle the error by passing
+#' one or more error messages back to the framework. The framework will then
+#' write error messages to the log and stop execution. Error messages are
+#' stored in a component of the returned list called Errors. This component is
+#' a string vector where each element is an error message. The addErrorMsg will
+#' create the Error component if it does not already exist and will add an error
+#' message to the vector.
+#'
+#' @param ResultsListName the name of the results list given as a character
+#' string
+#' @param ErrMsg a character string that contains the error message
+#' @return None. The function modifies the results list by adding an error
+#' message to the Errors component of the results list. It creates the Errors
+#' component if it does not already exist.
+#' @export
+addErrorMsg <- function(ResultsListName, ErrMsg) {
+  Results_ls <- get(ResultsListName, envir = parent.frame())
+  Results_ls$Errors <- c(Results_ls$Errors, ErrMsg)
+  assign(ResultsListName, Results_ls, envir = parent.frame())
+}
+
+
+#ADD WARNING MESSAGE TO RESULTS LIST
+#===================================
+#' Add a warning message to the results list
+#'
+#' \code{addWarningMsg} adds an warning message to the Warnings component of the
+#' module results list that is passed back to the framework.
+#'
+#' This function is a convenience function for module developers for passing
+#' warning messages back to the framework. The preferred method for handling
+#' warnings in module execution is for the module to handle the warning by
+#' passing one or more warning messages back to the framework. The framework
+#' will then write warning messages to the log and stop execution. Warning
+#' messages are stored in a component of the returned list called Warnings. This
+#' component is a string vector where each element is an warning message. The
+#' addWarningMsg will create the Warning component if it does not already exist
+#' and will add a warning message to the vector.
+#'
+#' @param ResultsListName the name of the results list given as a character
+#' string
+#' @param WarnMsg a character string that contains the warning message
+#' @return None. The function modifies the results list by adding a warning
+#' message to the Warnings component of the results list. It creates the
+#' Warnings component if it does not already exist.
+#' @export
+addWarningMsg <- function(ResultsListName, WarnMsg) {
+  Results_ls <- get(ResultsListName, envir = parent.frame())
+  Results_ls$Warnings <- c(Results_ls$Warnings, WarnMsg)
+  assign(ResultsListName, Results_ls, envir = parent.frame())
+}
+
+
 #LOAD ESTIMATION DATA
 #====================
 #' Load estimation data
@@ -309,6 +371,15 @@ checkModuleOutputs <-
 #' @param RunFor A string identifying what years the module is to be tested for.
 #'   The value must be the same as the value that is used when the module is run
 #'   in a module. Allowed values are 'AllYears', 'BaseYear', and 'NotBaseYear'.
+#' @param StopOnErr A logical identifying whether model execution should be
+#'   stopped if the module transmits one or more error messages or whether
+#'   execution should continue with the next module. The default value is TRUE.
+#'   This is how error handling will ordinarily proceed during a model run. A
+#'   value of FALSE is used when 'Initialize' modules in packages are run during
+#'   model initialization. These 'Initialize' modules are used to check and
+#'   preprocess inputs. For this purpose, the module will identify any errors in
+#'   the input data, the 'initializeModel' function will collate all the data
+#'   errors and print them to the log.
 #' @return If DoRun is FALSE, the return value is a list containing the module
 #'   specifications. If DoRun is TRUE, there is no return value. The function
 #'   writes out messages to the console and to the log as the testing proceeds.
@@ -326,7 +397,8 @@ testModule <-
            LoadDatastore = FALSE,
            SaveDatastore = TRUE,
            DoRun = TRUE,
-           RunFor = "AllYears") {
+           RunFor = "AllYears",
+           StopOnErr = TRUE) {
 
     #Set working directory to tests and return to main module directory on exit
     #--------------------------------------------------------------------------
@@ -401,20 +473,41 @@ testModule <-
 
     #Process, check, and load module inputs
     #--------------------------------------
-    if(!is.null(Specs_ls$Inp)) {
-
+    if (ModuleName == "Initialize") {
       writeLog("Attempting to process, check and load module inputs.",
                Print = TRUE)
       ProcessedInputs_ls <- processModuleInputs(Specs_ls, ModuleName)
       if (length(ProcessedInputs_ls$Errors) != 0)  {
         writeLog(ProcessedInputs_ls$Errors)
-        stop("Input files have errors. Check the log for details.")
+        stop("Input files for Initialize module have errors. Check the log for details.")
+      } else {
+        if (!is.null(ProcessedInputs_ls$Warnings)) {
+          if (length(ProcessedInputs_ls$Warnings > 0)) {
+            writeLog(ProcessedInputs_ls$Warnings)
+          }
+        }
+        if (SaveDatastore) {
+          inputsToDatastore(ProcessedInputs_ls, Specs_ls, ModuleName)
+          return()
+        } else {
+          return(ProcessedInputs_ls)
+        }
       }
-      inputsToDatastore(ProcessedInputs_ls, Specs_ls, ModuleName)
-      writeLog("Module inputs successfully checked and loaded into datastore.",
-               Print = TRUE)
     } else {
-      writeLog("No inputs to process.", Print = TRUE)
+      if(!is.null(Specs_ls$Inp)) {
+        writeLog("Attempting to process, check and load module inputs.",
+                 Print = TRUE)
+        ProcessedInputs_ls <- processModuleInputs(Specs_ls, ModuleName)
+        if (length(ProcessedInputs_ls$Errors) != 0)  {
+          writeLog(ProcessedInputs_ls$Errors)
+          stop("Input files for Initialize module have errors. Check the log for details.")
+        }
+        inputsToDatastore(ProcessedInputs_ls, Specs_ls, ModuleName)
+        writeLog("Module inputs successfully checked and loaded into datastore.",
+                 Print = TRUE)
+      } else {
+        writeLog("No inputs to process.", Print = TRUE)
+      }
     }
 
     #Check whether datastore contains all data items in Get specifications
@@ -517,19 +610,42 @@ testModule <-
           } else {
             R <- Func(L)
           }
-          #Check results
-          Check_ <-
-            checkModuleOutputs(
-              Data_ls = R,
-              ModuleSpec_ls = Specs_ls,
-              ModuleName = ModuleName)
-          ResultsCheck_ <- Check_
-          #Save results if SaveDatastore and no errors found
-          if (SaveDatastore & length(Check_) == 0) {
-            setInDatastore(R, Specs_ls, ModuleName, Year, Geo = NULL)
+          #Check for errors and warnings in module return list
+          #Save results in datastore if no errors from module
+          if (is.null(R$Errors)) {
+            #Check results
+            Check_ <-
+              checkModuleOutputs(
+                Data_ls = R,
+                ModuleSpec_ls = Specs_ls,
+                ModuleName = ModuleName)
+            ResultsCheck_ <- Check_
+            #Save results if SaveDatastore and no errors found
+            if (SaveDatastore & length(Check_) == 0) {
+              setInDatastore(R, Specs_ls, ModuleName, Year, Geo = NULL)
+            }
+          }
+          #Handle warnings
+          if (!is.null(R$Warnings)) {
+            writeLog(R$Warnings)
+            Msg <-
+              paste0("Module ", ModuleName, " has reported one or more warnings. ",
+                     "Check log for details.")
+            warning(Msg)
+          }
+          #Handle errors
+          if (!is.null(R$Errors) & StopOnErr) {
+            writeLog(R$Errors)
+            Msg <-
+              paste0("Module ", ModuleName, " has reported one or more errors. ",
+                     "Check log for details.")
+            stop(Msg)
           }
         #Otherwise the following code is run
         } else {
+          #Initialize vectors to store module errors and warnings
+          Errors_ <- character(0)
+          Warnings_ <- character(0)
           #Identify the units of geography to iterate over
           GeoCategory <- Specs_ls$RunBy
           #Create the geographic index list
@@ -558,16 +674,36 @@ testModule <-
             } else {
               R <- Func(L)
             }
-            #Check results
-            Check_ <-
-              checkModuleOutputs(
-                Data_ls = R,
-                ModuleSpec_ls = Specs_ls,
-                ModuleName = ModuleName)
-            ResultsCheck_ <- c(ResultsCheck_, Check_)
-            #Save results if SaveDatastore and no errors found
-            if (SaveDatastore & length(Check_) == 0) {
-              setInDatastore(R, Specs_ls, ModuleName, Year, Geo = Geo, GeoIndex_ls = GeoIndex_ls)
+            #Check for errors and warnings in module return list
+            #Save results in datastore if no errors from module
+            if (is.null(R$Errors)) {
+              #Check results
+              Check_ <-
+                checkModuleOutputs(
+                  Data_ls = R,
+                  ModuleSpec_ls = Specs_ls,
+                  ModuleName = ModuleName)
+              ResultsCheck_ <- c(ResultsCheck_, Check_)
+              #Save results if SaveDatastore and no errors found
+              if (SaveDatastore & length(Check_) == 0) {
+                setInDatastore(R, Specs_ls, ModuleName, Year, Geo = Geo, GeoIndex_ls = GeoIndex_ls)
+              }
+            }
+            #Handle warnings
+            if (!is.null(R$Warnings)) {
+              writeLog(R$Warnings)
+              Msg <-
+                paste0("Module ", ModuleName, " has reported one or more warnings. ",
+                       "Check log for details.")
+              warning(Msg)
+            }
+            #Handle errors
+            if (!is.null(R$Errors) & StopOnErr) {
+              writeLog(R$Errors)
+              Msg <-
+                paste0("Module ", ModuleName, " has reported one or more errors. ",
+                       "Check log for details.")
+              stop(Msg)
             }
           }
         }
