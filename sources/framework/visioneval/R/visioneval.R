@@ -136,6 +136,30 @@ initializeModel <-
     ModuleCalls_df <- unique(getModelState()$ModuleCalls_df)
     #Get list of installed packages
     InstalledPkgs_ <- rownames(installed.packages())
+    #Check that all module packages are in list of installed packages
+    RequiredPkg_ <- unique(ModuleCalls_df$PackageName)
+    MissingPkg_ <- RequiredPkg_[!(RequiredPkg_ %in% InstalledPkgs_)]
+    if (length(MissingPkg_ != 0)) {
+      Msg <-
+        paste0("One or more required packages need to be installed in order ",
+               "to run the model. Following are the missing package(s): ",
+               paste(MissingPkg_, collapse = ", "), ".")
+      stop(Msg)
+    }
+    #Check for 'Initialize' module in each package if so add to ModuleCalls_df
+    for (Pkg in RequiredPkg_) {
+      PkgData <- data(package = Pkg)$results[,"Item"]
+      if ("Initialize" %in% PkgData) {
+        Add_df <-
+          data.frame(
+            ModuleName = "Initialize",
+            PackageName = Pkg,
+            RunFor = "AllYears",
+            Year = "Year"
+          )
+        ModuleCalls_df <- rbind(ModuleCalls_df, Add_df)
+      }
+    }
     #Iterate through each module call and check availability and specifications
     #create combined list of all specifications
     Errors_ <- character(0)
@@ -222,9 +246,21 @@ initializeModel <-
       Package <- ModuleCalls_df$PackageName[i]
       ModuleSpecs_ls <-
         processModuleSpecs(getModuleSpecs(Module, Package))
+      #If there are inputs, process them
       if (!is.null(ModuleSpecs_ls$Inp)) {
         ProcessedInputs_ls[[Module]] <-
           processModuleInputs(ModuleSpecs_ls, Module)
+        #If module is Initialize process inputs with Initialize function
+        if (Module == "Initialize") {
+          ProcessedInputs_ls[[Module]] <-
+            call(paste(Package, Module, sep = "::"),
+                 ProcessedInputs_ls[[Module]])
+          if (!is.null(ProcessedInputs_ls$Warnings)) {
+            if (length(ProcessedInputs_ls$Warnings > 0)) {
+              writeLog(ProcessedInputs_ls$Warnings)
+            }
+          }
+        }
       }
     }
     #Check whether there are any input errors
@@ -273,10 +309,19 @@ initializeModel <-
 #' "AllYears", only the base year "BaseYear", or for all years except the base
 #' year "NotBaseYear".
 #' @param RunYear A string identifying the run year.
+#' @param StopOnErr A logical identifying whether model execution should be
+#'   stopped if the module transmits one or more error messages or whether
+#'   execution should continue with the next module. The default value is TRUE.
+#'   This is how error handling will ordinarily proceed during a model run. A
+#'   value of FALSE is used when 'Initialize' modules in packages are run during
+#'   model initialization. These 'Initialize' modules are used to check and
+#'   preprocess inputs. For this purpose, the module will identify any errors in
+#'   the input data, the 'initializeModel' function will collate all the data
+#'   errors and print them to the log.
 #' @return None. The function writes results to the specified locations in the
 #'   datastore and prints a message to the console when the module is being run.
 #' @export
-runModule <- function(ModuleName, PackageName, RunFor, RunYear) {
+runModule <- function(ModuleName, PackageName, RunFor, RunYear, StopOnErr = TRUE) {
   #Check whether the module should be run for the current run year
   #---------------------------------------------------------------
   BaseYear <- getModelState()$BaseYear
@@ -314,6 +359,10 @@ runModule <- function(ModuleName, PackageName, RunFor, RunYear) {
       Call$Specs[[Alias]]$RunBy <- M$Specs$RunBy
     }
   }
+  #Initialize vectors to store module errors and warnings
+  #------------------------------------------------------
+  Errors_ <- character(0)
+  Warnings_ <- character(0)
   #Run module
   #----------
   if (M$Specs$RunBy == "Region") {
@@ -325,13 +374,27 @@ runModule <- function(ModuleName, PackageName, RunFor, RunYear) {
           getFromDatastore(Call$Specs[[Alias]], RunYear = Year)
       }
     }
-    #Run module and store results in datastore
+    #Run module
     if (exists("Call")) {
       R <- M$Func(L, Call$Func)
     } else {
       R <- M$Func(L)
     }
-    setInDatastore(R, M$Specs, ModuleName, Year = RunYear, Geo = NULL)
+    #Save results in datastore if no errors from module
+    if (is.null(R$Errors)) {
+      setInDatastore(R, M$Specs, ModuleName, Year = RunYear, Geo = NULL)
+    }
+    #Add module errors and warnings if any
+    Errors_ <- c(Errors_, R$Errors)
+    Warnings_ <- c(Errors_, R$Warnings)
+    #Handle errors
+    if (!is.null(R$Errors) & StopOnErr) {
+      writeLog(Errors_)
+      Msg <-
+        paste0("Module ", ModuleName, " has reported one or more errors. ",
+               "Check log for details.")
+      stop(Msg)
+    }
   } else {
     #Identify the units of geography to iterate over
     GeoCategory <- M$Specs$RunBy
@@ -355,13 +418,27 @@ runModule <- function(ModuleName, PackageName, RunFor, RunYear) {
             getFromDatastore(Call$Specs[[Alias]], RunYear = Year, Geo, GeoIndex_ls = GeoIndex_ls[[Alias]])
         }
       }
-      #Run model for geographic area and store results in datastore
+      #Run model for geographic area
       if (exists("Call")) {
         R <- M$Func(L, Call$Func)
       } else {
         R <- M$Func(L)
       }
-      setInDatastore(R, M$Specs, ModuleName, RunYear, Geo, GeoIndex_ls)
+      #Save results in datastore if no errors from module
+      if (is.null(R$Errors)) {
+        setInDatastore(R, M$Specs, ModuleName, RunYear, Geo, GeoIndex_ls)
+      }
+      #Add module errors and warnings if any
+      Errors_ <- c(Errors_, R$Errors)
+      Warnings_ <- c(Errors_, R$Warnings)
+      #Handle errors
+      if (!is.null(R$Errors) & StopOnErr) {
+        writeLog(Errors_)
+        Msg <-
+          paste0("Module ", ModuleName, " has reported one or more errors. ",
+                 "Check log for details.")
+        stop(Msg)
+      }
     }
   }
   #Log and print ending message
@@ -371,4 +448,12 @@ runModule <- function(ModuleName, PackageName, RunFor, RunYear) {
            "' for year '", RunYear, "'.")
   writeLog(Msg)
   print(Msg)
+  #Return error and warning messages if not StopOnErr
+  #--------------------------------------------------
+  if (!StopOnErr) {
+    list(
+      Errors = Errors_,
+      Warnings = Warnings_
+    )
+  }
 }
