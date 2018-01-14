@@ -2,8 +2,5 @@
 
 export(CalculateBaseCommercialDvmt)
 export(CalculateFutureCommercialDvmt)
-export(SplitLDComDvmt)
-export(adjustAgeDistribution)
-export(findMeanAge)
 import(visioneval)
 importFrom("stats", "predict", "smooth.spline")
