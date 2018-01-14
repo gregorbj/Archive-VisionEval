@@ -1,7 +1,7 @@
 Package: VETravelCost
 Type: Package
 Title: Calculate Household Travel Costs
-Version: 0.1.0
+Version: 0.0.9
 Author: Brian Gregor [aut, cre],
 Maintainer: Brian Gregor <gregorb@or-analytics.com>
 Copyright: AASHTO

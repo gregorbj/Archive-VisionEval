@@ -1,4 +1,4 @@
-library(rhdf5)
+library(visioneval)
 library(filesstrings)
 
 #Load datastore from VEHouseholdVehicles package
@@ -8,23 +8,7 @@ untar("Datastore.tar")
 file.remove("Datastore.tar")
 setwd("..")
 
-#Test CalculateHouseholdDVMT module
-source("R/CalculateHouseholdDVMT.R")
-testModule(
-  ModuleName = "CalculateHouseholdDVMT",
-  LoadDatastore = TRUE,
-  SaveDatastore = TRUE,
-  DoRun = TRUE
-)
-
-#Test CalculateAltModeTrips module
-source("R/CalculateAltModeTrips.R")
-testModule(
-  ModuleName = "CalculateAltModeTrips",
-  LoadDatastore = TRUE,
-  SaveDatastore = TRUE,
-  DoRun = TRUE
-)
+#Put test code here
 
 #Finish up
 setwd("tests")
