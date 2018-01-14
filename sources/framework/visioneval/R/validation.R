@@ -933,6 +933,11 @@ checkSpecTypeUnits <- function(Spec_ls, SpecGroup, SpecNum) {
 #' @export
 SpecRequirements <- function(){
   list(
+    RunFor =
+      list(
+        ValueType = "character",
+        ValuesAllowed = c("AllYears", "BaseYear", "NotBaseYear")
+      ),
     RunBy =
       list(
         ValueType = "character",
@@ -1075,7 +1080,7 @@ checkSpec <- function(Spec_ls, SpecGroup, SpecNum) {
       }
     }
   #Check a specification
-  if (SpecGroup == "RunBy") {
+  if (SpecGroup %in% c("RunBy", "RunFor")) {
     Errors_ <- c(Errors_, checkRequirement())
   } else {
     for (nm in names(Require_ls)) {
@@ -1107,6 +1112,18 @@ checkSpec <- function(Spec_ls, SpecGroup, SpecNum) {
 #' @export
 checkModuleSpecs <- function(Specs_ls, ModuleName) {
   Errors_ <- character(0)
+  #Check RunFor
+  #------------
+  if (!is.null(Specs_ls$RunFor)) {
+    Err_ <- checkSpec(Specs_ls$RunFor, "RunFor", 1)
+    if (length(Err_) != 0) {
+      Msg <-
+        paste0(
+          "'RunFor' specification for module '", ModuleName,
+          "' has one or more errors as follows.")
+      Errors_ <- c(Errors_, Msg, Err_)
+    }
+  }
   #Check RunBy
   #-----------
   Err_ <- checkSpec(Specs_ls$RunBy, "RunBy", 1)
