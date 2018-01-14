@@ -2,7 +2,6 @@
 
 export(AssignVehicleAge)
 export(AssignVehicleOwnership)
-export(AssignVehiclePowertrain)
 export(AssignVehicleType)
 export(CreateVehicleTable)
 export(adjustAgeDistribution)
@@ -10,5 +9,4 @@ export(calcAgeDistributionByInc)
 export(findMeanAge)
 import(ordinal)
 import(visioneval)
-importFrom("stats", "as.formula", "binomial", "glm", "predict",
-           "runif", "smooth.spline")
+importFrom("stats", "as.formula", "binomial", "glm", "predict", "runif", "smooth.spline")
