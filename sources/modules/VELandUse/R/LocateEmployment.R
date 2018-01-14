@@ -28,8 +28,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-library(visioneval)
-library(fields)
+
+#=================================
+#Packages used in code development
+#=================================
+#Uncomment following lines during code development. Recomment when done.
+# library(visioneval)
+# library(fields)
+
 
 #=============================================
 #SECTION 1: ESTIMATE AND SAVE MODEL PARAMETERS

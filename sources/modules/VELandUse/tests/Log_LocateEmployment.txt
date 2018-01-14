@@ -30,3 +30,35 @@ Test of VESimHouseholds package modules
 
 2017-11-08 07:23:06 : Congratulations. Module LocateEmployment passed all tests. 
 
+Test
+Test of VESimHouseholds package modules
+2018-01-14_14:57:27
+
+2018-01-14 14:57:27 : Testing LocateEmployment. 
+
+2018-01-14 14:57:27 : Attempting to load datastore. 
+
+2018-01-14 14:57:27 : Datastore loaded. 
+
+2018-01-14 14:57:27 : Attempting to load and check specifications. 
+
+2018-01-14 14:57:28 : Module specifications successfully loaded and checked. 
+
+2018-01-14 14:57:28 : Attempting to process, check and load module inputs. 
+
+2018-01-14 14:57:32 : Module inputs successfully checked and loaded into datastore. 
+
+2018-01-14 14:57:32 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-01-14 14:57:32 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-01-14 14:57:32 : Running module and checking whether outputs meet Set specifications. 
+
+2018-01-14 14:57:32 : Also saving module outputs to datastore. 
+
+2018-01-14 14:57:42 : Module run successfully and outputs meet Set specifications. 
+
+2018-01-14 14:57:42 : Module outputs saved to datastore. 
+
+2018-01-14 14:57:42 : Congratulations. Module LocateEmployment passed all tests. 
+

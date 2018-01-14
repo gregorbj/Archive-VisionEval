@@ -1,5 +1,6 @@
-library(rhdf5)
 library(filesstrings)
+library(visioneval)
+library(fields)
 
 #Load datastore from VESimHouseholds package
 file.copy("../VESimHouseholds/tests/Datastore.tar", "tests/Datastore.tar")
