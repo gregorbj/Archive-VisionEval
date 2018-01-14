@@ -45,15 +45,6 @@ testModule(
   DoRun = TRUE
 )
 
-#Test AssignVehiclePowertrain module
-source("R/AssignVehiclePowertrain.R")
-testModule(
-  ModuleName = "AssignVehiclePowertrain",
-  LoadDatastore = TRUE,
-  SaveDatastore = TRUE,
-  DoRun = TRUE
-)
-
 #Finish up
 setwd("tests")
 tar("Datastore.tar", "Datastore")
