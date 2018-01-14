@@ -1148,6 +1148,237 @@ expandSpec <- function(SpecToExpand_ls) {
 }
 
 
+#FILTER INP SPECIFICATIONS BASED ON WHETHER SPECIFICATION IS OPTIONAL
+#====================================================================
+#' Filters Inp specifications list based on OPTIONAL specification attributes.
+#'
+#' \code{doProcessInpSpec}Filters out Inp specifications whose OPTIONAL
+#' specification attribute is TRUE but the specified input file is not present.
+#'
+#' An Inp specification component may have an OPTIONAL specification whose value
+#' is TRUE. If so, and if the specified input file is present, then the input
+#' specification needs to be processed. This function checks whether the
+#' OPTIONAL specification is present, whether its value is TRUE, and whether the
+#' file exists. If all of these are true, then the input specification needs to
+#' be processed. The input specification also needs to be processed if it is
+#' not optional. A specification is not optional if the OPTIONAL attribute is
+#' not present or if it is present and the value is not TRUE. The function
+#' returns a list of all the Inp specifications that meet these criteria.
+#'
+#' @param InpSpecs_ls A standard specifications list for Inp specifications.
+#' @param InputDir The path to the input directory.
+#' @return A list containing the Inp specification components that meet the
+#' criteria of either not being optional or being optional and the specified
+#' input file is present.
+#' @export
+doProcessInpSpec <- function(InpSpecs_ls, InputDir = "inputs") {
+  #Define function to check an individual specification
+  #Return TRUE if specification is to be used
+  checkOptional <- function(SpecToCheck_ls) {
+    DoProcess <- TRUE
+    IsOptional <- FALSE
+    if (!is.null(SpecToCheck_ls$OPTIONAL)) {
+      if (SpecToCheck_ls$OPTIONAL == TRUE) {
+        IsOptional <- TRUE
+      }
+    }
+    if (IsOptional) {
+      if (file.exists(file.path(InputDir, SpecToCheck_ls$FILE))) {
+        DoProcess <- TRUE
+      } else {
+        DoProcess <- FALSE
+      }
+    }
+    DoProcess
+  }
+  #Return all input specifications that must be processed
+  Out_ls <- list()
+  j <- 1
+  for (i in 1:length(InpSpecs_ls)) {
+    Spec_ls <- InpSpecs_ls[[i]]
+    if (checkOptional(Spec_ls)) {
+      Out_ls[[j]] <- Spec_ls
+      j <- j + 1
+    }
+  }
+  Out_ls
+}
+#Test code
+# setwd("tests")
+# source("data/TestOptionalSpecs.R")
+# doProcessInpSpec(TestOptionalSpecs$Inp)
+# setwd("..")
+# rm(TestOptionalSpecs)
+
+
+#DO PROCESS GET SPECIFICATION COMPONENT
+#======================================
+#' Filters Get specifications list based on OPTIONAL specification attributes.
+#'
+#' \code{doProcessGetSpec}Filters out Get specifications whose OPTIONAL
+#' specification attribute is TRUE but the specified dataset is not included in
+#' the corresponding Inp specifications nor is it present in the datastore.
+#'
+#' A Get specification component may have an OPTIONAL specification whose value
+#' is TRUE. If so, and if the specified dataset will be created by processing
+#' the corresponding Inp specifications or if the dataset is already present in
+#' the datastore then the get specification needs to be processed. This function
+#' checks whether the OPTIONAL specification is present, whether its value is
+#' TRUE, and whether the dataset will be created by processing the corresponding
+#' Inp specifications or if it exists in the datastore for all model run years.
+#' If all of these are true, then the get specification needs to be processed.
+#' The get specification also needs to be processed if it is not optional. A
+#' specification is not optional if the OPTIONAL attribute is not present or if
+#' it is present and the value is not TRUE. The function returns a list of all
+#' the Get specifications that meet these criteria.
+#'
+#' @param GetSpecs_ls A standard specifications list for Get specifications.
+#' @param DstoreListing_df A standard datastore listing dataframe.
+#' @param RunYears_ A string vector of the model run years.
+#' @return A list containing the Get specification components that meet the
+#' criteria of either not being optional or being optional and the specified
+#' input file is present.
+#' @export
+doProcessGetSpec <-
+  function(GetSpecs_ls, DstoreListing_df, RunYears_) {
+    #Define function to check an individual specification
+    #Return TRUE if specification is to be used
+    checkOptional <- function(SpecToCheck_ls) {
+      DoProcess <- TRUE
+      IsOptional <- FALSE
+      if (!is.null(SpecToCheck_ls$OPTIONAL)) {
+        if (SpecToCheck_ls$OPTIONAL == TRUE) {
+          IsOptional <- TRUE
+        }
+      }
+      if (IsOptional) {
+        Name_ <- unlist(SpecToCheck_ls$NAME)
+        Table_ <- rep(SpecToCheck_ls$TABLE, length(Name_))
+        DatasetsExist_ <- logical(0)
+        for (i in 1:length(Name_)) {
+          DatasetExists_ <-
+            sapply(RunYears_, function(x) {
+              checkDataset(
+                Name = Name_[i],
+                Table = Table_[i],
+                Group = x,
+                DstoreListing_df = DstoreListing_df
+              )})
+          DatasetsExist_ <- c(DatasetsExist_, DatasetExists_)
+        }
+        if (all(DatasetsExist_)) {
+          DoProcess <- TRUE
+        } else {
+          DoProcess <- FALSE
+        }
+      }
+      DoProcess
+    }
+    #Return all input specifications that must be processed
+    Out_ls <- list()
+    j <- 1
+    for (i in 1:length(GetSpecs_ls)) {
+      Spec_ls <- GetSpecs_ls[[i]]
+      if (checkOptional(Spec_ls)) {
+        Out_ls[[j]] <- Spec_ls
+        j <- j + 1
+      }
+    }
+    Out_ls
+  }
+
+#Test code
+# source("data/InitializeSpecs.R")
+# doProcessGetSpec(
+#   InitializeSpecifications$Get,
+#   InitializeSpecifications$Inp,
+#   readModelState(FileName = "tests/ModelState.Rda")$Datastore,
+#   readModelState(FileName = "tests/ModelState.Rda")$Years)
+#
+# setwd("tests")
+# source("data/TestOptionalSpecs.R")
+# doProcessGetSpec(
+#   TestOptionalSpecs$Get,
+#   readModelState()$Datastore,
+#   readModelState()$Years)
+# setwd("..")
+# rm(TestOptionalSpecs)
+
+
+#DO PROCESS SET SPECIFICATION COMPONENT
+#======================================
+#' Filters Set specifications list based on OPTIONAL specification attributes.
+#'
+#' \code{doProcessSetSpec}Filters out Set specifications whose OPTIONAL
+#' specification attribute is TRUE but the specified dataset is not included in
+#' the corresponding Get specifications.
+#'
+#' A Set specification component may have an OPTIONAL specification whose value
+#' is TRUE. If so, and if the specified dataset is included in the corresponding
+#' Get specifications then the Set specification component needs to be
+#' processed. This function checks whether the OPTIONAL specification is
+#' present, whether its value is TRUE, and whether the dataset will be created
+#' by processing the corresponding Get specifications. If all of these are true,
+#' then the Set specification needs to be processed. The Set specification also
+#' needs to be processed if it is not optional. A specification is not optional
+#' if the OPTIONAL attribute is not present or if it is present and the value is
+#' not TRUE. The function returns a list of all the Set specifications that meet
+#' these criteria. It is important to note that optional Set specifications only
+#' exist to enable modules to do additional processing of input data. For
+#' example, to adjust proportions so that they exactly equal 1. In this general
+#' use case, optional input datasets are loaded, then they are retrieved from
+#' the datastore, processed, and then resaved to the datastore.
+#'
+#' @param SetSpecs_ls A standard specifications list for Set specifications.
+#' @param ProcessedGetSpecs_ls A processed specifications of Get specifications
+#' that has been processed by the 'doProcessGetSpec' to remove all OPTIONAL
+#' specifications that will not be processed.
+#' @return A list containing the Set specification components that meet the
+#' criteria of either not being optional or being optional and the specified
+#' input file is present.
+#' @export
+doProcessSetSpec <-
+  function(SetSpecs_ls, ProcessedGetSpecs_ls) {
+    #Make table of datasets that will created by processing GetSpecs_ls
+    GetDatasets_ <-
+      do.call(c, lapply(ProcessedGetSpecs_ls, function(x) {
+        Name_ <- unlist(x$NAME)
+        Table_ <- rep(unlist(x$TABLE), length(Name_))
+        paste(Name_, Table_)
+      }))
+    #Define function to check an individual specification
+    #Return TRUE if specification is to be used
+    checkOptional <- function(SpecToCheck_ls) {
+      DoProcess <- TRUE
+      IsOptional <- FALSE
+      if (!is.null(SpecToCheck_ls$OPTIONAL)) {
+        if (SpecToCheck_ls$OPTIONAL == TRUE) {
+          IsOptional <- TRUE
+        }
+      }
+      if (IsOptional) {
+        if (all(paste(SpecToCheck_ls$NAME, SpecToCheck_ls$TABLE) %in% GetDatasets_)) {
+          DoProcess <- TRUE
+        } else {
+          DoProcess <- FALSE
+        }
+      }
+      DoProcess
+    }
+    #Return all input specifications that must be processed
+    Out_ls <- list()
+    j <- 1
+    for (i in 1:length(SetSpecs_ls)) {
+      Spec_ls <- SetSpecs_ls[[i]]
+      if (checkOptional(Spec_ls)) {
+        Out_ls[[j]] <- Spec_ls
+        j <- j + 1
+      }
+    }
+    Out_ls
+  }
+
+
 #PROCESS MODULE SPECIFICATIONS
 #=============================
 #' Process module specifications to expand items with multiple names.
@@ -1167,6 +1398,7 @@ expandSpec <- function(SpecToExpand_ls) {
 #' specifications.
 #' @export
 processModuleSpecs <- function(Spec_ls) {
+  G <- readModelState()
   #Define a function to process a component of a specifications list
   processComponent <- function(Component_ls) {
     Result_ls <- list()
@@ -1186,13 +1418,17 @@ processModuleSpecs <- function(Spec_ls) {
     Out_ls$NewSetTable <- Spec_ls$NewSetTable
   }
   if (!is.null(Spec_ls$Inp)) {
-    Out_ls$Inp <- processComponent(Spec_ls$Inp)
+    FilteredInpSpec_ls <- doProcessInpSpec(Spec_ls$Inp)
+    Out_ls$Inp <- processComponent(FilteredInpSpec_ls)
   }
   if (!is.null(Spec_ls$Get)) {
-    Out_ls$Get <- processComponent(Spec_ls$Get)
+    FilteredGetSpec_ls <-
+      doProcessGetSpec(Spec_ls$Get, G$Datastore, G$Years)
+    Out_ls$Get <- processComponent(FilteredGetSpec_ls)
   }
   if (!is.null(Spec_ls$Set)) {
-    Out_ls$Set <- processComponent(Spec_ls$Set)
+    FilteredSetSpec_ls <- doProcessSetSpec(Spec_ls$Set, FilteredGetSpec_ls)
+    Out_ls$Set <- processComponent(FilteredSetSpec_ls)
   }
   if (!is.null(Spec_ls$Call)) {
     Out_ls$Call <- Spec_ls$Call
