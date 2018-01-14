@@ -7,7 +7,8 @@
 testModule(ModuleName, ParamDir = "defs",
   RunParamFile = "run_parameters.json", GeoFile = "geo.csv",
   ModelParamFile = "model_parameters.json", LoadDatastore = FALSE,
-  SaveDatastore = TRUE, DoRun = TRUE, RunFor = "AllYears")
+  SaveDatastore = TRUE, DoRun = TRUE, RunFor = "AllYears",
+  StopOnErr = TRUE)
 }
 \arguments{
 \item{ModuleName}{A string identifying the module name.}
@@ -47,6 +48,16 @@ will checked for consistency with the Set specifications.}
 \item{RunFor}{A string identifying what years the module is to be tested for.
 The value must be the same as the value that is used when the module is run
 in a module. Allowed values are 'AllYears', 'BaseYear', and 'NotBaseYear'.}
+
+\item{StopOnErr}{A logical identifying whether model execution should be
+stopped if the module transmits one or more error messages or whether
+execution should continue with the next module. The default value is TRUE.
+This is how error handling will ordinarily proceed during a model run. A
+value of FALSE is used when 'Initialize' modules in packages are run during
+model initialization. These 'Initialize' modules are used to check and
+preprocess inputs. For this purpose, the module will identify any errors in
+the input data, the 'initializeModel' function will collate all the data
+errors and print them to the log.}
 }
 \value{
 If DoRun is FALSE, the return value is a list containing the module

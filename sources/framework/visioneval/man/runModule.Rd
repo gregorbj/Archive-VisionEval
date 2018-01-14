@@ -4,7 +4,7 @@
 \alias{runModule}
 \title{Run module.}
 \usage{
-runModule(ModuleName, PackageName, RunFor, RunYear)
+runModule(ModuleName, PackageName, RunFor, RunYear, StopOnErr = TRUE)
 }
 \arguments{
 \item{ModuleName}{A string identifying the name of a module object.}
@@ -17,6 +17,16 @@ a part of.}
 year "NotBaseYear".}
 
 \item{RunYear}{A string identifying the run year.}
+
+\item{StopOnErr}{A logical identifying whether model execution should be
+stopped if the module transmits one or more error messages or whether
+execution should continue with the next module. The default value is TRUE.
+This is how error handling will ordinarily proceed during a model run. A
+value of FALSE is used when 'Initialize' modules in packages are run during
+model initialization. These 'Initialize' modules are used to check and
+preprocess inputs. For this purpose, the module will identify any errors in
+the input data, the 'initializeModel' function will collate all the data
+errors and print them to the log.}
 }
 \value{
 None. The function writes results to the specified locations in the
