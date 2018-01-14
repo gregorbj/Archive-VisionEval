@@ -1,5 +1,7 @@
-library(rhdf5)
+#library(rhdf5)
 library(filesstrings)
+library(visioneval)
+library(data.table)
 
 #Load datastore from VEHouseholdVehicles package
 file.copy("../VEHouseholdVehicles/tests/Datastore.tar", "tests/Datastore.tar")

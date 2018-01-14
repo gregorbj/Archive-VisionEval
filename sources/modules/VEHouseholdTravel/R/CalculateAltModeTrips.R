@@ -3,7 +3,13 @@
 #=======================
 #This module calculates transit, walk, and bike trips for households.
 
-library(visioneval)
+
+#=================================
+#Packages used in code development
+#=================================
+#Uncomment following lines during code development. Recomment when done.
+# library(visioneval)
+
 
 #=============================================
 #SECTION 1: ESTIMATE AND SAVE MODEL PARAMETERS
