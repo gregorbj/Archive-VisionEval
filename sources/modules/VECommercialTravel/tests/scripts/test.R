@@ -28,16 +28,6 @@ testModule(
   RunFor = "NotBaseYear"
 )
 
-#Test SplitLDComDvmt module
-source("R/SplitLDComDvmt.R")
-testModule(
-  ModuleName = "SplitLDComDvmt",
-  LoadDatastore = TRUE,
-  SaveDatastore = TRUE,
-  DoRun = TRUE,
-  RunFor = "AllYears"
-)
-
 #Finish up
 setwd("tests")
 tar("Datastore.tar", "Datastore")
