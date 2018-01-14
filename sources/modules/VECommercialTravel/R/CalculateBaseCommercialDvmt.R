@@ -1,8 +1,8 @@
 #=============================
 #CalculateBaseCommercialDvmt.R
 #=============================
-#This module calculates base year commercial light-duty vehicle DVMT and
-#heavy-duty DVMT. It reads in the basis for calculating future DVMT from base
+#This module calculates base year commercial service vehicle DVMT and
+#heavy truck DVMT. It reads in the basis for calculating future DVMT from base
 #year DVMT. This basis can be household DVMT, household income, workers, or
 #population. The module computes the ratio corresponding to the specified basis
 #and saves it along with the base year DVMT.
@@ -45,8 +45,8 @@ CalculateBaseCommercialDvmtSpecifications <- list(
   #Specify input data
   Inp = items(
     item(
-      NAME = "RatioLDComDvmtHhDvmt",
-      FILE = "marea_base_year_com_dvmt.csv",
+      NAME = "RatioComSvcDvmtHhDvmt",
+      FILE = "marea_base_year_comsvc_dvmt.csv",
       TABLE = "Marea",
       GROUP = "BaseYear",
       TYPE = "double",
@@ -60,8 +60,23 @@ CalculateBaseCommercialDvmtSpecifications <- list(
       DESCRIPTION = "Ratio between light-duty commercial vehicle DVMT (resulting from household and business demand in the metropolitan area) and household DVMT in base year"
     ),
     item(
-      NAME = "BaseYearHDComDvmt",
-      FILE = "marea_base_year_com_dvmt.csv",
+      NAME = "ComSvcDvmtGrowthBasis",
+      FILE = "marea_base_year_comsvc_dvmt.csv",
+      TABLE = "Marea",
+      GROUP = "BaseYear",
+      TYPE = "character",
+      UNITS = "category",
+      NAVALUE = -1,
+      SIZE = 10,
+      PROHIBIT = "",
+      ISELEMENTOF = c("Population", "Income", "Dvmt", "Workers"),
+      UNLIKELY = "",
+      TOTAL = "",
+      DESCRIPTION = "Basis for growing commercial service vehicle DVMT"
+    ),
+    item(
+      NAME = "BaseYearHvyTrkDvmt",
+      FILE = "marea_base_year_hvytrk_dvmt.csv",
       TABLE = "Marea",
       GROUP = "BaseYear",
       TYPE = "compound",
@@ -75,10 +90,8 @@ CalculateBaseCommercialDvmtSpecifications <- list(
       DESCRIPTION = "Heavy duty truck DVMT on metropolitan area roads"
     ),
     item(
-      NAME = items(
-        "LDComDvmtGrowthBasis",
-        "HDComDvmtGrowthBasis"),
-      FILE = "marea_base_year_com_dvmt.csv",
+      NAME = "HvyTrkDvmtGrowthBasis",
+      FILE = "marea_base_year_hvytrk_dvmt.csv",
       TABLE = "Marea",
       GROUP = "BaseYear",
       TYPE = "character",
@@ -89,15 +102,13 @@ CalculateBaseCommercialDvmtSpecifications <- list(
       ISELEMENTOF = c("Population", "Income", "Dvmt", "Workers"),
       UNLIKELY = "",
       TOTAL = "",
-      DESCRIPTION = items(
-        "Basis for growing commercial light-duty vehicle DVMT",
-        "Basis for growing commercial heavy-duty vehicle DVMT")
+      DESCRIPTION = "Basis for growing commercial service vehicle DVMT"
     )
   ),
   #Specify data to be loaded from data store
   Get = items(
     item(
-      NAME = "RatioLDComDvmtHhDvmt",
+      NAME = "RatioComSvcDvmtHhDvmt",
       TABLE = "Marea",
       GROUP = "BaseYear",
       TYPE = "double",
@@ -106,18 +117,25 @@ CalculateBaseCommercialDvmtSpecifications <- list(
       ISELEMENTOF = ""
     ),
     item(
-      NAME = "BaseYearHDComDvmt",
+      NAME = "BaseYearHvyTrkDvmt",
       TABLE = "Marea",
       GROUP = "BaseYear",
       TYPE = "compound",
       UNITS = "MI/DAY",
-      PROHIBIT = c("NA", "< 0"),
+      PROHIBIT = c("NA", "<= 0"),
       ISELEMENTOF = ""
     ),
     item(
-      NAME = items(
-        "LDComDvmtGrowthBasis",
-        "HDComDvmtGrowthBasis"),
+      NAME = "ComSvcDvmtGrowthBasis",
+      TABLE = "Marea",
+      GROUP = "BaseYear",
+      TYPE = "character",
+      UNITS = "category",
+      PROHIBIT = "",
+      ISELEMENTOF = c("Population", "Income", "Dvmt", "Workers")
+    ),
+    item(
+      NAME = "HvyTrkDvmtGrowthBasis",
       TABLE = "Marea",
       GROUP = "BaseYear",
       TYPE = "character",
@@ -175,8 +193,8 @@ CalculateBaseCommercialDvmtSpecifications <- list(
   Set = items(
     item(
       NAME =
-        items("LDComDvmtDvmtFactor",
-              "HDComDvmtDvmtFactor"),
+        items("ComSvcDvmtDvmtFactor",
+              "HvyTrkDvmtDvmtFactor"),
       TABLE = "Marea",
       GROUP = "Year",
       TYPE = "double",
@@ -187,14 +205,14 @@ CalculateBaseCommercialDvmtSpecifications <- list(
       SIZE = 0,
       DESCRIPTION =
         items(
-          "Ratio of base year commercial light-duty vehicle DVMT to household DVMT",
-          "Ratio of base year commercial heavy-duty vehicle DVMT to household DVMT"
+          "Ratio of base year commercial service vehicle DVMT to household DVMT",
+          "Ratio of base year heavy truck DVMT to household DVMT"
         )
     ),
     item(
       NAME =
-        items("LDComDvmtIncomeFactor",
-              "HDComDvmtIncomeFactor"),
+        items("ComSvcDvmtIncomeFactor",
+              "HvyTrkDvmtIncomeFactor"),
       TABLE = "Marea",
       GROUP = "Year",
       TYPE = "compound",
@@ -205,14 +223,14 @@ CalculateBaseCommercialDvmtSpecifications <- list(
       SIZE = 0,
       DESCRIPTION =
         items(
-          "Ratio of base year commercial light-duty vehicle DVMT to household income",
-          "Ratio of base year commercial heavy-duty vehicle DVMT to household income"
+          "Ratio of base year commercial service vehicle DVMT to household income",
+          "Ratio of base year heavy truck DVMT to household income"
         )
     ),
     item(
       NAME =
-        items("LDComDvmtPopFactor",
-              "HDComDvmtPopFactor"),
+        items("ComSvcDvmtPopFactor",
+              "HvyTrkDvmtPopFactor"),
       TABLE = "Marea",
       GROUP = "Year",
       TYPE = "compound",
@@ -223,14 +241,14 @@ CalculateBaseCommercialDvmtSpecifications <- list(
       SIZE = 0,
       DESCRIPTION =
         items(
-          "Ratio of base year commercial light-duty vehicle DVMT to population",
-          "Ratio of base year commercial heavy-duty vehicle DVMT to population"
+          "Ratio of base year commercial service vehicle DVMT to population",
+          "Ratio of base year heavy truck DVMT to population"
         )
     ),
     item(
       NAME =
-        items("LDComDvmtWkrFactor",
-              "HDComDvmtWkrFactor"),
+        items("ComSvcDvmtWkrFactor",
+              "HvyTrkDvmtWkrFactor"),
       TABLE = "Marea",
       GROUP = "Year",
       TYPE = "compound",
@@ -241,14 +259,14 @@ CalculateBaseCommercialDvmtSpecifications <- list(
       SIZE = 0,
       DESCRIPTION =
         items(
-          "Ratio of base year commercial light-duty vehicle DVMT to number of workers",
-          "Ratio of base year commercial heavy-duty vehicle DVMT to number of workers"
+          "Ratio of base year commercial service vehicle DVMT to number of workers",
+          "Ratio of base year heavy truck DVMT to number of workers"
         )
     ),
     item(
       NAME =
-        items("LDComDvmt",
-              "HDComDvmt"),
+        items("ComSvcDvmt",
+              "HvyTrkDvmt"),
       TABLE = "Marea",
       GROUP = "Year",
       TYPE = "compound",
@@ -259,8 +277,8 @@ CalculateBaseCommercialDvmtSpecifications <- list(
       SIZE = 0,
       DESCRIPTION =
         items(
-          "Commercial light-duty vehicle DVMT",
-          "Commercial heavy-duty vehicle DVMT"
+          "Commercial service DVMT",
+          "Heavy truck DVMT"
         )
     )
   )
@@ -320,20 +338,20 @@ CalculateBaseCommercialDvmt <- function(L) {
   TotIncome <- sum(L$Year$Household$Income)
   TotWorkers <- sum(L$Year$Household$Workers)
   #Calculate base year commercial DVMT
-  LDComDvmt <- TotHhDvmt * L$BaseYear$Marea$RatioLDComDvmtHhDvmt
-  HDComDvmt <- L$BaseYear$Marea$BaseYearHDComDvmt
+  ComSvcDvmt <- TotHhDvmt * L$BaseYear$Marea$RatioComSvcDvmtHhDvmt
+  HvyTrkDvmt <- L$BaseYear$Marea$BaseYearHvyTrkDvmt
   #Calculate ratio of commercial DVMT with household DVMT
-  LDComDvmtDvmtFactor <- LDComDvmt / TotHhDvmt
-  HDComDvmtDvmtFactor <- HDComDvmt / TotHhDvmt
+  ComSvcDvmtDvmtFactor <- ComSvcDvmt / TotHhDvmt
+  HvyTrkDvmtDvmtFactor <- HvyTrkDvmt / TotHhDvmt
   #Calculate ratio of commercial DVMT with household income
-  LDComDvmtIncomeFactor <- LDComDvmt / TotIncome
-  HDComDvmtIncomeFactor <- HDComDvmt / TotIncome
+  ComSvcDvmtIncomeFactor <-  ComSvcDvmt / TotIncome
+  HvyTrkDvmtIncomeFactor <- HvyTrkDvmt / TotIncome
   #Calculate ratio of commercial DVMT with population
-  LDComDvmtPopFactor <- LDComDvmt / TotPopulation
-  HDComDvmtPopFactor <- HDComDvmt / TotPopulation
+  ComSvcDvmtPopFactor <- ComSvcDvmt / TotPopulation
+  HvyTrkDvmtPopFactor <- HvyTrkDvmt / TotPopulation
   #Calculate ratio of commercial DVMT with workers
-  LDComDvmtWkrFactor <- LDComDvmt / TotWorkers
-  HDComDvmtWkrFactor <- HDComDvmt / TotWorkers
+  ComSvcDvmtWkrFactor <- ComSvcDvmt / TotWorkers
+  HvyTrkDvmtWkrFactor <- HvyTrkDvmt / TotWorkers
 
   #Return the results
   #------------------
@@ -341,16 +359,16 @@ CalculateBaseCommercialDvmt <- function(L) {
   Out_ls <- initDataList()
   Out_ls$Year$Marea <-
     list(
-      LDComDvmt = LDComDvmt,
-      HDComDvmt = HDComDvmt,
-      LDComDvmtDvmtFactor = LDComDvmtDvmtFactor,
-      HDComDvmtDvmtFactor = HDComDvmtDvmtFactor,
-      LDComDvmtIncomeFactor = LDComDvmtIncomeFactor,
-      HDComDvmtIncomeFactor = HDComDvmtIncomeFactor,
-      LDComDvmtPopFactor = LDComDvmtPopFactor,
-      HDComDvmtPopFactor = HDComDvmtPopFactor,
-      LDComDvmtWkrFactor = LDComDvmtWkrFactor,
-      HDComDvmtWkrFactor = HDComDvmtWkrFactor
+      ComSvcDvmt = ComSvcDvmt,
+      HvyTrkDvmt = HvyTrkDvmt,
+      ComSvcDvmtDvmtFactor = ComSvcDvmtDvmtFactor,
+      HvyTrkDvmtDvmtFactor = HvyTrkDvmtDvmtFactor,
+      ComSvcDvmtIncomeFactor = ComSvcDvmtIncomeFactor,
+      HvyTrkDvmtIncomeFactor = HvyTrkDvmtIncomeFactor,
+      ComSvcDvmtPopFactor = ComSvcDvmtPopFactor,
+      HvyTrkDvmtPopFactor = HvyTrkDvmtPopFactor,
+      ComSvcDvmtWkrFactor = ComSvcDvmtWkrFactor,
+      HvyTrkDvmtWkrFactor = HvyTrkDvmtWkrFactor
       )
   #Return the outputs list
   Out_ls
