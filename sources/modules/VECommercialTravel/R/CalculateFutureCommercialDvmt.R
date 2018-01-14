@@ -46,8 +46,8 @@ CalculateFutureCommercialDvmtSpecifications <- list(
   Get = items(
     item(
       NAME =
-        items("LDComDvmtDvmtFactor",
-              "HDComDvmtDvmtFactor"),
+        items("ComSvcDvmtDvmtFactor",
+              "HvyTrkDvmtDvmtFactor"),
       TABLE = "Marea",
       GROUP = "BaseYear",
       TYPE = "double",
@@ -57,8 +57,8 @@ CalculateFutureCommercialDvmtSpecifications <- list(
     ),
     item(
       NAME =
-        items("LDComDvmtIncomeFactor",
-              "HDComDvmtIncomeFactor"),
+        items("ComSvcDvmtIncomeFactor",
+              "HvyTrkDvmtIncomeFactor"),
       TABLE = "Marea",
       GROUP = "BaseYear",
       TYPE = "compound",
@@ -68,8 +68,8 @@ CalculateFutureCommercialDvmtSpecifications <- list(
     ),
     item(
       NAME =
-        items("LDComDvmtPopFactor",
-              "HDComDvmtPopFactor"),
+        items("ComSvcDvmtPopFactor",
+              "HvyTrkDvmtPopFactor"),
       TABLE = "Marea",
       GROUP = "BaseYear",
       TYPE = "compound",
@@ -79,8 +79,8 @@ CalculateFutureCommercialDvmtSpecifications <- list(
     ),
     item(
       NAME =
-        items("LDComDvmtWkrFactor",
-              "HDComDvmtWkrFactor"),
+        items("ComSvcDvmtWkrFactor",
+              "HvyTrkDvmtWkrFactor"),
       TABLE = "Marea",
       GROUP = "BaseYear",
       TYPE = "compound",
@@ -90,8 +90,8 @@ CalculateFutureCommercialDvmtSpecifications <- list(
     ),
     item(
       NAME = items(
-        "LDComDvmtGrowthBasis",
-        "HDComDvmtGrowthBasis"),
+        "ComSvcDvmtGrowthBasis",
+        "HvyTrkDvmtGrowthBasis"),
       TABLE = "Marea",
       GROUP = "BaseYear",
       TYPE = "character",
@@ -149,8 +149,8 @@ CalculateFutureCommercialDvmtSpecifications <- list(
   Set = items(
     item(
       NAME =
-        items("LDComDvmt",
-              "HDComDvmt"),
+        items("ComSvcDvmt",
+              "HvyTrkDvmt"),
       TABLE = "Marea",
       GROUP = "Year",
       TYPE = "compound",
@@ -215,35 +215,35 @@ CalculateFutureCommercialDvmt <- function(L) {
 
   #Calculate commercial light-duty vehicle DVMT
   #--------------------------------------------
-  LDPredictorValue <-
-    switch(L$BaseYear$Marea$LDComDvmtGrowthBasis,
+  ComSvcPredictorValue <-
+    switch(L$BaseYear$Marea$ComSvcDvmtGrowthBasis,
            Dvmt = sum(L$Year$Household$Dvmt),
            Income = sum(L$Year$Household$Income),
            Population = sum(L$Year$Household$HhSize),
            Workers = sum(L$Year$Household$Workers))
-  LDPredictorFactor <-
-    switch(L$BaseYear$Marea$LDComDvmtGrowthBasis,
-           Dvmt = L$BaseYear$Marea$LDComDvmtDvmtFactor,
-           Income = L$BaseYear$Marea$LDComDvmtIncomeFactor,
-           Population = L$BaseYear$Marea$LDComDvmtPopFactor,
-           Workers = L$BaseYear$Marea$LDComDvmtWkrFactor)
-  LDComDvmt <- LDPredictorValue * LDPredictorFactor
+  ComSvcPredictorFactor <-
+    switch(L$BaseYear$Marea$ComSvcDvmtGrowthBasis,
+           Dvmt = L$BaseYear$Marea$ComSvcDvmtDvmtFactor,
+           Income = L$BaseYear$Marea$ComSvcDvmtIncomeFactor,
+           Population = L$BaseYear$Marea$ComSvcDvmtPopFactor,
+           Workers = L$BaseYear$Marea$ComSvcDvmtWkrFactor)
+  ComSvcDvmt <- ComSvcPredictorValue * ComSvcPredictorFactor
 
   #Calculate commercial heavy-duty vehicle DVMT
   #--------------------------------------------
-  HDPredictorValue <-
-    switch(L$BaseYear$Marea$HDComDvmtGrowthBasis,
+  HvyTrkPredictorValue <-
+    switch(L$BaseYear$Marea$HvyTrkDvmtGrowthBasis,
            Dvmt = sum(L$Year$Household$Dvmt),
            Income = sum(L$Year$Household$Income),
            Population = sum(L$Year$Household$HhSize),
            Workers = sum(L$Year$Household$Workers))
-  HDPredictorFactor <-
-    switch(L$BaseYear$Marea$HDComDvmtGrowthBasis,
-           Dvmt = L$BaseYear$Marea$HDComDvmtDvmtFactor,
-           Income = L$BaseYear$Marea$HDComDvmtIncomeFactor,
-           Population = L$BaseYear$Marea$HDComDvmtPopFactor,
-           Workers = L$BaseYear$Marea$HDComDvmtWkrFactor)
-  HDComDvmt <- HDPredictorValue * HDPredictorFactor
+  HvyTrkPredictorFactor <-
+    switch(L$BaseYear$Marea$HvyTrkDvmtGrowthBasis,
+           Dvmt = L$BaseYear$Marea$HvyTrkDvmtDvmtFactor,
+           Income = L$BaseYear$Marea$HvyTrkDvmtIncomeFactor,
+           Population = L$BaseYear$Marea$HvyTrkDvmtPopFactor,
+           Workers = L$BaseYear$Marea$HvyTrkDvmtWkrFactor)
+  HvyTrkDvmt <- HvyTrkPredictorValue * HvyTrkPredictorFactor
 
   #Return the results
   #------------------
@@ -251,8 +251,8 @@ CalculateFutureCommercialDvmt <- function(L) {
   Out_ls <- initDataList()
   Out_ls$Year$Marea <-
     list(
-      LDComDvmt = LDComDvmt,
-      HDComDvmt = HDComDvmt
+      ComSvcDvmt = ComSvcDvmt,
+      HvyTrkDvmt = HvyTrkDvmt
       )
   #Return the outputs list
   Out_ls
