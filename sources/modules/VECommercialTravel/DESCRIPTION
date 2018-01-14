@@ -2,14 +2,13 @@ Package: VECommercialTravel
 Type: Package
 Title: Calculate travel by commercial vehicles
 Version: 0.2.0
+Date: 1/14/18
 Author: Brian Gregor [aut, cre],
 Maintainer: Brian Gregor <gregorb@or-analytics.com>
 Copyright: AASHTO
 URL: https://github.com/gregorbj/VisionEval/sources/modules/VETravelCosts
 Description: Contains several modules for calculating light and heavy duty
-    commercial vehicle travel by vehicle type, powertrain and age. Modules also 
-    calculate MPG and MPKWH for commercial vehicle travel by vehicle type, 
-    powertrain, and age.
+    commercial vehicle DVMT.
 License: Apache License 2.0
 LazyData: TRUE
 Depends: R (>= 3.1.0)
