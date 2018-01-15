@@ -149,7 +149,7 @@ initializeModel <-
     #Check for 'Initialize' module in each package if so add to ModuleCalls_df
     for (Pkg in RequiredPkg_) {
       PkgData <- data(package = Pkg)$results[,"Item"]
-      if ("Initialize" %in% PkgData) {
+      if ("InitializeSpecifications" %in% PkgData) {
         Add_df <-
           data.frame(
             ModuleName = "Initialize",
@@ -252,12 +252,13 @@ initializeModel <-
           processModuleInputs(ModuleSpecs_ls, Module)
         #If module is Initialize process inputs with Initialize function
         if (Module == "Initialize") {
-          ProcessedInputs_ls[[Module]] <-
-            call(paste(Package, Module, sep = "::"),
-                 ProcessedInputs_ls[[Module]])
-          if (!is.null(ProcessedInputs_ls$Warnings)) {
-            if (length(ProcessedInputs_ls$Warnings > 0)) {
-              writeLog(ProcessedInputs_ls$Warnings)
+          if (length(ProcessedInputs_ls[[Module]]$Errors) == 0) {
+            initFunc <- eval(parse(text = paste(Package, Module, sep = "::")))
+            ProcessedInputs_ls[[Module]] <- initFunc(ProcessedInputs_ls[[Module]])
+            if (!is.null(ProcessedInputs_ls$Warnings)) {
+              if (length(ProcessedInputs_ls$Warnings > 0)) {
+                writeLog(ProcessedInputs_ls$Warnings)
+              }
             }
           }
         }
