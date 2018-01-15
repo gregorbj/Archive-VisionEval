@@ -239,6 +239,7 @@ AssignHhVehiclePowertrain <- function(L, M) {
   #------
   #Fix seed as synthesis involves sampling
   set.seed(L$G$Seed)
+  EnergyEmissionsDefaults_ls <- VEEnergyAndEmissions::EnergyEmissionsDefaults_ls
 
   #Set up matrices of vehicle powertrain data
   #------------------------------------------
