@@ -20,7 +20,3 @@ import(ordinal)
 import(reshape2)
 import(stats)
 import(visioneval)
-<<<<<<< HEAD
-importFrom("stats", "as.formula", "binomial", "glm", "predict", "runif", "smooth.spline")
-=======
->>>>>>> 22d7f6d957f4d35bf9251004ddb9c0d264aa51b7
