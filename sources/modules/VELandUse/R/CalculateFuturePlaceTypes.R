@@ -398,6 +398,9 @@ CalculateFuturePlaceTypes <- function(L) {
     rm(EmpDiff, Probs_Pt, EmpDiff_, EmpDiff_Pt, TotalEmp_Pt_attr)
   }
 
+  # Fix the seed again to get similar results as RPAT
+  set.seed(L$G$Seed)
+
   # Assign employment locations randomly to the place types
   Prob_Pt <- TotalEmp_Pt / sum(TotalEmp_Pt)
   Prob_Pt[Prob_Pt < 0]  <- 0
@@ -441,6 +444,9 @@ CalculateFuturePlaceTypes <- function(L) {
   ModelCoeffs_corresp <- cbind(ModelCoeffs_CHDESC,ModelCoeffs_At)
   rm(ModelCoeffs_CHDESC, ModelCoeffs_At)
 
+  # Fix the seed again to get similar results as RPAT
+  set.seed(L$G$Seed)
+
   # Assign area types to households
   Hhlds$AreaType <- runLogit(HhldPop = Hhlds[ ,Ag], ModelData = Hhlds[ ,ModelVar_],
                              ModelCoeffs = HhAllocationModelCoeff_df, TargetPop = Target_At,
@@ -462,6 +468,9 @@ CalculateFuturePlaceTypes <- function(L) {
 
   for(At in AreaTypes){
     if(sum(Prob_Pt[PlaceTypes$At == At]) > 0){
+      # Fix the seed again to get similar results as RPAT
+      set.seed(L$G$Seed)
+
       Hhlds$DevType[Hhlds$AreaType == At] <- sample(PlaceTypes$DevT[PlaceTypes$At == At], sum(Hhlds$AreaType == At),
                                                     replace = TRUE, prob = Prob_Pt[PlaceTypes$At == At])
     }

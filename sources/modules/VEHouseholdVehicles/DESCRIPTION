@@ -15,10 +15,12 @@ Depends: R (>= 3.1.0)
 Imports:
     visioneval,
     ordinal,
+    reshape2,
+    stats,
     devtools,
     VE2001NHTS
 Suggests:
     knitr
 VignetteBuilder: knitr
 RoxygenNote: 6.0.1
-Remotes: gregorbj/VisionEval/sources/framework/visioneval@storagetest, gregorbj/VisionEval/sources/modules/VE2001NHTS@storagetest
+Remotes: gregorbj/VisionEval/sources/framework/visioneval@develop, gregorbj/VisionEval/sources/modules/VE2001NHTS@develop

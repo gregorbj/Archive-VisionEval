@@ -3,6 +3,10 @@ library(filesstrings)
 library(visioneval)
 library(ordinal)
 
+##################################################
+## Section 1. Tests for modules used in VERSPM
+##################################################
+
 #Load datastore from VETransportSupply package
 file.copy("../VETransportSupply/tests/Datastore.tar", "tests/Datastore.tar")
 setwd("tests")
@@ -51,3 +55,49 @@ setwd("tests")
 tar("Datastore.tar", "Datastore")
 dir.remove("Datastore")
 setwd("..")
+
+##################################################
+## Section 2. Tests for modules used in VERPAT
+##################################################
+
+# Set the working directory to tests folder and load the output from
+# previous module runs
+setwd("tests")
+# Copy and save the results from previous module tests
+zip("ModelState.zip","ModelState.Rda")
+file.remove("ModelState.Rda")
+tar("defs.tar","defs")
+tar("inputs.tar","inputs")
+dir.remove("defs")
+dir.remove("inputs")
+untar("Datastore_VERPAT.tar")
+unzip("ModelState_VERPAT.zip")
+untar("inputs_VERPAT.tar")
+setwd("..")
+
+#Test CreateBaseAccessibility module
+source("R/AssignVehicleFeatures.R")
+testModule(
+  ModuleName = "AssignVehicleFeatures",
+  LoadDatastore = TRUE,
+  SaveDatastore = TRUE,
+  DoRun = TRUE
+)
+
+
+#Finish up
+setwd("tests")
+tar("Datastore_VERPAT.tar", c("Datastore", "defs"))
+dir.remove("Datastore")
+dir.remove("defs")
+dir.remove("inputs")
+zip("ModelState_VERPAT.zip","ModelState.Rda")
+file.remove("ModelState.Rda")
+unzip("ModelState.zip")
+file.remove("ModelState.zip")
+untar("defs.tar")
+file.remove("defs.tar")
+untar("inputs.tar")
+file.remove("inputs.tar")
+setwd("..")
+

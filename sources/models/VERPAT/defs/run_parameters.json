@@ -4,9 +4,9 @@
   "Description": ["Pilot RPAT module in VisionEval"],
   "Region": ["Multnomah County Oregon"],
   "BaseYear": ["2005"],
-  "Years": ["2005", "2010"],
-  "DatastoreName": ["datastore.h5"],
-  "DatastoreType": ["H5"],
+  "Years": ["2005", "2035"],
+  "DatastoreName": ["Datastore"],
+  "DatastoreType": ["RD"],
   "Seed": [1],
   "RunTypes": ["E", "ELESNP"]
 }
