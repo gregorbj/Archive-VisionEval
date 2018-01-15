@@ -4,14 +4,10 @@
 \alias{doProcessGetSpec}
 \title{Filters Get specifications list based on OPTIONAL specification attributes.}
 \usage{
-doProcessGetSpec(GetSpecs_ls, ProcessedInpSpecs_ls, DstoreListing_df, RunYears_)
+doProcessGetSpec(GetSpecs_ls, DstoreListing_df, RunYears_)
 }
 \arguments{
 \item{GetSpecs_ls}{A standard specifications list for Get specifications.}
-
-\item{ProcessedInpSpecs_ls}{A processed specifications of Inp specifications
-that has been processed by the 'doProcessInpSpec' to remove all OPTIONAL
-specifications that will not be processed.}
 
 \item{DstoreListing_df}{A standard datastore listing dataframe.}
 
