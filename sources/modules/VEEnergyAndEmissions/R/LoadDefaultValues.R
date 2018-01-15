@@ -21,7 +21,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-library(visioneval)
+
+#=================================
+#Packages used in code development
+#=================================
+#Uncomment following lines during code development. Recomment when done.
+# library(visioneval)
+
 
 #============================================================
 #READ IN AND PROCESS DEFAULT VEHICLE AND FUEL CHARACTERISTICS

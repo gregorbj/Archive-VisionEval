@@ -1,4 +1,5 @@
-library(rhdf5)
+library(visioneval)
+library(data.table)
 library(filesstrings)
 
 #Load datastore from VECommercialTravel package

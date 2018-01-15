@@ -28,3 +28,33 @@ Test of VESimHouseholds package modules
 
 2018-01-04 07:59:29 : Congratulations. Module AssignHhVehicleDvmt passed all tests. 
 
+Test
+Test of VESimHouseholds package modules
+2018-01-14_16:05:14
+
+2018-01-14 16:05:15 : Testing AssignHhVehicleDvmt. 
+
+2018-01-14 16:05:15 : Attempting to load datastore. 
+
+2018-01-14 16:05:15 : Datastore loaded. 
+
+2018-01-14 16:05:15 : Attempting to load and check specifications. 
+
+2018-01-14 16:05:15 : Module specifications successfully loaded and checked. 
+
+2018-01-14 16:05:15 : No inputs to process. 
+
+2018-01-14 16:05:15 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-01-14 16:05:16 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-01-14 16:05:16 : Running module and checking whether outputs meet Set specifications. 
+
+2018-01-14 16:05:16 : Also saving module outputs to datastore. 
+
+2018-01-14 16:05:18 : Module run successfully and outputs meet Set specifications. 
+
+2018-01-14 16:05:18 : Module outputs saved to datastore. 
+
+2018-01-14 16:05:18 : Congratulations. Module AssignHhVehicleDvmt passed all tests. 
+
