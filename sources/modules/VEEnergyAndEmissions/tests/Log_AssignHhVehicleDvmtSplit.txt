@@ -58,3 +58,35 @@ Test of VESimHouseholds package modules
 
 2018-01-14 16:05:14 : Congratulations. Module AssignHhVehicleDvmtSplit passed all tests. 
 
+Test
+Test of VESimHouseholds package modules
+2018-01-14_19:48:27
+
+2018-01-14 19:48:28 : Testing AssignHhVehicleDvmtSplit. 
+
+2018-01-14 19:48:28 : Attempting to load datastore. 
+
+2018-01-14 19:48:28 : Datastore loaded. 
+
+2018-01-14 19:48:29 : Attempting to load and check specifications. 
+
+2018-01-14 19:48:29 : Module specifications successfully loaded and checked. 
+
+2018-01-14 19:48:29 : Attempting to process, check and load module inputs. 
+
+2018-01-14 19:48:29 : No inputs to process. 
+
+2018-01-14 19:48:29 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-01-14 19:48:29 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-01-14 19:48:29 : Running module and checking whether outputs meet Set specifications. 
+
+2018-01-14 19:48:29 : Also saving module outputs to datastore. 
+
+2018-01-14 19:48:44 : Module run successfully and outputs meet Set specifications. 
+
+2018-01-14 19:48:44 : Module outputs saved to datastore. 
+
+2018-01-14 19:48:44 : Congratulations. Module AssignHhVehicleDvmtSplit passed all tests. 
+

@@ -519,7 +519,7 @@ Initialize <- function(L) {
     Out_ls$Data$Year$Marea[Names_] <- checkProps(Names_, "Marea")
   }
   #Add Errors and Warnings to Out_ls and return
-  Out_ls$Errors <- c(Out_ls$Errors, Errors_)
+  Out_ls$Errors <- Errors_
   Out_ls$Warnings <- Warnings_
   Out_ls
 }

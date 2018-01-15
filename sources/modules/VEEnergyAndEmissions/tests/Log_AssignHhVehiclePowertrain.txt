@@ -130,3 +130,35 @@ Test of VESimHouseholds package modules
 
 2018-01-14 16:04:31 : Congratulations. Module AssignHhVehiclePowertrain passed all tests. 
 
+Test
+Test of VESimHouseholds package modules
+2018-01-14_19:47:54
+
+2018-01-14 19:47:54 : Testing AssignHhVehiclePowertrain. 
+
+2018-01-14 19:47:54 : Attempting to load datastore. 
+
+2018-01-14 19:47:54 : Datastore loaded. 
+
+2018-01-14 19:47:54 : Attempting to load and check specifications. 
+
+2018-01-14 19:47:55 : Module specifications successfully loaded and checked. 
+
+2018-01-14 19:47:55 : Attempting to process, check and load module inputs. 
+
+2018-01-14 19:47:55 : No inputs to process. 
+
+2018-01-14 19:47:55 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-01-14 19:47:55 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-01-14 19:47:55 : Running module and checking whether outputs meet Set specifications. 
+
+2018-01-14 19:47:55 : Also saving module outputs to datastore. 
+
+2018-01-14 19:48:07 : Module run successfully and outputs meet Set specifications. 
+
+2018-01-14 19:48:07 : Module outputs saved to datastore. 
+
+2018-01-14 19:48:07 : Congratulations. Module AssignHhVehiclePowertrain passed all tests. 
+
