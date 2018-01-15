@@ -473,9 +473,9 @@ testModule <-
 
     #Process, check, and load module inputs
     #--------------------------------------
+    writeLog("Attempting to process, check and load module inputs.",
+             Print = TRUE)
     if (ModuleName == "Initialize") {
-      writeLog("Attempting to process, check and load module inputs.",
-               Print = TRUE)
       ProcessedInputs_ls <- processModuleInputs(Specs_ls, ModuleName)
       if (length(ProcessedInputs_ls$Errors) != 0)  {
         writeLog(ProcessedInputs_ls$Errors)
@@ -486,6 +486,9 @@ testModule <-
             writeLog(ProcessedInputs_ls$Warnings)
           }
         }
+        #Apply the initialization function
+        initFunc <- get("Initialize")
+        ProcessedInputs_ls <- initFunc(ProcessedInputs_ls)
         if (SaveDatastore) {
           inputsToDatastore(ProcessedInputs_ls, Specs_ls, ModuleName)
           return()
@@ -495,8 +498,6 @@ testModule <-
       }
     } else {
       if(!is.null(Specs_ls$Inp)) {
-        writeLog("Attempting to process, check and load module inputs.",
-                 Print = TRUE)
         ProcessedInputs_ls <- processModuleInputs(Specs_ls, ModuleName)
         if (length(ProcessedInputs_ls$Errors) != 0)  {
           writeLog(ProcessedInputs_ls$Errors)
