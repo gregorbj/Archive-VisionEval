@@ -53,17 +53,9 @@ for(Year in getYears()) {
                 RunFor = "AllYears", RunYear = Year)
   runModule("AssignVehicleAge", "VEHouseholdVehicles", 
                 RunFor = "AllYears", RunYear = Year)
-  runModule("AssignVehiclePowertrain", "VEHouseholdVehicles", 
-                RunFor = "AllYears", RunYear = Year)
   runModule("CalculateHouseholdDvmt", "VEHouseholdTravel", 
                 RunFor = "AllYears", RunYear = Year)
   runModule("CalculateAltModeTrips", "VEHouseholdTravel", 
-                RunFor = "AllYears", RunYear = Year)
-  runModule("AssignVehicleDvmtSplit", "VEHouseholdTravel", 
-                RunFor = "AllYears", RunYear = Year)
-  runModule("AssignVehicleDvmt", "VEHouseholdTravel", 
-                RunFor = "AllYears", RunYear = Year)
-  runModule("CalculateVehicleEnergySplit", "VEHouseholdTravel", 
                 RunFor = "AllYears", RunYear = Year)
   runModule("DivertSovTravel", "VEHouseholdTravel", 
                 RunFor = "AllYears", RunYear = Year)
@@ -71,6 +63,10 @@ for(Year in getYears()) {
                 RunFor = "BaseYear", RunYear = Year)
   runModule("CalculateFutureCommercialDvmt", "VECommercialTravel", 
                 RunFor = "NotBaseYear", RunYear = Year)
-  runModule("SplitLDComDvmt", "VECommercialTravel", 
+  runModule("AssignHhVehiclePowertrain", "VEEnergyAndEmissions", 
+                RunFor = "AllYears", RunYear = Year)
+  runModule("AssignHhVehicleDvmtSplit", "VEEnergyAndEmissions", 
+                RunFor = "AllYears", RunYear = Year)
+  runModule("AssignHhVehicleDvmt", "VEEnergyAndEmissions", 
                 RunFor = "AllYears", RunYear = Year)
 }
