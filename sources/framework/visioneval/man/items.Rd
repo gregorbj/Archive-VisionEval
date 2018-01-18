@@ -10,8 +10,9 @@ items()
 a list.
 }
 \description{
-\code{items} is an alias for the list function whose purpose is to make
-module specifications easier to read.
+\code{items} a visioneval framework \strong{module developer} function that is
+an alias for the list function whose purpose is to make module specifications
+easier to read.
 }
 \details{
 This function defines an alternate name for list. It is used in module

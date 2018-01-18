@@ -33,8 +33,9 @@ None. The function writes results to the specified locations in the
   datastore and prints a message to the console when the module is being run.
 }
 \description{
-\code{runModule} runs a model module.
+\code{runModule} a visioneval framework model user function that
+runs a module.
 }
 \details{
-This function runs a module for  a specified year.
+This function runs a module for a specified year.
 }

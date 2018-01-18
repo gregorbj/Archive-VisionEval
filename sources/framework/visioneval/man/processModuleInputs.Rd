@@ -23,8 +23,9 @@ errors. The second (Data) is a list containing the data in the input files
 organized in the standard format for data exchange with the datastore.
 }
 \description{
-\code{processModuleInputs} processes input files identified in a module's
-'Inp' specifications in preparation for saving in the datastore.
+\code{processModuleInputs} a visioneval framework control function that
+processes input files identified in a module's 'Inp' specifications in
+preparation for saving in the datastore.
 }
 \details{
 This function processes the input files identified in a module's 'Inp'

@@ -23,7 +23,8 @@ The value TRUE is returned if the function is successful at creating
   written to the log.
 }
 \description{
-\code{initTableRD} initializes a table in an RData (RD) type datastore.
+\code{initTableRD} a visioneval framework datastore connection function
+initializes a table in an RData (RD) type datastore.
 }
 \details{
 This function initializes a table in an RData (RD) type datastore.

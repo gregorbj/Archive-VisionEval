@@ -16,8 +16,8 @@ the error messages to identify which module has errors.}
 A vector containing messages identifying any errors that are found.
 }
 \description{
-\code{checkModuleSpecs}checks all module specifications for
-completeness and for proper values.
+\code{checkModuleSpecs} a visioneval framework control function that checks
+all module specifications for completeness and for proper values.
 }
 \details{
 This function iterates through all the specifications for a module and

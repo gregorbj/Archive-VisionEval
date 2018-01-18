@@ -31,8 +31,8 @@ A logical value which is TRUE if the data are successfully saved to
 the datastore.
 }
 \description{
-\code{setInDatastore} saves to the datastore the data returned in a standard
-list by a module.
+\code{setInDatastore} a visioneval framework control function saves to the
+datastore the data returned in a standard list by a module.
 }
 \details{
 This function saves to the datastore the data sets identified in a module's

@@ -16,8 +16,9 @@ item must have (e.g. character, integer). The ValuesAllowed item identifies
 what values the item may have.
 }
 \description{
-\code{SpecRequirements}returns a list of basic requirements for module
-specifications to be used for checking correctness of specifications.
+\code{SpecRequirements} a visioneval framework control function that returns
+a list of basic requirements for module specifications to be used for
+checking correctness of specifications.
 }
 \details{
 This function returns a list of the basic requirements for module

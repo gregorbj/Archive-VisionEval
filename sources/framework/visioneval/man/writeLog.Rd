@@ -17,7 +17,8 @@ TRUE if the message is written to the log uccessfully.
 It appends the time and the message text to the run log.
 }
 \description{
-\code{writeLog} writes a message to the run log.
+\code{writeLog} a visioneval framework control function that writes a message
+to the run log.
 }
 \details{
 This function writes a message in the form of a string to the run log. It

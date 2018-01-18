@@ -20,7 +20,8 @@ TRUE if the listing is successfully read from the datastore and
 written to the model state file.
 }
 \description{
-\code{listDatastoreRD} lists the contents of an RData (RD) type datastore.
+\code{listDatastoreRD} a visioneval framework datastore connection function
+that lists the contents of an RData (RD) type datastore.
 }
 \details{
 This function lists the contents of a datastore for an RData (RD) type

@@ -18,8 +18,8 @@ TRUE if the log is created successfully. It creates a log file in the
   model state file.
 }
 \description{
-\code{initLog} creates a log (text file) that stores messages generated
-during a model run.
+\code{initLog} a visioneval framework control function that creates a log
+(text file) that stores messages generated during a model run.
 }
 \details{
 This function creates a log file that is a text file which stores messages

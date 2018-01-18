@@ -28,8 +28,8 @@ A function that creates a vector of positions corresponding to the
   location of the supplied value in the index field.
 }
 \description{
-\code{createIndex} creates an index for reading or writing module data to the
-datastore.
+\code{createIndex} a visioneval framework control function that creates an
+index for reading or writing module data to the datastore.
 }
 \details{
 This function creates indexing functions which return an index to positions

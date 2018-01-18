@@ -24,8 +24,9 @@ A list containing two components, Errors and Warnings. If no
   error messages.
 }
 \description{
-\code{checkDataConsistency} checks whether data to be written to a dataset is
-consistent with the dataset attributes.
+\code{checkDataConsistency} a visioneval framework control function that
+checks whether data to be written to a dataset is consistent with the dataset
+attributes.
 }
 \details{
 This function compares characteristics of data to be written to a dataset to

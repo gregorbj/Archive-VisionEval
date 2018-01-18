@@ -25,8 +25,9 @@ A list containing all the data sets specified in the module's
 'Get' specifications for the identified geographic area.
 }
 \description{
-\code{getFromDatastore} retrieves datasets identified in a module's 'Get'
-specifications from the datastore.
+\code{getFromDatastore} a visioneval framework control function that
+retrieves datasets identified in a module's 'Get' specifications from the
+datastore.
 }
 \details{
 This function retrieves from the datastore all of the data sets identified in

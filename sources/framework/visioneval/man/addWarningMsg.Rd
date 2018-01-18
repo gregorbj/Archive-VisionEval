@@ -18,8 +18,9 @@ message to the Warnings component of the results list. It creates the
 Warnings component if it does not already exist.
 }
 \description{
-\code{addWarningMsg} adds an warning message to the Warnings component of the
-module results list that is passed back to the framework.
+\code{addWarningMsg} a visioneval framework module developer function that
+adds an warning message to the Warnings component of the module results list
+that is passed back to the framework.
 }
 \details{
 This function is a convenience function for module developers for passing

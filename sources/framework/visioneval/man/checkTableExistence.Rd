@@ -19,8 +19,8 @@ as contained in the model state file.}
 A logical identifying whether a table is present in the datastore.
 }
 \description{
-\code{checkTableExistence} checks whether a table is present in the
-datastore.
+\code{checkTableExistence} a visioneval framework control function that
+checks whether a table is present in the datastore.
 }
 \details{
 This function checks whether a table is present in the datastore.

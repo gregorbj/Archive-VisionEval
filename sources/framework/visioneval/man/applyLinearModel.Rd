@@ -39,8 +39,8 @@ search range, a summary of predicted values when the model is run with
 dispersion set at the high value of the search range.
 }
 \description{
-\code{applyLinearModel} applies an estimated linear model to a set of input
-data.
+\code{applyLinearModel} a visioneval framework module developer function that
+applies an estimated linear model to a set of input data.
 }
 \details{
 The function calculates the result of applying a linear regression model to a

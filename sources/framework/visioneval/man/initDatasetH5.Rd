@@ -19,8 +19,8 @@ exists the function throws an error and writes an error message to the log.
 Updates the model state file.
 }
 \description{
-\code{initDatasetH5} initializes a dataset in an HDF5 (H5) type datastore
-table.
+\code{initDatasetH5} a visioneval framework datastore connection function
+that initializes a dataset in an HDF5 (H5) type datastore table.
 }
 \details{
 This function initializes a dataset in an HDF5 (H5) type datastore table.

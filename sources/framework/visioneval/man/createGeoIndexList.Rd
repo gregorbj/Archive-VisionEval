@@ -19,8 +19,9 @@ specifications in which each component includes all the geographic datasets
 for the table represented by the component.
 }
 \description{
-\code{createGeoIndexList} creates a list containing the geographic indices
-for tables in the operating datastore for identified tables.
+\code{createGeoIndexList} a visioneval framework control function that
+creates a list containing the geographic indices for tables in the operating
+datastore for identified tables.
 }
 \details{
 This function takes a 'Get' or 'Set' specifications list for a module and the

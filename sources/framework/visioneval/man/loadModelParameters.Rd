@@ -15,8 +15,9 @@ The function returns TRUE if the model parameters file exists and
 its values are sucessfully written to the datastore.
 }
 \description{
-\code{loadModelParameters} reads the 'model_parameters.json' file and
-stores the contents in the 'Global/Model' group of the datastore.
+\code{loadModelParameters} a visioneval framework control function reads the
+'model_parameters.json' file and stores the contents in the 'Global/Model'
+group of the datastore.
 }
 \details{
 This function reads the 'model_parameters.json' file in the 'defs' directory

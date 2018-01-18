@@ -19,9 +19,10 @@ criteria of either not being optional or being optional and the specified
 input file is present.
 }
 \description{
-\code{doProcessGetSpec}Filters out Get specifications whose OPTIONAL
-specification attribute is TRUE but the specified dataset is not included in
-the corresponding Inp specifications nor is it present in the datastore.
+\code{doProcessGetSpec} a visioneval framework control function that filters
+out Get specifications whose OPTIONAL specification attribute is TRUE but the
+specified dataset is not included in the corresponding Inp specifications nor
+is it present in the datastore.
 }
 \details{
 A Get specification component may have an OPTIONAL specification whose value

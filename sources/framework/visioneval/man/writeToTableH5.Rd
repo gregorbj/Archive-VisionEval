@@ -22,8 +22,9 @@ written to.}
 TRUE if data is sucessfully written. Updates model state file.
 }
 \description{
-\code{writeToTableRD} writes data to an RData (RD) type datastore table and
-initializes dataset if needed.
+\code{writeToTableRD} a visioneval framework datastore connection function
+that writes data to an RData (RD) type datastore table and initializes
+dataset if needed.
 }
 \details{
 This function writes a dataset file to an RData (RD) type datastore table. It

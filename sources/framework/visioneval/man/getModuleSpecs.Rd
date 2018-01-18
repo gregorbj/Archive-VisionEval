@@ -17,8 +17,8 @@ A specifications list that is the same as the specifications list
 defined for the module in the package.
 }
 \description{
-\code{getModuleSpecs}Function retrieves the specifications list for a module
-and returns the specifications list.
+\code{getModuleSpecs} a visioneval framework control function that retrieves
+the specifications list for a module and returns the specifications list.
 }
 \details{
 This function loads the specifications for a module in a package. It returns

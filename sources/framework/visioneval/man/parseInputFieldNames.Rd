@@ -30,9 +30,9 @@ the list is named with the value of the Name component (i.e. the field name
 without the year and multiplier elements.)
 }
 \description{
-\code{parseInputFieldNames} parses the field names of an input file to
-separate out the field name, currency year (if data is
-currency type), and value multiplier.
+\code{parseInputFieldNames} a visioneval framework control function that
+parses the field names of an input file to separate out the field name,
+currency year (if data is currency type), and value multiplier.
 }
 \details{
 The field names of input files can be used to encode more information than

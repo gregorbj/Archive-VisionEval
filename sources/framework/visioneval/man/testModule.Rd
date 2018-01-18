@@ -69,7 +69,8 @@ If DoRun is FALSE, the return value is a list containing the module
   error messages are also written to the log.
 }
 \description{
-\code{testModule} sets up a test environment and tests a module.
+\code{testModule} a visioneval framework module developer function that sets
+up a test environment and tests a module.
 }
 \details{
 This function is used to set up a test environment and test a module to check

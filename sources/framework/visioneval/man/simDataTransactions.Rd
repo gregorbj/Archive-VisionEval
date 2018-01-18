@@ -23,11 +23,11 @@ writing messages to the log and stops program execution if there are any
 errors.
 }
 \description{
-\code{simDataTransactions}Function loads all module specifications in order
-(by run year) and creates a simulated listing of the data which is in the
-datastore and the requests of data from the datastore and checks whether
-tables will be present to put datasets in and that datasets will be present
-that data is to be retrieved from.
+\code{simDataTransactions} a visioneval framework control function that loads
+all module specifications in order (by run year) and creates a simulated
+listing of the data which is in the datastore and the requests of data from
+the datastore and checks whether tables will be present to put datasets in
+and that datasets will be present that data is to be retrieved from.
 }
 \details{
 This function creates a list of the datastore listings for the working

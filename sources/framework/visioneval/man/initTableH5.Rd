@@ -22,7 +22,8 @@ The value TRUE is returned if the function is successful at creating
   written to the log.
 }
 \description{
-\code{initTableH5} initializes a table in an HDF5 (H5) type datastore.
+\code{initTableH5} a visioneval framework datastore connection function that
+initializes a table in an HDF5 (H5) type datastore.
 }
 \details{
 This function initializes a table in an HDF5 (H5) type datastore.

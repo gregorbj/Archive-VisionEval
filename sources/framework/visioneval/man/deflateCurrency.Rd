@@ -25,8 +25,8 @@ Values_ are returned with a Converted attribute of FALSE. Otherwise the
 conversion is done and the Converted attribute of the returned values is TRUE.
 }
 \description{
-\code{deflateCurrency} converts currency values between different years of
-measure.
+\code{deflateCurrency} a visioneval framework control function that
+converts currency values between different years of measure.
 }
 \details{
 The visioneval framework stores all currency values in the base year real

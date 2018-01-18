@@ -16,13 +16,13 @@ A list of standard specifications lists which has a component for
 each value in the NAME attribute of the input specifications list.
 }
 \description{
-\code{expandSpec} takes a Inp, Get, or Set specification and processes it to
-be in a form that can be used by other functions which use the specification
-in processing inputs or reading from or writing to the datastore. The
-parseUnitsSpec function is called to parse the UNITS attribute to extract
-name, multiplier, and year values. When the specification has multiple
-values for the NAME attribute, the function creates a specification for each
-name value.
+\code{expandSpec} a visioneval framework control function that takes a Inp,
+Get, or Set specification and processes it to be in a form that can be used
+by other functions which use the specification in processing inputs or
+reading from or writing to the datastore. The parseUnitsSpec function is
+called to parse the UNITS attribute to extract name, multiplier, and year
+values. When the specification has multiple values for the NAME attribute,
+the function creates a specification for each name value.
 }
 \details{
 The VisionEval design allows module developers to assign multiple values to

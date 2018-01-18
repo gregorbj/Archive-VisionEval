@@ -11,8 +11,9 @@ The function returns TRUE if the geographic tables and datasets are
   sucessfully written to the datastore.
 }
 \description{
-\code{initDatastoreGeography} initializes tables and writes datasets to the
-datastore which describe geographic relationships of the model.
+\code{initDatastoreGeography} a visioneval framework control function that
+initializes tables and writes datasets to the datastore which describe
+geographic relationships of the model.
 }
 \details{
 This function writes tables to the datastore for each of the geographic

@@ -38,8 +38,9 @@ the value in the 'SearchRange_' for the function parameter which
 matches the target value.
 }
 \description{
-\code{binarySearch} uses a binary search algorithm to find the value of a
-function parameter for which the function achieves a target value.
+\code{binarySearch} a visioneval framework module developer function that
+uses a binary search algorithm to find the value of a function parameter for
+which the function achieves a target value.
 }
 \details{
 A binary search algorithm is used by several modules to calibrate the

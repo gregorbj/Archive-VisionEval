@@ -11,7 +11,8 @@ TRUE if the listing is successfully read from the datastore and
 written to the model state file.
 }
 \description{
-\code{listDatastoreH5} lists the contents of an HDF5 (H5) type datastore.
+\code{listDatastoreH5} a visioneval framework datastore connection function
+that lists the contents of an HDF5 (H5) type datastore.
 }
 \details{
 This function lists the contents of a datastore for an HDF5 (H5) type

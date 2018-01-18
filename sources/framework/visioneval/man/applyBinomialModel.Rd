@@ -43,8 +43,8 @@ search range, a two-element vector identifying if the search range produces
 NA or NaN values.
 }
 \description{
-\code{applyBinomialModel} applies an estimated binomial model to a set of
-input data.
+\code{applyBinomialModel} a visioneval framework module developer function
+that applies an estimated binomial model to a set of input data.
 }
 \details{
 The function calculates the result of applying a binomial logit model to a

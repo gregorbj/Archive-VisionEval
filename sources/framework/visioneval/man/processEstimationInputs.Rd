@@ -22,8 +22,9 @@ data is being used in.}
 A data frame containing the estimation data.
 }
 \description{
-\code{processEstimationInputs} checks whether specified model estimation data
-meets specifications and returns the data in a data frame.
+\code{processEstimationInputs} a visioneval framework module developer
+function that checks whether specified model estimation data meets
+specifications and returns the data in a data frame.
 }
 \details{
 This function is used to check whether a specified CSV-formatted data file

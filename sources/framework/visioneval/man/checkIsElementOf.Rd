@@ -20,8 +20,9 @@ A character vector of messages which identify the data field and the
   conditions are met.
 }
 \description{
-\code{checkIsElementOf} checks whether a data vector contains any elements
-that are not in an allowed set of values.
+\code{checkIsElementOf} a visioneval framework control function that checks
+whether a data vector contains any elements that are not in an allowed set of
+values.
 }
 \details{
 This function is used to check whether categorical data values are consistent

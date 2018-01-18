@@ -19,8 +19,8 @@ TRUE if dataset is successfully initialized. If the identified table
 does not exist, the function throws an error.
 }
 \description{
-\code{initDatasetRD} initializes a dataset in an RData (RD) type datastore
-table.
+\code{initDatasetRD} a visioneval framework datastore connection function
+initializes a dataset in an RData (RD) type datastore table.
 }
 \details{
 This function initializes a dataset in an RData (RD) type datastore table.

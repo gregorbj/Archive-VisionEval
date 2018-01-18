@@ -29,8 +29,8 @@ The value TRUE is returned if the function is successful at reading
   model state file as Geo_df'.
 }
 \description{
-\code{readGeography} reads the geographic specifications file for the
-model.
+\code{readGeography} a visioneval framework control function that reads the
+geographic specifications file for the model.
 }
 \details{
 This function manages the reading and error checking of geographic

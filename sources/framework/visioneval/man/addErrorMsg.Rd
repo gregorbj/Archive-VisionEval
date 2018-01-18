@@ -18,8 +18,9 @@ message to the Errors component of the results list. It creates the Errors
 component if it does not already exist.
 }
 \description{
-\code{addErrorMsg} adds an error message to the Errors component of the
-module results list that is passed back to the framework.
+\code{addErrorMsg} a visioneval framework module developer function that adds
+an error message to the Errors component of the module results list that is
+passed back to the framework.
 }
 \details{
 This function is a convenience function for module developers for passing

@@ -14,9 +14,9 @@ None. The function assigns datastore interactions functions to the
 first position of the search path.
 }
 \description{
-\code{assignDatastoreFunctions} assigns the values of the functions for
-interacting with the datastore to the functions for the declared datastore
-type.
+\code{assignDatastoreFunctions} a visioneval framework control function that
+assigns the values of the functions for interacting with the datastore to the
+functions for the declared datastore type.
 }
 \details{
 The visioneval framework can work with different types of datastores. For

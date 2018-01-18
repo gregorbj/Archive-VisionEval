@@ -22,8 +22,9 @@ A logical indicating successful completion. Most of the outputs of
 the function are the side effects of writing data to the datastore.
 }
 \description{
-\code{inputsToDatastore} takes a list of processed module input files and
-writes the datasets to the datastore.
+\code{inputsToDatastore} a visioneval framework control function that takes a
+list of processed module input files and writes the datasets to the
+datastore.
 }
 \details{
 This function takes a processed list of input datasets specified by a module

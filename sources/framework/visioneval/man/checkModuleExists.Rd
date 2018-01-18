@@ -23,8 +23,8 @@ are installed.}
 TRUE if all packages and modules are present and FALSE if not.
 }
 \description{
-\code{checkModuleExists}Function checks whether a module required to run a
-model is present.
+\code{checkModuleExists} a visioneval framework control function that checks
+whether a module required to run a model is present.
 }
 \details{
 This function takes a specified module and package, checks whether the

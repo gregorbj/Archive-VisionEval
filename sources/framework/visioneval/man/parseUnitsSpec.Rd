@@ -20,11 +20,11 @@ representation of a year or NA if the component is missing or not a proper
 year. The UNITS component is modified to only be the units name.
 }
 \description{
-\code{parseUnitsSpec} parses the UNITS attribute of a standard Inp, Get, or
-Set specification for a dataset to identify the units name, multiplier, and
-year for currency data. Returns a modified specifications list whose UNITS
-value is only the units name, and includes a MULTIPLIER attribute and YEAR
-attribute.
+\code{parseUnitsSpec} a visioneval framework control function that parses the
+UNITS attribute of a standard Inp, Get, or Set specification for a dataset to
+identify the units name, multiplier, and year for currency data. Returns a
+modified specifications list whose UNITS value is only the units name, and
+includes a MULTIPLIER attribute and YEAR attribute.
 }
 \details{
 The UNITS component of a specifications list can encode information in

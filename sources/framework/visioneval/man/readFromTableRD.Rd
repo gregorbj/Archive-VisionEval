@@ -27,8 +27,8 @@ A vector of the same type stored in the datastore and specified in
   the TYPE attribute.
 }
 \description{
-\code{readFromTableRD} reads a dataset from an RData (RD) type datastore
-table.
+\code{readFromTableRD} a visioneval framework datastore connection function
+that reads a dataset from an RData (RD) type datastore table.
 }
 \details{
 This function reads a dataset from an RData (RD) type datastore table.

@@ -12,8 +12,9 @@ listDatastore function which adds a listing of the datastore contents to the
 model state file.
 }
 \description{
-\code{initDatastoreH5} creates datastore with starting structure for an HDF5
-(H5) type datastore.
+\code{initDatastoreH5} a visioneval framework datastore connection function
+that creates datastore with starting structure for an HDF5 (H5) type
+datastore.
 }
 \details{
 This function creates the datastore for the model run with the initial

@@ -25,8 +25,8 @@ A vector of the same type stored in the datastore and specified in
   the TYPE attribute.
 }
 \description{
-\code{readFromTableH5} reads a dataset from an HDF5 (H5) type datastore
-table.
+\code{readFromTableH5} a visioneval framework datastore connection function
+that reads a dataset from an HDF5 (H5) type datastore table.
 }
 \details{
 This function reads a dataset from an HDF5 (H5) type datastore table.

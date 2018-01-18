@@ -10,12 +10,14 @@ getYears()
 A character vector of the model run years.
 }
 \description{
-\code{getYears} reads the Years component from the the model state file.
+\code{getYears} a visioneval framework model user function that reads the
+Years component from the the model state file.
 }
 \details{
 This is a convenience function to make it easier to retrieve the Years
-component of the model state file. If the Years component includes the base
-year then order the Years component so that it is first. This ordering is
+component of the model state file which lists all of the specified model run
+years. If the Years component includes the base year, then the returned
+vector of years places the base year first in the order. This ordering is
 important because some modules calculate future year values by pivoting off
 of base year values so the base year must be run first.
 }

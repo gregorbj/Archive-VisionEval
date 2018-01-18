@@ -17,8 +17,9 @@ criteria of either not being optional or being optional and the specified
 input file is present.
 }
 \description{
-\code{doProcessInpSpec}Filters out Inp specifications whose OPTIONAL
-specification attribute is TRUE but the specified input file is not present.
+\code{doProcessInpSpec} a visioneval framework control function that filters
+out Inp specifications whose OPTIONAL specification attribute is TRUE but the
+specified input file is not present.
 }
 \details{
 An Inp specification component may have an OPTIONAL specification whose value

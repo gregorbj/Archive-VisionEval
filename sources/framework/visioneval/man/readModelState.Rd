@@ -17,8 +17,8 @@ file.}
 A list containing the specified components from the model state file.
 }
 \description{
-\code{readModelState} reads components of the file that saves a copy of the
-model state
+\code{readModelState} a visioneval framework control function that reads
+components of the file that saves a copy of the model state.
 }
 \details{
 The model state is stored in a list (ModelState_ls) that is also saved as a

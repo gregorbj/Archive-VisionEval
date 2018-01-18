@@ -16,8 +16,9 @@ frame containing the respective Inp and Set specifications of registered
 modules.
 }
 \description{
-\code{readVENameRegistry} reads the VisionEval name registry and returns a
-list of data frames containing the Inp and Set specifications.
+\code{readVENameRegistry} a visioneval framework module developer function
+that reads the VisionEval name registry and returns a list of data frames
+containing the Inp and Set specifications.
 }
 \details{
 The VisionEval name registry (VENameRegistry.json) keeps track of the

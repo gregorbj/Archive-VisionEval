@@ -23,8 +23,8 @@ logical identifying whether Bzones are specified; and CzoneSpecified, a
 logical identifying whether Czones are specified.
 }
 \description{
-\code{checkGeography} checks geographic specifications file for
-model.
+\code{checkGeography} a visioneval framework control function that checks
+geographic specifications file for model.
 }
 \details{
 This function reads the file containing geographic specifications for the

@@ -12,8 +12,9 @@ listDatastore function which adds a listing of the datastore contents to the
 model state file.
 }
 \description{
-\code{initDatastoreRD} creates datastore with starting structure for an RData
-(RD) type datastore.
+\code{initDatastoreRD} a visioneval framework datastore connection function
+that creates a datastore with starting structure for an RData (RD) type
+datastore.
 }
 \details{
 This function creates the datastore for the model run with the initial

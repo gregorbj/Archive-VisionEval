@@ -19,8 +19,8 @@ TRUE if successful. Has a side effect of updating the VisionEval
 name registry.
 }
 \description{
-\code{writeVENameRegistry} writes module Inp and Set specifications to the
-VisionEval name registry.
+\code{writeVENameRegistry} a visioneval framework control function that
+writes module Inp and Set specifications to the VisionEval name registry.
 }
 \details{
 The VisionEval name registry (VENameRegistry.json) keeps track of the
