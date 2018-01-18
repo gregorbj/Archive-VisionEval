@@ -9,8 +9,9 @@
 #=================
 #' Alias for list function.
 #'
-#' \code{item} is an alias for the list function whose purpose is to make
-#' module specifications easier to read.
+#' \code{item} a visioneval framework module developer function that is an alias
+#' for the list function whose purpose is to make module specifications easier
+#' to read.
 #'
 #' This function defines an alternate name for list. It is used in module
 #' specifications to identify data items in the Inp, Get, and Set portions of
@@ -22,8 +23,9 @@ item <- list
 
 #' Alias for list function.
 #'
-#' \code{items} is an alias for the list function whose purpose is to make
-#' module specifications easier to read.
+#' \code{items} a visioneval framework \strong{module developer} function that is
+#' an alias for the list function whose purpose is to make module specifications
+#' easier to read.
 #'
 #' This function defines an alternate name for list. It is used in module
 #' specifications to identify a group of data items in the Inp, Get, and Set
@@ -34,12 +36,35 @@ item <- list
 items <- list
 
 
+#INITIALIZE DATA LIST
+#====================
+#' Initialize a list for data transferred to and from datastore
+#'
+#' \code{initDataList} a visioneval framework module developer function that
+#' creates a list to be used for transferring data to and from the datastore.
+#'
+#' This function initializes a list to store data that is transferred from
+#' the datastore to a module or returned from a module to be saved in the
+#' datastore. The list has 3 named components (Global, Year, and BaseYear). This
+#' is the standard structure for data being passed to and from a module and the
+#' datastore.
+#'
+#' @return A list that has 3 named list components: Global, Year, BaseYear
+#' @export
+initDataList <- function() {
+  list(Global = list(),
+       Year = list(),
+       BaseYear = list())
+}
+
+
 #ADD ERROR MESSAGE TO RESULTS LIST
 #=================================
 #' Add an error message to the results list
 #'
-#' \code{addErrorMsg} adds an error message to the Errors component of the
-#' module results list that is passed back to the framework.
+#' \code{addErrorMsg} a visioneval framework module developer function that adds
+#' an error message to the Errors component of the module results list that is
+#' passed back to the framework.
 #'
 #' This function is a convenience function for module developers for passing
 #' error messages back to the framework. The preferred method for handling
@@ -69,8 +94,9 @@ addErrorMsg <- function(ResultsListName, ErrMsg) {
 #===================================
 #' Add a warning message to the results list
 #'
-#' \code{addWarningMsg} adds an warning message to the Warnings component of the
-#' module results list that is passed back to the framework.
+#' \code{addWarningMsg} a visioneval framework module developer function that
+#' adds an warning message to the Warnings component of the module results list
+#' that is passed back to the framework.
 #'
 #' This function is a convenience function for module developers for passing
 #' warning messages back to the framework. The preferred method for handling
@@ -100,8 +126,9 @@ addWarningMsg <- function(ResultsListName, WarnMsg) {
 #====================
 #' Load estimation data
 #'
-#' \code{processEstimationInputs} checks whether specified model estimation data
-#' meets specifications and returns the data in a data frame.
+#' \code{processEstimationInputs} a visioneval framework module developer
+#' function that checks whether specified model estimation data meets
+#' specifications and returns the data in a data frame.
 #'
 #' This function is used to check whether a specified CSV-formatted data file
 #' used in model estimation is correctly formatted and contains acceptable
@@ -219,8 +246,9 @@ processEstimationInputs <- function(Inp_ls, FileName, ModuleName) {
 #===============================================================
 #' Check module outputs for consistency with specifications
 #'
-#' \code{checkModuleOutputs} checks output list produced by a module for
-#' consistency with the module's specifications.
+#' \code{checkModuleOutputs} a visioneval framework module developer function
+#' that checks output list produced by a module for consistency with the
+#' module's specifications.
 #'
 #' This function is used to check whether the output list produced by a module
 #' is consistent with the module's specifications. If there are any
@@ -322,7 +350,8 @@ checkModuleOutputs <-
 #===========
 #' Test module
 #'
-#' \code{testModule} sets up a test environment and tests a module.
+#' \code{testModule} a visioneval framework module developer function that sets
+#' up a test environment and tests a module.
 #'
 #' This function is used to set up a test environment and test a module to check
 #' that it can run successfully in the VisionEval model system. The function
@@ -768,8 +797,9 @@ testModule <-
 #======================
 #' Binary search function to find a parameter which achieves a target value.
 #'
-#' \code{binarySearch} uses a binary search algorithm to find the value of a
-#' function parameter for which the function achieves a target value.
+#' \code{binarySearch} a visioneval framework module developer function that
+#' uses a binary search algorithm to find the value of a function parameter for
+#' which the function achieves a target value.
 #'
 #' A binary search algorithm is used by several modules to calibrate the
 #' intercept of a binary logit model to match a specified proportion or to
@@ -878,7 +908,8 @@ binarySearch <-
 #===========================
 #' Makes a string representation of a model equation.
 #'
-#' \code{makeModelFormulaString} creates a string equivalent of a model equation.
+#' \code{makeModelFormulaString} a visioneval framework module developer
+#' function that creates a string equivalent of a model equation.
 #'
 #' The return values of model estimation functions such as 'lm' and 'glm'
 #' contain a large amount of information in addition to the parameter estimates
@@ -908,8 +939,8 @@ makeModelFormulaString <- function (EstimatedModel) {
 #======================
 #' Applies an estimated binomial model to a set of input values.
 #'
-#' \code{applyBinomialModel} applies an estimated binomial model to a set of
-#' input data.
+#' \code{applyBinomialModel} a visioneval framework module developer function
+#' that applies an estimated binomial model to a set of input data.
 #'
 #' The function calculates the result of applying a binomial logit model to a
 #' set of input data. If a target proportion (TargetProp) is specified, the
@@ -1014,8 +1045,8 @@ applyBinomialModel <-
 #====================
 #' Applies an estimated linear model to a set of input values.
 #'
-#' \code{applyLinearModel} applies an estimated linear model to a set of input
-#' data.
+#' \code{applyLinearModel} a visioneval framework module developer function that
+#' applies an estimated linear model to a set of input data.
 #'
 #' The function calculates the result of applying a linear regression model to a
 #' set of input data. If a target mean value (TargetMean) is specified, the
@@ -1106,8 +1137,8 @@ applyLinearModel <-
 #=====================================
 #' Writes module Inp and Set specifications to the VisionEval name registry.
 #'
-#' \code{writeVENameRegistry} writes module Inp and Set specifications to the
-#' VisionEval name registry.
+#' \code{writeVENameRegistry} a visioneval framework control function that
+#' writes module Inp and Set specifications to the VisionEval name registry.
 #'
 #' The VisionEval name registry (VENameRegistry.json) keeps track of the
 #' dataset names created by all registered modules by reading in datasets
@@ -1173,8 +1204,9 @@ writeVENameRegistry <-
 #=================================
 #' Reads the VisionEval name registry.
 #'
-#' \code{readVENameRegistry} reads the VisionEval name registry and returns a
-#' list of data frames containing the Inp and Set specifications.
+#' \code{readVENameRegistry} a visioneval framework module developer function
+#' that reads the VisionEval name registry and returns a list of data frames
+#' containing the Inp and Set specifications.
 #'
 #' The VisionEval name registry (VENameRegistry.json) keeps track of the
 #' dataset names created by all registered modules by reading in datasets
@@ -1209,8 +1241,9 @@ readVENameRegistry <-
 #=================================
 #' Returns Get specifications for registered datasets.
 #'
-#' \code{getRegisteredGetSpecs} returns a data frame of Get specifications for
-#' datasets in the VisionEval name registry.
+#' \code{getRegisteredGetSpecs} a visioneval framework module developer function
+#' that returns a data frame of Get specifications for datasets in the
+#' VisionEval name registry.
 #'
 #' The VisionEval name registry (VENameRegistry.json) keeps track of the
 #' dataset names created by all registered modules by reading in datasets
