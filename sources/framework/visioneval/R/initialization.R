@@ -10,8 +10,9 @@
 #======================
 #' Initialize model state.
 #'
-#' \code{initModelState} loads model run parameters into the model state
-#' list in the global workspace and saves as file.
+#' \code{initModelState} a visioneval framework control function that loads
+#' model run parameters into the model state list in the global workspace and
+#' saves as file.
 #'
 #' This function creates the model state list and loads model run parameters
 #' recorded in the 'parameters.json' file into the model state list. It also
@@ -59,8 +60,8 @@ initModelStateFile <-
 #======================
 #' Get values from model state list.
 #'
-#' \code{getModelState} reads components of the list that keeps track of the
-#' model state
+#' \code{getModelState} a visioneval framework control function that reads
+#' components of the list that keeps track of the model state.
 #'
 #' Key variables that are important for managing the model run are stored in a
 #' list (ModelState_ls) that is managed in the global environment. This
@@ -89,8 +90,9 @@ getModelState <- function(Names_ = "All", FileName = "ModelState.Rda") {
 #==================
 #' Update model state.
 #'
-#' \code{setModelState} updates the list that keeps track of the model state
-#' with list of components to update and resaves in the model state file.
+#' \code{setModelState} a visioneval framework control function that updates the
+#' list that keeps track of the model state with list of components to update
+#' and resaves in the model state file.
 #'
 #' Key variables that are important for managing the model run are stored in a
 #' list (ModelState_ls) that is in the global workspace and saved in the
@@ -118,8 +120,8 @@ setModelState <-
 #=====================
 #' Reads values from model state file.
 #'
-#' \code{readModelState} reads components of the file that saves a copy of the
-#' model state
+#' \code{readModelState} a visioneval framework control function that reads
+#' components of the file that saves a copy of the model state.
 #'
 #' The model state is stored in a list (ModelState_ls) that is also saved as a
 #' file (ModelState.Rda) whenever the list is updated. This function reads the
@@ -148,11 +150,13 @@ readModelState <- function(Names_ = "All", FileName = "ModelState.Rda") {
 #==============
 #' Retrieve years
 #'
-#' \code{getYears} reads the Years component from the the model state file.
+#' \code{getYears} a visioneval framework model user function that reads the
+#' Years component from the the model state file.
 #'
 #' This is a convenience function to make it easier to retrieve the Years
-#' component of the model state file. If the Years component includes the base
-#' year then order the Years component so that it is first. This ordering is
+#' component of the model state file which lists all of the specified model run
+#' years. If the Years component includes the base year, then the returned
+#' vector of years places the base year first in the order. This ordering is
 #' important because some modules calculate future year values by pivoting off
 #' of base year values so the base year must be run first.
 #'
@@ -173,8 +177,8 @@ getYears <- function() {
 #======================
 #' Retrieve default units for model
 #'
-#' \code{getUnits} retrieves the default model units for a vector of complex
-#' data types.
+#' \code{getUnits} a visioneval framework control function that retrieves the
+#' default model units for a vector of complex data types.
 #'
 #' This is a convenience function to make it easier to retrieve the default
 #' units for a complex data type (e.g. distance, volume, speed). The default
@@ -201,8 +205,8 @@ getUnits <- function(Type_) {
 #==================
 #' Initialize run log.
 #'
-#' \code{initLog} creates a log (text file) that stores messages generated
-#' during a model run.
+#' \code{initLog} a visioneval framework control function that creates a log
+#' (text file) that stores messages generated during a model run.
 #'
 #' This function creates a log file that is a text file which stores messages
 #' generated during a model run. The name of the log is 'Log <date> <time>'
@@ -244,7 +248,8 @@ initLog <- function(Suffix = NULL) {
 #============
 #' Write to log.
 #'
-#' \code{writeLog} writes a message to the run log.
+#' \code{writeLog} a visioneval framework control function that writes a message
+#' to the run log.
 #'
 #' This function writes a message in the form of a string to the run log. It
 #' logs the time as well as the message to the run log.
@@ -272,8 +277,8 @@ writeLog <- function(Msg = "", Print = FALSE) {
 #====================
 #' Load saved datastore.
 #'
-#' \code{loadDatastore} copy an existing saved datastore and write information
-#' to run environment.
+#' \code{loadDatastore} a visioneval framework control function that copies an
+#' existing saved datastore and writes information to run environment.
 #'
 #' This function copies a saved datastore as the working datastore attributes
 #' the global list with related geographic information. This function enables
@@ -333,8 +338,8 @@ loadDatastore <- function(FileToLoad, Dir="defs/", GeoFile, SaveDatastore = TRUE
 #==============================
 #' Read geographic specifications.
 #'
-#' \code{readGeography} reads the geographic specifications file for the
-#' model.
+#' \code{readGeography} a visioneval framework control function that reads the
+#' geographic specifications file for the model.
 #'
 #' This function manages the reading and error checking of geographic
 #' specifications for the model. It calls the checkGeography function to check
@@ -388,8 +393,8 @@ readGeography <- function(Dir = "defs", GeoFile = "geo.csv") {
 #===============================
 #' Check geographic specifications.
 #'
-#' \code{checkGeography} checks geographic specifications file for
-#' model.
+#' \code{checkGeography} a visioneval framework control function that checks
+#' geographic specifications file for model.
 #'
 #' This function reads the file containing geographic specifications for the
 #' model and checks the file entries to determine whether they are internally
@@ -508,8 +513,9 @@ checkGeography <- function(Directory, Filename) {
 #==============================
 #' Initialize datastore geography.
 #'
-#' \code{initDatastoreGeography} initializes tables and writes datasets to the
-#' datastore which describe geographic relationships of the model.
+#' \code{initDatastoreGeography} a visioneval framework control function that
+#' initializes tables and writes datasets to the datastore which describe
+#' geographic relationships of the model.
 #'
 #' This function writes tables to the datastore for each of the geographic
 #' levels. These tables are then used during a model run to store values that
@@ -647,152 +653,13 @@ initDatastoreGeography <- function() {
 }
 
 
-# initDatastoreGeography <- function() {
-#   G <- getModelState()
-#   #Make lists of zone specifications
-#   Mareas_ <- unique(G$Geo_df$Marea)
-#   MareaSpec_ls <- list(MODULE = "visioneval",
-#                        NAME = "Marea",
-#                        TABLE = "Marea",
-#                        TYPE = "character",
-#                        UNITS = "",
-#                        NAVALUE = "NA",
-#                        PROHIBIT = "",
-#                        ISELEMENTOF = "",
-#                        SIZE = max(nchar(Mareas_)),
-#                        LENGTH = length(Mareas_))
-#   Azones_ <- unique(G$Geo_df$Azone)
-#   AzoneSpec_ls <- list(MODULE = "visioneval",
-#                        NAME = "Azone",
-#                        TABLE = "Azone",
-#                        TYPE = "character",
-#                        UNITS = "",
-#                        NAVALUE = "NA",
-#                        PROHIBIT = "",
-#                        ISELEMENTOF = "",
-#                        SIZE = max(nchar(Azones_)))
-#   if(G$BzoneSpecified) {
-#     Bzones_ <- unique(G$Geo_df$Bzone)
-#     BzoneSpec_ls <- list(MODULE = "visioneval",
-#                          NAME = "Bzone",
-#                          TABLE = "Bzone",
-#                          TYPE = "character",
-#                          UNITS = "",
-#                          NAVALUE = "NA",
-#                          PROHIBIT = "",
-#                          ISELEMENTOF = "",
-#                          SIZE = max(nchar(Bzones_)))
-#   }
-#   if(G$CzoneSpecified) {
-#     Czones_ <- unique(G$Geo_df$Czone)
-#     CzoneSpec_ls <- list(MODULE = "visioneval",
-#                          NAME = "Czone",
-#                          TABLE = "Czone",
-#                          TYPE = "character",
-#                          UNITS = "",
-#                          NAVALUE = "NA",
-#                          PROHIBIT = "",
-#                          ISELEMENTOF = "",
-#                          SIZE = max(nchar(Czones_)))
-#   }
-#   #Initialize geography tables and zone datasets
-#   GroupNames <- c("Global", G$Years)
-#   for (GroupName in GroupNames) {
-#     initTable(Table = "Region", Group = GroupName, Length = 1)
-#     initTable(Table = "Azone", Group = GroupName, Length = length(Azones_))
-#     initDataset(AzoneSpec_ls, Group = GroupName)
-#     initTable(Table = "Marea", Group = GroupName, Length = length(Mareas_))
-#     initDataset(MareaSpec_ls, Group = GroupName)
-#     if(G$BzoneSpecified) {
-#       initTable(Table = "Bzone", Group = GroupName, Length = length(Bzones_))
-#       initDataset(BzoneSpec_ls, Group = GroupName)
-#     }
-#     if(G$CzoneSpecified) {
-#       initTable(Table = "Czone", Group = GroupName, Length = length(Czones_))
-#       initDataset(CzoneSpec_ls, Group = GroupName)
-#     }
-#   }
-#   rm(GroupName)
-#   #Add zone names to zone tables
-#   for (GroupName in GroupNames) {
-#     if (!G$BzoneSpecified & !G$CzoneSpecified) {
-#       #Write to Azone table
-#       writeToTable(G$Geo_df$Azone, AzoneSpec_ls, Group = GroupName, Index = NULL)
-#       MareaSpec_ls$TABLE = "Azone"
-#       MareaSpec_ls$LENGTH = nrow(G$Geo_df)
-#       writeToTable(G$Geo_df$Marea, MareaSpec_ls, Group = GroupName, Index = NULL)
-#       #Write to Marea table
-#       MareaSpec_ls$TABLE = "Marea"
-#       MareaSpec_ls$LENGTH = length(Mareas_)
-#       writeToTable(Mareas_, MareaSpec_ls, Group = GroupName, Index = NULL)
-#     }
-#     if (G$BzoneSpecified & !G$CzoneSpecified) {
-#       #Write to Bzone table
-#       writeToTable(G$Geo_df$Bzone, BzoneSpec_ls, Group = GroupName, Index = NULL)
-#       AzoneSpec_ls$TABLE = "Bzone"
-#       AzoneSpec_ls$LENGTH = nrow(G$Geo_df)
-#       writeToTable(G$Geo_df$Azone, AzoneSpec_ls, Group = GroupName, Index = NULL)
-#       MareaSpec_ls$TABLE = "Bzone"
-#       MareaSpec_ls$LENGTH = nrow(G$Geo_df)
-#       writeToTable(G$Geo_df$Marea, MareaSpec_ls, Group = GroupName, Index = NULL)
-#       #Write to Azone table
-#       AzoneSpec_ls$TABLE = "Azone"
-#       AzoneSpec_ls$LENGTH = length(Azones_)
-#       writeToTable(Azones_, AzoneSpec_ls, Group = GroupName, Index = NULL)
-#       AzoneGeo_df <- G$Geo_df[!duplicated(G$Geo_df$Azone),]
-#
-#       writeToTable(AzoneGeo_df$Marea[match(Azones_, AzoneGeo_df$Azone)],
-#                    MareaSpec_ls, Group = GroupName, Index = NULL)
-#       rm(AzoneGeo_df)
-#       #Write to Marea table
-#       MareaSpec_ls$TABLE = "Marea"
-#       MareaSpec_ls$LENGTH = length(Mareas_)
-#       writeToTable(Mareas_, MareaSpec_ls, Group = GroupName, Index = NULL)
-#     }
-#     if (G$CzoneSpecified) {
-#       #Write to Czone table
-#       writeToTable(G$Geo_df$Czone, CzoneSpec_ls, Group = GroupName, Index = NULL)
-#       BzoneSpec_ls$TABLE = "Czone"
-#       BzoneSpec_ls$LENGTH = nrow(G$Geo_df)
-#       writeToTable(G$Geo_df$Bzone, BzoneSpec_ls, Group = GroupName, Index = NULL)
-#       AzoneSpec_ls$TABLE = "Czone"
-#       AzoneSpec_ls$LENGTH = nrow(G$Geo_df)
-#       writeToTable(G$Geo_df$Azone, AzoneSpec_ls, Group = GroupName, Index = NULL)
-#       MareaSpec_ls$TABLE = "Czone"
-#       MareaSpec_ls$LENGTH = nrow(G$Geo_df)
-#       writeToTable(G$Geo_df$Marea, MareaSpec_ls, Group = GroupName, Index = NULL)
-#       #Write to Bzone table
-#       Geo_df <- G$Geo_df[!duplicated(G$Geo_df$Bzone), c("Azone", "Bzone")]
-#       BzoneSpec_ls$TABLE = "Bzone"
-#       BzoneSpec_ls$LENGTH = nrow(Geo_df)
-#       writeToTable(Geo_df$Bzone, BzoneSpec_ls, Group = GroupName, Index = NULL)
-#       AzoneSpec_ls$TABLE = "Bzone"
-#       AzoneSpec_ls$LENGTH = nrow(Geo_df)
-#       writeToTable(Geo_df$Azone, AzoneSpec_ls, Group = GroupName, Index = NULL)
-#       #Write to Azone table
-#       AzoneSpec_ls$TABLE = "Azone"
-#       AzoneSpec_ls$LENGTH = length(Azones_)
-#       writeToTable(Azones_, AzoneSpec_ls, Group = GroupName, Index = NULL)
-#       #Write to Marea table
-#       MareaSpec_ls$TABLE = "Marea"
-#       MareaSpec_ls$LENGTH = length(Mareas_)
-#       writeToTable(Mareas_, MareaSpec_ls, Group = GroupName, Index = NULL)
-#     }
-#   }
-#   #Write to log that complete
-#   Message <- "Geography sucessfully added to datastore."
-#   writeLog(Message)
-#   TRUE
-# }
-
-
-
 #LOAD MODEL PARAMETERS
 #=====================
 #' Load model global parameters file into datastore.
 #'
-#' \code{loadModelParameters} reads the 'model_parameters.json' file and
-#' stores the contents in the 'Global/Model' group of the datastore.
+#' \code{loadModelParameters} a visioneval framework control function reads the
+#' 'model_parameters.json' file and stores the contents in the 'Global/Model'
+#' group of the datastore.
 #'
 #' This function reads the 'model_parameters.json' file in the 'defs' directory
 #' which contains parameters specific to a model rather than to a module. These
@@ -847,8 +714,9 @@ loadModelParameters <- function(ModelParamFile = "model_parameters.json") {
 #==================
 #' Parse model script.
 #'
-#' \code{parseModel}Function reads and parses the model script to identify the
-#' sequence of module calls and the associated call arguments.
+#' \code{parseModel} a visioneval framework control function that reads and
+#' parses the model script to identify the sequence of module calls and the
+#' associated call arguments.
 #'
 #' This function reads in the model run script and parses the script to
 #' identify the sequence of module calls. It extracts each call to 'runModule'
@@ -1008,8 +876,8 @@ parseModelScript <-
 #=========================
 #' Check whether a module required to run a model is present
 #'
-#' \code{checkModuleExists}Function checks whether a module required to run a
-#' model is present.
+#' \code{checkModuleExists} a visioneval framework control function that checks
+#' whether a module required to run a model is present.
 #'
 #' This function takes a specified module and package, checks whether the
 #' package has been installed and whether the module is in the package. The
@@ -1082,8 +950,8 @@ checkModuleExists <-
 #=========================
 #' Retrieve module specifications from a package
 #'
-#' \code{getModuleSpecs}Function retrieves the specifications list for a module
-#' and returns the specifications list.
+#' \code{getModuleSpecs} a visioneval framework control function that retrieves
+#' the specifications list for a module and returns the specifications list.
 #'
 #' This function loads the specifications for a module in a package. It returns
 #' the specifications list.
@@ -1107,13 +975,13 @@ getModuleSpecs <- function(ModuleName, PackageName) {
 #' Expand a Inp, Get, or Set specification so that is can be used by other
 #' functions to process inputs and to read from or write to the datastore.
 #'
-#' \code{expandSpec} takes a Inp, Get, or Set specification and processes it to
-#' be in a form that can be used by other functions which use the specification
-#' in processing inputs or reading from or writing to the datastore. The
-#' parseUnitsSpec function is called to parse the UNITS attribute to extract
-#' name, multiplier, and year values. When the specification has multiple
-#' values for the NAME attribute, the function creates a specification for each
-#' name value.
+#' \code{expandSpec} a visioneval framework control function that takes a Inp,
+#' Get, or Set specification and processes it to be in a form that can be used
+#' by other functions which use the specification in processing inputs or
+#' reading from or writing to the datastore. The parseUnitsSpec function is
+#' called to parse the UNITS attribute to extract name, multiplier, and year
+#' values. When the specification has multiple values for the NAME attribute,
+#' the function creates a specification for each name value.
 #'
 #' The VisionEval design allows module developers to assign multiple values to
 #' the NAME attributes of a Inp, Get, or Set specification where the other
@@ -1152,8 +1020,9 @@ expandSpec <- function(SpecToExpand_ls) {
 #====================================================================
 #' Filters Inp specifications list based on OPTIONAL specification attributes.
 #'
-#' \code{doProcessInpSpec}Filters out Inp specifications whose OPTIONAL
-#' specification attribute is TRUE but the specified input file is not present.
+#' \code{doProcessInpSpec} a visioneval framework control function that filters
+#' out Inp specifications whose OPTIONAL specification attribute is TRUE but the
+#' specified input file is not present.
 #'
 #' An Inp specification component may have an OPTIONAL specification whose value
 #' is TRUE. If so, and if the specified input file is present, then the input
@@ -1215,9 +1084,10 @@ doProcessInpSpec <- function(InpSpecs_ls, InputDir = "inputs") {
 #======================================
 #' Filters Get specifications list based on OPTIONAL specification attributes.
 #'
-#' \code{doProcessGetSpec}Filters out Get specifications whose OPTIONAL
-#' specification attribute is TRUE but the specified dataset is not included in
-#' the corresponding Inp specifications nor is it present in the datastore.
+#' \code{doProcessGetSpec} a visioneval framework control function that filters
+#' out Get specifications whose OPTIONAL specification attribute is TRUE but the
+#' specified dataset is not included in the corresponding Inp specifications nor
+#' is it present in the datastore.
 #'
 #' A Get specification component may have an OPTIONAL specification whose value
 #' is TRUE. If so, and if the specified dataset will be created by processing
@@ -1309,9 +1179,9 @@ doProcessGetSpec <-
 #======================================
 #' Filters Set specifications list based on OPTIONAL specification attributes.
 #'
-#' \code{doProcessSetSpec}Filters out Set specifications whose OPTIONAL
-#' specification attribute is TRUE but the specified dataset is not included in
-#' the corresponding Get specifications.
+#' \code{doProcessSetSpec} a visioneval framework control function that filters
+#' out Set specifications whose OPTIONAL specification attribute is TRUE but the
+#' specified dataset is not included in the corresponding Get specifications.
 #'
 #' A Set specification component may have an OPTIONAL specification whose value
 #' is TRUE. If so, and if the specified dataset is included in the corresponding
@@ -1383,10 +1253,10 @@ doProcessSetSpec <-
 #=============================
 #' Process module specifications to expand items with multiple names.
 #'
-#' \code{processModuleSpecs}Function processes a full module specifications list,
-#' expanding all elements in the Inp, Get, and Set components by parsing the
-#' UNITS attributes and duplicating every specification which has multiple
-#' values for the NAME attribute.
+#' \code{processModuleSpecs} a visioneval framework control function that
+#' processes a full module specifications list, expanding all elements in the
+#' Inp, Get, and Set components by parsing the UNITS attributes and duplicating
+#' every specification which has multiple values for the NAME attribute.
 #'
 #' This function process a module specification list. If any of the
 #' specifications include multiple listings of data sets (i.e. fields) in a
@@ -1441,11 +1311,11 @@ processModuleSpecs <- function(Spec_ls) {
 #================================
 #' Create simulation of datastore transactions.
 #'
-#' \code{simDataTransactions}Function loads all module specifications in order
-#' (by run year) and creates a simulated listing of the data which is in the
-#' datastore and the requests of data from the datastore and checks whether
-#' tables will be present to put datasets in and that datasets will be present
-#' that data is to be retrieved from.
+#' \code{simDataTransactions} a visioneval framework control function that loads
+#' all module specifications in order (by run year) and creates a simulated
+#' listing of the data which is in the datastore and the requests of data from
+#' the datastore and checks whether tables will be present to put datasets in
+#' and that datasets will be present that data is to be retrieved from.
 #'
 #' This function creates a list of the datastore listings for the working
 #' datastore and for all datastore references. The list includes a 'Global'
