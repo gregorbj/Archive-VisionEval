@@ -10,9 +10,9 @@
 #================
 #' Initialize model.
 #'
-#' \code{initializeModel}Function initializes a VisionEval model, loading all
-#' parameters and inputs, and making checks to ensure that model can run
-#' successfully.
+#' \code{initializeModel} a visioneval framework model user function
+#' that initializes a VisionEval model, loading all parameters and inputs, and
+#' making checks to ensure that model can run successfully.
 #'
 #' This function does several things to initialize the model environment and
 #' datastore including:
@@ -299,9 +299,10 @@ initializeModel <-
 #==========
 #' Run module.
 #'
-#' \code{runModule} runs a model module.
+#' \code{runModule} a visioneval framework model user function that
+#' runs a module.
 #'
-#' This function runs a module for  a specified year.
+#' This function runs a module for a specified year.
 #'
 #' @param ModuleName A string identifying the name of a module object.
 #' @param PackageName A string identifying the name of the package the module is
