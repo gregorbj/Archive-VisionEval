@@ -14,9 +14,10 @@
 #=======================
 #' Check dataset existence
 #'
-#' \code{checkDataset} checks whether a dataset exists in the datastore and
-#' returns a TRUE or FALSE value with an attribute of the full path to where the
-#' dataset should be located in the datastore.
+#' \code{checkDataset} a visioneval framework control function that checks
+#' whether a dataset exists in the datastore and returns a TRUE or FALSE value
+#' with an attribute of the full path to where the dataset should be located in
+#' the datastore.
 #'
 #' This function checks whether a dataset exists. The dataset is identified by
 #' its name and the table and group names it is in. If the dataset is not in the
@@ -50,7 +51,8 @@ checkDataset <- function(Name, Table, Group, DstoreListing_df) {
 #===========================
 #' Get attributes of a dataset
 #'
-#' \code{getDatasetAttr} retrieves the attributes for a dataset in the datastore
+#' \code{getDatasetAttr} a visioneval framework control function that retrieves
+#' the attributes for a dataset in the datastore.
 #'
 #' This function extracts the listed attributes for a specific dataset from the
 #' datastore listing.
@@ -75,8 +77,8 @@ getDatasetAttr <- function(Name, Table, Group, DstoreListing_df) {
 #==========================
 #' Check whether table exists in the datastore
 #'
-#' \code{checkTableExistence} checks whether a table is present in the
-#' datastore.
+#' \code{checkTableExistence} a visioneval framework control function that
+#' checks whether a table is present in the datastore.
 #'
 #' This function checks whether a table is present in the datastore.
 #'
@@ -97,8 +99,9 @@ checkTableExistence <- function(Table, Group, DstoreListing_df) {
 #===============================
 #' Check specification consistency
 #'
-#' \code{checkSpecConsistency} checks whether the specifications for a dataset
-#' are consistent with the data attributes in the datastore
+#' \code{checkSpecConsistency} a visioneval framework control function that
+#' checks whether the specifications for a dataset are consistent with the data
+#' attributes in the datastore.
 #'
 #' This function compares the specifications for a dataset identified in a
 #' module "Get" or "Set" are consistent with the attributes for that data in the
@@ -126,15 +129,6 @@ checkSpecConsistency <- function(Spec_ls, DstoreAttr_) {
     )
     Errors_ <- c(Errors_, Message)
   }
-  #With code that allows unit conversions, can't expect units to be the same
-  # if (Spec_ls$UNITS != DstoreAttr_$UNITS) {
-  #   Message <- paste0(
-  #     "UNITS mismatch for ", Spec_ls$NAME, ". ",
-  #     "Module ", Spec_ls$MODULE, "asks for UNITS = (", Spec_ls$UNITS, "). ",
-  #     "Datastore contains UNITS = (", DstoreAttr_$UNITS, ")."
-  #   )
-  #   Warnings_ <- c(Warnings_, Message)
-  # }
   if (!is.null(Spec_ls$PROHIBIT) & !is.null(DstoreAttr_$PROHIBIT)) {
     if (!all(Spec_ls$PROHIBIT %in% DstoreAttr_$PROHIBIT) |
         !all(DstoreAttr_$PROHIBIT %in% Spec_ls$PROHIBIT)) {
@@ -169,8 +163,8 @@ checkSpecConsistency <- function(Spec_ls, DstoreAttr_) {
 #===============
 #' Check data type
 #'
-#' \code{checkMatchType} checks whether the data type of a data vector is
-#' consistent with specifications.
+#' \code{checkMatchType} a visioneval framework control function that checks
+#' whether the data type of a data vector is consistent with specifications.
 #'
 #' This function checks whether the data type of a data vector is consistent
 #' with a specified data type. An error message is generated if data can't be
@@ -238,8 +232,9 @@ checkMatchType <- function(Data_, Type, DataName) {
 #============================
 #' Check values with conditions.
 #'
-#' \code{checkMatchConditions} checks whether a data vector contains any
-#' elements that match a set of conditions.
+#' \code{checkMatchConditions} a visioneval framework control function that
+#' checks whether a data vector contains any elements that match a set of
+#' conditions.
 #'
 #' This function checks whether any of the values in a data vector match one or
 #' more conditions. The conditions are specified in a character vector where
@@ -297,8 +292,9 @@ checkMatchConditions <- function(Data_, Conditions_, DataName, ConditionType) {
 #=====================================================
 #' Check if data values are in a specified set of values
 #'
-#' \code{checkIsElementOf} checks whether a data vector contains any elements
-#' that are not in an allowed set of values.
+#' \code{checkIsElementOf} a visioneval framework control function that checks
+#' whether a data vector contains any elements that are not in an allowed set of
+#' values.
 #'
 #' This function is used to check whether categorical data values are consistent
 #' with the defined set of allowed values.
@@ -337,8 +333,9 @@ checkIsElementOf <- function(Data_, SetElements_, DataName){
 #=========================================
 #' Check data consistency with specification
 #'
-#' \code{checkDataConsistency} checks whether data to be written to a dataset is
-#' consistent with the dataset attributes.
+#' \code{checkDataConsistency} a visioneval framework control function that
+#' checks whether data to be written to a dataset is consistent with the dataset
+#' attributes.
 #'
 #' This function compares characteristics of data to be written to a dataset to
 #' the dataset attributes to determine whether they are consistent.
@@ -427,11 +424,11 @@ checkDataConsistency <- function(DatasetName, Data_, DstoreAttr_) {
 #=========================
 #' Parse units specification into components and add to specifications list.
 #'
-#' \code{parseUnitsSpec} parses the UNITS attribute of a standard Inp, Get, or
-#' Set specification for a dataset to identify the units name, multiplier, and
-#' year for currency data. Returns a modified specifications list whose UNITS
-#' value is only the units name, and includes a MULTIPLIER attribute and YEAR
-#' attribute.
+#' \code{parseUnitsSpec} a visioneval framework control function that parses the
+#' UNITS attribute of a standard Inp, Get, or Set specification for a dataset to
+#' identify the units name, multiplier, and year for currency data. Returns a
+#' modified specifications list whose UNITS value is only the units name, and
+#' includes a MULTIPLIER attribute and YEAR attribute.
 #'
 #' The UNITS component of a specifications list can encode information in
 #' addition to the units name. This includes a value units multiplier and in
@@ -509,8 +506,9 @@ parseUnitsSpec <-
 #' Returns a list of returns a list of recognized data types, the units for each
 #' type, and storage mode of each type.
 #'
-#' \code{Types} returns a list of returns a list of recognized data types, the
-#' units for each type, and storage mode of each type.
+#' \code{Types} a visioneval framework control function that returns a list of
+#' returns a list of recognized data types, the units for each type, and storage
+#' mode of each type.
 #'
 #' This function stores a listing of the dataset types recognized by the
 #' visioneval framework, the units recognized for each type, and the storage
@@ -634,9 +632,10 @@ Types <- function(){
 #=======================
 #' Check measurement units for consistency with recognized units for stated type.
 #'
-#' \code{checkUnits}checks the specified UNITS for a dataset for consistency
-#' with the recognized units for the TYPE specification for the dataset. It also
-#' splits compound units into elements.
+#' \code{checkUnits} a visioneval framework control function that checks the
+#' specified UNITS for a dataset for consistency with the recognized units for
+#' the TYPE specification for the dataset. It also splits compound units into
+#' elements.
 #'
 #' The visioneval code recognizes 4 simple data types (integer, double, logical,
 #' and character) and 9 complex data types (e.g. distance, time, mass).
@@ -801,9 +800,9 @@ checkUnits <- function(DataType, Units) {
 #' Checks the TYPE and UNITS and associated MULTIPLIER and YEAR attributes of a
 #' Inp, Get, or Set specification for consistency.
 #'
-#' \code{checkSpecTypeUnits}Checks correctness of TYPE, UNITS, MULTIPLIER and
-#' YEAR attributes of a specification that has been processed with the
-#' parseUnitsSpec function.
+#' \code{checkSpecTypeUnits} a visioneval framework control function that checks
+#' correctness of TYPE, UNITS, MULTIPLIER and YEAR attributes of a specification
+#' that has been processed with the parseUnitsSpec function.
 #'
 #' This function checks whether the TYPE and UNITS of a module's specification
 #' contain errors. The check is done on a module specification in which the
@@ -913,8 +912,9 @@ checkSpecTypeUnits <- function(Spec_ls, SpecGroup, SpecNum) {
 #======================================================
 #' List basic module specifications to check for correctness
 #'
-#' \code{SpecRequirements}returns a list of basic requirements for module
-#' specifications to be used for checking correctness of specifications.
+#' \code{SpecRequirements} a visioneval framework control function that returns
+#' a list of basic requirements for module specifications to be used for
+#' checking correctness of specifications.
 #'
 #' This function returns a list of the basic requirements for module
 #' specifications. The main components of the list are the components of module
@@ -1010,8 +1010,8 @@ SpecRequirements <- function(){
 #============================
 #' Checks a module specifications for completeness and for incorrect entries
 #'
-#' \code{checkSpec}Function checks a single module specification for
-#' completeness and for proper values.
+#' \code{checkSpec} a visioneval framework control function that checks a single
+#' module specification for completeness and for proper values.
 #'
 #' This function checks whether a single module specification (i.e. the
 #' specification for a single dataset contains the minimum required
@@ -1098,8 +1098,8 @@ checkSpec <- function(Spec_ls, SpecGroup, SpecNum) {
 #=====================================
 #' Checks all module specifications for completeness and for incorrect entries
 #'
-#' \code{checkModuleSpecs}checks all module specifications for
-#' completeness and for proper values.
+#' \code{checkModuleSpecs} a visioneval framework control function that checks
+#' all module specifications for completeness and for proper values.
 #'
 #' This function iterates through all the specifications for a module and
 #' calls the checkSpec function to check each specification for completeness and
@@ -1295,8 +1295,9 @@ checkModuleSpecs <- function(Specs_ls, ModuleName) {
 #=======================================
 #' Check years and geography of input file
 #'
-#' \code{checkInputYearGeo} checks the 'Year' and 'Geo' columns of an input file
-#' to determine whether they are complete and have no duplications.
+#' \code{checkInputYearGeo} a visioneval framework control function that checks
+#' the 'Year' and 'Geo' columns of an input file to determine whether they are
+#' complete and have no duplications.
 #'
 #' This function checks the 'Year' and 'Geo' columns of an input file to
 #' determine whether there are records for all run years specified for the
@@ -1355,8 +1356,8 @@ checkInputYearGeo <- function(Year_, Geo_, Group, Table) {
 #============================================================
 #' Find the full specification corresponding to a defined NAME, TABLE, and GROUP
 #'
-#' \code{findSpec} returns the full dataset specification for defined NAME,
-#' TABLE, and GROUP.
+#' \code{findSpec} a visioneval framework control function that returns the full
+#' dataset specification for defined NAME, TABLE, and GROUP.
 #'
 #' This function finds and returns the full specification from a specifications
 #' list whose NAME, TABLE and GROUP values correspond to the Name, Table, and
@@ -1382,8 +1383,9 @@ findSpec <- function(Specs_ls, Name, Table, Group) {
 #' Sort a data frame so that the order of rows matches the geography in a
 #' datastore table.
 #'
-#' \code{sortGeoTable} returns a data frame whose rows are sorted to match the
-#' geography in a specified table in the datastore.
+#' \code{sortGeoTable} a visioneval framework control function that returns a
+#' data frame whose rows are sorted to match the geography in a specified table
+#' in the datastore.
 #'
 #' This function sorts the rows of a data frame that the 'Geo' field in the
 #' data frame matches the corresponding geography names in the specified table
@@ -1417,9 +1419,9 @@ sortGeoTable <- function(Data_df, Table, Group) {
 #' Parse field names of input file to separate out the field name, currency
 #' year, and multiplier.
 #'
-#' \code{parseInputFieldNames} parses the field names of an input file to
-#' separate out the field name, currency year (if data is
-#' currency type), and value multiplier.
+#' \code{parseInputFieldNames} a visioneval framework control function that
+#' parses the field names of an input file to separate out the field name,
+#' currency year (if data is currency type), and value multiplier.
 #'
 #' The field names of input files can be used to encode more information than
 #' the name itself. It can also encode the currency year for currency type data
@@ -1589,8 +1591,9 @@ parseInputFieldNames <-
 #==========================
 #' Process module input files
 #'
-#' \code{processModuleInputs} processes input files identified in a module's
-#' 'Inp' specifications in preparation for saving in the datastore.
+#' \code{processModuleInputs} a visioneval framework control function that
+#' processes input files identified in a module's 'Inp' specifications in
+#' preparation for saving in the datastore.
 #'
 #' This function processes the input files identified in a module's 'Inp'
 #' specifications in preparation for saving the data in the datastore. Several
