@@ -21,30 +21,12 @@
 #                                                                             #
 ###############################################################################
 
-#ASSIGN LOADING OF FILE TO NAME
-#==============================
-#' Return a data file anonomously
-#'
-#' \code{assignLoad} loads a data file and returns anonomously
-#'
-#' This function loads a dataset and returns it anomously so that it can be
-#' assigned to a name.
-#'
-#' @param Filename a string identifying the full path to the data file to be
-#' loaded.
-#' @return the contents of the file identified by the Filename
-#' @export
-assignLoad <- function(Filename){
-  load(Filename)
-  get(ls()[ls() != "Filename"])
-}
-
-
 #LIST DATASTORE CONTENTS
 #=======================
 #' List datastore contents for an RData (RD) type datastore.
 #'
-#' \code{listDatastoreRD} lists the contents of an RData (RD) type datastore.
+#' \code{listDatastoreRD} a visioneval framework datastore connection function
+#' that lists the contents of an RData (RD) type datastore.
 #'
 #' This function lists the contents of a datastore for an RData (RD) type
 #' datastore.
@@ -62,6 +44,11 @@ assignLoad <- function(Filename){
 listDatastoreRD <- function(DataListing_ls = NULL) {
   #Load the model state file and the datastore listing file
   G <- getModelState()
+  #Define function to assign the contents of a file to a file to an object
+  assignLoad <- function(Filename){
+    load(Filename)
+    get(ls()[ls() != "Filename"])
+  }
   #Load the datastore listing
   DatastoreListing_ls <-
     assignLoad(file.path(G$DatastoreName, "DatastoreListing.Rda"))
@@ -91,8 +78,9 @@ listDatastoreRD <- function(DataListing_ls = NULL) {
 #====================
 #' Initialize Datastore for an RData (RD) type datastore.
 #'
-#' \code{initDatastoreRD} creates datastore with starting structure for an RData
-#' (RD) type datastore.
+#' \code{initDatastoreRD} a visioneval framework datastore connection function
+#' that creates a datastore with starting structure for an RData (RD) type
+#' datastore.
 #'
 #' This function creates the datastore for the model run with the initial
 #' structure for an RData (RD) type datastore.
@@ -148,7 +136,8 @@ initDatastoreRD <- function() {
 #=============================
 #' Initialize table in an RData (RD) type datastore.
 #'
-#' \code{initTableRD} initializes a table in an RData (RD) type datastore.
+#' \code{initTableRD} a visioneval framework datastore connection function
+#' initializes a table in an RData (RD) type datastore.
 #'
 #' This function initializes a table in an RData (RD) type datastore.
 #'
@@ -184,8 +173,8 @@ initTableRD <- function(Table, Group, Length) {
 #===============================
 #' Initialize dataset in an RData (RD) type datastore table.
 #'
-#' \code{initDatasetRD} initializes a dataset in an RData (RD) type datastore
-#' table.
+#' \code{initDatasetRD} a visioneval framework datastore connection function
+#' initializes a dataset in an RData (RD) type datastore table.
 #'
 #' This function initializes a dataset in an RData (RD) type datastore table.
 #'
@@ -242,8 +231,8 @@ initDatasetRD <- function(Spec_ls, Group) {
 #===============
 #' Read from an RData (RD) type datastore table.
 #'
-#' \code{readFromTableRD} reads a dataset from an RData (RD) type datastore
-#' table.
+#' \code{readFromTableRD} a visioneval framework datastore connection function
+#' that reads a dataset from an RData (RD) type datastore table.
 #'
 #' This function reads a dataset from an RData (RD) type datastore table.
 #'
@@ -326,8 +315,9 @@ readFromTableRD <- function(Name, Table, Group, DstoreLoc = NULL, Index = NULL) 
 #==============
 #' Write to an RData (RD) type datastore table.
 #'
-#' \code{writeToTableRD} writes data to an RData (RD) type datastore table and
-#' initializes dataset if needed.
+#' \code{writeToTableRD} a visioneval framework datastore connection function
+#' that writes data to an RData (RD) type datastore table and initializes
+#' dataset if needed.
 #'
 #' This function writes a dataset file to an RData (RD) type datastore table. It
 #' initializes the dataset if the dataset does not exist. Enables data to be
@@ -407,7 +397,8 @@ writeToTableRD <- function(Data_, Spec_ls, Group, Index = NULL) {
 #=======================
 #' List datastore contents for an HDF5 (H5) type datastore.
 #'
-#' \code{listDatastoreH5} lists the contents of an HDF5 (H5) type datastore.
+#' \code{listDatastoreH5} a visioneval framework datastore connection function
+#' that lists the contents of an HDF5 (H5) type datastore.
 #'
 #' This function lists the contents of a datastore for an HDF5 (H5) type
 #' datastore.
@@ -446,8 +437,9 @@ listDatastoreH5 <- function() {
 #====================
 #' Initialize Datastore for an HDF5 (H5) type datastore.
 #'
-#' \code{initDatastoreH5} creates datastore with starting structure for an HDF5
-#' (H5) type datastore.
+#' \code{initDatastoreH5} a visioneval framework datastore connection function
+#' that creates datastore with starting structure for an HDF5 (H5) type
+#' datastore.
 #'
 #' This function creates the datastore for the model run with the initial
 #' structure for an HDF5 (H5) type datastore.
@@ -484,7 +476,8 @@ initDatastoreH5 <- function() {
 #=============================
 #' Initialize table in an HDF5 (H5) type datastore.
 #'
-#' \code{initTableH5} initializes a table in an HDF5 (H5) type datastore.
+#' \code{initTableH5} a visioneval framework datastore connection function that
+#' initializes a table in an HDF5 (H5) type datastore.
 #'
 #' This function initializes a table in an HDF5 (H5) type datastore.
 #'
@@ -517,8 +510,8 @@ initTableH5 <- function(Table, Group, Length) {
 #===============================
 #' Initialize dataset in an HDF5 (H5) type datastore table.
 #'
-#' \code{initDatasetH5} initializes a dataset in an HDF5 (H5) type datastore
-#' table.
+#' \code{initDatasetH5} a visioneval framework datastore connection function
+#' that initializes a dataset in an HDF5 (H5) type datastore table.
 #'
 #' This function initializes a dataset in an HDF5 (H5) type datastore table.
 #'
@@ -582,8 +575,8 @@ initDatasetH5 <- function(Spec_ls, Group) {
 #===============
 #' Read from an HDF5 (H5) type datastore table.
 #'
-#' \code{readFromTableH5} reads a dataset from an HDF5 (H5) type datastore
-#' table.
+#' \code{readFromTableH5} a visioneval framework datastore connection function
+#' that reads a dataset from an HDF5 (H5) type datastore table.
 #'
 #' This function reads a dataset from an HDF5 (H5) type datastore table.
 #'
@@ -656,8 +649,9 @@ readFromTableH5 <- function(Name, Table, Group, File = "datastore.h5", Index = N
 #==============
 #' Write to an RData (RD) type datastore table.
 #'
-#' \code{writeToTableRD} writes data to an RData (RD) type datastore table and
-#' initializes dataset if needed.
+#' \code{writeToTableRD} a visioneval framework datastore connection function
+#' that writes data to an RData (RD) type datastore table and initializes
+#' dataset if needed.
 #'
 #' This function writes a dataset file to an RData (RD) type datastore table. It
 #' initializes the dataset if the dataset does not exist. Enables data to be
@@ -715,9 +709,9 @@ writeToTableH5 <- function(Data_, Spec_ls, Group, Index = NULL) {
 #======================================
 #' Assign datastore interaction functions
 #'
-#' \code{assignDatastoreFunctions} assigns the values of the functions for
-#' interacting with the datastore to the functions for the declared datastore
-#' type.
+#' \code{assignDatastoreFunctions} a visioneval framework control function that
+#' assigns the values of the functions for interacting with the datastore to the
+#' functions for the declared datastore type.
 #'
 #' The visioneval framework can work with different types of datastores. For
 #' example a datastore which stores datasets in an HDF5 file or a datastore
@@ -754,8 +748,9 @@ assignDatastoreFunctions <- function(DstoreType) {
 #=============================
 #' Create a list of geographic indices for all tables in a datastore.
 #'
-#' \code{createGeoIndexList} creates a list containing the geographic indices
-#' for tables in the operating datastore for identified tables.
+#' \code{createGeoIndexList} a visioneval framework control function that
+#' creates a list containing the geographic indices for tables in the operating
+#' datastore for identified tables.
 #'
 #' This function takes a 'Get' or 'Set' specifications list for a module and the
 #' 'RunBy' specification and returns a list which has a component for each table
@@ -819,8 +814,8 @@ createGeoIndexList <-
 #========================
 #' Create datastore index.
 #'
-#' \code{createIndex} creates an index for reading or writing module data to the
-#' datastore.
+#' \code{createIndex} a visioneval framework control function that creates an
+#' index for reading or writing module data to the datastore.
 #'
 #' This function creates indexing functions which return an index to positions
 #' in datasets that correspond to positions in an index field of a table. For
@@ -858,70 +853,13 @@ createGeoIndex <- function(Table, Group, RunBy, Geo, GeoIndex_ls) {
   Idx_
 }
 
-# #CREATE A DATASTORE INDEX
-# #========================
-# #' Create datastore index.
-# #'
-# #' \code{createIndex} creates an index for reading or writing module data to the
-# #' datastore.
-# #'
-# #' This function creates indexing functions which return an index to positions
-# #' in datasets that correspond to positions in an index field of a table. For
-# #' example if the index field is 'Azone' in the 'Household' table, this function
-# #' will return a function that when provided the name of a particular Azone,
-# #' will return the positions corresponding to that Azone.
-# #'
-# #' @param Name A string identifying the dataset the index is being created
-# #'   for.
-# #' @param Table A string identifying the name of the table the index is
-# #'   being created for.
-# #' @param Group A string identifying the group the table is located in.
-# #' @return A function that creates a vector of positions corresponding to the
-# #'   location of the supplied value in the index field.
-# #' @export
-# createIndex <- function(Name, Table, Group) {
-#   ValsToIndexBy <-
-#     readFromTable(Name, Table, Group)
-#   return(function(IndexVal) {
-#     which(ValsToIndexBy == IndexVal)
-#   })
-# }
-#AzoneIndex <- createIndex("Azone", "Bzone", "2010")
-#Az <- c("A1", "A2", "A3")
-#for (az in Az) print(readFromTable("Bzone", "Bzone", "2010", Index = AzoneIndex(az)))
-#TestSpec_ls$NAME <- "TestIndexWrite"
-#for (i in 1:length(Az)) writeToTable(paste("C", i), TestSpec_ls, "2010", Index = AzoneIndex(Az[i]))
-#readFromTable("TestIndexWrite", "Bzone", "2010")
-
-
-#INITIALIZE DATA LIST
-#====================
-#' Initialize a list for data transferred to and from datastore
-#'
-#' \code{initDataList} creates a list to be used for transferring data to and
-#' from the datastore.
-#'
-#' This function initializes a list to store data that is transferred from
-#' the datastore to a module or returned from a module to be saved in the
-#' datastore. The list has 3 named components (Global, Year, and BaseYear). This
-#' is the standard structure for data being passed to and from a module and the
-#' datastore.
-#'
-#' @return A list that has 3 named list components: Global, Year, BaseYear
-#' @export
-initDataList <- function() {
-  list(Global = list(),
-       Year = list(),
-       BaseYear = list())
-}
-
-
 #GET DATA SETS IDENTIFIED IN MODULE SPECIFICATIONS FROM DATASTORE
 #================================================================
 #' Retrieve data identified in 'Get' specifications from datastore
 #'
-#' \code{getFromDatastore} retrieves datasets identified in a module's 'Get'
-#' specifications from the datastore.
+#' \code{getFromDatastore} a visioneval framework control function that
+#' retrieves datasets identified in a module's 'Get' specifications from the
+#' datastore.
 #'
 #' This function retrieves from the datastore all of the data sets identified in
 #' a module's 'Get' specifications. If the module's specifications include the
@@ -1058,8 +996,8 @@ getFromDatastore <- function(ModuleSpec_ls, RunYear, Geo = NULL, GeoIndex_ls = N
 #====================================================
 #' Save the data sets returned by a module in the datastore
 #'
-#' \code{setInDatastore} saves to the datastore the data returned in a standard
-#' list by a module.
+#' \code{setInDatastore} a visioneval framework control function saves to the
+#' datastore the data returned in a standard list by a module.
 #'
 #' This function saves to the datastore the data sets identified in a module's
 #' 'Set' specifications and included in the list returned by the module. If a
@@ -1176,8 +1114,9 @@ setInDatastore <-
 #' Write the datasets in a list of module inputs that have been processed to the
 #' datastore.
 #'
-#' \code{inputsToDatastore} takes a list of processed module input files and
-#' writes the datasets to the datastore.
+#' \code{inputsToDatastore} a visioneval framework control function that takes a
+#' list of processed module input files and writes the datasets to the
+#' datastore.
 #'
 #' This function takes a processed list of input datasets specified by a module
 #' created by the application of the 'processModuleInputs' function and writes
