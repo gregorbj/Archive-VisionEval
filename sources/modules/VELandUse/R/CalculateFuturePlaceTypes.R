@@ -173,8 +173,8 @@ CalculateFuturePlaceTypesSpecifications <- list(
       ISELEMENTOF = ""
     ),
     item(
-      NAME = items("TotalPop",
-                   "TotalEmp"),
+      NAME = items("UrbanPop",
+                   "UrbanEmp"),
       TABLE = "Bzone",
       GROUP = "BaseYear",
       TYPE = "people",
@@ -222,8 +222,8 @@ CalculateFuturePlaceTypesSpecifications <- list(
       DESCRIPTION = "A list of place types as assigned to the businesses"
     ),
     item(
-      NAME = items("TotalPop",
-                   "TotalEmp"),
+      NAME = items("UrbanPop",
+                   "UrbanEmp"),
       TABLE = "Bzone",
       GROUP = "Year",
       TYPE = "people",
@@ -236,7 +236,7 @@ CalculateFuturePlaceTypesSpecifications <- list(
                           "Total employees by place types")
     ),
     item(
-      NAME = "TotalIncome",
+      NAME = "UrbanIncome",
       TABLE = "Bzone",
       GROUP = "Year",
       TYPE = "currency",
@@ -319,8 +319,8 @@ CalculateFuturePlaceTypes <- function(L) {
   TotalEmp <- sum(L$Year$Business$emp)
 
   # Get the base year population and employment
-  BasePop_Pt <- L$BaseYear$Bzone$TotalPop
-  BaseEmp_Pt <- L$BaseYear$Bzone$TotalEmp
+  BasePop_Pt <- L$BaseYear$Bzone$UrbanPop
+  BaseEmp_Pt <- L$BaseYear$Bzone$UrbanEmp
 
   # Calculate the place type population and employment proportions
   PopGrowth_ <- TotalPop - sum(BasePop_Pt)
@@ -529,9 +529,9 @@ CalculateFuturePlaceTypes <- function(L) {
   attributes(TotalIncome_Pt) <- NULL
 
   Out_ls$Year$Bzone <- items(
-    TotalPop = TotalPop_Pt,
-    TotalEmp = TotalEmp_Pt,
-    TotalIncome = TotalIncome_Pt
+    UrbanPop = TotalPop_Pt,
+    UrbanEmp = TotalEmp_Pt,
+    UrbanIncome = TotalIncome_Pt
   )
 
 
