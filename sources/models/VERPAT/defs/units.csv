@@ -5,9 +5,11 @@ area,SQMI
 mass,LB
 volume,GAL
 time,DAY
+time,YR
 speed,MPH
 vehicle_distance,VMT
 passenger_distance,PMT
 payload_distance,TONMI
 people,PRSN
 households,HH
+vehicles,VEH

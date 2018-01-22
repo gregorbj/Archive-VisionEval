@@ -4,5 +4,117 @@
    "TYPE": "double",
    "UNITS": "multiplier",
    "PROHIBIT": "",
-   "ISELEMENTOF": ""}
+   "ISELEMENTOF": ""},
+  {
+    "NAME": "FwyLaneMiGrowth",
+    "VALUE": "1",
+    "TYPE" : "double",
+    "UNITS" : "multiplier",
+    "PROHIBIT" : "c('NA', '< 0')",
+    "ISELEMENTOF" : ""
+  },
+  {
+    "NAME" : "ArtLaneMiGrowth",
+    "VALUE": "1",
+    "TYPE" : "double",
+    "UNITS" : "multiplier",
+    "PROHIBIT" : "c('NA', '< 0')",
+    "ISELEMENTOF" : ""
+  },
+  {
+    "NAME" : "BusRevMiPCGrowth",
+    "VALUE": "1",
+    "TYPE" : "double",
+    "UNITS" : "multiplier",
+    "PROHIBIT" : "c('NA', '< 0')",
+    "ISELEMENTOF" : ""
+  },
+  {
+    "NAME" : "RailRevMiPCGrowth",
+    "VALUE": "1",
+    "TYPE" : "double",
+    "UNITS" : "multiplier",
+    "PROHIBIT" : "c('NA', '< 0')",
+    "ISELEMENTOF" : ""
+  },
+  {
+    "NAME" : "LtTruckProp",
+    "VALUE": "0.45",
+    "TYPE" : "double",
+    "UNITS" : "multiplier",
+    "PROHIBIT" : "c('NA', '< 0')",
+    "ISELEMENTOF" : ""
+  },
+  {
+    "NAME" : "BaseCostPerMile",
+    "VALUE": "0.04",
+    "TYPE" : "compound",
+    "UNITS" : "USD/MI",
+    "PROHIBIT" : "c('NA', '< 0')",
+    "ISELEMENTOF" : ""
+  },
+  {
+    "NAME" : "FutureCostPerMile",
+    "VALUE": "0.04",
+    "TYPE" : "compound",
+    "UNITS" : "USD/MI",
+    "PROHIBIT" : "c('NA', '< 0')",
+    "ISELEMENTOF" : ""
+  },
+  {
+    "NAME" : "DvmtBudgetProp",
+    "VALUE": "0.1",
+    "TYPE" : "double",
+    "UNITS" : "multiplier",
+    "PROHIBIT" : "c('NA', '< 0', '> 1')",
+    "ISELEMENTOF" : ""
+  },
+  {
+    "NAME" : "AnnVmtInflator",
+    "VALUE": "365",
+    "TYPE" : "integer",
+    "UNITS" : "DAYS",
+    "PROHIBIT" : "c('NA', '< 0')",
+    "ISELEMENTOF" : ""
+  },
+  {
+    "NAME" : "TrnstnProp",
+    "VALUE": "1",
+    "TYPE" : "double",
+    "UNITS" : "multiplier",
+    "PROHIBIT" : "c('NA', '< 0', '> 1')",
+    "ISELEMENTOF" : ""
+  },
+  {
+    "NAME" : "FuelCost",
+    "VALUE": "1.82",
+    "TYPE" : "compound",
+    "UNITS" : "USD/GAL",
+    "PROHIBIT" : "c('NA', '< 0')",
+    "ISELEMENTOF" : ""
+  },
+  {
+    "NAME" : "GasTax",
+    "VALUE": "0.424",
+    "TYPE" : "compound",
+    "UNITS" : "USD/GAL",
+    "PROHIBIT" : "c('NA', '< 0')",
+    "ISELEMENTOF" : ""
+  },
+  {
+    "NAME" : "CarbonCost",
+    "VALUE": "0",
+    "TYPE" : "compound",
+    "UNITS" : "USD/GAL",
+    "PROHIBIT" : "c('NA', '< 0')",
+    "ISELEMENTOF" : ""
+  },
+  {
+    "NAME" : "VmtCost",
+    "VALUE": "0",
+    "TYPE" : "compound",
+    "UNITS" : "USD/GAL",
+    "PROHIBIT" : "c('NA', '< 0')",
+    "ISELEMENTOF" : ""
+  }
 ]
