@@ -62,10 +62,12 @@ script:
     for element in ${packages[@]}
     do
       echo $element
-      cd sources/modules/$element
-      Rscript -e 'devtools::install_deps(".")'
-      R CMD INSTALL .
-      cd ../../..
+      if ( [ $element != "." ] ); then
+        cd sources/modules/$element
+        Rscript -e 'devtools::install_deps(".")'
+        R CMD INSTALL .
+        cd ../../..
+      fi
     done
     
     #run module or model tests
@@ -74,6 +76,9 @@ script:
       Rscript -e 'devtools::check(".")'
       Rscript -e "tryCatch( source( '$SCRIPT' ) )"
       R CMD INSTALL .
+      exit_status=$?
     else
       Rscript -e "tryCatch( source( '$SCRIPT' ) )"
+      exit_status=$?
     fi
+    exit $exit_status
