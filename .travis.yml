@@ -24,43 +24,12 @@ before_install:
   - "if [ $(phantomjs --version) != $PHANTOMJS_VERSION ]; then hash -r; fi"
   - "phantomjs --version"
 
-# fast binary package install
-r_binary_packages: 
-  - curl
-  - devtools
-  - roxygen2
-  - stringr
-  - knitr
-  - data.table
-  - ordinal
-  - geosphere
-  - fields
-  - car
-  - pbkrtest
-  - quantreg
-  - reshape
-  - pbkrtest
-  - shiny
-  - shinyjs
-  - shinyFiles
-  - DT
-  - shinyBS
-  - future
-  - testit
-  - jsonlite
-  - shinyAce
-  - envDocument
-  - rhandsontable
-  
-bioc_packages:
-  - BiocInstaller
-  - rhdf5
-
-r_github_packages:
-  - tdhock/namedCapture
-  - trestletech/shinyTree
-  - rstudio/webdriver
-  - rstudio/shinytest
+install:
+  - Rscript -e 'install.packages(c("curl","devtools", "roxygen2", "stringr", "knitr", "data.table", "ordinal", "geosphere", "fields", "car", "pbkrtest", "quantreg", "reshape"))'
+  - Rscript -e 'devtools::install_bioc(c("BiocInstaller", "rhdf5"))'
+  # Packages required for VEGUI  
+  - Rscript -e 'install.packages(c("shiny", "shinyjs", "shinyFiles", "data.table", "DT", "shinyBS", "future", "testit", "jsonlite", "shinyAce", "envDocument", "rhandsontable"))'
+  - Rscript -e 'devtools::install_github(c("tdhock/namedCapture", "trestletech/shinyTree", "rstudio/webdriver", "rstudio/shinytest"))'
 
 # setup a different environment variable for each Travis build environment (in the matrix) to run in parallel
 env:
