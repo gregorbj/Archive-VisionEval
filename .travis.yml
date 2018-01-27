@@ -77,6 +77,9 @@ env:
    - FOLDER=sources/models/VERSPM/Test1          SCRIPT='run_model.R'             PACKAGE=false
    - FOLDER=sources/VEGUI                        SCRIPT='run_vegui_test.R'        PACKAGE=false
 
+install:
+   echo 'install step'
+
 # install and test framework, modules, models, GUI
 script:
   - |
