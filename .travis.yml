@@ -46,9 +46,6 @@ env:
    - FOLDER=sources/models/VERSPM/Test1          SCRIPT='run_model.R'             TYPE=model       DEPENDS=visioneval
    - FOLDER=sources/VEGUI                        SCRIPT='run_vegui_test.R'        TYPE=model       DEPENDS=visioneval
 
-install:
-  - echo 'install step'
-
 # install and test framework, modules, models, GUI
 script:
   - |
