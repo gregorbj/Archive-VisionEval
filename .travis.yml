@@ -61,7 +61,6 @@ script:
     IFS=',' read -r -a packages <<< $DEPENDS
     for element in ${packages[@]}
     do
-      echo $element
       if ( [ $element != "." ] ); then
         cd sources/modules/$element
         Rscript -e 'devtools::install_deps(".")'
@@ -71,6 +70,7 @@ script:
     done
     
     #run module or model tests
+    cd $FOLDER
     if ( [ $TYPE == "module" ] ); then
       Rscript -e 'devtools::install_deps(".")'
       Rscript -e 'devtools::check(".")'
