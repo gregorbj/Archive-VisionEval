@@ -24,82 +24,61 @@ before_install:
   - "if [ $(phantomjs --version) != $PHANTOMJS_VERSION ]; then hash -r; fi"
   - "phantomjs --version"
 
-# fast binary package install
-r_binary_packages: 
-  - curl
-  - devtools
-  - roxygen2
-  - stringr
-  - knitr
-  - data.table
-  - ordinal
-  - geosphere
-  - fields
-  - car
-  - pbkrtest
-  - quantreg
-  - reshape
-  - pbkrtest
-  - shiny
-  - shinyjs
-  - shinyFiles
-  - DT
-  - shinyBS
-  - future
-  - testit
-  - jsonlite
-  - shinyAce
-  - envDocument
-  - rhandsontable
-  
-bioc_packages:
-  - BiocInstaller
-  - rhdf5
-
-r_github_packages:
-  - tdhock/namedCapture
-  - trestletech/shinyTree
-  - rstudio/webdriver
-  - rstudio/shinytest
+install:
+  - Rscript -e 'install.packages(c("curl","devtools", "roxygen2", "stringr", "knitr", "data.table", "ordinal", "geosphere", "fields", "car", "pbkrtest", "quantreg", "reshape"))'
+  - Rscript -e 'devtools::install_bioc(c("BiocInstaller", "rhdf5"))'
+  # Packages required for VEGUI  
+  - Rscript -e 'install.packages(c("shiny", "shinyjs", "shinyFiles", "data.table", "DT", "shinyBS", "future", "testit", "jsonlite", "shinyAce", "envDocument", "rhandsontable"))'
+  - Rscript -e 'devtools::install_github(c("tdhock/namedCapture", "trestletech/shinyTree", "rstudio/webdriver", "rstudio/shinytest"))'
 
 # setup a different environment variable for each Travis build environment (in the matrix) to run in parallel
 env:
-   - FOLDER=sources/framework/visioneval         SCRIPT='tests/scripts/test.R'    TYPE=framework   DEPENDS=visioneval
-   - FOLDER=sources/modules/VE2001NHTS           SCRIPT='tests/scripts/test.R'    TYPE=module      DEPENDS=visioneval
-   - FOLDER=sources/modules/VESimHouseholds      SCRIPT='tests/scripts/test.R'    TYPE=module      DEPENDS=visioneval
-   - FOLDER=sources/modules/VELandUse            SCRIPT='tests/scripts/test.R'    TYPE=module      DEPENDS=visioneval
-   - FOLDER=sources/modules/VESyntheticFirms     SCRIPT='tests/scripts/test.R'    TYPE=module      DEPENDS=visioneval
-   - FOLDER=sources/modules/VETransportSupply    SCRIPT='tests/scripts/test.R'    TYPE=module      DEPENDS=visioneval
-   - FOLDER=sources/modules/VECommercialTravel   SCRIPT='tests/scripts/test.R'    TYPE=module      DEPENDS=visioneval
-   - FOLDER=sources/modules/VEHouseholdTravel    SCRIPT='tests/scripts/test.R'    TYPE=module      DEPENDS=visioneval
-   - FOLDER=sources/modules/VEHouseholdVehicles  SCRIPT='tests/scripts/test.R'    TYPE=module      DEPENDS=visioneval
-   - FOLDER=sources/models/VERPAT                SCRIPT='run_model.R'             TYPE=model       DEPENDS=visioneval
-   - FOLDER=sources/models/VERSPM/Test1          SCRIPT='run_model.R'             TYPE=model       DEPENDS=visioneval
-   - FOLDER=sources/VEGUI                        SCRIPT='run_vegui_test.R'        TYPE=model       DEPENDS=visioneval
-
-install:
-  - echo 'install step'
+   - FOLDER=sources/framework/visioneval         SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=
+   - FOLDER=sources/modules/VE2001NHTS           SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=
+   - FOLDER=sources/modules/VECommercialTravel   SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=VE2001NHTS
+   - FOLDER=sources/modules/VEEnergyAndEmissions SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=VE2001NHTS
+   - FOLDER=sources/modules/VEHouseholdTravel    SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=VE2001NHTS
+   - FOLDER=sources/modules/VEHouseholdVehicles  SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=VE2001NHTS
+   - FOLDER=sources/modules/VELandUse            SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=VE2001NHTS,VESimHouseholds
+   - FOLDER=sources/modules/VESimHouseholds      SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=
+   - FOLDER=sources/modules/VESyntheticFirms     SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=
+   - FOLDER=sources/modules/VETransportSupply    SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=
+   - FOLDER=sources/modules/VETravelCost         SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=
+   - FOLDER=sources/models/VERPAT                SCRIPT=run_model.R             TYPE=model       DEPENDS=VE2001NHTS,VESimHouseholds,VESyntheticFirms,VELandUse,VETransportSupply,VEHouseholdVehicles,VEHouseholdTravel
+   - FOLDER=sources/models/VERSPM/Test1          SCRIPT=run_model.R             TYPE=model       DEPENDS=VE2001NHTS,VESimHouseholds,VELandUse,VETransportSupply,VEHouseholdVehicles,VEHouseholdTravel,VECommercialTravel,VEEnergyAndEmissions
+   - FOLDER=sources/VEGUI                        SCRIPT=run_vegui_test.R        TYPE=model       DEPENDS=VE2001NHTS,VESimHouseholds,VESyntheticFirms,VELandUse,VETransportSupply,VEHouseholdVehicles,VEHouseholdTravel
 
 # install and test framework, modules, models, GUI
 script:
   - |
-    if [ $TYPE == "framework" ]; then
-      cd $FOLDER
-      Rscript -e 'devtools::install_deps(".")'
-      Rscript -e 'devtools::check(".")'
-      Rscript -e "tryCatch( source( $SCRIPT ) )"
-      R CMD INSTALL .
-    fi
+    #install framework
+    cd sources/framework/visioneval
+    Rscript -e 'devtools::install_deps(".")'
+    R CMD INSTALL .
+    cd ../../..
+    
+    #install dependent packages
+    IFS=',' read -r -a packages <<< $DEPENDS
+    for element in ${packages[@]}
+    do
+      if ( [ $element != "." ] ); then
+        cd sources/modules/$element
+        Rscript -e 'devtools::install_deps(".")'
+        R CMD INSTALL .
+        cd ../../..
+      fi
+    done
+    
+    #run module or model tests
+    cd $FOLDER
     if ( [ $TYPE == "module" ] ); then
-      #need to install dependent packages
-      cd $FOLDER
       Rscript -e 'devtools::install_deps(".")'
       Rscript -e 'devtools::check(".")'
-      Rscript -e "tryCatch( source( $SCRIPT ) )"
+      Rscript -e "tryCatch( source( '$SCRIPT' ) )"
       R CMD INSTALL .
+      exit_status=$?
+    else
+      Rscript -e "tryCatch( source( '$SCRIPT' ) )"
+      exit_status=$?
     fi
-    if [ $TYPE == "model" ]; then
-      #need to install dependent packages
-      cd $FOLDER
-      Rscript -e "tryCatch( source( $SCRIPT ) )"
-    fi
+    exit $exit_status
