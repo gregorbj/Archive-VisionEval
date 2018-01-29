@@ -62,8 +62,6 @@
 InitializeSpecifications <- list(
   #Level of geography module is applied at
   RunBy = "Region",
-  #Time frame
-  RunFor = "AllYears",
   #Specify new tables to be created by Inp if any
   #Specify new tables to be created by Set if any
   #Specify input data
