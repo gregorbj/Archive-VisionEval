@@ -150,7 +150,10 @@ addWarningMsg <- function(ResultsListName, WarnMsg) {
 #' directory of the package.
 #' @param ModuleName A string identifying the name of the module the estimation
 #' data is being used in.
-#' @return A data frame containing the estimation data.
+#' @return A data frame containing the estimation data according to
+#' specifications with data types consistent with specifications and columns
+#' not specified removed. Execution stops if any errors are found. Error
+#' messages are printed to the console. Warnings are also printed to the console.
 #' @export
 processEstimationInputs <- function(Inp_ls, FileName, ModuleName) {
   #Define a function which expands a specification with multiple NAME items
@@ -237,8 +240,22 @@ processEstimationInputs <- function(Inp_ls, FileName, ModuleName) {
       print(Warnings_[i])
     }
   }
-  #Return the data frame
-  Data_df
+  #Identify the data class for each input file field
+  ColClasses_ <- unlist(lapply(Inp_ls, function(x) {
+    Type <- x$TYPE
+    Class <- Types()[[Type]]$mode
+    if (Class == "double") Class <- "numeric"
+    Class
+  }))
+  names(ColClasses_) <- unlist(lapply(Inp_ls, function(x) {
+    x$NAME
+  }))
+  #Match the classes with order of field names in the input file
+  ColClasses_ <- ColClasses_[names(Data_df)]
+  #Convert NA values into "NULL" (columns in data not to be read in)
+  ColClasses_[is.na(ColClasses_)] <- "NULL"
+  #Read the data file with the assigned column classes
+  read.csv(FilePath, colClasses = ColClasses_)
 }
 
 
@@ -370,7 +387,7 @@ checkModuleOutputs <-
 #' the Get specifications, whether the module will run, and whether all of the
 #' outputs meet the module's Set specifications. The latter check is carried out
 #' in large part by the checkModuleOutputs function that is called.
-#' #'
+#'
 #' @param ModuleName A string identifying the module name.
 #' @param ParamDir A string identifying the location of the directory where
 #' the run parameters, model parameters, and geography definition files are
