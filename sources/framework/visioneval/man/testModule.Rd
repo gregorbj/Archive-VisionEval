@@ -90,5 +90,4 @@ datastore, whether the datastore contains all the module inputs identified in
 the Get specifications, whether the module will run, and whether all of the
 outputs meet the module's Set specifications. The latter check is carried out
 in large part by the checkModuleOutputs function that is called.
-#'
 }
