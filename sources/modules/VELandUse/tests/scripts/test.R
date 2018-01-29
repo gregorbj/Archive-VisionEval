@@ -102,10 +102,8 @@ testModule(
 
 #Finish up
 setwd("tests")
-tar("Datastore_VERPAT.tar", c("Datastore", "defs"))
 dir.remove("Datastore")
 dir.remove("defs")
-zip("ModelState_VERPAT.zip","ModelState.Rda")
 file.remove("ModelState.Rda")
 unzip("ModelState.zip")
 file.remove("ModelState.zip")

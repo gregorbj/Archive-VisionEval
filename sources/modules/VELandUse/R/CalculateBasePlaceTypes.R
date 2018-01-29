@@ -236,8 +236,8 @@ CalculateBasePlaceTypesSpecifications <- list(
       DESCRIPTION = "A list of place types as assigned to the businesses"
     ),
     item(
-      NAME = items("TotalPop",
-                   "TotalEmp"),
+      NAME = items("UrbanPop",
+                   "UrbanEmp"),
       TABLE = "Bzone",
       GROUP = "Year",
       TYPE = "people",
@@ -250,7 +250,7 @@ CalculateBasePlaceTypesSpecifications <- list(
                           "Total employees by place types")
     ),
     item(
-      NAME = "TotalIncome",
+      NAME = "UrbanIncome",
       TABLE = "Bzone",
       GROUP = "Year",
       TYPE = "currency",
@@ -734,9 +734,9 @@ CalculateBasePlaceTypes <- function(L) {
   attributes(TotalIncome_Pt) <- NULL
 
   Out_ls$Year$Bzone <- items(
-    TotalPop = TotalPop_Pt,
-    TotalEmp = TotalEmp_Pt,
-    TotalIncome = TotalIncome_Pt
+    UrbanPop = TotalPop_Pt,
+    UrbanEmp = TotalEmp_Pt,
+    UrbanIncome = TotalIncome_Pt
   )
 
   rm(Hhlds, TotalPop_Pt, TotalEmp_Pt, TotalIncome_Pt)

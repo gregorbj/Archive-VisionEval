@@ -60,6 +60,9 @@
 
 #Set up data and functions to estimate models
 #--------------------------------------------
+#' @import data.table
+#' @importFrom stats as.formula rnorm runif sd ppois quantile
+
 #Load NHTS household data
 Hh_df <- VE2001NHTS::Hh_df
 #Add variables to Hh_df
