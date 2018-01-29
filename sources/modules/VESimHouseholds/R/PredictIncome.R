@@ -26,7 +26,9 @@
 #=================================
 #Packages used in code development
 #=================================
-#Uncomment following lines during code development. Recomment when done.
+#The following commented lines of code are in the script for code development
+#purposes only. Uncomment them if needed to work on the script. Recomment when
+#done.
 # library(visioneval)
 # library(car)
 
