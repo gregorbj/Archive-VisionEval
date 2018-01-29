@@ -34,45 +34,59 @@
 #containing travel and other relevant data for each survey household.
 
 
-#=====
-#SETUP
-#=====
+library(visioneval)
+
+
+#==================
+#LOAD NHTS DATASETS
+#==================
 
 #Define functions
 #----------------
-
+#Define function to convert name to proper name (only first letter capitalized)
 toProperName <- function(X){
           EndX <- nchar(X)
           paste(toupper(substring(X, 1, 1)), tolower(substring(X, 2, EndX)), sep="")
 }
 
+#Define function to convert 1-dimensional array into a named vector
 toVecFrom1DAry <- function(X_ar){
   X_ <- as.vector(X_ar)
   names(X_) <- names(X_ar)
   X_
 }
 
-doPadNum <- function(Num_, Len = 2) {
+#Define function to convert numbers to strings and add leading zeros if
+#necessary so that every one has 2 characters (e.g. '1' becomes 01)
+doPadNum <- function(Num_) {
   Num_ <- as.character(Num_)
   Num_[nchar(Num_) < 2] <- paste0(0, Num_[nchar(Num_) < 2])
   Num_
 }
 
+#Define function to retrieve NHTS dataset from repository, unzip, and read as
+#data frame
+getZipDatasetFromRepo <- function(Repo, DatasetName) {
+  ZipArchiveFileName <- paste0(DatasetName, ".zip")
+  CsvFileName <- paste0(DatasetName, ".csv")
+  download.file(file.path(Repo, ZipArchiveFileName), ZipArchiveFileName)
+  Data_df <- read.csv(unzip(ZipArchiveFileName), as.is = TRUE)
+  file.remove(ZipArchiveFileName, CsvFileName)
+  Data_df
+}
+
 #Identify NHTS data directory
 #----------------------------
-#Change the location of this to your local directory where the raw NHTS files
-#are kept if you need to change the variables you want to extract from those
-#files.
-NhtsDataDir <- "C:/Users/Brian/Documents/GitHub/NHTS_datasets"
+#Compressed NHTS 2001 public use datasets are available in the following GitHub
+#repository. This may change in the future.
+Nhts2001Repo <-
+  "https://raw.githubusercontent.com/gregorbj/NHTS2001/master/data"
 
 #Load NHTS household data
 #------------------------
-#Load the data frame of NHTS household data if it exists
-if (file.exists("data-raw/Hh_df.rda")) {
-  load("data-raw/Hh_df.rda")
-} else {
-#Otherwise create it from the NHTS file
-  Hh_df <- read.csv(file.path(NhtsDataDir, "HHPUB.csv"), as.is = TRUE)
+#Download data from repository and process if it has not already been done
+if (!file.exists("data-raw/Hh_df.rda")) {
+  Hh_df <- getZipDatasetFromRepo(Nhts2001Repo, "HHPUB")
   Keep_ <- c("HOUSEID", "AGE_P1", "AGE_P2", "AGE_P3", "AGE_P4", "AGE_P5", "AGE_P6",
              "AGE_P7", "AGE_P8", "AGE_P9", "AGE_P10", "AGE_P11", "AGE_P12", "AGE_P13",
              "AGE_P14", "CENSUS_D", "CENSUS_R", "DRVRCNT", "EXPFLHHN", "EXPFLLHH",
@@ -81,76 +95,170 @@ if (file.exists("data-raw/Hh_df.rda")) {
              "HHSIZE", "HHVEHCNT", "HOMETYPE", "HTEEMPDN", "HTHRESDN", "HTHUR",
              "HTPPOPDN", "LIF_CYC", "MSACAT", "MSASIZE", "RAIL", "RATIO16V",
              "URBAN", "URBRUR", "WRKCOUNT", "CNTTDHH")
-  AllTripsHh_ <- Hh_df$HOUSEID[!is.na(Hh_df$EXPFLLHH)]
-  Hh_df <- Hh_df[Hh_df$HOUSEID %in% AllTripsHh_, Keep_]
+  Hh_df <- Hh_df[, Keep_]
   save(Hh_df, file = "data-raw/Hh_df.rda", compress = TRUE)
+} else {
+#Otherwise read in from 'data-raw' directory
+  load("data-raw/Hh_df.rda")
 }
-#Convert names and NA values
+#Identify households that have expansion factor
+AllTripsHh_ <- Hh_df$HOUSEID[!is.na(Hh_df$EXPFLLHH)]
+#Limit households to those that have expansion factor
+Hh_df <- Hh_df[Hh_df$HOUSEID %in% AllTripsHh_,]
+#Convert field names to proper names
 names(Hh_df) <- toProperName(names(Hh_df))
+#Convert negative values to NA
 Hh_df[Hh_df < 0] <- NA
 
 #Load NHTS vehicle data
 #----------------------
-#Load the data frame of NHTS vehicle data if it exists
-if (file.exists("data-raw/Veh_df.rda")) {
-  load("data-raw/Veh_df.rda")
-} else {
-#Otherwise create it from the NHTS file
-  Veh_df <- read.csv(file.path(NhtsDataDir, "VEHPUB.csv"), as.is = TRUE)
+#Download data from repository and process if it has not already been done
+if (!file.exists("data-raw/Veh_df.rda")) {
+  Veh_df <- getZipDatasetFromRepo(Nhts2001Repo, "VEHPUB")
   Keep_ <-
     c("HOUSEID", "VEHID", "BESTMILE", "EIADMPG", "GSCOST", "VEHTYPE", "VEHYEAR",
       "VEHMILES" )
-  Veh_df <-
-    Veh_df[Veh_df$HOUSEID %in% AllTripsHh_, Keep_]
+  Veh_df <- Veh_df[, Keep_]
   save(Veh_df, file = "data-raw/Veh_df.rda", compress = TRUE)
+} else {
+  load("data-raw/Veh_df.rda")
 }
-#Convert names and NA values
+#Only include vehicle data for households that have expansion factor
+Veh_df <- Veh_df[Veh_df$HOUSEID %in% AllTripsHh_,]
+#Convert field names to proper names
 names(Veh_df) <- toProperName(names(Veh_df))
+#Convert Vehid to character
 Veh_df$Vehid <- as.character(Veh_df$Vehid)
+#Convert negative values to NA
 Veh_df[Veh_df < 0] <- NA
 
 #Load NHTS person data
 #---------------------
-#Load the data frame of NHTS person data if it exists
-if (file.exists("data-raw/Per_df.rda")) {
-  load("data-raw/Per_df.rda")
-} else {
-#Otherwise create it from the NHTS file
+#Download data from repository and process if it has not already been done
+if (!file.exists("data-raw/Per_df.rda")) {
+  Per_df <- getZipDatasetFromRepo(Nhts2001Repo, "PERPUB")
   Keep_ <-
     c("HOUSEID", "PERSONID", "COMMDRVR", "NBIKETRP", "NWALKTRP", "USEPUBTR",
       "WRKDRIVE", "WRKTRANS", "DTGAS", "DISTTOWK")
-  Per_df <-
-    Per_df[Per_df$HOUSEID %in% AllTripsHh_, Keep_]
+  Per_df <- Per_df[, Keep_]
   save(Per_df, file = "data-raw/Per_df.rda", compress = TRUE)
+  } else {
+  load("data-raw/Per_df.rda")
 }
-#Convert names and NA values
+#Only include person data for households that have expansion factor
+Per_df <- Per_df[Per_df$HOUSEID %in% AllTripsHh_,]
+#Convert field names to proper names
 names(Per_df) <- toProperName(names(Per_df))
+#Create a unique person ID
 Per_df$Personid <- paste0(Per_df$Houseid, doPadNum(Per_df$Personid))
+#Convert negative values to NA
 Per_df[Per_df < 0] <- NA
 
 #Load NHTS daily trip data
 #-------------------------
-#Load the data frame of NHTS person data if it exists
-if (file.exists("data-raw/Dt_df.rda")) {
-  load("data-raw/Dt_df.rda")
-} else {
-#Otherwise create it from the NHTS file
-  Dt_df <- read.csv(file.path(NhtsDataDir, "DAYPUB.csv") , as.is = TRUE)
+#Download data from repository and process if it has not already been done
+if (!file.exists("data-raw/Dt_df.rda")) {
+  Dt_df <- getZipDatasetFromRepo(Nhts2001Repo, "DAYPUB")
   Keep_ <-
     c("HOUSEID", "TDCASEID", "VEHID", "VEHUSED", "TRPHHVEH","PERSONID",
       "NUMONTRP", "TRPTRANS", "TRPMILES", "TRVL_MIN", "DWELTIME", "PSGR_FLG",
       "WHYFROM", "WHYTO", "VEHTYPE")
-  Dt_df <-
-    Dt_df[Dt_df$HOUSEID %in% AllTripsHh_, Keep_]
+  Dt_df <- Dt_df[, Keep_]
   save(Dt_df, file = "data-raw/Dt_df.rda", compress = TRUE)
+} else {
+  load("data-raw/Dt_df.rda")
 }
-#Convert names and NA values
+#Only include trip data for households that have expansion factor
+Dt_df <- Dt_df[Dt_df$HOUSEID %in% AllTripsHh_,]
+#Convert field names to proper names
 names(Dt_df) <- toProperName(names(Dt_df))
+#Convert Vehid to character
 Dt_df$Vehid <- as.character(Dt_df$Vehid)
+#Create a unique person ID
 Dt_df$Personid <- paste0(Dt_df$Houseid, doPadNum(Dt_df$Personid))
+#Convert negative values to NA
 Dt_df[Dt_df < 0] <- NA
 
-rm(NhtsDataDir)
+
+#=======================================
+#LOAD METROPOLITAN ROAD AND TRANSIT DATA
+#=======================================
+
+#Describe specifications for road supply data file
+#-------------------------------------------------
+RoadInp_ls <- items(
+  item(
+    NAME = items(
+      "MsaCode",
+      "UrbanizedArea"),
+    TYPE = "character",
+    PROHIBIT = "NA",
+    ISELEMENTOF = "",
+    UNLIKELY = "",
+    TOTAL = ""
+  ),
+  item(
+    NAME = items(
+      "RoadMiles",
+      "TotalDvmt",
+      "Population",
+      "Area",
+      "Density",
+      "RoadMileCap",
+      "FwyMiles",
+      "FwyLaneMi"),
+    TYPE = "double",
+    PROHIBIT = c("NA", "< 0"),
+    ISELEMENTOF = "",
+    UNLIKELY = "",
+    TOTAL = ""
+  )
+)
+
+#Read in road supply data
+#------------------------
+Hwy2001_df <-
+  processEstimationInputs(
+    RoadInp_ls,
+    "highway_statistics.csv",
+    "Make2001NHTSDataset")
+rm(RoadInp_ls)
+
+#Describe specifications for transit supply data file
+#----------------------------------------------------
+TransitInp_ls <- items(
+  item(
+    NAME = items(
+      "UZAName",
+      "MSACode"),
+    TYPE = "character",
+    PROHIBIT = "",
+    ISELEMENTOF = "",
+    UNLIKELY = "",
+    TOTAL = ""
+  ),
+  item(
+    NAME = items(
+      "BusEqRevMi",
+      "UZAPop",
+      "BusEqRevMiPC"),
+    TYPE = "double",
+    PROHIBIT = "< 0",
+    ISELEMENTOF = "",
+    UNLIKELY = "",
+    TOTAL = ""
+  )
+)
+
+#Read in transit supply data
+#---------------------------
+Transit2001_df <-
+  processEstimationInputs(
+    TransitInp_ls,
+    "uza_bus_eq_rev_mi.csv",
+    "Make2001NHTSDataset")
+rm(TransitInp_ls)
+
 
 #================
 #PROCESS DATASETS
@@ -531,9 +639,9 @@ rm(Per_ls, Numcommdrvr_Hh, Nbiketrp_Hh, Nwalktrp_Hh, Usepubtr_Hh, Numwrkdrvr_Hh)
 #Change Hhc_msa to character variable to link up highway data properly
 Hh_df$Hhc_msa <- as.character(Hh_df$Hhc_msa)
 #Load data file
-Hwy2001_df <-
-  read.csv("data-raw/HighwayStatistics2.csv",
-           colClasses = c(rep("character", 2), rep("numeric", 8)))
+# Hwy2001_df <-
+#   read.csv("data-raw/HighwayStatistics2.csv",
+#            colClasses = c(rep("character", 2), rep("numeric", 8)))
 #Sum quantities by Msa Code
 RoadMi_Mc <- toVecFrom1DAry(tapply(Hwy2001_df$RoadMiles, Hwy2001_df$MsaCode, sum))
 Pop_Mc <- toVecFrom1DAry(tapply(Hwy2001_df$Population, Hwy2001_df$MsaCode, sum))
@@ -555,7 +663,7 @@ rm(RoadMi_Mc, Pop_Mc, FwyLnMi_Mc, Area_Mc, RoadMiCap_Mc, FwyLnMiCap_Mc,
 #Add the transit supply data
 #---------------------------
 #Load the data file
-Transit2001_df <- read.csv("data-raw/uza_bus_eq_rev_mi.csv", as.is = TRUE)
+# Transit2001_df <- read.csv("data-raw/uza_bus_eq_rev_mi.csv", as.is = TRUE)
 Transit2001_df$MSACode <- as.character(Transit2001_df$MSACode)
 Transit2001_df$MSACode[Transit2001_df$MSACode == "520"] <- "0520"
 Transit2001_df$MSACode[Transit2001_df$MSACode == "640"] <- "0640"
