@@ -53,8 +53,7 @@
 #'
 #' @param Data_df A data frame containing estimation data.
 #' @param StartTerms_ A character vector of the terms of the model to be
-#' tested in the model. The function estimates the model using these terms
-#' and then drops all terms whose p value is greater than 0.05.
+#' tested in the model.
 #' @return A list which has the following components:
 #' Type: a string identifying the type of model ("binomial"),
 #' Formula: a string representation of the model equation,
