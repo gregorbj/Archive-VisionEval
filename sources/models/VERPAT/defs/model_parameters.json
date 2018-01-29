@@ -116,5 +116,29 @@
     "UNITS" : "USD/GAL",
     "PROHIBIT" : "c('NA', '< 0')",
     "ISELEMENTOF" : ""
+  },
+  {
+    "NAME" : "BaseLtVehDvmt",
+    "VALUE": "27244",
+    "TYPE" : "compound",
+    "UNITS" : "MI/DAY",
+    "PROHIBIT" : "c('NA', '< 0')",
+    "ISELEMENTOF" : ""
+  },
+  {
+    "NAME" : "BaseFwyArtProp",
+    "VALUE": "0.77",
+    "TYPE" : "double",
+    "UNITS" : "proportion",
+    "PROHIBIT" : "c('NA', '< 0', '> 1')",
+    "ISELEMENTOF" : ""
+  },
+  {
+    "NAME" : "TruckVmtGrowthMultiplier",
+    "VALUE": "1",
+    "TYPE" : "double",
+    "UNITS" : "multiplier",
+    "PROHIBIT" : "c('NA', '< 0')",
+    "ISELEMENTOF" : ""
   }
 ]

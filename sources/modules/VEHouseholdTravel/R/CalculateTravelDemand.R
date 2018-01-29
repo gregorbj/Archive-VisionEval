@@ -116,6 +116,10 @@ CalculateTravelDemandSpecifications <- list(
     item(
       TABLE = "FuelComp",
       GROUP = "Global"
+    ),
+    item(
+      TABLE = "Vmt",
+      GROUP = "Global"
     )
   ),
   #Specify new tables to be created by Set if any
@@ -203,6 +207,48 @@ CalculateTravelDemandSpecifications <- list(
         "The average ethanol proportion in gasoline sold",
         "The average biodiesel proportion in diesel sold"
       )
+    ),
+    item(
+      NAME = "Type",
+      TABLE = "Vmt",
+      GROUP = "Global",
+      FILE = "region_truck_bus_vmt.csv",
+      TYPE = "character",
+      UNITS = "category",
+      PROHIBIT = "NA",
+      ISELEMENTOF = c("BusVmt","TruckVmt"),
+      SIZE = 8,
+      DESCRIPTION = "The vehicle types for which the vmt attributes were measured"
+    ),
+    item(
+      NAME = "PropVmt",
+      TABLE = "Vmt",
+      GROUP = "Global",
+      FILE = "region_truck_bus_vmt.csv",
+      TYPE = "double",
+      UNITS = "proportion",
+      PROHIBIT = c("NA", "< 0", "> 1"),
+      ISELEMENTOF = "",
+      DESCRIPTION = "The regions proportion of Vmt"
+    ),
+    item(
+      NAME = item(
+        "Fwy",
+        "Art",
+        "Other"
+      ),
+      TABLE = "Vmt",
+      GROUP = "Global",
+      FILE = "region_truck_bus_vmt.csv",
+      TYPE = "double",
+      UNITS = "proportion",
+      PROHIBIT = c("NA", "< 0", "> 1"),
+      ISELEMENTOF = "",
+      DESCRIPTION = item(
+        "The freeway proportion of Vmt",
+        "The arterial proportion of Vmt",
+        "The proportion of Vmt in rest of the functional classes"
+      )
     )
   ),
   #Specify data to be loaded from data store
@@ -215,6 +261,25 @@ CalculateTravelDemandSpecifications <- list(
       UNITS = "ID",
       PROHIBIT = "",
       ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "UrbanIncome",
+      TABLE = "Bzone",
+      GROUP = "Year",
+      TYPE = "currency",
+      UNITS = "USD.1999",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "UrbanIncome",
+      TABLE = "Bzone",
+      GROUP = "BaseYear",
+      TYPE = "currency",
+      UNITS = "USD.1999",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      OPTIONAL = TRUE
     ),
     item(
       NAME = item(
@@ -433,10 +498,84 @@ CalculateTravelDemandSpecifications <- list(
       UNITS = "proportion",
       PROHIBIT = c("NA", "< 0", "> 1"),
       ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "BaseLtVehDvmt",
+      TABLE = "Model",
+      GROUP = "Global",
+      TYPE = "compound",
+      UNITS = "MI/DAY",
+      PROHIBIT = c('NA', '< 0'),
+      SIZE = 0,
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "BaseFwyArtProp",
+      TABLE = "Model",
+      GROUP = "Global",
+      TYPE = "double",
+      UNITS = "proportion",
+      PROHIBIT = c('NA', '< 0', '> 1'),
+      SIZE = 0,
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "TruckVmtGrowthMultiplier",
+      TABLE = "Model",
+      GROUP = "Global",
+      TYPE = "double",
+      UNITS = "multiplier",
+      PROHIBIT = c('NA', '< 0'),
+      SIZE = 0,
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "Type",
+      TABLE = "Vmt",
+      GROUP = "Global",
+      TYPE = "character",
+      UNITS = "category",
+      PROHIBIT = "NA",
+      ISELEMENTOF = c("BusVmt","TruckVmt"),
+      SIZE = 8
+    ),
+    item(
+      NAME = "PropVmt",
+      TABLE = "Vmt",
+      GROUP = "Global",
+      TYPE = "double",
+      UNITS = "proportion",
+      PROHIBIT = c("NA", "< 0", "> 1"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = item(
+        "Fwy",
+        "Art",
+        "Other"
+      ),
+      TABLE = "Vmt",
+      GROUP = "Global",
+      TYPE = "double",
+      UNITS = "proportion",
+      PROHIBIT = c("NA", "< 0", "> 1"),
+      ISELEMENTOF = ""
     )
   ),
   #Specify data to saved in the data store
   Set = items(
+    item(
+      NAME = "TruckDvmt",
+      TABLE = "Marea",
+      GROUP = "Year",
+      TYPE = "compound",
+      UNITS = "MI/DAY",
+      NAVALUE = -1,
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      SIZE = 0,
+      DESCRIPTION = "Average daily vehicle miles traveled by trucks"
+    ),
     item(
       NAME = "Dvmt",
       TABLE = "Bzone",
@@ -1048,12 +1187,50 @@ CalculateTravelDemand <- function(L) {
   DvmtPt_[is.na(DvmtPt_)] <- 0
   names(DvmtPt_) <- as.character(L$Year$Bzone$Bzone)
 
+  #CALCULATE HEAVY TRUCK VMT
+  #=========================
+  # AG: Do not know the reason for multiplying base dvmt by 1000
+  BaseLtVehDvmt_ <- L$Global$Model$BaseLtVehDvmt * 1000
+  TruckBusDvmtParam_ <- data.frame(L$Global$Vmt)
+  PropVmt_ <- TruckBusDvmtParam_[TruckBusDvmtParam_$Type=="TruckVmt", "PropVmt"]
+  BaseTruckDvmt_ <- BaseLtVehDvmt_ / (1 - PropVmt_) * PropVmt_
+
+  # Load data summaries
+  #--------------------
+  BaseIncomeByPlaceType_ <- IncomeByPlaceType_ <- L$Year$Bzone$UrbanIncome
+
+  # Load base year income
+  if(L$G$Year != L$G$BaseYear){
+    BaseIncomeByPlaceType_ <- L$BaseYear$Bzone$UrbanIncome
+  }
+
+  # Calculate truck VMT by metropolitan area
+  #-----------------------------------------
+  # Calculate growth in total percapita income from base year
+  # Calculate change in income
+  BaseIncome_ <- sum(BaseIncomeByPlaceType_)
+  FutureIncome_ <- sum(IncomeByPlaceType_)
+  IncomeGrowth_ <- FutureIncome_/BaseIncome_
+  # Calculate truck DVMT
+  TruckDvmt_ <- IncomeGrowth_ * L$Global$Model$TruckVmtGrowthMultiplier * BaseTruckDvmt_
+  rm(BaseLtVehDvmt_, TruckBusDvmtParam_, PropVmt_, BaseTruckDvmt_,
+     BaseIncomeByPlaceType_, IncomeByPlaceType_,
+     BaseIncome_, FutureIncome_, IncomeGrowth_)
+  gc()
+
+
+
   #Return the results
   Out_ls <- initDataList()
   Out_ls$Year <- list(
+    Marea = list(),
     Bzone = list(),
     Household = list(),
     Vehicle = list()
+  )
+  # Azone results
+  Out_ls$Year$Marea <- list(
+    TruckDvmt = TruckDvmt_
   )
   # Bzone results
   Out_ls$Year$Bzone <- list(
