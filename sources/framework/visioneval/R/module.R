@@ -532,12 +532,11 @@ testModule <-
             writeLog(ProcessedInputs_ls$Warnings)
           }
         }
-        #Apply the initialization function
-        initFunc <- get("Initialize")
-        ProcessedInputs_ls <- initFunc(ProcessedInputs_ls)
-        if (SaveDatastore) {
+        #Apply the initialization function if DoRun is TRUE
+        if (DoRun) {
+          initFunc <- get("Initialize")
+          ProcessedInputs_ls <- initFunc(ProcessedInputs_ls)
           inputsToDatastore(ProcessedInputs_ls, Specs_ls, ModuleName)
-          return()
         } else {
           return(ProcessedInputs_ls)
         }
@@ -793,6 +792,9 @@ testModule <-
         }
       }
       #Get data from datastore
+      if (RunFor == "AllYears") Year <- getYears()[1]
+      if (RunFor == "BaseYear") Year <- G$BaseYear
+      if (RunFor == "NotBaseYear") Year <- getYears()[!getYears() %in% G$BaseYear][1]
       L <- getFromDatastore(Specs_ls, RunYear = Year, Geo = NULL)
       if (exists("Call")) {
         for (Alias in names(Call$Specs)) {
