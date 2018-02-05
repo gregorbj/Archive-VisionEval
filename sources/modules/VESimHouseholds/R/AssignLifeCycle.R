@@ -164,6 +164,7 @@ rm(AssignLifeCycleSpecifications)
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
 #' @import visioneval
+#' @include CreateEstimationDatasets.R CreateHouseholds.R PredictWorkers.R PredictIncome.R
 #' @export
 AssignLifeCycle <- function(L) {
   #Convert inputs to data frame
