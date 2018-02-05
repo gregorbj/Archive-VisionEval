@@ -58,3 +58,67 @@ Test of VESimHouseholds package modules
 
 2018-01-14 15:14:51 : Congratulations. Module AssignLifeCycle passed all tests. 
 
+Test
+Test of VESimHouseholds package modules
+2018-02-04_13:40:06
+
+2018-02-04 13:40:07 : Testing AssignLifeCycle. 
+
+2018-02-04 13:40:07 : Attempting to load datastore. 
+
+2018-02-04 13:40:07 : Datastore loaded. 
+
+2018-02-04 13:40:07 : Attempting to load and check specifications. 
+
+2018-02-04 13:40:07 : Module specifications successfully loaded and checked. 
+
+2018-02-04 13:40:07 : Attempting to process, check and load module inputs. 
+
+2018-02-04 13:40:07 : No inputs to process. 
+
+2018-02-04 13:40:07 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-02-04 13:40:07 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-02-04 13:40:07 : Running module and checking whether outputs meet Set specifications. 
+
+2018-02-04 13:40:07 : Also saving module outputs to datastore. 
+
+2018-02-04 13:40:10 : Module run successfully and outputs meet Set specifications. 
+
+2018-02-04 13:40:10 : Module outputs saved to datastore. 
+
+2018-02-04 13:40:10 : Congratulations. Module AssignLifeCycle passed all tests. 
+
+Test
+Test of VESimHouseholds package modules
+2018-02-04_21:04:18
+
+2018-02-04 21:04:18 : Testing AssignLifeCycle. 
+
+2018-02-04 21:04:18 : Attempting to load datastore. 
+
+2018-02-04 21:04:18 : Datastore loaded. 
+
+2018-02-04 21:04:18 : Attempting to load and check specifications. 
+
+2018-02-04 21:04:19 : Module specifications successfully loaded and checked. 
+
+2018-02-04 21:04:19 : Attempting to process, check and load module inputs. 
+
+2018-02-04 21:04:19 : No inputs to process. 
+
+2018-02-04 21:04:19 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-02-04 21:04:19 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-02-04 21:04:19 : Running module and checking whether outputs meet Set specifications. 
+
+2018-02-04 21:04:19 : Also saving module outputs to datastore. 
+
+2018-02-04 21:04:23 : Module run successfully and outputs meet Set specifications. 
+
+2018-02-04 21:04:23 : Module outputs saved to datastore. 
+
+2018-02-04 21:04:23 : Congratulations. Module AssignLifeCycle passed all tests. 
+

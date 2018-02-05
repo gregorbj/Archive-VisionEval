@@ -58,3 +58,67 @@ Test of VESimHouseholds package modules
 
 2018-01-14 15:14:47 : Congratulations. Module PredictWorkers passed all tests. 
 
+Test
+Test of VESimHouseholds package modules
+2018-02-04_13:39:41
+
+2018-02-04 13:39:41 : Testing PredictWorkers. 
+
+2018-02-04 13:39:41 : Attempting to load datastore. 
+
+2018-02-04 13:39:41 : Datastore loaded. 
+
+2018-02-04 13:39:41 : Attempting to load and check specifications. 
+
+2018-02-04 13:39:41 : Module specifications successfully loaded and checked. 
+
+2018-02-04 13:39:42 : Attempting to process, check and load module inputs. 
+
+2018-02-04 13:39:42 : No inputs to process. 
+
+2018-02-04 13:39:42 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-02-04 13:39:42 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-02-04 13:39:42 : Running module and checking whether outputs meet Set specifications. 
+
+2018-02-04 13:39:42 : Also saving module outputs to datastore. 
+
+2018-02-04 13:39:58 : Module run successfully and outputs meet Set specifications. 
+
+2018-02-04 13:39:58 : Module outputs saved to datastore. 
+
+2018-02-04 13:39:58 : Congratulations. Module PredictWorkers passed all tests. 
+
+Test
+Test of VESimHouseholds package modules
+2018-02-04_21:03:52
+
+2018-02-04 21:03:52 : Testing PredictWorkers. 
+
+2018-02-04 21:03:52 : Attempting to load datastore. 
+
+2018-02-04 21:03:52 : Datastore loaded. 
+
+2018-02-04 21:03:52 : Attempting to load and check specifications. 
+
+2018-02-04 21:03:52 : Module specifications successfully loaded and checked. 
+
+2018-02-04 21:03:52 : Attempting to process, check and load module inputs. 
+
+2018-02-04 21:03:52 : No inputs to process. 
+
+2018-02-04 21:03:52 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-02-04 21:03:52 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-02-04 21:03:52 : Running module and checking whether outputs meet Set specifications. 
+
+2018-02-04 21:03:52 : Also saving module outputs to datastore. 
+
+2018-02-04 21:04:18 : Module run successfully and outputs meet Set specifications. 
+
+2018-02-04 21:04:18 : Module outputs saved to datastore. 
+
+2018-02-04 21:04:18 : Congratulations. Module PredictWorkers passed all tests. 
+
