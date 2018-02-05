@@ -43,23 +43,7 @@
 
 #Define a function to estimate household size proportion parameters
 #------------------------------------------------------------------
-#' Calculate proportions of households by household size
-#'
-#' \code{calcHhAgeTypes} creates a matrix of household types and age
-#' probabilities.
-#'
-#' This function produces a matrix of probabilities that a person in one of six
-#' age groups is in one of many household types where each household type is
-#' determined by the number of persons in each age category.
-#'
-#' @param HhData_df A dataframe of household estimation data as produced by the
-#' CreateEstimationDatasets.R script.
-#' @param Threshold A number between 0 and 1 identifying the percentile
-#' cutoff for determining the most prevalent households.
-#' @return A matrix where the rows are the household types and the columns are
-#' the age categories and the values are the number of persons.
-#' @include CreateEstimationDatasets.R
-#' @export
+
 calcHhAgeTypes <- function(HhData_df, Threshold = 0.99) {
   Hh_df <- HhData_df[HhData_df$HhType == "Reg",]
   Ag <-
@@ -654,7 +638,8 @@ createGrpHhByAge <-
 #' SIZE: A named integer vector having two elements. The first element, "Azone",
 #' identifies the size of the longest Azone name. The second element, "HhId",
 #' identifies the size of the longest HhId.
-#' @import visioneval
+#' @import visioneval stats
+#' @include CreateEstimationDatasets.R
 #' @export
 CreateHouseholds <- function(L) {
   #Define dimension name vectors
