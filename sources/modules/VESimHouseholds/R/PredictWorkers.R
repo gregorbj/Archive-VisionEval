@@ -44,27 +44,7 @@
 
 #Define a function to estimate worker model parameters
 #-----------------------------------------------------
-#' Calculate worker model parameters
-#'
-#' \code{calcWorkerProportions} creates a matrix of proportions of persons who
-#' are workers by household type and age group for regular households and for
-#' the noninstitutionalized group quarters population.
-#'
-#' This function creates a matrix of proportions of persons who are workers by
-#' household type and age group for regular households and for the
-#' noninstitutionalized group quarters population. The rows are named by the
-#' household type names which for regular households are strings with the
-#' number of persons by age group separated by hyphens and is Grp for the
-#' noninstitutionalized group quarters population. These names correspond to
-#' values in the HhType dataset in the Household table of the datastore.
-#'
-#' @param HhData_df A dataframe of household estimation data as produced by the
-#' CreateEstimationDatasets.R script.
-#' @return A matrix of the proportions of persons who are workers by household
-#' type and age group. Where the row names are the household type (HhType)
-#' names and the column names are the age group names.
-#' @include CreateEstimationDatasets.R CreateHouseholds.R
-#' @export
+
 calcWorkerProportions <- function(HhData_df) {
   GQ_df <- HhData_df[HhData_df$HhType == "Grp",]
   Hh_df <- HhData_df[HhData_df$HhType == "Reg",]
@@ -275,6 +255,7 @@ rm(PredictWorkersSpecifications)
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
 #' @import visioneval
+#' @include CreateEstimationDatasets.R CreateHouseholds.R
 #' @export
 PredictWorkers <- function(L) {
   #Define dimension name vectors
