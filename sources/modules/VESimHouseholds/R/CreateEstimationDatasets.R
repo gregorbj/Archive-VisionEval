@@ -38,8 +38,16 @@ PumsHhInp_ls <- items(
   item(
     NAME =
       items("SERIALNO",
-            "PUMA5",
-            "HWEIGHT",
+            "PUMA5"),
+    TYPE = "character",
+    PROHIBIT = "",
+    ISELEMENTOF = "",
+    UNLIKELY = "",
+    TOTAL = ""
+  ),
+  item(
+    NAME =
+      items("HWEIGHT",
             "UNITTYPE",
             "PERSONS"),
     TYPE = "integer",
@@ -50,8 +58,8 @@ PumsHhInp_ls <- items(
   ),
   item(
     NAME = "BLDGSZ",
-    TYPE = "integer",
-    PROHIBIT = c("< 0"),
+    TYPE = "character",
+    PROHIBIT = "",
     ISELEMENTOF = "",
     UNLIKELY = "",
     TOTAL = ""
@@ -68,13 +76,25 @@ PumsHhInp_ls <- items(
 #PUMS person data
 PumsPerInp_ls <- items(
   item(
-    NAME =
-      items("SERIALNO",
-            "AGE",
-            "WRKLYR",
-            "MILITARY"),
+    NAME = "SERIALNO",
+    TYPE = "character",
+    PROHIBIT = "",
+    ISELEMENTOF = "",
+    UNLIKELY = "",
+    TOTAL = ""
+  ),
+  item(
+    NAME = "AGE",
     TYPE = "integer",
     PROHIBIT = c("< 0"),
+    ISELEMENTOF = "",
+    UNLIKELY = "",
+    TOTAL = ""
+  ),
+  item(
+    NAME = "WRKLYR",
+    TYPE = "character",
+    PROHIBIT = "",
     ISELEMENTOF = "",
     UNLIKELY = "",
     TOTAL = ""
@@ -97,6 +117,7 @@ Hh_df <-
     PumsHhInp_ls,
     "pums_households.csv",
     "CreateEstimationDatasets.R")
+Hh_df$BLDGSZ <- as.numeric(Hh_df$BLDGSZ)
 rm(PumsHhInp_ls)
 #Read in PUMS person data file
 Per_df <-
