@@ -89,7 +89,7 @@ listDatastoreRD <- function(DataListing_ls = NULL) {
 #' listDatastore function which adds a listing of the datastore contents to the
 #' model state file.
 #' @export
-#' @import filesstrings
+#' @import filesstrings stats utils
 initDatastoreRD <- function() {
   G <- getModelState()
   DatastoreName <- G$DatastoreName
