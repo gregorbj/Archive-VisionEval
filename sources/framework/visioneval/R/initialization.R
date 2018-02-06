@@ -1105,12 +1105,13 @@ doProcessInpSpec <- function(InpSpecs_ls, InputDir = "inputs") {
 #' @param GetSpecs_ls A standard specifications list for Get specifications.
 #' @param DstoreListing_df A standard datastore listing dataframe.
 #' @param RunYears_ A string vector of the model run years.
+#' @param BaseYear A string representation of the base year.
 #' @return A list containing the Get specification components that meet the
 #' criteria of either not being optional or being optional and the specified
 #' input file is present.
 #' @export
 doProcessGetSpec <-
-  function(GetSpecs_ls, DstoreListing_df, RunYears_) {
+  function(GetSpecs_ls, DstoreListing_df, RunYears_, BaseYear) {
     #Define function to check an individual specification
     #Return TRUE if specification is to be used
     checkOptional <- function(SpecToCheck_ls) {
@@ -1124,16 +1125,40 @@ doProcessGetSpec <-
       if (IsOptional) {
         Name_ <- unlist(SpecToCheck_ls$NAME)
         Table_ <- rep(SpecToCheck_ls$TABLE, length(Name_))
+        Group_ <- rep(SpecToCheck_ls$GROUP, length(Name_))
         DatasetsExist_ <- logical(0)
         for (i in 1:length(Name_)) {
-          DatasetExists_ <-
-            sapply(RunYears_, function(x) {
+          # Code to execute if GROUP is "Year"
+          if (Group_[i] == "Year") {
+            DatasetExists_ <-
+              sapply(RunYears_, function(x) {
+                checkDataset(
+                  Name = Name_[i],
+                  Table = Table_[i],
+                  Group = x,
+                  DstoreListing_df = DstoreListing_df
+                )})
+          }
+          # Code to execute if GROUP is "BaseYear"
+          if (Group_[i] == "BaseYear") {
+            DatasetExists_ <-
               checkDataset(
                 Name = Name_[i],
                 Table = Table_[i],
-                Group = x,
+                Group = BaseYear,
                 DstoreListing_df = DstoreListing_df
-              )})
+              )
+          }
+          # Code to execute if GROUP is "Global"
+          if (Group_[i] == "Global") {
+            DatasetExists_ <-
+              checkDataset(
+                Name = Name_[i],
+                Table = Table_[i],
+                Group = "Global",
+                DstoreListing_df = DstoreListing_df
+              )
+          }
           DatasetsExist_ <- c(DatasetsExist_, DatasetExists_)
         }
         if (all(DatasetsExist_)) {
@@ -1158,6 +1183,7 @@ doProcessGetSpec <-
   }
 
 #Test code
+# setwd("tests")
 # source("data/InitializeSpecs.R")
 # doProcessGetSpec(
 #   InitializeSpecifications$Get,
@@ -1170,7 +1196,8 @@ doProcessGetSpec <-
 # doProcessGetSpec(
 #   TestOptionalSpecs$Get,
 #   readModelState()$Datastore,
-#   readModelState()$Years)
+#   readModelState()$Years,
+#   readModelState()$BaseYear)
 # setwd("..")
 # rm(TestOptionalSpecs)
 
@@ -1293,7 +1320,7 @@ processModuleSpecs <- function(Spec_ls) {
   }
   if (!is.null(Spec_ls$Get)) {
     FilteredGetSpec_ls <-
-      doProcessGetSpec(Spec_ls$Get, G$Datastore, G$Years)
+      doProcessGetSpec(Spec_ls$Get, G$Datastore, G$Years, G$BaseYear)
     Out_ls$Get <- processComponent(FilteredGetSpec_ls)
   }
   if (!is.null(Spec_ls$Set)) {
