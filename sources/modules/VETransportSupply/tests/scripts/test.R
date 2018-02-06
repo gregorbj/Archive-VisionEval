@@ -63,7 +63,7 @@ testModule(
   LoadDatastore = TRUE,
   SaveDatastore = TRUE,
   DoRun = TRUE,
-  RunFor = "BaseYear"
+  RunFor = "AllYears"
 )
 
 #Test CreateFutureAccessibility module
