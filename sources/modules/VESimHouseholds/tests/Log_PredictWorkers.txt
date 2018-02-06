@@ -1,124 +1,192 @@
 Test
 Test of VESimHouseholds package modules
-2017-11-03_11:16:40
+2018-02-05_09:47:34
 
-2017-11-03 11:16:40 : Testing PredictWorkers. 
+2018-02-05 09:47:34 : Testing PredictWorkers. 
 
-2017-11-03 11:16:40 : Attempting to load datastore. 
+2018-02-05 09:47:35 : Attempting to load datastore. 
 
-2017-11-03 11:16:40 : Datastore loaded. 
+2018-02-05 09:47:35 : Datastore loaded. 
 
-2017-11-03 11:16:40 : Attempting to load and check specifications. 
+2018-02-05 09:47:35 : Attempting to load and check specifications. 
 
-2017-11-03 11:16:40 : Module specifications successfully loaded and checked. 
+2018-02-05 09:47:35 : Module specifications successfully loaded and checked. 
 
-2017-11-03 11:16:40 : No inputs to process. 
+2018-02-05 09:47:35 : Attempting to process, check and load module inputs. 
 
-2017-11-03 11:16:40 : Checking whether datastore contains all datasets in Get specifications. 
+2018-02-05 09:47:36 : Module inputs successfully checked and loaded into datastore. 
 
-2017-11-03 11:16:40 : Datastore contains all datasets identified in module Get specifications. 
+2018-02-05 09:47:36 : Checking whether datastore contains all datasets in Get specifications. 
 
-2017-11-03 11:16:40 : Running module and checking whether outputs meet Set specifications. 
+2018-02-05 09:47:36 : Datastore contains all datasets identified in module Get specifications. 
 
-2017-11-03 11:16:40 : Also saving module outputs to datastore. 
+2018-02-05 09:47:36 : Running module and checking whether outputs meet Set specifications. 
 
-2017-11-03 11:16:56 : Module run successfully and outputs meet Set specifications. 
+2018-02-05 09:47:36 : Also saving module outputs to datastore. 
 
-2017-11-03 11:16:56 : Module outputs saved to datastore. 
+2018-02-05 09:48:01 : Module run successfully and outputs meet Set specifications. 
 
-2017-11-03 11:16:56 : Congratulations. Module PredictWorkers passed all tests. 
+2018-02-05 09:48:01 : Module outputs saved to datastore. 
 
-Test
-Test of VESimHouseholds package modules
-2018-01-14_15:14:25
-
-2018-01-14 15:14:25 : Testing PredictWorkers. 
-
-2018-01-14 15:14:25 : Attempting to load datastore. 
-
-2018-01-14 15:14:26 : Datastore loaded. 
-
-2018-01-14 15:14:26 : Attempting to load and check specifications. 
-
-2018-01-14 15:14:26 : Module specifications successfully loaded and checked. 
-
-2018-01-14 15:14:26 : No inputs to process. 
-
-2018-01-14 15:14:26 : Checking whether datastore contains all datasets in Get specifications. 
-
-2018-01-14 15:14:26 : Datastore contains all datasets identified in module Get specifications. 
-
-2018-01-14 15:14:26 : Running module and checking whether outputs meet Set specifications. 
-
-2018-01-14 15:14:27 : Also saving module outputs to datastore. 
-
-2018-01-14 15:14:47 : Module run successfully and outputs meet Set specifications. 
-
-2018-01-14 15:14:47 : Module outputs saved to datastore. 
-
-2018-01-14 15:14:47 : Congratulations. Module PredictWorkers passed all tests. 
+2018-02-05 09:48:01 : Congratulations. Module PredictWorkers passed all tests. 
 
 Test
 Test of VESimHouseholds package modules
-2018-02-04_13:39:41
+2018-02-06_11:55:32
 
-2018-02-04 13:39:41 : Testing PredictWorkers. 
+2018-02-06 11:55:32 : Testing PredictWorkers. 
 
-2018-02-04 13:39:41 : Attempting to load datastore. 
+2018-02-06 11:55:32 : Attempting to load datastore. 
 
-2018-02-04 13:39:41 : Datastore loaded. 
+2018-02-06 11:55:32 : Datastore loaded. 
 
-2018-02-04 13:39:41 : Attempting to load and check specifications. 
+2018-02-06 11:55:32 : Attempting to load and check specifications. 
 
-2018-02-04 13:39:41 : Module specifications successfully loaded and checked. 
+2018-02-06 11:55:33 : Module specifications successfully loaded and checked. 
 
-2018-02-04 13:39:42 : Attempting to process, check and load module inputs. 
+2018-02-06 11:55:33 : Attempting to process, check and load module inputs. 
 
-2018-02-04 13:39:42 : No inputs to process. 
+2018-02-06 11:55:34 : Module inputs successfully checked and loaded into datastore. 
 
-2018-02-04 13:39:42 : Checking whether datastore contains all datasets in Get specifications. 
+2018-02-06 11:55:34 : Checking whether datastore contains all datasets in Get specifications. 
 
-2018-02-04 13:39:42 : Datastore contains all datasets identified in module Get specifications. 
+2018-02-06 11:55:34 : Datastore contains all datasets identified in module Get specifications. 
 
-2018-02-04 13:39:42 : Running module and checking whether outputs meet Set specifications. 
+2018-02-06 11:55:34 : Running module and checking whether outputs meet Set specifications. 
 
-2018-02-04 13:39:42 : Also saving module outputs to datastore. 
+2018-02-06 11:55:34 : Also saving module outputs to datastore. 
 
-2018-02-04 13:39:58 : Module run successfully and outputs meet Set specifications. 
+2018-02-06 11:55:47 : Module run successfully and outputs meet Set specifications. 
 
-2018-02-04 13:39:58 : Module outputs saved to datastore. 
+2018-02-06 11:55:47 : Module outputs saved to datastore. 
 
-2018-02-04 13:39:58 : Congratulations. Module PredictWorkers passed all tests. 
+2018-02-06 11:55:47 : Congratulations. Module PredictWorkers passed all tests. 
 
 Test
 Test of VESimHouseholds package modules
-2018-02-04_21:03:52
+2018-02-06_12:07:37
 
-2018-02-04 21:03:52 : Testing PredictWorkers. 
+2018-02-06 12:07:37 : Testing PredictWorkers. 
 
-2018-02-04 21:03:52 : Attempting to load datastore. 
+2018-02-06 12:07:37 : Attempting to load datastore. 
 
-2018-02-04 21:03:52 : Datastore loaded. 
+2018-02-06 12:07:37 : Datastore loaded. 
 
-2018-02-04 21:03:52 : Attempting to load and check specifications. 
+2018-02-06 12:07:37 : Attempting to load and check specifications. 
 
-2018-02-04 21:03:52 : Module specifications successfully loaded and checked. 
+2018-02-06 12:07:37 : Module specifications successfully loaded and checked. 
 
-2018-02-04 21:03:52 : Attempting to process, check and load module inputs. 
+2018-02-06 12:07:37 : Attempting to process, check and load module inputs. 
 
-2018-02-04 21:03:52 : No inputs to process. 
+2018-02-06 12:07:37 : Module inputs successfully checked and loaded into datastore. 
 
-2018-02-04 21:03:52 : Checking whether datastore contains all datasets in Get specifications. 
+2018-02-06 12:07:37 : Checking whether datastore contains all datasets in Get specifications. 
 
-2018-02-04 21:03:52 : Datastore contains all datasets identified in module Get specifications. 
+2018-02-06 12:07:37 : Datastore contains all datasets identified in module Get specifications. 
 
-2018-02-04 21:03:52 : Running module and checking whether outputs meet Set specifications. 
+2018-02-06 12:07:38 : Running module and checking whether outputs meet Set specifications. 
 
-2018-02-04 21:03:52 : Also saving module outputs to datastore. 
+2018-02-06 12:07:39 : Also saving module outputs to datastore. 
 
-2018-02-04 21:04:18 : Module run successfully and outputs meet Set specifications. 
+2018-02-06 12:07:47 : Module run successfully and outputs meet Set specifications. 
 
-2018-02-04 21:04:18 : Module outputs saved to datastore. 
+2018-02-06 12:07:47 : Module outputs saved to datastore. 
 
-2018-02-04 21:04:18 : Congratulations. Module PredictWorkers passed all tests. 
+2018-02-06 12:07:47 : Congratulations. Module PredictWorkers passed all tests. 
+
+Test
+Test of VESimHouseholds package modules
+2018-02-06_12:22:32
+
+2018-02-06 12:22:32 : Testing PredictWorkers. 
+
+2018-02-06 12:22:32 : Attempting to load datastore. 
+
+2018-02-06 12:22:32 : Datastore loaded. 
+
+2018-02-06 12:22:32 : Attempting to load and check specifications. 
+
+2018-02-06 12:22:33 : Module specifications successfully loaded and checked. 
+
+2018-02-06 12:22:33 : Attempting to process, check and load module inputs. 
+
+2018-02-06 12:22:34 : Module inputs successfully checked and loaded into datastore. 
+
+2018-02-06 12:22:34 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-02-06 12:22:34 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-02-06 12:22:34 : Running module and checking whether outputs meet Set specifications. 
+
+2018-02-06 12:22:34 : Also saving module outputs to datastore. 
+
+2018-02-06 12:22:41 : Module run successfully and outputs meet Set specifications. 
+
+2018-02-06 12:22:41 : Module outputs saved to datastore. 
+
+2018-02-06 12:22:42 : Congratulations. Module PredictWorkers passed all tests. 
+
+Test
+Test of VESimHouseholds package modules
+2018-02-06_12:26:12
+
+2018-02-06 12:26:12 : Testing PredictWorkers. 
+
+2018-02-06 12:26:12 : Attempting to load datastore. 
+
+2018-02-06 12:26:12 : Datastore loaded. 
+
+2018-02-06 12:26:12 : Attempting to load and check specifications. 
+
+2018-02-06 12:26:13 : Module specifications successfully loaded and checked. 
+
+2018-02-06 12:26:13 : Attempting to process, check and load module inputs. 
+
+2018-02-06 12:26:14 : Module inputs successfully checked and loaded into datastore. 
+
+2018-02-06 12:26:14 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-02-06 12:26:14 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-02-06 12:26:14 : Running module and checking whether outputs meet Set specifications. 
+
+2018-02-06 12:26:14 : Also saving module outputs to datastore. 
+
+2018-02-06 12:26:24 : Module run successfully and outputs meet Set specifications. 
+
+2018-02-06 12:26:24 : Module outputs saved to datastore. 
+
+2018-02-06 12:26:24 : Congratulations. Module PredictWorkers passed all tests. 
+
+Test
+Test of VESimHouseholds package modules
+2018-02-06_12:31:08
+
+2018-02-06 12:31:08 : Testing PredictWorkers. 
+
+2018-02-06 12:31:08 : Attempting to load datastore. 
+
+2018-02-06 12:31:08 : Datastore loaded. 
+
+2018-02-06 12:31:08 : Attempting to load and check specifications. 
+
+2018-02-06 12:31:08 : Module specifications successfully loaded and checked. 
+
+2018-02-06 12:31:08 : Attempting to process, check and load module inputs. 
+
+2018-02-06 12:31:19 : Module inputs successfully checked and loaded into datastore. 
+
+2018-02-06 12:31:19 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-02-06 12:31:19 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-02-06 12:31:19 : Running module and checking whether outputs meet Set specifications. 
+
+2018-02-06 12:31:19 : Also saving module outputs to datastore. 
+
+2018-02-06 12:31:36 : Module run successfully and outputs meet Set specifications. 
+
+2018-02-06 12:31:36 : Module outputs saved to datastore. 
+
+2018-02-06 12:31:36 : Congratulations. Module PredictWorkers passed all tests. 
 
