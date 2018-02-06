@@ -93,6 +93,46 @@ TestOptionalSpecs <- list(
       PROHIBIT = c("NA", "<= 0", ">= 1"),
       ISELEMENTOF = "",
       OPTIONAL = TRUE
+    ),
+    item(
+      NAME = "AutoPropHEV",
+      TABLE = "HHPowertrainProportions",
+      GROUP = "Global",
+      TYPE = "double",
+      UNITS = "proportion",
+      PROHIBIT = c("NA",  "< 0", "> 1"),
+      ISELEMENTOF = "",
+      OPTIONAL = TRUE
+    ),
+    item(
+      NAME = "DatasetNotThere",
+      TABLE = "HHPowertrainProportions",
+      GROUP = "Global",
+      TYPE = "double",
+      UNITS = "proportion",
+      PROHIBIT = c("NA",  "< 0", "> 1"),
+      ISELEMENTOF = "",
+      OPTIONAL = TRUE
+    ),
+    item(
+      NAME = "HhId",
+      TABLE = "Vehicle",
+      GROUP = "BaseYear",
+      TYPE = "character",
+      UNITS = "ID",
+      PROHIBIT = "NA",
+      ISELEMENTOF = "",
+      OPTIONAL = TRUE
+    ),
+    item(
+      NAME = "DatasetNotThere",
+      TABLE = "Vehicle",
+      GROUP = "BaseYear",
+      TYPE = "character",
+      UNITS = "ID",
+      PROHIBIT = "NA",
+      ISELEMENTOF = "",
+      OPTIONAL = TRUE
     )
   )
 )
