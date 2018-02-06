@@ -26,37 +26,19 @@ for(Year in getYears()) {
   runModule(
     ModuleName = "CreateHouseholds",
     PackageName = "VESimHouseholds",
-    RunFor = "BaseYear",
+    RunFor = "AllYears",
     RunYear = Year
   )
   runModule(
     ModuleName = "PredictWorkers",
     PackageName = "VESimHouseholds",
-    RunFor = "BaseYear",
+    RunFor = "AllYears",
     RunYear = Year
   )
   runModule(
     ModuleName = "PredictIncome",
     PackageName = "VESimHouseholds",
-    RunFor = "BaseYear",
-    RunYear = Year
-  )
-  runModule(
-    ModuleName = "CreateHouseholds",
-    PackageName = "VESimHouseholds",
-    RunFor = "NotBaseYear",
-    RunYear = Year
-  )
-  runModule(
-    ModuleName = "PredictWorkers",
-    PackageName = "VESimHouseholds",
-    RunFor = "NotBaseYear",
-    RunYear = Year
-  )
-  runModule(
-    ModuleName = "PredictIncome",
-    PackageName = "VESimHouseholds",
-    RunFor = "NotBaseYear",
+    RunFor = "AllYears",
     RunYear = Year
   )
    runModule(
@@ -82,21 +64,22 @@ for(Year in getYears()) {
   runModule(
     ModuleName = "CreateBaseAccessibility",
     PackageName = "VETransportSupply",
-    RunFor = "BaseYear",
-    RunYear = Year)
-  runModule(
-    ModuleName = "CreateFutureAccessibility",
-    PackageName = "VETransportSupply",
-    RunFor = "NotBaseYear",
+    RunFor = "AllYears",
     RunYear = Year)
   runModule(
     ModuleName = "AssignVehicleFeatures",
     PackageName = "VEHouseholdVehicles",
-    RunFor = "AllYears",
+    RunFor = "NotBaseYear",
     RunYear = Year)
   runModule(
     ModuleName = "CalculateTravelDemand",
     PackageName = "VEHouseholdTravel",
-    RunFor = "AllYears",
+    RunFor = "NotBaseYear",
     RunYear = Year)
+  runModule(
+    ModuleName = "CalculateCongestionBase",
+    PackageName = "VETransportSupplyUse",
+    RunFor = "NotBaseYear",
+    RunYear = Year
+  )
 }

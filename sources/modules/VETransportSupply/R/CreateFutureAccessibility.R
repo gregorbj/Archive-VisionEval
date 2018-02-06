@@ -151,8 +151,8 @@ CreateFutureAccessibilitySpecifications <- list(
   Set = items(
     item(
       NAME = items(
-        "FwyLaneMiPC",
-        "ArtLaneMiPC"),
+        "FwyLaneMiPCFuture",
+        "ArtLaneMiPCFuture"),
       TABLE = "Marea",
       GROUP = "Year",
       TYPE = "compound",
@@ -166,7 +166,7 @@ CreateFutureAccessibilitySpecifications <- list(
         "Ratio of urbanized area arterial lane-miles to urbanized area population")
     ),
     item(
-      NAME = "TranRevMiPC",
+      NAME = "TranRevMiPCFuture",
       TABLE = "Marea",
       GROUP = "Year",
       TYPE = "compound",
@@ -178,8 +178,8 @@ CreateFutureAccessibilitySpecifications <- list(
       DESCRIPTION = "Transit revenue miles per capita for the region"),
     item(
       NAME = items(
-        "BusRevMi",
-        "RailRevMi"),
+        "BusRevMiFuture",
+        "RailRevMiFuture"),
       TABLE = "Marea",
       GROUP = "Year",
       TYPE = "distance",
@@ -301,11 +301,11 @@ CreateFutureAccessibility <- function(L) {
   Out_ls <- initDataList()
   Out_ls$Year$Marea <-
     list(
-      FwyLaneMiPC = FwyLaneMiPC_Ma,
-      ArtLaneMiPC = ArtLaneMiPC_Ma,
-      TranRevMiPC = TranRevMiPC_Ma,
-      BusRevMi = BusRevMi_Ma,
-      RailRevMi = RailRevMi_Ma
+      FwyLaneMiPCFuture = FwyLaneMiPC_Ma,
+      ArtLaneMiPCFuture = ArtLaneMiPC_Ma,
+      TranRevMiPCFuture = TranRevMiPC_Ma,
+      BusRevMiFuture = BusRevMi_Ma,
+      RailRevMiFuture = RailRevMi_Ma
     )
   #Return the outputs list
   Out_ls

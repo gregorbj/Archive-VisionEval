@@ -140,5 +140,30 @@
     "UNITS" : "multiplier",
     "PROHIBIT" : "c('NA', '< 0')",
     "ISELEMENTOF" : ""
+  },
+  {
+    "NAME" : "TranRevMiAdjFactor",
+    "VALUE": "1.12",
+    "TYPE" : "double",
+    "UNITS" : "multiplier",
+    "PROHIBIT" : "c('NA', '< 0')",
+    "ISELEMENTOF" : ""
+  },
+  {
+    "NAME" : "WorkVmtProp",
+    "VALUE": "0.25",
+    "TYPE" : "double",
+    "UNITS" : "proportion",
+    "PROHIBIT" : "c('NA', '< 0', '> 1')",
+    "ISELEMENTOF" : ""
+  },
+  {
+    "NAME" : "HhDvmtToRoadDvmt",
+    "VALUE": "0.95",
+    "TYPE" : "double",
+    "UNITS" : "proportion",
+    "PROHIBIT" : "c('NA', '< 0', '> 1')",
+    "ISELEMENTOF" : ""
   }
+
 ]
