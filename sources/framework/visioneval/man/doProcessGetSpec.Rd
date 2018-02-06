@@ -4,7 +4,7 @@
 \alias{doProcessGetSpec}
 \title{Filters Get specifications list based on OPTIONAL specification attributes.}
 \usage{
-doProcessGetSpec(GetSpecs_ls, DstoreListing_df, RunYears_)
+doProcessGetSpec(GetSpecs_ls, DstoreListing_df, RunYears_, BaseYear)
 }
 \arguments{
 \item{GetSpecs_ls}{A standard specifications list for Get specifications.}
@@ -12,6 +12,8 @@ doProcessGetSpec(GetSpecs_ls, DstoreListing_df, RunYears_)
 \item{DstoreListing_df}{A standard datastore listing dataframe.}
 
 \item{RunYears_}{A string vector of the model run years.}
+
+\item{BaseYear}{A string representation of the base year.}
 }
 \value{
 A list containing the Get specification components that meet the
