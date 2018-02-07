@@ -80,6 +80,20 @@ for(Year in getYears()) {
     ModuleName = "CalculateCongestionBase",
     PackageName = "VETransportSupplyUse",
     RunFor = "NotBaseYear",
-    RunYear = Year
-  )
+    RunYear = Year)
+  runModule(
+    ModuleName = "CreateFutureAccessibility",
+    PackageName = "VETransportSupply",
+    RunFor = "NotBaseYear",
+    RunYear = Year)
+  runModule(
+    ModuleName = "AssignVehicleFeaturesFuture",
+    PackageName = "VEHouseholdVehicles",
+    RunFor = "NotBaseYear",
+    RunYear = Year)
+  runModule(
+    ModuleName = "CalculateTravelDemandFuture",
+    PackageName = "VEHouseholdTravel",
+    RunFor = "NotBaseYear",
+    RunYear = Year)
 }

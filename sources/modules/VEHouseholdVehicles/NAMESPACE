@@ -2,6 +2,7 @@
 
 export(AssignVehicleAge)
 export(AssignVehicleFeatures)
+export(AssignVehicleFeaturesFuture)
 export(AssignVehicleOwnership)
 export(AssignVehicleType)
 export(CreateVehicleTable)
