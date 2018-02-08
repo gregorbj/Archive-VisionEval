@@ -63,6 +63,7 @@ Hh_df$ZeroVeh <- as.numeric(Hh_df$NumVeh == 0)
 Hh_df$OneVeh <- as.numeric(Hh_df$NumVeh == 1)
 Hh_df$DrvAgePop <- Hh_df$Hhsize - Hh_df$Age0to14
 Hh_df$Workers <- Hh_df$Wrkcount
+Hh_df$Drivers <- Hh_df$Drvrcnt
 
 #Define functions used in estimations
 #------------------------------------
@@ -126,23 +127,25 @@ simulateDvmt <- function(PowDvmt_, ZeroDvmtProb_, SD, Pow) {
 #-------------------------------------------------------
 #Estimate metropolitan model
 IndepVars_ <-
-  c("DrvAgePop", "LogIncome", "Hbppopdn", "BusEqRevMiPC", "NumVeh",  "ZeroVeh",
+  c("Drivers", "LogIncome", "Hbppopdn", "BusEqRevMiPC", "NumVeh",  "ZeroVeh",
     "UrbanDev", "Workers", "Age0to14")
 TestHh_df <- Hh_df[IsMetro_, c("ZeroDvmt", IndepVars_)]
 TestHh_df <- TestHh_df[complete.cases(TestHh_df),]
 MetroZeroDvmt_GLM <-
   glm(makeFormula("ZeroDvmt", IndepVars_), family=binomial, data = TestHh_df)
 # summary(MetroZeroDvmt_GLM)
+# anova(NonMetroZeroDvmt_GLM, test = "Chisq")
 rm(IndepVars_, TestHh_df)
 #Estimate nonmetropolitan model
 IndepVars_ <-
-  c("DrvAgePop", "LogIncome", "Hbppopdn", "NumVeh", "ZeroVeh", "Workers",
+  c("Drivers", "LogIncome", "Hbppopdn", "NumVeh", "ZeroVeh", "Workers",
     "Age0to14")
 TestHh_df <- Hh_df[!IsMetro_, c("ZeroDvmt", IndepVars_)]
 TestHh_df <- TestHh_df[complete.cases(TestHh_df),]
 NonMetroZeroDvmt_GLM <-
   glm(makeFormula("ZeroDvmt", IndepVars_), family=binomial, data = TestHh_df)
 # summary(NonMetroZeroDvmt_GLM)
+# anova(NonMetroZeroDvmt_GLM, test = "Chisq")
 rm(IndepVars_, TestHh_df)
 
 #Estimate linear model of DVMT for households that have DVMT
@@ -152,7 +155,7 @@ MetroPow <- findPower(Hh_df$Dvmt[IsMetro_])
 NonMetroPow <- findPower(Hh_df$Dvmt[!IsMetro_])
 #Estimate metropolitan model
 IndepVars_ <-
-  c("DrvAgePop", "LogIncome", "Hbppopdn", "NumVeh", "ZeroVeh", "OneVeh",
+  c("Drivers", "LogIncome", "Hbppopdn", "NumVeh", "ZeroVeh", "OneVeh",
     "Workers", "UrbanDev", "Age0to14")
 TestHh_df <- Hh_df[IsMetro_ & Hh_df$ZeroDvmt == "N", c("Dvmt", IndepVars_)]
 TestHh_df$PowDvmt <- TestHh_df$Dvmt ^ MetroPow
@@ -163,7 +166,7 @@ MetroPowDvmt_LM <-
 rm(IndepVars_, TestHh_df)
 #Estimate non-metropolitan model
 IndepVars_ <-
-  c("DrvAgePop", "LogIncome", "Hbppopdn", "NumVeh", "ZeroVeh", "OneVeh",
+  c("Drivers", "LogIncome", "Hbppopdn", "NumVeh", "ZeroVeh", "OneVeh",
     "Workers", "Age0to14")
 TestHh_df <- Hh_df[!IsMetro_ & Hh_df$ZeroDvmt == "N", c("Dvmt", IndepVars_)]
 TestHh_df$PowDvmt <- TestHh_df$Dvmt ^ NonMetroPow
@@ -177,7 +180,7 @@ rm(IndepVars_, TestHh_df)
 #-----------------------------------------------------------------------------
 #Prepare metropolitan household data frame
 IndepVars_ <-
-  c("DrvAgePop", "LogIncome", "Hbppopdn", "NumVeh", "ZeroVeh", "OneVeh",
+  c("Drivers", "LogIncome", "Hbppopdn", "NumVeh", "ZeroVeh", "OneVeh",
     "Workers", "UrbanDev", "Age0to14")
 TestHh_df <- Hh_df[IsMetro_ & Hh_df$ZeroDvmt == "N", c("Dvmt", IndepVars_)]
 TestHh_df$PowDvmt <- TestHh_df$Dvmt ^ MetroPow
@@ -196,7 +199,7 @@ MetroSD <- calcDispersonFactor(ObsPowDvmt_, EstPowDvmt_)
 rm(IndepVars_, TestHh_df, ObsPowDvmt_, EstPowDvmt_)
 #Prepare nonmetropolitan household data frame
 IndepVars_ <-
-  c("DrvAgePop", "LogIncome", "Hbppopdn", "NumVeh", "ZeroVeh", "OneVeh",
+  c("Drivers", "LogIncome", "Hbppopdn", "NumVeh", "ZeroVeh", "OneVeh",
     "Workers", "Age0to14")
 TestHh_df <- Hh_df[!IsMetro_ & Hh_df$ZeroDvmt == "N", c("Dvmt", IndepVars_)]
 TestHh_df$PowDvmt <- TestHh_df$Dvmt ^ NonMetroPow
@@ -218,7 +221,7 @@ rm(IndepVars_, TestHh_df, ObsPowDvmt_, EstPowDvmt_)
 #--------------------------------------
 #Simulate 1000 days of DVMT for metropolitan households
 Vars_ <-
-  c("Houseid", "DrvAgePop", "LogIncome", "Hbppopdn", "BusEqRevMiPC", "NumVeh",
+  c("Houseid", "Drivers", "LogIncome", "Hbppopdn", "BusEqRevMiPC", "NumVeh",
     "ZeroVeh", "OneVeh", "Workers", "UrbanDev", "Age0to14", "Dvmt")
 TestHh_df <- Hh_df[IsMetro_, Vars_]
 TestHh_df <- TestHh_df[complete.cases(TestHh_df),]
@@ -234,7 +237,7 @@ for (i in 1:1000) {
 rm(Vars_, TestHh_df, ZeroDvmtProb_, EstPowDvmt_, i)
 #Simulate 1000 days of DVMT for non-metropolitan households
 Vars_ <-
-  c("Houseid", "DrvAgePop", "LogIncome", "Hbppopdn", "NumVeh", "ZeroVeh",
+  c("Houseid", "Drivers", "LogIncome", "Hbppopdn", "NumVeh", "ZeroVeh",
     "OneVeh", "Workers", "Age0to14", "Dvmt")
 TestHh_df <- Hh_df[!IsMetro_, Vars_]
 TestHh_df <- TestHh_df[complete.cases(TestHh_df),]
@@ -270,7 +273,7 @@ rm(MetroHhDvmt_HhX, NonMetroHhDvmt_HhX)
 #--------------------------------------
 #Estimate metropolitan household model
 IndepVars_ <-
-  c("DrvAgePop", "LogIncome", "Hbppopdn", "NumVeh", "ZeroVeh", "OneVeh",
+  c("Drivers", "LogIncome", "Hbppopdn", "NumVeh", "ZeroVeh", "OneVeh",
     "Workers", "UrbanDev", "Age0to14")
 TestHh_df <- Hh_df[IsMetro_, c("Houseid", IndepVars_)]
 TestHh_df <- TestHh_df[complete.cases(TestHh_df),]
@@ -285,7 +288,7 @@ MetroAveDvmt_LM <-
 rm(IndepVars_, TestHh_df)
 #Estimate non-metropolitan household model
 IndepVars_ <-
-  c("DrvAgePop", "LogIncome", "Hbppopdn", "NumVeh", "ZeroVeh", "OneVeh",
+  c("Drivers", "LogIncome", "Hbppopdn", "NumVeh", "ZeroVeh", "OneVeh",
     "Workers", "Age0to14")
 TestHh_df <- Hh_df[!IsMetro_, c("Houseid", IndepVars_)]
 TestHh_df <- TestHh_df[complete.cases(TestHh_df),]
@@ -463,6 +466,15 @@ CalculateHouseholdDvmtSpecifications <- list(
     ),
     item(
       NAME = "Workers",
+      TABLE = "Household",
+      GROUP = "Year",
+      TYPE = "people",
+      UNITS = "PRSN",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "Drivers",
       TABLE = "Household",
       GROUP = "Year",
       TYPE = "people",
