@@ -983,6 +983,12 @@ makeModelFormulaString <- function (EstimatedModel) {
 #' repeated draws of the model. This is used in the case where for example the
 #' input data is households and the output is vehicles and the repeat variable
 #' is the number of vehicles in the household.
+#' 'ApplyRandom' a logical identifying whether the results will be affected by
+#' random draws (i.e. if a random number in range 0 - 1 is less than the
+#' computed probability) or if a probability cutoff is used (i.e. if the
+#' computed probability is greater then 0.5). This is an optional component. If
+#' it isn't present, the function runs with ApplyRandom = TRUE.
+#'
 #' @param Data_df a data frame containing the data required for applying the
 #' model.
 #' @param TargetProp a number identifying a target proportion for the default
@@ -992,6 +998,10 @@ makeModelFormulaString <- function (EstimatedModel) {
 #' is to only check whether the specified 'SearchRange' for the model will
 #' produce acceptable values (i.e. no NA or NaN values). If FALSE (the default),
 #' the function will run the model and will not check the target search range.
+#' @param ApplyRandom a logical identifying whether the outcome will be
+#' be affected by random draws (i.e. if a random number in range 0 - 1 is less
+#' than the computed probability) or if a probability cutoff is used (i.e. if
+#' the computed probability is greater than 0.5)
 #' @return a vector of choice values for each record of the input data frame if
 #' the model is being run, or if the function is run to only check the target
 #' search range, a two-element vector identifying if the search range produces
@@ -1001,13 +1011,18 @@ applyBinomialModel <-
   function(Model_ls,
            Data_df,
            TargetProp = NULL,
-           CheckTargetSearchRange = FALSE) {
+           CheckTargetSearchRange = FALSE,
+           ApplyRandom = TRUE) {
     #Check that model is 'binomial' type
     if (Model_ls$Type != "binomial") {
       Msg <- paste0("Wrong model type. ",
                     "Model is identified as Type = ", Model_ls$Type, ". ",
                     "Function only works with 'binomial' type models.")
       stop(Msg)
+    }
+    #Check whether Model_ls has ApplyRandom component and assign value if so
+    if (!is.null(Model_ls$ApplyRandom)) {
+      ApplyRandom <- Model_ls$ApplyRandom
     }
     #Prepare data
     if (!is.null(Model_ls$PrepFun)) {
@@ -1028,11 +1043,17 @@ applyBinomialModel <-
       sum(Probs_) / length(Probs_)
     }
     #Define a function to assign results
-    assignResults <- function(Probs_) {
-      N <- length(Probs_)
-      Result_ <- rep(Model_ls$Choices[2], N)
-      Result_[runif(N) <= Probs_] <- Model_ls$Choices[1]
-      Result_
+    if (ApplyRandom) {
+      assignResults <- function(Probs_) {
+        N <- length(Probs_)
+        Result_ <- rep(Model_ls$Choices[2], N)
+        Result_[runif(N) <= Probs_] <- Model_ls$Choices[1]
+        Result_
+      }
+    } else {
+      assignResults <- function(Probs_) {
+        ifelse(Probs_ > 0.5, Model_ls$Choices[1], Model_ls$Choices[2])
+      }
     }
     #Apply the model
     if (CheckTargetSearchRange) {
