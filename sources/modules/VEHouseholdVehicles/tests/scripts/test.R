@@ -14,6 +14,15 @@ untar("Datastore.tar")
 file.remove("Datastore.tar")
 setwd("..")
 
+#Test AssignDrivers module
+source("R/AssignDrivers.R")
+testModule(
+  ModuleName = "AssignDrivers",
+  LoadDatastore = TRUE,
+  SaveDatastore = TRUE,
+  DoRun = TRUE
+)
+
 #Test AssignVehicleOwnership module
 source("R/AssignVehicleOwnership.R")
 testModule(
