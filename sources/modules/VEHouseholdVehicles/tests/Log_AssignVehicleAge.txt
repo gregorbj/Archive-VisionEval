@@ -1,64 +1,32 @@
 Test
 Test of VESimHouseholds package modules
-2017-12-20_11:50:19
+2018-02-08_10:43:41
 
-2017-12-20 11:50:19 : Testing AssignVehicleAge. 
+2018-02-08 10:43:41 : Testing AssignVehicleAge. 
 
-2017-12-20 11:50:19 : Attempting to load datastore. 
+2018-02-08 10:43:41 : Attempting to load datastore. 
 
-2017-12-20 11:50:19 : Datastore loaded. 
+2018-02-08 10:43:41 : Datastore loaded. 
 
-2017-12-20 11:50:19 : Attempting to load and check specifications. 
+2018-02-08 10:43:41 : Attempting to load and check specifications. 
 
-2017-12-20 11:50:19 : Module specifications successfully loaded and checked. 
+2018-02-08 10:43:41 : Module specifications successfully loaded and checked. 
 
-2017-12-20 11:50:19 : Attempting to process, check and load module inputs. 
+2018-02-08 10:43:41 : Attempting to process, check and load module inputs. 
 
-2017-12-20 11:50:26 : Module inputs successfully checked and loaded into datastore. 
+2018-02-08 10:43:48 : Module inputs successfully checked and loaded into datastore. 
 
-2017-12-20 11:50:26 : Checking whether datastore contains all datasets in Get specifications. 
+2018-02-08 10:43:48 : Checking whether datastore contains all datasets in Get specifications. 
 
-2017-12-20 11:50:26 : Datastore contains all datasets identified in module Get specifications. 
+2018-02-08 10:43:48 : Datastore contains all datasets identified in module Get specifications. 
 
-2017-12-20 11:50:26 : Running module and checking whether outputs meet Set specifications. 
+2018-02-08 10:43:48 : Running module and checking whether outputs meet Set specifications. 
 
-2017-12-20 11:50:26 : Also saving module outputs to datastore. 
+2018-02-08 10:43:48 : Also saving module outputs to datastore. 
 
-2017-12-20 11:50:40 : Module run successfully and outputs meet Set specifications. 
+2018-02-08 10:44:01 : Module run successfully and outputs meet Set specifications. 
 
-2017-12-20 11:50:40 : Module outputs saved to datastore. 
+2018-02-08 10:44:02 : Module outputs saved to datastore. 
 
-2017-12-20 11:50:40 : Congratulations. Module AssignVehicleAge passed all tests. 
-
-Test
-Test of VESimHouseholds package modules
-2018-01-14_14:11:08
-
-2018-01-14 14:11:08 : Testing AssignVehicleAge. 
-
-2018-01-14 14:11:08 : Attempting to load datastore. 
-
-2018-01-14 14:11:09 : Datastore loaded. 
-
-2018-01-14 14:11:09 : Attempting to load and check specifications. 
-
-2018-01-14 14:11:09 : Module specifications successfully loaded and checked. 
-
-2018-01-14 14:11:09 : Attempting to process, check and load module inputs. 
-
-2018-01-14 14:11:10 : Module inputs successfully checked and loaded into datastore. 
-
-2018-01-14 14:11:10 : Checking whether datastore contains all datasets in Get specifications. 
-
-2018-01-14 14:11:10 : Datastore contains all datasets identified in module Get specifications. 
-
-2018-01-14 14:11:10 : Running module and checking whether outputs meet Set specifications. 
-
-2018-01-14 14:11:10 : Also saving module outputs to datastore. 
-
-2018-01-14 14:11:21 : Module run successfully and outputs meet Set specifications. 
-
-2018-01-14 14:11:21 : Module outputs saved to datastore. 
-
-2018-01-14 14:11:21 : Congratulations. Module AssignVehicleAge passed all tests. 
+2018-02-08 10:44:02 : Congratulations. Module AssignVehicleAge passed all tests. 
 
