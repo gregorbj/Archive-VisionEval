@@ -1623,8 +1623,6 @@ parseInputFieldNames <-
 processModuleInputs <-
   function(ModuleSpec_ls, ModuleName, Dir = "inputs") {
     G <- getModelState()
-    FileErr_ <- character(0)
-    FileWarn_ <- character(0)
     InpSpec_ls <- ModuleSpec_ls$Inp
 
     #ORGANIZE THE SPECIFICATIONS BY INPUT FILE AND NAME
@@ -1643,8 +1641,12 @@ processModuleInputs <-
     Data_ls <- initDataList()
 
     #ITERATE THROUGH SORTED SPECIFICATIONS AND LOAD DATA INTO LIST
+    FileErr_ls <- list()
     Files_ <- names(SortSpec_ls)
     for (File in Files_) {
+      #Initialize FileErr_ and FileWarn_
+      FileErr_ <- character(0)
+      FileWarn_ <- character(0)
       #Extract the specifications
       Spec_ls <- SortSpec_ls[[File]]
       #Check that file exists
@@ -1851,13 +1853,11 @@ processModuleInputs <-
         DataCheck_ls <-
           checkDataConsistency(Name, Data_, ThisSpec_ls)
         if (length(DataCheck_ls$Errors) != 0) {
-          writeLog(DataCheck_ls$Errors)
           DataErr_ls$Errors <-
             c(DataErr_ls$Errors, DataCheck_ls$Errors)
           next()
         }
         if (length(DataCheck_ls$Warnings) != 0) {
-          writeLog(DataCheck_ls$Warnings)
           DataErr_ls$Warnings <-
             c(DataErr_ls$Warnings, DataCheck_ls$Warnings)
         }
@@ -1904,6 +1904,7 @@ processModuleInputs <-
         FileErr_ <- c(FileErr_, Msg, DataErr_ls$Errors)
         writeLog(FileErr_)
       }
+      FileErr_ls <- c(FileErr_ls, FileErr_)
       if (length(DataErr_ls$Warnings) != 0) {
         Msg <-
           paste0(
@@ -1917,7 +1918,7 @@ processModuleInputs <-
     }#End loop through input files
 
     #RETURN THE RESULTS
-    list(Errors = FileErr_, Data = Data_ls)
+    list(Errors = unlist(FileErr_ls), Data = Data_ls)
   }
 
 
