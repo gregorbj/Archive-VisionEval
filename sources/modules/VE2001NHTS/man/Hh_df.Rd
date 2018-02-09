@@ -46,6 +46,16 @@
   \item{Age30to54}{Number of persons age 30 to 54 in household}
   \item{Age55to64}{Number of persons age 55 to 64 in household}
   \item{Age65Plus}{Number of persons age 65 or older in household}
+  \item{Drv15to19}{Number of drivers 15 to 19 in household}
+  \item{Drv20to29}{Number of drivers 20 to 29 in household}
+  \item{Drv30to54}{Number of drivers 30 to 54 in household}
+  \item{Drv55to64}{Number of drivers 55 to 64 in household}
+  \item{Drv65Plus}{Number of drivers 65 or older in household}
+  \item{Wkr15to19}{Number of workers 15 to 19 in household}
+  \item{Wkr20to29}{Number of workers 20 to 29 in household}
+  \item{Wkr30to54}{Number of workers 30 to 54 in household}
+  \item{Wkr55to64}{Number of workers 55 to 64 in household}
+  \item{Wkr65Plus}{Number of workers 65 or older in household}
   \item{Income}{Household income}
   \item{IncGrp}{Household income group}
   \item{UrbanDev}{Flag identifying whether household lived in an 'Urban' area}
