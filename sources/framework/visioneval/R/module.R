@@ -524,7 +524,6 @@ testModule <-
     if (ModuleName == "Initialize") {
       ProcessedInputs_ls <- processModuleInputs(Specs_ls, ModuleName)
       if (length(ProcessedInputs_ls$Errors) != 0)  {
-        writeLog(ProcessedInputs_ls$Errors)
         stop("Input files for Initialize module have errors. Check the log for details.")
       } else {
         if (!is.null(ProcessedInputs_ls$Warnings)) {
