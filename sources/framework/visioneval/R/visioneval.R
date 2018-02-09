@@ -265,14 +265,15 @@ initializeModel <-
       }
     }
     #Check whether there are any input errors
-    HasErrors <-
-      any(unlist(lapply(ProcessedInputs_ls, function(x) {
-        x$Errors != 0
-      })))
+    InpErrors_ <- unlist(lapply(ProcessedInputs_ls, function (x) {
+      x$Errors
+    }))
+    HasErrors <- length(InpErrors_ != 0)
     if (HasErrors) {
-      writeLog(ProcessedInputs_ls$Errors)
+      writeLog(InpErrors_)
       stop("Input files have errors. Check the log for details.")
     }
+    rm(InpErrors_)
 
     #Load model inputs into the datastore
     #------------------------------------
