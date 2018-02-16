@@ -519,39 +519,48 @@ testModule <-
 
     #Process, check, and load module inputs
     #--------------------------------------
-    writeLog("Attempting to process, check and load module inputs.",
-             Print = TRUE)
-    if (ModuleName == "Initialize") {
-      ProcessedInputs_ls <- processModuleInputs(Specs_ls, ModuleName)
-      if (length(ProcessedInputs_ls$Errors) != 0)  {
-        stop("Input files for Initialize module have errors. Check the log for details.")
-      } else {
-        if (!is.null(ProcessedInputs_ls$Warnings)) {
-          if (length(ProcessedInputs_ls$Warnings > 0)) {
-            writeLog(ProcessedInputs_ls$Warnings)
-          }
-        }
-        #Apply the initialization function if DoRun is TRUE
-        if (DoRun) {
-          initFunc <- get("Initialize")
-          ProcessedInputs_ls <- initFunc(ProcessedInputs_ls)
-          inputsToDatastore(ProcessedInputs_ls, Specs_ls, ModuleName)
-        } else {
-          return(ProcessedInputs_ls)
-        }
-      }
+    if (is.null(Specs_ls$Inp)) {
+      writeLog("No inputs to process.", Print = TRUE)
     } else {
-      if(!is.null(Specs_ls$Inp)) {
-        ProcessedInputs_ls <- processModuleInputs(Specs_ls, ModuleName)
-        if (length(ProcessedInputs_ls$Errors) != 0)  {
-          writeLog(ProcessedInputs_ls$Errors)
-          stop("Input files for Initialize module have errors. Check the log for details.")
-        }
+      writeLog("Attempting to process, check and load module inputs.",
+             Print = TRUE)
+      # Process module inputs
+      ProcessedInputs_ls <- processModuleInputs(Specs_ls, ModuleName)
+      # Write warnings to log if any
+      if (length(ProcessedInputs_ls$Warnings != 0)) {
+        writeLog(ProcessedInputs_ls$Warnings)
+      }
+      # Write errors to log and stop if any errors
+      if (length(ProcessedInputs_ls$Errors) != 0)  {
+        Msg <- paste0(
+          "Input files for module ", ModuleName,
+          " have errors. Check the log for details."
+        )
+        stop(Msg)
+      }
+      # If module is NOT Initialize, save the inputs in the datastore
+      if (ModuleName != "Initialize") {
         inputsToDatastore(ProcessedInputs_ls, Specs_ls, ModuleName)
         writeLog("Module inputs successfully checked and loaded into datastore.",
                  Print = TRUE)
       } else {
-        writeLog("No inputs to process.", Print = TRUE)
+      # If module IS Initialize, apply the Initialize function
+        initFunc <- get("Initialize")
+        InitializedInputs_ls <- initFunc(ProcessedInputs_ls)
+        # Write warnings to log if any
+        if (length(InitializedInputs_ls$Warnings != 0)) {
+          writeLog(InitializedInputs_ls$Warnings)
+        }
+        # Write errors to log and stop if any errors
+        if (length(InitializedInputs_ls$Errors) != 0) {
+          writeLog(InitializedInputs_ls$Errors)
+          stop("Errors in Initialize module inputs. Check log for details.")
+        }
+        # Save inputs to datastore
+        inputsToDatastore(InitializedInputs_ls, Specs_ls, ModuleName)
+        writeLog("Module inputs successfully checked and loaded into datastore.",
+                 Print = TRUE)
+        return() # Break out of function because purpose of Initialize is to process inputs.
       }
     }
 
