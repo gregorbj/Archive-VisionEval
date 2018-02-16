@@ -137,3 +137,66 @@ TestOptionalSpecs <- list(
   )
 )
 
+
+#Second set of specifications to test if OPTIONAl attribute is retained for
+#Get and Set specs.
+
+PredictWorkersSpecifications <- list(
+  #Level of geography module is applied at
+  RunBy = "Region",
+  #Specify input data
+  #Specify data to be loaded from data store
+  Get = items(
+    item(
+      NAME =
+        items("RelEmp15to19",
+              "RelEmp20to29",
+              "RelEmp30to54",
+              "RelEmp55to64",
+              "RelEmp65Plus"),
+      TABLE = "Azone",
+      GROUP = "Year",
+      TYPE = "double",
+      UNITS = "proportion",
+      PROHIBIT = c("< 0"),
+      ISELEMENTOF = "",
+      OPTIONAL = TRUE
+    )
+  ),
+  #Specify data to saved in the data store
+  Set = items(
+    item(
+      NAME =
+        items("Wkr15to19",
+              "Wkr20to29",
+              "Wkr30to54",
+              "Wkr55to64",
+              "Wkr65Plus"),
+      TABLE = "Household",
+      GROUP = "Year",
+      TYPE = "people",
+      UNITS = "PRSN",
+      NAVALUE = -1,
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      SIZE = 0,
+      DESCRIPTION =
+        items("Workers in 15 to 19 year old age group",
+              "Workers in 20 to 29 year old age group",
+              "Workers in 30 to 54 year old age group",
+              "Workers in 55 to 64 year old age group",
+              "Workers in 65 or older age group"),
+      OPTIONAL = TRUE
+    )
+  )
+)
+setwd("tests")
+ProcessedSpec_ls <- processModuleSpecs(PredictWorkersSpecifications)
+all(unlist(lapply(ProcessedSpec_ls$Get, function(x) {
+  x$OPTIONAL == TRUE
+})))
+all(unlist(lapply(ProcessedSpec_ls$Set, function(x) {
+  x$OPTIONAL == TRUE
+})))
+rm(ProcessedSpec_ls)
+setwd("..")
