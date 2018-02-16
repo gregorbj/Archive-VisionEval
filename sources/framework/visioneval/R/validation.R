@@ -1642,6 +1642,7 @@ processModuleInputs <-
 
     #ITERATE THROUGH SORTED SPECIFICATIONS AND LOAD DATA INTO LIST
     FileErr_ls <- list()
+    FileWarn_ls <- list()
     Files_ <- names(SortSpec_ls)
     for (File in Files_) {
       #Initialize FileErr_ and FileWarn_
@@ -1915,10 +1916,14 @@ processModuleInputs <-
         FileWarn_ <- c(FileWarn_, Msg, DataErr_ls$Warnings)
         writeLog(FileWarn_)
       }
+      FileWarn_ls <- c(FileWarn_ls, FileWarn_)
     }#End loop through input files
 
     #RETURN THE RESULTS
-    list(Errors = unlist(FileErr_ls), Data = Data_ls)
+    list(
+      Errors = unlist(FileErr_ls),
+      Warnings = unlist(FileWarn_ls),
+      Data = Data_ls)
   }
 
 
