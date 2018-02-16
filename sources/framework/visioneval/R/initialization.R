@@ -1316,15 +1316,14 @@ processModuleSpecs <- function(Spec_ls) {
   }
   if (!is.null(Spec_ls$Inp)) {
     FilteredInpSpec_ls <- doProcessInpSpec(Spec_ls$Inp)
-    Out_ls$Inp <- processComponent(FilteredInpSpec_ls)
+    if (length(FilteredInpSpec_ls > 0)) {
+      Out_ls$Inp <- processComponent(FilteredInpSpec_ls)
+    }
   }
   if (!is.null(Spec_ls$Get)) {
-    FilteredGetSpec_ls <-
-      doProcessGetSpec(Spec_ls$Get, G$Datastore, G$Years, G$BaseYear)
     Out_ls$Get <- processComponent(FilteredGetSpec_ls)
   }
   if (!is.null(Spec_ls$Set)) {
-    FilteredSetSpec_ls <- doProcessSetSpec(Spec_ls$Set, FilteredGetSpec_ls)
     Out_ls$Set <- processComponent(FilteredSetSpec_ls)
   }
   if (!is.null(Spec_ls$Call)) {
