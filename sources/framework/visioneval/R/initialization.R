@@ -1321,10 +1321,10 @@ processModuleSpecs <- function(Spec_ls) {
     }
   }
   if (!is.null(Spec_ls$Get)) {
-    Out_ls$Get <- processComponent(FilteredGetSpec_ls)
+    Out_ls$Get <- processComponent(Spec_ls$Get)
   }
   if (!is.null(Spec_ls$Set)) {
-    Out_ls$Set <- processComponent(FilteredSetSpec_ls)
+    Out_ls$Set <- processComponent(Spec_ls$Set)
   }
   if (!is.null(Spec_ls$Call)) {
     Out_ls$Call <- Spec_ls$Call
