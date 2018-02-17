@@ -1,76 +1,38 @@
 Test
 Test of VESimHouseholds package modules
-2018-02-05_09:46:09
+2018-02-17_09:59:37
 
-2018-02-05 09:46:09 : Testing CreateHouseholds. 
+2018-02-17 09:59:37 : Testing CreateHouseholds. 
 
-2018-02-05 09:46:09 : Attempting to initialize datastore. 
+2018-02-17 09:59:37 : Attempting to initialize datastore. 
 
-2018-02-05 09:46:09 : Geographical indices successfully read. 
+2018-02-17 09:59:37 : Geographical indices successfully read. 
 
-2018-02-05 09:46:11 : Geography sucessfully added to datastore. 
+2018-02-17 10:00:00 : Geography sucessfully added to datastore. 
 
-2018-02-05 09:46:11 : Loading model parameters file. 
+2018-02-17 10:00:00 : Loading model parameters file. 
 
-2018-02-05 09:46:13 : Datastore initialized. 
+2018-02-17 10:00:01 : Datastore initialized. 
 
-2018-02-05 09:46:13 : Attempting to load and check specifications. 
+2018-02-17 10:00:01 : Attempting to load and check specifications. 
 
-2018-02-05 09:46:14 : Module specifications successfully loaded and checked. 
+2018-02-17 10:00:02 : Module specifications successfully loaded and checked. 
 
-2018-02-05 09:46:14 : Attempting to process, check and load module inputs. 
+2018-02-17 10:00:02 : Attempting to process, check and load module inputs. 
 
-2018-02-05 09:46:49 : Module inputs successfully checked and loaded into datastore. 
+2018-02-17 10:00:10 : Module inputs successfully checked and loaded into datastore. 
 
-2018-02-05 09:46:49 : Checking whether datastore contains all datasets in Get specifications. 
+2018-02-17 10:00:10 : Checking whether datastore contains all datasets in Get specifications. 
 
-2018-02-05 09:46:49 : Datastore contains all datasets identified in module Get specifications. 
+2018-02-17 10:00:13 : Datastore contains all datasets identified in module Get specifications. 
 
-2018-02-05 09:46:49 : Running module and checking whether outputs meet Set specifications. 
+2018-02-17 10:00:13 : Running module and checking whether outputs meet Set specifications. 
 
-2018-02-05 09:46:49 : Also saving module outputs to datastore. 
+2018-02-17 10:00:13 : Also saving module outputs to datastore. 
 
-2018-02-05 09:47:32 : Module run successfully and outputs meet Set specifications. 
+2018-02-17 10:01:04 : Module run successfully and outputs meet Set specifications. 
 
-2018-02-05 09:47:32 : Module outputs saved to datastore. 
+2018-02-17 10:01:04 : Module outputs saved to datastore. 
 
-2018-02-05 09:47:32 : Congratulations. Module CreateHouseholds passed all tests. 
-
-Test
-Test of VESimHouseholds package modules
-2018-02-06_12:29:29
-
-2018-02-06 12:29:29 : Testing CreateHouseholds. 
-
-2018-02-06 12:29:29 : Attempting to initialize datastore. 
-
-2018-02-06 12:29:30 : Geographical indices successfully read. 
-
-2018-02-06 12:29:43 : Geography sucessfully added to datastore. 
-
-2018-02-06 12:29:43 : Loading model parameters file. 
-
-2018-02-06 12:29:43 : Datastore initialized. 
-
-2018-02-06 12:29:43 : Attempting to load and check specifications. 
-
-2018-02-06 12:29:45 : Module specifications successfully loaded and checked. 
-
-2018-02-06 12:29:45 : Attempting to process, check and load module inputs. 
-
-2018-02-06 12:30:18 : Module inputs successfully checked and loaded into datastore. 
-
-2018-02-06 12:30:18 : Checking whether datastore contains all datasets in Get specifications. 
-
-2018-02-06 12:30:18 : Datastore contains all datasets identified in module Get specifications. 
-
-2018-02-06 12:30:18 : Running module and checking whether outputs meet Set specifications. 
-
-2018-02-06 12:30:18 : Also saving module outputs to datastore. 
-
-2018-02-06 12:31:05 : Module run successfully and outputs meet Set specifications. 
-
-2018-02-06 12:31:05 : Module outputs saved to datastore. 
-
-2018-02-06 12:31:05 : Congratulations. Module CreateHouseholds passed all tests. 
+2018-02-17 10:01:04 : Congratulations. Module CreateHouseholds passed all tests. 
 
