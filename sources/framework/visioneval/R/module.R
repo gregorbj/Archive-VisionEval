@@ -571,27 +571,66 @@ testModule <-
       Print = TRUE)
     G <- getModelState()
     Get_ls <- Specs_ls$Get
+    #Vector to keep track of missing datasets that are specified
     Missing_ <- character(0)
+    #Function to check whether dataset is optional
+    isOptional <- function(Spec_ls) {
+      if (!is.null(Spec_ls$OPTIONAL)) {
+        Spec_ls$OPTIONAL
+      } else {
+        FALSE
+      }
+    }
+    #Vector to keep track of Get specs that need to be removed from list because
+    #they are optional and the datasets are not present
+    OptSpecToRemove_ <- numeric(0)
+    #Check each specification
     for (i in 1:length(Get_ls)) {
       Spec_ls <- Get_ls[[i]]
       if (Spec_ls$GROUP == "Year") {
         for (Year in G$Years) {
           Present <-
             checkDataset(Spec_ls$NAME, Spec_ls$TABLE, Year, G$Datastore)
-          if (!Present) Missing_ <- c(Missing_, attributes(Present))
+          if (!Present) {
+            if(isOptional(Spec_ls)) {
+              #Identify for removal because optional and not present
+              OptSpecToRemove_ <- c(OptSpecToRemove_, i)
+            } else {
+              #Identify as missing because not optional and not present
+              Missing_ <- c(Missing_, attributes(Present))
+            }
+          }
         }
       }
       if (Spec_ls$GROUP == "BaseYear") {
         Present <-
           checkDataset(Spec_ls$NAME, Spec_ls$TABLE, G$BaseYear, G$Datastore)
-        if (!Present) Missing_ <- c(Missing_, attributes(Present))
+        if (!Present) {
+          if (isOptional(Spec_ls)) {
+            #Identify for removal because optional and not present
+            OptSpecToRemove_ <- c(OptSpecToRemove_, i)
+          } else {
+            #Identify as missing because not optional and not present
+            Missing_ <- c(Missing_, attributes(Present))
+          }
+        }
       }
       if (Spec_ls$GROUP == "Global") {
         Present <-
           checkDataset(Spec_ls$NAME, Spec_ls$TABLE, "Global", G$Datastore)
-        if (!Present) Missing_ <- c(Missing_, attributes(Present))
+        if (!Present) {
+          if (isOptional(Spec_ls)) {
+            #Identify for removal because optional and not present
+            OptSpecToRemove_ <- c(OptSpecToRemove_, i)
+          } else {
+            #Identify as missing because not optional and not present
+            Missing_ <- c(Missing_, attributes(Present))
+          }
+        }
       }
     }
+    #If any non-optional datasets are missing, write out error messages and
+    #stop execution
     if (length(Missing_) != 0) {
       Msg <-
         paste0("The following datasets identified in the Get specifications ",
@@ -604,6 +643,11 @@ testModule <-
                "for details.")
       )
       rm(Msg)
+    }
+    #If any optional datasets are missing, remove the specifications for them so
+    #that there will be no errors when data are retrieved from the datastore
+    if (length(OptSpecToRemove_) != 0) {
+      Specs_ls$Get <- Specs_ls$Get[-OptSpecToRemove_]
     }
     writeLog(
       "Datastore contains all datasets identified in module Get specifications.",
