@@ -251,7 +251,8 @@ AssignDriversSpecifications <- list(
           "Target proportion of unadjusted model number of drivers 30 to 54 years old (1 = no adjustment)",
           "Target proportion of unadjusted model number of drivers 55 to 64 years old (1 = no adjustment)",
           "Target proportion of unadjusted model number of drivers 65 or older (1 = no adjustment)"
-        )
+        ),
+      OPTIONAL = TRUE
     )
   ),
   #Specify data to be loaded from data store
@@ -270,14 +271,7 @@ AssignDriversSpecifications <- list(
       UNITS = "proportion",
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
-      DESCRIPTION =
-        items(
-          "Target proportion of unadjusted model number of drivers 15 to 19 years old (1 = no adjustment)",
-          "Target proportion of unadjusted model number of drivers 20 to 29 years old (1 = no adjustment)",
-          "Target proportion of unadjusted model number of drivers 30 to 54 years old (1 = no adjustment)",
-          "Target proportion of unadjusted model number of drivers 55 to 64 years old (1 = no adjustment)",
-          "Target proportion of unadjusted model number of drivers 65 or older (1 = no adjustment)"
-        )
+      OPTIONAL = TRUE
     ),
     item(
       NAME = "Marea",
@@ -569,7 +563,11 @@ AssignDrivers <- function(L) {
     # Create model dataset for Bin
     Per_df <- makeModelDataset(Bin)
     # Get the driver age category adjustment prop
-    DrvAdjProp <- L$Year$Region[[paste0("Drv", Bin, "AdjProp")]]
+    if (!is.null(L$Year$Region[[paste0("Drv", Bin, "AdjProp")]])) {
+      DrvAdjProp <- L$Year$Region[[paste0("Drv", Bin, "AdjProp")]]
+    } else {
+      DrvAdjProp <- 1
+    }
     # Run metropolitan model
     MetroPer_df <- Per_df[Per_df$DevType == "Urban",]
     Driver_ <- applyBinomialModel(
