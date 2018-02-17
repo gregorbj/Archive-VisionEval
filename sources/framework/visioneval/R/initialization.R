@@ -1316,7 +1316,7 @@ processModuleSpecs <- function(Spec_ls) {
   }
   if (!is.null(Spec_ls$Inp)) {
     FilteredInpSpec_ls <- doProcessInpSpec(Spec_ls$Inp)
-    if (length(FilteredInpSpec_ls > 0)) {
+    if (length(FilteredInpSpec_ls) > 0) {
       Out_ls$Inp <- processComponent(FilteredInpSpec_ls)
     }
   }
@@ -1512,6 +1512,16 @@ simDataTransactions <- function(AllSpecs_ls) {
     }
   }
 
+  #Define function to check whether dataset is optional
+  #----------------------------------------------------
+  isOptional <- function(Spec_ls) {
+    if (!is.null(Spec_ls$OPTIONAL)) {
+      Spec_ls$OPTIONAL
+    } else {
+      FALSE
+    }
+  }
+
   #Iterate through run years and modules to simulate model run
   #-----------------------------------------------------------
   for (Year in RunYears_) {
@@ -1602,7 +1612,7 @@ simDataTransactions <- function(AllSpecs_ls) {
             }
             rm(Dstore_df, DatasetInDstore)
           }
-          if (!DatasetFound) {
+          if (!DatasetFound & !isOptional(Spec_ls)) {
             Msg <-
               paste0("Module '", Module,
                      "' has a 'Get' specification for dataset '", Name,
