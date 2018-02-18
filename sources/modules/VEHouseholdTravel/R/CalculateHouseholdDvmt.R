@@ -456,6 +456,15 @@ CalculateHouseholdDvmtSpecifications <- list(
       ISELEMENTOF = ""
     ),
     item(
+      NAME = "Marea",
+      TABLE = "Household",
+      GROUP = "Year",
+      TYPE = "character",
+      UNITS = "ID",
+      PROHIBIT = "",
+      ISELEMENTOF = ""
+    ),
+    item(
       NAME = "Age0to14",
       TABLE = "Household",
       GROUP = "Year",
@@ -541,6 +550,18 @@ CalculateHouseholdDvmtSpecifications <- list(
       ISELEMENTOF = "",
       SIZE = 0,
       DESCRIPTION = "Average daily vehicle miles traveled by the household in autos or light trucks"
+    ),
+    item(
+      NAME = "HhDvmt",
+      TABLE = "Marea",
+      GROUP = "Year",
+      TYPE = "compound",
+      UNITS = "MI/DAY",
+      NAVALUE = -1,
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      SIZE = 0,
+      DESCRIPTION = "Average daily vehicle miles traveled in autos or light trucks by households residing in the Marea"
     )
   ),
   Call = TRUE
@@ -646,6 +667,10 @@ CalculateHouseholdDvmt <- function(L) {
     as.vector(eval(parse(text = DvmtModel_ls$NonMetro$Pctl95),
                    envir = Hh_df[!IsUr_,]))
 
+  #Sum the DVMT by Marea
+  #---------------------
+  Dvmt_Ma <- tapply(Hh_df$Dvmt, Hh_df$Marea, sum)[Ma]
+
   #Return the results
   #------------------
   #Initialize output list
@@ -654,6 +679,8 @@ CalculateHouseholdDvmt <- function(L) {
     list(
       Dvmt = AveDvmt_,
       Dvmt95th = Dvmt95th_)
+  Out_ls$Year$Marea <-
+    list(HhDvmt = unname(Dvmt_Ma))
   #Return the outputs list
   Out_ls
 }
