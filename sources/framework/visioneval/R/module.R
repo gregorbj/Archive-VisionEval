@@ -255,7 +255,7 @@ processEstimationInputs <- function(Inp_ls, FileName, ModuleName) {
   #Convert NA values into "NULL" (columns in data not to be read in)
   ColClasses_[is.na(ColClasses_)] <- "NULL"
   #Read the data file with the assigned column classes
-  read.csv(FilePath, colClasses = ColClasses_)
+  read.csv(FilePath, colClasses = ColClasses_)[, Names]
 }
 
 
