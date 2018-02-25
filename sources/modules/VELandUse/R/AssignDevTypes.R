@@ -79,6 +79,15 @@ AssignDevTypesSpecifications <- list(
   #Specify data to be loaded from data store
   Get = items(
     item(
+      NAME = "Marea",
+      TABLE = "Marea",
+      GROUP = "Year",
+      TYPE = "character",
+      UNITS = "ID",
+      PROHIBIT = "",
+      ISELEMENTOF = ""
+    ),
+    item(
       NAME = "Bzone",
       TABLE = "Bzone",
       GROUP = "Year",
@@ -144,6 +153,15 @@ AssignDevTypesSpecifications <- list(
       UNITS = "PRSN",
       PROHIBIT = c("NA", "<= 0"),
       ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "Income",
+      TABLE = "Household",
+      GROUP = "Year",
+      TYPE = "currency",
+      UNITS = "USD.2010",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = ""
     )
   ),
   #Specify data to saved in the data store
@@ -167,7 +185,7 @@ AssignDevTypesSpecifications <- list(
       TYPE = "character",
       UNITS = "ID",
       NAVALUE = "NA",
-      PROHIBIT = "NA",
+      PROHIBIT = "",
       ISELEMENTOF = "",
       DESCRIPTION = "Name of metropolitan area (Marea) that household is in or NA if none"
     ),
@@ -181,7 +199,7 @@ AssignDevTypesSpecifications <- list(
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
       SIZE = 0,
-      DESCRIPTION = "Population in the Urban development type portion of the zone"
+      DESCRIPTION = "Urbanized area population in the Bzone"
     ),
     item(
       NAME = "RuralPop",
@@ -193,7 +211,55 @@ AssignDevTypesSpecifications <- list(
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
       SIZE = 0,
-      DESCRIPTION = "Population in the Rural development type portion of the zone"
+      DESCRIPTION = "Rural (i.e. non-urbanized area) population in the Bzone"
+    ),
+    item(
+      NAME = "UrbanPop",
+      TABLE = "Marea",
+      GROUP = "Year",
+      TYPE = "people",
+      UNITS = "PRSN",
+      NAVALUE = -1,
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      SIZE = 0,
+      DESCRIPTION = "Urbanized area population in the Marea (metropolitan area)"
+    ),
+    item(
+      NAME = "RuralPop",
+      TABLE = "Marea",
+      GROUP = "Year",
+      TYPE = "people",
+      UNITS = "PRSN",
+      NAVALUE = -1,
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      SIZE = 0,
+      DESCRIPTION = "Rural (i.e. non-urbanized area) population in the Marea (metropolitan area)"
+    ),
+    item(
+      NAME = "UrbanIncome",
+      TABLE = "Marea",
+      GROUP = "Year",
+      TYPE = "currency",
+      UNITS = "USD.2010",
+      NAVALUE = -1,
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      SIZE = 0,
+      DESCRIPTION = "Total household income of the urbanized area population in the Marea (metropolitan area)"
+    ),
+    item(
+      NAME = "RuralIncome",
+      TABLE = "Marea",
+      GROUP = "Year",
+      TYPE = "currency",
+      UNITS = "USD.2010",
+      NAVALUE = -1,
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      SIZE = 0,
+      DESCRIPTION = "Total household income of the rural (i.e. non-urbanized area) population in the Marea (metropolitan area)"
     )
   )
 )
@@ -262,6 +328,8 @@ AssignDevTypes <- function(L) {
   Ht <- c("SF", "MF", "GQ")
   #Define a vector of Bzones
   Bz <- L$Year$Bzone$Bzone
+  #Define a vector of Mareas
+  Ma <- L$Year$Marea$Marea
 
   #Assign development types
   #------------------------
@@ -286,8 +354,21 @@ AssignDevTypes <- function(L) {
   Pop_BzDt <-
     tapply(L$Year$Household$HhSize,
            list(L$Year$Household$Bzone, DevType_),
-           sum)[Bz,Dt]
+           sum)
   Pop_BzDt[is.na(Pop_BzDt)] <- 0
+
+  #Calculate urban and rural population and total household income by Marea
+  #------------------------------------------------------------------------
+  Pop_MaDt <-
+    tapply(L$Year$Household$HhSize,
+           list(Marea_, DevType_),
+           sum)
+  Pop_MaDt[is.na(Pop_MaDt)] <- 0
+  Income_MaDt <-
+    tapply(L$Year$Household$Income,
+           list(Marea_, DevType_),
+           sum)
+  Income_MaDt[is.na(Income_MaDt)] <- 0
 
   #Return list of results
   #----------------------
@@ -298,8 +379,15 @@ AssignDevTypes <- function(L) {
     max(nchar(Marea_[!is.na(Marea_)]))
   Out_ls$Year$Bzone <-
     list(
-      UrbanPop = unname(Pop_BzDt[,"Urban"]),
-      RuralPop = unname(Pop_BzDt[,"Rural"])
+      UrbanPop = unname(Pop_BzDt[Bz,"Urban"]),
+      RuralPop = unname(Pop_BzDt[Bz,"Rural"])
+    )
+  Out_ls$Year$Marea <-
+    list(
+      UrbanPop = unname(Pop_MaDt[Ma,"Urban"]),
+      RuralPop = unname(Pop_MaDt[Ma,"Rural"]),
+      UrbanIncome = unname(Income_MaDt[Ma,"Urban"]),
+      RuralIncome = unname(Income_MaDt[Ma,"Rural"])
     )
   Out_ls
 }
