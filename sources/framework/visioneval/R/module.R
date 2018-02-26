@@ -544,23 +544,27 @@ testModule <-
         writeLog("Module inputs successfully checked and loaded into datastore.",
                  Print = TRUE)
       } else {
-      # If module IS Initialize, apply the Initialize function
-        initFunc <- get("Initialize")
-        InitializedInputs_ls <- initFunc(ProcessedInputs_ls)
-        # Write warnings to log if any
-        if (length(InitializedInputs_ls$Warnings != 0)) {
-          writeLog(InitializedInputs_ls$Warnings)
+        if (DoRun) {
+          # If module IS Initialize, apply the Initialize function
+          initFunc <- get("Initialize")
+          InitializedInputs_ls <- initFunc(ProcessedInputs_ls)
+          # Write warnings to log if any
+          if (length(InitializedInputs_ls$Warnings != 0)) {
+            writeLog(InitializedInputs_ls$Warnings)
+          }
+          # Write errors to log and stop if any errors
+          if (length(InitializedInputs_ls$Errors) != 0) {
+            writeLog(InitializedInputs_ls$Errors)
+            stop("Errors in Initialize module inputs. Check log for details.")
+          }
+          # Save inputs to datastore
+          inputsToDatastore(InitializedInputs_ls, Specs_ls, ModuleName)
+          writeLog("Module inputs successfully checked and loaded into datastore.",
+                   Print = TRUE)
+          return() # Break out of function because purpose of Initialize is to process inputs.
+        } else {
+          return(ProcessedInputs_ls)
         }
-        # Write errors to log and stop if any errors
-        if (length(InitializedInputs_ls$Errors) != 0) {
-          writeLog(InitializedInputs_ls$Errors)
-          stop("Errors in Initialize module inputs. Check log for details.")
-        }
-        # Save inputs to datastore
-        inputsToDatastore(InitializedInputs_ls, Specs_ls, ModuleName)
-        writeLog("Module inputs successfully checked and loaded into datastore.",
-                 Print = TRUE)
-        return() # Break out of function because purpose of Initialize is to process inputs.
       }
     }
 
