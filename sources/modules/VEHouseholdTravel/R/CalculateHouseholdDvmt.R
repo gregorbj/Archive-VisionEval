@@ -552,7 +552,7 @@ CalculateHouseholdDvmtSpecifications <- list(
       DESCRIPTION = "Average daily vehicle miles traveled by the household in autos or light trucks"
     ),
     item(
-      NAME = "HhDvmt",
+      NAME = "UrbanHhDvmt",
       TABLE = "Marea",
       GROUP = "Year",
       TYPE = "compound",
@@ -561,7 +561,19 @@ CalculateHouseholdDvmtSpecifications <- list(
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
       SIZE = 0,
-      DESCRIPTION = "Average daily vehicle miles traveled in autos or light trucks by households residing in the Marea"
+      DESCRIPTION = "Average daily vehicle miles traveled in autos or light trucks by households residing in the urbanized portion of the Marea"
+    ),
+    item(
+      NAME = "RuralHhDvmt",
+      TABLE = "Marea",
+      GROUP = "Year",
+      TYPE = "compound",
+      UNITS = "MI/DAY",
+      NAVALUE = -1,
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      SIZE = 0,
+      DESCRIPTION = "Average daily vehicle miles traveled in autos or light trucks by households residing in the non-urbanized portion of the Marea"
     )
   ),
   Call = TRUE
@@ -669,7 +681,8 @@ CalculateHouseholdDvmt <- function(L) {
 
   #Sum the DVMT by Marea
   #---------------------
-  Dvmt_Ma <- tapply(Hh_df$Dvmt, Hh_df$Marea, sum)[Ma]
+  Dvmt_MaDt <-
+    tapply(Hh_df$Dvmt, list(Hh_df$Marea, Hh_df$DevType), sum)
 
   #Return the results
   #------------------
@@ -680,7 +693,8 @@ CalculateHouseholdDvmt <- function(L) {
       Dvmt = AveDvmt_,
       Dvmt95th = Dvmt95th_)
   Out_ls$Year$Marea <-
-    list(HhDvmt = unname(Dvmt_Ma))
+    list(UrbanHhDvmt = unname(Dvmt_MaDt[Ma,"Urban"]),
+         RuralHhDvmt = unname(Dvmt_MaDt[Ma,"Rural"]))
   #Return the outputs list
   Out_ls
 }
