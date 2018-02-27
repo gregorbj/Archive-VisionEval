@@ -74,6 +74,7 @@ ServiceInp_ls <- items(
   item(
     NAME =
       items("RevenueMiles",
+            "DeadheadMiles",
             "PassengerMiles"),
     TYPE = "double",
     PROHIBIT = c("< 0"),
@@ -97,6 +98,24 @@ ServiceInp_ls <- items(
 
 #Define function to estimate public transit model parameters
 #-----------------------------------------------------------
+#' Estimate public transit model parameters.
+#'
+#' \code{estimateTransitModel} estimates transit model parameters.
+#'
+#' This function estimates transit model parameters from 2015 National Transit
+#' Database information on transit agencies and service levels. The function
+#' calculates factors for converting annual revenue miles by transit mode to
+#' total bus-equivalent revenue miles. It also calculates factors to convert
+#' revenue miles by mode into vehicle miles by mode.
+#'
+#' @return A list containing the following elements:
+#' BusEquivalents_df: factors to convert revenue miles by mode into bus
+#' equivalents,
+#' UZABusEqRevMile_df: data on bus equivalent revenue miles by urbanized area,
+#' VehMiFactors_df: factors to convert revenue miles by mode into vehicle miles
+#' by mode.
+#' @import stats
+#' @export
 estimateTransitModel <- function() {
   #Read in and process transit datasets
   #------------------------------------
@@ -158,6 +177,31 @@ estimateTransitModel <- function() {
       BusEquivalents = unname(BusEquiv_Cm)
     )
 
+  #Calculate revenue miles to total vehicle mile factors by mode
+  #-------------------------------------------------------------
+  #Convert DeadheadMiles for mode DT from NA to 0
+  Service_df$DeadheadMiles[Service_df$Mode == "DT"] <- 0
+  #Create data frame of complete cases of revenue miles and deadhead miles
+  Veh_df <- Service_df[, c("Mode", "RevenueMiles", "DeadheadMiles")]
+  Veh_df <- Veh_df[complete.cases(Veh_df),]
+  #Calculate total revenue miles by combined mode
+  RevMi_Md <- tapply(Veh_df$RevenueMiles, Veh_df$Mode, sum)
+  RevMi_Cm <- unlist(lapply(CombinedCode_ls, function(x) {
+    sum(RevMi_Md[x])
+  }))
+  #Calculate total deadhead miles by combined mode
+  DeadMi_Md <- tapply(Veh_df$DeadheadMiles, Veh_df$Mode, sum)
+  DeadMi_Cm <- unlist(lapply(CombinedCode_ls, function(x) {
+    sum(DeadMi_Md[x])
+  }))
+  #Calculate vehicle mile factors by combined mode
+  VehMiFactors_Cm <- (RevMi_Cm + DeadMi_Cm) / RevMi_Cm
+  VehMiFactors_df <-
+    data.frame(
+      Mode = names(VehMiFactors_Cm),
+      VehMiFactors = unname(VehMiFactors_Cm)
+    )
+
   #Calculate bus equivalent transit service by urbanized area
   #----------------------------------------------------------
   #Attach urbanized area code to service data
@@ -197,7 +241,8 @@ estimateTransitModel <- function() {
   #------------------
   list(
     BusEquivalents_df = BusEquiv_df,
-    UZABusEqRevMile_df = UZABusEqRevMile_df
+    UZABusEqRevMile_df = UZABusEqRevMile_df,
+    VehMiFactors_df = VehMiFactors_df
   )
 }
 
@@ -206,6 +251,7 @@ estimateTransitModel <- function() {
 TransitParam_ls <- estimateTransitModel()
 BusEquivalents_df <- TransitParam_ls$BusEquivalents_df
 UZABusEqRevMile_df <- TransitParam_ls$UZABusEqRevMile_df
+VehMiFactors_df <- TransitParam_ls$VehMiFactors_df
 rm(AgencyInp_ls)
 rm(ServiceInp_ls)
 
@@ -238,6 +284,37 @@ rm(ServiceInp_ls)
 #' @source AssignTransitService.R script.
 "BusEquivalents_df"
 devtools::use_data(BusEquivalents_df, overwrite = TRUE)
+
+#Save the vehicle mile factors
+#-----------------------------
+#' Revenue miles to vehicle miles conversion factors
+#'
+#' Vehicle mile factors convert revenue miles for various modes to vehicle
+#' miles for those modes.
+#'
+#' @format A data frame with 8 rows and 2 variables containing factors for
+#' converting revenue miles of various modes to vehicle miles.
+#' Mode names are 2-character codes corresponding to consolidated mode types.
+#' Consolidated mode types represent modes that have similar characteristics and
+#' bus equivalency values. The consolidate mode codes and their meanings are as
+#' follows:
+#' DR = Demand-responsive
+#' VP = Vanpool and similar
+#' MB = Standard motor bus
+#' RB = Bus rapid transit and commuter bus
+#' MG = Monorail/automated guideway
+#' SR = Streetcar/trolley bus/inclined plain
+#' HR = Heavy Rail/Light Rail
+#' CR = Commuter Rail/Hybrid Rail/Cable Car/Aerial Tramway
+#'
+#' \describe{
+#'   \item{Mode}{abbreviation for consolidated mode}
+#'   \item{VehMiFactors}{numeric factors for converting revenue miles to
+#'   vehicle miles}
+#' }
+#' @source AssignTransitService.R script.
+"VehMiFactors_df"
+devtools::use_data(VehMiFactors_df, overwrite = TRUE)
 
 #Save the urbanized area bus equivalency data
 #--------------------------------------------
@@ -291,8 +368,8 @@ AssignTransitServiceSpecifications <- list(
       FILE = "marea_transit_service.csv",
       TABLE = "Marea",
       GROUP = "Year",
-      TYPE = "distance",
-      UNITS = "MI",
+      TYPE = "compound",
+      UNITS = "MI/YR",
       NAVALUE = -1,
       SIZE = 0,
       PROHIBIT = c("NA", "< 0"),
@@ -360,8 +437,8 @@ AssignTransitServiceSpecifications <- list(
           "CRRevMi"),
       TABLE = "Marea",
       GROUP = "Year",
-      TYPE = "distance",
-      UNITS = "MI",
+      TYPE = "compound",
+      UNITS = "MI/YR",
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = ""
     ),
@@ -382,12 +459,33 @@ AssignTransitServiceSpecifications <- list(
       TABLE = "Marea",
       GROUP = "Year",
       TYPE = "compound",
-      UNITS = "MI/PRSN",
+      UNITS = "MI/PRSN/YR",
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
       SIZE = 0,
-      DESCRIPTION = "Ratio of bus-equivalent revenue-miles (i.e. revenue-miles at the same productivity - passenger miles per revenue mile - as standard bus) to urbanized area population"
+      DESCRIPTION = "Ratio of annual bus-equivalent revenue-miles (i.e. revenue-miles at the same productivity - passenger miles per revenue mile - as standard bus) to urbanized area population"
+    ),
+    item(
+      NAME =
+        items(
+          "VanDvmt",
+          "BusDvmt",
+          "RailDvmt"
+        ),
+      TABLE = "Marea",
+      GROUP = "Year",
+      TYPE = "compound",
+      UNITS = "MI/DAY",
+      NAVALUE = -1,
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      SIZE = 0,
+      DESCRIPTION = items(
+        "Total daily miles traveled by vans of various sizes to provide demand responsive, vanpool, and similar services.",
+        "Total daily miles traveled by buses of various sizes to provide bus service of various types.",
+        "Total daily miles traveled by light rail, heavy rail, commuter rail, and similar types of vehicles."
+        )
     )
   )
 )
@@ -464,12 +562,43 @@ AssignTransitService <- function(L) {
   #Calculate Marea bus equivalent revenue miles per capita
   TranRevMiPC_Ma <- BusEqRevMi_Ma / UrbanPop_Ma
 
+  #Calculate vehicle miles by vehicle type
+  #---------------------------------------
+  #Make vector of vehicle miles factors conforming with RevMi_df
+  VehMiFactors_Md <- VehMiFactors_df$VehMiFactors
+  names(VehMiFactors_Md) <- VehMiFactors_df$Mode
+  VehMiFactors_Md <- VehMiFactors_Md[names(RevMi_df)]
+  #Calculate daily vehicle miles by Marea and mode
+  VehMi_MaMd <- as.matrix(sweep(RevMi_df, 2, VehMiFactors_Md, "*")) / 365
+  #Define correspondence between modes and vehicle types
+  ModeToVehType_ <- c(
+    DR = "Van",
+    VP = "Van",
+    MB = "Bus",
+    RB = "Bus",
+    MG = "Rail",
+    SR = "Rail",
+    HR = "Rail",
+    CR = "Rail"
+  )
+  ModeToVehType_ <- ModeToVehType_[colnames(VehMi_MaMd)]
+  VehMi_df <-
+    data.frame(
+      t(
+        apply(VehMi_MaMd, 1, function(x) {
+          tapply(x, ModeToVehType_, sum) })
+        )
+      )
+
   #Return the results
   #------------------
   #Initialize output list
   Out_ls <- initDataList()
   Out_ls$Year$Marea <-
-    list(TranRevMiPC = TranRevMiPC_Ma)
+    list(TranRevMiPC = TranRevMiPC_Ma,
+         VanDvmt = VehMi_df$Van,
+         BusDvmt = VehMi_df$Bus,
+         RailDvmt = VehMi_df$Rail)
   #Return the outputs list
   Out_ls
 }
