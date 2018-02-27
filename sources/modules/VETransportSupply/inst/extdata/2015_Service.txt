@@ -11,6 +11,7 @@ AgencyName: Transit agency name
 Mode: Abbreviation for transit mode (see notes below for meaning)
 TimePeriod: Time period for which data is reported (e.g. Average Weekday, Annual Total)
 RevenueMiles: Vehicle/passenger car miles in revenue service
+DeadheadMiles: Vehicle/passenger car miles not in revenue service
 PassengerMiles: Passenger miles
 
 Source:
@@ -31,6 +32,7 @@ Agency Name					AgencyName
 Mode						Mode
 Time Period					TimePeriod
 Actual Vehicles/ Passenger Car  Revenue Miles	RevenueMiles
+Actual Vehicles/ Passenger Deadhead Miles       DeadheadMiles
 Passenger Miles					PassengerMiles
 
 The Mode values are abbreviations that have the following values:
