@@ -543,361 +543,17 @@ devtools::use_data(CalculateTravelDemandFutureSpecifications, overwrite = TRUE)
 # households and the vehicles.
 
 
-#Define a function that predicts average DVMT for each household
-#---------------------------------------------------------------------------
-#' Function to predict average DVMT
-#'
-#' \code{predictAveDvmt} predicts average DVMT for each household.
-#'
-#' This function takes a data frame of households and a list of models which
-#' are used to predict the average daily vehicle miles traveled for each
-#' household.
-#' @param Hh_df A household data frame consisting of household attributes used to
-#' predict average DVMT.
-#' @param Model_ls A list of DVMT assignment models.
-#' @param Type A string indicating the region type. ("Metro": Default, or "NonMetro")
-#' @return A matrix containing average, maximum, and 95th percentile of daily
-#' vehicle miles traveled.
-predictAveDvmt <- function( Hh_df, Model_ls, Type ) {
-  # Check if proper Type specified
-  if( !( Type %in% c( "Metro", "NonMetro" ) ) ) {
-    stop( "Type must be either 'Metro' or 'NonMetro'" )
-  }
-  # Extract model components for specified type
-  DvmtAveModel <- Model_ls[[Type]]$DvmtAveModel
-  DvmtMaxModel <- Model_ls[[Type]]$DvmtMaxModel
-  Dvmt95thModel <- Model_ls[[Type]]$Dvmt95thModel
-  Pow <- Model_ls[[Type]]$Pow
-  # Make log income transform
-  Hh_df$Income[ Hh_df$Income <= 0 ] <- 1
-  Hh_df$LogIncome <- log( Hh_df$Income )
-  Hh_df$ZeroVeh <- as.numeric( Hh_df$Vehicles < 1 )
-  Hh_df$DrvAgePop <- Hh_df$HhSize - Hh_df$Age0to14
-  # Boost vehicle ownership by 0.05 for carshare households
-
-  ##########
-  ## AG to CS: What is carshare? Is it the same as automobile share (auto vs LtTruck)
-  Hh_df$Vehicles[ Hh_df$Carshare == 1 ] <-
-    Hh_df$Vehicles[ Hh_df$Carshare == 1 ] + 0.05
-  # Define an intercept variable
-  Intercept <- 1
-  # Apply the DVMT models
-  PowDvmtAve_ <- as.vector( eval( parse( text=DvmtAveModel ), envir=Hh_df ) )
-  PowDvmtAve_[ PowDvmtAve_ < 0 ] <- 0
-  DvmtAve_ <- PowDvmtAve_ ^ (1/Pow)
-  Hh_df$DvmtAve <- DvmtAve_
-  Hh_df$DvmtAveSq <- DvmtAve_ ^ 2
-  Hh_df$DvmtAveCu <- DvmtAve_ ^ 3
-  DvmtMax_ <- as.vector( eval( parse( text=DvmtMaxModel ), envir=Hh_df ) )
-  Dvmt95th_ <- as.vector( eval( parse( text=Dvmt95thModel ), envir=Hh_df ) )
-  # Return the result
-  return(cbind( DvmtAve=DvmtAve_, DvmtMax=DvmtMax_, Dvmt95th=Dvmt95th_ ))
-}
-
-#Define a function that calculates and adjusts DVMT under budget considerations
-#---------------------------------------------------------------------------
-#' Function to calculate and adjust DVMT
-#'
-#' \code{calculateAdjAveDvmt} calculates DVMT for each household and adjusts it
-#' under budget consideration and annual VMT inflation.
-#'
-#' This function takes a data frame of households and a list of models which
-#' are used to predict the average daily vehicle miles traveled for each
-#' household (w/o budget consideration). These vehicle miles are then adjusted
-#' after considering the budget allocated towards travel.
-#' @param Hh_df A household data frame consisting of household attributes used to
-#' predict average DVMT.
-#' @param Model_ls A list of DVMT assignment models.
-#' @param Type A string indicating the region type. ("Metro": Default, or "NonMetro")
-#' @param BudgetProp A numeric signifying the proportion of budget allocated towards travel.
-#' @param AnnVmtInflator A numeric indicating annual VMT inflator.
-#' @param TrnstnProp A numeric indicating the transportation proportion.
-#' @return A list containing adjusted average DVMT and budget for each household.
-calculateAdjAveDvmt <- function( Hh_df, Model_ls, Type, BudgetProp, AnnVmtInflator=365, TrnstnProp ) {
-  # Calculate the household DVMT without budget considerations
-  AveDvmtHh <- predictAveDvmt( Hh_df, Model_ls, Type )[,1]
-  # Put in a small value for AveDvmt if 0 or less to avoid negative or infinite calcs
-  AveDvmtHh[ AveDvmtHh <= 0 ] <- 1e-6
-  Hh_df$AveDvmt <- AveDvmtHh
-  # Calculate base and future average costs per mile
-  BaseCostPerMiHh <- Hh_df$BaseCostPerMile
-  FutrCostPerMiHh <- Hh_df$BaseCostPerMile
-  # Calculate household budget
-  BudgetHh <- Hh_df$Income * BudgetProp / AnnVmtInflator
-  # Adjust budget with insurance adjustment if that data is provided
-  if( !is.null( Hh_df$InsBudgetAdj ) ) {
-    InsBudgetAdjHh <- Hh_df$InsBudgetAdj
-    BudgetHh <- BudgetHh - InsBudgetAdjHh
-  }
-  # Calculate the threshold budget cost per mile
-  ThshldCostPerMiHh <- BudgetHh / AveDvmtHh
-  # Make sure that the base DVMT does not exceed the budget
-  BaseExceedsBudget <- ThshldCostPerMiHh < BaseCostPerMiHh
-  AveDvmtHh[ BaseExceedsBudget ] <- BudgetHh[ BaseExceedsBudget ] /
-    BaseCostPerMiHh[ BaseExceedsBudget ]
-  ThshldCostPerMiHh[ BaseExceedsBudget ] <- BaseCostPerMiHh[ BaseExceedsBudget ]
-  # Calculate parameters for computing DVMT transitions in price function
-  TrnstnPriceRangeHh <- ( ThshldCostPerMiHh - BaseCostPerMiHh ) * TrnstnProp
-  LwTrnstnCostPerMiHh <- ThshldCostPerMiHh - TrnstnPriceRangeHh
-  HiTrnstnCostPerMiHh <- ThshldCostPerMiHh + TrnstnPriceRangeHh
-  CostScaleHh <- pi / TrnstnPriceRangeHh
-  TrnstnDvmtRangeHh <- ( AveDvmtHh - BudgetHh / HiTrnstnCostPerMiHh ) / 2
-  DvmtScaleHh <- TrnstnDvmtRangeHh / ( cosh( 1.2 * pi ) - cosh( 0 ) )
-  # Identify the portion of the curves that costs are in
-  Below <- FutrCostPerMiHh < LwTrnstnCostPerMiHh
-  LowTr <- FutrCostPerMiHh >= LwTrnstnCostPerMiHh &
-    FutrCostPerMiHh <= ThshldCostPerMiHh
-  HiTr <- FutrCostPerMiHh > ThshldCostPerMiHh &
-    FutrCostPerMiHh <= HiTrnstnCostPerMiHh
-  Above <- FutrCostPerMiHh > HiTrnstnCostPerMiHh
-  # Calculate the adjusted DVMT
-  AdjDvmtHh <- numeric( nrow( Hh_df ) )
-  AdjDvmtHh[Below] <- AveDvmtHh[Below]
-  AdjDvmtHh[Above] <- BudgetHh[Above] / FutrCostPerMiHh[Above]
-  AdjDvmtHh[LowTr] <- AveDvmtHh[LowTr] +
-    ( 1 - cosh( ( FutrCostPerMiHh[LowTr] - LwTrnstnCostPerMiHh[LowTr] )
-                * CostScaleHh[LowTr] ) ) * DvmtScaleHh[LowTr]
-  AdjDvmtHh[HiTr] <- BudgetHh[HiTr] / FutrCostPerMiHh[HiTr] +
-    ( 1 - cosh( ( HiTrnstnCostPerMiHh[HiTr] - FutrCostPerMiHh[HiTr] )
-                * CostScaleHh[HiTr] ) ) * DvmtScaleHh[HiTr]
-  # If future cost per mile equals base cost per mile use base DVMT
-  AdjDvmtHh[ FutrCostPerMiHh == BaseCostPerMiHh ] <-
-    AveDvmtHh[ FutrCostPerMiHh == BaseCostPerMiHh ]
-  # Return the results
-  list( AdjDvmt=AdjDvmtHh, BaseDvmt=AveDvmtHh, Budget=BudgetHh,
-        BelowTrnstn=Below, LowTrnstn=LowTr, HiTrnstn=HiTr, AboveTrnstn=Above )
-}
-
-#Define a function that calculates DVMT for all vehicles
-#---------------------------------------------------------------------------
-#' Function to calculate DVMT for all vehicles
-#'
-#' \code{calculateVehDvmt} calculates daily vehicle miles traveled for each vehicle in
-#' a household.
-#'
-#' This function takes a data frame of households and vehicles, and assigns the household
-#' average DVMT to the vehicles.
-#'
-#' @param Hh_df A household data frame consisting average DVMT and household id.
-#' @param Vehicles_df A vehicle data frame consisting of variables used for DVMT assignment.
-#' @return A numeric vector of DVMT.
-calculateVehDvmt <- function( Hh_df, Vehicles_df ) {
-  VehDvmt_ <- Hh_df[match(Vehicles_df$HhId, Hh_df$HhId),"Dvmt"] * Vehicles_df$DvmtProp
-  return(VehDvmt = VehDvmt_)
-}
-
-#Define a function that calculates average Co2 equivalent gas emissions
-#---------------------------------------------------------------------------
-#' Function to calculate average Co2 equivalent gas emissions for fuels by
-#' vehicle type
-#'
-#' \code{calculateAveFuelCo2e} calculates average Co2 equivalent gas emissions
-#' by vehicle and fuel type.
-#'
-#' This function uses the composition of fuel and the proportion of fuel used
-#' by vehicle type to calculate the average Co2 equivalent gas emissions for
-#' a specific forecast year.
-#' @param ForecastYear An integer indicating the forecast year.
-#' @param FuelProp A data frame consisting of fuel proportion used by vehicle types.
-#' @param FuelComp A data frame consisting of composition of fuels.
-#' @param FuelCo2Ft A data frame containing the intensity of carbon by fuel types.
-#' @param MJPerGallon A numeric indicating the energy per gallon of fuel. (Default: 121)
-#' @param OutputType A string indicating the units of the output. ("MetricTons":Default or "Pounds")
-#' @return A named array indicating the average Co2 equivalent gas emissions by vehicle type.
-calculateAveFuelCo2e <- function( ForecastYear = NULL, FuelProp = NULL, FuelComp = NULL,
-                                  FuelCo2Ft = NULL, MJPerGallon = 121, OutputType="MetricTons" ) {
-  # Check that OutputType is proper values
-  #---------------------------------------
-  if( !( OutputType %in% c( "MetricTons", "Pounds" ) ) ) {
-    stop( "OutputType must be MetricTons or Pounds" )
-  }
-  if(is.null(ForecastYear) | is.null(FuelProp)| is.null(FuelComp) | is.null(FuelCo2Ft)) {
-    stop( "Missing arguments to the function" )
-  }
-  AutoIndex <- FuelProp$VehType == "Auto"
-  LtTrkIndex <- FuelProp$VehType == "LtTruck"
-  AutoCompIndex <- FuelComp$VehType == "Auto"
-  LtTrkCompIndex <- FuelComp$VehType == "LtTruck"
-  # Calculate average
-  #------------------
-  # Calculate auto fuel proportions
-  AutoPropDieselBlend <- FuelProp[ AutoIndex, "PropDiesel" ]
-  AutoPropCng <- FuelProp[ AutoIndex, "PropCng" ]
-  AutoPropGasBlend <-  FuelProp[ AutoIndex, "PropGas" ]
-  AutoPropEthanol <- AutoPropGasBlend *  FuelComp[ AutoCompIndex, "GasPropEth" ]
-  AutoPropGas <- AutoPropGasBlend - AutoPropEthanol
-  AutoPropBiodiesel <- AutoPropDieselBlend * FuelComp[ AutoCompIndex, "DieselPropBio" ]
-  AutoPropDiesel <- AutoPropDieselBlend - AutoPropBiodiesel
-  rm( AutoPropDieselBlend, AutoPropGasBlend )
-  # Calculate light truck fuel proportions
-  LtTrkPropDieselBlend <- FuelProp[ LtTrkIndex, "PropDiesel" ]
-  LtTrkPropCng <- FuelProp[ LtTrkIndex, "PropCng" ]
-  LtTrkPropGasBlend <-  FuelProp[ LtTrkIndex, "PropGas" ]
-  LtTrkPropEthanol <- LtTrkPropGasBlend *  FuelComp[ LtTrkCompIndex, "GasPropEth" ]
-  LtTrkPropGas <- LtTrkPropGasBlend - LtTrkPropEthanol
-  LtTrkPropBiodiesel <- LtTrkPropDieselBlend * FuelComp[ LtTrkCompIndex, "DieselPropBio" ]
-  LtTrkPropDiesel <- LtTrkPropDieselBlend - LtTrkPropBiodiesel
-  rm( LtTrkPropDieselBlend, LtTrkPropGasBlend )
-  # Get correct gasoline type value for the year
-  if( ForecastYear == "1990" ) {
-    GasCo2e <- FuelCo2Ft[ FuelCo2Ft$Fuel == "RFG", "Intensity"]
-  } else {
-    GasCo2e <- FuelCo2Ft[ FuelCo2Ft$Fuel == "CARBOB", "Intensity"]
-  }
-  # Calculate the average auto fuel carbon intensity
-  AutoCo2e <- ( AutoPropGas * GasCo2e ) +
-    ( AutoPropCng * FuelCo2Ft[ FuelCo2Ft$Fuel == "Cng", "Intensity"] ) +
-    ( AutoPropEthanol * FuelCo2Ft[ FuelCo2Ft$Fuel == "Ethanol", "Intensity"] ) +
-    ( AutoPropDiesel * FuelCo2Ft[ FuelCo2Ft$Fuel == "ULSD", "Intensity"] ) +
-    ( AutoPropBiodiesel * FuelCo2Ft[ FuelCo2Ft$Fuel == "Biodiesel", "Intensity"] )
-  if( OutputType == "MetricTons" ) {
-    AutoCo2e <- AutoCo2e * MJPerGallon / 1000000
-  }
-  if( OutputType == "Pounds" ) {
-    AutoCo2e <- AutoCo2e * MJPerGallon * 2.20462262 / 1000
-  }
-  # Calculate the average light truck fuel carbon intensity
-  LtTrkCo2e <- ( LtTrkPropGas * GasCo2e ) +
-    ( LtTrkPropCng * FuelCo2Ft[ FuelCo2Ft$Fuel == "Cng", "Intensity"] ) +
-    ( LtTrkPropEthanol * FuelCo2Ft[ FuelCo2Ft$Fuel == "Ethanol", "Intensity"] ) +
-    ( LtTrkPropDiesel * FuelCo2Ft[ FuelCo2Ft$Fuel == "ULSD", "Intensity"] ) +
-    ( LtTrkPropBiodiesel * FuelCo2Ft[ FuelCo2Ft$Fuel == "Biodiesel", "Intensity"] )
-  if( OutputType == "MetricTons" ) {
-    LtTrkCo2e <- LtTrkCo2e * MJPerGallon / 1000000
-  }
-  if( OutputType == "Pounds" ) {
-    LtTrkCo2e <- LtTrkCo2e * MJPerGallon * 2.20462262 / 1000
-  }
-
-  # Return the result
-  #------------------
-  return(c( Auto=AutoCo2e, LtTrk=LtTrkCo2e ))
-}
-
-#Define a function that calculates average Co2 equivalent gas emissions for vehicles
-#---------------------------------------------------------------------------
-#' Function to calculate average Co2 equivalent gas emissions for fuels for
-#' the households and the vehicles
-#'
-#' \code{calculateVehFuelCo2} calculates average Co2 equivalent gas emissions
-#' for the households and the vehicles.
-#'
-#' This function uses Dvmt and fuel efficiency of the vehicles, along with
-#' the average Co2 equivalent gas emissions by vehicle type to assign
-#' emissions to the vehicles.
-#' @param Hh_df A household data frame consisting of household attributes used to
-#' assign Co2 equivalent emissions.
-#' @param Vehicles_df A vehicle data frame consisting of vehicle attributes used to
-#' assign Co2 equivalent emissions.
-#' @param AveFuelCo2e A named array indicating the average Co2 equivalent gas emissions
-#' by vehicle type.
-#' @return A list containing assignment of gas emissions.
-calculateVehFuelCo2 <- function(Hh_df, Vehicles_df, AveFuelCo2e) {
-
-  # Calculate fuel consumption & CO2e for households with vehicles
-  #---------------------------------------------------------------
-  # Idx. <- rep( 1:sum(HasVeh.Hh), Data..$Hhvehcnt[ HasVeh.Hh ] )
-  Dvmt_ <- Vehicles_df$Dvmt
-  Mpg_ <- Vehicles_df$Mileage
-  VehType_ <- as.character(Vehicles_df$Type)
-  FuelGallons_ <- as.numeric(Dvmt_ / Mpg_)
-  FuelCo2e_ <- FuelGallons_ * AveFuelCo2e[ VehType_ ]
-  FuelGallonsHh <- rowsum(FuelGallons_, Vehicles_df$HhId)[,1]
-  FuelCo2eHh <- rowsum(FuelCo2e_, Vehicles_df$HhId)[,1]
-
-  # Calculate totals in order to compute proportions and average rates
-  #-------------------------------------------------------------------
-  TotDvmt <- sum(Dvmt_)
-  TotFuelGallons <- sum(FuelGallonsHh)
-  TotFuelCo2e <- sum(FuelCo2eHh)
-
-  # Calculate proportions and rates for zero-car households
-  #--------------------------------------------------------
-  AveGpm <- TotFuelGallons / TotDvmt
-  AveFuelCo2eRate <- TotFuelCo2e / TotDvmt
-
-  # Calculate consumption and emissions for zero-car households
-  #------------------------------------------------------------
-  ZeroVehDvmtHh <- Hh_df[Hh_df$ZeroVeh==1, "Dvmt"]
-  names(ZeroVehDvmtHh) <- Hh_df[Hh_df$ZeroVeh==1, "HhId"]
-  ZeroVehFuelGallonsHh <- ZeroVehDvmtHh * AveGpm
-  ZeroVehFuelCo2eHh <- ZeroVehDvmtHh * AveFuelCo2eRate
-
-  # Combine all household data together
-  #------------------------------------
-  AllFuelGallonsHh <- numeric( nrow( Hh_df ) )
-  AllFuelGallonsHh[Hh_df$ZeroVeh!=1] <- FuelGallonsHh
-  AllFuelGallonsHh[Hh_df$ZeroVeh==1] <- ZeroVehFuelGallonsHh
-  AllFuelCo2eHh <- numeric( nrow( Hh_df ) )
-  AllFuelCo2eHh[Hh_df$ZeroVeh!=1] <- FuelCo2eHh
-  AllFuelCo2eHh[Hh_df$ZeroVeh==1] <- ZeroVehFuelCo2eHh
-
-  # Return the result
-  #------------------
-  list( FuelGallons=AllFuelGallonsHh, FuelCo2e=AllFuelCo2eHh )
-}
-
-#Define a function that calculates total fuel cost per mile
-#---------------------------------------------------------------------------
-#' Function to calculate total fuel cost per mile for the households
-#'
-#' \code{calculateCosts} calculates total fuel cost per mile for the
-#' households.
-#'
-#' This function uses fuel cost, gas tax, carbon cost, and vehicle miles traveled
-#' by vehicles of the households to calculate total fuel cost per mile.
-#' @param Hh_df A household data frame consisting of household attributes used to
-#' caolculate total fuel cost per mile.
-#' @param Costs A named numeric consisting of the costs, and/or tax  information.
-#' @param NonPrivateFactor A numeric.
-#' @return A list containing various fuel costs.
-calculateCosts <- function( Hh_df, Costs, NonPrivateFactor=5 ) {
-  # Calculate total daily fuel cost
-  FuelCostHh <- Hh_df$FuelGallons * Costs[ "FuelCost" ]
-  # Calculate gas tax cost
-  GasTaxCostHh <- Hh_df$FuelGallons * Costs[ "GasTax" ]
-  # Calculate total daily carbon cost
-  CarbonCostHh <- ( Hh_df$FuelCo2e ) * Costs[ "CarbonCost" ]
-  # Calculate total daily VMT cost
-  VmtCostHh <- Hh_df$Dvmt * Costs[ "VmtCost" ]
-  # Calculate total vehicle cost
-  BaseCostHh <- FuelCostHh + GasTaxCostHh + CarbonCostHh + VmtCostHh
-  TotCostHh <- BaseCostHh + Hh_df$DailyPkgCost
-  # Calculate the average cost per mile for households that have vehicles and DVMT
-  HasVehHh <- Hh_df$Vehicles >= 1
-  HasDvmtHh <- Hh_df$Dvmt > 0
-  AveBaseCostMile <- mean( BaseCostHh[ HasVehHh & HasDvmtHh ] / Hh_df$Dvmt[ HasVehHh & HasDvmtHh ] )
-  # Calculate vehicle costs for zero vehicle households and households that have no DVMT
-  HasNoVehOrNoDvmtHh <- !HasVehHh | !HasDvmtHh
-  TotCostHh[ HasNoVehOrNoDvmtHh  ] <- Hh_df$Dvmt[ HasNoVehOrNoDvmtHh ] * 5 * AveBaseCostMile
-  FuelCostHh[ HasNoVehOrNoDvmtHh ] <- 0
-  GasTaxCostHh[ HasNoVehOrNoDvmtHh ] <- 0
-  CarbonCostHh[ HasNoVehOrNoDvmtHh ] <- 0
-  VmtCostHh[ HasNoVehOrNoDvmtHh ] <- 0
-  # Calculate the average cost per mile
-  FutrCostPerMileHh <- TotCostHh / Hh_df$Dvmt
-  # Calculate average cost per mile for households with no vehicles or no DVMT
-  FutrCostPerMileHh[ HasNoVehOrNoDvmtHh ] <- 5 * AveBaseCostMile
-  # Reduce average cost per mile where it is out of the norm
-  Cost95th <- quantile( FutrCostPerMileHh, prob=0.95 )
-  FutrCostPerMileHh[ FutrCostPerMileHh > Cost95th ] <- Cost95th
-  # Return the result
-  list( FuelCost=FuelCostHh, GasTaxCost=GasTaxCostHh,
-        CarbonCost=CarbonCostHh, VmtCost=VmtCostHh,
-        TotCost=TotCostHh, FutrCostPerMi=FutrCostPerMileHh)
-}
-
 #Main module function calculates various attributes of travel demand
 #------------------------------------------------------------
 #' Calculate various attributes of travel demands for each household
-#' and vehicle.
+#' and vehicle using future data
 #'
 #' \code{CalculateTravelDemandFuture} calculate various attributes of travel
-#' demands for each household and vehicle.
+#' demands for each household and vehicle using future data
 #'
 #' This function calculates dvmt by placetypes, households, and vehicles.
 #' It also calculates fuel gallons consumed, total fuel cost, and Co2 equivalent
-#' gas emission for each household.
+#' gas emission for each household using future data.
 #'
 #' @param L A list containing the components listed in the Get specifications
 #' for the module.
@@ -908,211 +564,67 @@ calculateCosts <- function( Hh_df, Costs, NonPrivateFactor=5 ) {
 CalculateTravelDemandFuture <- function(L) {
   #Set up
   #------
-  #Fix seed
-  set.seed(L$G$Seed)
+  # Function to rename variables to be consistent with Get specfications
+  # of CalculateTravelDemand.
 
-  # Get the household data frame
-  Hh_df <- data.frame(L$Year$Household)
-
-  # Remove suffix "Future" from column names
-  Hh_df_colnames <- colnames(Hh_df)
-  colnames(Hh_df) <- gsub("Future","",Hh_df_colnames)
-
-  # Assign household attributes
-  ######AG to CS/BS Average Density
-  ###AG to CS/BS should this be a calculated average for the region?
-  Hh_df$Htppopdn <- 500
-  ###AG to CS/BS should this be 0 for rural? Or are we just using an average for both density and this var and then adjusting using 5D values?
-  Hh_df$FwyLaneMiPC <- L$Year$Marea$FwyLaneMiPCFuture*1e3
-  Hh_df$TranRevMiPC <- L$Year$Marea$TranRevMiPCFuture
-  Hh_df$Urban <- 1
-  Hh_df$DrvAgePop <- Hh_df$HhSize - Hh_df$Age0to14
-  Hh_df$ZeroVeh <- 0
-  Hh_df$ZeroVeh[Hh_df$Vehicles==0] <- 1
-
-  # Identify metropolitan area
-  IsMetro_ <- Hh_df$Urban == 1
-
-  #1st DVMT calculation (no adjustment for costs)
-  #==============================================
-
-  # Calculate the average DVMT
-  #---------------------------
-  ModelVar_ <- c( "Income", "Htppopdn", "Vehicles", "TranRevMiPC",
-                  "FwyLaneMiPC", "DrvAgePop", "HhSize", "Age0to14",
-                  "Age15to19", "Age20to29", "Age30to54", "Age55to64",
-                  "Age65Plus", "Urban", "BaseCostPerMile", "FutureCostPerMile" )
-  # Assume a base and future cost of 4 cents per mile
-  # so that budget constraints don't impinge on the amount of vehicle travel
-  Hh_df$BaseCostPerMile <- L$Global$Model$BaseCostPerMile
-  Hh_df$FutureCostPerMile <- L$Global$Model$BaseCostPerMile
-  Hh_df$Dvmt <- 0
-
-  if( any( IsMetro_ ) ) {
-    Hh_df$Dvmt[ IsMetro_ ] <- calculateAdjAveDvmt( Hh_df[ IsMetro_, ModelVar_ ],
-                                                 DvmtModels_ls, "Metro", BudgetProp=L$Global$Model$DvmtBudgetProp, AnnVmtInflator=L$Global$Model$AnnVmtInflator,
-                                                 TrnstnProp=L$Global$Model$TrnstnProp )[[1]]
-  }
-  if( any( !IsMetro_ ) ) {
-    Hh_df$Dvmt[ !IsMetro_ ] <- calculateAdjAveDvmt( Hh_df[ IsMetro_, ModelVar_ ],
-                                                    DvmtModels_ls, "NonMetro", BudgetProp=L$Global$Model$DvmtBudgetProp, AnnVmtInflator=L$Global$Model$AnnVmtInflator,
-                                                    TrnstnProp=L$Global$Model$TrnstnProp )[[1]]
+  # Function to add suffix 'Future' at the end of all the variable names
+  AddSuffixFuture <- function(x, suffix = "Future"){
+    # Check if x is a list
+    if(is.list(x)){
+      if(length(x) > 0){
+        # Check if elements of x is a list
+        isElementList <- unlist(lapply(x,is.list))
+        # Modify the names of elements that are not the list
+        noList <- x[!isElementList]
+        if(!identical(names(noList),character(0))){
+          names(noList) <- paste0(names(noList),suffix)
+        }
+        # Repeat the function for elements that are list
+        yesList <- lapply(x[isElementList], AddSuffixFuture)
+        x <- unlist(list(noList,yesList), recursive = FALSE)
+        return(x)
+      }
+      return(x)
+    }
+    return(NULL)
   }
 
-  # Assign vehicle DVMT
-  #====================
 
-  # Assign vehicle mileage to household vehicles
-  Vehicles_df <- data.frame(L$Year$Vehicle)
-
-  # Remove Future from column names
-  Vehicles_df_colnames <- colnames(Vehicles_df)
-  colnames(Vehicles_df) <- gsub("Future","",Vehicles_df_colnames)
-
-  Vehicles_df$Dvmt <- calculateVehDvmt( Hh_df[,c("HhId","Dvmt")], Vehicles_df )
-
-  # Calculate fuel consumption and CO2e production
-  #=============================================================
-
-  # Calculate average fuel CO2e per gallon
-  #---------------------------------------
-  FuelProp <- data.frame(L$Global$FuelProp)
-  FuelComp <- data.frame(L$Global$FuelComp)
-  FuelCo2Ft <- data.frame(L$Global$Fuel)
-  AveFuelCo2e_ <- calculateAveFuelCo2e( L$G$Year, FuelProp=FuelProp, FuelComp=FuelComp,
-                                        FuelCo2Ft=FuelCo2Ft,
-                                   MJPerGallon=121, OutputType="MetricTons" )
-
-  # Calculate consumption and production at a household level
-  #----------------------------------------------------------
-
-  ModelVar_ <- c("HhId" ,"Mileage", "Type", "Dvmt")
-  FuelCo2e_ <- calculateVehFuelCo2(Hh_df[, c("ZeroVeh","HhId", "Dvmt")], Vehicles_df[ , ModelVar_ ], AveFuelCo2e=AveFuelCo2e_ )
-  Hh_df$FuelGallons <- FuelCo2e_$FuelGallons
-  Hh_df$FuelCo2e <- FuelCo2e_$FuelCo2e
-  rm( AveFuelCo2e_, FuelCo2e_ )
-  rm( ModelVar_ )
-  gc()
-
-  #Calculate household travel costs
-  #================================
-
-  # Calculate all household costs
-  #------------------------------
-
-  # assume zero parking cost at this point
-  Hh_df$DailyPkgCost <- 0
-  # gathers cost parameters into costs.
-  Costs_ <- c(L$Global$Model$FuelCost,
-              L$Global$Model$GasTax,
-              L$Global$Model$CarbonCost,
-              L$Global$Model$VmtCost)
-  names(Costs_) <- c("FuelCost","GasTax","CarbonCost","VmtCost")
-  ModelVar_ <- c( "FuelGallons", "FuelCo2e", "Dvmt", "DailyPkgCost", "Vehicles" )
-  Costs_ <- calculateCosts( Hh_df[ , ModelVar_ ], Costs_)
-  Hh_df$FutureCostPerMile <- Costs_$FutrCostPerMi
-  rm( Costs_, ModelVar_ )
-  gc()
-
-  # Calculate DVMT with new costs and reallocate to vehicles
-  #=========================================================
-
-  # Recalculate DVMT
-  #-----------------
-  PrevDvmtHh <- Hh_df$Dvmt
-  ModelVar_ <- c( "Income", "Htppopdn", "Vehicles", "TranRevMiPC", "FwyLaneMiPC", "DrvAgePop",
-                  "HhSize", "Age0to14", "Age15to19", "Age20to29", "Age30to54", "Age55to64", "Age65Plus",
-                  "Urban", "BaseCostPerMile", "FutureCostPerMile" )
-  if( any( IsMetro_ ) ) {
-    Hh_df$Dvmt[ IsMetro_ ] <- calculateAdjAveDvmt( Hh_df[ IsMetro_, ModelVar_ ],
-                                                   DvmtModels_ls, "Metro", BudgetProp=L$Global$Model$DvmtBudgetProp, AnnVmtInflator=L$Global$Model$AnnVmtInflator,
-                                                   TrnstnProp=L$Global$Model$TrnstnProp )[[1]]
-  }
-  if( any( !IsMetro_ ) ) {
-    Hh_df$Dvmt[ !IsMetro_ ] <- calculateAdjAveDvmt( Hh_df[ IsMetro_, ModelVar_ ],
-                                                    DvmtModels_ls, "NonMetro", BudgetProp=L$Global$Model$DvmtBudgetProp, AnnVmtInflator=L$Global$Model$AnnVmtInflator,
-                                                    TrnstnProp=L$Global$Model$TrnstnProp )[[1]]
+  # Function to remove suffix 'Future' from all the variable names
+  RemoveSuffixFuture <- function(x, suffix = "Future"){
+    # Check if x is a list
+    if(is.list(x)){
+      if(length(x) > 0){
+        # Check if elements of x is a list
+        isElementList <- unlist(lapply(x,is.list))
+        # Modify the names of elements that are not the list
+        noList <- x[!isElementList]
+        if(length(noList)>0){
+          names(noList) <- gsub(suffix,"",names(noList))
+        }
+        # Repeat the function for elements that are list
+        yesList <- lapply(x[isElementList], RemoveSuffixFuture)
+        x <- unlist(list(noList,yesList), recursive = FALSE)
+        return(x)
+      }
+      return(x)
+    }
+    return(NULL)
   }
 
-  # Split adjusted DVMT among vehicles
-  #-----------------------------------
-  DvmtAdjFactorHh <- Hh_df$Dvmt / PrevDvmtHh
-  names(DvmtAdjFactorHh) <- as.character(Hh_df$HhId)
-  Vehicles_df$Dvmt <- Vehicles_df$Dvmt * DvmtAdjFactorHh[as.character(Vehicles_df$HhId)]
-  rm( DvmtAdjFactorHh)
-  gc()
-
-  # Sum up DVMT by development type
-  #================================
-
-  DvmtPt_ <- rowsum( Hh_df$Dvmt, Hh_df$HhPlaceTypes)[,1]
-  DvmtPt_ <- DvmtPt_[as.character(L$Year$Bzone$Bzone)]
-  DvmtPt_[is.na(DvmtPt_)] <- 0
-  names(DvmtPt_) <- as.character(L$Year$Bzone$Bzone)
-
-  #CALCULATE HEAVY TRUCK VMT
-  #=========================
-  # AG: Do not know the reason for multiplying base dvmt by 1000
-  BaseLtVehDvmt_ <- L$Global$Model$BaseLtVehDvmt * 1000
-  TruckBusDvmtParam_ <- data.frame(L$Global$Vmt)
-  PropVmt_ <- TruckBusDvmtParam_[TruckBusDvmtParam_$Type=="TruckVmt", "PropVmt"]
-  BaseTruckDvmt_ <- BaseLtVehDvmt_ / (1 - PropVmt_) * PropVmt_
-
-  # Load data summaries
-  #--------------------
-  BaseIncomeByPlaceType_ <- IncomeByPlaceType_ <- L$Year$Bzone$UrbanIncome
-
-  # Load base year income
-  if(L$G$Year != L$G$BaseYear){
-    BaseIncomeByPlaceType_ <- L$BaseYear$Bzone$UrbanIncome
-  }
-
-  # Calculate truck VMT by metropolitan area
-  #-----------------------------------------
-  # Calculate growth in total percapita income from base year
-  # Calculate change in income
-  BaseIncome_ <- sum(BaseIncomeByPlaceType_)
-  FutureIncome_ <- sum(IncomeByPlaceType_)
-  IncomeGrowth_ <- FutureIncome_/BaseIncome_
-  # Calculate truck DVMT
-  TruckDvmt_ <- IncomeGrowth_ * L$Global$Model$TruckVmtGrowthMultiplier * BaseTruckDvmt_
-  rm(BaseLtVehDvmt_, TruckBusDvmtParam_, PropVmt_, BaseTruckDvmt_,
-     BaseIncomeByPlaceType_, IncomeByPlaceType_,
-     BaseIncome_, FutureIncome_, IncomeGrowth_)
-  gc()
-
+  # Modify the input data set
+  L <- RemoveSuffixFuture(L)
 
 
   #Return the results
-  Out_ls <- initDataList()
-  Out_ls$Year <- list(
-    Marea = list(),
-    Bzone = list(),
-    Household = list(),
-    Vehicle = list()
-  )
-  # Azone results
-  Out_ls$Year$Marea <- list(
-    TruckDvmtFuture = TruckDvmt_
-  )
-  # Bzone results
-  Out_ls$Year$Bzone <- list(
-    DvmtFuture = DvmtPt_
-  )
-  # Household results
-  Out_ls$Year$Household <- list(
-    DvmtFuture = Hh_df$Dvmt,
-    FuelGallonsFuture = Hh_df$FuelGallons,
-    FuelCo2eFuture = Hh_df$FuelCo2e,
-    DailyParkingCostFuture = Hh_df$DailyPkgCost,
-    FutureCostPerMileFuture = Hh_df$FutureCostPerMile
-  )
-  # Vehicle results
-    Out_ls$Year$Vehicle <-list(
-      DvmtFuture = as.numeric(Vehicles_df$Dvmt)
-    )
+  #------------------
+  # Call the CalculateTravelDemand function with the new dataset
+  Out_ls <- CalculateTravelDemand(L)
+
+  # Add 'Future' suffix to all the variables
+  Out_ls <- AddSuffixFuture(Out_ls)
   #Return the outputs list
-  Out_ls
+  return(Out_ls)
 }
 
 

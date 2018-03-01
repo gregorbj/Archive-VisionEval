@@ -3,7 +3,7 @@
 \name{CalculateTravelDemandFuture}
 \alias{CalculateTravelDemandFuture}
 \title{Calculate various attributes of travel demands for each household
-and vehicle.}
+and vehicle using future data}
 \usage{
 CalculateTravelDemandFuture(L)
 }
@@ -17,10 +17,10 @@ specifications for the module.
 }
 \description{
 \code{CalculateTravelDemandFuture} calculate various attributes of travel
-demands for each household and vehicle.
+demands for each household and vehicle using future data
 }
 \details{
 This function calculates dvmt by placetypes, households, and vehicles.
 It also calculates fuel gallons consumed, total fuel cost, and Co2 equivalent
-gas emission for each household.
+gas emission for each household using future data.
 }

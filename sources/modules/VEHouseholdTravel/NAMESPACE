@@ -2,6 +2,7 @@
 
 export(CalculateAltModeTrips)
 export(CalculateHouseholdDvmt)
+export(CalculateInducedDemand)
 export(CalculateTravelDemand)
 export(CalculateTravelDemandFuture)
 export(DivertSovTravel)
