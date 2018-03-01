@@ -26,8 +26,8 @@
 #Packages used in code development
 #=================================
 #Uncomment following lines during code development. Recomment when done.
-# library(visioneval)
-# library(ordinal)
+library(visioneval)
+library(ordinal)
 
 
 #=============================================
@@ -44,20 +44,22 @@
 #Create model estimation dataset
 #-------------------------------
 #Load selected data from VE2001NHTS package
+Hh_df <- VE2001NHTS::Hh_df
 FieldsToKeep_ <-
   c("NumVeh", "Income", "Hbppopdn", "Hhsize", "Hometype", "UrbanDev", "FwyLnMiPC",
-    "Wrkcount", "Age0to14", "Age65Plus", "MsaPopDen", "BusEqRevMiPC")
-Hh_df <- VE2001NHTS::Hh_df[, FieldsToKeep_]
+    "Wrkcount", "Drvrcnt", "Age0to14", "Age65Plus", "MsaPopDen", "BusEqRevMiPC")
+Hh_df <- Hh_df[, FieldsToKeep_]
 #Create additional data fields
 Hh_df$IsSF <- as.numeric(Hh_df$Hometype %in% c("Single Family", "Mobile Home"))
 Hh_df$HhSize <- Hh_df$Hhsize
 Hh_df$DrvAgePop <- Hh_df$HhSize - Hh_df$Age0to14
 Hh_df$OnlyElderly <- as.numeric(Hh_df$HhSize == Hh_df$Age65Plus)
-Hh_df$LogIncome <- log(Hh_df$Income)
+Hh_df$LogIncome <- log1p(Hh_df$Income)
 Hh_df$LogDensity <- log(Hh_df$Hbppopdn)
 Hh_df$ZeroVeh <- as.numeric(Hh_df$NumVeh == 0)
 Hh_df$LowInc <- as.numeric(Hh_df$Income <= 20000)
 Hh_df$Workers <- Hh_df$Wrkcount
+Hh_df$Drivers <- Hh_df$Drvrcnt
 Hh_df$IsUrbanMixNbrhd <- Hh_df$UrbanDev
 Hh_df$TranRevMiPC <- Hh_df$BusEqRevMiPC
 rm(FieldsToKeep_)
@@ -67,14 +69,15 @@ rm(FieldsToKeep_)
 AutoOwnModels_ls <-
   list(
     Metro = list(),
-    NonMetro = list()
+    NonMetro = list(),
+    Stats = list()
   )
 
 #Model metropolitan households
 #-----------------------------
 #Make metropolitan household estimation dataset
 Terms_ <-
-  c("IsSF", "IsUrbanMixNbrhd", "Workers", "DrvAgePop", "TranRevMiPC", "LogIncome",
+  c("IsSF", "IsUrbanMixNbrhd", "Workers", "Drivers", "TranRevMiPC", "LogIncome",
     "HhSize", "LogDensity", "OnlyElderly", "LowInc", "NumVeh", "ZeroVeh",
     "FwyLnMiPC")
 EstData_df <- Hh_df[!is.na(Hh_df$TranRevMiPC), Terms_]
@@ -83,11 +86,15 @@ rm(Terms_)
 #Model zero vehicle households
 AutoOwnModels_ls$Metro$Zero <-
   glm(
-    ZeroVeh ~ Workers + LowInc + LogIncome + IsSF + DrvAgePop +
-      IsUrbanMixNbrhd + LogDensity + TranRevMiPC,
+    ZeroVeh ~ Workers + LowInc + LogIncome + IsSF + Drivers + IsUrbanMixNbrhd +
+      LogDensity + TranRevMiPC,
     data = EstData_df,
     family = binomial
   )
+AutoOwnModels_ls$Stats$MetroZeroSummary <-
+  print(summary(AutoOwnModels_ls$Metro$Zero))
+AutoOwnModels_ls$Stats$MetroZeroAnova <-
+  print(anova(AutoOwnModels_ls$Metro$Zero, test = "Chisq"))
 #Trim down model
 AutoOwnModels_ls$Metro$Zero[c("residuals", "fitted.values",
                               "linear.predictors", "weights",
@@ -100,30 +107,40 @@ EstData_df$VehOrd[EstData_df$VehOrd > 6] <- 6
 EstData_df$VehOrd <- ordered(EstData_df$VehOrd)
 AutoOwnModels_ls$Metro$Count <-
   clm(
-    VehOrd ~ Workers + LogIncome + DrvAgePop + HhSize + OnlyElderly + IsSF +
+    VehOrd ~ Workers + LogIncome + Drivers + HhSize + OnlyElderly + IsSF +
       IsUrbanMixNbrhd + LogDensity + TranRevMiPC,
     data = EstData_df,
     threshold = "equidistant"
   )
+AutoOwnModels_ls$Stats$MetroCountSummary <-
+  print(summary(AutoOwnModels_ls$Metro$Count))
 #Trim down model
 AutoOwnModels_ls$Metro$Count[c("fitted.values", "model", "y")] <- NULL
 
-#Model nonmetropolitan households
-#--------------------------------
+#Model non-metropolitan households
+#---------------------------------
 #Make non-metropolitan household estimation dataset
 Terms_ <-
-  c("IsSF", "Workers", "DrvAgePop", "LogIncome", "HhSize",
-    "LogDensity", "OnlyElderly", "LowInc", "NumVeh", "ZeroVeh")
+  c("IsSF", "Workers", "Drivers", "LogIncome", "HhSize", "LogDensity",
+    "OnlyElderly", "LowInc", "NumVeh", "ZeroVeh")
 EstData_df <- Hh_df[is.na(Hh_df$TranRevMiPC), Terms_]
 EstData_df <- EstData_df[complete.cases(EstData_df),]
+#Remove 2 cases with 10 workers in household. Including them in the model
+#estimation causes probabilities close to zero which reduces the reliability of
+#the estimated model
+EstData_df <- EstData_df[EstData_df$Workers != 10,]
 rm(Terms_)
 #Model zero vehicle households
 AutoOwnModels_ls$NonMetro$Zero <-
   glm(
-    ZeroVeh ~ Workers + LowInc + LogIncome + IsSF + DrvAgePop + LogDensity + OnlyElderly,
+    ZeroVeh ~ Workers + LowInc + LogIncome + IsSF + Drivers + LogDensity,
     data = EstData_df,
     family = binomial
   )
+AutoOwnModels_ls$Stats$NonMetroZeroSummary <-
+  print(summary(AutoOwnModels_ls$NonMetro$Zero))
+AutoOwnModels_ls$Stats$NonMetroZeroAnova <-
+  print(anova(AutoOwnModels_ls$NonMetro$Zero, test = "Chisq"))
 #Trim down model
 AutoOwnModels_ls$NonMetro$Zero[c("residuals", "fitted.values",
                               "linear.predictors", "weights",
@@ -136,10 +153,13 @@ EstData_df$VehOrd[EstData_df$VehOrd > 6] <- 6
 EstData_df$VehOrd <- ordered(EstData_df$VehOrd)
 AutoOwnModels_ls$NonMetro$Count <-
   clm(
-    VehOrd ~ Workers + LogIncome + DrvAgePop + HhSize + OnlyElderly + IsSF + LogDensity,
+    VehOrd ~ Workers + LogIncome + Drivers + HhSize + OnlyElderly + IsSF +
+      LogDensity,
     data = EstData_df,
     threshold = "equidistant"
   )
+AutoOwnModels_ls$Stats$NonMetroCountSummary <-
+  print(summary(AutoOwnModels_ls$NonMetro$Count))
 #Trim down model
 AutoOwnModels_ls$NonMetro$Count[c("fitted.values", "model", "y")] <- NULL
 #Clean up
@@ -196,7 +216,7 @@ AssignVehicleOwnershipSpecifications <- list(
       TABLE = "Marea",
       GROUP = "Year",
       TYPE = "compound",
-      UNITS = "MI/PRSN",
+      UNITS = "MI/PRSN/YR",
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = ""
     ),
@@ -246,6 +266,15 @@ AssignVehicleOwnershipSpecifications <- list(
       ISELEMENTOF = ""
     ),
     item(
+      NAME = "Drivers",
+      TABLE = "Household",
+      GROUP = "Year",
+      TYPE = "people",
+      UNITS = "PRSN",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = ""
+    ),
+    item(
       NAME = "Income",
       TABLE = "Household",
       GROUP = "Year",
@@ -273,10 +302,7 @@ AssignVehicleOwnershipSpecifications <- list(
       ISELEMENTOF = ""
     ),
     item(
-      NAME =
-        items(
-          "Age0to14",
-          "Age65Plus"),
+      NAME = "Age65Plus",
       TABLE = "Household",
       GROUP = "Year",
       TYPE = "people",
@@ -374,10 +400,9 @@ AssignVehicleOwnership <- function(L) {
   #----------------------------------------------------
   Hh_df <- data.frame(L$Year$Household)
   Hh_df$IsSF <- as.numeric(Hh_df$HouseType == "SF")
-  Hh_df$DrvAgePop <- Hh_df$HhSize - Hh_df$Age0to14
   Hh_df$OnlyElderly <- as.numeric(Hh_df$HhSize == Hh_df$Age65Plus)
   Hh_df$LowInc <- as.numeric(Hh_df$Income <= 20000)
-  Hh_df$LogIncome <- log(Hh_df$Income)
+  Hh_df$LogIncome <- log1p(Hh_df$Income)
   Density_ <- L$Year$Bzone$D1B[match(L$Year$Household$Bzone, L$Year$Bzone$Bzone)]
   Hh_df$LogDensity <- log(Density_)
   TranRevMiPC_Bz <- L$Year$Marea$TranRevMiPC[match(L$Year$Bzone$Marea, L$Year$Marea$Marea)]
@@ -385,6 +410,7 @@ AssignVehicleOwnership <- function(L) {
 
   #Run the model
   #-------------
+  #Probability no vehicles
   NoVehicleProb_ <- numeric(NumHh)
   NoVehicleProb_[Hh_df$DevType == "Urban"] <-
     predict(AutoOwnModels_ls$Metro$Zero,
@@ -394,6 +420,7 @@ AssignVehicleOwnership <- function(L) {
     predict(AutoOwnModels_ls$NonMetro$Zero,
             newdata = Hh_df[Hh_df$DevType == "Rural",],
             type = "response")
+  #Vehicle counts
   Vehicles_ <- integer(NumHh)
   Vehicles_[Hh_df$DevType == "Urban"] <-
     as.integer(predict(AutoOwnModels_ls$Metro$Count,
@@ -403,7 +430,10 @@ AssignVehicleOwnership <- function(L) {
     as.integer(predict(AutoOwnModels_ls$NonMetro$Count,
             newdata = Hh_df[Hh_df$DevType == "Rural",],
             type = "class")$fit)
+  #Set count to zero for households modeled as having no vehicles
   Vehicles_[NoVehicleProb_ >= runif(NumHh)] <- 0
+  #Set count to zero for households having no drivers
+  Vehicles_[L$Year$Household$Drivers == 0] <- 0
 
   #Return the results
   #------------------

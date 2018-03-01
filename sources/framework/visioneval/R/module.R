@@ -255,7 +255,7 @@ processEstimationInputs <- function(Inp_ls, FileName, ModuleName) {
   #Convert NA values into "NULL" (columns in data not to be read in)
   ColClasses_[is.na(ColClasses_)] <- "NULL"
   #Read the data file with the assigned column classes
-  read.csv(FilePath, colClasses = ColClasses_)
+  read.csv(FilePath, colClasses = ColClasses_)[, Names]
 }
 
 
@@ -519,40 +519,52 @@ testModule <-
 
     #Process, check, and load module inputs
     #--------------------------------------
-    writeLog("Attempting to process, check and load module inputs.",
-             Print = TRUE)
-    if (ModuleName == "Initialize") {
-      ProcessedInputs_ls <- processModuleInputs(Specs_ls, ModuleName)
-      if (length(ProcessedInputs_ls$Errors) != 0)  {
-        writeLog(ProcessedInputs_ls$Errors)
-        stop("Input files for Initialize module have errors. Check the log for details.")
-      } else {
-        if (!is.null(ProcessedInputs_ls$Warnings)) {
-          if (length(ProcessedInputs_ls$Warnings > 0)) {
-            writeLog(ProcessedInputs_ls$Warnings)
-          }
-        }
-        #Apply the initialization function if DoRun is TRUE
-        if (DoRun) {
-          initFunc <- get("Initialize")
-          ProcessedInputs_ls <- initFunc(ProcessedInputs_ls)
-          inputsToDatastore(ProcessedInputs_ls, Specs_ls, ModuleName)
-        } else {
-          return(ProcessedInputs_ls)
-        }
-      }
+    if (is.null(Specs_ls$Inp)) {
+      writeLog("No inputs to process.", Print = TRUE)
     } else {
-      if(!is.null(Specs_ls$Inp)) {
-        ProcessedInputs_ls <- processModuleInputs(Specs_ls, ModuleName)
-        if (length(ProcessedInputs_ls$Errors) != 0)  {
-          writeLog(ProcessedInputs_ls$Errors)
-          stop("Input files for Initialize module have errors. Check the log for details.")
-        }
+      writeLog("Attempting to process, check and load module inputs.",
+             Print = TRUE)
+      # Process module inputs
+      ProcessedInputs_ls <- processModuleInputs(Specs_ls, ModuleName)
+      # Write warnings to log if any
+      if (length(ProcessedInputs_ls$Warnings != 0)) {
+        writeLog(ProcessedInputs_ls$Warnings)
+      }
+      # Write errors to log and stop if any errors
+      if (length(ProcessedInputs_ls$Errors) != 0)  {
+        Msg <- paste0(
+          "Input files for module ", ModuleName,
+          " have errors. Check the log for details."
+        )
+        stop(Msg)
+      }
+      # If module is NOT Initialize, save the inputs in the datastore
+      if (ModuleName != "Initialize") {
         inputsToDatastore(ProcessedInputs_ls, Specs_ls, ModuleName)
         writeLog("Module inputs successfully checked and loaded into datastore.",
                  Print = TRUE)
       } else {
-        writeLog("No inputs to process.", Print = TRUE)
+        if (DoRun) {
+          # If module IS Initialize, apply the Initialize function
+          initFunc <- get("Initialize")
+          InitializedInputs_ls <- initFunc(ProcessedInputs_ls)
+          # Write warnings to log if any
+          if (length(InitializedInputs_ls$Warnings != 0)) {
+            writeLog(InitializedInputs_ls$Warnings)
+          }
+          # Write errors to log and stop if any errors
+          if (length(InitializedInputs_ls$Errors) != 0) {
+            writeLog(InitializedInputs_ls$Errors)
+            stop("Errors in Initialize module inputs. Check log for details.")
+          }
+          # Save inputs to datastore
+          inputsToDatastore(InitializedInputs_ls, Specs_ls, ModuleName)
+          writeLog("Module inputs successfully checked and loaded into datastore.",
+                   Print = TRUE)
+          return() # Break out of function because purpose of Initialize is to process inputs.
+        } else {
+          return(ProcessedInputs_ls)
+        }
       }
     }
 
@@ -563,27 +575,66 @@ testModule <-
       Print = TRUE)
     G <- getModelState()
     Get_ls <- Specs_ls$Get
+    #Vector to keep track of missing datasets that are specified
     Missing_ <- character(0)
+    #Function to check whether dataset is optional
+    isOptional <- function(Spec_ls) {
+      if (!is.null(Spec_ls$OPTIONAL)) {
+        Spec_ls$OPTIONAL
+      } else {
+        FALSE
+      }
+    }
+    #Vector to keep track of Get specs that need to be removed from list because
+    #they are optional and the datasets are not present
+    OptSpecToRemove_ <- numeric(0)
+    #Check each specification
     for (i in 1:length(Get_ls)) {
       Spec_ls <- Get_ls[[i]]
       if (Spec_ls$GROUP == "Year") {
         for (Year in G$Years) {
           Present <-
             checkDataset(Spec_ls$NAME, Spec_ls$TABLE, Year, G$Datastore)
-          if (!Present) Missing_ <- c(Missing_, attributes(Present))
+          if (!Present) {
+            if(isOptional(Spec_ls)) {
+              #Identify for removal because optional and not present
+              OptSpecToRemove_ <- c(OptSpecToRemove_, i)
+            } else {
+              #Identify as missing because not optional and not present
+              Missing_ <- c(Missing_, attributes(Present))
+            }
+          }
         }
       }
       if (Spec_ls$GROUP == "BaseYear") {
         Present <-
           checkDataset(Spec_ls$NAME, Spec_ls$TABLE, G$BaseYear, G$Datastore)
-        if (!Present) Missing_ <- c(Missing_, attributes(Present))
+        if (!Present) {
+          if (isOptional(Spec_ls)) {
+            #Identify for removal because optional and not present
+            OptSpecToRemove_ <- c(OptSpecToRemove_, i)
+          } else {
+            #Identify as missing because not optional and not present
+            Missing_ <- c(Missing_, attributes(Present))
+          }
+        }
       }
       if (Spec_ls$GROUP == "Global") {
         Present <-
           checkDataset(Spec_ls$NAME, Spec_ls$TABLE, "Global", G$Datastore)
-        if (!Present) Missing_ <- c(Missing_, attributes(Present))
+        if (!Present) {
+          if (isOptional(Spec_ls)) {
+            #Identify for removal because optional and not present
+            OptSpecToRemove_ <- c(OptSpecToRemove_, i)
+          } else {
+            #Identify as missing because not optional and not present
+            Missing_ <- c(Missing_, attributes(Present))
+          }
+        }
       }
     }
+    #If any non-optional datasets are missing, write out error messages and
+    #stop execution
     if (length(Missing_) != 0) {
       Msg <-
         paste0("The following datasets identified in the Get specifications ",
@@ -596,6 +647,11 @@ testModule <-
                "for details.")
       )
       rm(Msg)
+    }
+    #If any optional datasets are missing, remove the specifications for them so
+    #that there will be no errors when data are retrieved from the datastore
+    if (length(OptSpecToRemove_) != 0) {
+      Specs_ls$Get <- Specs_ls$Get[-OptSpecToRemove_]
     }
     writeLog(
       "Datastore contains all datasets identified in module Get specifications.",
@@ -983,6 +1039,12 @@ makeModelFormulaString <- function (EstimatedModel) {
 #' repeated draws of the model. This is used in the case where for example the
 #' input data is households and the output is vehicles and the repeat variable
 #' is the number of vehicles in the household.
+#' 'ApplyRandom' a logical identifying whether the results will be affected by
+#' random draws (i.e. if a random number in range 0 - 1 is less than the
+#' computed probability) or if a probability cutoff is used (i.e. if the
+#' computed probability is greater then 0.5). This is an optional component. If
+#' it isn't present, the function runs with ApplyRandom = TRUE.
+#'
 #' @param Data_df a data frame containing the data required for applying the
 #' model.
 #' @param TargetProp a number identifying a target proportion for the default
@@ -992,6 +1054,10 @@ makeModelFormulaString <- function (EstimatedModel) {
 #' is to only check whether the specified 'SearchRange' for the model will
 #' produce acceptable values (i.e. no NA or NaN values). If FALSE (the default),
 #' the function will run the model and will not check the target search range.
+#' @param ApplyRandom a logical identifying whether the outcome will be
+#' be affected by random draws (i.e. if a random number in range 0 - 1 is less
+#' than the computed probability) or if a probability cutoff is used (i.e. if
+#' the computed probability is greater than 0.5)
 #' @return a vector of choice values for each record of the input data frame if
 #' the model is being run, or if the function is run to only check the target
 #' search range, a two-element vector identifying if the search range produces
@@ -1001,13 +1067,18 @@ applyBinomialModel <-
   function(Model_ls,
            Data_df,
            TargetProp = NULL,
-           CheckTargetSearchRange = FALSE) {
+           CheckTargetSearchRange = FALSE,
+           ApplyRandom = TRUE) {
     #Check that model is 'binomial' type
     if (Model_ls$Type != "binomial") {
       Msg <- paste0("Wrong model type. ",
                     "Model is identified as Type = ", Model_ls$Type, ". ",
                     "Function only works with 'binomial' type models.")
       stop(Msg)
+    }
+    #Check whether Model_ls has ApplyRandom component and assign value if so
+    if (!is.null(Model_ls$ApplyRandom)) {
+      ApplyRandom <- Model_ls$ApplyRandom
     }
     #Prepare data
     if (!is.null(Model_ls$PrepFun)) {
@@ -1028,11 +1099,17 @@ applyBinomialModel <-
       sum(Probs_) / length(Probs_)
     }
     #Define a function to assign results
-    assignResults <- function(Probs_) {
-      N <- length(Probs_)
-      Result_ <- rep(Model_ls$Choices[2], N)
-      Result_[runif(N) <= Probs_] <- Model_ls$Choices[1]
-      Result_
+    if (ApplyRandom) {
+      assignResults <- function(Probs_) {
+        N <- length(Probs_)
+        Result_ <- rep(Model_ls$Choices[2], N)
+        Result_[runif(N) <= Probs_] <- Model_ls$Choices[1]
+        Result_
+      }
+    } else {
+      assignResults <- function(Probs_) {
+        ifelse(Probs_ > 0.5, Model_ls$Choices[1], Model_ls$Choices[2])
+      }
     }
     #Apply the model
     if (CheckTargetSearchRange) {

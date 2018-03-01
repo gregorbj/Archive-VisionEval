@@ -45,8 +45,8 @@ library(visioneval)
 #----------------
 #Define function to convert name to proper name (only first letter capitalized)
 toProperName <- function(X){
-          EndX <- nchar(X)
-          paste(toupper(substring(X, 1, 1)), tolower(substring(X, 2, EndX)), sep="")
+  EndX <- nchar(X)
+  paste(toupper(substring(X, 1, 1)), tolower(substring(X, 2, EndX)), sep="")
 }
 
 #Define function to convert 1-dimensional array into a named vector
@@ -66,6 +66,19 @@ doPadNum <- function(Num_) {
 
 #Define function to retrieve NHTS dataset from repository, unzip, and read as
 #data frame
+#----------------------------------------------------------------------------
+#' Retrieve data in zip archive from repository
+#'
+#' \code{getZipDatasetFromRepo} retrieve a zip archive containing a csv file
+#' from a repository, unzip, and read as data frame
+#'
+#' This function retrieves a zip archive containing a csv file from a
+#' repository, unzips it, and reads it in as data frame which it returns.
+#'
+#' @param Repo A string that is the url where the zip archive is located.
+#' @param DatasetName The name of the dataset.
+#' @return A data frame containing the data in the zip archive.
+#' @import utils
 getZipDatasetFromRepo <- function(Repo, DatasetName) {
   ZipArchiveFileName <- paste0(DatasetName, ".zip")
   CsvFileName <- paste0(DatasetName, ".csv")
@@ -87,18 +100,23 @@ Nhts2001Repo <-
 #Download data from repository and process if it has not already been done
 if (!file.exists("data-raw/Hh_df.rda")) {
   Hh_df <- getZipDatasetFromRepo(Nhts2001Repo, "HHPUB")
-  Keep_ <- c("HOUSEID", "AGE_P1", "AGE_P2", "AGE_P3", "AGE_P4", "AGE_P5", "AGE_P6",
-             "AGE_P7", "AGE_P8", "AGE_P9", "AGE_P10", "AGE_P11", "AGE_P12", "AGE_P13",
-             "AGE_P14", "CENSUS_D", "CENSUS_R", "DRVRCNT", "EXPFLHHN", "EXPFLLHH",
-             "FLGFINCM", "HBHRESDN", "HBHUR", "HBPPOPDN", "HHC_MSA", "HHFAMINC",
-             "HHINCTTL", "HHNUMBIK", "HHR_AGE", "HHR_DRVR", "HHR_RACE", "HHR_SEX",
-             "HHSIZE", "HHVEHCNT", "HOMETYPE", "HTEEMPDN", "HTHRESDN", "HTHUR",
+  Keep_ <- c("HOUSEID", "AGE_P1", "AGE_P2", "AGE_P3", "AGE_P4", "AGE_P5",
+             "AGE_P6", "AGE_P7", "AGE_P8", "AGE_P9", "AGE_P10", "AGE_P11",
+             "AGE_P12", "AGE_P13", "AGE_P14", "CENSUS_D", "CENSUS_R", "DRVRCNT",
+             "DRV_P1", "DRV_P2", "DRV_P3", "DRV_P4", "DRV_P5", "DRV_P6",
+             "DRV_P7", "DRV_P8", "DRV_P9", "DRV_P10", "DRV_P11", "DRV_P12",
+             "DRV_P13", "DRV_P14", "EXPFLHHN", "EXPFLLHH", "FLGFINCM",
+             "HBHRESDN", "HBHUR", "HBPPOPDN", "HHC_MSA", "HHFAMINC", "HHINCTTL",
+             "HHNUMBIK", "HHR_AGE", "HHR_DRVR", "HHR_RACE", "HHR_SEX", "HHSIZE",
+             "HHVEHCNT", "HOMETYPE", "HTEEMPDN", "HTHRESDN", "HTHUR",
              "HTPPOPDN", "LIF_CYC", "MSACAT", "MSASIZE", "RAIL", "RATIO16V",
-             "URBAN", "URBRUR", "WRKCOUNT", "CNTTDHH")
+             "URBAN", "URBRUR", "WRKCOUNT", "WKR_P1", "WKR_P2", "WKR_P3",
+             "WKR_P4", "WKR_P5", "WKR_P6", "WKR_P7", "WKR_P8", "WKR_P9",
+             "WKR_P10", "WKR_P11", "WKR_P12", "WKR_P13", "WKR_P14", "CNTTDHH")
   Hh_df <- Hh_df[, Keep_]
   save(Hh_df, file = "data-raw/Hh_df.rda", compress = TRUE)
 } else {
-#Otherwise read in from 'data-raw' directory
+  #Otherwise read in from 'data-raw' directory
   load("data-raw/Hh_df.rda")
 }
 #Identify households that have expansion factor
@@ -139,10 +157,11 @@ if (!file.exists("data-raw/Per_df.rda")) {
   Per_df <- getZipDatasetFromRepo(Nhts2001Repo, "PERPUB")
   Keep_ <-
     c("HOUSEID", "PERSONID", "COMMDRVR", "NBIKETRP", "NWALKTRP", "USEPUBTR",
-      "WRKDRIVE", "WRKTRANS", "DTGAS", "DISTTOWK")
+      "WRKDRIVE", "WRKTRANS", "WORKER", "DTGAS", "DISTTOWK", "DRIVER", "R_AGE",
+      "R_SEX")
   Per_df <- Per_df[, Keep_]
   save(Per_df, file = "data-raw/Per_df.rda", compress = TRUE)
-  } else {
+} else {
   load("data-raw/Per_df.rda")
 }
 #Only include person data for households that have expansion factor
@@ -271,8 +290,10 @@ AgeFields_ <-
     "Age_p8", "Age_p9", "Age_p10", "Age_p11", "Age_p12", "Age_p13", "Age_p14" )
 # Set up person age categories
 AgeBreaks <- c(0, 14, 19, 29, 54, 64, max(Hh_df[,AgeFields_], na.rm = TRUE))
+# Create a matrix of the age fields
+Ages_HhPr <- as.matrix(Hh_df[,AgeFields_])
 # Tabulate persons per household by age category
-Ages_HhAg <- t(apply( Hh_df[,AgeFields_], 1, function(x) {
+Ages_HhAg <- t(apply(Ages_HhPr, 1, function(x) {
   table(cut(x, AgeBreaks, include.lowest=TRUE, right=FALSE))
 }))
 # Assign tabulations to age category variables
@@ -282,9 +303,51 @@ Hh_df$Age20to29 <- Ages_HhAg[,3]
 Hh_df$Age30to54 <- Ages_HhAg[,4]
 Hh_df$Age55to64 <- Ages_HhAg[,5]
 Hh_df$Age65Plus <- Ages_HhAg[,6]
-# Clean up
+
+#Calculate the number of drivers by age group and add summary to household data
+#------------------------------------------------------------------------------
+DrvFields_ <-
+  c("Drv_p1", "Drv_p2", "Drv_p3", "Drv_p4", "Drv_p5", "Drv_p6", "Drv_p7",
+    "Drv_p8", "Drv_p9", "Drv_p10", "Drv_p11", "Drv_p12", "Drv_p13", "Drv_p14" )
+# Create a matrix of driver fields with 1 for driver and NA for non-driver
+Drvs_HhPr <- as.matrix(Hh_df[,DrvFields_])
+Drvs_HhPr[Drvs_HhPr != 1] <- NA
+# Tabulate drivers per household by age category
+Drvs_HhAg <- t(apply(Ages_HhPr * Drvs_HhPr, 1, function(x) {
+  table(cut(x, AgeBreaks, include.lowest=TRUE, right=FALSE))
+}))
+# Assign tabulations to age category variables
+Hh_df$Drv15to19 <- Drvs_HhAg[,2]
+Hh_df$Drv20to29 <- Drvs_HhAg[,3]
+Hh_df$Drv30to54 <- Drvs_HhAg[,4]
+Hh_df$Drv55to64 <- Drvs_HhAg[,5]
+Hh_df$Drv65Plus <- Drvs_HhAg[,6]
+
+#Calculate the number of workers by age group and add summary to household data
+#------------------------------------------------------------------------------
+WkrFields_ <-
+  c("Wkr_p1", "Wkr_p2", "Wkr_p3", "Wkr_p4", "Wkr_p5", "Wkr_p6", "Wkr_p7",
+    "Wkr_p8", "Wkr_p9", "Wkr_p10", "Wkr_p11", "Wkr_p12", "Wkr_p13", "Wkr_p14" )
+# Create a matrix of worker fields with 1 for worker and NA for non-worker
+Wkrs_HhPr <- as.matrix(Hh_df[,WkrFields_])
+Wkrs_HhPr[Wkrs_HhPr != 1] <- NA
+# Tabulate workers per household by age category
+Wkrs_HhAg <- t(apply(Ages_HhPr * Wkrs_HhPr, 1, function(x) {
+  table(cut(x, AgeBreaks, include.lowest=TRUE, right=FALSE))
+}))
+# Assign tabulations to age category variables
+Hh_df$Wkr15to19 <- Wkrs_HhAg[,2]
+Hh_df$Wkr20to29 <- Wkrs_HhAg[,3]
+Hh_df$Wkr30to54 <- Wkrs_HhAg[,4]
+Hh_df$Wkr55to64 <- Wkrs_HhAg[,5]
+Hh_df$Wkr65Plus <- Wkrs_HhAg[,6]
+
+#Clean up temporary files from age tabulations
+#----------------------------------------------
 Hh_df[AgeFields_] <- NULL
-rm( AgeFields_, AgeBreaks, Ages_HhAg )
+Hh_df[DrvFields_] <- NULL
+Hh_df[WkrFields_] <- NULL
+rm(AgeFields_, AgeBreaks, Ages_HhAg, Drvs_HhAg, Wkrs_HhAg)
 
 #Process household income data
 #-----------------------------
@@ -525,9 +588,9 @@ rm(FieldsToCheck_, IsComplete_)
 IsInLimits_ <-
   with(HhTours_df,
        Distance != 0 & Distance <= quantile(Distance, 0.99) &
-       TravelTime != 0 & TravelTime <= quantile(TravelTime, 0.99) &
-       DwellTime != 0 & DwellTime <= quantile(DwellTime, 0.99)
-       )
+         TravelTime != 0 & TravelTime <= quantile(TravelTime, 0.99) &
+         DwellTime != 0 & DwellTime <= quantile(DwellTime, 0.99)
+  )
 HhTours_df <- HhTours_df[IsInLimits_,]
 rm(IsInLimits_)
 #Limit to sensible trip speeds
@@ -609,6 +672,19 @@ rm(IsTransitTravel_, TransitDpmt_Hh)
 Hh_df$ZeroDvmt <- "N"
 Hh_df$ZeroDvmt[Hh_df$PvtVehDvmt == 0 & Hh_df$ShrVehDvmt == 0] <- "Y"
 Hh_df$ZeroDvmt <- as.factor(Hh_df$ZeroDvmt)
+
+#Process person driver status, worker status, and age
+#----------------------------------------------------
+#Driver status 1 = driver, 0 = non-driver
+Per_df$Driver[(Per_df$Driver != 1) & !is.na(Per_df$Driver)] <- 0
+#Convert Worker to 1 for worker and 0 for non-worker
+Per_df$Worker[(Per_df$Worker != 1) & !is.na(Per_df$Worker)] <- 0
+#Assign age category
+AgeBreaks <- c(0, 14, 19, 29, 54, 64, max(Per_df$R_age, na.rm = TRUE))
+AgeGroups_ <-
+  c("Age0to14", "Age15to19", "Age20to29", "Age30to54", "Age55to64", "Age65Plus")
+Per_df$AgeGroup <- cut(Per_df$R_age, AgeBreaks, AgeGroups_)
+rm(AgeBreaks, AgeGroups_)
 
 #Add person travel data to the household records
 #-----------------------------------------------
@@ -713,7 +789,7 @@ Hh_df$LargeHh <- Hh_df$Hhsize * 0
 Hh_df$LargeHh[Hh_df$Hhsize > 3] <- 1
 Hh_df$LargeHh <- factor(Hh_df$LargeHh, labels = c("Small", "Large"))
 #Clean up workspace
-rm(Dt_df, Per_df, toProperName, toVecFrom1DAry)
+rm(Dt_df, toProperName, toVecFrom1DAry)
 
 
 #==========================
@@ -767,6 +843,16 @@ rm(Dt_df, Per_df, toProperName, toVecFrom1DAry)
 #'   \item{Age30to54}{Number of persons age 30 to 54 in household}
 #'   \item{Age55to64}{Number of persons age 55 to 64 in household}
 #'   \item{Age65Plus}{Number of persons age 65 or older in household}
+#'   \item{Drv15to19}{Number of drivers 15 to 19 in household}
+#'   \item{Drv20to29}{Number of drivers 20 to 29 in household}
+#'   \item{Drv30to54}{Number of drivers 30 to 54 in household}
+#'   \item{Drv55to64}{Number of drivers 55 to 64 in household}
+#'   \item{Drv65Plus}{Number of drivers 65 or older in household}
+#'   \item{Wkr15to19}{Number of workers 15 to 19 in household}
+#'   \item{Wkr20to29}{Number of workers 20 to 29 in household}
+#'   \item{Wkr30to54}{Number of workers 30 to 54 in household}
+#'   \item{Wkr55to64}{Number of workers 55 to 64 in household}
+#'   \item{Wkr65Plus}{Number of workers 65 or older in household}
 #'   \item{Income}{Household income}
 #'   \item{IncGrp}{Household income group}
 #'   \item{UrbanDev}{Flag identifying whether household lived in an 'Urban' area}
@@ -867,3 +953,34 @@ rm(Veh_df)
 devtools::use_data(HhTours_df, overwrite = TRUE)
 rm(HhTours_df)
 
+
+#=======================
+#SAVE THE PERSON DATASET
+#=======================
+#' Person dataset from the 2001 National Household Travel Survey
+#'
+#' A dataset of person characteristics derived from the 2001 National Household
+#' Travel Survey and used in the estimation of several VisionEval models.
+#'
+#'  @format A data frame with 144884 rows and 14 columns.
+#'  \describe{
+#'    \item{Houseid}{Unique household ID}
+#'    \item{Personid}{Unique ID of person in household}
+#'    \item{Commdrvr}{Person is a commercial driver}
+#'    \item{Nbiketrp}{Number of bike trips in past week}
+#'    \item{Nwalktrp}{Number of walk trips in past week}
+#'    \item{Usepubtr}{Used public transit on travel day}
+#'    \item{Wrkdrive}{Job requires driving a motor vehicle}
+#'    \item{Wrktrans}{Transportation mode to work last week}
+#'    \item{Worker}{Person has job (1=yes, 0=no)}
+#'    \item{Dtgas}{Price of gasoline}
+#'    \item{Disttowk}{Distance to work in miles}
+#'    \item{Driver}{Driver status (1=driver, 0=non-driver)}
+#'    \item{R_age}{Age}
+#'    \item{R_sex}{Sex}
+#'    \item{AgeGroup}{AgeGroup: Age0to14, Age15to19, Age20to29, Age30to54, Age55to64, Age65Plus}
+#'  }
+#'  @source 2001 National Household Travel Survey and Make2001NHTSDataset.R script.
+"Per_df"
+devtools::use_data(Per_df, overwrite = TRUE)
+rm(Per_df)

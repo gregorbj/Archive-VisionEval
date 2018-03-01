@@ -61,7 +61,7 @@ CalculateAltModeTripsSpecifications <- list(
       TABLE = "Marea",
       GROUP = "Year",
       TYPE = "compound",
-      UNITS = "MI/PRSN",
+      UNITS = "MI/PRSN/YR",
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = ""
     ),

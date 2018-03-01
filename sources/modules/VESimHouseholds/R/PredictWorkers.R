@@ -5,7 +5,9 @@
 #quarters population. It is a simple model which predicts workers as a function
 #of the household type and age composition. There is no responsiveness to jobs
 #or how changes in the job market and demographics might change the worker age
-#composition.
+#composition, but the user can exogenously adjust the relative employment by
+#age group, Azone, and year. The values are the proportions of persons in the
+#age group who are workers relative to the proportions in the estimation year.
 
 # Copyright [2017] [AASHTO]
 # Based in part on works previously copyrighted by the Oregon Department of
@@ -115,6 +117,35 @@ rm(calcWorkerProportions, Hh_df)
 PredictWorkersSpecifications <- list(
   #Level of geography module is applied at
   RunBy = "Region",
+  #Specify input data
+  Inp = items(
+    item(
+      NAME =
+        items("RelEmp15to19",
+              "RelEmp20to29",
+              "RelEmp30to54",
+              "RelEmp55to64",
+              "RelEmp65Plus"),
+      FILE = "azone_relative_employment.csv",
+      TABLE = "Azone",
+      GROUP = "Year",
+      TYPE = "double",
+      UNITS = "proportion",
+      NAVALUE = -1,
+      SIZE = 0,
+      PROHIBIT = c("< 0"),
+      ISELEMENTOF = "",
+      UNLIKELY = "",
+      TOTAL = "",
+      DESCRIPTION =
+        items("Ratio of workers to persons age 15 to 19 in model year vs. in estimation data year",
+              "Ratio of workers to persons age 20 to 29 in model year vs. in estimation data year",
+              "Ratio of workers to persons age 30 to 54 in model year vs. in estimation data year",
+              "Ratio of workers to persons age 55 to 64 in model year vs. in estimation data year",
+              "Ratio of workers to persons age 65 or older in model year vs. in estimation data year"),
+      OPTIONAL = TRUE
+    )
+  ),
   #Specify data to be loaded from data store
   Get = items(
     item(
@@ -131,6 +162,21 @@ PredictWorkersSpecifications <- list(
       UNITS = "PRSN",
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = ""
+    ),
+    item(
+      NAME =
+        items("RelEmp15to19",
+              "RelEmp20to29",
+              "RelEmp30to54",
+              "RelEmp55to64",
+              "RelEmp65Plus"),
+      TABLE = "Azone",
+      GROUP = "Year",
+      TYPE = "double",
+      UNITS = "proportion",
+      PROHIBIT = c("< 0"),
+      ISELEMENTOF = "",
+      OPTIONAL = TRUE
     ),
     item(
       NAME = "HhType",
@@ -219,9 +265,10 @@ PredictWorkersSpecifications <- list(
 #'
 #' A list containing specifications for the PredictWorkers module.
 #'
-#' @format A list containing 3 components:
+#' @format A list containing 4 components:
 #' \describe{
 #'  \item{RunBy}{the level of geography that the module is run at}
+#'  \item{Inp}{module inputs to be saved to the datastore}
 #'  \item{Get}{module inputs to be read from the datastore}
 #'  \item{Set}{module outputs to be written to the datastore}
 #' }
@@ -238,7 +285,11 @@ rm(PredictWorkersSpecifications)
 #household and tallies the total number of workers in the household. It uses
 #the matrix of worker proportions by household type and age group as choice
 #probabilities for determining the number of workers by age group for each
-#household.
+#household. The relative employment value for each age group, which is the
+#employment rate for the age group relative to the employment rate for the
+#model estimation year data is used to adjust the relative employment to reflect
+#changes in relative employment for other years. For example, the great
+#recession of 2007 to 2012 hit the millenial generation particularly hard.
 
 #Main module function that predicts workers by age for each household
 #--------------------------------------------------------------------
@@ -262,6 +313,7 @@ PredictWorkers <- function(L) {
   Ag <-
     c("Age15to19", "Age20to29", "Age30to54", "Age55to64", "Age65Plus")
   Wk <- gsub("Age", "Wkr", Ag)
+  Re <- gsub("Age", "RelEmp", Ag)
   Az <- L$Year$Azone$Azone
   #Fix seed as synthesis involves sampling
   set.seed(L$G$Seed)
@@ -282,7 +334,10 @@ PredictWorkers <- function(L) {
     list(
       NumWkr = integer(length(L$Year$Azone))
     )
-  #Define function to predict workers for a household age group
+  #Define function to predict total number of workers for a household age group
+  #N is a vector of the number of persons in the age group by household
+  #P is the the worker probability for the age group and household type by
+  #household
   getNumWkr <- function(N, P) {
     as.integer(sum(sample(c(1,0), size = N, replace = TRUE, prob = c(P, 1-P))))
   }
@@ -290,9 +345,14 @@ PredictWorkers <- function(L) {
   for (i in 1:length(Ag)) {
     NumPrsn_ <- L$Year$Household[[Ag[i]]]
     Probs_ <- PropHhWkr_HtAg[L$Year$Household$HhType, Ag[i]]
+    if (!is.null(L$Year$Azone[[Re[i]]])) {
+      RelEmp <- L$Year$Azone[[Re[i]]]
+    } else {
+      RelEmp <- 1
+    }
     DoPredict_ <- NumPrsn_ > 0 & Probs_ > 0
     Out_ls$Year$Household[[Wk[i]]][DoPredict_] <-
-      mapply(getNumWkr, NumPrsn_[DoPredict_], Probs_[DoPredict_])
+      mapply(getNumWkr, NumPrsn_[DoPredict_], Probs_[DoPredict_] * RelEmp)
     rm(NumPrsn_, Probs_, DoPredict_)
   }
   rm(i)

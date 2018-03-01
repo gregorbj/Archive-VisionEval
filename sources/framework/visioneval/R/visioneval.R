@@ -254,25 +254,26 @@ initializeModel <-
         if (Module == "Initialize") {
           if (length(ProcessedInputs_ls[[Module]]$Errors) == 0) {
             initFunc <- eval(parse(text = paste(Package, Module, sep = "::")))
-            ProcessedInputs_ls[[Module]] <- initFunc(ProcessedInputs_ls[[Module]])
-            if (!is.null(ProcessedInputs_ls$Warnings)) {
-              if (length(ProcessedInputs_ls$Warnings > 0)) {
-                writeLog(ProcessedInputs_ls$Warnings)
-              }
+            InitializedInputs_ls <- initFunc(ProcessedInputs_ls[[Module]])
+            ProcessedInputs_ls[[Module]]$Data <- InitializedInputs_ls$Data
+            ProcessedInputs_ls[[Module]]$Errors <- InitializedInputs_ls$Errors
+            if (length(InitializedInputs_ls$Warnings > 0)) {
+              writeLog(InitializedInputs_ls$Warnings)
             }
           }
         }
       }
     }
     #Check whether there are any input errors
-    HasErrors <-
-      any(unlist(lapply(ProcessedInputs_ls, function(x) {
-        x$Errors != 0
-      })))
+    InpErrors_ <- unlist(lapply(ProcessedInputs_ls, function (x) {
+      x$Errors
+    }))
+    HasErrors <- length(InpErrors_ != 0)
     if (HasErrors) {
-      writeLog(ProcessedInputs_ls$Errors)
+      writeLog(InpErrors_)
       stop("Input files have errors. Check the log for details.")
     }
+    rm(InpErrors_)
 
     #Load model inputs into the datastore
     #------------------------------------
