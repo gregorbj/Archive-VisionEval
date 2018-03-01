@@ -1,0 +1,388 @@
+RPAT Pilot
+Pilot RPAT module in VisionEval
+2018-01-01_13:14:57
+
+2018-01-01 13:14:57 : Testing CreateFutureAccessibility. 
+
+2018-01-01 13:14:57 : Attempting to load datastore. 
+
+2018-01-01 13:14:57 : Datastore loaded. 
+
+2018-01-01 13:14:57 : Attempting to load and check specifications. 
+
+2018-01-01 13:14:58 : Module specifications successfully loaded and checked. 
+
+2018-01-01 13:14:58 : No inputs to process. 
+
+2018-01-01 13:14:58 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-01-01 13:14:58 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-01-01 13:14:58 : Running module and checking whether outputs meet Set specifications. 
+
+2018-01-01 13:14:58 : Also saving module outputs to datastore. 
+
+RPAT Pilot
+Pilot RPAT module in VisionEval
+2018-01-01_13:15:15
+
+2018-01-01 13:15:15 : Testing CreateFutureAccessibility. 
+
+2018-01-01 13:15:15 : Attempting to load datastore. 
+
+2018-01-01 13:15:15 : Datastore loaded. 
+
+2018-01-01 13:15:15 : Attempting to load and check specifications. 
+
+2018-01-01 13:15:15 : Module specifications successfully loaded and checked. 
+
+2018-01-01 13:15:15 : No inputs to process. 
+
+2018-01-01 13:15:15 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-01-01 13:15:15 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-01-01 13:15:15 : Running module and checking whether outputs meet Set specifications. 
+
+2018-01-01 13:15:15 : Also saving module outputs to datastore. 
+
+RPAT Pilot
+Pilot RPAT module in VisionEval
+2018-01-01_13:17:45
+
+2018-01-01 13:17:45 : Testing CreateFutureAccessibility. 
+
+2018-01-01 13:17:45 : Attempting to load datastore. 
+
+2018-01-01 13:17:45 : Datastore loaded. 
+
+2018-01-01 13:17:45 : Attempting to load and check specifications. 
+
+2018-01-01 13:17:45 : Module specifications successfully loaded and checked. 
+
+2018-01-01 13:17:45 : No inputs to process. 
+
+2018-01-01 13:17:45 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-01-01 13:17:45 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-01-01 13:17:45 : Running module and checking whether outputs meet Set specifications. 
+
+2018-01-01 13:17:45 : Also saving module outputs to datastore. 
+
+RPAT Pilot
+Pilot RPAT module in VisionEval
+2018-01-01_13:18:13
+
+2018-01-01 13:18:13 : Testing CreateFutureAccessibility. 
+
+2018-01-01 13:18:13 : Attempting to load datastore. 
+
+2018-01-01 13:18:13 : Datastore loaded. 
+
+2018-01-01 13:18:13 : Attempting to load and check specifications. 
+
+2018-01-01 13:18:13 : Module specifications successfully loaded and checked. 
+
+2018-01-01 13:18:13 : No inputs to process. 
+
+2018-01-01 13:18:13 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-01-01 13:18:13 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-01-01 13:18:13 : Running module and checking whether outputs meet Set specifications. 
+
+2018-01-01 13:18:13 : Also saving module outputs to datastore. 
+
+RPAT Pilot
+Pilot RPAT module in VisionEval
+2018-01-01_13:20:07
+
+2018-01-01 13:20:07 : Testing CreateFutureAccessibility. 
+
+2018-01-01 13:20:07 : Attempting to load datastore. 
+
+2018-01-01 13:20:07 : Datastore loaded. 
+
+2018-01-01 13:20:07 : Attempting to load and check specifications. 
+
+2018-01-01 13:20:07 : Module specifications successfully loaded and checked. 
+
+2018-01-01 13:20:07 : No inputs to process. 
+
+2018-01-01 13:20:07 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-01-01 13:20:07 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-01-01 13:20:07 : Running module and checking whether outputs meet Set specifications. 
+
+2018-01-01 13:20:07 : Also saving module outputs to datastore. 
+
+RPAT Pilot
+Pilot RPAT module in VisionEval
+2018-01-01_13:57:43
+
+2018-01-01 13:57:43 : Testing CreateFutureAccessibility. 
+
+2018-01-01 13:57:43 : Attempting to load datastore. 
+
+2018-01-01 13:57:43 : Datastore loaded. 
+
+2018-01-01 13:57:43 : Attempting to load and check specifications. 
+
+2018-01-01 13:57:43 : Module specifications successfully loaded and checked. 
+
+2018-01-01 13:57:43 : No inputs to process. 
+
+2018-01-01 13:57:43 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-01-01 13:57:43 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-01-01 13:57:43 : Running module and checking whether outputs meet Set specifications. 
+
+2018-01-01 13:57:43 : Also saving module outputs to datastore. 
+
+RPAT Pilot
+Pilot RPAT module in VisionEval
+2018-01-01_13:59:24
+
+2018-01-01 13:59:24 : Testing CreateFutureAccessibility. 
+
+2018-01-01 13:59:24 : Attempting to load datastore. 
+
+2018-01-01 13:59:24 : Datastore loaded. 
+
+2018-01-01 13:59:24 : Attempting to load and check specifications. 
+
+2018-01-01 13:59:24 : Module specifications successfully loaded and checked. 
+
+2018-01-01 13:59:24 : No inputs to process. 
+
+2018-01-01 13:59:24 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-01-01 13:59:24 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-01-01 13:59:24 : Running module and checking whether outputs meet Set specifications. 
+
+2018-01-01 13:59:24 : Also saving module outputs to datastore. 
+
+RPAT Pilot
+Pilot RPAT module in VisionEval
+2018-01-01_14:08:48
+
+2018-01-01 14:08:48 : Testing CreateFutureAccessibility. 
+
+2018-01-01 14:08:48 : Attempting to load datastore. 
+
+2018-01-01 14:08:48 : Datastore loaded. 
+
+2018-01-01 14:08:48 : Attempting to load and check specifications. 
+
+2018-01-01 14:08:48 : Module specifications successfully loaded and checked. 
+
+2018-01-01 14:08:48 : No inputs to process. 
+
+2018-01-01 14:08:48 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-01-01 14:08:48 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-01-01 14:08:48 : Running module and checking whether outputs meet Set specifications. 
+
+2018-01-01 14:08:48 : Also saving module outputs to datastore. 
+
+2018-01-01 14:09:22 : Module run successfully and outputs meet Set specifications. 
+
+2018-01-01 14:09:22 : Module outputs saved to datastore. 
+
+2018-01-01 14:09:22 : Congratulations. Module CreateFutureAccessibility passed all tests. 
+
+RPAT Pilot
+Pilot RPAT module in VisionEval
+2018-01-09_11:27:13
+
+2018-01-09 11:27:13 : Testing CreateFutureAccessibility. 
+
+2018-01-09 11:27:13 : Attempting to load datastore. 
+
+2018-01-09 11:27:13 : Datastore loaded. 
+
+2018-01-09 11:27:13 : Attempting to load and check specifications. 
+
+2018-01-09 11:27:13 : Module specifications successfully loaded and checked. 
+
+2018-01-09 11:27:13 : No inputs to process. 
+
+2018-01-09 11:27:13 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-01-09 11:27:13 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-01-09 11:27:13 : Running module and checking whether outputs meet Set specifications. 
+
+2018-01-09 11:27:14 : Also saving module outputs to datastore. 
+
+2018-01-09 11:27:20 : Module run successfully and outputs meet Set specifications. 
+
+2018-01-09 11:27:20 : Module outputs saved to datastore. 
+
+2018-01-09 11:27:20 : Congratulations. Module CreateFutureAccessibility passed all tests. 
+
+RPAT Pilot
+Pilot RPAT module in VisionEval
+2018-01-22_10:12:39
+
+2018-01-22 10:12:39 : Testing CreateFutureAccessibility. 
+
+2018-01-22 10:12:39 : Attempting to load datastore. 
+
+2018-01-22 10:12:39 : Datastore loaded. 
+
+2018-01-22 10:12:39 : Attempting to load and check specifications. 
+
+2018-01-22 10:12:39 : Module specifications successfully loaded and checked. 
+
+2018-01-22 10:12:39 : Attempting to process, check and load module inputs. 
+
+2018-01-22 10:12:39 : No inputs to process. 
+
+2018-01-22 10:12:39 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-01-22 10:12:39 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-01-22 10:12:39 : Running module and checking whether outputs meet Set specifications. 
+
+2018-01-22 10:12:39 : Also saving module outputs to datastore. 
+
+2018-01-22 10:12:39 : Module run successfully and outputs meet Set specifications. 
+
+2018-01-22 10:12:39 : Module outputs saved to datastore. 
+
+2018-01-22 10:12:39 : Congratulations. Module CreateFutureAccessibility passed all tests. 
+
+RPAT Pilot
+Pilot RPAT module in VisionEval
+2018-01-22_10:56:33
+
+2018-01-22 10:56:33 : Testing CreateFutureAccessibility. 
+
+2018-01-22 10:56:33 : Attempting to load datastore. 
+
+2018-01-22 10:56:33 : Datastore loaded. 
+
+2018-01-22 10:56:33 : Attempting to load and check specifications. 
+
+2018-01-22 10:56:33 : Module specifications successfully loaded and checked. 
+
+2018-01-22 10:56:33 : Attempting to process, check and load module inputs. 
+
+2018-01-22 10:56:33 : No inputs to process. 
+
+2018-01-22 10:56:33 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-01-22 10:56:33 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-01-22 10:56:33 : Running module and checking whether outputs meet Set specifications. 
+
+2018-01-22 10:56:33 : Also saving module outputs to datastore. 
+
+2018-01-22 10:56:33 : Module run successfully and outputs meet Set specifications. 
+
+2018-01-22 10:56:33 : Module outputs saved to datastore. 
+
+2018-01-22 10:56:33 : Congratulations. Module CreateFutureAccessibility passed all tests. 
+
+RPAT Pilot
+Pilot RPAT module in VisionEval
+2018-02-27_10:13:46
+
+2018-02-27 10:13:46 : Testing CreateFutureAccessibility. 
+
+2018-02-27 10:13:46 : Attempting to load datastore. 
+
+2018-02-27 10:13:46 : Datastore loaded. 
+
+2018-02-27 10:13:46 : Attempting to load and check specifications. 
+
+2018-02-27 10:13:46 : Module specifications successfully loaded and checked. 
+
+2018-02-27 10:13:46 : Attempting to process, check and load module inputs. 
+
+2018-02-27 10:13:46 : No inputs to process. 
+
+2018-02-27 10:13:46 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-02-27 10:13:46 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-02-27 10:13:46 : Running module and checking whether outputs meet Set specifications. 
+
+2018-02-27 10:13:46 : Also saving module outputs to datastore. 
+
+2018-02-27 10:13:51 : Module run successfully and outputs meet Set specifications. 
+
+2018-02-27 10:13:51 : Module outputs saved to datastore. 
+
+2018-02-27 10:13:51 : Congratulations. Module CreateFutureAccessibility passed all tests. 
+
+RPAT Pilot
+Pilot RPAT module in VisionEval
+2018-02-27_10:15:47
+
+2018-02-27 10:15:47 : Testing CreateFutureAccessibility. 
+
+2018-02-27 10:15:47 : Attempting to load datastore. 
+
+2018-02-27 10:15:47 : Datastore loaded. 
+
+2018-02-27 10:15:47 : Attempting to load and check specifications. 
+
+2018-02-27 10:15:47 : Module specifications successfully loaded and checked. 
+
+2018-02-27 10:15:47 : Attempting to process, check and load module inputs. 
+
+2018-02-27 10:15:47 : No inputs to process. 
+
+2018-02-27 10:15:47 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-02-27 10:15:47 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-02-27 10:15:47 : Running module and checking whether outputs meet Set specifications. 
+
+2018-02-27 10:15:47 : Also saving module outputs to datastore. 
+
+2018-02-27 10:15:50 : Module run successfully and outputs meet Set specifications. 
+
+2018-02-27 10:15:50 : Module outputs saved to datastore. 
+
+2018-02-27 10:15:50 : Congratulations. Module CreateFutureAccessibility passed all tests. 
+
+RPAT Pilot
+Pilot RPAT module in VisionEval
+2018-02-27_21:45:13
+
+2018-02-27 21:45:13 : Testing CreateFutureAccessibility. 
+
+2018-02-27 21:45:13 : Attempting to load datastore. 
+
+2018-02-27 21:45:13 : Datastore loaded. 
+
+2018-02-27 21:45:13 : Attempting to load and check specifications. 
+
+2018-02-27 21:45:14 : Module specifications successfully loaded and checked. 
+
+2018-02-27 21:45:14 : Attempting to process, check and load module inputs. 
+
+2018-02-27 21:45:14 : No inputs to process. 
+
+2018-02-27 21:45:14 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-02-27 21:45:14 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-02-27 21:45:14 : Running module and checking whether outputs meet Set specifications. 
+
+2018-02-27 21:45:14 : Also saving module outputs to datastore. 
+
+2018-02-27 21:45:20 : Module run successfully and outputs meet Set specifications. 
+
+2018-02-27 21:45:20 : Module outputs saved to datastore. 
+
+2018-02-27 21:45:20 : Congratulations. Module CreateFutureAccessibility passed all tests. 
+
