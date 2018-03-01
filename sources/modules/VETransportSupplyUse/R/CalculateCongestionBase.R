@@ -354,6 +354,17 @@ CalculateCongestionBaseSpecifications <- list(
       SIZE = 0,
       ISELEMENTOF = "",
       DESCRIPTION = "Fuel efficiency adjustment for households"
+    ),
+    item(
+      NAME = "LtVehDvmtFactor",
+      TABLE = "Model",
+      GROUP = "Global",
+      TYPE = "double",
+      UNITS = "multiplier",
+      PROHIBIT = c('NA', '< 0'),
+      SIZE = 0,
+      ISELEMENTOF = "",
+      DESCRIPTION = "Light vehicle Dvmt factor"
     )
   )
 )
@@ -700,6 +711,10 @@ CalculateCongestionBase <- function(L) {
   BaseLtVehDvmt_Ma <- L$Global$Model$BaseLtVehDvmt
   LtVehDvmtFactor_Ma <- BaseLtVehDvmt_Ma * 1000 / HhDvmt
 
+  if(!is.null(L$Global$Model$LtVehDvmtFactor)){
+    LtVehDvmtFactor_Ma <- L$Global$Model$LtVehDvmtFactor
+  }
+
   # If other runtype then we have to find a way to load LtVehDvmtFactor_Ma
   # instead of calculating
 
@@ -787,6 +802,11 @@ CalculateCongestionBase <- function(L) {
       DelayVehHrBus = DelayVehHrByMaVehType_vc[Marea_vc, "Bus"],
       DelayVehHrTruck = DelayVehHrByMaVehType_vc[Marea_vc, "Truck"],
       MpgAdjHh = as.numeric(HhMpgAdj_Ma)
+    )
+  )
+  Out_ls$Global <- list(
+    Model = list(
+      LtVehDvmtFactor = LtVehDvmtFactor_Ma
     )
   )
   return(Out_ls)
