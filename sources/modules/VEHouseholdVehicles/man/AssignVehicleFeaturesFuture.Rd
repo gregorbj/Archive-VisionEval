@@ -15,11 +15,11 @@ A list containing the components specified in the Set
 specifications for the module.
 }
 \description{
-\code{AssignVehicleFeaturesFuture} create vehicle table and populate with
-vehicle type, age, and mileage records.
+\code{AssignVehicleFeaturesFuture} populate vehicle table with
+vehicle type, age, and mileage records using future data.
 }
 \details{
-This function creates the 'Vehicle' table in the datastore and populates it
-with records of vehicle types, ages, mileage, and mileage proportions
-along with household IDs.
+This function populates vehicle table with records of
+vehicle types, ages, mileage, and mileage proportions
+along with household IDs using future data.
 }

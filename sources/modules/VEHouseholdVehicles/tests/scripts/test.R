@@ -70,9 +70,10 @@ tar("defs.tar","defs")
 tar("inputs.tar","inputs")
 dir.remove("defs")
 dir.remove("inputs")
-untar("Datastore_VERPAT.tar")
-unzip("ModelState_VERPAT.zip")
-untar("inputs_VERPAT.tar")
+untar("Datastore_AssignVehicleFeatures.tar")
+untar("defs_AssignVehicleFeatures.tar")
+unzip("ModelState_AssignVehicleFeatures.zip")
+untar("inputs_AssignVehicleFeatures.tar")
 setwd("..")
 
 #Test CreateBaseAccessibility module
@@ -84,6 +85,25 @@ testModule(
   DoRun = TRUE
 )
 
+# Reorganize folder for next VERPAT module test
+setwd("tests")
+file.remove("ModelState.Rda")
+dir.remove("Datastore")
+dir.remove("defs")
+untar("Datastore_AssignVehicleFeaturesFuture.tar")
+untar("defs_AssignVehicleFeaturesFuture.tar")
+unzip("ModelState_AssignVehicleFeaturesFuture.zip")
+setwd("..")
+
+#Test CreateBaseAccessibility module
+source("R/AssignVehicleFeaturesFuture.R")
+testModule(
+  ModuleName = "AssignVehicleFeaturesFuture",
+  LoadDatastore = TRUE,
+  SaveDatastore = TRUE,
+  DoRun = TRUE,
+  RunFor = "NotBaseYear"
+)
 
 #Finish up
 setwd("tests")
