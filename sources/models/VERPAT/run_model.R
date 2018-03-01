@@ -96,4 +96,14 @@ for(Year in getYears()) {
     PackageName = "VEHouseholdTravel",
     RunFor = "NotBaseYear",
     RunYear = Year)
+  runModule(
+    ModuleName = "CalculateInducedDemand",
+    PackageName = "VEHouseholdTravel",
+    RunFor = "NotBaseYear",
+    RunYear = Year)
+  runModule(
+    ModuleName = "CalculateCongestionFuture",
+    PackageName = "VETransportSupplyUse",
+    RunFor = "NotBaseYear",
+    RunYear = Year)
 }
