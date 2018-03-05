@@ -1,0 +1,140 @@
+RPAT Pilot
+Pilot RPAT module in VisionEval
+2018-01-09_12:25:30
+
+2018-01-09 12:25:30 : Testing AssignVehicleFeatures. 
+
+2018-01-09 12:25:30 : Attempting to load datastore. 
+
+2018-01-09 12:25:30 : Datastore loaded. 
+
+2018-01-09 12:25:30 : Attempting to load and check specifications. 
+
+2018-01-09 12:25:31 : Module specifications successfully loaded and checked. 
+
+2018-01-09 12:25:31 : Attempting to process, check and load module inputs. 
+
+2018-01-09 12:25:42 : Module inputs successfully checked and loaded into datastore. 
+
+2018-01-09 12:25:42 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-01-09 12:25:42 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-01-09 12:25:42 : Running module and checking whether outputs meet Set specifications. 
+
+2018-01-09 12:25:42 : Also saving module outputs to datastore. 
+
+2018-01-09 12:26:04 : Specified table - 2005/Vehicle - doesn't exist. The table must be initialized before the dataset can be initialized. 
+
+RPAT Pilot
+Pilot RPAT module in VisionEval
+2018-01-09_12:28:36
+
+2018-01-09 12:28:36 : Testing AssignVehicleFeatures. 
+
+2018-01-09 12:28:36 : Attempting to load datastore. 
+
+2018-01-09 12:28:36 : Datastore loaded. 
+
+2018-01-09 12:28:36 : Attempting to load and check specifications. 
+
+2018-01-09 12:28:37 : Module specifications successfully loaded and checked. 
+
+2018-01-09 12:28:37 : Attempting to process, check and load module inputs. 
+
+RPAT Pilot
+Pilot RPAT module in VisionEval
+2018-01-09_12:32:18
+
+2018-01-09 12:32:18 : Testing AssignVehicleFeatures. 
+
+2018-01-09 12:32:18 : Attempting to load datastore. 
+
+2018-01-09 12:32:20 : Datastore loaded. 
+
+2018-01-09 12:32:20 : Attempting to load and check specifications. 
+
+2018-01-09 12:32:20 : Module specifications successfully loaded and checked. 
+
+2018-01-09 12:32:20 : Attempting to process, check and load module inputs. 
+
+2018-01-09 12:32:51 : Module inputs successfully checked and loaded into datastore. 
+
+2018-01-09 12:32:51 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-01-09 12:32:51 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-01-09 12:32:51 : Running module and checking whether outputs meet Set specifications. 
+
+2018-01-09 12:32:51 : Also saving module outputs to datastore. 
+
+2018-01-09 12:34:37 : Module run successfully and outputs meet Set specifications. 
+
+2018-01-09 12:34:39 : Module outputs saved to datastore. 
+
+2018-01-09 12:34:39 : Congratulations. Module AssignVehicleFeatures passed all tests. 
+
+RPAT Pilot
+Pilot RPAT module in VisionEval
+2018-01-22_10:58:03
+
+2018-01-22 10:58:03 : Testing AssignVehicleFeatures. 
+
+2018-01-22 10:58:03 : Attempting to load datastore. 
+
+2018-01-22 10:58:03 : Datastore loaded. 
+
+2018-01-22 10:58:03 : Attempting to load and check specifications. 
+
+2018-01-22 10:58:03 : Module specifications successfully loaded and checked. 
+
+2018-01-22 10:58:03 : Attempting to process, check and load module inputs. 
+
+2018-01-22 10:58:18 : Module inputs successfully checked and loaded into datastore. 
+
+2018-01-22 10:58:18 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-01-22 10:58:18 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-01-22 10:58:18 : Running module and checking whether outputs meet Set specifications. 
+
+2018-01-22 10:58:18 : Also saving module outputs to datastore. 
+
+2018-01-22 10:59:27 : Module run successfully and outputs meet Set specifications. 
+
+2018-01-22 10:59:29 : Module outputs saved to datastore. 
+
+2018-01-22 10:59:29 : Congratulations. Module AssignVehicleFeatures passed all tests. 
+
+RPAT Pilot
+Pilot RPAT module in VisionEval
+2018-02-27_10:28:20
+
+2018-02-27 10:28:20 : Testing AssignVehicleFeatures. 
+
+2018-02-27 10:28:20 : Attempting to load datastore. 
+
+2018-02-27 10:28:21 : Datastore loaded. 
+
+2018-02-27 10:28:21 : Attempting to load and check specifications. 
+
+2018-02-27 10:28:21 : Module specifications successfully loaded and checked. 
+
+2018-02-27 10:28:21 : Attempting to process, check and load module inputs. 
+
+2018-02-27 10:28:48 : Module inputs successfully checked and loaded into datastore. 
+
+2018-02-27 10:28:48 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-02-27 10:28:48 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-02-27 10:28:48 : Running module and checking whether outputs meet Set specifications. 
+
+2018-02-27 10:28:48 : Also saving module outputs to datastore. 
+
+2018-02-27 10:30:32 : Module run successfully and outputs meet Set specifications. 
+
+2018-02-27 10:30:35 : Module outputs saved to datastore. 
+
+2018-02-27 10:30:35 : Congratulations. Module AssignVehicleFeatures passed all tests. 
+

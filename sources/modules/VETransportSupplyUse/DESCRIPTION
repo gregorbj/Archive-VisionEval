@@ -22,3 +22,4 @@ Encoding: UTF-8
 RoxygenNote: 6.0.1
 Collate:
         'CalculateCongestionBase.R'
+        'CalculateCongestionFuture.R'

@@ -51,9 +51,10 @@ tar("defs.tar","defs")
 tar("inputs.tar","inputs")
 dir.remove("defs")
 dir.remove("inputs")
-untar("Datastore_VERPAT.tar")
-unzip("ModelState_VERPAT.zip")
-untar("inputs_VERPAT.tar")
+untar("Datastore_CreateBaseAccessibility.tar")
+untar("defs_CreateBaseAccessibility.tar")
+unzip("ModelState_CreateBaseAccessibility.zip")
+untar("inputs_CreateBaseAccessibility.tar")
 setwd("..")
 
 #Test CreateBaseAccessibility module
@@ -66,6 +67,16 @@ testModule(
   RunFor = "AllYears"
 )
 
+# Reorganize folder for next VERPAT module test
+setwd("tests")
+dir.remove("defs")
+dir.remove("Datastore")
+file.remove("ModelState.Rda")
+untar("Datastore_CreateFutureAccessibility.tar")
+untar("defs_CreateFutureAccessibility.tar")
+unzip("ModelState_CreateFutureAccessibility.zip")
+setwd("..")
+
 #Test CreateFutureAccessibility module
 source("R/CreateFutureAccessibility.R")
 testModule(
@@ -75,6 +86,7 @@ testModule(
   DoRun = TRUE,
   RunFor = "NotBaseYear"
 )
+
 
 #Finish up
 setwd("tests")

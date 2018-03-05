@@ -20,13 +20,13 @@ setwd("tests")
 # tar("inputs.tar","inputs")
 # dir.remove("defs")
 # dir.remove("inputs")
-untar("Datastore_VERPAT.tar")
-untar("defs_VERPAT.tar")
-unzip("ModelState_VERPAT.zip")
-untar("inputs_VERPAT.tar")
+untar("Datastore_CalculateCongestionBase.tar")
+untar("defs_CalculateCongestionBase.tar")
+unzip("ModelState_CalculateCongestionBase.zip")
+untar("inputs_CalculateCongestionBase.tar")
 setwd("..")
 
-#Test CreateBaseAccessibility module
+#Test CalculateCongestionBase module
 source("R/CalculateCongestionBase.R")
 testModule(
   ModuleName = "CalculateCongestionBase",
@@ -34,6 +34,26 @@ testModule(
   SaveDatastore = TRUE,
   DoRun = TRUE,
   RunFor = "AllYears"
+)
+
+#Reorganize folder to test next VERPAT module
+setwd("tests")
+dir.remove("Datastore")
+dir.remove("defs")
+file.remove("ModelState.rda")
+untar("Datastore_CalculateCongestionFuture.tar")
+untar("defs_CalculateCongestionFuture.tar")
+unzip("ModelState_CalculateCongestionFuture.zip")
+setwd("..")
+
+#Test CalculateCongestionFuture module
+source("R/CalculateCongestionFuture.R")
+testModule(
+  ModuleName = "CalculateCongestionFuture",
+  LoadDatastore = TRUE,
+  SaveDatastore = TRUE,
+  DoRun = TRUE,
+  RunFor = "NotBaseYear"
 )
 
 #Finish up

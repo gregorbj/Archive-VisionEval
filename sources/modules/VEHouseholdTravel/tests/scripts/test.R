@@ -61,10 +61,10 @@ tar("defs.tar","defs")
 tar("inputs.tar","inputs")
 dir.remove("defs")
 dir.remove("inputs")
-untar("Datastore_VERPAT.tar")
-untar("defs_VERPAT.tar")
-unzip("ModelState_VERPAT.zip")
-untar("inputs_VERPAT.tar")
+untar("Datastore_CalculateTravelDemand.tar")
+untar("defs_CalculateTravelDemand.tar")
+unzip("ModelState_CalculateTravelDemand.zip")
+untar("inputs_CalculateTravelDemand.tar")
 setwd("..")
 
 #Test CalculateTravelDemand module
@@ -76,6 +76,47 @@ testModule(
   DoRun = TRUE
 )
 
+# Reorganize folder for next VERPAT module test
+setwd("tests")
+dir.remove("Datastore")
+file.remove("ModelState.Rda")
+dir.remove("defs")
+untar("Datastore_CalculateTravelDemandFuture.tar")
+untar("defs_CalculateTravelDemandFuture.tar")
+unzip("ModelState_CalculateTravelDemandFuture.zip")
+setwd("..")
+
+#Test CalculateTravelDemandFuture module
+source("R/CalculateTravelDemandFuture.R")
+testModule(
+  ModuleName = "CalculateTravelDemandFuture",
+  LoadDatastore = TRUE,
+  SaveDatastore = TRUE,
+  DoRun = TRUE,
+  RunFor = "NotBaseYear"
+)
+
+# Reorganize folder for next VERPAT module test
+setwd("tests")
+dir.remove("Datastore")
+file.remove("ModelState.Rda")
+dir.remove("defs")
+dir.remove("inputs")
+untar("Datastore_CalculateInducedDemand.tar")
+untar("defs_CalculateInducedDemand.tar")
+unzip("ModelState_CalculateInducedDemand.zip")
+untar("inputs_CalculateInducedDemand.tar")
+setwd("..")
+
+#Test CalculateTravelDemandFuture module
+source("R/CalculateInducedDemand.R")
+testModule(
+  ModuleName = "CalculateInducedDemand",
+  LoadDatastore = TRUE,
+  SaveDatastore = TRUE,
+  DoRun = TRUE,
+  RunFor = "NotBaseYear"
+)
 
 #Finish up
 setwd("tests")

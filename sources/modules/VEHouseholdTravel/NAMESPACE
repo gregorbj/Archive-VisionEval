@@ -2,7 +2,9 @@
 
 export(CalculateAltModeTrips)
 export(CalculateHouseholdDvmt)
+export(CalculateInducedDemand)
 export(CalculateTravelDemand)
+export(CalculateTravelDemandFuture)
 export(DivertSovTravel)
 import(data.table)
 import(visioneval)
