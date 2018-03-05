@@ -501,6 +501,7 @@ testModule <-
     }
     writeLog("Attempting to load and check specifications.", Print = TRUE)
     Specs_ls <- loadSpec()
+    #Check for errors
     Errors_ <- checkModuleSpecs(Specs_ls, ModuleName)
     if (length(Errors_) != 0) {
       Msg <-
@@ -514,8 +515,24 @@ testModule <-
       rm(Msg)
     }
     rm(Errors_)
-    writeLog("Module specifications successfully loaded and checked.",
+    writeLog("Module specifications successfully loaded and checked for errors.",
              Print = TRUE)
+    #Check for developer warnings
+    DeveloperWarnings_ls <-
+      lapply(c(Specs_ls$Inp, Specs_ls$Get, Specs_ls$Set), function(x) {
+        attributes(x)$WARN
+      })
+    DeveloperWarnings_ <-
+      unique(unlist(lapply(DeveloperWarnings_ls, function(x) x[!is.null(x)])))
+    if (length(DeveloperWarnings_) != 0) {
+      writeLog(DeveloperWarnings_)
+      Msg <- paste0(
+        "Specifications check for module '", ModuleName, "' generated one or ",
+        "more warnings. Check log for details."
+      )
+      warning(Msg)
+      rm(DeveloperWarnings_ls, DeveloperWarnings_, Msg)
+    }
 
     #Process, check, and load module inputs
     #--------------------------------------
