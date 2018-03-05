@@ -434,20 +434,34 @@ checkDataConsistency <- function(DatasetName, Data_, DstoreAttr_) {
 #' addition to the units name. This includes a value units multiplier and in
 #' the case of currency values the year for the currency measurement. The
 #' multiplier element can only be expressed in scientific notation where the
-#' number before the 'e' can only be 1.
+#' number before the 'e' can only be 1. If the year element for a currency
+#' specification is missing, it is replaced by the model base year which is
+#' recorded in the model state file. If this is done, a WARN attribute is added
+#' to the specifications list notifying the module developer that there is no
+#' year element and the model base year will be used when the module is called.
+#' The test module function reads this warning and writes it to the module test
+#' log. This way the module developer is made aware of the situation so that it
+#' may be corrected if necessary. The model user is not bothered by the warning.
 #'
 #' @param Spec_ls A standard specifications list for a Inp, Get, or Set item.
+#' @param ComponentName A string that is the name of the specifications
+#' the the specification comes from (e.g. "Inp", "Get", "Set).
 #' @return a list that is a standard specifications list with the addition of
 #' a MULTIPLIER component and a YEAR component as well as a modification of the
 #' UNIT component. The MULTIPLIER component can have the value of NA, a number,
 #' or NaN. The value is NA if the multiplier is missing. It is a number if the
 #' multiplier is a valid number. The value is NaN if the multiplier is not a
 #' valid number. The YEAR component is a character string that is a 4-digit
-#' representation of a year or NA if the component is missing or not a proper
-#' year. The UNITS component is modified to only be the units name.
+#' representation of a year or NA if the component is not a proper year. If the
+#' year component is missing from the UNITS specification for currency data,
+#' the model base year is substituted. In that case, a WARN attribute is added
+#' to the returned specifications list. This is read by the testModule function
+#' and written to the module test log to notify the module developer. After the
+#' UNITS component has been parsed and the YEAR and MULTIPLIER components
+#' extracted, the UNITS component is modified to only be the units name.
 #' @export
 parseUnitsSpec <-
-  function(Spec_ls) {
+  function(Spec_ls, ComponentName) {
     #Define function to return a multiplier value from a multiplier string
     #NA if none, NaN if not a properly specified scientic notation (e.g. 1e3)
     getMultiplier <- function(String) {
@@ -486,8 +500,24 @@ parseUnitsSpec <-
     Spec_ls$UNITS <- UnitsSplit_[1]
     #If currency type, the year is the 2nd element and multiplier is 3rd element
     if (Spec_ls$TYPE == "currency") {
-      Year <- UnitsSplit_[2]
-      Multiplier <- UnitsSplit_[3]
+      if (length(UnitsSplit_) == 1 & ComponentName != "Inp") {
+        Year <- readModelState()$BaseYear
+        Multiplier <- NA
+        Msg <- paste0(
+          "Warning note to module developer. The ", ComponentName,
+          " specification for dataset ", Spec_ls$NAME, " in table ",
+          Spec_ls$TABLE, " does not specify a currency year. ",
+          "The model user's base year will be assumed when the module is called. ",
+          "If this is not the intended behavior, include the intended currency ",
+          "year in the UNITS specification as described in the VisionEval ",
+          "module developer documentation."
+        )
+        attributes(Spec_ls)$WARN <- Msg
+        rm(Msg)
+      } else {
+        Year <- UnitsSplit_[2]
+        Multiplier <- UnitsSplit_[3]
+      }
     } else {
       Year <- NA
       Multiplier <- UnitsSplit_[2]
@@ -499,7 +529,20 @@ parseUnitsSpec <-
     #Return the result
     Spec_ls
   }
-
+#Test module developer warning if year not specified in UNITS spec for
+#currency data in Get or Set specifications
+# setwd("tests")
+# TestSpec_ls <- item(
+#   NAME = "RuralIncome",
+#   TABLE = "Marea",
+#   GROUP = "BaseYear",
+#   TYPE = "currency",
+#   UNITS = "USD",
+#   PROHIBIT = c("NA", "< 0"),
+#   ISELEMENTOF = ""
+# )
+# parseUnitsSpec(TestSpec_ls, "Get")
+# setwd("..")
 
 #RECOGNIZED TYPES AND UNITS ATTRIBUTES FOR SPECIFICATIONS
 #========================================================
