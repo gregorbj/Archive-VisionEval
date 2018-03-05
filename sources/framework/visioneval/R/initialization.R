@@ -997,12 +997,14 @@ getModuleSpecs <- function(ModuleName, PackageName) {
 #'
 #' @param SpecToExpand_ls A standard specifications list for a specification
 #' whose NAME attribute has multiple values.
+#' @param ComponentName A string that is the name of the specifications
+#' that the specification is a part of (e.g. "Inp", "Get", "Set").
 #' @return A list of standard specifications lists which has a component for
 #' each value in the NAME attribute of the input specifications list.
 #' @export
 #Define a function which expands a specification with multiple NAME items
-expandSpec <- function(SpecToExpand_ls) {
-  SpecToExpand_ls <- parseUnitsSpec(SpecToExpand_ls)
+expandSpec <- function(SpecToExpand_ls, ComponentName) {
+  SpecToExpand_ls <- parseUnitsSpec(SpecToExpand_ls, ComponentName)
   Names_ <- unlist(SpecToExpand_ls$NAME)
   Descriptions_ <- unlist(SpecToExpand_ls$DESCRIPTION)
   Expanded_ls <- list()
@@ -1101,11 +1103,11 @@ doProcessInpSpec <- function(InpSpecs_ls, InputDir = "inputs") {
 processModuleSpecs <- function(Spec_ls) {
   G <- readModelState()
   #Define a function to process a component of a specifications list
-  processComponent <- function(Component_ls) {
+  processComponent <- function(Component_ls, ComponentName) {
     Result_ls <- list()
     for (i in 1:length(Component_ls)) {
       Temp_ls <- Component_ls[[i]]
-      Result_ls <- c(Result_ls, expandSpec(Temp_ls))
+      Result_ls <- c(Result_ls, expandSpec(Temp_ls, ComponentName))
     }
     Result_ls
   }
@@ -1121,14 +1123,14 @@ processModuleSpecs <- function(Spec_ls) {
   if (!is.null(Spec_ls$Inp)) {
     FilteredInpSpec_ls <- doProcessInpSpec(Spec_ls$Inp)
     if (length(FilteredInpSpec_ls) > 0) {
-      Out_ls$Inp <- processComponent(FilteredInpSpec_ls)
+      Out_ls$Inp <- processComponent(FilteredInpSpec_ls, "Inp")
     }
   }
   if (!is.null(Spec_ls$Get)) {
-    Out_ls$Get <- processComponent(Spec_ls$Get)
+    Out_ls$Get <- processComponent(Spec_ls$Get, "Get")
   }
   if (!is.null(Spec_ls$Set)) {
-    Out_ls$Set <- processComponent(Spec_ls$Set)
+    Out_ls$Set <- processComponent(Spec_ls$Set, "Set")
   }
   if (!is.null(Spec_ls$Call)) {
     Out_ls$Call <- Spec_ls$Call
