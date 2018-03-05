@@ -4,10 +4,13 @@
 \alias{parseUnitsSpec}
 \title{Parse units specification into components and add to specifications list.}
 \usage{
-parseUnitsSpec(Spec_ls)
+parseUnitsSpec(Spec_ls, ComponentName)
 }
 \arguments{
 \item{Spec_ls}{A standard specifications list for a Inp, Get, or Set item.}
+
+\item{ComponentName}{A string that is the name of the specifications
+the the specification comes from (e.g. "Inp", "Get", "Set).}
 }
 \value{
 a list that is a standard specifications list with the addition of
@@ -16,8 +19,13 @@ UNIT component. The MULTIPLIER component can have the value of NA, a number,
 or NaN. The value is NA if the multiplier is missing. It is a number if the
 multiplier is a valid number. The value is NaN if the multiplier is not a
 valid number. The YEAR component is a character string that is a 4-digit
-representation of a year or NA if the component is missing or not a proper
-year. The UNITS component is modified to only be the units name.
+representation of a year or NA if the component is not a proper year. If the
+year component is missing from the UNITS specification for currency data,
+the model base year is substituted. In that case, a WARN attribute is added
+to the returned specifications list. This is read by the testModule function
+and written to the module test log to notify the module developer. After the
+UNITS component has been parsed and the YEAR and MULTIPLIER components
+extracted, the UNITS component is modified to only be the units name.
 }
 \description{
 \code{parseUnitsSpec} a visioneval framework control function that parses the
@@ -31,5 +39,12 @@ The UNITS component of a specifications list can encode information in
 addition to the units name. This includes a value units multiplier and in
 the case of currency values the year for the currency measurement. The
 multiplier element can only be expressed in scientific notation where the
-number before the 'e' can only be 1.
+number before the 'e' can only be 1. If the year element for a currency
+specification is missing, it is replaced by the model base year which is
+recorded in the model state file. If this is done, a WARN attribute is added
+to the specifications list notifying the module developer that there is no
+year element and the model base year will be used when the module is called.
+The test module function reads this warning and writes it to the module test
+log. This way the module developer is made aware of the situation so that it
+may be corrected if necessary. The model user is not bothered by the warning.
 }

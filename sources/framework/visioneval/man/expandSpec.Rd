@@ -5,11 +5,14 @@
 \title{Expand a Inp, Get, or Set specification so that is can be used by other
 functions to process inputs and to read from or write to the datastore.}
 \usage{
-expandSpec(SpecToExpand_ls)
+expandSpec(SpecToExpand_ls, ComponentName)
 }
 \arguments{
 \item{SpecToExpand_ls}{A standard specifications list for a specification
 whose NAME attribute has multiple values.}
+
+\item{ComponentName}{A string that is the name of the specifications
+that the specification is a part of (e.g. "Inp", "Get", "Set").}
 }
 \value{
 A list of standard specifications lists which has a component for
