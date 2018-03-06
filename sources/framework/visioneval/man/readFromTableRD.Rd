@@ -16,8 +16,7 @@ dataset is located.}
 data is to be read from.}
 
 \item{DstoreLoc}{a string representation of the file path of the datastore.
-NULL if the datastore is the directory identified in the 'DatastoreName'
-property of the model state file.}
+NULL if the datastore is the current directory.}
 
 \item{Index}{A numeric vector identifying the positions the data is to be
 written to. NULL if the entire dataset is to be read.}

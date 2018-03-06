@@ -242,34 +242,33 @@ initDatasetRD <- function(Spec_ls, Group) {
 #' @param Group a string representation of the name of the datastore group the
 #' data is to be read from.
 #' @param DstoreLoc a string representation of the file path of the datastore.
-#' NULL if the datastore is the directory identified in the 'DatastoreName'
-#' property of the model state file.
+#' NULL if the datastore is the current directory.
 #' @param Index A numeric vector identifying the positions the data is to be
 #'   written to. NULL if the entire dataset is to be read.
 #' @return A vector of the same type stored in the datastore and specified in
 #'   the TYPE attribute.
 #' @export
 readFromTableRD <- function(Name, Table, Group, DstoreLoc = NULL, Index = NULL) {
-  getModelListing <- function(DstoreRef) {
-    SplitRef_ <- unlist(strsplit(DstoreRef, "/"))
-    RefHead <- paste(SplitRef_[-length(SplitRef_)], collapse = "/")
-    if (RefHead == "") {
-      ModelStateFile <- "ModelState.Rda"
-    } else {
-      ModelStateFile <- paste(RefHead, "ModelState.Rda", sep = "/")
-    }
-    readModelState(FileName = ModelStateFile)
-  }
+  #Get the directory where the datastore is located from DstoreLoc
   if (is.null(DstoreLoc)) {
+    DstoreDir <- ""
+  } else {
+    ParseDstoreLoc_ <- unlist(strsplit(DstoreLoc, "/"))
+    DstoreDir <- paste(ParseDstoreLoc_[-length(ParseDstoreLoc_)], collapse = "/")
+  }
+  #Load the model state file
+  if (DstoreDir == "") {
     G <- readModelState()
   } else {
-    G <- getModelListing(DstoreRef = DstoreLoc)
+    G <- readModelState(FileName = file.path(DstoreDir, "ModelState.Rda"))
   }
-  #Check that dataset exists to read from
+  #If DstoreLoc is NULL get the name of the datastore from the model state
+  if (is.null(DstoreLoc)) DstoreLoc <- G$DatastoreName
+  #Check that dataset exists to read from and if so get path to dataset
   DatasetExists <- checkDataset(Name, Table, Group, G$Datastore)
   if (DatasetExists) {
     FileName <- paste(Name, "Rda", sep = ".")
-    DatasetPath <- file.path(G$DatastoreName, Group, Table, FileName)
+    DatasetPath <- file.path(DstoreLoc, Group, Table, FileName)
   } else {
     Message <-
       paste("Dataset", Name, "in table", Table, "in group", Group, "doesn't exist.")
@@ -299,13 +298,9 @@ readFromTableRD <- function(Name, Table, Group, DstoreLoc = NULL, Index = NULL) 
       Dataset <- Dataset[Index]
     }
   }
-  #Report out results
-  Message <- paste0("Read data ", file.path(Group, Table, Name))
-  #writeLog(Message)
-  #Apply the attributes and return
-  # attributes(Dataset) <- Attr_ls
+  #Return results
   attributes(Dataset) <- NULL
-  Dataset #as.vector(Dataset)
+  Dataset
 }
 #readFromTableRD("Azone", "Azone", "2010")
 #readFromTableRD("Azone", "Azone", "2010", Index = 1:2)
@@ -592,18 +587,22 @@ initDatasetH5 <- function(Spec_ls, Group) {
 #'   the TYPE attribute.
 #' @export
 #' @import rhdf5
-readFromTableH5 <- function(Name, Table, Group, File = "datastore.h5", Index = NULL) {
-  getModelListing <- function(DstoreRef) {
-    SplitRef_ <- unlist(strsplit(DstoreRef, "/"))
-    RefHead <- paste(SplitRef_[-length(SplitRef_)], collapse = "/")
-    if (RefHead == "") {
-      ModelStateFile <- "ModelState.Rda"
-    } else {
-      ModelStateFile <- paste(RefHead, "ModelState.Rda", sep = "/")
-    }
-    readModelState(FileName = ModelStateFile)
+readFromTableH5 <- function(Name, Table, Group, File = NULL, Index = NULL) {
+  #Get the directory where the datastore is located from File
+  if (is.null(File)) {
+    DstoreDir <- ""
+  } else {
+    ParseDstoreLoc_ <- unlist(strsplit(File, "/"))
+    DstoreDir <- paste(ParseDstoreLoc_[-length(ParseDstoreLoc_)], collapse = "/")
   }
-  G <- getModelListing(DstoreRef = File)
+  #Load the model state file
+  if (DstoreDir == "") {
+    G <- readModelState()
+  } else {
+    G <- readModelState(FileName = file.path(DstoreDir, "ModelState.Rda"))
+  }
+  #If File is NULL get the name of the datastore from the model state
+  if (is.null(File)) File <- G$DatastoreName
   #Check that dataset exists to read from
   DatasetExists <- checkDataset(Name, Table, Group, G$Datastore)
   if (DatasetExists) {
@@ -630,17 +629,15 @@ readFromTableH5 <- function(Name, Table, Group, File = "datastore.h5", Index = N
   }
   #Read data
   if (is.null(Index)) {
-    Data_ <- h5read(G$DatastoreName, DatasetName, read.attributes = TRUE)
+    Data_ <- h5read(File, DatasetName, read.attributes = TRUE)
   } else {
     Data_ <-
-      h5read(G$DatastoreName, DatasetName, index = list(Index), read.attributes = TRUE)
+      h5read(File, DatasetName, index = list(Index), read.attributes = TRUE)
   }
   #Convert NA values
   NAValue <- as.vector(attributes(Data_)$NAVALUE)
   Data_[Data_ == NAValue] <- NA
-  #Report out results
-  Message <- paste0("Read data ", DatasetName)
-  writeLog(Message)
+  #Return results
   as.vector(Data_)
 }
 
