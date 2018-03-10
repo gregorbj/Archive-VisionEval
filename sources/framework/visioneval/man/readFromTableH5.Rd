@@ -4,7 +4,7 @@
 \alias{readFromTableH5}
 \title{Read from an HDF5 (H5) type datastore table.}
 \usage{
-readFromTableH5(Name, Table, Group, File = "datastore.h5", Index = NULL)
+readFromTableH5(Name, Table, Group, File = NULL, Index = NULL)
 }
 \arguments{
 \item{Name}{A string identifying the name of the dataset to be read from.}
