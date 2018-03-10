@@ -43,32 +43,19 @@
 #' @export
 listDatastoreRD <- function(DataListing_ls = NULL) {
   #Load the model state file and the datastore listing file
-  G <- getModelState()
-  #Define function to assign the contents of a file to a file to an object
-  assignLoad <- function(Filename){
-    load(Filename)
-    get(ls()[ls() != "Filename"])
-  }
-  #Load the datastore listing
-  DatastoreListing_ls <-
-    assignLoad(file.path(G$DatastoreName, "DatastoreListing.Rda"))
-  #Update the datastore listing if required
+  Datastore_df <- getModelState()$Datastore
+  #Update the datastore listing
   if (!is.null(DataListing_ls)) {
-    for (i in 1:3) {
-      DatastoreListing_ls[[i]] <-
-        c(DatastoreListing_ls[[i]], DataListing_ls[[i]])
-    }
-    DatastoreListing_ls[[4]] <-
-      c(DatastoreListing_ls[[4]], list(DataListing_ls[[4]]))
+    NewDatastore_df <- rbind(Datastore_df, c(NA, NA, NA, list(NA)))
+    NewDatastore_df$group <- c(Datastore_df$group, DataListing_ls$group)
+    NewDatastore_df$name <- c(Datastore_df$name, DataListing_ls$name)
+    NewDatastore_df$groupname <-
+      c(Datastore_df$groupname, DataListing_ls$groupname)
+    NewDatastore_df$attributes <-
+      c(Datastore_df$attributes, list(DataListing_ls$attributes))
   }
   #Resave the datastore listing
-  save(DatastoreListing_ls,
-       file = file.path(G$DatastoreName, "DatastoreListing.Rda"))
-  #Update the model state
-  DatastoreListing_df <-
-    data.frame(DatastoreListing_ls[1:3], stringsAsFactors = FALSE)
-  DatastoreListing_df$attributes <- DatastoreListing_ls$attributes
-  setModelState(list(Datastore = DatastoreListing_df))
+  setModelState(list(Datastore = NewDatastore_df))
   #Return TRUE if successful
   TRUE
 }
@@ -100,15 +87,15 @@ initDatastoreRD <- function() {
   #Create datastore
   dir.create(DatastoreName)
   #Initialize the DatastoreListing
-  DatastoreListing_ls <-
-    list(
+  Datastore_df <-
+     data.frame(
       group = "/",
       name = "",
       groupname = "",
-      attributes = list(NA)
-    )
-  save(DatastoreListing_ls,
-       file = file.path(DatastoreName, "DatastoreListing.Rda"))
+      attributes = NA,
+      stringsAsFactors = FALSE)
+  Datastore_df$attributes <- as.list(Datastore_df$attributes)
+  setModelState(list(Datastore = Datastore_df))
   #Create global group which stores data that is constant for all geography and
   #all years
   dir.create(file.path(DatastoreName, "Global"))
@@ -168,6 +155,7 @@ initTableRD <- function(Table, Group, Length) {
   TRUE
 }
 #initTableRD("Azone", "2010", 3)
+
 
 #INITIALIZE A DATASET IN A TABLE
 #===============================
@@ -258,7 +246,7 @@ readFromTableRD <- function(Name, Table, Group, DstoreLoc = NULL, Index = NULL) 
   }
   #Load the model state file
   if (DstoreDir == "") {
-    G <- readModelState()
+    G <- getModelState()
   } else {
     G <- readModelState(FileName = file.path(DstoreDir, "ModelState.Rda"))
   }
@@ -334,15 +322,26 @@ writeToTableRD <- function(Data_, Spec_ls, Group, Index = NULL) {
   #Check that dataset exists to write to and attempt to create if not
   DatasetExists <- checkDataset(Name, Table, Group, G$Datastore)
   if (!DatasetExists) {
-    initDatasetRD(Spec_ls, Group)
-    G <- getModelState()
+    GroupName <- paste(Group, Spec_ls$TABLE, sep = "/")
+    Length <-
+      G$Datastore$attributes[G$Datastore$groupname == GroupName][[1]]$LENGTH
+    Dataset <-
+      switch(Types()[[Spec_ls$TYPE]]$mode,
+             character = character(Length),
+             double = numeric(Length),
+             integer = integer(Length),
+             logical = logical(Length))
+    Attr_ls <- Spec_ls
+    listDatastoreRD(
+      list(group = paste0("/", GroupName), name = Name,
+           groupname = paste(GroupName, Name, sep = "/"),
+           attributes = Spec_ls
+      )
+    )
+  } else {
+    Dataset <- readFromTableRD(Name, Table, Group)
+    Attr_ls <- attributes(Dataset)
   }
-  #Read in the saved dataset
-  Dataset <- readFromTableRD(Name, Table, Group)
-  #Save the attributes
-  Attr_ls <- attributes(Dataset)
-  #Convert NA values
-  # Data_[is.na(Data_)] <- Spec_ls$NAVALUE
   #Modify the loaded dataset
   if (is.null(Index)) {
     Dataset <- Data_
@@ -365,6 +364,7 @@ writeToTableRD <- function(Data_, Spec_ls, Group, Index = NULL) {
   save(Dataset, file = file.path(G$DatastoreName, Group, Table, DatasetName))
   TRUE
 }
+
 #readFromTableRD("Azone", "Azone", "2010")
 #NewVals_ <- paste0("A", 1:3)
 #writeToTableRD(NewVals_, TestSpec_ls, "2010", Index = NULL)
@@ -597,7 +597,7 @@ readFromTableH5 <- function(Name, Table, Group, File = NULL, Index = NULL) {
   }
   #Load the model state file
   if (DstoreDir == "") {
-    G <- readModelState()
+    G <- getModelState()
   } else {
     G <- readModelState(FileName = file.path(DstoreDir, "ModelState.Rda"))
   }
@@ -807,6 +807,7 @@ createGeoIndexList <-
     Index_ls
   }
 
+
 #CREATE A DATASTORE INDEX
 #========================
 #' Create datastore index.
@@ -849,6 +850,7 @@ createGeoIndex <- function(Table, Group, RunBy, Geo, GeoIndex_ls) {
   }
   Idx_
 }
+
 
 #GET DATA SETS IDENTIFIED IN MODULE SPECIFICATIONS FROM DATASTORE
 #================================================================
@@ -968,7 +970,7 @@ getFromDatastore <- function(ModuleSpec_ls, RunYear, Geo = NULL, GeoIndex_ls = N
           )
           Conversion_ls <-
           convertUnits(Data_, Type,
-                       getDatasetAttr(Name, Table, AttrGroup, G$Datastore)$UNITS,
+                       getDatasetAttr(Name, Table, AttrGroup, DstoreListing_ls)$UNITS,
                        Spec_ls$UNITS)
           Data_ <- Conversion_ls$Values
           rm(AttrGroup, Conversion_ls)
