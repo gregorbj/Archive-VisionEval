@@ -208,8 +208,7 @@ LocateEmploymentSpecifications <- list(
     item(
       NAME =
         items("HhId",
-              "WkrId",
-              "Bzone"),
+              "WkrId"),
       TABLE = "Worker",
       GROUP = "Year",
       TYPE = "character",
@@ -219,8 +218,18 @@ LocateEmploymentSpecifications <- list(
       ISELEMENTOF = "",
       DESCRIPTION =
         items("Unique household ID",
-              "Unique worker ID",
-              "Bzone ID of worker job location")
+              "Unique worker ID")
+    ),
+    item(
+      NAME = "Bzone",
+      TABLE = "Worker",
+      GROUP = "Year",
+      TYPE = "character",
+      UNITS = "ID",
+      NAVALUE = -1,
+      PROHIBIT = "",
+      ISELEMENTOF = "",
+      DESCRIPTION = "Bzone ID of worker job location"
     ),
     item(
       NAME = "DistanceToWork",
