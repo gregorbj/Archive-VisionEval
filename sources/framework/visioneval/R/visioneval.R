@@ -129,6 +129,88 @@ initializeModel <-
       loadModelParameters(ModelParamFile = ModelParamFile)
     }
 
+    #Initialize tables with geo datasets included in referenced datastores
+    #---------------------------------------------------------------------
+    if (!is.null(getModelState()$DatastoreReferences)) {
+      #Identify tables in the model run datastore
+      DstoreTables_ <- local({
+        GpNames_ <- getModelState()$Datastore$groupname
+        GpNamesSplit_ls <- strsplit(GpNames_, "/")
+        IsTable_ <- unlist(lapply(GpNamesSplit_ls, function(x) length(x) == 2))
+        GpNames_[IsTable_]
+      })
+      #Get list of references
+      DSRef_ls <- getModelState()$DatastoreReferences
+      #Identify references that overlap model run years
+      RunYears_ <- getModelState()$Years
+      DSRef_ls <- DSRef_ls[names(DSRef_ls) %in% c("Global", RunYears_)]
+      #Identify the referenced datastore files
+      DSRefFiles_ <- unique(unlist(DSRef_ls))
+      #Information on referenced datastore tables needed in model run datastore
+      RefCopyInfo_ls <- list()
+      for (i in seq_along(DSRefFiles_)) {
+        RefCopyInfo_ls[[i]] <- local({
+          #Load model state file for datastore
+          ParseDstoreLoc_ <- unlist(strsplit(DSRefFiles_[i], "/"))
+          DstoreDir <-
+            paste(ParseDstoreLoc_[-length(ParseDstoreLoc_)], collapse = "/")
+          Dstore_df <-
+            readModelState(FileName = file.path(DstoreDir, "ModelState.Rda"))$Datastore
+          #Process groupnames in datastore
+          GrpNmSplit_ls <- strsplit(Dstore_df$groupname, "/")
+          #Identify table entries that need to be copied
+          DstoreGroups_ <- unlist(lapply(GrpNmSplit_ls, function(x) x[1]))
+          HasModelGroup_ <- DstoreGroups_ %in% c("Global", RunYears_)
+          IsTable_ <- unlist(lapply(GrpNmSplit_ls, function(x) length(x) == 2))
+          IsNotPresent_ <- !(Dstore_df$groupname %in% DstoreTables_)
+          Get_ <- HasModelGroup_ & IsTable_ & IsNotPresent_
+          TabsToCopy_df <- Dstore_df[Get_,]
+          #Select datastore entries for tables that need to be copied
+          IsGeoDataset_ <- unlist(lapply(GrpNmSplit_ls, function(x){
+            x[3] %in% c("Azone", "Bzone", "Czone", "Marea")
+          }))
+          IsNotPresent_ <- !(Dstore_df$group %in% paste0("/", DstoreTables_))
+          Get_ <- HasModelGroup_ & IsNotPresent_ & IsGeoDataset_
+          DsetsToCopy_df <- Dstore_df[Get_,]
+          #Return list of tables to initialize and datasets to copy
+          list(Tables = TabsToCopy_df, Datasets = DsetsToCopy_df)
+        })
+      }
+      #Initialize tables
+      TabInfo_df <-
+        unique(do.call(rbind, lapply(RefCopyInfo_ls, function(x) x$Tables)))
+      CopyInfo_df <- data.frame(
+        Table = TabInfo_df$name,
+        Group = gsub("/", "", TabInfo_df$group),
+        Length = unlist(lapply(TabInfo_df$attributes, function(x) x$LENGTH)),
+        stringsAsFactors = FALSE
+      )
+      for (i in 1:nrow(CopyInfo_df)) {
+        initTable(CopyInfo_df$Table[i], CopyInfo_df$Group[i], CopyInfo_df$Length[i])
+      }
+      rm(TabInfo_df, CopyInfo_df, i)
+      #Copy datasets
+      for (i in seq_along(RefCopyInfo_ls)) {
+        DsetInfo_df <- RefCopyInfo_ls[[i]]$Datasets
+        GroupTableName_ls <- strsplit(DsetInfo_df$groupname, "/")
+        for (j in 1:nrow(DsetInfo_df)) {
+          Name <- GroupTableName_ls[[j]][3]
+          Table <- GroupTableName_ls[[j]][2]
+          Group <- GroupTableName_ls[[j]][1]
+          DsetExists <- checkDataset(Name, Table, Group, getModelState()$Datastore)
+          if (!DsetExists) {
+            Attributes <- DsetInfo_df$attributes[j][[1]]
+            Data_ <- readFromTable(Name, Table, Group, DSRefFiles_[i])
+            writeToTable(Data_, Attributes, Group)
+            rm(Attributes, Data_)
+          }
+          rm(Name, Table, Group, DsetExists)
+        }
+      }
+      rm(DstoreTables_, DSRef_ls, RunYears_, DSRefFiles_, RefCopyInfo_ls,
+         DsetInfo_df, GroupTableName_ls)
+    }
+
     #Parse script to make table of all the module calls, check and combine specs
     #---------------------------------------------------------------------------
     #Parse script and make data frame of modules that are called directly
