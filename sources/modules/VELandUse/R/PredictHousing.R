@@ -415,8 +415,8 @@ PredictHousingSpecifications <- list(
       GROUP = "Year",
       TYPE = "character",
       UNITS = "ID",
-      NAVALUE = "NA",
-      PROHIBIT = "NA",
+      NAVALUE = "",
+      PROHIBIT = "",
       ISELEMENTOF = "",
       DESCRIPTION = "ID of Bzone in which household resides"
     ),
