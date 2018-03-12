@@ -22,7 +22,7 @@
 #' does not segregate datasets by datastore. Attempting to use this function to
 #' compare multiple scenarios could produce unpredictable results.
 #'
-#' @param Table_ls a named list where the name of each component is the name of
+#' @param Tables_ls a named list where the name of each component is the name of
 #' a table in a datastore group and the value is a string vector of the names
 #' of the datasets to be retrieved.
 #' @param Group a string that is the name of the group to retrieve the table
@@ -38,7 +38,6 @@
 #' retrieved and the value is a data frame containing the identified datasets.
 #' The 'Missing' component is a list which identifies the datasets that are
 #' missing in each table.
-#' @import visioneval
 #' @export
 readDatastoreTables <- function(Tables_ls, Group, DstoreLocs_, DstoreType) {
   #Check that DstoreTypes are supported
