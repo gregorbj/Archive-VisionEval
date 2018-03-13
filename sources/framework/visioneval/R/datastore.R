@@ -42,21 +42,40 @@
 #' written to the model state file.
 #' @export
 listDatastoreRD <- function(DataListing_ls = NULL) {
-  #Load the model state file and the datastore listing file
-  Datastore_df <- getModelState()$Datastore
+  #Load the model state file
+  if (exists("ModelState_ls")) {
+    G <- getModelState()
+  } else {
+    G <- readModelState()
+  }
+  #If no Datastore component, get from DatastoreListing.Rda
+  if (is.null(G$Datastore)) {
+    load(file.path(G$DatastoreName, "DatastoreListing.Rda"))
+    Datastore_df <- data.frame(
+      group = DatastoreListing_ls$group,
+      name = DatastoreListing_ls$name,
+      groupname = DatastoreListing_ls$groupname,
+      stringsAsFactors = FALSE
+    )
+    Datastore_df$attributes <- DatastoreListing_ls$attributes
+  } else {
+    Datastore_df <- G$Datastore
+  }
   #Update the datastore listing
   if (!is.null(DataListing_ls)) {
-    NewDatastore_df <- rbind(Datastore_df, c(NA, NA, NA, list(NA)))
-    NewDatastore_df$group <- c(Datastore_df$group, DataListing_ls$group)
-    NewDatastore_df$name <- c(Datastore_df$name, DataListing_ls$name)
-    NewDatastore_df$groupname <-
-      c(Datastore_df$groupname, DataListing_ls$groupname)
+    NewDatastore_df <-
+      rbind(
+        Datastore_df[,c("group", "name", "groupname")],
+        DataListing_ls[c("group", "name", "groupname")])
     NewDatastore_df$attributes <-
       c(Datastore_df$attributes, list(DataListing_ls$attributes))
+  } else {
+    NewDatastore_df <- Datastore_df
   }
-  #Resave the datastore listing
+  #Update model state and datastore listing
   setModelState(list(Datastore = NewDatastore_df))
-  #Return TRUE if successful
+  DatastoreListing_ls <- as.list(NewDatastore_df)
+  save(DatastoreListing_ls, file = file.path(G$DatastoreName, "DatastoreListing.Rda"))
   TRUE
 }
 
