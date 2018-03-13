@@ -3,6 +3,7 @@
 export(CalculateAltModeTrips)
 export(CalculateHouseholdDvmt)
 export(CalculateInducedDemand)
+export(CalculatePolicyVmt)
 export(CalculateTravelDemand)
 export(CalculateTravelDemandFuture)
 export(DivertSovTravel)

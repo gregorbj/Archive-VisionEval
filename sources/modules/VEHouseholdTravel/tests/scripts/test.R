@@ -118,6 +118,28 @@ testModule(
   RunFor = "NotBaseYear"
 )
 
+# Reorganize folder for next VERPAT module test
+setwd("tests")
+dir.remove("Datastore")
+file.remove("ModelState.Rda")
+dir.remove("defs")
+dir.remove("inputs")
+untar("Datastore_CalculatePolicyVmt.tar")
+untar("defs_CalculatePolicyVmt.tar")
+untar("inputs_CalculatePolicyVmt.tar")
+unzip("ModelState_CalculatePolicyVmt.zip")
+setwd("..")
+
+#Test CalculateTravelDemandFuture module
+source("R/CalculatePolicyVmt.R")
+testModule(
+  ModuleName = "CalculatePolicyVmt",
+  LoadDatastore = TRUE,
+  SaveDatastore = TRUE,
+  DoRun = TRUE,
+  RunFor = "NotBaseYear"
+)
+
 #Finish up
 setwd("tests")
 dir.remove("Datastore")
