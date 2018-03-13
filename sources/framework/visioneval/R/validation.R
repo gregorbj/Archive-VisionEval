@@ -501,7 +501,7 @@ parseUnitsSpec <-
     #If currency type, the year is the 2nd element and multiplier is 3rd element
     if (Spec_ls$TYPE == "currency") {
       if (length(UnitsSplit_) == 1 & ComponentName != "Inp") {
-        Year <- readModelState()$BaseYear
+        Year <- getModelState()$BaseYear
         Multiplier <- NA
         Msg <- paste0(
           "Warning note to module developer. The ", ComponentName,

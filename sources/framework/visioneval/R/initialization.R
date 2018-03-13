@@ -51,6 +51,7 @@ initModelStateFile <-
     ModelState_ls$Deflators <- read.csv(DeflatorFilePath, as.is = TRUE)
     ModelState_ls$Units <- read.csv(UnitsFilePath, as.is = TRUE)
     save(ModelState_ls, file = "ModelState.Rda")
+    ModelState_ls <<- ModelState_ls
   }
   TRUE
 }
@@ -69,15 +70,11 @@ initModelStateFile <-
 #'
 #' @param Names_ A string vector of the components to extract from the
 #' ModelState_ls list.
-#' @param FileName A string that is the file name of the model state file. The
 #' default value is ModelState.Rda.
 #' @return A list containing the specified components from the model state file.
 #' @export
-getModelState <- function(Names_ = "All", FileName = "ModelState.Rda") {
-  if (file.exists(FileName)) {
-    load(FileName)
-  }
-  if ("ModelState_ls" %in% ls()) State_ls <- get("ModelState_ls")
+getModelState <- function(Names_ = "All") {
+  State_ls <- ModelState_ls
   if (Names_[1] == "All") {
     return(State_ls)
   } else {
@@ -112,8 +109,19 @@ setModelState <-
     }
     ModelState_ls$LastChanged <- Sys.time()
     save(ModelState_ls, file = FileName)
+    ModelState_ls <<- ModelState_ls
     TRUE
   }
+# setModelState <-
+#   function(ChangeState_ls, FileName = "ModelState.Rda") {
+#     ModelState_ls <- getModelState()
+#     for (i in 1:length(ChangeState_ls)) {
+#       ModelState_ls[[names(ChangeState_ls[i])]] <- ChangeState_ls[[i]]
+#     }
+#     ModelState_ls$LastChanged <- Sys.time()
+#     save(ModelState_ls, file = FileName)
+#     TRUE
+#   }
 
 
 #READ MODEL STATE FILE
@@ -1101,7 +1109,7 @@ doProcessInpSpec <- function(InpSpecs_ls, InputDir = "inputs") {
 #' specifications.
 #' @export
 processModuleSpecs <- function(Spec_ls) {
-  G <- readModelState()
+  G <- getModelState()
   #Define a function to process a component of a specifications list
   processComponent <- function(Component_ls, ComponentName) {
     Result_ls <- list()
@@ -1238,8 +1246,12 @@ simDataTransactions <- function(AllSpecs_ls) {
       Refs_ <- G$DatastoreReferences[[Name]]
       for (Ref in Refs_) {
         if (file.exists(Ref)) {
-          Dstores_ls[[Name]][[Ref]] <-
-            readModelState("Datastore", FileName = getInventoryRef(Ref))
+          RefDstore_df <-
+            readModelState(FileName = getInventoryRef(Ref))$Datastore
+          RefDstore_df <- RefDstore_df[grep(Name, RefDstore_df$group),]
+          Dstores_ls[[Name]][[Ref]] <- RefDstore_df
+          rm(RefDstore_df)
+
         } else {
           Msg <-
             paste0("The file '", Ref,
@@ -1388,6 +1400,7 @@ simDataTransactions <- function(AllSpecs_ls) {
       if (!is.null(ModuleSpecs_ls$Get)) {
         for (j in 1:length(ModuleSpecs_ls$Get)) {
           Spec_ls <- ModuleSpecs_ls$Get[[j]]
+          Spec_ls$MODULE <- Module
           Group <- Spec_ls[["GROUP"]]
           Table <- Spec_ls[["TABLE"]]
           Name <- Spec_ls[["NAME"]]

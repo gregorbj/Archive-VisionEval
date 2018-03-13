@@ -244,7 +244,7 @@ CreateHouseholdsSpecifications <- list(
       GROUP = "Year",
       TYPE = "compound",
       UNITS = "PRSN/HH",
-      PROHIBIT = c("NA", "< 0"),
+      PROHIBIT = c("< 0"),
       ISELEMENTOF = ""
     ),
     item(
