@@ -1640,7 +1640,7 @@ CalculatePolicyVmt <- function(L) {
   #------
 
   # Function to rename variables to be consistent with Get specfications
-  # of CalculateTravelDemand.
+  # of CalculatePolicyVmt.
 
   # Function to add suffix 'Future' at the end of all the variable names
   AddSuffixFuture <- function(x, suffix = "Future"){
