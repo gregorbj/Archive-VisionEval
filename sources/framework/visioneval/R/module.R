@@ -610,17 +610,34 @@ testModule <-
       Spec_ls <- Get_ls[[i]]
       if (Spec_ls$GROUP == "Year") {
         for (Year in G$Years) {
-          Present <-
-            checkDataset(Spec_ls$NAME, Spec_ls$TABLE, Year, G$Datastore)
-          if (!Present) {
-            if(isOptional(Spec_ls)) {
-              #Identify for removal because optional and not present
-              OptSpecToRemove_ <- c(OptSpecToRemove_, i)
-            } else {
-              #Identify as missing because not optional and not present
-              Missing_ <- c(Missing_, attributes(Present))
+          if (RunFor == "NotBaseYear"){
+            if(!Year %in% G$BaseYear){
+              Present <-
+                checkDataset(Spec_ls$NAME, Spec_ls$TABLE, Year, G$Datastore)
+              if (!Present) {
+                if(isOptional(Spec_ls)) {
+                  #Identify for removal because optional and not present
+                  OptSpecToRemove_ <- c(OptSpecToRemove_, i)
+                } else {
+                  #Identify as missing because not optional and not present
+                  Missing_ <- c(Missing_, attributes(Present))
+                }
+              }
+            }
+          } else {
+            Present <-
+              checkDataset(Spec_ls$NAME, Spec_ls$TABLE, Year, G$Datastore)
+            if (!Present) {
+              if(isOptional(Spec_ls)) {
+                #Identify for removal because optional and not present
+                OptSpecToRemove_ <- c(OptSpecToRemove_, i)
+              } else {
+                #Identify as missing because not optional and not present
+                Missing_ <- c(Missing_, attributes(Present))
+              }
             }
           }
+
         }
       }
       if (Spec_ls$GROUP == "BaseYear") {
