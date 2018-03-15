@@ -13,7 +13,7 @@ Description: This package creates and saves 3 data frames that are used to
     (NHTS) augmented with data on metropolitan area freeway supply and transit
     supply. The package produces a data frames of household characteristics and
     travel, vehicle characteristics, household tours .
-License: file LICENSE
+License: Apache License 2.0
 LazyData: TRUE
 Depends: R (>= 3.1.0)
 Imports:

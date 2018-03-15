@@ -3,13 +3,13 @@ Type: Package
 Title: Model household vehicles
 Version: 0.7
 Date: 1/14/18
-Author: Brian Gregor [aut, cre],
-Maintainer: Brian Gregor <gregorb@or-analytics.com>
+Author: Brian Gregor [aut, cre], Aditya Gore <aditya.gore@rsginc.com> [cre]
+Maintainer: Brian Gregor <gregorb@or-analytics.com>, Aditya Gore <aditya.gore@rsginc.com>
 Copyright: AASHTO
 URL: https://github.com/gregorbj/VisionEval/sources/modules/VEVehicleOwnership
 Description: This package contains modules which predict household vehicle
     ownership, including the number own, body types, and ages.
-License: file LICENSE
+License: Apache License 2.0
 LazyData: TRUE
 Depends: R (>= 3.1.0)
 Imports:
