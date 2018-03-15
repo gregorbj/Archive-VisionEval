@@ -1,0 +1,5 @@
+Size,Ramp,Incident,Signal,Access
+Small,0,0.67,0.33,0.28
+Medium,0.03,0.43,0.5,0.42
+Large,0.43,0.69,0.41,0.49
+VeryLarge,0.41,0.78,0.43,0.46

@@ -1,0 +1,6 @@
+RoadClass,LDVShortWB,Motorcycle,Bus,LDVLongWB,SingleTruck,CombiTruck
+  Interstate Rural,138324 ,1524 ,1553 ,43965 ,11217 ,49104 
+  Other Arterial Rural,229775 ,2890 ,2034 ,89585 ,18934 ,33064 
+  Other Rural,230210 ,2806 ,2048 ,92755 ,18058 ,16218 
+  Interstate Urban,339570 ,2223 ,2011 ,83723 ,14498 ,35807 
+  Other Urban,1087865 ,9070 ,6123 ,312684 ,48031 ,41595 
