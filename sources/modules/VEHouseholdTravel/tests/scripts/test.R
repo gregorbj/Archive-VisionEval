@@ -108,7 +108,7 @@ unzip("ModelState_CalculateInducedDemand.zip")
 untar("inputs_CalculateInducedDemand.tar")
 setwd("..")
 
-#Test CalculateTravelDemandFuture module
+#Test CalculateInducedDemand module
 source("R/CalculateInducedDemand.R")
 testModule(
   ModuleName = "CalculateInducedDemand",
@@ -130,7 +130,7 @@ untar("inputs_CalculatePolicyVmt.tar")
 unzip("ModelState_CalculatePolicyVmt.zip")
 setwd("..")
 
-#Test CalculateTravelDemandFuture module
+#Test CalculatePolicyVmt module
 source("R/CalculatePolicyVmt.R")
 testModule(
   ModuleName = "CalculatePolicyVmt",
