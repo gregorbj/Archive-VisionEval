@@ -477,7 +477,7 @@ server <- function(input, output, session) {
     if (!file.exists(filePath)) {
       returnValue_dt <- NULL
       } else {
-        G <- getModelState()
+        G <- readModelState()
         table_dt <- data.table::data.table(G$Datastore)
         if(nrow(table_dt) > 0){
           table_attributes_ls <- table_dt[,attributes]
@@ -566,8 +566,8 @@ server <- function(input, output, session) {
       #From now on we will get the current ModelState by reading the object stored on disk
     reactiveFilePaths_rv[[MODEL_STATE_FILE]] <<- file.path(scriptInfo_ls$fileDirectory, "ModelState.Rda")
 
-    reactiveFilePaths_rv[[VE_LOG]] <<- file.path(scriptInfo_ls$fileDirectory, getModelState()$LogFile)
-    reactiveFilePaths_rv[[DATASTORE]] <<- file.path(scriptInfo_ls$fileDirectory, getModelState()$DatastoreName)
+    reactiveFilePaths_rv[[VE_LOG]] <<- file.path(scriptInfo_ls$fileDirectory, readModelState()$LogFile)
+    reactiveFilePaths_rv[[DATASTORE]] <<- file.path(scriptInfo_ls$fileDirectory, readModelState()$DatastoreName)
 
     defsDirectory <- file.path(scriptInfo_ls$fileDirectory, "defs")
 
@@ -612,7 +612,7 @@ server <- function(input, output, session) {
     #From now on we will get the current ModelState by reading the object stored on disk
     #store the current ModelState in the global options
     #so that the process will use the same log file as the one we have already started tracking...
-    ModelState_ls = getModelState()
+    ModelState_ls <- readModelState()
     options("visioneval.preExistingModelState" = ModelState_ls)
     debugConsole("getScriptOutput entered")
     setwd(dirname(datapath))
@@ -632,7 +632,7 @@ server <- function(input, output, session) {
       # if(file.exists(reactiveFilePaths_rv[[MODEL_STATE_FILE]])){
       #   remove(reactiveFilePaths_rv[[MODEL_STATE_FILE]])
       # }
-      getModelState() #reference ModelState_ls so future will recognize it as a global
+      #reference ModelState_ls so future will recognize it as a global
       getScriptOutput(datapath, isolate(reactiveFilePaths_rv[[CAPTURED_SOURCE]]))
       }),
       callback = function(asyncResult) {
@@ -1001,7 +1001,7 @@ server <- function(input, output, session) {
       row <- as.integer(selection)
       DataPathTable <- reactiveFileReaders_ls[[DATASTORE]]()
       DataRow <- DataPathTable[row]
-      G <- getModelState()
+      G <- readModelState()
       filepaths <- data.table::data.table(G$Datastore)
       otherReactiveValues_rv[[DATASTORE_TABLE_IDENTIFIER]] <- paste0(DataRow$Group, "/",
                                                                      DataRow$Name)
