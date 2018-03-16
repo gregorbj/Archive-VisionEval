@@ -326,19 +326,20 @@ initializeModel <-
     for (i in 1:nrow(ModuleCalls_df)) {
       Module <- ModuleCalls_df$ModuleName[i]
       Package <- ModuleCalls_df$PackageName[i]
+      EntryName <- paste(Package, Module, sep = "::")
       ModuleSpecs_ls <-
         processModuleSpecs(getModuleSpecs(Module, Package))
       #If there are inputs, process them
       if (!is.null(ModuleSpecs_ls$Inp)) {
-        ProcessedInputs_ls[[Module]] <-
+        ProcessedInputs_ls[[EntryName]] <-
           processModuleInputs(ModuleSpecs_ls, Module)
         #If module is Initialize process inputs with Initialize function
         if (Module == "Initialize") {
           if (length(ProcessedInputs_ls[[Module]]$Errors) == 0) {
             initFunc <- eval(parse(text = paste(Package, Module, sep = "::")))
-            InitializedInputs_ls <- initFunc(ProcessedInputs_ls[[Module]])
-            ProcessedInputs_ls[[Module]]$Data <- InitializedInputs_ls$Data
-            ProcessedInputs_ls[[Module]]$Errors <- InitializedInputs_ls$Errors
+            InitializedInputs_ls <- initFunc(ProcessedInputs_ls[[EntryName]])
+            ProcessedInputs_ls[[EntryName]]$Data <- InitializedInputs_ls$Data
+            ProcessedInputs_ls[[EntryName]]$Errors <- InitializedInputs_ls$Errors
             if (length(InitializedInputs_ls$Warnings > 0)) {
               writeLog(InitializedInputs_ls$Warnings)
             }
@@ -362,10 +363,11 @@ initializeModel <-
     for (i in 1:nrow(ModuleCalls_df)) {
       Module <- ModuleCalls_df$ModuleName[i]
       Package <- ModuleCalls_df$PackageName[i]
+      EntryName <- paste(Package, Module, sep = "::")
       ModuleSpecs_ls <-
         processModuleSpecs(getModuleSpecs(Module, Package))
       if (!is.null(ModuleSpecs_ls$Inp)) {
-        inputsToDatastore(ProcessedInputs_ls[[Module]], ModuleSpecs_ls, Module)
+        inputsToDatastore(ProcessedInputs_ls[[EntryName]], ModuleSpecs_ls, Module)
       }
     }
 
