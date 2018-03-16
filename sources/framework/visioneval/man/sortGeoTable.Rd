@@ -20,8 +20,9 @@ The data frame which has been sorted to match the order of geography
 in the specified table in the datastore.
 }
 \description{
-\code{sortGeoTable} returns a data frame whose rows are sorted to match the
-geography in a specified table in the datastore.
+\code{sortGeoTable} a visioneval framework control function that returns a
+data frame whose rows are sorted to match the geography in a specified table
+in the datastore.
 }
 \details{
 This function sorts the rows of a data frame that the 'Geo' field in the

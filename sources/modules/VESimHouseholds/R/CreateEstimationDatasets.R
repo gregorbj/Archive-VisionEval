@@ -6,24 +6,14 @@
 #household and person data. This script reads in the data files and creates the
 #datasets needed to estimate these models.
 
-# Copyright [2017] [AASHTO]
-# Based in part on works previously copyrighted by the Oregon Department of
-# Transportation and made available under the Apache License, Version 2.0 and
-# compatible open-source licenses.
 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 
-library(visioneval)
+#=================================
+#Packages used in code development
+#=================================
+#Uncomment following lines during code development. Recomment when done.
+# library(visioneval)
+
 
 #Describe specifications for input data files
 #--------------------------------------------
@@ -32,8 +22,16 @@ PumsHhInp_ls <- items(
   item(
     NAME =
       items("SERIALNO",
-            "PUMA5",
-            "HWEIGHT",
+            "PUMA5"),
+    TYPE = "character",
+    PROHIBIT = "",
+    ISELEMENTOF = "",
+    UNLIKELY = "",
+    TOTAL = ""
+  ),
+  item(
+    NAME =
+      items("HWEIGHT",
             "UNITTYPE",
             "PERSONS"),
     TYPE = "integer",
@@ -44,8 +42,8 @@ PumsHhInp_ls <- items(
   ),
   item(
     NAME = "BLDGSZ",
-    TYPE = "integer",
-    PROHIBIT = c("< 0"),
+    TYPE = "character",
+    PROHIBIT = "",
     ISELEMENTOF = "",
     UNLIKELY = "",
     TOTAL = ""
@@ -62,13 +60,25 @@ PumsHhInp_ls <- items(
 #PUMS person data
 PumsPerInp_ls <- items(
   item(
-    NAME =
-      items("SERIALNO",
-            "AGE",
-            "WRKLYR",
-            "MILITARY"),
+    NAME = "SERIALNO",
+    TYPE = "character",
+    PROHIBIT = "",
+    ISELEMENTOF = "",
+    UNLIKELY = "",
+    TOTAL = ""
+  ),
+  item(
+    NAME = "AGE",
     TYPE = "integer",
     PROHIBIT = c("< 0"),
+    ISELEMENTOF = "",
+    UNLIKELY = "",
+    TOTAL = ""
+  ),
+  item(
+    NAME = "WRKLYR",
+    TYPE = "character",
+    PROHIBIT = "",
     ISELEMENTOF = "",
     UNLIKELY = "",
     TOTAL = ""
@@ -91,6 +101,7 @@ Hh_df <-
     PumsHhInp_ls,
     "pums_households.csv",
     "CreateEstimationDatasets.R")
+Hh_df$BLDGSZ <- as.numeric(Hh_df$BLDGSZ)
 rm(PumsHhInp_ls)
 #Read in PUMS person data file
 Per_df <-

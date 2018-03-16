@@ -20,8 +20,9 @@ A character vector containing a list of error messages or having a
 length of 0 if there are no error messages.
 }
 \description{
-\code{checkModuleOutputs} checks output list produced by a module for
-consistency with the module's specifications.
+\code{checkModuleOutputs} a visioneval framework module developer function
+that checks output list produced by a module for consistency with the
+module's specifications.
 }
 \details{
 This function is used to check whether the output list produced by a module

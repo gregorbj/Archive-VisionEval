@@ -6,24 +6,6 @@
 #metropolitan area freeway supply and transit supply. The package produces a
 #data frame of values by household.
 
-# Copyright [2017] [AASHTO]
-# Based largely on works previously copyrighted by the Oregon Department of
-# Transportation and made available under the Apache License, Version 2.0 and
-# compatible open-source licenses.
-
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-
 #=======
 #PURPOSE
 #=======
@@ -34,100 +16,249 @@
 #containing travel and other relevant data for each survey household.
 
 
-#=====
-#SETUP
-#=====
+library(visioneval)
+
+
+#==================
+#LOAD NHTS DATASETS
+#==================
 
 #Define functions
 #----------------
-
+#Define function to convert name to proper name (only first letter capitalized)
 toProperName <- function(X){
-          EndX <- nchar(X)
-          paste(toupper(substring(X, 1, 1)), tolower(substring(X, 2, EndX)), sep="")
+  EndX <- nchar(X)
+  paste(toupper(substring(X, 1, 1)), tolower(substring(X, 2, EndX)), sep="")
 }
 
+#Define function to convert 1-dimensional array into a named vector
 toVecFrom1DAry <- function(X_ar){
   X_ <- as.vector(X_ar)
   names(X_) <- names(X_ar)
   X_
 }
 
+#Define function to convert numbers to strings and add leading zeros if
+#necessary so that every one has 2 characters (e.g. '1' becomes 01)
+doPadNum <- function(Num_) {
+  Num_ <- as.character(Num_)
+  Num_[nchar(Num_) < 2] <- paste0(0, Num_[nchar(Num_) < 2])
+  Num_
+}
+
+#Define function to retrieve NHTS dataset from repository, unzip, and read as
+#data frame
+#----------------------------------------------------------------------------
+#' Retrieve data in zip archive from repository
+#'
+#' \code{getZipDatasetFromRepo} retrieve a zip archive containing a csv file
+#' from a repository, unzip, and read as data frame
+#'
+#' This function retrieves a zip archive containing a csv file from a
+#' repository, unzips it, and reads it in as data frame which it returns.
+#'
+#' @param Repo A string that is the url where the zip archive is located.
+#' @param DatasetName The name of the dataset.
+#' @return A data frame containing the data in the zip archive.
+#' @import utils
+getZipDatasetFromRepo <- function(Repo, DatasetName) {
+  ZipArchiveFileName <- paste0(DatasetName, ".zip")
+  CsvFileName <- paste0(DatasetName, ".csv")
+  download.file(file.path(Repo, ZipArchiveFileName), ZipArchiveFileName)
+  Data_df <- read.csv(unzip(ZipArchiveFileName), as.is = TRUE)
+  file.remove(ZipArchiveFileName, CsvFileName)
+  Data_df
+}
+
+#Identify NHTS data directory
+#----------------------------
+#Compressed NHTS 2001 public use datasets are available in the following GitHub
+#repository. This may change in the future.
+Nhts2001Repo <-
+  "https://raw.githubusercontent.com/gregorbj/NHTS2001/master/data"
+
 #Load NHTS household data
 #------------------------
-#The following commented code was used to develop R dataset from the NHTS
-#HHPUB.csv file:
-# Hh_df <- read.csv("inst/extdata/HHPUB.csv", as.is = TRUE)
-# Keep_ <- c("HOUSEID", "AGE_P1", "AGE_P2", "AGE_P3", "AGE_P4", "AGE_P5", "AGE_P6",
-#   "AGE_P7", "AGE_P8", "AGE_P9", "AGE_P10", "AGE_P11", "AGE_P12", "AGE_P13",
-#   "AGE_P14", "CENSUS_D", "CENSUS_R", "DRVRCNT", "EXPFLHHN", "EXPFLLHH",
-#   "FLGFINCM", "HBHRESDN", "HBHUR", "HBPPOPDN", "HHC_MSA", "HHFAMINC",
-#   "HHINCTTL", "HHNUMBIK", "HHR_AGE", "HHR_DRVR", "HHR_RACE", "HHR_SEX",
-#   "HHSIZE", "HHVEHCNT", "HOMETYPE", "HTEEMPDN", "HTHRESDN", "HTHUR",
-#   "HTPPOPDN", "LIF_CYC", "MSACAT", "MSASIZE", "RAIL", "RATIO16V",
-#   "URBAN", "URBRUR", "WRKCOUNT", "CNTTDHH")
-# AllTripsHh_ <- Hh_df$HOUSEID[!is.na(Hh_df$EXPFLLHH)]
-# Hh_df <- Hh_df[Hh_df$HOUSEID %in% AllTripsHh_, Keep_]
-# save(Hh_df, file = "inst/extdata/Hh_df.rda", compress = TRUE)
-
-#Load NHTS household dataset
-load("inst/extdata/Hh_df.rda")
+#Download data from repository and process if it has not already been done
+if (!file.exists("data-raw/Hh_df.rda")) {
+  Hh_df <- getZipDatasetFromRepo(Nhts2001Repo, "HHPUB")
+  Keep_ <- c("HOUSEID", "AGE_P1", "AGE_P2", "AGE_P3", "AGE_P4", "AGE_P5",
+             "AGE_P6", "AGE_P7", "AGE_P8", "AGE_P9", "AGE_P10", "AGE_P11",
+             "AGE_P12", "AGE_P13", "AGE_P14", "CENSUS_D", "CENSUS_R", "DRVRCNT",
+             "DRV_P1", "DRV_P2", "DRV_P3", "DRV_P4", "DRV_P5", "DRV_P6",
+             "DRV_P7", "DRV_P8", "DRV_P9", "DRV_P10", "DRV_P11", "DRV_P12",
+             "DRV_P13", "DRV_P14", "EXPFLHHN", "EXPFLLHH", "FLGFINCM",
+             "HBHRESDN", "HBHUR", "HBPPOPDN", "HHC_MSA", "HHFAMINC", "HHINCTTL",
+             "HHNUMBIK", "HHR_AGE", "HHR_DRVR", "HHR_RACE", "HHR_SEX", "HHSIZE",
+             "HHVEHCNT", "HOMETYPE", "HTEEMPDN", "HTHRESDN", "HTHUR",
+             "HTPPOPDN", "LIF_CYC", "MSACAT", "MSASIZE", "RAIL", "RATIO16V",
+             "URBAN", "URBRUR", "WRKCOUNT", "WKR_P1", "WKR_P2", "WKR_P3",
+             "WKR_P4", "WKR_P5", "WKR_P6", "WKR_P7", "WKR_P8", "WKR_P9",
+             "WKR_P10", "WKR_P11", "WKR_P12", "WKR_P13", "WKR_P14", "CNTTDHH")
+  Hh_df <- Hh_df[, Keep_]
+  save(Hh_df, file = "data-raw/Hh_df.rda", compress = TRUE)
+} else {
+  #Otherwise read in from 'data-raw' directory
+  load("data-raw/Hh_df.rda")
+}
+#Identify households that have expansion factor
+AllTripsHh_ <- Hh_df$HOUSEID[!is.na(Hh_df$EXPFLLHH)]
+#Limit households to those that have expansion factor
+Hh_df <- Hh_df[Hh_df$HOUSEID %in% AllTripsHh_,]
+#Convert field names to proper names
 names(Hh_df) <- toProperName(names(Hh_df))
+#Convert negative values to NA
 Hh_df[Hh_df < 0] <- NA
 
 #Load NHTS vehicle data
 #----------------------
-#The following commented code was used to develop R dataset from the NHTS
-#VEHPUB.csv file:
-# Veh_df <- read.csv("inst/extdata/VEHPUB.csv", as.is = TRUE)
-# Keep_ <-
-#   c("HOUSEID", "VEHID", "BESTMILE", "EIADMPG", "GSCOST", "VEHTYPE", "VEHYEAR",
-#     "VEHMILES" )
-# Veh_df <-
-#   Veh_df[Veh_df$HOUSEID %in% AllTripsHh_, Keep_]
-# save(Veh_df, file = "inst/extdata/Veh_df.rda", compress = TRUE)
-
-#Load the NHTS vehicle dataset
-load("inst/extdata/Veh_df.rda")
+#Download data from repository and process if it has not already been done
+if (!file.exists("data-raw/Veh_df.rda")) {
+  Veh_df <- getZipDatasetFromRepo(Nhts2001Repo, "VEHPUB")
+  Keep_ <-
+    c("HOUSEID", "VEHID", "BESTMILE", "EIADMPG", "GSCOST", "VEHTYPE", "VEHYEAR",
+      "VEHMILES" )
+  Veh_df <- Veh_df[, Keep_]
+  save(Veh_df, file = "data-raw/Veh_df.rda", compress = TRUE)
+} else {
+  load("data-raw/Veh_df.rda")
+}
+#Only include vehicle data for households that have expansion factor
+Veh_df <- Veh_df[Veh_df$HOUSEID %in% AllTripsHh_,]
+#Convert field names to proper names
 names(Veh_df) <- toProperName(names(Veh_df))
+#Convert Vehid to character
 Veh_df$Vehid <- as.character(Veh_df$Vehid)
+#Convert negative values to NA
 Veh_df[Veh_df < 0] <- NA
 
 #Load NHTS person data
 #---------------------
-#The following commented code was used to develop R dataset from the NHTS
-#PERPUB.csv file:
-# Per_df <- read.csv("inst/extdata/PERPUB.csv", as.is = TRUE)
-# Keep_ <-
-#   c("HOUSEID", "PERSONID", "COMMDRVR", "NBIKETRP", "NWALKTRP", "USEPUBTR",
-#     "WRKDRIVE", "WRKTRANS", "DTGAS")
-# Per_df <-
-#   Per_df[Per_df$HOUSEID %in% AllTripsHh_, Keep_]
-# save(Per_df, file = "inst/extdata/Per_df.rda", compress = TRUE)
-
-#Load the NHTS persons file
-load("inst/extdata/Per_df.rda")
+#Download data from repository and process if it has not already been done
+if (!file.exists("data-raw/Per_df.rda")) {
+  Per_df <- getZipDatasetFromRepo(Nhts2001Repo, "PERPUB")
+  Keep_ <-
+    c("HOUSEID", "PERSONID", "COMMDRVR", "NBIKETRP", "NWALKTRP", "USEPUBTR",
+      "WRKDRIVE", "WRKTRANS", "WORKER", "DTGAS", "DISTTOWK", "DRIVER", "R_AGE",
+      "R_SEX")
+  Per_df <- Per_df[, Keep_]
+  save(Per_df, file = "data-raw/Per_df.rda", compress = TRUE)
+} else {
+  load("data-raw/Per_df.rda")
+}
+#Only include person data for households that have expansion factor
+Per_df <- Per_df[Per_df$HOUSEID %in% AllTripsHh_,]
+#Convert field names to proper names
 names(Per_df) <- toProperName(names(Per_df))
-Per_df$Personid <- as.character(Per_df$Personid)
+#Create a unique person ID
+Per_df$Personid <- paste0(Per_df$Houseid, doPadNum(Per_df$Personid))
+#Convert negative values to NA
 Per_df[Per_df < 0] <- NA
 
 #Load NHTS daily trip data
 #-------------------------
-# The following commented code was used to develop R dataset from the NHTS
-# DAYPUB.csv file:
-# Dt_df <- read.csv("inst/extdata/DAYPUB.csv", as.is = TRUE)
-# Keep_ <-
-#   c("HOUSEID", "VEHID", "PERSONID", "NUMONTRP", "TRPMILES", "TRPTRANS",
-#     "TRVL_MIN", "PSGR_FLG", "WHYFROM", "WHYTO")
-# Dt_df <-
-#   Dt_df[Dt_df$HOUSEID %in% AllTripsHh_, Keep_]
-# save(Dt_df, file = "inst/extdata/Dt_df.rda", compress = TRUE)
-
-#Load the NHTS daily trips file
-load("inst/extdata/Dt_df.rda")
+#Download data from repository and process if it has not already been done
+if (!file.exists("data-raw/Dt_df.rda")) {
+  Dt_df <- getZipDatasetFromRepo(Nhts2001Repo, "DAYPUB")
+  Keep_ <-
+    c("HOUSEID", "TDCASEID", "VEHID", "VEHUSED", "TRPHHVEH","PERSONID",
+      "NUMONTRP", "TRPTRANS", "TRPMILES", "TRVL_MIN", "DWELTIME", "PSGR_FLG",
+      "WHYFROM", "WHYTO", "VEHTYPE")
+  Dt_df <- Dt_df[, Keep_]
+  save(Dt_df, file = "data-raw/Dt_df.rda", compress = TRUE)
+} else {
+  load("data-raw/Dt_df.rda")
+}
+#Only include trip data for households that have expansion factor
+Dt_df <- Dt_df[Dt_df$HOUSEID %in% AllTripsHh_,]
+#Convert field names to proper names
 names(Dt_df) <- toProperName(names(Dt_df))
+#Convert Vehid to character
 Dt_df$Vehid <- as.character(Dt_df$Vehid)
-Dt_df$Personid <- as.character(Dt_df$Personid)
+#Create a unique person ID
+Dt_df$Personid <- paste0(Dt_df$Houseid, doPadNum(Dt_df$Personid))
+#Convert negative values to NA
 Dt_df[Dt_df < 0] <- NA
+
+
+#=======================================
+#LOAD METROPOLITAN ROAD AND TRANSIT DATA
+#=======================================
+
+#Describe specifications for road supply data file
+#-------------------------------------------------
+RoadInp_ls <- items(
+  item(
+    NAME = items(
+      "MsaCode",
+      "UrbanizedArea"),
+    TYPE = "character",
+    PROHIBIT = "NA",
+    ISELEMENTOF = "",
+    UNLIKELY = "",
+    TOTAL = ""
+  ),
+  item(
+    NAME = items(
+      "RoadMiles",
+      "TotalDvmt",
+      "Population",
+      "Area",
+      "Density",
+      "RoadMileCap",
+      "FwyMiles",
+      "FwyLaneMi"),
+    TYPE = "double",
+    PROHIBIT = c("NA", "< 0"),
+    ISELEMENTOF = "",
+    UNLIKELY = "",
+    TOTAL = ""
+  )
+)
+
+#Read in road supply data
+#------------------------
+Hwy2001_df <-
+  processEstimationInputs(
+    RoadInp_ls,
+    "highway_statistics.csv",
+    "Make2001NHTSDataset")
+rm(RoadInp_ls)
+
+#Describe specifications for transit supply data file
+#----------------------------------------------------
+TransitInp_ls <- items(
+  item(
+    NAME = items(
+      "UZAName",
+      "MSACode"),
+    TYPE = "character",
+    PROHIBIT = "",
+    ISELEMENTOF = "",
+    UNLIKELY = "",
+    TOTAL = ""
+  ),
+  item(
+    NAME = items(
+      "BusEqRevMi",
+      "UZAPop",
+      "BusEqRevMiPC"),
+    TYPE = "double",
+    PROHIBIT = "< 0",
+    ISELEMENTOF = "",
+    UNLIKELY = "",
+    TOTAL = ""
+  )
+)
+
+#Read in transit supply data
+#---------------------------
+Transit2001_df <-
+  processEstimationInputs(
+    TransitInp_ls,
+    "uza_bus_eq_rev_mi.csv",
+    "Make2001NHTSDataset")
+rm(TransitInp_ls)
 
 
 #================
@@ -141,8 +272,10 @@ AgeFields_ <-
     "Age_p8", "Age_p9", "Age_p10", "Age_p11", "Age_p12", "Age_p13", "Age_p14" )
 # Set up person age categories
 AgeBreaks <- c(0, 14, 19, 29, 54, 64, max(Hh_df[,AgeFields_], na.rm = TRUE))
+# Create a matrix of the age fields
+Ages_HhPr <- as.matrix(Hh_df[,AgeFields_])
 # Tabulate persons per household by age category
-Ages_HhAg <- t(apply( Hh_df[,AgeFields_], 1, function(x) {
+Ages_HhAg <- t(apply(Ages_HhPr, 1, function(x) {
   table(cut(x, AgeBreaks, include.lowest=TRUE, right=FALSE))
 }))
 # Assign tabulations to age category variables
@@ -152,9 +285,51 @@ Hh_df$Age20to29 <- Ages_HhAg[,3]
 Hh_df$Age30to54 <- Ages_HhAg[,4]
 Hh_df$Age55to64 <- Ages_HhAg[,5]
 Hh_df$Age65Plus <- Ages_HhAg[,6]
-# Clean up
+
+#Calculate the number of drivers by age group and add summary to household data
+#------------------------------------------------------------------------------
+DrvFields_ <-
+  c("Drv_p1", "Drv_p2", "Drv_p3", "Drv_p4", "Drv_p5", "Drv_p6", "Drv_p7",
+    "Drv_p8", "Drv_p9", "Drv_p10", "Drv_p11", "Drv_p12", "Drv_p13", "Drv_p14" )
+# Create a matrix of driver fields with 1 for driver and NA for non-driver
+Drvs_HhPr <- as.matrix(Hh_df[,DrvFields_])
+Drvs_HhPr[Drvs_HhPr != 1] <- NA
+# Tabulate drivers per household by age category
+Drvs_HhAg <- t(apply(Ages_HhPr * Drvs_HhPr, 1, function(x) {
+  table(cut(x, AgeBreaks, include.lowest=TRUE, right=FALSE))
+}))
+# Assign tabulations to age category variables
+Hh_df$Drv15to19 <- Drvs_HhAg[,2]
+Hh_df$Drv20to29 <- Drvs_HhAg[,3]
+Hh_df$Drv30to54 <- Drvs_HhAg[,4]
+Hh_df$Drv55to64 <- Drvs_HhAg[,5]
+Hh_df$Drv65Plus <- Drvs_HhAg[,6]
+
+#Calculate the number of workers by age group and add summary to household data
+#------------------------------------------------------------------------------
+WkrFields_ <-
+  c("Wkr_p1", "Wkr_p2", "Wkr_p3", "Wkr_p4", "Wkr_p5", "Wkr_p6", "Wkr_p7",
+    "Wkr_p8", "Wkr_p9", "Wkr_p10", "Wkr_p11", "Wkr_p12", "Wkr_p13", "Wkr_p14" )
+# Create a matrix of worker fields with 1 for worker and NA for non-worker
+Wkrs_HhPr <- as.matrix(Hh_df[,WkrFields_])
+Wkrs_HhPr[Wkrs_HhPr != 1] <- NA
+# Tabulate workers per household by age category
+Wkrs_HhAg <- t(apply(Ages_HhPr * Wkrs_HhPr, 1, function(x) {
+  table(cut(x, AgeBreaks, include.lowest=TRUE, right=FALSE))
+}))
+# Assign tabulations to age category variables
+Hh_df$Wkr15to19 <- Wkrs_HhAg[,2]
+Hh_df$Wkr20to29 <- Wkrs_HhAg[,3]
+Hh_df$Wkr30to54 <- Wkrs_HhAg[,4]
+Hh_df$Wkr55to64 <- Wkrs_HhAg[,5]
+Hh_df$Wkr65Plus <- Wkrs_HhAg[,6]
+
+#Clean up temporary files from age tabulations
+#----------------------------------------------
 Hh_df[AgeFields_] <- NULL
-rm( AgeFields_, AgeBreaks, Ages_HhAg )
+Hh_df[DrvFields_] <- NULL
+Hh_df[WkrFields_] <- NULL
+rm(AgeFields_, AgeBreaks, Ages_HhAg, Drvs_HhAg, Wkrs_HhAg)
 
 #Process household income data
 #-----------------------------
@@ -283,187 +458,215 @@ rm(Gscostmile2_Hh, Veh_ls, HhAveMpg_Hh, Gscost_Hh)
 
 #Tabulate daily vehicle travel from the day trip data and add to the household data
 #----------------------------------------------------------------------------------
-#Daily vehicle travel in personal vehicles is tabulated for each household. For
-#these purposes, personal vehicle travel is defined to include all modes that
-#are most likely to be owned by households: car, van, SUV,  pickup truck, other
-#truck, RV, motorcycle. Vehicle travel is only summed for person trips where the
-#person is identified as a driver in order to avoid double counting. A separate
-#tabulation is made of vehicle travel by households that own no vehicles. For
-#these purposes, taxicabs are included in the definition of personal vehicle
-#travel. This is important in order to model the effect of carsharing (for no
-#vehicle households, carsharing tends to increase vehicle travel).
+#Daily vehicle and non-vehicle travel in personal vehicles is tabulated for each
+#household. The following code identifies tours for each person in each
+#household and sums up the distance, travel time, and dwell time for each tour.
+#It also notes several other tour characteristics including, whether the tour
+#starts at home and whether it ends at home, number of trips in the tour, the
+#vehicle ID of the vehicle used, the mode, the type of vehicle, whether a
+#household vehicle was used, the types of destinations along the tour, and the
+#distance to work from home of the person. It also includes a 'tour signature'
+#which is the sequence of starting and ending trip activity codes and vehicle
+#ID. This signature is used to match up tours in the household. If more than one
+#person had the same tour signature, the duplicate tours are eliminated, the
+#number of persons on the tour is recorded, and the maximum distance to work of
+#persons on the tour is recorded. From these tour records, tabulations are made
+#by household of the VMT of travel using household vehicles, VMT of travel using
+#non-household vehicles (excluding public transit vehicles), PMT of walk travel,
+#PMT of bicycle travel, and PMT of public transit travel. School bus travel is
+#included as public transit travel. See code below for more details.
 
-#Tabulate private vehicle travel where not a passenger and speed is reasonable
-#-----------------------------------------------------------------------------
-#Make filters for selecting the proper records
-WasNotPsgr_ <- Dt_df$Psgr_flg == 2
-WasPrivateVeh_ <- Dt_df$Trptrans %in% 1:7
-WasRecorded_ <- Dt_df$Trpmiles > 0
-NotTooFast_ <- Dt_df$Trpmiles / Dt_df$Trvl_min < 1.5
-UseRecord_ <- WasNotPsgr_ & WasPrivateVeh_ & WasRecorded_ & NotTooFast_
-#Tabulate vehicle miles by household
-Dvmt_Hh <-
-  toVecFrom1DAry(
-    tapply(Dt_df$Trpmiles[UseRecord_], Dt_df$Houseid[UseRecord_], sum))
-Hh_df$Dvmt <- unname(Dvmt_Hh[match(Hh_df$Houseid, names(Dvmt_Hh))])
-
-#Make a variable to identify home-to-home tours
-#----------------------------------------------
-HomeStart_ <- Dt_df$Whyfrom
-HomeStart_[HomeStart_ != 1] <- 0
-TourNum_ <- unlist(tapply(HomeStart_, Dt_df$Houseid, cumsum))
-Padding_ <- rep("0", length(TourNum_))
-Padding_[nchar(TourNum_) == 2] <- ""
-TourId_ <- paste(Dt_df$Houseid, Padding_, TourNum_, sep="")
-rm(HomeStart_, Padding_)
-
-#Calculate mileage in short SOV tours
-#------------------------------------
-#Calculate total vehicle miles in each home-to-home tour
-IsVehicle_ <- as.numeric(Dt_df$Vehid) > 0
-TrpVmt_ <- Dt_df$Trpmiles * as.numeric(IsVehicle_)
-TrpVmt_[TourNum_ == 0] <- NA # NA for non-home-to-home tours
-TourVmt_ <- tapply(TrpVmt_[UseRecord_] , TourId_[UseRecord_] , sum)
-IsNaTourVmt_ <- is.na(TourVmt_) # Identify which records are NA
-TourVmt_ <- TourVmt_[!IsNaTourVmt_] # Remove the NA records
-#Identify single occupancy vehicle tours
-IsSov_ <- IsVehicle_ & (Dt_df$Numontrp == 1)
-IsSovTour_ <- tapply(IsSov_[UseRecord_], TourId_[UseRecord_], function(x) all(x))
-IsSovTour_ <- IsSovTour_[!IsNaTourVmt_]
-#Identify households that have SOV tours
-TourHhId_ <- substr(names(TourVmt_), 1, 9)
-#Sum up SOV tour mileage less than specified lengths by household
-calcTourVmtProp <- function(TourLen) {
-  SovTour_ <-
-    toVecFrom1DAry(
-      tapply(TourVmt_[TourVmt_ <= TourLen & IsSovTour_],
-           TourHhId_[TourVmt_ <= TourLen & IsSovTour_], sum))
-  SovTour_Hh <- numeric(nrow(Hh_df))
-  names(SovTour_Hh) <- Hh_df$Houseid
-  SovTour_Hh[names(SovTour_)] <- SovTour_
-  NaHhNames_ <- unique(substr(names(IsNaTourVmt_)[IsNaTourVmt_], 1, 9))
-  SovTour_Hh[NaHhNames_] <- NA
-  unname(SovTour_Hh) / Hh_df$Dvmt
+#Define function to process person tours
+getPersonTours <- function(PTrp_df, replaceNA = FALSE) {
+  if (replaceNA) {
+    WhyFrom_ <- PTrp_df$Whyfrom
+    WhyTo_ <- PTrp_df$Whyto
+    NaIdx_ <- which(is.na(WhyFrom_))
+    for (i in NaIdx_) {
+      if (i == 1) {
+        WhyFrom_[i] <- 1
+      } else {
+        WhyToLag <- WhyTo_[i - 1]
+        if (!is.na(WhyToLag) & WhyToLag == 1) {
+          WhyFrom_[i] <- 1
+        } else {
+          WhyFrom_[i] <- 0
+        }
+      }
+    }
+    PTrp_df$Whyfrom <- WhyFrom_
+  }
+  Tours_ls <- split(PTrp_df, cumsum(PTrp_df$Whyfrom == 1))
+  do.call(rbind, lapply(Tours_ls, function(x) {
+    data.frame(
+      Houseid = x$Houseid[1],
+      Distance = sum(x$Trpmiles, na.rm = TRUE),
+      TravelTime = sum(x$Trvl_min, na.rm = TRUE),
+      DwellTime = sum(x$Dweltime, na.rm = TRUE),
+      StartHome = x$Whyfrom[1] == 1,
+      EndHome = tail(x$Whyto,1) == 1,
+      Trips = nrow(x),
+      Persons = max(x$Numontrp),
+      Vehid = x$Vehused[1],
+      Trptrans = x$Trptrans[1],
+      Vehtype = x$Vehtype[1],
+      HhVehUsed = x$Trphhveh[1],
+      Whyto = paste(x$Whyto, collapse = "-"),
+      Disttowk = Per_df$Disttowk[Per_df$Personid == x$Personid[1]],
+      Signature =
+        paste(paste(c(rbind(x$Whyfrom, x$Whyto)), collapse = ""), x$Vehid[1], sep = "-")
+    )
+  }))
 }
-#Calculate proportions of household DVMT in SOV categories and add to Hh_df
-Hh_df$PropSovDvmtLE2 <- calcTourVmtProp(2)
-Hh_df$PropSovDvmtLE5 <- calcTourVmtProp(5)
-Hh_df$PropSovDvmtLE10 <- calcTourVmtProp(10)
-Hh_df$PropSovDvmtLE15 <- calcTourVmtProp(15)
-Hh_df$PropSovDvmtLE20 <- calcTourVmtProp(20)
-#Clean up workspace
-rm(TrpVmt_, TourVmt_, IsNaTourVmt_, IsSov_, IsSovTour_, TourHhId_)
+#Define function to process household tours, removing duplicated person tour info
+getHouseholdTours <- function(HTrp_df) {
+  PTrp_ls <- split(HTrp_df, HTrp_df$Personid)
+  PTours_df <- do.call(rbind, lapply(PTrp_ls, function(x) {
+    if (any(is.na(x$Whyfrom))) {
+      getPersonTours(x, TRUE)
+    } else {
+      getPersonTours(x)
+    }
+  } ))
+  HTours_ls <- split(PTours_df, PTours_df$Signature)
+  HTours_df <- do.call(rbind, lapply(HTours_ls, function(x) {
+    y <- x[1,]
+    if (any(!is.na(x$Disttowk))) {
+      y$Disttowk <- max(x$Disttowk, na.rm = TRUE)
+    } else {
+      y$Disttowk <- NA
+    }
+    y
+  }))
+  HTours_df[, -which(names(HTours_df) == "Signature")]
+}
+#Create data frame of tours by household if not already created
+#It takes a long time to create the data frame of tours and so the code to do so
+#should not be run unless a completed tour dataset has not been created or if
+#the code is changed
+if (file.exists("data-raw/ToursByHh_df.Rda")) {
+  load("data-raw/ToursByHh_df.Rda")
+} else {
+  HTrp_ls <- split(Dt_df, Dt_df$Houseid)
+  ToursByHh_ls <- lapply(HTrp_ls, getHouseholdTours)
+  ToursByHh_df <- do.call(rbind, ToursByHh_ls)
+  rownames(ToursByHh_df) <- NULL
+  ToursByHh_df$Houseid <- as.character(ToursByHh_df$Houseid)
+  ToursByHh_df$Whyto <- as.character(ToursByHh_df$Whyto)
+  save(ToursByHh_df, file = "data-raw/ToursByHh_df.Rda")
+  rm(HTrp_ls, ToursByHh_ls)
+}
+#Make a copy of household tour data frame to further refine
+HhTours_df <- ToursByHh_df
+#Limit to complete cases
+FieldsToCheck_ <-
+  c("Houseid", "Distance", "TravelTime", "DwellTime", "StartHome", "EndHome",
+    "Trips", "Persons", "Trptrans", "Whyto")
+IsComplete_ <-
+  complete.cases(HhTours_df[, FieldsToCheck_])
+HhTours_df <- HhTours_df[IsComplete_,]
+rm(FieldsToCheck_, IsComplete_)
+#Limit to 99th percentile for Distance, TravelTime, and DwellTime
+IsInLimits_ <-
+  with(HhTours_df,
+       Distance != 0 & Distance <= quantile(Distance, 0.99) &
+         TravelTime != 0 & TravelTime <= quantile(TravelTime, 0.99) &
+         DwellTime != 0 & DwellTime <= quantile(DwellTime, 0.99)
+  )
+HhTours_df <- HhTours_df[IsInLimits_,]
+rm(IsInLimits_)
+#Limit to sensible trip speeds
+Speeds_ <- with(HhTours_df, 60 * Distance / TravelTime)
+IsInLimits_ <-
+  Speeds_ >= quantile(Speeds_, 0.005) & Speeds_ <= quantile(Speeds_, 0.995)
+HhTours_df <- HhTours_df[IsInLimits_,]
+rm(Speeds_, IsInLimits_)
+#Add a Mode variable
+HhTours_df <- HhTours_df[HhTours_df$Trptrans > 0 & HhTours_df$Trptrans != 91,]
+HhTours_df <- HhTours_df[,]
+Modes_ <- c("1" = "Auto", "2" = "LtTrk", "3" = "LtTrk", "4" = "LtTrk",
+            "5" = "OthTrk", "6" = "RV", "7" = "Motorcycle", "8" = "Airplane",
+            "9" = "Airplane", "10" = "Bus", "11" = "Bus", "12" = "SchoolBus",
+            "13" = "Bus", "14" = "Bus", "15" = "Train", "16" = "Train",
+            "17" = "Subway", "18" = "StreetCar", "19" = "Boat", "20" = "Boat",
+            "21" = "Boat", "22" = "Taxi", "23" = "Taxi", "24" = "Taxi",
+            "25" = "Bicycle", "26" = "Walk")
+HhTours_df$Mode <- Modes_[as.character(HhTours_df$Trptrans)]
+rm(Modes_)
+#Add a flag for whether tour has a work purpose
+IncludesWork_ <-
+  sapply(HhTours_df$Whyto, function(x) {
+    any(unlist(strsplit(x, "-")) %in% c("10", "11", "12", "13", "14"))
+  })
+HhTours_df$IncludesWork <- unname(IncludesWork_)
+rm(IncludesWork_)
 
-#Calculate work trip mileage proportions
-#---------------------------------------
-#Identify work tours
-WorkCodes_ <- c(11, 12, 13, 14)
-IsWork_ <- (Dt_df$Whyfrom %in% WorkCodes_) | (Dt_df$Whyto %in% WorkCodes_)
-IsWorkTour_ <- tapply(IsWork_, TourId_, function(x) any(x))
-#Calculate total vehicle miles in each home-to-home tour
-TrpVmt_ <- Dt_df$Trpmiles * as.numeric(IsVehicle_)
-TrpVmt_[TourNum_ == 0] <- NA # NA for non-home-to-home tours
-TourVmt_ <- tapply(TrpVmt_[UseRecord_] , TourId_[UseRecord_] , sum)
-WkTourVmt_ <- TourVmt_[IsWorkTour_]
-IsNaWkTourVmt_ <- is.na(WkTourVmt_) # Identify which records are NA
-WkTourVmt_ <- WkTourVmt_[!IsNaWkTourVmt_] # Remove NA records
-#Identify households that have work tours
-WkTourHhId_ <- substr(names(WkTourVmt_), 1, 9)
-#Sum work tour DVMT by household
-HhWkTourVmt_ <- tapply(WkTourVmt_, WkTourHhId_, sum)
-#Put results in a vector that conforms with Hh_df
-WkTourVmt_Hh <- numeric(nrow( Hh_df))
-names(WkTourVmt_Hh) <- Hh_df$Houseid
-WkTourVmt_Hh[names(HhWkTourVmt_)] <- HhWkTourVmt_
-#Set values as NA for households with ambiguous tours
-NaHhNames_ <- unique(substr(names(IsNaWkTourVmt_)[IsNaWkTourVmt_], 1, 9))
-WkTourVmt_Hh[NaHhNames_] <- NA
-WkTourVmt_Hh <- WkTourVmt_Hh[!is.na(names(WkTourVmt_Hh))]
-#Calculate the proportion of household DVMT that is part of a work tour and put in Hh_df
-Hh_df$PropWkDvmt <- WkTourVmt_Hh / Hh_df$Dvmt
-#Clean up workspace
-rm(TourNum_, TourId_, WorkCodes_, IsWork_, IsWorkTour_, TrpVmt_, TourVmt_,
-   WkTourVmt_, IsNaWkTourVmt_, WkTourHhId_, WkTourVmt_Hh, NaHhNames_ )
+#Tabulate household travel
+#-------------------------
+#Travel in household vehicles
+IsPvtVehTravel_ <-
+  HhTours_df$Mode %in% c("Auto", "LtTrk", "OthTrk", "RV", "Motorcycle") & HhTours_df$HhVehUsed == 1
+PvtVehDvmt_Hh <- unlist(tapply(HhTours_df$Distance[IsPvtVehTravel_], HhTours_df$Houseid[IsPvtVehTravel_], sum))
+# sum(PvtVehDvmt_Hh)
+# sum(PvtVehDvmt_Hh) / nrow(HhTours_df)
+Hh_df$PvtVehDvmt <- as.vector(PvtVehDvmt_Hh[Hh_df$Houseid])
+Hh_df$PvtVehDvmt[is.na(Hh_df$PvtVehDvmt)] <- 0
+rm(IsPvtVehTravel_, PvtVehDvmt_Hh)
+#Travel in non-household 'shared' vehicles
+IsShrVehTravel_ <-
+  HhTours_df$Mode %in% c("Taxi") |
+  (HhTours_df$Mode %in% c("Auto", "LtTrk", "OthTrk", "RV", "Motorcycle") & (HhTours_df$HhVehUsed == 2))
+ShrVehDvmt_Hh <- unlist(tapply(HhTours_df$Distance[IsShrVehTravel_], HhTours_df$Houseid[IsShrVehTravel_], sum))
+# sum(ShrVehDvmt_Hh)
+# sum(ShrVehDvmt_Hh) / nrow(HhTours_df)
+Hh_df$ShrVehDvmt <- as.vector(ShrVehDvmt_Hh[Hh_df$Houseid])
+Hh_df$ShrVehDvmt[is.na(Hh_df$ShrVehDvmt)] <- 0
+rm(IsShrVehTravel_, ShrVehDvmt_Hh)
+#Travel by walking
+IsWalkTravel_ <- HhTours_df$Mode == "Walk"
+WalkDpmt_Hh <-
+  with(HhTours_df,
+       unlist(tapply((Distance * Persons)[IsWalkTravel_], HhTours_df$Houseid[IsWalkTravel_], sum)))
+# sum(WalkDpmt_Hh)
+# sum(WalkDpmt_Hh) / nrow(HhTours_df)
+Hh_df$WalkDpmt <- as.vector(WalkDpmt_Hh[Hh_df$Houseid])
+Hh_df$WalkDpmt[is.na(Hh_df$WalkDpmt)] <- 0
+rm(IsWalkTravel_, WalkDpmt_Hh)
+#Travel by bicycling
+IsBicycleTravel_ <- HhTours_df$Mode == "Bicycle"
+BicycleDpmt_Hh <- unlist(tapply(HhTours_df$Distance[IsBicycleTravel_], HhTours_df$Houseid[IsBicycleTravel_], sum))
+# sum(BicycleDpmt_Hh)
+# sum(BicycleDpmt_Hh) / nrow(HhTours_df)
+Hh_df$BikeDpmt <- as.vector(BicycleDpmt_Hh[Hh_df$Houseid])
+Hh_df$BikeDpmt[is.na(Hh_df$BikeDpmt)] <- 0
+rm(IsBicycleTravel_, BicycleDpmt_Hh)
+#Travel using public transportation
+IsTransitTravel_ <- HhTours_df$Mode %in% c("Bus", "SchoolBus", "Train", "Subway", "StreetCar")
+TransitDpmt_Hh <- unlist(tapply(HhTours_df$Distance[IsTransitTravel_], HhTours_df$Houseid[IsTransitTravel_], sum))
+# sum(TransitDpmt_Hh)
+# sum(TransitDpmt_Hh) / nrow(HhTours_df)
+Hh_df$TransitDpmt <- as.vector(TransitDpmt_Hh[Hh_df$Houseid])
+Hh_df$TransitDpmt[is.na(Hh_df$TransitDpmt)] <- 0
+rm(IsTransitTravel_, TransitDpmt_Hh)
 
-#Tabulate private vehicle travel of zero-vehicle households as a passenger
-#-------------------------------------------------------------------------
-#Identify number of household vehicles
-NumVeh_Dt <- Hh_df$Hhvehcnt[match(Dt_df$Houseid, Hh_df$Houseid)]
-#Make additional filters for selecting the proper records
-#Include taxicab in the definition of private vehicles
-WasPrivateVeh_ <- Dt_df$Trptrans %in% c(1:7, 22)
-WasNoVehHhTravel_ <- NumVeh_Dt == 0
-WasPsgr_ <- Dt_df$Psgr_flg == 1
-UseRecord_ <-
-  WasNoVehHhTravel_ & WasPsgr_ & WasPrivateVeh_ & WasRecorded_ & NotTooFast_
-#Tabulate vehicle miles of passenger travel by zero vehicle households
-ZeroVehPassDvmt_Hh <-
-  toVecFrom1DAry(
-    tapply(Dt_df$Trpmiles[UseRecord_], Dt_df$Houseid[UseRecord_], sum))
-Hh_df$ZeroVehPassDvmt <-
-  unname(ZeroVehPassDvmt_Hh[match(Hh_df$Houseid, names(ZeroVehPassDvmt_Hh))])
-#Clean up
-rm(WasPrivateVeh_, WasRecorded_, NotTooFast_, WasNoVehHhTravel_, WasPsgr_,
-   UseRecord_, ZeroVehPassDvmt_Hh )
-
-#Calculate walk and bike trip mileage
-#------------------------------------
-WasWalkOrBikeTrp_ <- Dt_df$Trptrans %in% c(25, 26)
-TrpMiles_ <- Dt_df$Trpmiles
-TrpMiles_[TrpMiles_ < 0] <- NA
-WalkBikeMiles_Hx <-
-  tapply(TrpMiles_[WasWalkOrBikeTrp_], Dt_df$Houseid[WasWalkOrBikeTrp_], sum)
-WalkBikeMiles_Hh <- numeric(nrow(Hh_df))
-names(WalkBikeMiles_Hh) <- Hh_df$Houseid
-WalkBikeMiles_Hh[names(WalkBikeMiles_Hx)] <- WalkBikeMiles_Hx
-Hh_df$WalkBikeMiles <- WalkBikeMiles_Hh
-rm(WasWalkOrBikeTrp_, TrpMiles_, WalkBikeMiles_Hx, WalkBikeMiles_Hh)
-
-#Examine household day trip records that have no "usable" DVMT
-#-------------------------------------------------------------
-#Identify the households having NA values for Dvmt
-NaHh_ <- Hh_df$Houseid[is.na(Hh_df$Dvmt)]
-# There are 8899 of them
-length(NaHh_)
-
-#Evaluate households that have no day trip records (3950)
-#--------------------------------------------------------
-DtHh_ <- unique(Dt_df$Houseid)
-NoDtHh_ <- Hh_df$Houseid[!(Hh_df$Houseid %in% DtHh_)]
-#55% percent of the no day trip households only have persons over 65 years old
-OnlyElderly_Hh <- Hh_df$Age65Plus == Hh_df$Hhsize
-sum(NoDtHh_ %in% Hh_df$Houseid[OnlyElderly_Hh]) / length(NoDtHh_)
-# 61% have only one person in the household and 30% have two persons in the household
-table(Hh_df$Hhsize[Hh_df$Houseid %in% NoDtHh_]) / length(NoDtHh_)
-# These records will be coded with zero because it is reasonable to believe that
-# the households took no trips on the survey day
-Hh_df$Dvmt[Hh_df$Houseid %in% NoDtHh_] <- 0
-
-#Evaluate households that do have some day trip records
-#------------------------------------------------------
-#Make a subset of the day trip data for the NA households having day trip data
-NaHh2_ <- NaHh_[!(NaHh_ %in% NoDtHh_)]
-NotUseDt_df <- Dt_df[Dt_df$Houseid %in% NaHh2_,]
-NotUseDt_df$WasPrivateVeh <- NotUseDt_df$Trptrans %in% c(1:7, 22)
-# Split the dataset
-NotUseDt_ls <- split(NotUseDt_df, NotUseDt_df$Houseid)
-# Identify households where all trips were as passengers or non-private vehicle
-# These will all be identified as having zero VMT
-WasAllPsgr_ <- unlist(lapply(NotUseDt_ls, function(x) {
-  all(x$Psgr_flg %in% c(-1, 1))
-}))
-AllPsgrHh_ <- names(WasAllPsgr_)[WasAllPsgr_]
-Hh_df$Dvmt[Hh_df$Houseid %in% AllPsgrHh_] <- 0
-# Clean up
-rm(NaHh_, DtHh_, NoDtHh_, OnlyElderly_Hh, NaHh2_, NotUseDt_df, NotUseDt_ls,
-   WasAllPsgr_, AllPsgrHh_)
-
-#Make a variable which identifies households that did no travel
-#--------------------------------------------------------------
+#Identifies households that did no private or shared vehicle travel
+#------------------------------------------------------------------
 Hh_df$ZeroDvmt <- "N"
-Hh_df$ZeroDvmt[Hh_df$Dvmt == 0] <- "Y"
-Hh_df$ZeroDvmt[is.na(Hh_df$Dvmt)] <- NA
+Hh_df$ZeroDvmt[Hh_df$PvtVehDvmt == 0 & Hh_df$ShrVehDvmt == 0] <- "Y"
 Hh_df$ZeroDvmt <- as.factor(Hh_df$ZeroDvmt)
+
+#Process person driver status, worker status, and age
+#----------------------------------------------------
+#Driver status 1 = driver, 0 = non-driver
+Per_df$Driver[(Per_df$Driver != 1) & !is.na(Per_df$Driver)] <- 0
+#Convert Worker to 1 for worker and 0 for non-worker
+Per_df$Worker[(Per_df$Worker != 1) & !is.na(Per_df$Worker)] <- 0
+#Assign age category
+AgeBreaks <- c(0, 14, 19, 29, 54, 64, max(Per_df$R_age, na.rm = TRUE))
+AgeGroups_ <-
+  c("Age0to14", "Age15to19", "Age20to29", "Age30to54", "Age55to64", "Age65Plus")
+Per_df$AgeGroup <- cut(Per_df$R_age, AgeBreaks, AgeGroups_)
+rm(AgeBreaks, AgeGroups_)
 
 #Add person travel data to the household records
 #-----------------------------------------------
@@ -494,9 +697,9 @@ rm(Per_ls, Numcommdrvr_Hh, Nbiketrp_Hh, Nwalktrp_Hh, Usepubtr_Hh, Numwrkdrvr_Hh)
 #Change Hhc_msa to character variable to link up highway data properly
 Hh_df$Hhc_msa <- as.character(Hh_df$Hhc_msa)
 #Load data file
-Hwy2001_df <-
-  read.csv("inst/extdata/HighwayStatistics2.csv",
-           colClasses = c(rep("character", 2), rep("numeric", 8)))
+# Hwy2001_df <-
+#   read.csv("data-raw/HighwayStatistics2.csv",
+#            colClasses = c(rep("character", 2), rep("numeric", 8)))
 #Sum quantities by Msa Code
 RoadMi_Mc <- toVecFrom1DAry(tapply(Hwy2001_df$RoadMiles, Hwy2001_df$MsaCode, sum))
 Pop_Mc <- toVecFrom1DAry(tapply(Hwy2001_df$Population, Hwy2001_df$MsaCode, sum))
@@ -518,7 +721,7 @@ rm(RoadMi_Mc, Pop_Mc, FwyLnMi_Mc, Area_Mc, RoadMiCap_Mc, FwyLnMiCap_Mc,
 #Add the transit supply data
 #---------------------------
 #Load the data file
-Transit2001_df <- read.csv("inst/extdata/uza_bus_eq_rev_mi.csv", as.is = TRUE)
+# Transit2001_df <- read.csv("data-raw/uza_bus_eq_rev_mi.csv", as.is = TRUE)
 Transit2001_df$MSACode <- as.character(Transit2001_df$MSACode)
 Transit2001_df$MSACode[Transit2001_df$MSACode == "520"] <- "0520"
 Transit2001_df$MSACode[Transit2001_df$MSACode == "640"] <- "0640"
@@ -568,9 +771,7 @@ Hh_df$LargeHh <- Hh_df$Hhsize * 0
 Hh_df$LargeHh[Hh_df$Hhsize > 3] <- 1
 Hh_df$LargeHh <- factor(Hh_df$LargeHh, labels = c("Small", "Large"))
 #Clean up workspace
-rm(Dt_df, Per_df, Dvmt_Hh, HhWkTourVmt_, IsVehicle_, NumVeh_Dt, WasNotPsgr_,
-   calcTourVmtProp, toProperName, toVecFrom1DAry, BusEqRevMiPC_,
-   IsIdentifiedUZA_, Transit2001_df)
+rm(Dt_df, toProperName, toVecFrom1DAry)
 
 
 #==========================
@@ -624,6 +825,16 @@ rm(Dt_df, Per_df, Dvmt_Hh, HhWkTourVmt_, IsVehicle_, NumVeh_Dt, WasNotPsgr_,
 #'   \item{Age30to54}{Number of persons age 30 to 54 in household}
 #'   \item{Age55to64}{Number of persons age 55 to 64 in household}
 #'   \item{Age65Plus}{Number of persons age 65 or older in household}
+#'   \item{Drv15to19}{Number of drivers 15 to 19 in household}
+#'   \item{Drv20to29}{Number of drivers 20 to 29 in household}
+#'   \item{Drv30to54}{Number of drivers 30 to 54 in household}
+#'   \item{Drv55to64}{Number of drivers 55 to 64 in household}
+#'   \item{Drv65Plus}{Number of drivers 65 or older in household}
+#'   \item{Wkr15to19}{Number of workers 15 to 19 in household}
+#'   \item{Wkr20to29}{Number of workers 20 to 29 in household}
+#'   \item{Wkr30to54}{Number of workers 30 to 54 in household}
+#'   \item{Wkr55to64}{Number of workers 55 to 64 in household}
+#'   \item{Wkr65Plus}{Number of workers 65 or older in household}
 #'   \item{Income}{Household income}
 #'   \item{IncGrp}{Household income group}
 #'   \item{UrbanDev}{Flag identifying whether household lived in an 'Urban' area}
@@ -640,15 +851,11 @@ rm(Dt_df, Per_df, Dvmt_Hh, HhWkTourVmt_, IsVehicle_, NumVeh_Dt, WasNotPsgr_,
 #'   \item{Gscost}{Average cost of gasoline per gallon}
 #'   \item{Gscostmile}{Average cost of gasoline per mile of household vehicle travel}
 #'   \item{Gscostmile2}{Average cost of gasoline per mile using EIA derived miles per equivalent-gallon}
-#'   \item{Dvmt}{Household vehicle miles of travel on survey day}
-#'   \item{PropSovDvmtLE2}{Proportion of DVMT in single-occupant vehicle tours less than or equal to 2 miles}
-#'   \item{PropSovDvmtLE5}{Proportion of DVMT in single-occupant vehicle tours less than or equal to 5 miles}
-#'   \item{PropSovDvmtLE10}{Proportion of DVMT in single-occupant vehicle tours less than or equal to 10 miles}
-#'   \item{PropSovDvmtLE15}{Proportion of DVMT in single-occupant vehicle tours less than or equal to 15 miles}
-#'   \item{PropSovDvmtLE20}{Proportion of DVMT in single-occupant vehicle tours less than or equal to 20 miles}
-#'   \item{PropWkDvmt}{Proportion of DVMT in work tours}
-#'   \item{ZeroVehPassDvmt}{DVMT as passenger for zero-vehicle households}
-#'   \item{WalkBikeMiles}{Miles traveled by walking or bicycling}
+#'   \item{PvtVehDvmt}{Household vehicle miles of travel on survey day using household (i.e. private) vehicles}
+#'   \item{ShrVehDvmt}{Household vehicle miles of travel on survey day using non-household (i.e. shared) vehicles}
+#'   \item{WalkDpmt}{Household person miles of walking on survey day}
+#'   \item{BikeDpmt}{Household person miles of bicycling on survey day}
+#'   \item{TransitDpmt}{Household person miles of public transit travel on survey day}
 #'   \item{ZeroDvmt}{Flag identifying whether household had no DVMT on survey day}
 #'   \item{Numcommdrvr}{Number of commercial drivers in household}
 #'   \item{Nbiketrp}{Number of bike trips on travel survey day}
@@ -694,3 +901,68 @@ rm(Hh_df)
 devtools::use_data(Veh_df, overwrite = TRUE)
 rm(Veh_df)
 
+
+#=====================
+#SAVE THE TOUR DATASET
+#=====================
+#' Household tour dataset from the 2001 National Household Travel Survey
+#'
+#' A dataset of household tours (shared person tours) derived from the 2001
+#' National Household Travel Survey and used in the estimation of several
+#' VisionEval models.
+#'
+#'  @format A data frame with 154270 rows and 16 columns.
+#'  \describe{
+#'    \item{Houseid}{Unique household ID}
+#'    \item{Distance}{Total distance in miles of the tour}
+#'    \item{TravelTime}{Total time in minutes spent traveling on the tour}
+#'    \item{DwellTime}{Total time in minutes spent at activities on the tour}
+#'    \item{StartHome}{Logical identifying if the tour started at home}
+#'    \item{EndHome}{Logical identifying if the tour ended at home}
+#'    \item{Trips}{Number of trips in the tour}
+#'    \item{Persons}{Number of persons on the tour}
+#'    \item{Vehid}{Unique ID for vehicle in household}
+#'    \item{Trptrans}{Mode of transportation (see 2001 NHTS codebook for TRPTRANS)}
+#'    \item{Vehtype}{Type of vehicle used (see 2001 NHTS codebook for VEHTYPE)}
+#'    \item{HhVehUsed}{Whether household vehicle used (1=yes, 2=no)}
+#'    \item{Whyto}{String contenating successive activity codes at trip end (see 2001 NHTS codebook for WHYTO)}
+#'    \item{Disttowk}{Distance from home to work for the person on the tour who works farthest from home}
+#'    \item{Mode}{Simplified travel mode category (see script for definitions)}
+#'    \item{IncludesWork}{Logical identifying whether tour includes a work activity (codes 10, 11, 12, 13, 14)}
+#'  }
+#'  @source 2001 National Household Travel Survey and Make2001NHTSDataset.R script.
+"HhTours_df"
+devtools::use_data(HhTours_df, overwrite = TRUE)
+rm(HhTours_df)
+
+
+#=======================
+#SAVE THE PERSON DATASET
+#=======================
+#' Person dataset from the 2001 National Household Travel Survey
+#'
+#' A dataset of person characteristics derived from the 2001 National Household
+#' Travel Survey and used in the estimation of several VisionEval models.
+#'
+#'  @format A data frame with 144884 rows and 14 columns.
+#'  \describe{
+#'    \item{Houseid}{Unique household ID}
+#'    \item{Personid}{Unique ID of person in household}
+#'    \item{Commdrvr}{Person is a commercial driver}
+#'    \item{Nbiketrp}{Number of bike trips in past week}
+#'    \item{Nwalktrp}{Number of walk trips in past week}
+#'    \item{Usepubtr}{Used public transit on travel day}
+#'    \item{Wrkdrive}{Job requires driving a motor vehicle}
+#'    \item{Wrktrans}{Transportation mode to work last week}
+#'    \item{Worker}{Person has job (1=yes, 0=no)}
+#'    \item{Dtgas}{Price of gasoline}
+#'    \item{Disttowk}{Distance to work in miles}
+#'    \item{Driver}{Driver status (1=driver, 0=non-driver)}
+#'    \item{R_age}{Age}
+#'    \item{R_sex}{Sex}
+#'    \item{AgeGroup}{AgeGroup: Age0to14, Age15to19, Age20to29, Age30to54, Age55to64, Age65Plus}
+#'  }
+#'  @source 2001 National Household Travel Survey and Make2001NHTSDataset.R script.
+"Per_df"
+devtools::use_data(Per_df, overwrite = TRUE)
+rm(Per_df)

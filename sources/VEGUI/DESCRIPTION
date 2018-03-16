@@ -1,0 +1,15 @@
+Package: VEGUI
+Type: Package
+Title: VisionEval Graphical User Interface
+Version: 0.1
+Date: 03/15/18
+Author: Aditya Gore <aditya.gore@rsginc.com> [cre], Ben Stabler <ben.stabler@rsginc.com> [cre]
+Maintainer: Aditya Gore <aditya.gore@rsginc.com>, Ben Stabler <ben.stabler@rsginc.com>
+Copyright: AASHTO
+URL: https://github.com/gregorbj/VisionEval/sources/VEGUI
+Description: GUI for running VisionEval.
+License: Apache License 2.0
+LazyData: TRUE
+Depends: R (>= 3.1.0)
+Imports:
+    shiny

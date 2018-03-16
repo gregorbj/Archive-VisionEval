@@ -4,21 +4,21 @@
 \alias{adjustEmployment}
 \title{Adjusts Bzone employment to match workers}
 \usage{
-adjustEmployment(EmpTarget, Emp_Bz)
+adjustEmployment(EmpTarget, Emp_, Names = NULL)
 }
 \arguments{
-\item{EmpTarget}{An number identifying the total number of jobs so that each
-worker has a job.}
+\item{EmpTarget}{An number identifying the total number of jobs to be
+matched.}
 
-\item{Emp_Bz}{A named numeric vector identifying the employment of the type
-in each Bzone.}
+\item{Emp_}{A numeric vector identifying the employment in each Bzone.}
+
+\item{Names}{A character vector identifying names corresponding to the
+Emp_ argument vector if any.}
 }
 \value{
-A list having two components:
-BalancedEmp_Bz A named numeric vector giving the employment by Bzone which
-matches workers, and
-AdjEmp_Bz A named numeric vector giving the amount of adjustment that was
-made to the original employment in each Bzone.
+A integer vector of the number of jobs by Bzone which sums to the
+total. The positions correspond to the positions of the input vector of jobs
+by Bzone.
 }
 \description{
 \code{adjustEmployment} adjusts Bzone employment by type so that total

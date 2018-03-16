@@ -14,8 +14,8 @@ A string vector identifying the default units for the complex data
 type(s) or NA if any of the type(s) are not defined.
 }
 \description{
-\code{getUnits} retrieves the default model units for a vector of complex
-data types.
+\code{getUnits} a visioneval framework control function that retrieves the
+default model units for a vector of complex data types.
 }
 \details{
 This is a convenience function to make it easier to retrieve the default

@@ -263,7 +263,7 @@ server <- function(input, output, session) {
 
   otherReactiveValues_rv <- reactiveValues() #WARNING- DON'T USE VARIABLES TO INITIALIZE LIST KEYS - the variable name will be used, not the value
 
-  otherReactiveValues_rv[[DEBUG_CONSOLE_OUTPUT]] <- data.table::data.table(time = paste(Sys.time()), message = "Placeholder to be deleted")[-1, ]
+  otherReactiveValues_rv[[DEBUG_CONSOLE_OUTPUT]] <- data.table::data.table(time = character(), message = character())
 
   otherReactiveValues_rv[[MODULE_PROGRESS]] <- data.table::data.table()
 
@@ -272,6 +272,7 @@ server <- function(input, output, session) {
   reactiveFilePaths_rv[[CAPTURED_SOURCE]] <- tempfile(pattern = "VEGUI_source_capture", fileext = ".txt")
 
   reactiveFileReaders_ls <- list() # A list of reactive variables
+
 
   # Print all the messages out to the console
   debugConsole <- function(msg) {
@@ -308,13 +309,33 @@ server <- function(input, output, session) {
     return(result_vc)
   } #end SafeReadLines
 
+  SafeReadAndCleanLines <- function(filePath) {
+    debugConsole(paste0("SafeReadAndCleanLinesfunction called to load ",
+                        filePath, ". Exists? ", file.exists(filePath)
+    )
+    ) #end SafeReadAndCleanLines
+    fileContents <- SafeReadLines(filePath)
+    results <- vector('character') #a zero length vector unlike c() which is NULL
+
+    for (line in fileContents) {
+      if (nchar(trimws(line)) > 0) {
+        #remove all leading and/or traiing spaces or quotes
+        cleanLine <- gsub("^[ \"]+|[v\"]+$", "", line)
+        if (nchar(cleanLine) > 0) {
+          results <- c(results, cleanLine)
+        }
+      }
+    } #end loop over lines
+    return(results)
+  } #end SafeReadAndCleanLines
+
   # Read a csv file
   SafeReadCSV <- function(filePath) {
     debugConsole(paste0("SafeReadCSV called to load ",
       filePath,". Exists? ",file.exists(filePath)))
     result_dt <- ""
     if (file.exists(filePath)) {
-      result_dt <- data.table::as.data.table(read.csv(filePath))
+      result_dt <- data.table::fread(filePath)
     }
     return(result_dt)
   } #end SafeReadCSV
@@ -332,6 +353,7 @@ server <- function(input, output, session) {
     }
 
 
+  # Function that adds reactive objects that read files to a globally maintained list.
   registerReactiveFileHandler <- function(reactiveFileNameKey, readFunc = SafeReadLines) {
       debugConsole(paste0("registerReactiveFileHandler called to register '",
           reactiveFileNameKey, "' names(reactiveFileReaders_ls): ",
@@ -429,26 +451,7 @@ server <- function(input, output, session) {
     }
   ) #end observe(label = processRunningTasks
 
-  SafeReadAndCleanLines <- function(filePath) {
-    debugConsole(paste0("SafeReadAndCleanLinesfunction called to load ",
-        filePath, ". Exists? ", file.exists(filePath)
-      )
-    ) #end SafeReadAndCleanLines
-    fileContents <- SafeReadLines(filePath)
-    results <- vector('character') #a zero length vector unlike c() which is NULL
-
-    for (line in fileContents) {
-      if (nchar(trimws(line)) > 0) {
-        #remove all leading and/or traiing spaces or quotes
-        cleanLine <- gsub("^[ \"]+|[v\"]+$", "", line)
-        if (nchar(cleanLine) > 0) {
-          results <- c(results, cleanLine)
-        }
-      }
-    } #end loop over lines
-    return(results)
-  }
-
+  # Get the progress of modules
   getModuleProgress <- reactive({
     pattern <- "(?<date>^20[0-9]{2}(?:-[0-9]{2}){2}) (?<time>[^ ]+) :.*-- (?<actionType>(?:Finish|Start)(?:ing)?) module '(?<moduleName>[^']+)' for year '(?<year>[^']+)'"
     cleanedLogLines <- reactiveFileReaders_ls[[VE_LOG]]() # reactiveFileReaders_ls[[VE_LOG]]: reactive value
@@ -469,12 +472,21 @@ server <- function(input, output, session) {
   ) #end VE_LOG file handler
 
   registerReactiveFileHandler(DATASTORE, readFunc = function(filePath) {
+    debugConsole(paste0("registerReactiveFileHandler for DATASTORE called to load ",
+                        filePath, ". Exists? ", file.exists(filePath)))
     if (!file.exists(filePath)) {
       returnValue_dt <- NULL
       } else {
-        table_dt <- data.table::data.table(rhdf5::h5ls(filePath))
-        table_dt <- table_dt[otype == "H5I_GROUP", .(Group = group, Name = name)]
-        returnValue_dt <- table_dt
+        G <- readModelState()
+        table_dt <- data.table::data.table(G$Datastore)
+        if(nrow(table_dt) > 0){
+          table_attributes_ls <- table_dt[,attributes]
+          table_groups_present <- sapply(table_attributes_ls, function(x) "LENGTH" %in% names(x))
+          table_dt <- table_dt[table_groups_present,.(Group = group,Name = name)]
+          returnValue_dt <- table_dt#[!Name %in% getYears()]
+        } else {
+          returnValue_dt <- NULL
+        }
       }
       return(returnValue_dt)
     }
@@ -493,9 +505,22 @@ server <- function(input, output, session) {
     }
   )
 
-  registerReactiveFileHandler(MODEL_PARAMETERS_FILE, SafeReadJSON)
-  registerReactiveFileHandler(RUN_PARAMETERS_FILE, SafeReadJSON)
-  registerReactiveFileHandler(GEO_CSV_FILE, SafeReadCSV)
+  registerReactiveFileHandler(MODEL_PARAMETERS_FILE, readFunc = function(filePath) {
+    debugConsole(paste0("registerReactiveFileHandler for MODEL_PARAMETERS_FILE called to load ",
+                        filePath, ". Exists? ", file.exists(filePath)))
+    return(SafeReadJSON(filePath))}
+  )
+  registerReactiveFileHandler(RUN_PARAMETERS_FILE, readFunc = function(filePath) {
+    debugConsole(paste0("registerReactiveFileHandler for RUN_PARAMETERS_FILE called to load ",
+                        filePath, ". Exists? ", file.exists(filePath)))
+    return(SafeReadJSON(filePath))}
+  )
+
+  registerReactiveFileHandler(GEO_CSV_FILE, readFunc = function(filePath) {
+    debugConsole(paste0("registerReactiveFileHandler for GEO_CSV_FILE called to load ",
+                        filePath, ". Exists? ", file.exists(filePath)))
+    return(SafeReadCSV(filePath))}
+  )
 
   registerReactiveFileHandler(MODEL_STATE_FILE, #use a function so change of filePath will trigger refresh....
                               readFunc = function(filePath) {
@@ -538,11 +563,11 @@ server <- function(input, output, session) {
     visioneval::initLog()
     visioneval::writeLog("VE_GUI called visioneval::initModelStateFile() and visioneval::initLog()")
 
-      #Fome now on we will get the current ModelState by reading the object stored on disk
+      #From now on we will get the current ModelState by reading the object stored on disk
     reactiveFilePaths_rv[[MODEL_STATE_FILE]] <<- file.path(scriptInfo_ls$fileDirectory, "ModelState.Rda")
 
-    reactiveFilePaths_rv[[VE_LOG]] <<- file.path(scriptInfo_ls$fileDirectory, getModelState()$LogFile)
-    reactiveFilePaths_rv[[DATASTORE]] <<- file.path(scriptInfo_ls$fileDirectory, getModelState()$DatastoreName)
+    reactiveFilePaths_rv[[VE_LOG]] <<- file.path(scriptInfo_ls$fileDirectory, readModelState()$LogFile)
+    reactiveFilePaths_rv[[DATASTORE]] <<- file.path(scriptInfo_ls$fileDirectory, readModelState()$DatastoreName)
 
     defsDirectory <- file.path(scriptInfo_ls$fileDirectory, "defs")
 
@@ -552,7 +577,7 @@ server <- function(input, output, session) {
 
     reactiveFilePaths_rv[[GEO_CSV_FILE]] <<- file.path(defsDirectory, "geo.csv")
 
-    #change to the settings tab
+    #move to the settings tab
     updateNavlistPanel(session, "navlist", selected = TAB_SETTINGS)
     debugConsole("getScriptInfo exited")
     return(scriptInfo_ls)
@@ -566,31 +591,6 @@ server <- function(input, output, session) {
     modelModules_dt <- data.table::as.data.table(visioneval::parseModelScript(datapath, TestMode = TRUE))
     return(modelModules_dt)
   }) #end getModelModules
-
-  # Run the model
-  observeEvent(input[[RUN_MODEL_BUTTON]], label = RUN_MODEL_BUTTON, handlerExpr = {
-    req(input[[SELECT_RUN_SCRIPT_BUTTON]])
-    debugConsole("observeEvent input$runModel entered")
-    datapath <- getScriptInfo()$datapath
-    disableActionButtons()
-    startAsyncTask(CAPTURED_SOURCE, future({
-      getModelState() #reference ModelState_ls so future will recognize it as a global
-      getScriptOutput(datapath, isolate(reactiveFilePaths_rv[[CAPTURED_SOURCE]]))
-      }),
-      callback = function(asyncResult) {
-        # asyncResult:
-        #   asyncTaskName = asyncTaskName,
-        #   taskResult = taskResult,
-        #   submitTime = submitTime,
-        #   endTime = endTime,
-        #   elapsedTime = elapsedTime,
-        #   caughtError = caughtError,
-        #   caughtWarning = caughtWarning
-        enableActionButtons()
-      },
-      debug = TRUE) # end startAsyncTask
-    debugConsole("observeEvent input$runModel exited")
-  }) #end runModel observeEvent
 
   # Buttons to disable when the model is running
   disableActionButtons <- function() {
@@ -612,7 +612,7 @@ server <- function(input, output, session) {
     #From now on we will get the current ModelState by reading the object stored on disk
     #store the current ModelState in the global options
     #so that the process will use the same log file as the one we have already started tracking...
-    ModelState_ls = getModelState()
+    ModelState_ls <- readModelState()
     options("visioneval.preExistingModelState" = ModelState_ls)
     debugConsole("getScriptOutput entered")
     setwd(dirname(datapath))
@@ -621,6 +621,36 @@ server <- function(input, output, session) {
     debugConsole("getScriptOutput exited")
     return(NULL)
   } #end getScriptOutput
+
+  # Run the model
+  observeEvent(input[[RUN_MODEL_BUTTON]], label = RUN_MODEL_BUTTON, handlerExpr = {
+    req(input[[SELECT_RUN_SCRIPT_BUTTON]])
+    debugConsole("observeEvent input$runModel entered")
+    datapath <- getScriptInfo()$datapath
+    disableActionButtons()
+    startAsyncTask(CAPTURED_SOURCE, future({
+      # if(file.exists(reactiveFilePaths_rv[[MODEL_STATE_FILE]])){
+      #   remove(reactiveFilePaths_rv[[MODEL_STATE_FILE]])
+      # }
+      #reference ModelState_ls so future will recognize it as a global
+      getScriptOutput(datapath, isolate(reactiveFilePaths_rv[[CAPTURED_SOURCE]]))
+      }),
+      callback = function(asyncResult) {
+        # asyncResult:
+        #   asyncTaskName = asyncTaskName,
+        #   taskResult = taskResult,
+        #   submitTime = submitTime,
+        #   endTime = endTime,
+        #   elapsedTime = elapsedTime,
+        #   caughtError = caughtError,
+        #   caughtWarning = caughtWarning
+        enableActionButtons()
+      },
+      debug = TRUE) # end startAsyncTask
+    debugConsole("observeEvent input$runModel exited")
+  }) #end runModel observeEvent
+
+
 
   # Save the changes made to the parameters to the parameter file
   saveParameterFile <- function(parameterFileIdentifier) {
@@ -648,6 +678,7 @@ server <- function(input, output, session) {
   observeEvent(input[[SAVE_MODEL_PARAMETERS_FILE]], handlerExpr = {
       saveParameterFile(MODEL_PARAMETERS_FILE)
     }, label = SAVE_MODEL_PARAMETERS_FILE)
+
 
   observeEvent(input[[REVERT_MODEL_PARAMETERS_FILE]], handlerExpr = {
       revertParameterFile(MODEL_PARAMETERS_FILE)
@@ -942,20 +973,49 @@ server <- function(input, output, session) {
     getScriptInfo()$datapath
   })
 
+  # Function to load data from visioneval readFromTable function
+  loadVERPAT <- function(filepaths, datastore_type = "RD"){
+    # Ancillary function
+    mbasename <- function(filepath,n=1){
+      for(i in seq_len(n-1)){
+        filepath <- dirname(filepath)
+      }
+      return(basename(filepath))
+    }
+
+    if(datastore_type == "RD"){
+      readFromTable <- visioneval::readFromTableRD
+    } else {
+      readFromTable <- visioneval::readFromTableH5
+    }
+    verpatoutput <- filepaths[,.(value = list(readFromTable(Name=mbasename(groupname, 1), Table = mbasename(groupname, 2), Group = mbasename(groupname, 3)))), by = .(name)]
+    finaloutput <- as.data.table(verpatoutput$value)
+    setnames(finaloutput, colnames(finaloutput), verpatoutput$name)
+    return(finaloutput)
+  }
+
   observeEvent(input$DATASTORE_TABLE_row_last_clicked,{
     selection <- input$DATASTORE_TABLE_row_last_clicked
     print(paste0("input$DATASTORE_TABLE_row_last_clicked: ", selection))
     if (!is.null(selection)) {
       row <- as.integer(selection)
-      hdf5PathTable <- reactiveFileReaders_ls[[DATASTORE]]()
-      hdf5Row <- hdf5PathTable[row]
-      otherReactiveValues_rv[[DATASTORE_TABLE_IDENTIFIER]] <- paste0(hdf5Row$Group, "/",
-                                                                     hdf5Row$Name)
+      DataPathTable <- reactiveFileReaders_ls[[DATASTORE]]()
+      DataRow <- DataPathTable[row]
+      G <- readModelState()
+      filepaths <- data.table::data.table(G$Datastore)
+      otherReactiveValues_rv[[DATASTORE_TABLE_IDENTIFIER]] <- paste0(DataRow$Group, "/",
+                                                                     DataRow$Name)
+      if(nrow(filepaths) > 0){
+        filepaths <- filepaths[group %in% otherReactiveValues_rv[[DATASTORE_TABLE_IDENTIFIER]]]
+      }
 
-      fileContent <- rhdf5::h5read(reactiveFilePaths_rv[[DATASTORE]],
-                                   otherReactiveValues_rv[[DATASTORE_TABLE_IDENTIFIER]])
-      hdf5DataTable <- data.table::as.data.table(fileContent)
-      otherReactiveValues_rv[[VIEW_DATASTORE_TABLE]] <- hdf5DataTable
+      if(nrow(filepaths) > 0){
+        table_dt <- loadVERPAT(filepaths,G$DatastoreType)
+        otherReactiveValues_rv[[VIEW_DATASTORE_TABLE]] <- table_dt
+      } else {
+        otherReactiveValues_rv[[DATASTORE_TABLE_IDENTIFIER]] <- ""
+        otherReactiveValues_rv[[VIEW_DATASTORE_TABLE]] <- FALSE
+      }
     } else {
       otherReactiveValues_rv[[DATASTORE_TABLE_IDENTIFIER]] <- ""
       otherReactiveValues_rv[[VIEW_DATASTORE_TABLE]] <- FALSE

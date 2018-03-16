@@ -17,8 +17,8 @@ default value is ModelState.Rda.}
 A list containing the specified components from the model state file.
 }
 \description{
-\code{getModelState} reads components of the list that keeps track of the
-model state
+\code{getModelState} a visioneval framework control function that reads
+components of the list that keeps track of the model state.
 }
 \details{
 Key variables that are important for managing the model run are stored in a

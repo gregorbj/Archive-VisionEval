@@ -28,8 +28,9 @@ geography records. If 'DupInput' is TRUE, the list contains a component that
 is a string identifying the duplicated year and geography records.
 }
 \description{
-\code{checkInputYearGeo} checks the 'Year' and 'Geo' columns of an input file
-to determine whether they are complete and have no duplications.
+\code{checkInputYearGeo} a visioneval framework control function that checks
+the 'Year' and 'Geo' columns of an input file to determine whether they are
+complete and have no duplications.
 }
 \details{
 This function checks the 'Year' and 'Geo' columns of an input file to

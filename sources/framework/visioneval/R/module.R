@@ -9,8 +9,9 @@
 #=================
 #' Alias for list function.
 #'
-#' \code{item} is an alias for the list function whose purpose is to make
-#' module specifications easier to read.
+#' \code{item} a visioneval framework module developer function that is an alias
+#' for the list function whose purpose is to make module specifications easier
+#' to read.
 #'
 #' This function defines an alternate name for list. It is used in module
 #' specifications to identify data items in the Inp, Get, and Set portions of
@@ -22,8 +23,9 @@ item <- list
 
 #' Alias for list function.
 #'
-#' \code{items} is an alias for the list function whose purpose is to make
-#' module specifications easier to read.
+#' \code{items} a visioneval framework \strong{module developer} function that is
+#' an alias for the list function whose purpose is to make module specifications
+#' easier to read.
 #'
 #' This function defines an alternate name for list. It is used in module
 #' specifications to identify a group of data items in the Inp, Get, and Set
@@ -34,12 +36,99 @@ item <- list
 items <- list
 
 
+#INITIALIZE DATA LIST
+#====================
+#' Initialize a list for data transferred to and from datastore
+#'
+#' \code{initDataList} a visioneval framework module developer function that
+#' creates a list to be used for transferring data to and from the datastore.
+#'
+#' This function initializes a list to store data that is transferred from
+#' the datastore to a module or returned from a module to be saved in the
+#' datastore. The list has 3 named components (Global, Year, and BaseYear). This
+#' is the standard structure for data being passed to and from a module and the
+#' datastore.
+#'
+#' @return A list that has 3 named list components: Global, Year, BaseYear
+#' @export
+initDataList <- function() {
+  list(Global = list(),
+       Year = list(),
+       BaseYear = list())
+}
+
+
+#ADD ERROR MESSAGE TO RESULTS LIST
+#=================================
+#' Add an error message to the results list
+#'
+#' \code{addErrorMsg} a visioneval framework module developer function that adds
+#' an error message to the Errors component of the module results list that is
+#' passed back to the framework.
+#'
+#' This function is a convenience function for module developers for passing
+#' error messages back to the framework. The preferred method for handling
+#' errors in module execution is for the module to handle the error by passing
+#' one or more error messages back to the framework. The framework will then
+#' write error messages to the log and stop execution. Error messages are
+#' stored in a component of the returned list called Errors. This component is
+#' a string vector where each element is an error message. The addErrorMsg will
+#' create the Error component if it does not already exist and will add an error
+#' message to the vector.
+#'
+#' @param ResultsListName the name of the results list given as a character
+#' string
+#' @param ErrMsg a character string that contains the error message
+#' @return None. The function modifies the results list by adding an error
+#' message to the Errors component of the results list. It creates the Errors
+#' component if it does not already exist.
+#' @export
+addErrorMsg <- function(ResultsListName, ErrMsg) {
+  Results_ls <- get(ResultsListName, envir = parent.frame())
+  Results_ls$Errors <- c(Results_ls$Errors, ErrMsg)
+  assign(ResultsListName, Results_ls, envir = parent.frame())
+}
+
+
+#ADD WARNING MESSAGE TO RESULTS LIST
+#===================================
+#' Add a warning message to the results list
+#'
+#' \code{addWarningMsg} a visioneval framework module developer function that
+#' adds an warning message to the Warnings component of the module results list
+#' that is passed back to the framework.
+#'
+#' This function is a convenience function for module developers for passing
+#' warning messages back to the framework. The preferred method for handling
+#' warnings in module execution is for the module to handle the warning by
+#' passing one or more warning messages back to the framework. The framework
+#' will then write warning messages to the log and stop execution. Warning
+#' messages are stored in a component of the returned list called Warnings. This
+#' component is a string vector where each element is an warning message. The
+#' addWarningMsg will create the Warning component if it does not already exist
+#' and will add a warning message to the vector.
+#'
+#' @param ResultsListName the name of the results list given as a character
+#' string
+#' @param WarnMsg a character string that contains the warning message
+#' @return None. The function modifies the results list by adding a warning
+#' message to the Warnings component of the results list. It creates the
+#' Warnings component if it does not already exist.
+#' @export
+addWarningMsg <- function(ResultsListName, WarnMsg) {
+  Results_ls <- get(ResultsListName, envir = parent.frame())
+  Results_ls$Warnings <- c(Results_ls$Warnings, WarnMsg)
+  assign(ResultsListName, Results_ls, envir = parent.frame())
+}
+
+
 #LOAD ESTIMATION DATA
 #====================
 #' Load estimation data
 #'
-#' \code{processEstimationInputs} checks whether specified model estimation data
-#' meets specifications and returns the data in a data frame.
+#' \code{processEstimationInputs} a visioneval framework module developer
+#' function that checks whether specified model estimation data meets
+#' specifications and returns the data in a data frame.
 #'
 #' This function is used to check whether a specified CSV-formatted data file
 #' used in model estimation is correctly formatted and contains acceptable
@@ -61,7 +150,10 @@ items <- list
 #' directory of the package.
 #' @param ModuleName A string identifying the name of the module the estimation
 #' data is being used in.
-#' @return A data frame containing the estimation data.
+#' @return A data frame containing the estimation data according to
+#' specifications with data types consistent with specifications and columns
+#' not specified removed. Execution stops if any errors are found. Error
+#' messages are printed to the console. Warnings are also printed to the console.
 #' @export
 processEstimationInputs <- function(Inp_ls, FileName, ModuleName) {
   #Define a function which expands a specification with multiple NAME items
@@ -148,8 +240,22 @@ processEstimationInputs <- function(Inp_ls, FileName, ModuleName) {
       print(Warnings_[i])
     }
   }
-  #Return the data frame
-  Data_df
+  #Identify the data class for each input file field
+  ColClasses_ <- unlist(lapply(Inp_ls, function(x) {
+    Type <- x$TYPE
+    Class <- Types()[[Type]]$mode
+    if (Class == "double") Class <- "numeric"
+    Class
+  }))
+  names(ColClasses_) <- unlist(lapply(Inp_ls, function(x) {
+    x$NAME
+  }))
+  #Match the classes with order of field names in the input file
+  ColClasses_ <- ColClasses_[names(Data_df)]
+  #Convert NA values into "NULL" (columns in data not to be read in)
+  ColClasses_[is.na(ColClasses_)] <- "NULL"
+  #Read the data file with the assigned column classes
+  read.csv(FilePath, colClasses = ColClasses_)[, Names]
 }
 
 
@@ -157,8 +263,9 @@ processEstimationInputs <- function(Inp_ls, FileName, ModuleName) {
 #===============================================================
 #' Check module outputs for consistency with specifications
 #'
-#' \code{checkModuleOutputs} checks output list produced by a module for
-#' consistency with the module's specifications.
+#' \code{checkModuleOutputs} a visioneval framework module developer function
+#' that checks output list produced by a module for consistency with the
+#' module's specifications.
 #'
 #' This function is used to check whether the output list produced by a module
 #' is consistent with the module's specifications. If there are any
@@ -260,7 +367,8 @@ checkModuleOutputs <-
 #===========
 #' Test module
 #'
-#' \code{testModule} sets up a test environment and tests a module.
+#' \code{testModule} a visioneval framework module developer function that sets
+#' up a test environment and tests a module.
 #'
 #' This function is used to set up a test environment and test a module to check
 #' that it can run successfully in the VisionEval model system. The function
@@ -279,7 +387,7 @@ checkModuleOutputs <-
 #' the Get specifications, whether the module will run, and whether all of the
 #' outputs meet the module's Set specifications. The latter check is carried out
 #' in large part by the checkModuleOutputs function that is called.
-#' #'
+#'
 #' @param ModuleName A string identifying the module name.
 #' @param ParamDir A string identifying the location of the directory where
 #' the run parameters, model parameters, and geography definition files are
@@ -306,6 +414,18 @@ checkModuleOutputs <-
 #'   dataset that will be provided by the framework. The default value for this
 #'   parameter is TRUE. In that case, the module will be run and the results
 #'   will checked for consistency with the Set specifications.
+#' @param RunFor A string identifying what years the module is to be tested for.
+#'   The value must be the same as the value that is used when the module is run
+#'   in a module. Allowed values are 'AllYears', 'BaseYear', and 'NotBaseYear'.
+#' @param StopOnErr A logical identifying whether model execution should be
+#'   stopped if the module transmits one or more error messages or whether
+#'   execution should continue with the next module. The default value is TRUE.
+#'   This is how error handling will ordinarily proceed during a model run. A
+#'   value of FALSE is used when 'Initialize' modules in packages are run during
+#'   model initialization. These 'Initialize' modules are used to check and
+#'   preprocess inputs. For this purpose, the module will identify any errors in
+#'   the input data, the 'initializeModel' function will collate all the data
+#'   errors and print them to the log.
 #' @return If DoRun is FALSE, the return value is a list containing the module
 #'   specifications. If DoRun is TRUE, there is no return value. The function
 #'   writes out messages to the console and to the log as the testing proceeds.
@@ -322,7 +442,9 @@ testModule <-
            ModelParamFile = "model_parameters.json",
            LoadDatastore = FALSE,
            SaveDatastore = TRUE,
-           DoRun = TRUE) {
+           DoRun = TRUE,
+           RunFor = "AllYears",
+           StopOnErr = TRUE) {
 
     #Set working directory to tests and return to main module directory on exit
     #--------------------------------------------------------------------------
@@ -336,6 +458,10 @@ testModule <-
     initLog(ModuleName)
     writeLog(Msg, Print = TRUE)
     rm(Msg)
+
+    #Assign the correct datastore interaction functions
+    #--------------------------------------------------
+    assignDatastoreFunctions(readModelState()$DatastoreType)
 
     #Load datastore if specified or initialize new datastore
     #-------------------------------------------------------
@@ -375,6 +501,7 @@ testModule <-
     }
     writeLog("Attempting to load and check specifications.", Print = TRUE)
     Specs_ls <- loadSpec()
+    #Check for errors
     Errors_ <- checkModuleSpecs(Specs_ls, ModuleName)
     if (length(Errors_) != 0) {
       Msg <-
@@ -388,25 +515,74 @@ testModule <-
       rm(Msg)
     }
     rm(Errors_)
-    writeLog("Module specifications successfully loaded and checked.",
+    writeLog("Module specifications successfully loaded and checked for errors.",
              Print = TRUE)
+    #Check for developer warnings
+    DeveloperWarnings_ls <-
+      lapply(c(Specs_ls$Inp, Specs_ls$Get, Specs_ls$Set), function(x) {
+        attributes(x)$WARN
+      })
+    DeveloperWarnings_ <-
+      unique(unlist(lapply(DeveloperWarnings_ls, function(x) x[!is.null(x)])))
+    if (length(DeveloperWarnings_) != 0) {
+      writeLog(DeveloperWarnings_)
+      Msg <- paste0(
+        "Specifications check for module '", ModuleName, "' generated one or ",
+        "more warnings. Check log for details."
+      )
+      warning(Msg)
+      rm(DeveloperWarnings_ls, DeveloperWarnings_, Msg)
+    }
 
     #Process, check, and load module inputs
     #--------------------------------------
-    if(!is.null(Specs_ls$Inp)) {
-
-      writeLog("Attempting to process, check and load module inputs.",
-               Print = TRUE)
-      ProcessedInputs_ls <- processModuleInputs(Specs_ls, ModuleName)
-      if (length(ProcessedInputs_ls$Errors) != 0)  {
-        writeLog(ProcessedInputs_ls$Errors)
-        stop("Input files have errors. Check the log for details.")
-      }
-      inputsToDatastore(ProcessedInputs_ls, Specs_ls, ModuleName)
-      writeLog("Module inputs successfully checked and loaded into datastore.",
-               Print = TRUE)
-    } else {
+    if (is.null(Specs_ls$Inp)) {
       writeLog("No inputs to process.", Print = TRUE)
+    } else {
+      writeLog("Attempting to process, check and load module inputs.",
+             Print = TRUE)
+      # Process module inputs
+      ProcessedInputs_ls <- processModuleInputs(Specs_ls, ModuleName)
+      # Write warnings to log if any
+      if (length(ProcessedInputs_ls$Warnings != 0)) {
+        writeLog(ProcessedInputs_ls$Warnings)
+      }
+      # Write errors to log and stop if any errors
+      if (length(ProcessedInputs_ls$Errors) != 0)  {
+        Msg <- paste0(
+          "Input files for module ", ModuleName,
+          " have errors. Check the log for details."
+        )
+        stop(Msg)
+      }
+      # If module is NOT Initialize, save the inputs in the datastore
+      if (ModuleName != "Initialize") {
+        inputsToDatastore(ProcessedInputs_ls, Specs_ls, ModuleName)
+        writeLog("Module inputs successfully checked and loaded into datastore.",
+                 Print = TRUE)
+      } else {
+        if (DoRun) {
+          # If module IS Initialize, apply the Initialize function
+          initFunc <- get("Initialize")
+          InitializedInputs_ls <- initFunc(ProcessedInputs_ls)
+          # Write warnings to log if any
+          if (length(InitializedInputs_ls$Warnings != 0)) {
+            writeLog(InitializedInputs_ls$Warnings)
+          }
+          # Write errors to log and stop if any errors
+          if (length(InitializedInputs_ls$Errors) != 0) {
+            writeLog(InitializedInputs_ls$Errors)
+            stop("Errors in Initialize module inputs. Check log for details.")
+          }
+          # Save inputs to datastore
+          inputsToDatastore(InitializedInputs_ls, Specs_ls, ModuleName)
+          writeLog("Module inputs successfully checked and loaded into datastore.",
+                   Print = TRUE)
+          return() # Break out of function because purpose of Initialize is to process inputs.
+        } else {
+          return(ProcessedInputs_ls)
+        }
+      }
     }
 
     #Check whether datastore contains all data items in Get specifications
@@ -416,27 +592,83 @@ testModule <-
       Print = TRUE)
     G <- getModelState()
     Get_ls <- Specs_ls$Get
+    #Vector to keep track of missing datasets that are specified
     Missing_ <- character(0)
+    #Function to check whether dataset is optional
+    isOptional <- function(Spec_ls) {
+      if (!is.null(Spec_ls$OPTIONAL)) {
+        Spec_ls$OPTIONAL
+      } else {
+        FALSE
+      }
+    }
+    #Vector to keep track of Get specs that need to be removed from list because
+    #they are optional and the datasets are not present
+    OptSpecToRemove_ <- numeric(0)
+    #Check each specification
     for (i in 1:length(Get_ls)) {
       Spec_ls <- Get_ls[[i]]
       if (Spec_ls$GROUP == "Year") {
         for (Year in G$Years) {
-          Present <-
-            checkDataset(Spec_ls$NAME, Spec_ls$TABLE, Year, G$Datastore)
-          if (!Present) Missing_ <- c(Missing_, attributes(Present))
+          if (RunFor == "NotBaseYear"){
+            if(!Year %in% G$BaseYear){
+              Present <-
+                checkDataset(Spec_ls$NAME, Spec_ls$TABLE, Year, G$Datastore)
+              if (!Present) {
+                if(isOptional(Spec_ls)) {
+                  #Identify for removal because optional and not present
+                  OptSpecToRemove_ <- c(OptSpecToRemove_, i)
+                } else {
+                  #Identify as missing because not optional and not present
+                  Missing_ <- c(Missing_, attributes(Present))
+                }
+              }
+            }
+          } else {
+            Present <-
+              checkDataset(Spec_ls$NAME, Spec_ls$TABLE, Year, G$Datastore)
+            if (!Present) {
+              if(isOptional(Spec_ls)) {
+                #Identify for removal because optional and not present
+                OptSpecToRemove_ <- c(OptSpecToRemove_, i)
+              } else {
+                #Identify as missing because not optional and not present
+                Missing_ <- c(Missing_, attributes(Present))
+              }
+            }
+          }
+
         }
       }
       if (Spec_ls$GROUP == "BaseYear") {
         Present <-
           checkDataset(Spec_ls$NAME, Spec_ls$TABLE, G$BaseYear, G$Datastore)
-        if (!Present) Missing_ <- c(Missing_, attributes(Present))
+        if (!Present) {
+          if (isOptional(Spec_ls)) {
+            #Identify for removal because optional and not present
+            OptSpecToRemove_ <- c(OptSpecToRemove_, i)
+          } else {
+            #Identify as missing because not optional and not present
+            Missing_ <- c(Missing_, attributes(Present))
+          }
+        }
       }
       if (Spec_ls$GROUP == "Global") {
         Present <-
           checkDataset(Spec_ls$NAME, Spec_ls$TABLE, "Global", G$Datastore)
-        if (!Present) Missing_ <- c(Missing_, attributes(Present))
+        if (!Present) {
+          if (isOptional(Spec_ls)) {
+            #Identify for removal because optional and not present
+            OptSpecToRemove_ <- c(OptSpecToRemove_, i)
+          } else {
+            #Identify as missing because not optional and not present
+            Missing_ <- c(Missing_, attributes(Present))
+          }
+        }
       }
     }
+    #If any non-optional datasets are missing, write out error messages and
+    #stop execution
     if (length(Missing_) != 0) {
       Msg <-
         paste0("The following datasets identified in the Get specifications ",
@@ -450,6 +682,11 @@ testModule <-
       )
       rm(Msg)
     }
+    #If any optional datasets are missing, remove the specifications for them so
+    #that there will be no errors when data are retrieved from the datastore
+    if (length(OptSpecToRemove_) != 0) {
+      Specs_ls$Get <- Specs_ls$Get[-OptSpecToRemove_]
+    }
     writeLog(
       "Datastore contains all datasets identified in module Get specifications.",
       Print = TRUE)
@@ -457,8 +694,12 @@ testModule <-
     #Run the module and check that results meet specifications
     #---------------------------------------------------------
     #The module is run only if the DoRun argument is TRUE. Otherwise the
-    #datastore is initialized, specifications are checked, and inputs are
-    #loaded only.
+    #datastore is initialized, specifications are checked, and a list is
+    #returned which contains the specifications list, the data list from the
+    #datastore meeting specifications, and a functions list containing any
+    #called module functions.
+
+    #Run the module if DoRun is TRUE
     if (DoRun) {
       writeLog(
         "Running module and checking whether outputs meet Set specifications.",
@@ -467,44 +708,138 @@ testModule <-
       if (SaveDatastore) {
         writeLog("Also saving module outputs to datastore.", Print = TRUE)
       }
+      #Load the module function
       Func <- get(ModuleName)
-      for (Year in getYears()) {
+      #Load any modules identified by 'Call' spec if any
+      if (is.list(Specs_ls$Call)) {
+        Call <- list(
+          Func = list(),
+          Specs = list()
+        )
+        for (Alias in names(Specs_ls$Call)) {
+          Function <- Specs_ls$Call[[Alias]]
+          Specs <- paste0(Specs_ls$Call[[Alias]], "Specifications")
+          Call$Func[[Alias]] <- eval(parse(text = Function))
+          Call$Specs[[Alias]] <- processModuleSpecs(eval(parse(text = Specs)))
+          Call$Specs[[Alias]]$RunBy <- Specs_ls$RunBy
+        }
+      }
+      #Run module for each year
+      if (RunFor == "AllYears") Years <- getYears()
+      if (RunFor == "BaseYear") Years <- G$BaseYear
+      if (RunFor == "NotBaseYear") Years <- getYears()[!getYears() %in% G$BaseYear]
+      for (Year in Years) {
         ResultsCheck_ <- character(0)
+        #If RunBy is 'Region', this code is run
         if (Specs_ls$RunBy == "Region") {
           #Get data from datastore
-          L <- getFromDatastore(Specs_ls, RunYear = Year, Geo = NULL)
-          #Run module
-          R <- Func(L)
-          #Check results
-          Check_ <-
-            checkModuleOutputs(
-              Data_ls = R,
-              ModuleSpec_ls = Specs_ls,
-              ModuleName = ModuleName)
-          ResultsCheck_ <- Check_
-          #Save results if SaveDatastore and no errors found
-          if (SaveDatastore & length(Check_) == 0) {
-            setInDatastore(R, Specs_ls, ModuleName, Year, Geo = NULL)
+          L <- getFromDatastore(Specs_ls, RunYear = Year)
+          if (exists("Call")) {
+            for (Alias in names(Call$Specs)) {
+              L[[Alias]] <-
+                getFromDatastore(Call$Specs[[Alias]], RunYear = Year)
+            }
           }
-        } else {
-          GeoCategory <- Specs_ls$RunBy
-          Geo_ <- readFromTable(GeoCategory, GeoCategory, Year)
-          #Run module for each geographic area
-          for (Geo in Geo_) {
-            #Get data from datastore for geographic area
-            L <- getFromDatastore(Specs_ls, RunYear = Year, Geo = Geo)
-            #Run model for geographic area
+          #Run module
+          if (exists("Call")) {
+            R <- Func(L, Call$Func)
+          } else {
             R <- Func(L)
+          }
+          #Check for errors and warnings in module return list
+          #Save results in datastore if no errors from module
+          if (is.null(R$Errors)) {
             #Check results
             Check_ <-
               checkModuleOutputs(
                 Data_ls = R,
                 ModuleSpec_ls = Specs_ls,
                 ModuleName = ModuleName)
-            ResultsCheck_ <- c(ResultsCheck_, Check_)
+            ResultsCheck_ <- Check_
             #Save results if SaveDatastore and no errors found
             if (SaveDatastore & length(Check_) == 0) {
-              setInDatastore(R, Specs_ls, ModuleName, Year, Geo = Geo)
+              setInDatastore(R, Specs_ls, ModuleName, Year, Geo = NULL)
+            }
+          }
+          #Handle warnings
+          if (!is.null(R$Warnings)) {
+            writeLog(R$Warnings)
+            Msg <-
+              paste0("Module ", ModuleName, " has reported one or more warnings. ",
+                     "Check log for details.")
+            warning(Msg)
+          }
+          #Handle errors
+          if (!is.null(R$Errors) & StopOnErr) {
+            writeLog(R$Errors)
+            Msg <-
+              paste0("Module ", ModuleName, " has reported one or more errors. ",
+                     "Check log for details.")
+            stop(Msg)
+          }
+        #Otherwise the following code is run
+        } else {
+          #Initialize vectors to store module errors and warnings
+          Errors_ <- character(0)
+          Warnings_ <- character(0)
+          #Identify the units of geography to iterate over
+          GeoCategory <- Specs_ls$RunBy
+          #Create the geographic index list
+          GeoIndex_ls <- createGeoIndexList(c(Specs_ls$Get, Specs_ls$Set), GeoCategory, Year)
+          if (exists("Call")) {
+            for (Alias in names(Call$Specs)) {
+              GeoIndex_ls[[Alias]] <-
+                createGeoIndexList(Call$Specs[[Alias]]$Get, GeoCategory, Year)
+            }
+          }
+          #Run module for each geographic area
+          Geo_ <- readFromTable(GeoCategory, GeoCategory, Year)
+          for (Geo in Geo_) {
+            #Get data from datastore for geographic area
+            L <-
+              getFromDatastore(Specs_ls, RunYear = Year, Geo = Geo, GeoIndex_ls = GeoIndex_ls)
+            if (exists("Call")) {
+              for (Alias in names(Call$Specs)) {
+                L[[Alias]] <-
+                  getFromDatastore(Call$Specs[[Alias]], RunYear = Year, Geo = Geo, GeoIndex_ls = GeoIndex_ls[[Alias]])
+              }
+            }
+            #Run model for geographic area
+            if (exists("Call")) {
+              R <- Func(L, Call$Func)
+            } else {
+              R <- Func(L)
+            }
+            #Check for errors and warnings in module return list
+            #Save results in datastore if no errors from module
+            if (is.null(R$Errors)) {
+              #Check results
+              Check_ <-
+                checkModuleOutputs(
+                  Data_ls = R,
+                  ModuleSpec_ls = Specs_ls,
+                  ModuleName = ModuleName)
+              ResultsCheck_ <- c(ResultsCheck_, Check_)
+              #Save results if SaveDatastore and no errors found
+              if (SaveDatastore & length(Check_) == 0) {
+                setInDatastore(R, Specs_ls, ModuleName, Year, Geo = Geo, GeoIndex_ls = GeoIndex_ls)
+              }
+            }
+            #Handle warnings
+            if (!is.null(R$Warnings)) {
+              writeLog(R$Warnings)
+              Msg <-
+                paste0("Module ", ModuleName, " has reported one or more warnings. ",
+                       "Check log for details.")
+              warning(Msg)
+            }
+            #Handle errors
+            if (!is.null(R$Errors) & StopOnErr) {
+              writeLog(R$Errors)
+              Msg <-
+                paste0("Module ", ModuleName, " has reported one or more errors. ",
+                       "Check log for details.")
+              stop(Msg)
             }
           }
         }
@@ -530,8 +865,39 @@ testModule <-
       Msg <- paste0("Congratulations. Module ", ModuleName, " passed all tests.")
       writeLog(Msg, Print = TRUE)
       rm(Msg)
+
+      #Return the specifications, data list, and functions list if DoRun is FALSE
     } else {
-      return(Specs_ls)
+      #Load any modules identified by 'Call' spec if any
+      if (!is.null(Specs_ls$Call)) {
+        Call <- list(
+          Func = list(),
+          Specs = list()
+        )
+        for (Alias in names(Specs_ls$Call)) {
+          Function <- Specs_ls$Call[[Alias]]
+          Specs <- paste0(Specs_ls$Call[[Alias]], "Specifications")
+          Call$Func[[Alias]] <- eval(parse(text = Function))
+          Call$Specs[[Alias]] <- processModuleSpecs(eval(parse(text = Specs)))
+        }
+      }
+      #Get data from datastore
+      if (RunFor == "AllYears") Year <- getYears()[1]
+      if (RunFor == "BaseYear") Year <- G$BaseYear
+      if (RunFor == "NotBaseYear") Year <- getYears()[!getYears() %in% G$BaseYear][1]
+      L <- getFromDatastore(Specs_ls, RunYear = Year, Geo = NULL)
+      if (exists("Call")) {
+        for (Alias in names(Call$Specs)) {
+          L[[Alias]] <-
+            getFromDatastore(Call$Specs[[Alias]], RunYear = Year, Geo = NULL)
+        }
+      }
+      #Return the specifications, data list, and called functions
+      if (exists("Call")) {
+        return(list(Specs_ls = Specs_ls, L = L, M = Call$Func))
+      } else {
+        return(list(Specs_ls = Specs_ls, L = L))
+      }
     }
   }
 
@@ -540,8 +906,9 @@ testModule <-
 #======================
 #' Binary search function to find a parameter which achieves a target value.
 #'
-#' \code{binarySearch} uses a binary search algorithm to find the value of a
-#' function parameter for which the function achieves a target value.
+#' \code{binarySearch} a visioneval framework module developer function that
+#' uses a binary search algorithm to find the value of a function parameter for
+#' which the function achieves a target value.
 #'
 #' A binary search algorithm is used by several modules to calibrate the
 #' intercept of a binary logit model to match a specified proportion or to
@@ -566,6 +933,9 @@ testModule <-
 #' @param ... one or more optional arguments for the 'Function'.
 #' @param Target a numeric value that is compared with the return value of the
 #' 'Function'.
+#' @param DoWtAve a logical indicating whether successive weighted averaging is
+#' to be done. This is useful for getting stable results for stochastic
+#' calculations.
 #' @param MaxIter an integer specifying the maximum number of iterations
 #' to all the search to attempt.
 #' @param Tolerance a numeric value specifying the proportional difference
@@ -579,6 +949,7 @@ binarySearch <-
            SearchRange_,
            ...,
            Target = 0,
+           DoWtAve = TRUE,
            MaxIter = 100,
            Tolerance = 0.0001) {
     #Initialize vectors of low, middle and high values
@@ -628,12 +999,17 @@ binarySearch <-
       WtMid_ <- c(WtMid_, calcWtAve(Mid_))
       #Break out of loop if change in weighted mean of midpoint is less than tolerance
       if (length(Mid_) > 10) {
-        Chg <- diff(tail(Mid_, 4)) / tail(Mid_, 3)
+        Chg <- abs(diff(tail(Mid_, 4)) / tail(Mid_, 3))
         if (all(Chg < Tolerance)) break()
       }
     }
     #Return the weighted average of the midpoint value
-    tail(WtMid_, 1)
+    if (DoWtAve) {
+      Result <- tail(WtMid_, 1)
+    } else {
+      Result <- tail(Mid_, 1)
+    }
+    Result
   }
 
 
@@ -641,7 +1017,8 @@ binarySearch <-
 #===========================
 #' Makes a string representation of a model equation.
 #'
-#' \code{makeModelFormulaString} creates a string equivalent of a model equation.
+#' \code{makeModelFormulaString} a visioneval framework module developer
+#' function that creates a string equivalent of a model equation.
 #'
 #' The return values of model estimation functions such as 'lm' and 'glm'
 #' contain a large amount of information in addition to the parameter estimates
@@ -671,8 +1048,8 @@ makeModelFormulaString <- function (EstimatedModel) {
 #======================
 #' Applies an estimated binomial model to a set of input values.
 #'
-#' \code{applyBinomialModel} applies an estimated binomial model to a set of
-#' input data.
+#' \code{applyBinomialModel} a visioneval framework module developer function
+#' that applies an estimated binomial model to a set of input data.
 #'
 #' The function calculates the result of applying a binomial logit model to a
 #' set of input data. If a target proportion (TargetProp) is specified, the
@@ -692,6 +1069,16 @@ makeModelFormulaString <- function (EstimatedModel) {
 #' 'SearchRange' a two-element numeric vector which specifies the acceptable
 #' search range to use when determining the factor for adjusting the model
 #' constant.
+#' 'RepeatVar' a string which identifies the name of a field to use for
+#' repeated draws of the model. This is used in the case where for example the
+#' input data is households and the output is vehicles and the repeat variable
+#' is the number of vehicles in the household.
+#' 'ApplyRandom' a logical identifying whether the results will be affected by
+#' random draws (i.e. if a random number in range 0 - 1 is less than the
+#' computed probability) or if a probability cutoff is used (i.e. if the
+#' computed probability is greater then 0.5). This is an optional component. If
+#' it isn't present, the function runs with ApplyRandom = TRUE.
+#'
 #' @param Data_df a data frame containing the data required for applying the
 #' model.
 #' @param TargetProp a number identifying a target proportion for the default
@@ -701,6 +1088,10 @@ makeModelFormulaString <- function (EstimatedModel) {
 #' is to only check whether the specified 'SearchRange' for the model will
 #' produce acceptable values (i.e. no NA or NaN values). If FALSE (the default),
 #' the function will run the model and will not check the target search range.
+#' @param ApplyRandom a logical identifying whether the outcome will be
+#' be affected by random draws (i.e. if a random number in range 0 - 1 is less
+#' than the computed probability) or if a probability cutoff is used (i.e. if
+#' the computed probability is greater than 0.5)
 #' @return a vector of choice values for each record of the input data frame if
 #' the model is being run, or if the function is run to only check the target
 #' search range, a two-element vector identifying if the search range produces
@@ -710,13 +1101,18 @@ applyBinomialModel <-
   function(Model_ls,
            Data_df,
            TargetProp = NULL,
-           CheckTargetSearchRange = FALSE) {
+           CheckTargetSearchRange = FALSE,
+           ApplyRandom = TRUE) {
     #Check that model is 'binomial' type
     if (Model_ls$Type != "binomial") {
       Msg <- paste0("Wrong model type. ",
                     "Model is identified as Type = ", Model_ls$Type, ". ",
                     "Function only works with 'binomial' type models.")
       stop(Msg)
+    }
+    #Check whether Model_ls has ApplyRandom component and assign value if so
+    if (!is.null(Model_ls$ApplyRandom)) {
+      ApplyRandom <- Model_ls$ApplyRandom
     }
     #Prepare data
     if (!is.null(Model_ls$PrepFun)) {
@@ -725,6 +1121,9 @@ applyBinomialModel <-
     #Define function to calculate probabilities
     calcProbs <- function(x) {
       Results_ <- x + eval(parse(text = Model_ls$Formula), envir = Data_df)
+      if (!is.null(Model_ls$RepeatVar)) {
+        Results_ <- rep(Results_, Data_df[[Model_ls$RepeatVar]])
+      }
       Odds_ <- exp(Results_)
       Odds_ / (1 + Odds_)
     }
@@ -734,11 +1133,17 @@ applyBinomialModel <-
       sum(Probs_) / length(Probs_)
     }
     #Define a function to assign results
-    assignResults <- function(Probs_) {
-      N <- length(Probs_)
-      Result_ <- rep(Model_ls$Choices[2], N)
-      Result_[runif(N) <= Probs_] <- Model_ls$Choices[1]
-      Result_
+    if (ApplyRandom) {
+      assignResults <- function(Probs_) {
+        N <- length(Probs_)
+        Result_ <- rep(Model_ls$Choices[2], N)
+        Result_[runif(N) <= Probs_] <- Model_ls$Choices[1]
+        Result_
+      }
+    } else {
+      assignResults <- function(Probs_) {
+        ifelse(Probs_ > 0.5, Model_ls$Choices[1], Model_ls$Choices[2])
+      }
     }
     #Apply the model
     if (CheckTargetSearchRange) {
@@ -770,8 +1175,8 @@ applyBinomialModel <-
 #====================
 #' Applies an estimated linear model to a set of input values.
 #'
-#' \code{applyLinearModel} applies an estimated linear model to a set of input
-#' data.
+#' \code{applyLinearModel} a visioneval framework module developer function that
+#' applies an estimated linear model to a set of input data.
 #'
 #' The function calculates the result of applying a linear regression model to a
 #' set of input data. If a target mean value (TargetMean) is specified, the
@@ -862,8 +1267,8 @@ applyLinearModel <-
 #=====================================
 #' Writes module Inp and Set specifications to the VisionEval name registry.
 #'
-#' \code{writeVENameRegistry} writes module Inp and Set specifications to the
-#' VisionEval name registry.
+#' \code{writeVENameRegistry} a visioneval framework control function that
+#' writes module Inp and Set specifications to the VisionEval name registry.
 #'
 #' The VisionEval name registry (VENameRegistry.json) keeps track of the
 #' dataset names created by all registered modules by reading in datasets
@@ -902,7 +1307,8 @@ writeVENameRegistry <-
       NameRegistry_ls[[x]] <- NameRegistry_ls[[x]][!ExistingModuleEntries_]
     }
     #Process the Inp and Set specifications
-    ModuleSpecs_ls <- processModuleSpecs(getModuleSpecs(ModuleName, PackageName))
+    ModuleSpecs_ls <-
+      processModuleSpecs(getModuleSpecs(ModuleName, PackageName))
     Inp_ls <-
       lapply(ModuleSpecs_ls$Inp, function(x) {
         x$PACKAGE <- PackageName
@@ -928,8 +1334,9 @@ writeVENameRegistry <-
 #=================================
 #' Reads the VisionEval name registry.
 #'
-#' \code{readVENameRegistry} reads the VisionEval name registry and returns a
-#' list of data frames containing the Inp and Set specifications.
+#' \code{readVENameRegistry} a visioneval framework module developer function
+#' that reads the VisionEval name registry and returns a list of data frames
+#' containing the Inp and Set specifications.
 #'
 #' The VisionEval name registry (VENameRegistry.json) keeps track of the
 #' dataset names created by all registered modules by reading in datasets
@@ -964,8 +1371,9 @@ readVENameRegistry <-
 #=================================
 #' Returns Get specifications for registered datasets.
 #'
-#' \code{getRegisteredGetSpecs} returns a data frame of Get specifications for
-#' datasets in the VisionEval name registry.
+#' \code{getRegisteredGetSpecs} a visioneval framework module developer function
+#' that returns a data frame of Get specifications for datasets in the
+#' VisionEval name registry.
 #'
 #' The VisionEval name registry (VENameRegistry.json) keeps track of the
 #' dataset names created by all registered modules by reading in datasets

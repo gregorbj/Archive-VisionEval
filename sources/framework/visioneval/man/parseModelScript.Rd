@@ -20,8 +20,9 @@ order of the calls. Each row represents a module call in order. The columns
 identify the 'ModuleName', the 'PackageName', and the 'RunFor' value.
 }
 \description{
-\code{parseModel}Function reads and parses the model script to identify the
-sequence of module calls and the associated call arguments.
+\code{parseModel} a visioneval framework control function that reads and
+parses the model script to identify the sequence of module calls and the
+associated call arguments.
 }
 \details{
 This function reads in the model run script and parses the script to

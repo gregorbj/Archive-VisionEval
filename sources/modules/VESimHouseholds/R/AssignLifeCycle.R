@@ -21,24 +21,14 @@
 #09: one adult, retired, no children
 #10: 2+ adults, retired, no children
 
-# Copyright [2017] [AASHTO]
-# Based in part on works previously copyrighted by the Oregon Department of
-# Transportation and made available under the Apache License, Version 2.0 and
-# compatible open-source licenses.
 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 
-library(visioneval)
+#=================================
+#Packages used in code development
+#=================================
+#Uncomment following lines during code development. Recomment when done.
+# library(visioneval)
+
 
 #=============================================
 #SECTION 1: ESTIMATE AND SAVE MODEL PARAMETERS
@@ -94,7 +84,7 @@ AssignLifeCycleSpecifications <- list(
       TABLE = "Household",
       GROUP = "Year",
       TYPE = "character",
-      UNITS = "ID",
+      UNITS = "category",
       NAVALUE = "NA",
       PROHIBIT = "",
       ISELEMENTOF = ""
@@ -111,7 +101,8 @@ AssignLifeCycleSpecifications <- list(
       NAVALUE = -1,
       PROHIBIT = "",
       ISELEMENTOF = c("00", "01", "02", "03", "04", "09", "10"),
-      SIZE = 2
+      SIZE = 2,
+      DESCRIPTION = "Household life cycle as defined by 2009 NHTS LIF_CYC variable"
     )
   )
 )
@@ -157,6 +148,7 @@ rm(AssignLifeCycleSpecifications)
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
 #' @import visioneval
+#' @include CreateEstimationDatasets.R CreateHouseholds.R PredictWorkers.R PredictIncome.R
 #' @export
 AssignLifeCycle <- function(L) {
   #Convert inputs to data frame
@@ -201,69 +193,25 @@ AssignLifeCycle <- function(L) {
 }
 
 
-#====================
-#SECTION 4: TEST CODE
-#====================
-#The following code is useful for testing and module function development. The
-#first part initializes a datastore, loads inputs, and checks that the datastore
-#contains the data needed to run the module. The second part produces a list of
-#the data the module function will be provided by the framework when it is run.
-#This is useful to have when developing the module function. The third part
-#runs the whole module to check that everything runs correctly and that the
-#module outputs are consistent with specifications. Note that if a module
-#requires data produced by another module, the test code for the other module
-#must be run first so that the datastore contains the requisite data. Also note
-#that it is important that all of the test code is commented out when the
-#the package is built.
-
-#1) Test code to set up datastore and return module specifications
-#-----------------------------------------------------------------
-#The following commented-out code can be run to initialize a datastore, load
-#inputs, and check that the datastore contains the data needed to run the
-#module. It return the processed module specifications which can be used in
-#conjunction with the getFromDatastore function to fetch the list of data needed
-#by the module. Note that the following code assumes that all the data required
-#to set up a datastore are in the defs and inputs directories in the tests
-#directory. All files in the defs directory must have the default names.
-#
-# Specs_ls <- testModule(
+#================================
+#Code to aid development and test
+#================================
+#Test code to check specifications, loading inputs, and whether datastore
+#contains data needed to run module. Return input list (L) to use for developing
+#module functions
+#-------------------------------------------------------------------------------
+# TestDat_ <- testModule(
 #   ModuleName = "AssignLifeCycle",
 #   LoadDatastore = TRUE,
 #   SaveDatastore = TRUE,
 #   DoRun = FALSE
 # )
-#
-#2) Test code to create a list of module inputs to use in module function
-#------------------------------------------------------------------------
-#The following commented-out code can be run to create a list of module inputs
-#that may be used in the development of module functions. Note that the data
-#will be returned for the first year in the run years specified in the
-#run_parameters.json file. Also note that if the RunBy specification is not
-#Region, the code will by default return the data for the first geographic area
-#in the datastore.
-#
-# setwd("tests")
-# Year <- getYears()[1]
-# if (Specs_ls$RunBy == "Region") {
-#   L <- getFromDatastore(Specs_ls, RunYear = Year, Geo = NULL)
-# } else {
-#   GeoCategory <- Specs_ls$RunBy
-#   Geo_ <- readFromTable(GeoCategory, GeoCategory, Year)
-#   L <- getFromDatastore(Specs_ls, RunYear = Year, Geo = Geo_[1])
-#   rm(GeoCategory, Geo_)
-# }
-# rm(Year)
-# setwd("..")
-#
-#3) Test code to run full module tests
-#-------------------------------------
-#Run the following commented-out code after the module functions have been
-#written to test all aspects of the module including whether the module can be
-#run and whether the module will produce results that are consistent with the
-#module's Set specifications. It is also important to run this code if one or
-#more other modules in the package need the dataset(s) produced by this module.
-#
-# testModule(
+# L <- TestDat_$L
+
+#Test code to check everything including running the module and checking whether
+#the outputs are consistent with the 'Set' specifications
+#-------------------------------------------------------------------------------
+# TestDat_ <- testModule(
 #   ModuleName = "AssignLifeCycle",
 #   LoadDatastore = TRUE,
 #   SaveDatastore = TRUE,

@@ -1,0 +1,103 @@
+<!doctype html>
+<html>
+  
+<head>
+  <title>VisionEval Functions</title>
+  <!-- Load vis.js libraries -->
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.19.1/vis.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.19.1/vis.min.css" rel="stylesheet" type="text/css"/>
+  <!-- Load VisionEval framework function visualization data -->
+  <script src="functions_doc_files/js/nodes.js"></script>
+  <script src="functions_doc_files/js/edges.js"></script>
+  <script src="functions_doc_files/js/details.js"></script>
+  <!-- Visualization styling -->
+  <style type="text/css">
+    #mynetwork {
+      width: 1200px;
+      height: 800px
+    }
+  </style>
+</head>
+  
+<body>
+  <!-- Introduction -->
+  <h2>
+    VisionEval Function Relationships and Details
+  </h2>
+  <p>
+    <strong>blue</strong> = model user functions; <strong>green</strong> = model developer functions; <strong>yellow</strong> = framework control functions; <strong>red</strong> = HDF5 datastore interaction functions
+  </p>
+  <p>
+    <strong>Note</strong> that datastore functions are present to support different types of datastores. These are distinguished by the capitalized last two letters of the function names. Currently two types of datastores are supported, R data files (RD) and HDF5 files (H5). The type of datastore does not affect the function call relationships of the datastore functions. The datastore functions shown are the RD version functions.
+  </p>
+  <h3>
+    Network View Frame
+  </h3>
+  <p>
+    Click anywhere in the following network view frame to pan the view. Use mouse wheel to zoom in and out of view. Click on a function 'bubble' to highlight call relationships of the function and show function details below the network view frame.
+  </p>
+  
+  <!-- Create container for network and function detail displays -->
+  <div id="mynetwork" style="border: 2px solid black"></div>
+  <div id="details"></div>
+  
+  <!-- Program logic to display network and function detail -->
+  <script type="text/javascript">
+    // create a network
+    var container = document.getElementById('mynetwork');
+    var data = {
+      nodes: nodes,
+      edges: edges
+    };
+    var options = {
+      layout: {randomSeed:2},
+      physics: {
+        forceAtlas2Based: {
+          gravitationalConstant: -26,
+          centralGravity: 0.005,
+          springLength: 230,
+          springConstant: 0.18
+        },
+        maxVelocity: 146,
+        solver: 'forceAtlas2Based',
+        timestep: 0.5,
+        stabilization: {iterations: 150}
+      },
+      groups: {
+        user: {color:{background:'LightSkyBlue', 
+                      border:'DeepSkyBlue',
+                      highlight:{background:'LightSkyBlue',
+                                 border:'DeepSkyBlue'
+                                }
+                     }},
+        developer: {color:{background:'LightGreen',
+                           border:'MediumSeaGreen',
+                           highlight:{background:'LightGreen',
+                                      border:'MediumSeaGreen'
+                                     }
+                          }},
+        control: {color:{background:'Gold', 
+                         border:'Goldenrod',
+                         highlight:{background:'Gold',
+                                    border:'Goldenrod'
+                                   }
+                        }},
+        datastore: {color:{background:'LightPink', 
+                           border:'LightCoral',
+                           highlight:{background:'LightPink',
+                                      border:'LightCoral'
+                                     }
+                          }}
+      }
+    };
+    var network = new vis.Network(container, data, options);
+    // handle click on node to display function details
+    network.on("click", function (params) {
+      params.event = "[original event]";
+      document.getElementById('details').innerHTML =
+        functionDetails[params.nodes[0] - 1].details;
+    });
+  </script>
+</body>
+  
+</html>

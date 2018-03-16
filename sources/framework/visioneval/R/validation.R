@@ -14,9 +14,10 @@
 #=======================
 #' Check dataset existence
 #'
-#' \code{checkDataset} checks whether a dataset exists in the datastore and
-#' returns a TRUE or FALSE value with an attribute of the full path to where the
-#' dataset should be located in the datastore.
+#' \code{checkDataset} a visioneval framework control function that checks
+#' whether a dataset exists in the datastore and returns a TRUE or FALSE value
+#' with an attribute of the full path to where the dataset should be located in
+#' the datastore.
 #'
 #' This function checks whether a dataset exists. The dataset is identified by
 #' its name and the table and group names it is in. If the dataset is not in the
@@ -50,7 +51,8 @@ checkDataset <- function(Name, Table, Group, DstoreListing_df) {
 #===========================
 #' Get attributes of a dataset
 #'
-#' \code{getDatasetAttr} retrieves the attributes for a dataset in the datastore
+#' \code{getDatasetAttr} a visioneval framework control function that retrieves
+#' the attributes for a dataset in the datastore.
 #'
 #' This function extracts the listed attributes for a specific dataset from the
 #' datastore listing.
@@ -75,8 +77,8 @@ getDatasetAttr <- function(Name, Table, Group, DstoreListing_df) {
 #==========================
 #' Check whether table exists in the datastore
 #'
-#' \code{checkTableExistence} checks whether a table is present in the
-#' datastore.
+#' \code{checkTableExistence} a visioneval framework control function that
+#' checks whether a table is present in the datastore.
 #'
 #' This function checks whether a table is present in the datastore.
 #'
@@ -97,8 +99,9 @@ checkTableExistence <- function(Table, Group, DstoreListing_df) {
 #===============================
 #' Check specification consistency
 #'
-#' \code{checkSpecConsistency} checks whether the specifications for a dataset
-#' are consistent with the data attributes in the datastore
+#' \code{checkSpecConsistency} a visioneval framework control function that
+#' checks whether the specifications for a dataset are consistent with the data
+#' attributes in the datastore.
 #'
 #' This function compares the specifications for a dataset identified in a
 #' module "Get" or "Set" are consistent with the attributes for that data in the
@@ -126,15 +129,6 @@ checkSpecConsistency <- function(Spec_ls, DstoreAttr_) {
     )
     Errors_ <- c(Errors_, Message)
   }
-  #With code that allows unit conversions, can't expect units to be the same
-  # if (Spec_ls$UNITS != DstoreAttr_$UNITS) {
-  #   Message <- paste0(
-  #     "UNITS mismatch for ", Spec_ls$NAME, ". ",
-  #     "Module ", Spec_ls$MODULE, "asks for UNITS = (", Spec_ls$UNITS, "). ",
-  #     "Datastore contains UNITS = (", DstoreAttr_$UNITS, ")."
-  #   )
-  #   Warnings_ <- c(Warnings_, Message)
-  # }
   if (!is.null(Spec_ls$PROHIBIT) & !is.null(DstoreAttr_$PROHIBIT)) {
     if (!all(Spec_ls$PROHIBIT %in% DstoreAttr_$PROHIBIT) |
         !all(DstoreAttr_$PROHIBIT %in% Spec_ls$PROHIBIT)) {
@@ -169,8 +163,8 @@ checkSpecConsistency <- function(Spec_ls, DstoreAttr_) {
 #===============
 #' Check data type
 #'
-#' \code{checkMatchType} checks whether the data type of a data vector is
-#' consistent with specifications.
+#' \code{checkMatchType} a visioneval framework control function that checks
+#' whether the data type of a data vector is consistent with specifications.
 #'
 #' This function checks whether the data type of a data vector is consistent
 #' with a specified data type. An error message is generated if data can't be
@@ -238,8 +232,9 @@ checkMatchType <- function(Data_, Type, DataName) {
 #============================
 #' Check values with conditions.
 #'
-#' \code{checkMatchConditions} checks whether a data vector contains any
-#' elements that match a set of conditions.
+#' \code{checkMatchConditions} a visioneval framework control function that
+#' checks whether a data vector contains any elements that match a set of
+#' conditions.
 #'
 #' This function checks whether any of the values in a data vector match one or
 #' more conditions. The conditions are specified in a character vector where
@@ -297,8 +292,9 @@ checkMatchConditions <- function(Data_, Conditions_, DataName, ConditionType) {
 #=====================================================
 #' Check if data values are in a specified set of values
 #'
-#' \code{checkIsElementOf} checks whether a data vector contains any elements
-#' that are not in an allowed set of values.
+#' \code{checkIsElementOf} a visioneval framework control function that checks
+#' whether a data vector contains any elements that are not in an allowed set of
+#' values.
 #'
 #' This function is used to check whether categorical data values are consistent
 #' with the defined set of allowed values.
@@ -337,8 +333,9 @@ checkIsElementOf <- function(Data_, SetElements_, DataName){
 #=========================================
 #' Check data consistency with specification
 #'
-#' \code{checkDataConsistency} checks whether data to be written to a dataset is
-#' consistent with the dataset attributes.
+#' \code{checkDataConsistency} a visioneval framework control function that
+#' checks whether data to be written to a dataset is consistent with the dataset
+#' attributes.
 #'
 #' This function compares characteristics of data to be written to a dataset to
 #' the dataset attributes to determine whether they are consistent.
@@ -402,7 +399,7 @@ checkDataConsistency <- function(DatasetName, Data_, DstoreAttr_) {
   }
   #Check if any values in UNLIKELY
   if (!is.null(DstoreAttr_$UNLIKELY)) {
-    if (DstoreAttr_$UNLIKELY != "") {
+    if (DstoreAttr_$UNLIKELY[1] != "") {
       Message <- checkMatchConditions(
         Data_, DstoreAttr_$UNLIKELY, DatasetName, "UNLIKELY")
       Warnings_ <- c(Warnings_, Message)
@@ -427,30 +424,44 @@ checkDataConsistency <- function(DatasetName, Data_, DstoreAttr_) {
 #=========================
 #' Parse units specification into components and add to specifications list.
 #'
-#' \code{parseUnitsSpec} parses the UNITS attribute of a standard Inp, Get, or
-#' Set specification for a dataset to identify the units name, multiplier, and
-#' year for currency data. Returns a modified specifications list whose UNITS
-#' value is only the units name, and includes a MULTIPLIER attribute and YEAR
-#' attribute.
+#' \code{parseUnitsSpec} a visioneval framework control function that parses the
+#' UNITS attribute of a standard Inp, Get, or Set specification for a dataset to
+#' identify the units name, multiplier, and year for currency data. Returns a
+#' modified specifications list whose UNITS value is only the units name, and
+#' includes a MULTIPLIER attribute and YEAR attribute.
 #'
 #' The UNITS component of a specifications list can encode information in
 #' addition to the units name. This includes a value units multiplier and in
 #' the case of currency values the year for the currency measurement. The
 #' multiplier element can only be expressed in scientific notation where the
-#' number before the 'e' can only be 1.
+#' number before the 'e' can only be 1. If the year element for a currency
+#' specification is missing, it is replaced by the model base year which is
+#' recorded in the model state file. If this is done, a WARN attribute is added
+#' to the specifications list notifying the module developer that there is no
+#' year element and the model base year will be used when the module is called.
+#' The test module function reads this warning and writes it to the module test
+#' log. This way the module developer is made aware of the situation so that it
+#' may be corrected if necessary. The model user is not bothered by the warning.
 #'
 #' @param Spec_ls A standard specifications list for a Inp, Get, or Set item.
+#' @param ComponentName A string that is the name of the specifications
+#' the the specification comes from (e.g. "Inp", "Get", "Set).
 #' @return a list that is a standard specifications list with the addition of
 #' a MULTIPLIER component and a YEAR component as well as a modification of the
 #' UNIT component. The MULTIPLIER component can have the value of NA, a number,
 #' or NaN. The value is NA if the multiplier is missing. It is a number if the
 #' multiplier is a valid number. The value is NaN if the multiplier is not a
 #' valid number. The YEAR component is a character string that is a 4-digit
-#' representation of a year or NA if the component is missing or not a proper
-#' year. The UNITS component is modified to only be the units name.
+#' representation of a year or NA if the component is not a proper year. If the
+#' year component is missing from the UNITS specification for currency data,
+#' the model base year is substituted. In that case, a WARN attribute is added
+#' to the returned specifications list. This is read by the testModule function
+#' and written to the module test log to notify the module developer. After the
+#' UNITS component has been parsed and the YEAR and MULTIPLIER components
+#' extracted, the UNITS component is modified to only be the units name.
 #' @export
 parseUnitsSpec <-
-  function(Spec_ls) {
+  function(Spec_ls, ComponentName) {
     #Define function to return a multiplier value from a multiplier string
     #NA if none, NaN if not a properly specified scientic notation (e.g. 1e3)
     getMultiplier <- function(String) {
@@ -489,8 +500,24 @@ parseUnitsSpec <-
     Spec_ls$UNITS <- UnitsSplit_[1]
     #If currency type, the year is the 2nd element and multiplier is 3rd element
     if (Spec_ls$TYPE == "currency") {
-      Year <- UnitsSplit_[2]
-      Multiplier <- UnitsSplit_[3]
+      if (length(UnitsSplit_) == 1 & ComponentName != "Inp") {
+        Year <- getModelState()$BaseYear
+        Multiplier <- NA
+        Msg <- paste0(
+          "Warning note to module developer. The ", ComponentName,
+          " specification for dataset ", Spec_ls$NAME, " in table ",
+          Spec_ls$TABLE, " does not specify a currency year. ",
+          "The model user's base year will be assumed when the module is called. ",
+          "If this is not the intended behavior, include the intended currency ",
+          "year in the UNITS specification as described in the VisionEval ",
+          "module developer documentation."
+        )
+        attributes(Spec_ls)$WARN <- Msg
+        rm(Msg)
+      } else {
+        Year <- UnitsSplit_[2]
+        Multiplier <- UnitsSplit_[3]
+      }
     } else {
       Year <- NA
       Multiplier <- UnitsSplit_[2]
@@ -502,15 +529,29 @@ parseUnitsSpec <-
     #Return the result
     Spec_ls
   }
-
+#Test module developer warning if year not specified in UNITS spec for
+#currency data in Get or Set specifications
+# setwd("tests")
+# TestSpec_ls <- item(
+#   NAME = "RuralIncome",
+#   TABLE = "Marea",
+#   GROUP = "BaseYear",
+#   TYPE = "currency",
+#   UNITS = "USD",
+#   PROHIBIT = c("NA", "< 0"),
+#   ISELEMENTOF = ""
+# )
+# parseUnitsSpec(TestSpec_ls, "Get")
+# setwd("..")
 
 #RECOGNIZED TYPES AND UNITS ATTRIBUTES FOR SPECIFICATIONS
 #========================================================
 #' Returns a list of returns a list of recognized data types, the units for each
 #' type, and storage mode of each type.
 #'
-#' \code{Types} returns a list of returns a list of recognized data types, the
-#' units for each type, and storage mode of each type.
+#' \code{Types} a visioneval framework control function that returns a list of
+#' returns a list of recognized data types, the units for each type, and storage
+#' mode of each type.
 #'
 #' This function stores a listing of the dataset types recognized by the
 #' visioneval framework, the units recognized for each type, and the storage
@@ -583,6 +624,14 @@ Types <- function(){
         SEC = c(YR = 3.171e-8, DAY = 1.1574e-5, HR = 0.000277778, MIN = 0.0166667, SEC = 1)),
       mode = "double"
     ),
+    energy = list(
+      units = list(
+        KWH = c(KWH = 1, MJ = 3.6, GGE = 0.02967846),
+        MJ = c(KWH = 0.277778, MJ = 1, GGE = 0.008244023),
+        GGE = c(KWH = 33.69447, MJ = 121.3, GGE = 1)
+      ),
+      mode = "double"
+    ),
     people = list(
       units = list(
         PRSN = c(PRSN = 1)
@@ -626,9 +675,10 @@ Types <- function(){
 #=======================
 #' Check measurement units for consistency with recognized units for stated type.
 #'
-#' \code{checkUnits}checks the specified UNITS for a dataset for consistency
-#' with the recognized units for the TYPE specification for the dataset. It also
-#' splits compound units into elements.
+#' \code{checkUnits} a visioneval framework control function that checks the
+#' specified UNITS for a dataset for consistency with the recognized units for
+#' the TYPE specification for the dataset. It also splits compound units into
+#' elements.
 #'
 #' The visioneval code recognizes 4 simple data types (integer, double, logical,
 #' and character) and 9 complex data types (e.g. distance, time, mass).
@@ -793,9 +843,9 @@ checkUnits <- function(DataType, Units) {
 #' Checks the TYPE and UNITS and associated MULTIPLIER and YEAR attributes of a
 #' Inp, Get, or Set specification for consistency.
 #'
-#' \code{checkSpecTypeUnits}Checks correctness of TYPE, UNITS, MULTIPLIER and
-#' YEAR attributes of a specification that has been processed with the
-#' parseUnitsSpec function.
+#' \code{checkSpecTypeUnits} a visioneval framework control function that checks
+#' correctness of TYPE, UNITS, MULTIPLIER and YEAR attributes of a specification
+#' that has been processed with the parseUnitsSpec function.
 #'
 #' This function checks whether the TYPE and UNITS of a module's specification
 #' contain errors. The check is done on a module specification in which the
@@ -905,8 +955,9 @@ checkSpecTypeUnits <- function(Spec_ls, SpecGroup, SpecNum) {
 #======================================================
 #' List basic module specifications to check for correctness
 #'
-#' \code{SpecRequirements}returns a list of basic requirements for module
-#' specifications to be used for checking correctness of specifications.
+#' \code{SpecRequirements} a visioneval framework control function that returns
+#' a list of basic requirements for module specifications to be used for
+#' checking correctness of specifications.
 #'
 #' This function returns a list of the basic requirements for module
 #' specifications. The main components of the list are the components of module
@@ -925,6 +976,11 @@ checkSpecTypeUnits <- function(Spec_ls, SpecGroup, SpecNum) {
 #' @export
 SpecRequirements <- function(){
   list(
+    RunFor =
+      list(
+        ValueType = "character",
+        ValuesAllowed = c("AllYears", "BaseYear", "NotBaseYear")
+      ),
     RunBy =
       list(
         ValueType = "character",
@@ -957,7 +1013,9 @@ SpecRequirements <- function(){
         TYPE = list(ValueType = "character",
                     ValuesAllowed = "[0-9a-zA-Z_]"),
         UNITS = list(ValueType = "character",
-                     ValuesAllowed = "[0-9a-zA-Z_]")
+                     ValuesAllowed = "[0-9a-zA-Z_]"),
+        DESCRIPTION = list(ValueType = "character",
+                           ValuesAllowed = "[0-9a-zA-Z_]")
       ),
     Get =
       list(
@@ -983,7 +1041,9 @@ SpecRequirements <- function(){
         TYPE = list(ValueType = "character",
                     ValuesAllowed = "[0-9a-zA-Z_]"),
         UNITS = list(ValueType = "character",
-                     ValuesAllowed = "[0-9a-zA-Z_]")
+                     ValuesAllowed = "[0-9a-zA-Z_]"),
+        DESCRIPTION = list(ValueType = "character",
+                           ValuesAllowed = "[0-9a-zA-Z_]")
       )
   )
 }
@@ -993,8 +1053,8 @@ SpecRequirements <- function(){
 #============================
 #' Checks a module specifications for completeness and for incorrect entries
 #'
-#' \code{checkSpec}Function checks a single module specification for
-#' completeness and for proper values.
+#' \code{checkSpec} a visioneval framework control function that checks a single
+#' module specification for completeness and for proper values.
 #'
 #' This function checks whether a single module specification (i.e. the
 #' specification for a single dataset contains the minimum required
@@ -1029,25 +1089,41 @@ checkSpec <- function(Spec_ls, SpecGroup, SpecNum) {
         Name <- paste0(ReqName, " ")
       }
       Errors_ <- character(0)
-      if (typeof(Spec) != Req_ls$ValueType) {
+      if (length(Spec) == 0) {
         Msg <-
-          paste0("The type of the ", Name, "attribute of the ", SpecGroup,
-                 " specification number ", SpecNum, " is incorrect. ",
-                 "The attribute must be a ", Req_ls$ValueType, " type.")
+          paste0("Value of the ", Name, " attribute of the ", SpecGroup,
+                 " specification number ", SpecNum, " is missing. ",
+                 "The attribute must have a value.")
         Errors_ <- c(Errors_, Msg)
+      } else {
+        if (is.na(Spec)) {
+          Msg <-
+            paste0("Value of the ", Name, " attribute of the ", SpecGroup,
+                   " specification number ", SpecNum, " is NA. ",
+                   "The attribute must have a value.")
+          Errors_ <- c(Errors_, Msg)
+        } else {
+          if (typeof(Spec) != Req_ls$ValueType) {
+            Msg <-
+              paste0("The type of the ", Name, " attribute of the ", SpecGroup,
+                     " specification number ", SpecNum, " is incorrect. ",
+                     "The attribute must be a ", Req_ls$ValueType, " type.")
+            Errors_ <- c(Errors_, Msg)
+          }
+          if (!any(str_detect(Spec, Req_ls$ValuesAllowed))) {
+            Msg <-
+              paste0("The value of the ", Name, "attribute of the ", SpecGroup,
+                     " specification number ", SpecNum, " is incorrect. ",
+                     "The attribute value must be one of the following: ",
+                     paste(Req_ls$ValuesAllowed, collapse = ", "), ".")
+            Errors_ <- c(Errors_, Msg)
+          }
+        }
+        Errors_
       }
-      if (!any(str_detect(Spec, Req_ls$ValuesAllowed))) {
-        Msg <-
-          paste0("The value of the ", Name, "attribute of the ", SpecGroup,
-                 " specification number ", SpecNum, " is incorrect. ",
-                 "The attribute value must be one of the following: ",
-                 paste(Req_ls$ValuesAllowed, collapse = ", "), ".")
-        Errors_ <- c(Errors_, Msg)
-      }
-      Errors_
     }
   #Check a specification
-  if (SpecGroup == "RunBy") {
+  if (SpecGroup %in% c("RunBy", "RunFor")) {
     Errors_ <- c(Errors_, checkRequirement())
   } else {
     for (nm in names(Require_ls)) {
@@ -1065,8 +1141,8 @@ checkSpec <- function(Spec_ls, SpecGroup, SpecNum) {
 #=====================================
 #' Checks all module specifications for completeness and for incorrect entries
 #'
-#' \code{checkModuleSpecs}checks all module specifications for
-#' completeness and for proper values.
+#' \code{checkModuleSpecs} a visioneval framework control function that checks
+#' all module specifications for completeness and for proper values.
 #'
 #' This function iterates through all the specifications for a module and
 #' calls the checkSpec function to check each specification for completeness and
@@ -1079,6 +1155,18 @@ checkSpec <- function(Spec_ls, SpecGroup, SpecNum) {
 #' @export
 checkModuleSpecs <- function(Specs_ls, ModuleName) {
   Errors_ <- character(0)
+  #Check RunFor
+  #------------
+  if (!is.null(Specs_ls$RunFor)) {
+    Err_ <- checkSpec(Specs_ls$RunFor, "RunFor", 1)
+    if (length(Err_) != 0) {
+      Msg <-
+        paste0(
+          "'RunFor' specification for module '", ModuleName,
+          "' has one or more errors as follows.")
+      Errors_ <- c(Errors_, Msg, Err_)
+    }
+  }
   #Check RunBy
   #-----------
   Err_ <- checkSpec(Specs_ls$RunBy, "RunBy", 1)
@@ -1175,6 +1263,64 @@ checkModuleSpecs <- function(Specs_ls, ModuleName) {
     }
     rm(Err_)
   }
+  #Check Call specifications
+  #-------------------------
+  if (!is.null(Specs_ls$Call)) {
+    if (!is.list(Specs_ls$Call)) {
+      #If it is not a list check that the value is not something other than TRUE
+      if (Specs_ls$Call != TRUE) {
+        Msg <-
+          paste0(
+            "'Call' specification for module '", ModuleName,
+            "' is incorrect. If it is not NULL, its value must be TRUE ",
+            "or be a list which identifies the the modules to be called."
+          )
+        Errors_ <- c(Errors_, Msg)
+      } else {
+      #If the value is TRUE, check that there is not an 'Inp' specification
+        if (!is.null(Specs_ls$Inp)) {
+          Msg <-
+            paste0(
+              "Inconsistency between 'Call' and 'Inp' specifications for module '",
+              ModuleName, "'. The 'Call' specification is TRUE, ",
+              "identifying this as a module to be called by other ",
+              "modules rather than a module that is run by the 'runModule' function. ",
+              "Modules that are called by other modules must not have 'Inp' ",
+              "specifications because no inputs are processed for modules ",
+              "that are called by other modules."
+            )
+        }
+      }
+    } else {
+    #If it is a list, check that the module calls are correctly formatted
+      for (name in names(Specs_ls$Call)) {
+        Value <- Specs_ls$Call[[name]]
+        if (!is.character(Value)) {
+          Msg <-
+            paste0(
+              "'Call' specification for module '", ModuleName,
+              "' is incorrect. The value for '", name, "' is not a string."
+            )
+          Errors_ <- c(Errors_, Msg)
+        } else {
+          Value_ <- unlist(strsplit(Value, "::"))
+          if (length(Value_) != 2) {
+            Msg <-
+              paste0(
+                "'Call' specification for module '", ModuleName,
+                "' is incorrect. The value for '", name,
+                "' is not formatted correctly. ",
+                "It must be formatted like PackageName::ModuleName ",
+                "where 'PackageName' is the name of a package and ",
+                "'ModuleName' is the name of a module."
+              )
+            Errors_ <- c(Errors_, Msg)
+          }
+        }
+      }
+
+    }
+  }
 
   #Return errors
   #-------------
@@ -1192,8 +1338,9 @@ checkModuleSpecs <- function(Specs_ls, ModuleName) {
 #=======================================
 #' Check years and geography of input file
 #'
-#' \code{checkInputYearGeo} checks the 'Year' and 'Geo' columns of an input file
-#' to determine whether they are complete and have no duplications.
+#' \code{checkInputYearGeo} a visioneval framework control function that checks
+#' the 'Year' and 'Geo' columns of an input file to determine whether they are
+#' complete and have no duplications.
 #'
 #' This function checks the 'Year' and 'Geo' columns of an input file to
 #' determine whether there are records for all run years specified for the
@@ -1252,8 +1399,8 @@ checkInputYearGeo <- function(Year_, Geo_, Group, Table) {
 #============================================================
 #' Find the full specification corresponding to a defined NAME, TABLE, and GROUP
 #'
-#' \code{findSpec} returns the full dataset specification for defined NAME,
-#' TABLE, and GROUP.
+#' \code{findSpec} a visioneval framework control function that returns the full
+#' dataset specification for defined NAME, TABLE, and GROUP.
 #'
 #' This function finds and returns the full specification from a specifications
 #' list whose NAME, TABLE and GROUP values correspond to the Name, Table, and
@@ -1279,8 +1426,9 @@ findSpec <- function(Specs_ls, Name, Table, Group) {
 #' Sort a data frame so that the order of rows matches the geography in a
 #' datastore table.
 #'
-#' \code{sortGeoTable} returns a data frame whose rows are sorted to match the
-#' geography in a specified table in the datastore.
+#' \code{sortGeoTable} a visioneval framework control function that returns a
+#' data frame whose rows are sorted to match the geography in a specified table
+#' in the datastore.
 #'
 #' This function sorts the rows of a data frame that the 'Geo' field in the
 #' data frame matches the corresponding geography names in the specified table
@@ -1314,9 +1462,9 @@ sortGeoTable <- function(Data_df, Table, Group) {
 #' Parse field names of input file to separate out the field name, currency
 #' year, and multiplier.
 #'
-#' \code{parseInputFieldNames} parses the field names of an input file to
-#' separate out the field name, currency year (if data is
-#' currency type), and value multiplier.
+#' \code{parseInputFieldNames} a visioneval framework control function that
+#' parses the field names of an input file to separate out the field name,
+#' currency year (if data is currency type), and value multiplier.
 #'
 #' The field names of input files can be used to encode more information than
 #' the name itself. It can also encode the currency year for currency type data
@@ -1486,8 +1634,9 @@ parseInputFieldNames <-
 #==========================
 #' Process module input files
 #'
-#' \code{processModuleInputs} processes input files identified in a module's
-#' 'Inp' specifications in preparation for saving in the datastore.
+#' \code{processModuleInputs} a visioneval framework control function that
+#' processes input files identified in a module's 'Inp' specifications in
+#' preparation for saving in the datastore.
 #'
 #' This function processes the input files identified in a module's 'Inp'
 #' specifications in preparation for saving the data in the datastore. Several
@@ -1517,8 +1666,6 @@ parseInputFieldNames <-
 processModuleInputs <-
   function(ModuleSpec_ls, ModuleName, Dir = "inputs") {
     G <- getModelState()
-    FileErr_ <- character(0)
-    FileWarn_ <- character(0)
     InpSpec_ls <- ModuleSpec_ls$Inp
 
     #ORGANIZE THE SPECIFICATIONS BY INPUT FILE AND NAME
@@ -1537,8 +1684,13 @@ processModuleInputs <-
     Data_ls <- initDataList()
 
     #ITERATE THROUGH SORTED SPECIFICATIONS AND LOAD DATA INTO LIST
+    FileErr_ls <- list()
+    FileWarn_ls <- list()
     Files_ <- names(SortSpec_ls)
     for (File in Files_) {
+      #Initialize FileErr_ and FileWarn_
+      FileErr_ <- character(0)
+      FileWarn_ <- character(0)
       #Extract the specifications
       Spec_ls <- SortSpec_ls[[File]]
       #Check that file exists
@@ -1591,8 +1743,8 @@ processModuleInputs <-
       if (is.null(Data_ls[[Group]][[Table]])) {
         Data_ls[[Group]][[Table]] <- list()
       }
-      #If Group is Year, check that Geo and Year fields are correct
-      if (Group  == "Year") {
+      #If Group is Year and Table is not Region, check Geo and Year fields
+      if (Group  == "Year" & Table != "Region") {
         #Check that there are 'Year' and 'Geo' fields
         HasYearField <- "Year" %in% names(Data_df)
         HasGeoField <- "Geo" %in% names(Data_df)
@@ -1689,6 +1841,54 @@ processModuleInputs <-
           Data_ls[[Group]][[Table]]$Geo <- Data_df$Geo
         }
       }
+      #If Group is Year and Table is Region, check years are complete
+      if (Group  == "Year" & Table == "Region") {
+        #Check that there is a 'Year' field
+        HasYearField <- "Year" %in% names(Data_df)
+        if (!HasYearField) {
+          Msg <-
+            paste0(
+              "Input file error for module '", ModuleName,
+              "' for input file '", File, "'. ",
+              "'Table' specification is ", Table,
+              " but the input file is missing required 'Year' field."
+            )
+          FileErr_ <- c(FileErr_, Msg)
+          next()
+        }
+        #Check that the 'Year' field is complete and not duplicated
+        YearDuplicated <- any(duplicated(Data_df$Year))
+        YearIncomplete <- any(!(G$Years %in% Data_df$Year))
+        if (YearDuplicated | YearIncomplete) {
+          if (YearDuplicated) {
+            DupYear_ <- unique(Data_df$Year[YearDuplicated])
+            Msg <-
+              paste0(
+                "Input file error for module '", ModuleName,
+                "' for input file '", File, "'. ",
+                "Has duplicate inputs for the following years: ",
+                paste(DupYear_)
+              )
+            FileErr_ <- c(FileErr_, Msg)
+            rm(DupYear_)
+          }
+          if (YearIncomplete) {
+            IncompleteYear_ <- G$Years[YearIncomplete]
+            Msg <-
+              paste0(
+                "Input file error for module '", ModuleName,
+                "' for input file '", File, "'.",
+                "Is missing inputs for the following years: ",
+                paste(IncompleteYear_)
+              )
+            FileErr_ <- c(FileErr_, Msg)
+            rm(IncompleteYear_)
+          }
+          next()
+        } else {
+          Data_ls[[Group]][[Table]]$Year <- Data_df$Year
+        }
+      }
       #Check and load data into list
       DataErr_ls <- list(Errors = character(0), Warnings = character(0))
       for (Name in names(Spec_ls)) {
@@ -1697,13 +1897,11 @@ processModuleInputs <-
         DataCheck_ls <-
           checkDataConsistency(Name, Data_, ThisSpec_ls)
         if (length(DataCheck_ls$Errors) != 0) {
-          writeLog(DataCheck_ls$Errors)
           DataErr_ls$Errors <-
             c(DataErr_ls$Errors, DataCheck_ls$Errors)
           next()
         }
         if (length(DataCheck_ls$Warnings) != 0) {
-          writeLog(DataCheck_ls$Warnings)
           DataErr_ls$Warnings <-
             c(DataErr_ls$Warnings, DataCheck_ls$Warnings)
         }
@@ -1750,6 +1948,7 @@ processModuleInputs <-
         FileErr_ <- c(FileErr_, Msg, DataErr_ls$Errors)
         writeLog(FileErr_)
       }
+      FileErr_ls <- c(FileErr_ls, FileErr_)
       if (length(DataErr_ls$Warnings) != 0) {
         Msg <-
           paste0(
@@ -1760,10 +1959,14 @@ processModuleInputs <-
         FileWarn_ <- c(FileWarn_, Msg, DataErr_ls$Warnings)
         writeLog(FileWarn_)
       }
+      FileWarn_ls <- c(FileWarn_ls, FileWarn_)
     }#End loop through input files
 
     #RETURN THE RESULTS
-    list(Errors = FileErr_, Data = Data_ls)
+    list(
+      Errors = unlist(FileErr_ls),
+      Warnings = unlist(FileWarn_ls),
+      Data = Data_ls)
   }
 
 

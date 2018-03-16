@@ -1,10 +1,10 @@
 # R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
 
-language: R
+language: r
 sudo: true
 dist: trusty
 cache: packages
-
+  
 # Be strict when checking our package
 warnings_are_errors: false
 
@@ -24,79 +24,62 @@ before_install:
   - "if [ $(phantomjs --version) != $PHANTOMJS_VERSION ]; then hash -r; fi"
   - "phantomjs --version"
 
-# start by installing devtools
 install:
-  - Rscript -e 'install.packages(c("curl","devtools", "roxygen2", "stringr", "knitr"))'
+  - Rscript -e 'install.packages(c("curl","devtools", "roxygen2", "stringr", "knitr", "data.table", "ordinal", "geosphere", "fields", "car", "pbkrtest", "quantreg", "reshape"))'
   - Rscript -e 'devtools::install_bioc(c("BiocInstaller", "rhdf5"))'
+  # Packages required for VEGUI  
+  - Rscript -e 'install.packages(c("shiny", "shinyjs", "shinyFiles", "data.table", "DT", "shinyBS", "future", "testit", "jsonlite", "shinyAce", "envDocument", "rhandsontable"))'
+  - Rscript -e 'devtools::install_github(c("tdhock/namedCapture", "trestletech/shinyTree", "rstudio/webdriver", "rstudio/shinytest"))'
+
+# setup a different environment variable for each Travis build environment (in the matrix) to run in parallel
+env:
+   - FOLDER=sources/framework/visioneval         SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=
+   - FOLDER=sources/modules/VE2001NHTS           SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=
+   - FOLDER=sources/modules/VECommercialTravel   SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=VE2001NHTS
+   - FOLDER=sources/modules/VEEnergyAndEmissions SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=VE2001NHTS
+   - FOLDER=sources/modules/VEHouseholdTravel    SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=VE2001NHTS
+   - FOLDER=sources/modules/VEHouseholdVehicles  SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=VE2001NHTS
+   - FOLDER=sources/modules/VELandUse            SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=VE2001NHTS,VESimHouseholds
+   - FOLDER=sources/modules/VESimHouseholds      SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=
+   - FOLDER=sources/modules/VESyntheticFirms     SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=
+   - FOLDER=sources/modules/VETransportSupply    SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=
+   - FOLDER=sources/modules/VETransportSupplyUse SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=
+   - FOLDER=sources/modules/VETravelCost         SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=
+   - FOLDER=sources/models/VERPAT                SCRIPT=run_model.R             TYPE=model       DEPENDS=VE2001NHTS,VESimHouseholds,VESyntheticFirms,VELandUse,VETransportSupply,VEHouseholdVehicles,VEHouseholdTravel,VETransportSupplyUse
+   - FOLDER=sources/models/VERSPM/Test1          SCRIPT=run_model.R             TYPE=model       DEPENDS=VE2001NHTS,VESimHouseholds,VELandUse,VETransportSupply,VEHouseholdVehicles,VEHouseholdTravel,VECommercialTravel,VEEnergyAndEmissions
+   - FOLDER=sources/VEGUI                        SCRIPT=run_vegui_test.R        TYPE=model       DEPENDS=VE2001NHTS,VESimHouseholds,VESyntheticFirms,VELandUse,VETransportSupply,VEHouseholdVehicles,VEHouseholdTravel,VETransportSupplyUse
 
 # install and test framework, modules, models, GUI
 script:
   - |
+    #install framework
     cd sources/framework/visioneval
     Rscript -e 'devtools::install_deps(".")'
-    Rscript -e 'devtools::check(".")'
-    Rscript -e "tryCatch( source('tests/scripts/test.R') )"
     R CMD INSTALL .
     cd ../../..
     
-    cd sources/modules/VE2001NHTS;
-    Rscript -e 'devtools::install_deps(".")'
-    Rscript -e 'devtools::check(".")'
-    Rscript -e "tryCatch( source('tests/scripts/test.R') )"
-    R CMD INSTALL .
-    cd ../../..
-       
-    cd sources/modules/VELandUse;
-    Rscript -e 'devtools::install_deps(".")'
-    Rscript -e 'devtools::check(".")'
-    Rscript -e "tryCatch( source('tests/scripts/test.R') )"
-    R CMD INSTALL .
-    cd ../../..
+    #install dependent packages
+    IFS=',' read -r -a packages <<< $DEPENDS
+    for element in ${packages[@]}
+    do
+      if ( [ $element != "." ] ); then
+        cd sources/modules/$element
+        Rscript -e 'devtools::install_deps(".")'
+        R CMD INSTALL .
+        cd ../../..
+      fi
+    done
     
-    cd sources/modules/VESimHouseholds
-    Rscript -e 'devtools::install_deps(".")'
-    Rscript -e 'devtools::check(".")'
-    Rscript -e "tryCatch( source('tests/scripts/test.R') )"
-    R CMD INSTALL .
-    cd ../../..
-    
-    cd sources/modules/VESyntheticFirms
-    Rscript -e 'devtools::install_deps(".")'
-    Rscript -e 'devtools::check(".")'
-    Rscript -e "tryCatch( source('tests/scripts/test.R') )"
-    R CMD INSTALL .
-    cd ../../..
-    
-    cd sources/modules/VETransportSupply
-    Rscript -e 'devtools::install_deps(".")'
-    Rscript -e 'devtools::check(".")'
-    Rscript -e "tryCatch( source('tests/scripts/test.R') )"
-    R CMD INSTALL .
-    cd ../../..
-    
-    cd sources/modules/VETravelDemand
-    Rscript -e 'devtools::install_deps(".")'
-    Rscript -e 'devtools::check(".")'
-    Rscript -e "tryCatch( source('tests/scripts/test.R') )"
-    R CMD INSTALL .
-    cd ../../..
-    
-    cd sources/modules/VEVehicleOwnership
-    Rscript -e 'devtools::install_deps(".")'
-    Rscript -e 'devtools::check(".")'
-    Rscript -e "tryCatch( source('tests/scripts/test.R') )"
-    R CMD INSTALL .
-    cd ../../..
-    
-    cd sources/models/VERPAT
-    Rscript -e "tryCatch( source('run_model.R') )"
-    cd ../../..
-    
-    cd sources/models/VERSPM/Test1
-    Rscript -e "tryCatch( source('run_model.R') )"
-    cd ../../../..
-    
-    cd sources/VEGUI
-    Rscript -e 'install.packages(c("shiny", "shinyjs", "shinyFiles", "data.table", "DT", "shinyBS", "future", "testit", "jsonlite", "shinyAce", "envDocument", "rhandsontable"))'
-    Rscript -e 'devtools::install_github(c("tdhock/namedCapture", "trestletech/shinyTree", "rstudio/webdriver", "rstudio/shinytest"))'
-    Rscript -e "tryCatch( source('run_vegui_test.R') )"
+    #run module or model tests
+    cd $FOLDER
+    if ( [ $TYPE == "module" ] ); then
+      Rscript -e 'devtools::install_deps(".")'
+      Rscript -e 'devtools::check(".")'
+      Rscript -e "tryCatch( source( '$SCRIPT' ) )"
+      R CMD INSTALL .
+      exit_status=$?
+    else
+      Rscript -e "tryCatch( source( '$SCRIPT' ) )"
+      exit_status=$?
+    fi
+    exit $exit_status

@@ -1,0 +1,18 @@
+=======================================
+Documentation for uza_bus_eq_rev_mi.csv
+=======================================
+
+File Structure
+--------------
+Each row is a an urbanized area.
+Column names as follows:
+UZAName: Name of urbanized area
+MSACode: Code identifying the metropolitan area consistent with metropolitan area codes in the 2001 NHTS
+BusEqRevMi: Annual bus-equivalent revenue miles of all urbanized area public transit service. See VETransportSupply for information on calculating revenue mile equivalents.
+UZAPop: Urbanized area population
+BusEqRevMiPC: Ratio of annual bus-equivalent revenue miles to urbanized area population.
+
+
+Source:
+-------
+National Transit Database, https://www.transit.dot.gov/ntd

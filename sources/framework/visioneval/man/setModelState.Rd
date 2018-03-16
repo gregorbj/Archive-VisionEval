@@ -16,8 +16,9 @@ the ModelState_ls list. The default name is 'ModelState.Rda'.}
 TRUE if the model state list and file are changed.
 }
 \description{
-\code{setModelState} updates the list that keeps track of the model state
-with list of components to update and resaves in the model state file.
+\code{setModelState} a visioneval framework control function that updates the
+list that keeps track of the model state with list of components to update
+and resaves in the model state file.
 }
 \details{
 Key variables that are important for managing the model run are stored in a

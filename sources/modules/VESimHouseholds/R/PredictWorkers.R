@@ -5,26 +5,17 @@
 #quarters population. It is a simple model which predicts workers as a function
 #of the household type and age composition. There is no responsiveness to jobs
 #or how changes in the job market and demographics might change the worker age
-#composition.
+#composition, but the user can exogenously adjust the relative employment by
+#age group, Azone, and year. The values are the proportions of persons in the
+#age group who are workers relative to the proportions in the estimation year.
 
-# Copyright [2017] [AASHTO]
-# Based in part on works previously copyrighted by the Oregon Department of
-# Transportation and made available under the Apache License, Version 2.0 and
-# compatible open-source licenses.
 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+#=================================
+#Packages used in code development
+#=================================
+#Uncomment following lines during code development. Recomment when done.
+# library(visioneval)
 
-library(visioneval)
 
 #=============================================
 #SECTION 1: ESTIMATE AND SAVE MODEL PARAMETERS
@@ -38,27 +29,7 @@ library(visioneval)
 
 #Define a function to estimate worker model parameters
 #-----------------------------------------------------
-#' Calculate worker model parameters
-#'
-#' \code{calcWorkerProportions} creates a matrix of proportions of persons who
-#' are workers by household type and age group for regular households and for
-#' the noninstitutionalized group quarters population.
-#'
-#' This function creates a matrix of proportions of persons who are workers by
-#' household type and age group for regular households and for the
-#' noninstitutionalized group quarters population. The rows are named by the
-#' household type names which for regular households are strings with the
-#' number of persons by age group separated by hyphens and is Grp for the
-#' noninstitutionalized group quarters population. These names correspond to
-#' values in the HhType dataset in the Household table of the datastore.
-#'
-#' @param HhData_df A dataframe of household estimation data as produced by the
-#' CreateEstimationDatasets.R script.
-#' @return A matrix of the proportions of persons who are workers by household
-#' type and age group. Where the row names are the household type (HhType)
-#' names and the column names are the age group names.
-#' @include CreateEstimationDatasets.R CreateHouseholds.R
-#' @export
+
 calcWorkerProportions <- function(HhData_df) {
   GQ_df <- HhData_df[HhData_df$HhType == "Grp",]
   Hh_df <- HhData_df[HhData_df$HhType == "Reg",]
@@ -129,6 +100,35 @@ rm(calcWorkerProportions, Hh_df)
 PredictWorkersSpecifications <- list(
   #Level of geography module is applied at
   RunBy = "Region",
+  #Specify input data
+  Inp = items(
+    item(
+      NAME =
+        items("RelEmp15to19",
+              "RelEmp20to29",
+              "RelEmp30to54",
+              "RelEmp55to64",
+              "RelEmp65Plus"),
+      FILE = "azone_relative_employment.csv",
+      TABLE = "Azone",
+      GROUP = "Year",
+      TYPE = "double",
+      UNITS = "proportion",
+      NAVALUE = -1,
+      SIZE = 0,
+      PROHIBIT = c("< 0"),
+      ISELEMENTOF = "",
+      UNLIKELY = "",
+      TOTAL = "",
+      DESCRIPTION =
+        items("Ratio of workers to persons age 15 to 19 in model year vs. in estimation data year",
+              "Ratio of workers to persons age 20 to 29 in model year vs. in estimation data year",
+              "Ratio of workers to persons age 30 to 54 in model year vs. in estimation data year",
+              "Ratio of workers to persons age 55 to 64 in model year vs. in estimation data year",
+              "Ratio of workers to persons age 65 or older in model year vs. in estimation data year"),
+      OPTIONAL = TRUE
+    )
+  ),
   #Specify data to be loaded from data store
   Get = items(
     item(
@@ -147,11 +147,26 @@ PredictWorkersSpecifications <- list(
       ISELEMENTOF = ""
     ),
     item(
+      NAME =
+        items("RelEmp15to19",
+              "RelEmp20to29",
+              "RelEmp30to54",
+              "RelEmp55to64",
+              "RelEmp65Plus"),
+      TABLE = "Azone",
+      GROUP = "Year",
+      TYPE = "double",
+      UNITS = "proportion",
+      PROHIBIT = c("< 0"),
+      ISELEMENTOF = "",
+      OPTIONAL = TRUE
+    ),
+    item(
       NAME = "HhType",
       TABLE = "Household",
       GROUP = "Year",
       TYPE = "character",
-      UNITS = "ID",
+      UNITS = "category",
       NAVALUE = "NA",
       PROHIBIT = "",
       ISELEMENTOF = ""
@@ -192,7 +207,13 @@ PredictWorkersSpecifications <- list(
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
-      SIZE = 0
+      SIZE = 0,
+      DESCRIPTION =
+        items("Workers in 15 to 19 year old age group",
+              "Workers in 20 to 29 year old age group",
+              "Workers in 30 to 54 year old age group",
+              "Workers in 55 to 64 year old age group",
+              "Workers in 65 or older age group")
     ),
     item(
       NAME = "Workers",
@@ -203,7 +224,8 @@ PredictWorkersSpecifications <- list(
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
-      SIZE = 0
+      SIZE = 0,
+      DESCRIPTION = "Total workers"
     ),
     item(
       NAME = "NumWkr",
@@ -214,7 +236,8 @@ PredictWorkersSpecifications <- list(
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
-      SIZE = 0
+      SIZE = 0,
+      DESCRIPTION = "Number of workers residing in the zone"
     )
   )
 )
@@ -225,9 +248,10 @@ PredictWorkersSpecifications <- list(
 #'
 #' A list containing specifications for the PredictWorkers module.
 #'
-#' @format A list containing 3 components:
+#' @format A list containing 4 components:
 #' \describe{
 #'  \item{RunBy}{the level of geography that the module is run at}
+#'  \item{Inp}{module inputs to be saved to the datastore}
 #'  \item{Get}{module inputs to be read from the datastore}
 #'  \item{Set}{module outputs to be written to the datastore}
 #' }
@@ -244,7 +268,11 @@ rm(PredictWorkersSpecifications)
 #household and tallies the total number of workers in the household. It uses
 #the matrix of worker proportions by household type and age group as choice
 #probabilities for determining the number of workers by age group for each
-#household.
+#household. The relative employment value for each age group, which is the
+#employment rate for the age group relative to the employment rate for the
+#model estimation year data is used to adjust the relative employment to reflect
+#changes in relative employment for other years. For example, the great
+#recession of 2007 to 2012 hit the millenial generation particularly hard.
 
 #Main module function that predicts workers by age for each household
 #--------------------------------------------------------------------
@@ -261,12 +289,14 @@ rm(PredictWorkersSpecifications)
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
 #' @import visioneval
+#' @include CreateEstimationDatasets.R CreateHouseholds.R
 #' @export
 PredictWorkers <- function(L) {
   #Define dimension name vectors
   Ag <-
     c("Age15to19", "Age20to29", "Age30to54", "Age55to64", "Age65Plus")
   Wk <- gsub("Age", "Wkr", Ag)
+  Re <- gsub("Age", "RelEmp", Ag)
   Az <- L$Year$Azone$Azone
   #Fix seed as synthesis involves sampling
   set.seed(L$G$Seed)
@@ -287,7 +317,10 @@ PredictWorkers <- function(L) {
     list(
       NumWkr = integer(length(L$Year$Azone))
     )
-  #Define function to predict workers for a household age group
+  #Define function to predict total number of workers for a household age group
+  #N is a vector of the number of persons in the age group by household
+  #P is the the worker probability for the age group and household type by
+  #household
   getNumWkr <- function(N, P) {
     as.integer(sum(sample(c(1,0), size = N, replace = TRUE, prob = c(P, 1-P))))
   }
@@ -295,9 +328,14 @@ PredictWorkers <- function(L) {
   for (i in 1:length(Ag)) {
     NumPrsn_ <- L$Year$Household[[Ag[i]]]
     Probs_ <- PropHhWkr_HtAg[L$Year$Household$HhType, Ag[i]]
+    if (!is.null(L$Year$Azone[[Re[i]]])) {
+      RelEmp <- L$Year$Azone[[Re[i]]]
+    } else {
+      RelEmp <- 1
+    }
     DoPredict_ <- NumPrsn_ > 0 & Probs_ > 0
     Out_ls$Year$Household[[Wk[i]]][DoPredict_] <-
-      mapply(getNumWkr, NumPrsn_[DoPredict_], Probs_[DoPredict_])
+      mapply(getNumWkr, NumPrsn_[DoPredict_], Probs_[DoPredict_] * RelEmp)
     rm(NumPrsn_, Probs_, DoPredict_)
   }
   rm(i)
@@ -317,72 +355,27 @@ PredictWorkers <- function(L) {
 }
 
 
-#====================
-#SECTION 4: TEST CODE
-#====================
-#The following code is useful for testing and module function development. The
-#first part initializes a datastore, loads inputs, and checks that the datastore
-#contains the data needed to run the module. The second part produces a list of
-#the data the module function will be provided by the framework when it is run.
-#This is useful to have when developing the module function. The third part
-#runs the whole module to check that everything runs correctly and that the
-#module outputs are consistent with specifications. Note that if a module
-#requires data produced by another module, the test code for the other module
-#must be run first so that the datastore contains the requisite data. Also note
-#that it is important that all of the test code is commented out when the
-#the package is built.
-
-#1) Test code to set up datastore and return module specifications
-#-----------------------------------------------------------------
-#The following commented-out code can be run to initialize a datastore, load
-#inputs, and check that the datastore contains the data needed to run the
-#module. It return the processed module specifications which can be used in
-#conjunction with the getFromDatastore function to fetch the list of data needed
-#by the module. Note that the following code assumes that all the data required
-#to set up a datastore are in the defs and inputs directories in the tests
-#directory. All files in the defs directory must have the default names.
-#
-# Specs_ls <- testModule(
+#================================
+#Code to aid development and test
+#================================
+#Test code to check specifications, loading inputs, and whether datastore
+#contains data needed to run module. Return input list (L) to use for developing
+#module functions
+#-------------------------------------------------------------------------------
+# TestDat_ <- testModule(
 #   ModuleName = "PredictWorkers",
 #   LoadDatastore = TRUE,
 #   SaveDatastore = TRUE,
 #   DoRun = FALSE
 # )
-#
-#2) Test code to create a list of module inputs to use in module function
-#------------------------------------------------------------------------
-#The following commented-out code can be run to create a list of module inputs
-#that may be used in the development of module functions. Note that the data
-#will be returned for the first year in the run years specified in the
-#run_parameters.json file. Also note that if the RunBy specification is not
-#Region, the code will by default return the data for the first geographic area
-#in the datastore.
-#
-# setwd("tests")
-# Year <- getYears()[1]
-# if (Specs_ls$RunBy == "Region") {
-#   L <- getFromDatastore(Specs_ls, RunYear = Year, Geo = NULL)
-# } else {
-#   GeoCategory <- Specs_ls$RunBy
-#   Geo_ <- readFromTable(GeoCategory, GeoCategory, Year)
-#   L <- getFromDatastore(Specs_ls, RunYear = Year, Geo = Geo_[1])
-#   rm(GeoCategory, Geo_)
-# }
-# rm(Year)
-# setwd("..")
-#
-#3) Test code to run full module tests
-#-------------------------------------
-#Run the following commented-out code after the module functions have been
-#written to test all aspects of the module including whether the module can be
-#run and whether the module will produce results that are consistent with the
-#module's Set specifications. It is also important to run this code if one or
-#more other modules in the package need the dataset(s) produced by this module.
-#
-# testModule(
+# L <- TestDat_$L
+
+#Test code to check everything including running the module and checking whether
+#the outputs are consistent with the 'Set' specifications
+#-------------------------------------------------------------------------------
+# TestDat_ <- testModule(
 #   ModuleName = "PredictWorkers",
 #   LoadDatastore = TRUE,
 #   SaveDatastore = TRUE,
 #   DoRun = TRUE
 # )
-

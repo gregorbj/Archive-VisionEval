@@ -41,9 +41,9 @@ whether or not there are errors in initialization. It also prints a success
 message if initialization has been successful.
 }
 \description{
-\code{initializeModel}Function initializes a VisionEval model, loading all
-parameters and inputs, and making checks to ensure that model can run
-successfully.
+\code{initializeModel} a visioneval framework model user function
+that initializes a VisionEval model, loading all parameters and inputs, and
+making checks to ensure that model can run successfully.
 }
 \details{
 This function does several things to initialize the model environment and

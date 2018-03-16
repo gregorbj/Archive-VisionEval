@@ -1,0 +1,3 @@
+Geo,Year,HhVehCost.2010,HhVehRegCost.2010,HhVehInsurCost.2010,HhVehAVTechCost.2010,HhVehFinPeriod,HhVehDeprRate,HhVehIntRate,HhAVInsDiscProp,HhAVPrkgDiscProp,HhAVTripVmtAdj,HhAVRepoVmtAdj
+RVMPO,2010,20000,40,1000,NA,4,0.15,0.05,0.75,0.5,1,1
+RVMPO,2038,20000,40,1000,15000,4,0.15,0.05,0.75,0.5,1,1

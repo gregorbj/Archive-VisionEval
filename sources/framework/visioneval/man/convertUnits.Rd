@@ -28,18 +28,21 @@ Warnings - a string containing a warning message or character(0) if no
 warning.
 }
 \description{
-\code{convertUnits} converts values between different units of measure for
-complex and compound data types recognized by the visioneval code.
+\code{convertUnits} a visioneval framework control function that
+converts values between different units of measure for complex and compound
+data types recognized by the visioneval code.
 }
 \details{
 The visioneval code recognizes 4 simple data types (integer, double, logical,
-and character) and 9 complex data types (e.g. distance, time, mass).
-The simple data types can have any units of measure, but the complex data
-types must use units of measure that are declared in the Types() function. In
+and character) and 9 complex data types (e.g. distance, time, mass). The
+simple data types can have any units of measure, but the complex data types
+must use units of measure that are declared in the Types() function. In
 addition, there is a compound data type that can have units that are composed
 of the units of two or more complex data types. For example, speed is a
 compound data type composed of distance divided by speed. With this example,
 speed in miles per hour would be represented as MI/HR. This function converts
-a vector of values from one unit of measure to another unit of measure.
-For compound data type it combines multiple unit conversions.
+a vector of values from one unit of measure to another unit of measure. For
+compound data type it combines multiple unit conversions. The framework
+converts units based on the default units declared in the 'units.csv' model
+definition file and in UNITS specifications declared in modules.
 }

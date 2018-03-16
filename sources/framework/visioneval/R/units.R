@@ -10,19 +10,22 @@
 #=========================
 #' Convert values between units of measure.
 #'
-#' \code{convertUnits} converts values between different units of measure for
-#' complex and compound data types recognized by the visioneval code.
+#' \code{convertUnits} a visioneval framework control function that
+#' converts values between different units of measure for complex and compound
+#' data types recognized by the visioneval code.
 #'
 #' The visioneval code recognizes 4 simple data types (integer, double, logical,
-#' and character) and 9 complex data types (e.g. distance, time, mass).
-#' The simple data types can have any units of measure, but the complex data
-#' types must use units of measure that are declared in the Types() function. In
+#' and character) and 9 complex data types (e.g. distance, time, mass). The
+#' simple data types can have any units of measure, but the complex data types
+#' must use units of measure that are declared in the Types() function. In
 #' addition, there is a compound data type that can have units that are composed
 #' of the units of two or more complex data types. For example, speed is a
 #' compound data type composed of distance divided by speed. With this example,
 #' speed in miles per hour would be represented as MI/HR. This function converts
-#' a vector of values from one unit of measure to another unit of measure.
-#' For compound data type it combines multiple unit conversions.
+#' a vector of values from one unit of measure to another unit of measure. For
+#' compound data type it combines multiple unit conversions. The framework
+#' converts units based on the default units declared in the 'units.csv' model
+#' definition file and in UNITS specifications declared in modules.
 #'
 #' @param Values_ a numeric vector of values to convert from one unit to another.
 #' @param DataType a string identifying the data type.
@@ -195,20 +198,26 @@ convertUnits <-
 #================================================
 #' Convert values between different magnitudes.
 #'
-#' \code{convertMagnitude} converts values between different magnitudes such as
-#' between dollars and thousands of dollars.
+#' \code{convertMagnitude} a visioneval framework control function that
+#' converts values between different magnitudes such as between dollars and
+#' thousands of dollars.
 #'
 #' The visioneval framework stores all quantities in single units to be
 #' unambiguous about the data contained in the datastore. For example,  total
-#' income for a region would be stored in dollars rather than in thousands
-#' of dollars or millions of dollars. However, often inputs for large quantities
+#' income for a region would be stored in dollars rather than in thousands of
+#' dollars or millions of dollars. However, often inputs for large quantities
 #' are expressed in thousands or millions. Also submodels may be estimated using
 #' values expressed in multiples, or they might produce results that are
 #' multiples. Where that is the case, the framework enables model users and
 #' developers to encode the data multiplier in the input file field name or the
 #' UNITS specification. The framework functions then use that information to
 #' convert units to and from the single units stored in the datastore. This
-#' function implements the conversion.
+#' function implements the conversion. The multiplier must be specified in
+#' scientific notation used in R with the additional constraint that the digit
+#' term must be 1. For example, a multiplier of 1000 would be represented as
+#' 1e3. The multiplier is separated from the units name by a period (.). For
+#' example if the units of a dataset to be retrieved from the datastore are
+#' thousands of miles, the UNITS specification would be written as 'MI.1e3'.
 #'
 #' @param Values_ a numeric vector of values to convert from one unit to another.
 #' @param FromMagnitude a number or string identifying the magnitude of the
@@ -247,8 +256,8 @@ convertMagnitude <-
 #=====================================================
 #' Convert currency values to different years.
 #'
-#' \code{deflateCurrency} converts currency values between different years of
-#' measure.
+#' \code{deflateCurrency} a visioneval framework control function that
+#' converts currency values between different years of measure.
 #'
 #' The visioneval framework stores all currency values in the base year real
 #' currency (e.g. dollar) values. However, currency inputs may be in different

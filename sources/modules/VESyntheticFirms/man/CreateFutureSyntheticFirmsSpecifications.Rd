@@ -22,4 +22,3 @@ CreateFutureSyntheticFirmsSpecifications
 A list containing specifications for the CreateFutureSyntheticFirms module.
 }
 \keyword{datasets}
-

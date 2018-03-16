@@ -5,24 +5,27 @@
 \title{Expand a Inp, Get, or Set specification so that is can be used by other
 functions to process inputs and to read from or write to the datastore.}
 \usage{
-expandSpec(SpecToExpand_ls)
+expandSpec(SpecToExpand_ls, ComponentName)
 }
 \arguments{
 \item{SpecToExpand_ls}{A standard specifications list for a specification
 whose NAME attribute has multiple values.}
+
+\item{ComponentName}{A string that is the name of the specifications
+that the specification is a part of (e.g. "Inp", "Get", "Set").}
 }
 \value{
 A list of standard specifications lists which has a component for
 each value in the NAME attribute of the input specifications list.
 }
 \description{
-\code{expandSpec} takes a Inp, Get, or Set specification and processes it to
-be in a form that can be used by other functions which use the specification
-in processing inputs or reading from or writing to the datastore. The
-parseUnitsSpec function is called to parse the UNITS attribute to extract
-name, multiplier, and year values. When the specification has multiple
-values for the NAME attribute, the function creates a specification for each
-name value.
+\code{expandSpec} a visioneval framework control function that takes a Inp,
+Get, or Set specification and processes it to be in a form that can be used
+by other functions which use the specification in processing inputs or
+reading from or writing to the datastore. The parseUnitsSpec function is
+called to parse the UNITS attribute to extract name, multiplier, and year
+values. When the specification has multiple values for the NAME attribute,
+the function creates a specification for each name value.
 }
 \details{
 The VisionEval design allows module developers to assign multiple values to

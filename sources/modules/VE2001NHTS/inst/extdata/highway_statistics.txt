@@ -1,0 +1,22 @@
+========================================
+Documentation for highway_statistics.csv
+========================================
+
+File Structure
+--------------
+Each row is a an urbanized area.
+Column names as follows:
+MsaCode: Code identifying the metropolitan area consistent with metropolitan area codes in the 2001 NHTS
+UrbanizedArea: Name of the federal aid urbanized area
+RoadMiles: Total miles of all roadways in the urbanized area
+TotalDvmt: Total daily vehicle miles traveled (thousands)
+Population: Persons (thousands)
+Area: Net land area (square miles)
+Density: Persons per square mile
+RoadMileCap: Miles of roadway per 1000 persons
+FwyMiles: Total miles of freeways
+FwyLaneMi: Total freeway lane miles
+
+Source:
+-------
+Office of Highway Policy Information - Federal Highway Administration, Highway StatisticsSection V: Roadway Extent, Characteristics, and Performance, Table HM-72, Urbanized Areas - 2001: Selected Characteristics, https://www.fhwa.dot.gov/ohim/hs01/pdf/hm72.pdf

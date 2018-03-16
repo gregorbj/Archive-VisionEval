@@ -21,7 +21,8 @@ as contained in the model state file.}
 A named list of the dataset attributes.
 }
 \description{
-\code{getDatasetAttr} retrieves the attributes for a dataset in the datastore
+\code{getDatasetAttr} a visioneval framework control function that retrieves
+the attributes for a dataset in the datastore.
 }
 \details{
 This function extracts the listed attributes for a specific dataset from the

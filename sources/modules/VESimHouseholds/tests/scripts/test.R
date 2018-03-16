@@ -1,6 +1,7 @@
-library(rhdf5)
+library(visioneval)
+library(filesstrings)
 
-#Test CreateHouseholds module
+#Test CreateHouseholds.R module
 source("R/CreateHouseholds.R")
 testModule(
   ModuleName = "CreateHouseholds",
@@ -35,4 +36,10 @@ testModule(
   SaveDatastore = TRUE,
   DoRun = TRUE
 )
+
+#Finish up
+setwd("tests")
+tar("Datastore.tar", "Datastore")
+dir.remove("Datastore")
+setwd("..")
 

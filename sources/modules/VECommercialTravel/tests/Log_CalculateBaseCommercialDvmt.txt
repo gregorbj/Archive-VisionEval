@@ -1,0 +1,96 @@
+Test
+Test of VESimHouseholds package modules
+2017-12-20_15:16:56
+
+2017-12-20 15:16:56 : Testing CalculateBaseCommercialDvmt. 
+
+2017-12-20 15:16:56 : Attempting to load datastore. 
+
+2017-12-20 15:16:56 : Datastore loaded. 
+
+2017-12-20 15:16:56 : Attempting to load and check specifications. 
+
+2017-12-20 15:16:57 : Module specifications successfully loaded and checked. 
+
+2017-12-20 15:16:57 : Attempting to process, check and load module inputs. 
+
+2017-12-20 15:17:04 : Module inputs successfully checked and loaded into datastore. 
+
+2017-12-20 15:17:04 : Checking whether datastore contains all datasets in Get specifications. 
+
+2017-12-20 15:17:04 : Datastore contains all datasets identified in module Get specifications. 
+
+2017-12-20 15:17:04 : Running module and checking whether outputs meet Set specifications. 
+
+2017-12-20 15:17:04 : Also saving module outputs to datastore. 
+
+2017-12-20 15:17:16 : Module run successfully and outputs meet Set specifications. 
+
+2017-12-20 15:17:16 : Module outputs saved to datastore. 
+
+2017-12-20 15:17:16 : Congratulations. Module CalculateBaseCommercialDvmt passed all tests. 
+
+Test
+Test of VESimHouseholds package modules
+2018-01-14_14:26:21
+
+2018-01-14 14:26:24 : Testing CalculateBaseCommercialDvmt. 
+
+2018-01-14 14:26:24 : Attempting to load datastore. 
+
+2018-01-14 14:26:25 : Datastore loaded. 
+
+2018-01-14 14:26:25 : Attempting to load and check specifications. 
+
+2018-01-14 14:26:26 : Module specifications successfully loaded and checked. 
+
+2018-01-14 14:26:26 : Attempting to process, check and load module inputs. 
+
+2018-01-14 14:26:27 : Module inputs successfully checked and loaded into datastore. 
+
+2018-01-14 14:26:27 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-01-14 14:26:27 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-01-14 14:26:27 : Running module and checking whether outputs meet Set specifications. 
+
+2018-01-14 14:26:27 : Also saving module outputs to datastore. 
+
+2018-01-14 14:26:31 : Module run successfully and outputs meet Set specifications. 
+
+2018-01-14 14:26:32 : Module outputs saved to datastore. 
+
+2018-01-14 14:26:32 : Congratulations. Module CalculateBaseCommercialDvmt passed all tests. 
+
+Test
+Test of VESimHouseholds package modules
+2018-01-14_14:30:46
+
+2018-01-14 14:30:48 : Testing CalculateBaseCommercialDvmt. 
+
+2018-01-14 14:30:49 : Attempting to load datastore. 
+
+2018-01-14 14:30:49 : Datastore loaded. 
+
+2018-01-14 14:30:49 : Attempting to load and check specifications. 
+
+2018-01-14 14:30:50 : Module specifications successfully loaded and checked. 
+
+2018-01-14 14:30:50 : Attempting to process, check and load module inputs. 
+
+2018-01-14 14:30:50 : Module inputs successfully checked and loaded into datastore. 
+
+2018-01-14 14:30:51 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-01-14 14:30:51 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-01-14 14:30:52 : Running module and checking whether outputs meet Set specifications. 
+
+2018-01-14 14:30:52 : Also saving module outputs to datastore. 
+
+2018-01-14 14:30:54 : Module run successfully and outputs meet Set specifications. 
+
+2018-01-14 14:30:55 : Module outputs saved to datastore. 
+
+2018-01-14 14:30:55 : Congratulations. Module CalculateBaseCommercialDvmt passed all tests. 
+

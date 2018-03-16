@@ -133,6 +133,7 @@ CreateFutureSyntheticFirmsSpecifications <- list(
       GROUP = "Year",
       TYPE = "integer",
       UNITS = "naics",
+      DESCRIPTION = "The six digit naics code.",
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
@@ -144,6 +145,7 @@ CreateFutureSyntheticFirmsSpecifications <- list(
       GROUP = "Year",
       TYPE = "integer",
       UNITS = "category",
+      DESCRIPTION = "The employment size category.",
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
@@ -155,6 +157,7 @@ CreateFutureSyntheticFirmsSpecifications <- list(
       GROUP = "Year",
       TYPE = "integer",
       UNITS = "businesses",
+      DESCRIPTION = "The number of businesses.",
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
@@ -166,6 +169,7 @@ CreateFutureSyntheticFirmsSpecifications <- list(
       GROUP = "Year",
       TYPE = "integer",
       UNITS = "employees",
+      DESCRIPTION = "The number of employees in a business.",
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
@@ -212,6 +216,7 @@ devtools::use_data(CreateFutureSyntheticFirmsSpecifications, overwrite = TRUE)
 #'
 #' @param L A list
 #' @return A list
+#' @import visioneval stats
 #' @export
 CreateFutureSyntheticFirms <- function(L) {
   #Load the employment growth factor

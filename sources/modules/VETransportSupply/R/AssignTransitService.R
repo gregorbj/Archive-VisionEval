@@ -12,24 +12,16 @@
 #module also reads in an input file of neighborhood transit service level and
 #assigns to Bzones.
 
-# Copyright [2017] [AASHTO]
-# Based in part on works previously copyrighted by the Oregon Department of
-# Transportation and made available under the Apache License, Version 2.0 and
-# compatible open-source licenses.
 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+#=================================
+#Packages used in code development
+#=================================
+#The following commented lines of code are in the script for code development
+#purposes only. Uncomment them if needed to work on the script. Recomment when
+#done.
+# library(visioneval)
+# library(car)
 
-library(visioneval)
 
 #=============================================
 #SECTION 1: ESTIMATE AND SAVE MODEL PARAMETERS
@@ -65,6 +57,7 @@ ServiceInp_ls <- items(
   item(
     NAME =
       items("RevenueMiles",
+            "DeadheadMiles",
             "PassengerMiles"),
     TYPE = "double",
     PROHIBIT = c("< 0"),
@@ -88,6 +81,24 @@ ServiceInp_ls <- items(
 
 #Define function to estimate public transit model parameters
 #-----------------------------------------------------------
+#' Estimate public transit model parameters.
+#'
+#' \code{estimateTransitModel} estimates transit model parameters.
+#'
+#' This function estimates transit model parameters from 2015 National Transit
+#' Database information on transit agencies and service levels. The function
+#' calculates factors for converting annual revenue miles by transit mode to
+#' total bus-equivalent revenue miles. It also calculates factors to convert
+#' revenue miles by mode into vehicle miles by mode.
+#'
+#' @return A list containing the following elements:
+#' BusEquivalents_df: factors to convert revenue miles by mode into bus
+#' equivalents,
+#' UZABusEqRevMile_df: data on bus equivalent revenue miles by urbanized area,
+#' VehMiFactors_df: factors to convert revenue miles by mode into vehicle miles
+#' by mode.
+#' @import stats
+#' @export
 estimateTransitModel <- function() {
   #Read in and process transit datasets
   #------------------------------------
@@ -149,6 +160,31 @@ estimateTransitModel <- function() {
       BusEquivalents = unname(BusEquiv_Cm)
     )
 
+  #Calculate revenue miles to total vehicle mile factors by mode
+  #-------------------------------------------------------------
+  #Convert DeadheadMiles for mode DT from NA to 0
+  Service_df$DeadheadMiles[Service_df$Mode == "DT"] <- 0
+  #Create data frame of complete cases of revenue miles and deadhead miles
+  Veh_df <- Service_df[, c("Mode", "RevenueMiles", "DeadheadMiles")]
+  Veh_df <- Veh_df[complete.cases(Veh_df),]
+  #Calculate total revenue miles by combined mode
+  RevMi_Md <- tapply(Veh_df$RevenueMiles, Veh_df$Mode, sum)
+  RevMi_Cm <- unlist(lapply(CombinedCode_ls, function(x) {
+    sum(RevMi_Md[x])
+  }))
+  #Calculate total deadhead miles by combined mode
+  DeadMi_Md <- tapply(Veh_df$DeadheadMiles, Veh_df$Mode, sum)
+  DeadMi_Cm <- unlist(lapply(CombinedCode_ls, function(x) {
+    sum(DeadMi_Md[x])
+  }))
+  #Calculate vehicle mile factors by combined mode
+  VehMiFactors_Cm <- (RevMi_Cm + DeadMi_Cm) / RevMi_Cm
+  VehMiFactors_df <-
+    data.frame(
+      Mode = names(VehMiFactors_Cm),
+      VehMiFactors = unname(VehMiFactors_Cm)
+    )
+
   #Calculate bus equivalent transit service by urbanized area
   #----------------------------------------------------------
   #Attach urbanized area code to service data
@@ -188,7 +224,8 @@ estimateTransitModel <- function() {
   #------------------
   list(
     BusEquivalents_df = BusEquiv_df,
-    UZABusEqRevMile_df = UZABusEqRevMile_df
+    UZABusEqRevMile_df = UZABusEqRevMile_df,
+    VehMiFactors_df = VehMiFactors_df
   )
 }
 
@@ -197,6 +234,7 @@ estimateTransitModel <- function() {
 TransitParam_ls <- estimateTransitModel()
 BusEquivalents_df <- TransitParam_ls$BusEquivalents_df
 UZABusEqRevMile_df <- TransitParam_ls$UZABusEqRevMile_df
+VehMiFactors_df <- TransitParam_ls$VehMiFactors_df
 rm(AgencyInp_ls)
 rm(ServiceInp_ls)
 
@@ -229,6 +267,37 @@ rm(ServiceInp_ls)
 #' @source AssignTransitService.R script.
 "BusEquivalents_df"
 devtools::use_data(BusEquivalents_df, overwrite = TRUE)
+
+#Save the vehicle mile factors
+#-----------------------------
+#' Revenue miles to vehicle miles conversion factors
+#'
+#' Vehicle mile factors convert revenue miles for various modes to vehicle
+#' miles for those modes.
+#'
+#' @format A data frame with 8 rows and 2 variables containing factors for
+#' converting revenue miles of various modes to vehicle miles.
+#' Mode names are 2-character codes corresponding to consolidated mode types.
+#' Consolidated mode types represent modes that have similar characteristics and
+#' bus equivalency values. The consolidate mode codes and their meanings are as
+#' follows:
+#' DR = Demand-responsive
+#' VP = Vanpool and similar
+#' MB = Standard motor bus
+#' RB = Bus rapid transit and commuter bus
+#' MG = Monorail/automated guideway
+#' SR = Streetcar/trolley bus/inclined plain
+#' HR = Heavy Rail/Light Rail
+#' CR = Commuter Rail/Hybrid Rail/Cable Car/Aerial Tramway
+#'
+#' \describe{
+#'   \item{Mode}{abbreviation for consolidated mode}
+#'   \item{VehMiFactors}{numeric factors for converting revenue miles to
+#'   vehicle miles}
+#' }
+#' @source AssignTransitService.R script.
+"VehMiFactors_df"
+devtools::use_data(VehMiFactors_df, overwrite = TRUE)
 
 #Save the urbanized area bus equivalency data
 #--------------------------------------------
@@ -282,14 +351,25 @@ AssignTransitServiceSpecifications <- list(
       FILE = "marea_transit_service.csv",
       TABLE = "Marea",
       GROUP = "Year",
-      TYPE = "distance",
-      UNITS = "MI",
+      TYPE = "compound",
+      UNITS = "MI/YR",
       NAVALUE = -1,
       SIZE = 0,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
       UNLIKELY = "",
-      TOTAL = ""
+      TOTAL = "",
+      DESCRIPTION =
+        list(
+          "Annual revenue-miles of demand-responsive public transit service",
+          "Annual revenue-miles of van-pool and similar public transit service",
+          "Annual revenue-miles of standard bus public transit service",
+          "Annual revenue-miles of rapid-bus and commuter bus public transit service",
+          "Annual revenue-miles of monorail and automated guideway public transit service",
+          "Annual revenue-miles of streetcar and trolleybus public transit service",
+          "Annual revenue-miles of light rail and heavy rail public transit service",
+          "Annual revenue-miles of commuter rail, hybrid rail, cable car, and aerial tramway public transit service"
+        )
     ),
     item(
       NAME = "D4c",
@@ -303,7 +383,8 @@ AssignTransitServiceSpecifications <- list(
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
       UNLIKELY = "",
-      TOTAL = ""
+      TOTAL = "",
+      DESCRIPTION = "Aggregate frequency of transit service within 0.25 miles of block group boundary per hour during evening peak period (Ref: EPA 2010 Smart Location Database)"
     )
   ),
   #Specify data to be loaded from data store
@@ -339,8 +420,8 @@ AssignTransitServiceSpecifications <- list(
           "CRRevMi"),
       TABLE = "Marea",
       GROUP = "Year",
-      TYPE = "distance",
-      UNITS = "MI",
+      TYPE = "compound",
+      UNITS = "MI/YR",
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = ""
     ),
@@ -350,7 +431,7 @@ AssignTransitServiceSpecifications <- list(
       GROUP = "Year",
       TYPE = "people",
       UNITS = "PRSN",
-      PROHIBIT = c("NA", "<= 0"),
+      PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = ""
     )
   ),
@@ -361,11 +442,33 @@ AssignTransitServiceSpecifications <- list(
       TABLE = "Marea",
       GROUP = "Year",
       TYPE = "compound",
-      UNITS = "MI/PRSN",
+      UNITS = "MI/PRSN/YR",
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
-      SIZE = 0
+      SIZE = 0,
+      DESCRIPTION = "Ratio of annual bus-equivalent revenue-miles (i.e. revenue-miles at the same productivity - passenger miles per revenue mile - as standard bus) to urbanized area population"
+    ),
+    item(
+      NAME =
+        items(
+          "VanDvmt",
+          "BusDvmt",
+          "RailDvmt"
+        ),
+      TABLE = "Marea",
+      GROUP = "Year",
+      TYPE = "compound",
+      UNITS = "MI/DAY",
+      NAVALUE = -1,
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      SIZE = 0,
+      DESCRIPTION = items(
+        "Total daily miles traveled by vans of various sizes to provide demand responsive, vanpool, and similar services.",
+        "Total daily miles traveled by buses of various sizes to provide bus service of various types.",
+        "Total daily miles traveled by light rail, heavy rail, commuter rail, and similar types of vehicles."
+        )
     )
   )
 )
@@ -442,80 +545,67 @@ AssignTransitService <- function(L) {
   #Calculate Marea bus equivalent revenue miles per capita
   TranRevMiPC_Ma <- BusEqRevMi_Ma / UrbanPop_Ma
 
+  #Calculate vehicle miles by vehicle type
+  #---------------------------------------
+  #Make vector of vehicle miles factors conforming with RevMi_df
+  VehMiFactors_Md <- VehMiFactors_df$VehMiFactors
+  names(VehMiFactors_Md) <- VehMiFactors_df$Mode
+  VehMiFactors_Md <- VehMiFactors_Md[names(RevMi_df)]
+  #Calculate daily vehicle miles by Marea and mode
+  VehMi_MaMd <- as.matrix(sweep(RevMi_df, 2, VehMiFactors_Md, "*")) / 365
+  #Define correspondence between modes and vehicle types
+  ModeToVehType_ <- c(
+    DR = "Van",
+    VP = "Van",
+    MB = "Bus",
+    RB = "Bus",
+    MG = "Rail",
+    SR = "Rail",
+    HR = "Rail",
+    CR = "Rail"
+  )
+  ModeToVehType_ <- ModeToVehType_[colnames(VehMi_MaMd)]
+  VehMi_df <-
+    data.frame(
+      t(
+        apply(VehMi_MaMd, 1, function(x) {
+          tapply(x, ModeToVehType_, sum) })
+        )
+      )
+
   #Return the results
   #------------------
   #Initialize output list
   Out_ls <- initDataList()
   Out_ls$Year$Marea <-
-    list(TranRevMiPC = TranRevMiPC_Ma)
+    list(TranRevMiPC = TranRevMiPC_Ma,
+         VanDvmt = VehMi_df$Van,
+         BusDvmt = VehMi_df$Bus,
+         RailDvmt = VehMi_df$Rail)
   #Return the outputs list
   Out_ls
 }
 
 
-#====================
-#SECTION 4: TEST CODE
-#====================
-#The following code is useful for testing and module function development. The
-#first part initializes a datastore, loads inputs, and checks that the datastore
-#contains the data needed to run the module. The second part produces a list of
-#the data the module function will be provided by the framework when it is run.
-#This is useful to have when developing the module function. The third part
-#runs the whole module to check that everything runs correctly and that the
-#module outputs are consistent with specifications. Note that if a module
-#requires data produced by another module, the test code for the other module
-#must be run first so that the datastore contains the requisite data. Also note
-#that it is important that all of the test code is commented out when the
-#the package is built.
-
-#1) Test code to set up datastore and return module specifications
-#-----------------------------------------------------------------
-#The following commented-out code can be run to initialize a datastore, load
-#inputs, and check that the datastore contains the data needed to run the
-#module. It return the processed module specifications which can be used in
-#conjunction with the getFromDatastore function to fetch the list of data needed
-#by the module. Note that the following code assumes that all the data required
-#to set up a datastore are in the defs and inputs directories in the tests
-#directory. All files in the defs directory must have the default names.
-#
-# Specs_ls <- testModule(
+#================================
+#Code to aid development and test
+#================================
+#Test code to check specifications, loading inputs, and whether datastore
+#contains data needed to run module. Return input list (L) to use for developing
+#module functions
+#-------------------------------------------------------------------------------
+# TestDat_ <- testModule(
 #   ModuleName = "AssignTransitService",
 #   LoadDatastore = TRUE,
 #   SaveDatastore = TRUE,
 #   DoRun = FALSE
 # )
-#
-#2) Test code to create a list of module inputs to use in module function
-#------------------------------------------------------------------------
-#The following commented-out code can be run to create a list of module inputs
-#that may be used in the development of module functions. Note that the data
-#will be returned for the first year in the run years specified in the
-#run_parameters.json file. Also note that if the RunBy specification is not
-#Region, the code will by default return the data for the first geographic area
-#in the datastore.
-#
-# setwd("tests")
-# Year <- getYears()[1]
-# if (Specs_ls$RunBy == "Region") {
-#   L <- getFromDatastore(Specs_ls, RunYear = Year, Geo = NULL)
-# } else {
-#   GeoCategory <- Specs_ls$RunBy
-#   Geo_ <- readFromTable(GeoCategory, GeoCategory, Year)
-#   L <- getFromDatastore(Specs_ls, RunYear = Year, Geo = Geo_[1])
-#   rm(GeoCategory, Geo_)
-# }
-# rm(Year)
-# setwd("..")
-#
-#3) Test code to run full module tests
-#-------------------------------------
-#Run the following commented-out code after the module functions have been
-#written to test all aspects of the module including whether the module can be
-#run and whether the module will produce results that are consistent with the
-#module's Set specifications. It is also important to run this code if one or
-#more other modules in the package need the dataset(s) produced by this module.
-#
-# testModule(
+# L <- TestDat_$L
+
+#Test code to check everything including running the module and checking whether
+#the outputs are consistent with the 'Set' specifications
+#-------------------------------------------------------------------------------
+# TestDat_ <- testModule(
 #   ModuleName = "AssignTransitService",
 #   LoadDatastore = TRUE,
 #   SaveDatastore = TRUE,

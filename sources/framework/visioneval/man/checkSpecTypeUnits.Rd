@@ -23,9 +23,9 @@ is identified.}
 A vector containing messages identifying any errors that are found.
 }
 \description{
-\code{checkSpecTypeUnits}Checks correctness of TYPE, UNITS, MULTIPLIER and
-YEAR attributes of a specification that has been processed with the
-parseUnitsSpec function.
+\code{checkSpecTypeUnits} a visioneval framework control function that checks
+correctness of TYPE, UNITS, MULTIPLIER and YEAR attributes of a specification
+that has been processed with the parseUnitsSpec function.
 }
 \details{
 This function checks whether the TYPE and UNITS of a module's specification

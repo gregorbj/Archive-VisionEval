@@ -46,6 +46,16 @@
   \item{Age30to54}{Number of persons age 30 to 54 in household}
   \item{Age55to64}{Number of persons age 55 to 64 in household}
   \item{Age65Plus}{Number of persons age 65 or older in household}
+  \item{Drv15to19}{Number of drivers 15 to 19 in household}
+  \item{Drv20to29}{Number of drivers 20 to 29 in household}
+  \item{Drv30to54}{Number of drivers 30 to 54 in household}
+  \item{Drv55to64}{Number of drivers 55 to 64 in household}
+  \item{Drv65Plus}{Number of drivers 65 or older in household}
+  \item{Wkr15to19}{Number of workers 15 to 19 in household}
+  \item{Wkr20to29}{Number of workers 20 to 29 in household}
+  \item{Wkr30to54}{Number of workers 30 to 54 in household}
+  \item{Wkr55to64}{Number of workers 55 to 64 in household}
+  \item{Wkr65Plus}{Number of workers 65 or older in household}
   \item{Income}{Household income}
   \item{IncGrp}{Household income group}
   \item{UrbanDev}{Flag identifying whether household lived in an 'Urban' area}
@@ -62,15 +72,11 @@
   \item{Gscost}{Average cost of gasoline per gallon}
   \item{Gscostmile}{Average cost of gasoline per mile of household vehicle travel}
   \item{Gscostmile2}{Average cost of gasoline per mile using EIA derived miles per equivalent-gallon}
-  \item{Dvmt}{Household vehicle miles of travel on survey day}
-  \item{PropSovDvmtLE2}{Proportion of DVMT in single-occupant vehicle tours less than or equal to 2 miles}
-  \item{PropSovDvmtLE5}{Proportion of DVMT in single-occupant vehicle tours less than or equal to 5 miles}
-  \item{PropSovDvmtLE10}{Proportion of DVMT in single-occupant vehicle tours less than or equal to 10 miles}
-  \item{PropSovDvmtLE15}{Proportion of DVMT in single-occupant vehicle tours less than or equal to 15 miles}
-  \item{PropSovDvmtLE20}{Proportion of DVMT in single-occupant vehicle tours less than or equal to 20 miles}
-  \item{PropWkDvmt}{Proportion of DVMT in work tours}
-  \item{ZeroVehPassDvmt}{DVMT as passenger for zero-vehicle households}
-  \item{WalkBikeMiles}{Miles traveled by walking or bicycling}
+  \item{PvtVehDvmt}{Household vehicle miles of travel on survey day using household (i.e. private) vehicles}
+  \item{ShrVehDvmt}{Household vehicle miles of travel on survey day using non-household (i.e. shared) vehicles}
+  \item{WalkDpmt}{Household person miles of walking on survey day}
+  \item{BikeDpmt}{Household person miles of bicycling on survey day}
+  \item{TransitDpmt}{Household person miles of public transit travel on survey day}
   \item{ZeroDvmt}{Flag identifying whether household had no DVMT on survey day}
   \item{Numcommdrvr}{Number of commercial drivers in household}
   \item{Nbiketrp}{Number of bike trips on travel survey day}

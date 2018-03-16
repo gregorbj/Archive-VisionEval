@@ -22,8 +22,8 @@ specifications group has errors.}
 A vector containing messages identifying any errors that are found.
 }
 \description{
-\code{checkSpec}Function checks a single module specification for
-completeness and for proper values.
+\code{checkSpec} a visioneval framework control function that checks a single
+module specification for completeness and for proper values.
 }
 \details{
 This function checks whether a single module specification (i.e. the

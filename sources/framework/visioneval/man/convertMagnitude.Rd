@@ -24,19 +24,25 @@ Converted attribute of the returned values is FALSE. Otherwise the conversion
 is done and the Converted attribute of the returned values is TRUE.
 }
 \description{
-\code{convertMagnitude} converts values between different magnitudes such as
-between dollars and thousands of dollars.
+\code{convertMagnitude} a visioneval framework control function that
+converts values between different magnitudes such as between dollars and
+thousands of dollars.
 }
 \details{
 The visioneval framework stores all quantities in single units to be
 unambiguous about the data contained in the datastore. For example,  total
-income for a region would be stored in dollars rather than in thousands
-of dollars or millions of dollars. However, often inputs for large quantities
+income for a region would be stored in dollars rather than in thousands of
+dollars or millions of dollars. However, often inputs for large quantities
 are expressed in thousands or millions. Also submodels may be estimated using
 values expressed in multiples, or they might produce results that are
 multiples. Where that is the case, the framework enables model users and
 developers to encode the data multiplier in the input file field name or the
 UNITS specification. The framework functions then use that information to
 convert units to and from the single units stored in the datastore. This
-function implements the conversion.
+function implements the conversion. The multiplier must be specified in
+scientific notation used in R with the additional constraint that the digit
+term must be 1. For example, a multiplier of 1000 would be represented as
+1e3. The multiplier is separated from the units name by a period (.). For
+example if the units of a dataset to be retrieved from the datastore are
+thousands of miles, the UNITS specification would be written as 'MI.1e3'.
 }

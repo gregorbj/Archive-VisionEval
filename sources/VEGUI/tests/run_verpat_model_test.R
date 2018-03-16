@@ -99,8 +99,9 @@ if(dir.exists(file.path(save_dir,paste0(name,expected))) & !createExpectedResult
   run_model_script_button <- app$findElement(xpath = "//*[@id='RUN_MODEL_BUTTON']")
   run_model_script_button$click()
   while(!run_model_script_button$isEnabled()) {
-    Sys.sleep(1)
+    Sys.sleep(30)
     print(paste0("Running Model: ",!run_model_script_button$isEnabled()))
+    print(paste0("Time: ", Sys.time()))
   }
   Sys.sleep(1)
   # Screenshot not take as the displayed value contains timestamp and other identifiers
@@ -166,11 +167,13 @@ if(dir.exists(file.path(save_dir,paste0(name,expected))) & !createExpectedResult
   jsonlite::write_json(output, path = file.path(save_dir,paste0(name,expected),"002.json"),pretty=TRUE)
 
   # Run the model
+  Sys.sleep(30)
   run_model_script_button <- app$findElement(xpath = "//*[@id='RUN_MODEL_BUTTON']")
   run_model_script_button$click()
   while(!run_model_script_button$isEnabled()) {
-    Sys.sleep(1)
+    Sys.sleep(30)
     print(paste0("Running Model: ",!run_model_script_button$isEnabled()))
+    print(paste0("Time: ", Sys.time()))
   }
   Sys.sleep(1)
   # Screenshot not take as the displayed value contains timestamp and other identifiers

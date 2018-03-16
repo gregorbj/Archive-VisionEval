@@ -29,8 +29,9 @@ the model state list and loads parameters recorded in the 'parameters.json'
 file into the model state lists and saves a model state file.
 }
 \description{
-\code{initModelState} loads model run parameters into the model state
-list in the global workspace and saves as file.
+\code{initModelState} a visioneval framework control function that loads
+model run parameters into the model state list in the global workspace and
+saves as file.
 }
 \details{
 This function creates the model state list and loads model run parameters

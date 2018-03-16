@@ -24,8 +24,9 @@ A character vector of messages which identify the data field and the
   conditions are met.
 }
 \description{
-\code{checkMatchConditions} checks whether a data vector contains any
-elements that match a set of conditions.
+\code{checkMatchConditions} a visioneval framework control function that
+checks whether a data vector contains any elements that match a set of
+conditions.
 }
 \details{
 This function checks whether any of the values in a data vector match one or

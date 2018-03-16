@@ -22,8 +22,8 @@ A list having 2 components, Errors and Warnings. If no error or
   mismatch.
 }
 \description{
-\code{checkMatchType} checks whether the data type of a data vector is
-consistent with specifications.
+\code{checkMatchType} a visioneval framework control function that checks
+whether the data type of a data vector is consistent with specifications.
 }
 \details{
 This function checks whether the data type of a data vector is consistent

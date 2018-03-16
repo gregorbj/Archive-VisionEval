@@ -23,8 +23,9 @@ A data frame containing the Get specifications for the identified
 datasets.
 }
 \description{
-\code{getRegisteredGetSpecs} returns a data frame of Get specifications for
-datasets in the VisionEval name registry.
+\code{getRegisteredGetSpecs} a visioneval framework module developer function
+that returns a data frame of Get specifications for datasets in the
+VisionEval name registry.
 }
 \details{
 The VisionEval name registry (VENameRegistry.json) keeps track of the

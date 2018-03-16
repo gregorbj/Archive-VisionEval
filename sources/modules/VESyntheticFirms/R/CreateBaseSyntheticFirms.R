@@ -39,7 +39,8 @@ library(visioneval)
 #  PROHIBIT: data conditions that are prohibited or "" if not applicable;
 #  ISELEMENTOF: allowed categorical data values or "" if not applicable;
 #  UNLIKELY: data conditions that are unlikely or "" if not applicable;
-#  TOTAL: the total for all values (e.g. 1) or "" if not applicable.
+#  TOTAL: the total for all values (e.g. 1) or "" if not applicable;
+#  DESCRIPTION: the description of each data item.
 
 #Get: Identifies data to be loaded from the datastore. The
 #following need to be specified for every data item:
@@ -89,6 +90,7 @@ CreateBaseSyntheticFirmsSpecifications <- list(
       GROUP = "Global",
       TYPE = "character",
       UNITS = "county",
+      DESCRIPTION = "Name of the county.",
       NAVALUE = "",
       SIZE = 50,
       PROHIBIT = "",
@@ -103,6 +105,7 @@ CreateBaseSyntheticFirmsSpecifications <- list(
       GROUP = "Global",
       TYPE = "integer",
       UNITS = "year",
+      DESCRIPTION = "The year in which the data was collected.",
       NAVALUE = -1,
       SIZE = 0,
       PROHIBIT = "",
@@ -117,6 +120,7 @@ CreateBaseSyntheticFirmsSpecifications <- list(
       GROUP = "Global",
       TYPE = "integer",
       UNITS = "naics",
+      DESCRIPTION = "The six digit naics code.",
       NAVALUE = -1,
       SIZE = 0,
       PROHIBIT = c("NA", "< 0"),
@@ -151,7 +155,22 @@ CreateBaseSyntheticFirmsSpecifications <- list(
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
       UNLIKELY = "",
-      TOTAL = ""
+      TOTAL = "",
+      DESCRIPTION = items("Total number of employees",
+                          "Total number of establishments",
+                          "Total number of establishments with 1-4 employees",
+                          "Total number of establishments with 5-9 employees",
+                          "Total number of establishments with 10-19 employees",
+                          "Total number of establishments with 20-49 employees",
+                          "Total number of establishments with 50-99 employees",
+                          "Total number of establishments with 100-249 employees",
+                          "Total number of establishments with 250-499 employees",
+                          "Total number of establishments with 500-999 employees",
+                          "Total number of establishments with 1,000-9,999 employees",
+                          "Total number of establishments with 10,000-99,999 employees",
+                          "Total number of establishments with 100,000-999,999 employees",
+                          "Total number of establishments with 1,000,000-9,999,999 employees",
+                          "Total number of establishments with 10,000,000+ employees")
     )
   ), #end Inp
   #Specify data to be loaded from data store
@@ -216,6 +235,7 @@ CreateBaseSyntheticFirmsSpecifications <- list(
       GROUP = "Year",
       TYPE = "integer",
       UNITS = "naics",
+      DESCRIPTION = "The six digit naics code.",
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
@@ -227,6 +247,7 @@ CreateBaseSyntheticFirmsSpecifications <- list(
       GROUP = "Year",
       TYPE = "integer",
       UNITS = "category",
+      DESCRIPTION = "The employment size category",
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
@@ -238,6 +259,7 @@ CreateBaseSyntheticFirmsSpecifications <- list(
       GROUP = "Year",
       TYPE = "integer",
       UNITS = "businesses",
+      DESCRIPTION = "The number of businesses.",
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
@@ -249,6 +271,7 @@ CreateBaseSyntheticFirmsSpecifications <- list(
       GROUP = "Year",
       TYPE = "integer",
       UNITS = "employees",
+      DESCRIPTION = "The number of employees in a business.",
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
@@ -264,7 +287,7 @@ CreateBaseSyntheticFirmsSpecifications <- list(
 #'
 #' A list containing specifications for the CreateBaseSyntheticFirms module.
 #'
-#' @format A list containing 4 components:
+#' @format A list containing 6 components:
 #' \describe{
 #'  \item{RunBy}{the level of geography that the module is run at}
 #'  \item{NewInpTable}{new table to be created for datasets specified in the
@@ -299,16 +322,16 @@ devtools::use_data(CreateBaseSyntheticFirmsSpecifications, overwrite = TRUE)
 #'  to a long table with rows for each combination of industry and employee size, expand
 #'  the list out so there is a row per business
 #'
-#' @param L A list
+#' @param Biz_IsEs A list of business by industry and employee size
 #' @return A list
 #' @import reshape
 #' @export
-createBiz = function(Biz.IsEs) {
-  BizList.IsEs <- melt(Biz.IsEs[, -c(1, 3:4, 13)], id.vars = c("naics"))
-  names(BizList.IsEs)[which(names(BizList.IsEs) == "variable")] <- "esizecat"
-  names(BizList.IsEs)[which(names(BizList.IsEs) == "value")] <- "numbus"
-  BizList.IsEs <- BizList.IsEs[rep(seq_len(nrow(BizList.IsEs)), BizList.IsEs$numbus), ]
-  list(BizList.IsEs[sample(1:nrow(BizList.IsEs), nrow(BizList.IsEs), replace = FALSE), ])
+createBiz <- function(Biz_IsEs) {
+  BizList_IsEs <- melt(Biz_IsEs[, -c(1, 3:4, 13)], id.vars = c("naics"))
+  names(BizList_IsEs)[which(names(BizList_IsEs) == "variable")] <- "esizecat"
+  names(BizList_IsEs)[which(names(BizList_IsEs) == "value")] <- "numbus"
+  BizList_IsEs <- BizList_IsEs[rep(seq_len(nrow(BizList_IsEs)), BizList_IsEs$numbus), ]
+  list(BizList_IsEs[sample(1:nrow(BizList_IsEs), nrow(BizList_IsEs), replace = FALSE), ])
 }
 
 #This module has a main function, CreateBaseSyntheticFirms. This function creates SynBiz.IsEs.
@@ -321,6 +344,7 @@ createBiz = function(Biz.IsEs) {
 #'
 #' @param L A list
 #' @return A list
+#' @import visioneval stats
 #' @export
 CreateBaseSyntheticFirms <- function(L) {
   #Convert employment data into data frame

@@ -28,9 +28,10 @@ Operators: the operators that separate the units.
 Errors: a string containing an error message or character(0) if no error.
 }
 \description{
-\code{checkUnits}checks the specified UNITS for a dataset for consistency
-with the recognized units for the TYPE specification for the dataset. It also
-splits compound units into elements.
+\code{checkUnits} a visioneval framework control function that checks the
+specified UNITS for a dataset for consistency with the recognized units for
+the TYPE specification for the dataset. It also splits compound units into
+elements.
 }
 \details{
 The visioneval code recognizes 4 simple data types (integer, double, logical,

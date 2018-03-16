@@ -13,7 +13,8 @@ makeModelFormulaString(EstimatedModel)
 a string expression of the model equation.
 }
 \description{
-\code{makeModelFormulaString} creates a string equivalent of a model equation.
+\code{makeModelFormulaString} a visioneval framework module developer
+function that creates a string equivalent of a model equation.
 }
 \details{
 The return values of model estimation functions such as 'lm' and 'glm'

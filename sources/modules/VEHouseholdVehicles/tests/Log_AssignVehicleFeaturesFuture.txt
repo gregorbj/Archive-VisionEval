@@ -1,0 +1,138 @@
+RPAT Pilot
+Pilot RPAT module in VisionEval
+2018-02-27_10:31:00
+
+2018-02-27 10:31:00 : Testing AssignVehicleFeaturesFuture. 
+
+2018-02-27 10:31:00 : Attempting to load datastore. 
+
+2018-02-27 10:31:00 : Datastore loaded. 
+
+2018-02-27 10:31:00 : Attempting to load and check specifications. 
+
+2018-02-27 10:31:01 : Module specifications successfully loaded and checked. 
+
+2018-02-27 10:31:01 : Attempting to process, check and load module inputs. 
+
+2018-02-27 10:31:01 : No inputs to process. 
+
+2018-02-27 10:31:01 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-02-27 10:31:01 : The following datasets identified in the Get specifications for module AssignVehicleFeaturesFuture are missing from the datastore.
+2005/Marea/TranRevMiPCFuture
+2005/Marea/FwyLaneMiPCFuture 
+
+RPAT Pilot
+Pilot RPAT module in VisionEval
+2018-02-27_10:34:51
+
+2018-02-27 10:34:51 : Testing AssignVehicleFeaturesFuture. 
+
+2018-02-27 10:34:54 : Attempting to load datastore. 
+
+2018-02-27 10:34:58 : Datastore loaded. 
+
+2018-02-27 10:35:01 : Attempting to load and check specifications. 
+
+2018-02-27 10:35:07 : Module specifications successfully loaded and checked. 
+
+2018-02-27 10:35:07 : Attempting to process, check and load module inputs. 
+
+2018-02-27 10:35:14 : No inputs to process. 
+
+2018-02-27 10:35:18 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-02-27 10:36:57 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-02-27 10:37:01 : Running module and checking whether outputs meet Set specifications. 
+
+2018-02-27 10:37:04 : Also saving module outputs to datastore. 
+
+2018-02-27 10:38:51 : Module run successfully and outputs meet Set specifications. 
+
+2018-02-27 10:38:54 : Module outputs saved to datastore. 
+
+2018-02-27 10:38:57 : Congratulations. Module AssignVehicleFeaturesFuture passed all tests. 
+
+RPAT Pilot
+Pilot RPAT module in VisionEval
+2018-02-27_21:59:52
+
+2018-02-27 21:59:52 : Testing AssignVehicleFeaturesFuture. 
+
+2018-02-27 21:59:53 : Attempting to load datastore. 
+
+2018-02-27 21:59:53 : Datastore loaded. 
+
+2018-02-27 21:59:54 : Attempting to load and check specifications. 
+
+2018-02-27 21:59:55 : Module specifications successfully loaded and checked. 
+
+2018-02-27 21:59:55 : Attempting to process, check and load module inputs. 
+
+2018-02-27 21:59:55 : No inputs to process. 
+
+2018-02-27 21:59:56 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-02-27 22:00:07 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-02-27 22:00:07 : Running module and checking whether outputs meet Set specifications. 
+
+2018-02-27 22:00:07 : Also saving module outputs to datastore. 
+
+RPAT Pilot
+Pilot RPAT module in VisionEval
+2018-02-27_22:00:35
+
+2018-02-27 22:00:35 : Testing AssignVehicleFeaturesFuture. 
+
+2018-02-27 22:00:35 : Attempting to load datastore. 
+
+2018-02-27 22:00:36 : Datastore loaded. 
+
+2018-02-27 22:00:36 : Attempting to load and check specifications. 
+
+2018-02-27 22:00:37 : Module specifications successfully loaded and checked. 
+
+2018-02-27 22:00:37 : Attempting to process, check and load module inputs. 
+
+2018-02-27 22:00:37 : No inputs to process. 
+
+2018-02-27 22:00:37 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-02-27 22:00:37 : The following datasets identified in the Get specifications for module AssignVehicleFeaturesFuture are missing from the datastore.
+2005/Marea/TranRevMiPCFuture
+2005/Marea/FwyLaneMiPCFuture 
+
+RPAT Pilot
+Pilot RPAT module in VisionEval
+2018-02-27_22:00:46
+
+2018-02-27 22:00:47 : Testing AssignVehicleFeaturesFuture. 
+
+2018-02-27 22:00:47 : Attempting to load datastore. 
+
+2018-02-27 22:00:48 : Datastore loaded. 
+
+2018-02-27 22:00:48 : Attempting to load and check specifications. 
+
+2018-02-27 22:00:50 : Module specifications successfully loaded and checked. 
+
+2018-02-27 22:00:50 : Attempting to process, check and load module inputs. 
+
+2018-02-27 22:00:52 : No inputs to process. 
+
+2018-02-27 22:00:52 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-02-27 22:00:59 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-02-27 22:00:59 : Running module and checking whether outputs meet Set specifications. 
+
+2018-02-27 22:00:59 : Also saving module outputs to datastore. 
+
+2018-02-27 22:02:03 : Module run successfully and outputs meet Set specifications. 
+
+2018-02-27 22:02:06 : Module outputs saved to datastore. 
+
+2018-02-27 22:02:06 : Congratulations. Module AssignVehicleFeaturesFuture passed all tests. 
+

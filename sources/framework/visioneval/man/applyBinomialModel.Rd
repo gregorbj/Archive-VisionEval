@@ -5,7 +5,7 @@
 \title{Applies an estimated binomial model to a set of input values.}
 \usage{
 applyBinomialModel(Model_ls, Data_df, TargetProp = NULL,
-  CheckTargetSearchRange = FALSE)
+  CheckTargetSearchRange = FALSE, ApplyRandom = TRUE)
 }
 \arguments{
 \item{Model_ls}{a list which contains the following components:
@@ -18,7 +18,16 @@ application. If no preparation, this element of the list should not be
 present or should be set equal to NULL;
 'SearchRange' a two-element numeric vector which specifies the acceptable
 search range to use when determining the factor for adjusting the model
-constant.}
+constant.
+'RepeatVar' a string which identifies the name of a field to use for
+repeated draws of the model. This is used in the case where for example the
+input data is households and the output is vehicles and the repeat variable
+is the number of vehicles in the household.
+'ApplyRandom' a logical identifying whether the results will be affected by
+random draws (i.e. if a random number in range 0 - 1 is less than the
+computed probability) or if a probability cutoff is used (i.e. if the
+computed probability is greater then 0.5). This is an optional component. If
+it isn't present, the function runs with ApplyRandom = TRUE.}
 
 \item{Data_df}{a data frame containing the data required for applying the
 model.}
@@ -31,6 +40,11 @@ proportion to be achieved.}
 is to only check whether the specified 'SearchRange' for the model will
 produce acceptable values (i.e. no NA or NaN values). If FALSE (the default),
 the function will run the model and will not check the target search range.}
+
+\item{ApplyRandom}{a logical identifying whether the outcome will be
+be affected by random draws (i.e. if a random number in range 0 - 1 is less
+than the computed probability) or if a probability cutoff is used (i.e. if
+the computed probability is greater than 0.5)}
 }
 \value{
 a vector of choice values for each record of the input data frame if
@@ -39,8 +53,8 @@ search range, a two-element vector identifying if the search range produces
 NA or NaN values.
 }
 \description{
-\code{applyBinomialModel} applies an estimated binomial model to a set of
-input data.
+\code{applyBinomialModel} a visioneval framework module developer function
+that applies an estimated binomial model to a set of input data.
 }
 \details{
 The function calculates the result of applying a binomial logit model to a

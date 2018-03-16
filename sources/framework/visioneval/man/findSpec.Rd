@@ -19,8 +19,8 @@ findSpec(Specs_ls, Name, Table, Group)
 A list containing the full specifications for the dataset
 }
 \description{
-\code{findSpec} returns the full dataset specification for defined NAME,
-TABLE, and GROUP.
+\code{findSpec} a visioneval framework control function that returns the full
+dataset specification for defined NAME, TABLE, and GROUP.
 }
 \details{
 This function finds and returns the full specification from a specifications

@@ -1,8 +1,8 @@
 Package: VESimHouseholds
 Type: Package
 Title: Create Simulated Households with Attributes for VE
-Version: 0.7
-Date: 09/04/17
+Version: 0.9
+Date: 10/22/17
 Author: Brian Gregor [aut, cre],
 Maintainer: Brian Gregor <gregorb@or-analytics.com>
 Copyright: AASHTO
@@ -12,7 +12,7 @@ Description: This package contains several modules which create synthetic
     and life cycle. It also prepares a data frame of model estimation data from
     Census PUMS data that is used to estimate models in this package and the
     VELandUse package.
-License: file LICENSE
+License: Apache License 2.0
 LazyData: TRUE
 Depends: R (>= 3.1.0)
 Imports:
@@ -27,8 +27,8 @@ VignetteBuilder: knitr
 RoxygenNote: 6.0.1
 Remotes: gregorbj/VisionEval/sources/framework/visioneval@develop
 Collate: 
-    'AssignLifeCycle.R'
     'CreateEstimationDatasets.R'
     'CreateHouseholds.R'
     'PredictWorkers.R'
     'PredictIncome.R'
+    'AssignLifeCycle.R'

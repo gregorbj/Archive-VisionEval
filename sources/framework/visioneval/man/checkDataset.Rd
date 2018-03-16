@@ -23,9 +23,10 @@ an attribute that is a string of the full path to where the dataset should be
 in the datastore.
 }
 \description{
-\code{checkDataset} checks whether a dataset exists in the datastore and
-returns a TRUE or FALSE value with an attribute of the full path to where the
-dataset should be located in the datastore.
+\code{checkDataset} a visioneval framework control function that checks
+whether a dataset exists in the datastore and returns a TRUE or FALSE value
+with an attribute of the full path to where the dataset should be located in
+the datastore.
 }
 \details{
 This function checks whether a dataset exists. The dataset is identified by

@@ -12,12 +12,6 @@ WRKLYR: Worked in 1999
     0 = Not in universe (Under 16 years)
     1 = Yes
     2 = No
-MILITARY: Military Service
-    0 = Not in universe (Under 17 years)
-    1 = Yes, now on active duty
-    2 = Yes, on active duty in the past, but not now
-    3 = No, training for reserves or National Guard only
-    4 = No active duty service
 INCTOT: Person’s Total Income in 1999
     NA = Not in universe (Under 15 years)
     –019998 = Loss of $19,998 or more

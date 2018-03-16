@@ -16,8 +16,9 @@ distance, area, mass, volume, time, speed, vehicle_distance,
 passenger_distance, and payload_distance.
 }
 \description{
-\code{Types} returns a list of returns a list of recognized data types, the
-units for each type, and storage mode of each type.
+\code{Types} a visioneval framework control function that returns a list of
+returns a list of recognized data types, the units for each type, and storage
+mode of each type.
 }
 \details{
 This function stores a listing of the dataset types recognized by the

@@ -22,8 +22,9 @@ A list containing two components, Errors and Warnings. If no
   error messages.
 }
 \description{
-\code{checkSpecConsistency} checks whether the specifications for a dataset
-are consistent with the data attributes in the datastore
+\code{checkSpecConsistency} a visioneval framework control function that
+checks whether the specifications for a dataset are consistent with the data
+attributes in the datastore.
 }
 \details{
 This function compares the specifications for a dataset identified in a

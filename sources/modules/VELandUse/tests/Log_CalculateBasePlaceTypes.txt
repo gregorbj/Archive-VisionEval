@@ -1,0 +1,64 @@
+RPAT Pilot
+Pilot RPAT module in VisionEval
+2017-12-06_11:13:42
+
+2017-12-06 11:13:42 : Testing CalculateBasePlaceTypes. 
+
+2017-12-06 11:13:42 : Attempting to load datastore. 
+
+2017-12-06 11:13:42 : Datastore loaded. 
+
+2017-12-06 11:13:42 : Attempting to load and check specifications. 
+
+2017-12-06 11:13:42 : Module specifications successfully loaded and checked. 
+
+2017-12-06 11:13:42 : Attempting to process, check and load module inputs. 
+
+2017-12-06 11:13:42 : Module inputs successfully checked and loaded into datastore. 
+
+2017-12-06 11:13:42 : Checking whether datastore contains all datasets in Get specifications. 
+
+2017-12-06 11:13:42 : Datastore contains all datasets identified in module Get specifications. 
+
+2017-12-06 11:13:42 : Running module and checking whether outputs meet Set specifications. 
+
+2017-12-06 11:13:42 : Also saving module outputs to datastore. 
+
+2017-12-06 11:14:00 : Module run successfully and outputs meet Set specifications. 
+
+2017-12-06 11:14:00 : Module outputs saved to datastore. 
+
+2017-12-06 11:14:00 : Congratulations. Module CalculateBasePlaceTypes passed all tests. 
+
+RPAT Pilot
+Pilot RPAT module in VisionEval
+2018-01-22_10:53:47
+
+2018-01-22 10:53:47 : Testing CalculateBasePlaceTypes. 
+
+2018-01-22 10:53:47 : Attempting to load datastore. 
+
+2018-01-22 10:53:47 : Datastore loaded. 
+
+2018-01-22 10:53:47 : Attempting to load and check specifications. 
+
+2018-01-22 10:53:48 : Module specifications successfully loaded and checked. 
+
+2018-01-22 10:53:48 : Attempting to process, check and load module inputs. 
+
+2018-01-22 10:53:48 : Module inputs successfully checked and loaded into datastore. 
+
+2018-01-22 10:53:48 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-01-22 10:53:48 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-01-22 10:53:48 : Running module and checking whether outputs meet Set specifications. 
+
+2018-01-22 10:53:48 : Also saving module outputs to datastore. 
+
+2018-01-22 10:54:06 : Module run successfully and outputs meet Set specifications. 
+
+2018-01-22 10:54:06 : Module outputs saved to datastore. 
+
+2018-01-22 10:54:06 : Congratulations. Module CalculateBasePlaceTypes passed all tests. 
+

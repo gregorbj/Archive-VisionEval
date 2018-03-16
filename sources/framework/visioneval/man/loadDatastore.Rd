@@ -31,8 +31,8 @@ TRUE if the datastore is loaded. It copies the saved datastore to
   an error is thrown.
 }
 \description{
-\code{loadDatastore} copy an existing saved datastore and write information
-to run environment.
+\code{loadDatastore} a visioneval framework control function that copies an
+existing saved datastore and writes information to run environment.
 }
 \details{
 This function copies a saved datastore as the working datastore attributes
