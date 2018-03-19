@@ -306,9 +306,13 @@ InitializeSpecifications <- list(
     ),
     item(
       NAME = items(
+        "FwyNoneCongChg",
+        "FwyModCongChg",
         "FwyHvyCongChg",
         "FwySevCongChg",
         "FwyExtCongChg",
+        "ArtNoneCongChg",
+        "ArtModCongChg",
         "ArtHvyCongChg",
         "ArtSevCongChg",
         "ArtExtCongChg"),
@@ -324,9 +328,13 @@ InitializeSpecifications <- list(
       UNLIKELY = "",
       TOTAL = "",
       DESCRIPTION = items(
+        "Charge per mile (U.S. dollars) of vehicle travel on freeways during periods of no congestion",
+        "Charge per mile (U.S. dollars) of vehicle travel on freeways during periods of moderate congestion",
         "Charge per mile (U.S. dollars) of vehicle travel on freeways during periods of heavy congestion",
         "Charge per mile (U.S. dollars) of vehicle travel on freeways during periods of severe congestion",
         "Charge per mile (U.S. dollars) of vehicle travel on freeways during periods of extreme congestion",
+        "Charge per mile (U.S. dollars) of vehicle travel on arterials during periods of no congestion",
+        "Charge per mile (U.S. dollars) of vehicle travel on arterials during periods of moderate congestion",
         "Charge per mile (U.S. dollars) of vehicle travel on arterials during periods of heavy congestion",
         "Charge per mile (U.S. dollars) of vehicle travel on arterials during periods of severe congestion",
         "Charge per mile (U.S. dollars) of vehicle travel on arterials during periods of extreme congestion"
