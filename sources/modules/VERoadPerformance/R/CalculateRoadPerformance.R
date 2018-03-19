@@ -913,7 +913,7 @@ devtools::use_data(DvmtSplit_LM, overwrite = TRUE)
 #------------------------------
 CalculateRoadPerformanceSpecifications <- list(
   #Level of geography module is applied at
-  RunBy = "Marea",
+  RunBy = "Region",
   #Specify new tables to be created by Inp if any
   #Specify new tables to be created by Set if any
   #Specify input data
@@ -1007,9 +1007,13 @@ CalculateRoadPerformanceSpecifications <- list(
     ),
     item(
       NAME = items(
+        "FwyNoneCongChg",
+        "FwyModCongChg",
         "FwyHvyCongChg",
         "FwySevCongChg",
         "FwyExtCongChg",
+        "ArtNoneCongChg",
+        "ArtModCongChg",
         "ArtHvyCongChg",
         "ArtSevCongChg",
         "ArtExtCongChg"),
@@ -1221,6 +1225,11 @@ devtools::use_data(CalculateRoadPerformanceSpecifications, overwrite = TRUE)
 #' @export
 CalculateRoadPerformance <- function(L) {
 
+  #Set up
+  #------
+  Ma <- L$Year$Marea$Marea
+  Cl <- c("None", "Mod", "Hvy", "Sev", "Ext")
+
   #Calculate Lambda value for metropolitan area
   #--------------------------------------------
   DvmtSplitData_df <- data.frame(
@@ -1229,19 +1238,13 @@ CalculateRoadPerformance <- function(L) {
     ArtLnMiPC = with(L$Year$Marea, ArtLaneMi / UrbanPop),
     FwyLnMiSqMi = L$Year$Marea$FwyLaneMi / sum(L$Year$Bzone$UrbanArea)
   )
-  Lambda <- predict(DvmtSplit_LM, newdata = DvmtSplitData_df)
+  Lambda_Ma <- unname(predict(DvmtSplit_LM, newdata = DvmtSplitData_df))
+  names(Lambda_Ma) <- Ma
   rm(DvmtSplitData_df)
 
-  #Calculate speed and delay by congestion level
-  #---------------------------------------------
-  OpsDeployNames_ <- c(
-    "RampMeterDeployProp",
-    "IncidentMgtDeployProp",
-    "SignalCoordDeployProp",
-    "AccessMgtDeployProp",
-    "OtherFwyOpsDeployProp",
-    "OtherArtOpsDeployProp")
-  OpsDeployment_ <- unlist(L$Year$Marea[OpsDeployNames_])
+  #Calculate speed and delay by congestion level and metropolitan area
+  #-------------------------------------------------------------------
+  #Create matrix of user-defined other operations effects
   OtherOpsEffects_mx <- cbind(
     Fwy_Rcr = L$Global$OtherOpsEffectiveness$Fwy_Rcr,
     Fwy_NonRcr = L$Global$OtherOpsEffectiveness$Fwy_NonRcr,
@@ -1249,41 +1252,70 @@ CalculateRoadPerformance <- function(L) {
     Art_NonRcr = L$Global$OtherOpsEffectiveness$Art_NonRcr
   )
   rownames(OtherOpsEffects_mx) <- L$Global$OtherOpsEffectiveness$Level
-  SpeedAndDelay_ls <- calculateSpeeds(OpsDeployment_, OtherOpsEffects_mx)
-  rm(OpsDeployNames_, OpsDeployment_, OtherOpsEffects_mx)
+  #Calculate speed and delay by Marea and congestion level
+  SpeedAndDelay_ls <- list()
+  OpsDeployNames_ <- c(
+    "RampMeterDeployProp",
+    "IncidentMgtDeployProp",
+    "SignalCoordDeployProp",
+    "AccessMgtDeployProp",
+    "OtherFwyOpsDeployProp",
+    "OtherArtOpsDeployProp")
+  OpsDeployment_MaOp <- do.call(cbind, L$Year$Marea[OpsDeployNames_])
+  rownames(OpsDeployment_MaOp) <- Ma
+  for (ma in Ma) {
+    SpeedAndDelay_ls[[ma]] <-
+      calculateSpeeds(OpsDeployment_MaOp[ma,], OtherOpsEffects_mx)
+    rm(OpsDeployNames_, OpsDeployment_MaOp, OtherOpsEffects_mx)
+  }
+  #Convert to matrices
+  FwySpeed_MaCl <- do.call(rbind, lapply(SpeedAndDelay_ls, function(x) {
+    x$Speed[,"Fwy"]
+  }))
+  ArtSpeed_MaCl <- do.call(rbind, lapply(SpeedAndDelay_ls, function(x) {
+    x$Speed[,"Art"]
+  }))
+  FwyDelay_MaCl <- do.call(rbind, lapply(SpeedAndDelay_ls, function(x) {
+    x$Delay[,"Fwy"]
+  }))
+  ArtDelay_MaCl <- do.call(rbind, lapply(SpeedAndDelay_ls, function(x) {
+    x$Delay[,"Art"]
+  }))
 
-  #Make vectors of DVMT by vehicle type and road class
-  #---------------------------------------------------
-  LdvDvmt_ <-
-    unlist(L$Year$Marea[c("LdvFwyArtDvmt", "LdvOthDvmt")])
-  names(LdvDvmt_) <- c("FwyArt", "Oth")
-  HvyTrkDvmt_Rc <-
-    unlist(L$Year$Marea[c("HvyTrkFwyDvmt", "HvyTrkArtDvmt", "HvyTrkOthDvmt")])
-  names(HvyTrkDvmt_Rc) <- c("Fwy", "Art", "Oth")
-  BusDvmt_Rc <-
-    unlist(L$Year$Marea[c("BusFwyDvmt", "BusArtDvmt", "BusOthDvmt")])
-  names(BusDvmt_Rc) <- c("Fwy", "Art", "Oth")
+  #Make matrices of DVMT by metropolitan area, vehicle type and road class
+  #-----------------------------------------------------------------------
+  #Light-duty vehicle DVMT
+  LdvDvmt_MaRx <-
+    do.call(cbind, L$Year$Marea[c("LdvFwyArtDvmt", "LdvOthDvmt")])
+  colnames(LdvDvmt_MaRx) <- c("FwyArt", "Oth")
+  rownames(LdvDvmt_MaRx) <- Ma
+  #Heavy-duty vehicle DVMT
+  HvyTrkDvmt_MaRc <-
+    do.call(cbind, L$Year$Marea[c("HvyTrkFwyDvmt", "HvyTrkArtDvmt", "HvyTrkOthDvmt")])
+  colnames(HvyTrkDvmt_MaRc) <- c("Fwy", "Art", "Oth")
+  rownames(HvyTrkDvmt_MaRc) <- Ma
+  #Bus DVMT
+  BusDvmt_MaRc <-
+    do.call(cbind, L$Year$Marea[c("BusFwyDvmt", "BusArtDvmt", "BusOthDvmt")])
+  colnames(BusDvmt_MaRc) <- c("Fwy", "Art", "Oth")
+  rownames(BusDvmt_MaRc) <- Ma
 
-  #Create freeway and arterial price vectors
-  #-----------------------------------------
-  FwyPrices_Cl <- c(
-    None = 0,
-    Mod = 0,
-    Hwy = unname(L$Year$Marea$FwyHvyCongChg),
-    Sev = unname(L$Year$Marea$FwySevCongChg),
-    Ext = unname(L$Year$Marea$FwyExtCongChg)
-  )
-  ArtPrices_Cl <- c(
-    None = 0,
-    Mod = 0,
-    Hwy = unname(L$Year$Marea$ArtHvyCongChg),
-    Sev = unname(L$Year$Marea$ArtSevCongChg),
-    Ext = unname(L$Year$Marea$ArtExtCongChg)
-  )
+  #Create matrices of freeway and arterial congestion prices, and VOT
+  #------------------------------------------------------------------
+  FwyPrices_MaCl <- do.call(cbind, L$Year$Marea[paste0("Fwy", Cl, "CongChg")])
+  rownames(FwyPrices_MaCl) <- Ma
+  ArtPrices_MaCl <- do.call(cbind, L$Year$Marea[paste0("Art", Cl, "CongChg")])
+  rownames(ArtPrices_MaCl) <- Ma
   VOT <- L$Global$Model$ValueOfTime
 
+  #Create matrix of freeway and arterial lane miles
+  #------------------------------------------------
+  LaneMi_MaRc <- do.call(cbind, L$Year$Marea[c("FwyLaneMi", "ArtLaneMi")])
+  rownames(LaneMi_MaRc) <- Ma
+  colnames(LaneMi_MaRc) <- c("Fwy", "Art")
+
   #Define function to calculate average speed including price adjustments
-  #------------------------------------------
+  #----------------------------------------------------------------------
   calcAveSpeed <- function(Dvmt_Cl, Speed_Cl, Price_Cl, VOT) {
     Dvht <- sum(Dvmt_Cl / Speed_Cl)
     DvhtEq <- sum(Dvmt_Cl * Price_Cl / VOT)
@@ -1299,66 +1331,102 @@ CalculateRoadPerformance <- function(L) {
     c(Fwy = FwyDvmt, Art = ArtDvmt, Oth = LdvDvmt_["Oth"])
   }
 
-  #Iterate to balance DVMT and speed
-  #---------------------------------
-  #Initialize values
-  LastDvmtRatio <- 0
-  FwyAveSpeed <- 60
-  ArtAveSpeed <- 30
-  #Iterate to find solution
-  for (i in 1:100) {
-    LdvDvmt_Rc <- splitLdvDvmt(LdvDvmt_, FwyAveSpeed, ArtAveSpeed, Lambda)
-    Dvmt_Rc <- LdvDvmt_Rc + HvyTrkDvmt_Rc + BusDvmt_Rc
-    FwyDvmt_Cl <-
-      calculateCongestion("DVMT", "Fwy", L$Year$Marea$FwyLaneMi, Dvmt_Rc["Fwy"])
-    FwyAveSpeed <-
-      calcAveSpeed(FwyDvmt_Cl, SpeedAndDelay_ls$Speed[,"Fwy"], FwyPrices_Cl, VOT)
-    ArtDvmt_Cl <-
-      calculateCongestion("DVMT", "Art", L$Year$Marea$ArtLaneMi, Dvmt_Rc["Art"])
-    ArtAveSpeed <-
-      calcAveSpeed(ArtDvmt_Cl, SpeedAndDelay_ls$Speed[,"Art"], ArtPrices_Cl, VOT)
-    DvmtRatio <- sum(FwyDvmt_Cl) / sum(ArtDvmt_Cl)
-    if(abs(1 - LastDvmtRatio / DvmtRatio) < 0.0001) break()
-    LastDvmtRatio <- DvmtRatio
+  #Define function to balance freeway and arterial DVMT
+  #----------------------------------------------------
+  balanceFwyArtDvmt <- function(ma) {
+    #Initialize values
+    LastDvmtRatio <- 0
+    FwyAveSpeed <- 60
+    ArtAveSpeed <- 30
+    #Iterate to find solution
+    for (i in 1:100) {
+      LdvDvmt_Rc <-
+        splitLdvDvmt(LdvDvmt_MaRx[ma,], FwyAveSpeed, ArtAveSpeed, Lambda_Ma[ma])
+      Dvmt_Rc <-
+        LdvDvmt_Rc + HvyTrkDvmt_MaRc[ma,] + BusDvmt_MaRc[ma,]
+      FwyDvmt_Cl <-
+        calculateCongestion("DVMT", "Fwy", LaneMi_MaRc[ma,"Fwy"], Dvmt_Rc["Fwy"])
+      FwyAveSpeed <-
+        calcAveSpeed(FwyDvmt_Cl, FwySpeed_MaCl[ma,], FwyPrices_MaCl[ma,], VOT)
+      ArtDvmt_Cl <-
+        calculateCongestion("DVMT", "Art", LaneMi_MaRc[ma,"Art"], Dvmt_Rc["Art"])
+      ArtAveSpeed <-
+        calcAveSpeed(ArtDvmt_Cl, ArtSpeed_MaCl[ma,], ArtPrices_MaCl[ma,], VOT)
+      DvmtRatio <- sum(FwyDvmt_Cl) / sum(ArtDvmt_Cl)
+      if(abs(1 - LastDvmtRatio / DvmtRatio) < 0.0001) break()
+      LastDvmtRatio <- DvmtRatio
+    }
+    list(LdvDvmt = LdvDvmt_Rc,
+         FwyDvmt = FwyDvmt_Cl,
+         ArtDvmt = ArtDvmt_Cl)
   }
+
+  #Iterate through metropolitan areas and perform DVMT balancing
+  #-------------------------------------------------------------
+  BalanceResults_ls <- list()
+  for(ma in Ma) {
+    BalanceResults_ls[[ma]] <- balanceFwyArtDvmt(ma)
+  }
+
 
   #Calculate performance measures
   #------------------------------
   Out_ls <- initDataList()
   Out_ls$Year$Marea <- list()
   #LDV freeway DVMT and arterial DVMT
-  Out_ls$Year$Marea$LdvFwyDvmt <- unname(LdvDvmt_Rc["Fwy"])
-  Out_ls$Year$Marea$LdvArtDvmt <- unname(LdvDvmt_Rc["Art"])
+  Out_ls$Year$Marea$LdvFwyDvmt <-
+    unname(unlist(lapply(BalanceResults_ls, function(x) x$LdvDvmt["Fwy"])))
+  Out_ls$Year$Marea$LdvArtDvmt <-
+    unname(unlist(lapply(BalanceResults_ls, function(x) x$LdvDvmt["Art"])))
   #Average freeway speed by congestion level
-  Data_ls <- as.list(SpeedAndDelay_ls$Speed[,"Fwy"])
+  Data_ls <-
+    as.list(data.frame(
+      do.call(rbind, lapply(SpeedAndDelay_ls, function(x) x$Speed[,"Fwy"]))
+    ))
   names(Data_ls) <- paste0("Fwy", names(Data_ls), "CongSpeed")
   Out_ls$Year$Marea <- c(Out_ls$Year$Marea, Data_ls); rm(Data_ls)
   #Average arterial speed by congestion level
-  Data_ls <- as.list(SpeedAndDelay_ls$Speed[,"Art"])
+  Data_ls <-
+    as.list(data.frame(
+      do.call(rbind, lapply(SpeedAndDelay_ls, function(x) x$Speed[,"Art"]))
+    ))
   names(Data_ls) <- paste0("Art", names(Data_ls), "CongSpeed")
   Out_ls$Year$Marea <- c(Out_ls$Year$Marea, Data_ls); rm(Data_ls)
   #Average other road speed
   Out_ls$Year$Marea$OthSpd <- 25
   #Average freeway delay by congestion level
-  Data_ls <- as.list(SpeedAndDelay_ls$Delay[,"Fwy"])
+  Data_ls <-
+    as.list(data.frame(
+      do.call(rbind, lapply(SpeedAndDelay_ls, function(x) x$Delay[,"Fwy"]))
+    ))
   names(Data_ls) <- paste0("Fwy", names(Data_ls), "CongDelay")
   Out_ls$Year$Marea <- c(Out_ls$Year$Marea, Data_ls); rm(Data_ls)
   #Average arterial delay by congestion level
-  Data_ls <- as.list(SpeedAndDelay_ls$Delay[,"Art"])
+  Data_ls <-
+    as.list(data.frame(
+      do.call(rbind, lapply(SpeedAndDelay_ls, function(x) x$Delay[,"Art"]))
+    ))
   names(Data_ls) <- paste0("Art", names(Data_ls), "CongDelay")
   Out_ls$Year$Marea <- c(Out_ls$Year$Marea, Data_ls); rm(Data_ls)
   #Proportion of freeway DVMT by congestion level
-  Data_ls <- as.list(FwyDvmt_Cl / sum(FwyDvmt_Cl))
+  FwyDvmt_MaCl <-
+    do.call(rbind, lapply(BalanceResults_ls, function(x) x$FwyDvmt))
+  Data_ls <-
+    as.list(data.frame(sweep(FwyDvmt_MaCl, 1, rowSums(FwyDvmt_MaCl), "/")))
   names(Data_ls) <- paste0("FwyDvmtProp", names(Data_ls), "Cong")
   Out_ls$Year$Marea <- c(Out_ls$Year$Marea, Data_ls); rm(Data_ls)
   #Proportion of arterial DVMT by congestion level
-  Data_ls <- as.list(ArtDvmt_Cl / sum(ArtDvmt_Cl))
+  ArtDvmt_MaCl <-
+    do.call(rbind, lapply(BalanceResults_ls, function(x) x$ArtDvmt))
+  Data_ls <-
+    as.list(data.frame(sweep(ArtDvmt_MaCl, 1, rowSums(ArtDvmt_MaCl), "/")))
   names(Data_ls) <- paste0("ArtDvmtProp", names(Data_ls), "Cong")
   Out_ls$Year$Marea <- c(Out_ls$Year$Marea, Data_ls); rm(Data_ls)
   #Average congestion cost per mile
-  Out_ls$Year$Marea$AveCongPrice <-
-    (sum(FwyPrices_Cl * FwyDvmt_Cl) + sum(ArtPrices_Cl * ArtDvmt_Cl)) /
-    sum(FwyDvmt_Cl + ArtDvmt_Cl)
+  AveCongPrice_Ma <-
+    (rowSums(FwyPrices_MaCl * FwyDvmt_MaCl) + rowSums(ArtPrices_MaCl * ArtDvmt_MaCl)) /
+    sum(FwyDvmt_MaCl + ArtDvmt_MaCl)
+  Out_ls$Year$Marea$AveCongPrice <- AveCongPrice_Ma
   #Return the result
   Out_ls
 }
