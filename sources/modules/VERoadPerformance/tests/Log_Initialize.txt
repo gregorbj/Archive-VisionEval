@@ -1,20 +1,20 @@
 Test
 Test of VERoadPerformance package modules
-2018-03-15_07:56:36
+2018-03-18_18:01:38
 
-2018-03-15 07:56:36 : Testing Initialize. 
+2018-03-18 18:01:38 : Testing Initialize. 
 
-2018-03-15 07:56:36 : Attempting to load datastore. 
+2018-03-18 18:01:38 : Attempting to load datastore. 
 
-2018-03-15 07:56:37 : Datastore loaded. 
+2018-03-18 18:01:38 : Datastore loaded. 
 
-2018-03-15 07:56:37 : Attempting to load and check specifications. 
+2018-03-18 18:01:38 : Attempting to load and check specifications. 
 
-2018-03-15 07:56:40 : Module specifications successfully loaded and checked for errors. 
+2018-03-18 18:01:38 : Module specifications successfully loaded and checked for errors. 
 
-2018-03-15 07:56:40 : Attempting to process, check and load module inputs. 
+2018-03-18 18:01:38 : Attempting to process, check and load module inputs. 
 
-2018-03-15 07:56:42 : Warning regarding input values for HvyTrk inputs for Marea RVMPO. The sum of the values do not add up to 1 but are off by 1% or less so they have been adjusted to add up to 1. 
+2018-03-18 18:01:41 : Warning regarding input values for HvyTrk inputs for Marea RVMPO. The sum of the values do not add up to 1 but are off by 1% or less so they have been adjusted to add up to 1. 
 
-2018-03-15 07:58:57 : Module inputs successfully checked and loaded into datastore. 
+2018-03-18 18:03:01 : Module inputs successfully checked and loaded into datastore. 
 
