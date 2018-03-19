@@ -988,6 +988,7 @@ server <- function(input, output, session) {
     } else {
       readFromTable <- visioneval::readFromTableH5
     }
+    ModelState_ls <<- readModelState()
     verpatoutput <- filepaths[,.(value = list(readFromTable(Name=mbasename(groupname, 1), Table = mbasename(groupname, 2), Group = mbasename(groupname, 3)))), by = .(name)]
     finaloutput <- as.data.table(verpatoutput$value)
     setnames(finaloutput, colnames(finaloutput), verpatoutput$name)
