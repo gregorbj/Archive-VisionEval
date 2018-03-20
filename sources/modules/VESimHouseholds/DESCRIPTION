@@ -12,7 +12,7 @@ Description: This package contains several modules which create synthetic
     and life cycle. It also prepares a data frame of model estimation data from
     Census PUMS data that is used to estimate models in this package and the
     VELandUse package.
-License: file LICENSE
+License: Apache License 2.0
 LazyData: TRUE
 Depends: R (>= 3.1.0)
 Imports:

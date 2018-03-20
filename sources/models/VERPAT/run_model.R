@@ -106,4 +106,9 @@ for(Year in getYears()) {
     PackageName = "VETransportSupplyUse",
     RunFor = "NotBaseYear",
     RunYear = Year)
+  runModule(
+    ModuleName = "CalculatePolicyVmt",
+    PackageName = "VEHouseholdTravel",
+    RunFor = "NotBaseYear",
+    RunYear = Year)
 }

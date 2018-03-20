@@ -56,6 +56,26 @@ testModule(
   RunFor = "NotBaseYear"
 )
 
+#Reorganize folder to test next VERPAT module
+setwd("tests")
+dir.remove("Datastore")
+dir.remove("defs")
+file.remove("ModelState.rda")
+untar("Datastore_CalculateCongestionPolicy.tar")
+untar("defs_CalculateCongestionPolicy.tar")
+unzip("ModelState_CalculateCongestionPolicy.zip")
+setwd("..")
+
+#Test CalculateCongestionPolicy module
+source("R/CalculateCongestionPolicy.R")
+testModule(
+  ModuleName = "CalculateCongestionPolicy",
+  LoadDatastore = TRUE,
+  SaveDatastore = TRUE,
+  DoRun = TRUE,
+  RunFor = "NotBaseYear"
+)
+
 #Finish up
 setwd("tests")
 dir.remove("Datastore")

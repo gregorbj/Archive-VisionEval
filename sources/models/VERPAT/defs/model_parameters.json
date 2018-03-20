@@ -164,6 +164,29 @@
     "UNITS" : "proportion",
     "PROHIBIT" : "c('NA', '< 0', '> 1')",
     "ISELEMENTOF" : ""
+  },
+  {
+    "NAME" : "VmtCharge",
+    "VALUE": "0.05",
+    "TYPE" : "compound",
+    "UNITS" : "USD/MI",
+    "PROHIBIT" : "c('NA', '< 0')",
+    "ISELEMENTOF" : ""
+  },
+  {
+    "NAME" : "WorkVmtProp",
+    "VALUE": "0.25",
+    "TYPE" : "double",
+    "UNITS" : "proportion",
+    "PROHIBIT" : "c('NA', '< 0')",
+    "ISELEMENTOF" : ""
+  },
+  {
+    "NAME" : "AutoCostGrowth",
+    "VALUE": "1.5",
+    "TYPE" : "double",
+    "UNITS" : "multiplier",
+    "PROHIBIT" : "c('NA', '< 0')",
+    "ISELEMENTOF" : ""
   }
-
 ]

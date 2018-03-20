@@ -77,6 +77,10 @@ initializeModel <-
       initLog()
       writeLog(Msg)
     } else {
+      if(!"ModelState_ls" %in% ls()){
+        # Load modelstate file in the global environment
+        ModelState_ls <<- readModelState()
+      }
       writeLog("option visioneval.keepExistingModelState TRUE so skipping initModelStateFile and initLog",
                Print=TRUE)
       setModelState(preExistingModelState)

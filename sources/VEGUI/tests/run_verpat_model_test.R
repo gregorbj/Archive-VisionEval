@@ -167,6 +167,7 @@ if(dir.exists(file.path(save_dir,paste0(name,expected))) & !createExpectedResult
   jsonlite::write_json(output, path = file.path(save_dir,paste0(name,expected),"002.json"),pretty=TRUE)
 
   # Run the model
+  Sys.sleep(30)
   run_model_script_button <- app$findElement(xpath = "//*[@id='RUN_MODEL_BUTTON']")
   run_model_script_button$click()
   while(!run_model_script_button$isEnabled()) {

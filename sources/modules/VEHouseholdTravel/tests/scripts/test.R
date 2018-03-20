@@ -108,10 +108,32 @@ unzip("ModelState_CalculateInducedDemand.zip")
 untar("inputs_CalculateInducedDemand.tar")
 setwd("..")
 
-#Test CalculateTravelDemandFuture module
+#Test CalculateInducedDemand module
 source("R/CalculateInducedDemand.R")
 testModule(
   ModuleName = "CalculateInducedDemand",
+  LoadDatastore = TRUE,
+  SaveDatastore = TRUE,
+  DoRun = TRUE,
+  RunFor = "NotBaseYear"
+)
+
+# Reorganize folder for next VERPAT module test
+setwd("tests")
+dir.remove("Datastore")
+file.remove("ModelState.Rda")
+dir.remove("defs")
+dir.remove("inputs")
+untar("Datastore_CalculatePolicyVmt.tar")
+untar("defs_CalculatePolicyVmt.tar")
+untar("inputs_CalculatePolicyVmt.tar")
+unzip("ModelState_CalculatePolicyVmt.zip")
+setwd("..")
+
+#Test CalculatePolicyVmt module
+source("R/CalculatePolicyVmt.R")
+testModule(
+  ModuleName = "CalculatePolicyVmt",
   LoadDatastore = TRUE,
   SaveDatastore = TRUE,
   DoRun = TRUE,
