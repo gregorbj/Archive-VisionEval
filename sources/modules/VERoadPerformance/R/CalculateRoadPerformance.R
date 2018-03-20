@@ -851,9 +851,17 @@ rm(calcCongSpeeds)
 
 #Compute metropolitan factors for computing DVMT ratio from average speed ratio
 #------------------------------------------------------------------------------
+#Define function to calculate average speed
+calcAveSpd <- function(DvmtProp_MaCl, TotDvmt_Ma, AveSpd_MaCl) {
+  Dvmt_MaCl <- sweep(DvmtProp_MaCl, 1, TotDvmt_Ma, "*")
+  Dvht_MaCl <- Dvmt_MaCl / AveSpd_MaCl
+  rowSums(Dvmt_MaCl) / rowSums(Dvht_MaCl)
+}
 #Calculate average speeds and ratio of freeway to arterial average speed
-FwyAveSpeed_Ma <- rowSums(FwyCongProp_MaCl * AveFwySpds_MaCl)
-ArtAveSpeed_Ma <- rowSums(ArtCongProp_MaCl * AveArtSpds_MaCl)
+FwyAveSpeed_Ma <-
+  calcAveSpd(FwyCongProp_MaCl, Ums_df$FwyDvmt000, AveFwySpds_MaCl)
+ArtAveSpeed_Ma <-
+  calcAveSpd(ArtCongProp_MaCl, Ums_df$ArtDvmt000, AveArtSpds_MaCl)
 SpeedRatio_Ma <- FwyAveSpeed_Ma / ArtAveSpeed_Ma
 rm(FwyAveSpeed_Ma, FwyCongProp_MaCl, AveFwySpds_MaCl,
    ArtAveSpeed_Ma, ArtCongProp_MaCl, AveArtSpds_MaCl)
@@ -868,9 +876,13 @@ rm(DvmtRatio_Ma, SpeedRatio_Ma)
 #A linear model for calculating the computed 'Lambda' values is estimated using
 #independent variables available in the urban mobility study data. Several model
 #specifications were tested. The best performing model (having the highest
-#adjusted R-squared value) is shown below. An intercept is not in the model
-#because it was found to be statistically insignificant (P = 0.985) and because
-#it should be zero if there are no freeways.
+#adjusted R-squared value) is shown below. Highly significant terms are the
+#natural log of urbanized area population, the number of freeway lane miles per
+#capita, the number of arterial lane miles per capita, and the number of
+#freeway lane miles per square mile. Arterial lane miles per square mile and
+#population per square mile were found not to be significant. An intercept is
+#also not in the model because it was found to be statistically insignificant
+#(P = 0.985) and because it should be zero if there are no freeways.
 Lambda_df <- data.frame(
   Lambda = Lambda_Ma,
   LnMiRatio = with(Ums_df, FwyLnMi / ArtLnMi),
@@ -884,7 +896,7 @@ DvmtSplit_LM <-
   lm(Lambda ~ LogPop + FwyLnMiPC + ArtLnMiPC + FwyLnMiSqMi - 1,
      data = Lambda_df)
 #summary(DvmtSplit_LM)
-#plot(Lambda_Ma, fitted(DvmtSplit_LM))
+#plot(Lambda_Ma, fitted(DvmtSplit_LM)
 #cor(Lambda_df[,c("LogPop", "FwyLnMiPC", "ArtLnMiPC", "FwyLnMiSqMi")])
 rm(Lambda_df, Ums_df)
 
