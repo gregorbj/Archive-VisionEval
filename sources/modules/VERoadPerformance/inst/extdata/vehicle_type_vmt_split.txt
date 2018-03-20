@@ -1,0 +1,29 @@
+=========================================================
+Documentation for vehicle_type_vmt_split...csv data files
+=========================================================
+This documentation addresses 6 related files identify the percentages of daily vehicle miles traveled (DVMT) by different vehicle types (motorcycles, passenger cars, light trucks, buses, single-unit trucks, combination trucks) for several roadway classes (interstate, other arterial, other) in urban and rural areas by state (including the District of Columbia and Puerto Rico). The files are as follows:
+vehicle_type_vmt_split_rural_arterial.csv - percentages of DVMT by vehicle type on rural arterials by state
+vehicle_type_vmt_split_rural_interstate.csv - percentages of DVMT by vehicle type on rural interstates by state
+vehicle_type_vmt_split_rural_other.csv - percentages of DVMT by vehicle type on rural other roadways by state
+vehicle_type_vmt_split_urban_arterial.csv - percentages of DVMT by vehicle type on urban arterials by state
+vehicle_type_vmt_split_urban_interstate.csv - percentages of DVMT by vehicle type on urban interstates by state
+vehicle_type_vmt_split_urban_other.csv - percentages of DVMT by vehicle type on rural urban roadways by state
+
+Data in this file is used along with other datasets in the LoadDefaultRoadDvmtValues.R script to calculate default values for vehicle miles traveled by vehicle type (light-duty, heavy truck, bus) and urban and rural road class (freeway, arterial, other) for urban and rural areas by state and by urbanized area for the year 2010.
+
+File Structure
+--------------
+Rows contain data by state and the District of Columbia and Puerto Rico.
+Column names as follows:
+State: 2-letter postal code designation for the state
+Motorcycle: percentage of DVMT that is traveled by motorcycles
+Auto: percentage of DVMT that is traveled by automobiles (i.e. passenger cars)
+LightTruck: percentage of DVMT that is traveled by light trucks (i.e. pickup truck, sport utility vehicle, van)
+Bus: percentage of DVMT that is traveled by buses
+SingleTruck: percentage of DVMT that is traveled by single-unit trucks
+CombiTruck: percentage of DVMT that is traveled by combination trucks
+
+Source:
+-------
+Highway Statistics 2010, Federal Highway Administration, Office of Highway Policy Information, Table VM-4: Distribution of Annual Vehicle Distance Traveled - 2010, Percentage by Vehicle Type
+

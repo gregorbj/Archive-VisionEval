@@ -1,0 +1,21 @@
+===================================
+Documentation for ramp_metering.csv
+===================================
+Data in this file is used in the CalculateRoadPerformance.R script to specify the percentage reduction in recurring and non-recurring delay on freeways and on arterials that would occur at each congestion level with full implementation of ramp metering on freeways. Ramp metering is the practice of controlling the rate at which vehicles may enter a freeway. This practice reduces congestion on freeways at ramp merge points. Full implementation includes the installation of ramp meters and associated traffic monitoring and signal control software at all freeway ramps in an urbanized area where congestion at ramp merge occurs. Congestion categories are those defined by the Texas Transportation Institute for the Urban Mobility Study and include the following: None = none, Mod = moderate, Hvy = heavy, Sev = severe, Ext = extreme. Recurring congestion is congestion that occurs in the absence of traffic accidents and other incidents (e.g. disabled vehicle on shoulder, object on roadway). Non-recurring congestion is congestion that occurs because of traffic accidents or other incidents. Delay is the difference in the travel rate (hours per mile) between the average speed at the congestion level and the average speed with no congestion.
+
+File Structure
+--------------
+Rows contain data by congestion category
+Column names as follows:
+Level: Congestion level: None, Mod, Hvy, Sev, Ext 
+Fwy_Rcr: Percentage reduction in freeway delay due to recurring congestion
+Fwy_NonRcr: Percentage reduction in freeway delay due to non-recurring congestion
+Art_Rcr: Percentage reduction in arterial delay due to recurring congestion
+Art_NonRcr: Percentage reduction in arterial delay due to non-recurring congestion
+
+Source:
+-------
+Alex Bigazzi and Kelly Clifton, Refining GreenSTEP: Impacts of Vehicle Technologies and ITS/Operational Improvements on Travel Speed and Fuel Consumption Curves, Report on Task 2: Incorporation of Operations and ITS Improvements, Portland State University, November 2011.
+Bigazzi_GreenSTEP_estimate_ops_impacts.xls
+
+

@@ -1,6 +1,7 @@
 ==============================================
 Documentation for ave_vmt_per_vehicle_2010.csv
 ==============================================
+Data in this file is used in the LoadDefaultRoadDvmtValues.R along with data in the ldv_numbers_2010.csv to calculate the ratio between commercial light-duty vehicle (LDV) vehicle miles traveled (VMT) and household VMT.
 
 File Structure
 --------------

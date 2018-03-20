@@ -1,0 +1,23 @@
+======================================
+Documentation for state_population.csv
+======================================
+Data in this file is used along with other datasets in the LoadDefaultRoadDvmtValues.R script to calculate default values heavy truck vehicle miles traveled (VMT) per capita by state.
+
+File Structure
+--------------
+Rows contain data by state and the District of Columbia and Puerto Rico.
+Column names as follows:
+State: State name
+Abbreviation: Two-letter postal code for state
+Total: Total state population
+Rural: Population in rural (non-urbanized) areas of the state
+Urban: Population in urban (urbanized) areas of the state
+
+Source:
+-------
+U.S. Bureau of the Census, 2010 Census of Population
+http://www.census.gov/geo/www/ua/2010urbanruralclass.html
+Urban_Rural_by_State_2010_short_ver.xls
+
+
+
