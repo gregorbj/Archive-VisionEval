@@ -11,7 +11,7 @@
 #Packages used in code development
 #=================================
 #Uncomment following lines during code development. Recomment when done.
-# library(visioneval)
+library(visioneval)
 
 
 #=============================================
@@ -374,10 +374,9 @@ AssignHhVehiclePowertrain <- function(L, M) {
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions
 #-------------------------------------------------------------------------------
-# load("data/EnergyEmissionsDefaults_ls$HhPowertrain_df.rda")
-# load("data/EnergyEmissionsDefaults_ls$LdvPowertrainCharacteristics_df.rda")
+# load("data/EnergyEmissionsDefaults_ls")
 # TestDat_ <- testModule(
-#   ModuleName = "AssignVehiclePowertrain",
+#   ModuleName = "AssignHhVehiclePowertrain",
 #   LoadDatastore = TRUE,
 #   SaveDatastore = TRUE,
 #   DoRun = FALSE
@@ -390,7 +389,7 @@ AssignHhVehiclePowertrain <- function(L, M) {
 #the outputs are consistent with the 'Set' specifications
 #-------------------------------------------------------------------------------
 # TestDat_ <- testModule(
-#   ModuleName = "AssignVehiclePowertrain",
+#   ModuleName = "AssignHhVehiclePowertrain",
 #   LoadDatastore = TRUE,
 #   SaveDatastore = TRUE,
 #   DoRun = TRUE
