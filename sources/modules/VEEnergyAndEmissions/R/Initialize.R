@@ -26,7 +26,7 @@
 #Packages used in code development
 #=================================
 #Uncomment following lines during code development. Recomment when done.
-# library(visioneval)
+library(visioneval)
 
 
 #=============================================
@@ -57,7 +57,7 @@ InitializeSpecifications <- list(
       UNITS = "GM/MJ",
       NAVALUE = -1,
       SIZE = 0,
-      PROHIBIT = "< 0",
+      PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
       UNLIKELY = "",
       TOTAL = "",
@@ -105,7 +105,7 @@ InitializeSpecifications <- list(
       UNITS = "proportion",
       NAVALUE = -1,
       SIZE = 0,
-      PROHIBIT = c("< 0", "> 1"),
+      PROHIBIT = c("NA", "< 0", "> 1"),
       ISELEMENTOF = "",
       UNLIKELY = "",
       TOTAL = "",
@@ -136,7 +136,7 @@ InitializeSpecifications <- list(
       UNITS = "proportion",
       NAVALUE = -1,
       SIZE = 0,
-      PROHIBIT = c("NA", "< 0", "> 1"),
+      PROHIBIT = c("< 0", "> 1"),
       ISELEMENTOF = "",
       UNLIKELY = "",
       TOTAL = "",
@@ -173,7 +173,7 @@ InitializeSpecifications <- list(
       UNITS = "proportion",
       NAVALUE = -1,
       SIZE = 0,
-      PROHIBIT = c("NA", "< 0", "> 1"),
+      PROHIBIT = c("< 0", "> 1"),
       ISELEMENTOF = "",
       UNLIKELY = "",
       TOTAL = "",
@@ -384,6 +384,15 @@ Initialize <- function(L) {
   Warnings_ <- character(0)
   #Initialize output list with input values
   Out_ls <- L
+  #Define function to check for NA values
+  checkNA <- function(Names_, Geo) {
+    Values_ls <- L$Data$Year[[Geo]][Names_]
+    AllNA <- all(is.na(unlist(Values_ls)))
+    AnyNA <- any(is.na(unlist(Values_ls)))
+    NoNA <- !AnyNA
+    SomeNotAllNA <- AnyNA & !AllNA
+    list(None = NoNA, SomeNotAll = SomeNotAllNA)
+  }
   #Define function to check and adjust proportions
   checkProps <- function(Names_, Geo) {
     Values_ls <- L$Data$Year[[Geo]][Names_]
@@ -398,7 +407,7 @@ Initialize <- function(L) {
           ". The sum of values for a year is off by more than 1%. ",
           "They should add up to 1."
         )
-        Errors_ <- c(Errors_, Msg)
+        Errors_ <<- c(Errors_, Msg)
       }
       if (any(SumDiff_ > 0 & SumDiff_ < 0.01)) {
         Msg <- paste0(
@@ -407,7 +416,7 @@ Initialize <- function(L) {
           ". The sum of the values for a year do not add up to 1 ",
           "but are off by 1% or less so they have been adjusted to add up to 1."
         )
-        Warnings_ <- c(Warnings_, Msg)
+        Warnings_ <<- c(Warnings_, Msg)
         Values_mx <- sweep(Values_mx, 1, rowSums(Values_mx), "/")
         for (nm in colnames(Values_mx)) {
           Values_ls[[nm]] <- Values_mx[,nm]
@@ -424,7 +433,7 @@ Initialize <- function(L) {
           ". The sum of these values is off by more than 1%. ",
           "They should add up to 1."
         )
-        Errors_ <- c(Errors_, Msg)
+        Errors_ <<- c(Errors_, Msg)
       }
       if (SumDiff > 0 & SumDiff < 0.01) {
         Msg <- paste0(
@@ -433,7 +442,7 @@ Initialize <- function(L) {
           ". The sum of these values do not add up to 1 ",
           "but are off by 1% or less so they have been adjusted to add up to 1."
         )
-        Warnings_ <- c(Warnings_, Msg)
+        Warnings_ <<- c(Warnings_, Msg)
         Values_ <- Values_ / sum(Values_)
         for (nm in names(Values_)) {
           Values_ls[[nm]] <- Values_[nm]
@@ -443,62 +452,194 @@ Initialize <- function(L) {
     Values_ls
   }
 
-  #Check powertrain and fuel proportions
-  #-------------------------------------
   #Check and adjust car service vehicle powertrain proportions
+  #-----------------------------------------------------------
   Names_ <- c("CarSvcAutoPropIcev", "CarSvcAutoPropHev", "CarSvcAutoPropBev")
   if (all(Names_ %in% names(Out_ls$Data$Year$Region))) {
     Out_ls$Data$Year$Region[Names_] <- checkProps(Names_, "Region")
+  } else {
+    Msg <- paste0(
+      "region_carsvc_powertrain_prop.csv input file is present but not complete"
+    )
+    Errors_ <- c(Errors_, Msg)
   }
   Names_ <- c("CarSvcLtTrkPropIcev", "CarSvcLtTrkPropHev", "CarSvcLtTrkPropBev")
   if (all(Names_ %in% names(Out_ls$Data$Year$Region))) {
     Out_ls$Data$Year$Region[Names_] <- checkProps(Names_, "Region")
+  } else {
+    Msg <- paste0(
+      "region_carsvc_powertrain_prop.csv input file is present but not complete"
+    )
+    Errors_ <- c(Errors_, Msg)
   }
+
   #Check and adjust commercial service vehicle powertrain proportions
+  #------------------------------------------------------------------
   Names_ <- c("ComSvcAutoPropIcev", "ComSvcAutoPropHev", "ComSvcAutoPropBev")
   if (all(Names_ %in% names(Out_ls$Data$Year$Region))) {
     Out_ls$Data$Year$Region[Names_] <- checkProps(Names_, "Region")
+  } else {
+    Msg <- paste0(
+      "region_comsvc_powertrain_prop.csv input file is present but not complete"
+    )
+    Errors_ <- c(Errors_, Msg)
   }
   Names_ <- c("ComSvcLtTrkPropIcev", "ComSvcLtTrkPropHev", "ComSvcLtTrkPropBev")
   if (all(Names_ %in% names(Out_ls$Data$Year$Region))) {
     Out_ls$Data$Year$Region[Names_] <- checkProps(Names_, "Region")
+  } else {
+    Msg <- paste0(
+      "region_comsvc_powertrain_prop.csv input file is present but not complete"
+    )
+    Errors_ <- c(Errors_, Msg)
   }
+
   #Check heavy truck powertrain proportions
+  #----------------------------------------
   Names_ <- c("HvyTrkPropIcev", "HvyTrkPropHev", "HvyTrkPropBev")
   if (all(Names_ %in% names(Out_ls$Data$Year$Region))) {
     Out_ls$Data$Year$Region[Names_] <- checkProps(Names_, "Region")
+  } else {
+    Msg <- paste0(
+      "region_hvytrk_powertrain_prop.csv input file is present but not complete"
+    )
+    Errors_ <- c(Errors_, Msg)
   }
+
   #Check transit van fuel proportions
+  #----------------------------------
   Names_ <- c("VanPropDiesel", "VanPropGasoline", "VanPropCng")
   if (all(Names_ %in% names(Out_ls$Data$Year$Marea))) {
-    Out_ls$Data$Year$Marea[Names_] <- checkProps(Names_, "Marea")
+    HasNA <- checkNA(Names_, "Marea")
+    if (HasNA$None) {
+      Out_ls$Data$Year$Marea[Names_] <- checkProps(Names_, "Marea")
+    }
+    if (HasNA$SomeNotAll) {
+      Msg <- paste0(
+        "The 'Van' fields in the marea_transit_fuel.csv input file ",
+        "are not complete. They must all have data values, or all must be NA."
+      )
+      Errors_ <- c(Errors_, Msg)
+    }
+  } else {
+    Msg <- paste0(
+      "marea_transit_fuel.csv input file is present but not complete"
+    )
+    Errors_ <- c(Errors_, Msg)
   }
+
   #Check transit bus fuel proportions
+  #----------------------------------
   Names_ <- c("BusPropDiesel", "BusPropGasoline", "BusPropCng")
   if (all(Names_ %in% names(Out_ls$Data$Year$Marea))) {
-    Out_ls$Data$Year$Marea[Names_] <- checkProps(Names_, "Marea")
+    HasNA <- checkNA(Names_, "Marea")
+    if (HasNA$None) {
+      Out_ls$Data$Year$Marea[Names_] <- checkProps(Names_, "Marea")
+    }
+    if (HasNA$SomeNotAll) {
+      Msg <- paste0(
+        "The 'Bus' fields in the marea_transit_fuel.csv input file ",
+        "are not complete. They must all have data values, or all must be NA."
+      )
+      Errors_ <- c(Errors_, Msg)
+    }
+  } else {
+    Msg <- paste0(
+      "marea_transit_fuel.csv input file is present but not complete"
+    )
+    Errors_ <- c(Errors_, Msg)
   }
+
   #Check transit rail fuel proportions
+  #-----------------------------------
   Names_ <- c("RailPropDiesel", "RailPropGasoline")
   if (all(Names_ %in% names(Out_ls$Data$Year$Marea))) {
-    Out_ls$Data$Year$Marea[Names_] <- checkProps(Names_, "Marea")
+    HasNA <- checkNA(Names_, "Marea")
+    if (HasNA$None) {
+      Out_ls$Data$Year$Marea[Names_] <- checkProps(Names_, "Marea")
+    }
+    if (HasNA$SomeNotAll) {
+      Msg <- paste0(
+        "The 'Rail' fields in the marea_transit_fuel.csv input file ",
+        "are not complete. They must all have data values, or all must be NA."
+      )
+      Errors_ <- c(Errors_, Msg)
+    }
+  } else {
+    Msg <- paste0(
+      "marea_transit_fuel.csv input file is present but not complete"
+    )
+    Errors_ <- c(Errors_, Msg)
   }
+
   #Check transit van powertrain proportions
+  #----------------------------------------
   Names_ <- c("VanPropIcev", "VanPropHev", "VanPropBev")
   if (all(Names_ %in% names(Out_ls$Data$Year$Marea))) {
-    Out_ls$Data$Year$Marea[Names_] <- checkProps(Names_, "Marea")
+    HasNA <- checkNA(Names_, "Marea")
+    if (HasNA$None) {
+      Out_ls$Data$Year$Marea[Names_] <- checkProps(Names_, "Marea")
+    }
+    if (HasNA$SomeNotAll) {
+      Msg <- paste0(
+        "The 'Van' fields in the marea_transit_powertrain_prop.csv input file ",
+        "are not complete. They must all have data values, or all must be NA."
+      )
+      Errors_ <- c(Errors_, Msg)
+    }
+  } else {
+    Msg <- paste0(
+      "marea_transit_fuel.csv input file is present but not complete"
+    )
+    Errors_ <- c(Errors_, Msg)
   }
+
   #Check transit bus powertrain proportions
+  #----------------------------------------
   Names_ <- c("BusPropIcev", "BusPropHev", "BusPropBev")
   if (all(Names_ %in% names(Out_ls$Data$Year$Marea))) {
-    Out_ls$Data$Year$Marea[Names_] <- checkProps(Names_, "Marea")
+    HasNA <- checkNA(Names_, "Marea")
+    if (HasNA$None) {
+      Out_ls$Data$Year$Marea[Names_] <- checkProps(Names_, "Marea")
+    }
+    if (HasNA$SomeNotAll) {
+      Msg <- paste0(
+        "The 'Bus' fields in the marea_transit_powertrain_prop.csv input file ",
+        "are not complete. They must all have data values, or all must be NA."
+      )
+      Errors_ <- c(Errors_, Msg)
+    }
+  } else {
+    Msg <- paste0(
+      "marea_transit_fuel.csv input file is present but not complete"
+    )
+    Errors_ <- c(Errors_, Msg)
   }
+
   #Check transit rail powertrain proportions
+  #-----------------------------------------
   Names_ <- c("RailPropIcev", "RailPropHev", "RailPropEv")
   if (all(Names_ %in% names(Out_ls$Data$Year$Marea))) {
-    Out_ls$Data$Year$Marea[Names_] <- checkProps(Names_, "Marea")
+    HasNA <- checkNA(Names_, "Marea")
+    if (HasNA$None) {
+      Out_ls$Data$Year$Marea[Names_] <- checkProps(Names_, "Marea")
+    }
+    if (HasNA$SomeNotAll) {
+      Msg <- paste0(
+        "The 'Rail' fields in the marea_transit_powertrain_prop.csv input file ",
+        "are not complete. They must all have data values, or all must be NA."
+      )
+      Errors_ <- c(Errors_, Msg)
+    }
+  } else {
+    Msg <- paste0(
+      "marea_transit_fuel.csv input file is present but not complete"
+    )
+    Errors_ <- c(Errors_, Msg)
   }
+
   #Add Errors and Warnings to Out_ls and return
+  #--------------------------------------------
   Out_ls$Errors <- Errors_
   Out_ls$Warnings <- Warnings_
   Out_ls
@@ -515,7 +656,7 @@ Initialize <- function(L) {
 # TestDat_ <- testModule(
 #   ModuleName = "Initialize",
 #   LoadDatastore = TRUE,
-#   SaveDatastore = FALSE,
+#   SaveDatastore = TRUE,
 #   DoRun = FALSE
 # )
 # L <- TestDat_
@@ -525,8 +666,9 @@ Initialize <- function(L) {
 #the outputs are consistent with the 'Set' specifications
 #-------------------------------------------------------------------------------
 # TestDat_ <- testModule(
-#   ModuleName = "PredictIncome",
+#   ModuleName = "Initialize",
 #   LoadDatastore = TRUE,
 #   SaveDatastore = TRUE,
-#   DoRun = TRUE
+#   DoRun = FALSE
 # )
+
