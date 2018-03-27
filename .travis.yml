@@ -43,8 +43,9 @@ env:
    - FOLDER=sources/modules/VETransportSupply    SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=
    - FOLDER=sources/modules/VETransportSupplyUse SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=
    - FOLDER=sources/modules/VERoadPerformance    SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=
+   - FOLDER=sources/modules/VEEnergyAndEmissions SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=VE2001NHTS,VEHouseholdTravel
    - FOLDER=sources/models/VERPAT                SCRIPT=run_model.R             TYPE=model       DEPENDS=VE2001NHTS,VESimHouseholds,VESyntheticFirms,VELandUse,VETransportSupply,VEHouseholdVehicles,VEHouseholdTravel,VETransportSupplyUse
-   - FOLDER=sources/models/VERSPM/Test1          SCRIPT=run_model.R             TYPE=model       DEPENDS=VE2001NHTS,VESimHouseholds,VELandUse,VETransportSupply,VEHouseholdVehicles,VEHouseholdTravel,VERoadPerformance
+   - FOLDER=sources/models/VERSPM/Test1          SCRIPT=run_model.R             TYPE=model       DEPENDS=VE2001NHTS,VESimHouseholds,VELandUse,VETransportSupply,VEHouseholdVehicles,VEHouseholdTravel,VERoadPerformance,VEEnergyAndEmissions
    - FOLDER=sources/VEGUI                        SCRIPT=run_vegui_test.R        TYPE=model       DEPENDS=VE2001NHTS,VESimHouseholds,VESyntheticFirms,VELandUse,VETransportSupply,VEHouseholdVehicles,VEHouseholdTravel,VETransportSupplyUse
 
 # install and test framework, modules, models, GUI
