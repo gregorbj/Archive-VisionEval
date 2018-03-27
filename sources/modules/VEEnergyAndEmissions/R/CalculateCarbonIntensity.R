@@ -7,29 +7,12 @@
 #available, it uses them to calculate carbon intensities. Where not available,
 #it calculates carbon intensities from package data.
 
-# Copyright [2017] [AASHTO]
-# Based in part on works previously copyrighted by the Oregon Department of
-# Transportation and made available under the Apache License, Version 2.0 and
-# compatible open-source licenses.
-
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 
 #=================================
 #Packages used in code development
 #=================================
 #Uncomment following lines during code development. Recomment when done.
-library(visioneval)
+# library(visioneval)
 
 
 #=============================================
@@ -423,7 +406,7 @@ filterOnNames <- function(Data_misc, Filter_, Remove_ = NULL) {
 #' the names of the base fuel types consistent with the names used in FuelCI_
 #' although only the names of fuels used by the mode and type need to be
 #' included.
-#' @param BiofuelMix_ a named vector of the biofuel proportions of base fuels,
+#' @param BiofuelProp_ a named vector of the biofuel proportions of base fuels,
 #' or in the case of transit with multiple metropolitan area data, a matrix
 #' of biofuel proportions by type and metropolitan area. The names must be in
 #' form of the biofuel name concatenated with 'Prop' and concatenated with the
@@ -493,6 +476,7 @@ CalculateCarbonIntensity <- function(L) {
 
   #Get carbon intensity of fuels and electricity for the year
   #----------------------------------------------------------
+  EnergyEmissionsDefaults_ls <- VEEnergyAndEmissions::EnergyEmissionsDefaults_ls
   CI_ <- interpolateDfVals(EnergyEmissionsDefaults_ls$CarbonIntensity_df, Year)
   ElectricityCI <- CI_["Electricity"]
   AllFuelCI_ <- CI_[names(CI_) != "Electricity"]
