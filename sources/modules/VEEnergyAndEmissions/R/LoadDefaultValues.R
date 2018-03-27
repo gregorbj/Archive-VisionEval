@@ -19,6 +19,43 @@
 
 EnergyEmissionsDefaults_ls <- list()
 
+#---------------------
+#Congestion efficiency
+#---------------------
+#Specify input file attributes
+Inp_ls <- items(
+  item(
+    NAME = "Year",
+    TYPE = "integer",
+    PROHIBIT = c("NA", "< 0"),
+    ISELEMENTOF = "",
+    UNLIKELY = "",
+    TOTAL = ""
+  ),
+  item(
+    NAME =
+      items("LdIce",
+            "LdHev",
+            "LdEv",
+            "LdFcv",
+            "HdIce"),
+    TYPE = "double",
+    PROHIBIT = c("NA", "< 0"),
+    ISELEMENTOF = "",
+    UNLIKELY = "",
+    TOTAL = ""
+  )
+)
+#Load and process data
+CongestionEfficiency_df <-
+  processEstimationInputs(
+    Inp_ls,
+    "congestion_efficiency.csv",
+    "LoadDefaultValues.R")
+#Add to EnergyEmissionsDefaults_ls and clean up
+EnergyEmissionsDefaults_ls$CongestionEfficiency_df <- CongestionEfficiency_df
+rm(Inp_ls, CongestionEfficiency_df)
+
 #----------------
 #Carbon intensity
 #----------------
