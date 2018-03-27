@@ -4,7 +4,8 @@
 \alias{readFromTableH5}
 \title{Read from an HDF5 (H5) type datastore table.}
 \usage{
-readFromTableH5(Name, Table, Group, File = NULL, Index = NULL)
+readFromTableH5(Name, Table, Group, File = NULL, Index = NULL,
+  ReadAttr = FALSE)
 }
 \arguments{
 \item{Name}{A string identifying the name of the dataset to be read from.}
@@ -19,6 +20,9 @@ data is to be read from.}
 
 \item{Index}{A numeric vector identifying the positions the data is to be
 written to. NULL if the entire dataset is to be read.}
+
+\item{ReadAttr}{A logical identifying whether to return the attributes of
+the stored dataset. The default value is FALSE.}
 }
 \value{
 A vector of the same type stored in the datastore and specified in

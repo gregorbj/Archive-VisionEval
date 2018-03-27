@@ -4,7 +4,8 @@
 \alias{readFromTableRD}
 \title{Read from an RData (RD) type datastore table.}
 \usage{
-readFromTableRD(Name, Table, Group, DstoreLoc = NULL, Index = NULL)
+readFromTableRD(Name, Table, Group, DstoreLoc = NULL, Index = NULL,
+  ReadAttr = FALSE)
 }
 \arguments{
 \item{Name}{A string identifying the name of the dataset to be read from.}
@@ -20,10 +21,13 @@ NULL if the datastore is the current directory.}
 
 \item{Index}{A numeric vector identifying the positions the data is to be
 written to. NULL if the entire dataset is to be read.}
+
+\item{ReadAttr}{A logical identifying whether to return the attributes of
+the stored dataset. The default value is FALSE.}
 }
 \value{
 A vector of the same type stored in the datastore and specified in
-  the TYPE attribute.
+the TYPE attribute.
 }
 \description{
 \code{readFromTableRD} a visioneval framework datastore connection function
