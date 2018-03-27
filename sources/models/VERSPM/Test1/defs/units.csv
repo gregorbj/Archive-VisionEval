@@ -2,10 +2,10 @@ Type,Units
 currency,USD
 distance,MI
 area,SQMI
-mass,LB
+mass,KG
 volume,GAL
 time,DAY
-energy,MJ
+energy,GGE
 people,PRSN
 vehicles,VEH
 trips,TRIP
