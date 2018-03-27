@@ -1,35 +1,18 @@
-#====================================
-#CalculateHouseholdEnergyAndEmissions
-#====================================
+#=============================
+#CalculateHhEnergyAndEmissions
+#=============================
 #This module calculates the consumption of vehicle fuels and electricity
 #consumed by each household vehicle and the corresponding greenhouse gas
 #emissions. Vehicle fuel consumption is in gasoline-equivalent gallons,
 #electricity consumption in kilowatt-hours, and greenhouse gas emissions in
 #carbon-dioxide equivalents.
 
-# Copyright [2017] [AASHTO]
-# Based in part on works previously copyrighted by the Oregon Department of
-# Transportation and made available under the Apache License, Version 2.0 and
-# compatible open-source licenses.
-
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 
 #=================================
 #Packages used in code development
 #=================================
 #Uncomment following lines during code development. Recomment when done.
-library(visioneval)
+# library(visioneval)
 
 
 #=============================================
@@ -158,7 +141,7 @@ rm(Vm, Rg, smoothLookup, calcElectricProp)
 #'   \item{NonMetro_VmRg}{a matrix of electric power proportions by DVMT and battery range for non-metropolitan areas}
 #'   \item{getElecProp}{a function to get a value from a lookup table}
 #' }
-#' @source CalculateHouseholdEnergyAndEmissions.R script.
+#' @source CalculateHhEnergyAndEmissions.R script.
 "PhevElecProp_ls"
 devtools::use_data(PhevElecProp_ls, overwrite = TRUE)
 
@@ -169,7 +152,7 @@ devtools::use_data(PhevElecProp_ls, overwrite = TRUE)
 
 #Define the data specifications
 #------------------------------
-CalculateHouseholdEnergyAndEmissionsSpecifications <- list(
+CalculateHhEnergyAndEmissionsSpecifications <- list(
   #Level of geography module is applied at
   RunBy = "Marea",
   #Specify new tables to be created by Inp if any
@@ -450,21 +433,50 @@ CalculateHouseholdEnergyAndEmissionsSpecifications <- list(
 #'  \item{Get}{module inputs to be read from the datastore}
 #'  \item{Set}{module outputs to be written to the datastore}
 #' }
-#' @source CalculateHouseholdEnergyAndEmissions.R script.
-"CalculateHouseholdEnergyAndEmissions"
-devtools::use_data(CalculateHouseholdEnergyAndEmissionsSpecifications, overwrite = TRUE)
+#' @source CalculateHhEnergyAndEmissions.R script.
+"CalculateHhEnergyAndEmissionsSpecifications"
+devtools::use_data(CalculateHhEnergyAndEmissionsSpecifications, overwrite = TRUE)
 
 
 #=======================================================
 #SECTION 3: DEFINE FUNCTIONS THAT IMPLEMENT THE SUBMODEL
 #=======================================================
-#This function calculates the average carbon intensity of fuels (grams CO2e per
-#megajoule) by transportation mode. It also calculates the carbon intensity of
-#electricity. It checks for optional input data from users. If those data are
-#available, it uses them to calculate carbon intensities. Where not available,
-#it calculates carbon intensities from package data.
+#This function calculates the energy consumption and carbon emissions production
+#from household vehicle travel. Fuel consumption is calculated in gasoline
+#gallon equivalent. Electricity consumption is calculated in kilowatt hours.
+#Vehicle average MPG and MPkWh is adjusted to account for eco-driving, speed
+#smoothing, and congestion. Households are assigned to be eco-driving households
+#or not if that has not already been done. The module assumes that all vehicle
+#travel by households in the urbanized area are affected by congestion for the
+#purpose of adjusting MPG and MPkWh of their vehicles, while none of the travel
+#of households located outside of urbanized areas is affected. This is a
+#necessary simplification because the model currently does not estimate the
+#proportions of household travel inside and outside of urbanized areas. Carbon
+#emissions are calculated in carbon dioxide equivents (CO2e) using the carbon
+#intensities calculated by the CalculateCarbonIntensity module. The vehicle
+#energy and emissions are summed by household.
 
-CalculateHouseholdEnergyAndEmissions <- function(L) {
+#Main module function that calculates household vehicle energy and emissions
+#---------------------------------------------------------------------------
+#' Calculate energy and emissions of household vehicle travel.
+#'
+#' \code{CalculateHhEnergyAndEmissions} calculates the hydrocarbon and
+#' electrical energy consumption of the travel of each household vehicle and the
+#' carbon emissions produced.
+#'
+#' This function calculates the hydrocarbon and electrical energy consumption of
+#' the travel of each household vehicle and the carbon emissions produced. It
+#' assigns households to be eco-driving households or not if that hasn't been
+#' done before.
+#'
+#' @param L A list containing the components listed in the Get specifications
+#' for the module.
+#' @return A list containing the components specified in the Set
+#' specifications for the module.
+#' @import visioneval
+#' @export
+#'
+CalculateHhEnergyAndEmissions <- function(L) {
 
   #Set up
   #------
@@ -583,17 +595,20 @@ CalculateHouseholdEnergyAndEmissions <- function(L) {
   #Calculate household fuel/energy consumption and carbon emissions
   #----------------------------------------------------------------
   GGE_Hh <- tapply(GGE_Ve, L$Year$Vehicle$HhId, sum)[L$Year$Household$HhId]
+  GGE_Hh[is.na(GGE_Hh)] <- 0
   KWH_Hh <- tapply(KWH_Ve, L$Year$Vehicle$HhId, sum)[L$Year$Household$HhId]
+  KWH_Hh[is.na(KWH_Hh)] <- 0
   CO2e_Hh <- tapply(CO2e_Ve, L$Year$Vehicle$HhId, sum)[L$Year$Household$HhId]
+  CO2e_Hh[is.na(CO2e_Hh)] <- 0
 
   #Return the results
   #------------------
   Out_ls <- initDataList()
   Out_ls$Year$Household <- list(
-    IsEcoDrive = IsEcoDrive_Hh,
-    GGE = GGE_Hh,
-    KWH = KWH_Hh,
-    CO2e = CO2e_Hh
+    IsEcoDrive = as.integer(IsEcoDrive_Hh),
+    GGE = as.vector(GGE_Hh),
+    KWH = as.vector(KWH_Hh),
+    CO2e = as.vector(CO2e_Hh)
   )
   Out_ls$Year$Vehicle <- list(
     GGE = GGE_Ve,
@@ -614,20 +629,20 @@ CalculateHouseholdEnergyAndEmissions <- function(L) {
 # load("data/EnergyEmissionsDefaults_ls.rda")
 # attach(EnergyEmissionsDefaults_ls)
 # TestDat_ <- testModule(
-#   ModuleName = "CalculateHouseholdEnergyAndEmissions",
+#   ModuleName = "CalculateHhEnergyAndEmissions",
 #   LoadDatastore = TRUE,
 #   SaveDatastore = TRUE,
 #   DoRun = FALSE
 # )
 # L <- TestDat_$L
-# TestOut_ls <- CalculateHouseholdEnergyAndEmissions(L)
+# TestOut_ls <- CalculateHhEnergyAndEmissions(L)
 
 #Test code to check everything including running the module and checking whether
 #the outputs are consistent with the 'Set' specifications
 #-------------------------------------------------------------------------------
 # load("data/EnergyEmissionsDefaults_ls.rda")
 # TestDat_ <- testModule(
-#   ModuleName = "CalculateHouseholdEnergyAndEmissions",
+#   ModuleName = "CalculateHhEnergyAndEmissions",
 #   LoadDatastore = TRUE,
 #   SaveDatastore = TRUE,
 #   DoRun = TRUE
