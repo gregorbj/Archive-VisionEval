@@ -66,10 +66,10 @@ testModule(
   DoRun = TRUE
 )
 
-#Test CalculateHouseholdEnergyAndEmissions module
-source("R/CalculateHouseholdEnergyAndEmissions.R")
+#Test CalculateHhEnergyAndEmissions module
+source("R/CalculateHhEnergyAndEmissions.R")
 testModule(
-  ModuleName = "CalculateHouseholdEnergyAndEmissions",
+  ModuleName = "CalculateHhEnergyAndEmissions",
   LoadDatastore = TRUE,
   SaveDatastore = TRUE,
   DoRun = TRUE
