@@ -1117,6 +1117,12 @@ rm(Inp_ls, Names_, Cols_, Years_, Msg_, ty, pt, TransitPowertrain_df)
 #'
 #' @format A list containing 17 data frames:
 #' \describe{
+#'   \item{CongestionEfficiency_df}{the relative efficiency of vehicle types in congestion by year}
+#'     \item{LdIce}{congestion efficiency of light-duty internal combustion engine vehicles}
+#'     \item{LdHev}{congestion efficiency of light-duty hybrid-electric engine vehicles}
+#'     \item{LdEv}{congestion efficiency of light-duty battery electric vehicles}
+#'     \item{LdFcv}{congestion efficiency of light-duty fuel cell vehicles}
+#'     \item{HdIce}{congestion efficiency of heavy-duty internal combustion engine vehicles}
 #'   \item{CarbonIntensity_df}{a data frame of the carbon intensities of vehicle energy sources by year}
 #'     \item{Year}{calendar year}
 #'     \item{Gasoline}{carbon intensity of gasoline}
