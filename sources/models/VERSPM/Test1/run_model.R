@@ -45,4 +45,10 @@ for(Year in getYears()) {
   runModule("CalculateBaseRoadDvmt",         "VERoadPerformance",    RunFor = "BaseYear",    RunYear = Year)
   runModule("CalculateFutureRoadDvmt",       "VERoadPerformance",    RunFor = "NotBaseYear", RunYear = Year)
   runModule("CalculateRoadPerformance",      "VERoadPerformance",    RunFor = "AllYears",    RunYear = Year)
+  runModule("AssignHhVehiclePowertrain",     "VEEnergyAndEmissions", RunFor = "AllYears",    RunYear = Year)
+  runModule("AssignHhVehicleDvmtSplit",      "VEEnergyAndEmissions", RunFor = "AllYears",    RunYear = Year)
+  runModule("AssignHhVehicleDvmt",           "VEEnergyAndEmissions", RunFor = "AllYears",    RunYear = Year)
+  runModule("CalculateCarbonIntensity",      "VEEnergyAndEmissions", RunFor = "AllYears",    RunYear = Year)
+  runModule("CalculateMpgMpkwhAdjustments",  "VEEnergyAndEmissions", RunFor = "AllYears",    RunYear = Year)
+  runModule("CalculateHhEnergyAndEmissions", "VEEnergyAndEmissions", RunFor = "AllYears",    RunYear = Year)
 }
