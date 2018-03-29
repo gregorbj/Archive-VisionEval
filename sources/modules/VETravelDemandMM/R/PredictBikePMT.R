@@ -266,7 +266,8 @@ PredictBikePMTSpecifications <- list(
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
-      SIZE = 0
+      SIZE = 0,
+      DESCRIPTION = "Daily biking person miles traveled by all members of the household"
     )
   )
 )

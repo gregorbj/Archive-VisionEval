@@ -35,3 +35,6 @@ if(getRversion() >= "2.15.1")  utils::globalVariables(c("AADVMTModel_df",
                                                         "y",
                                                         "y_name"
                                                         ))
+
+# set the default stringsAsFactors option to FALSE
+options(stringsAsFactors=FALSE)
