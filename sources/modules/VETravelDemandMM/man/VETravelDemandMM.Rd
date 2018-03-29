@@ -10,5 +10,5 @@ Simulate Multi-Modal Travel Demand for Households
 }
 \details{
 See the README on
-\href{https://github.com/gregorbj/VisionEval/tree/develop/sources/modules/VETravelDemandMM}{GitHub}
+\href{https://github.com/gregorbj/VisionEval/sources/modules/VETravelDemandMM}{GitHub}
 }
