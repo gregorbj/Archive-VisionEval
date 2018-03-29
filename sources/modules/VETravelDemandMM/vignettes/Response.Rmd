@@ -21,7 +21,7 @@ Below are responses to the comments to the original pull request at https://gith
     
 1. The overall VE project travis.yaml script should be updated to include the new module and dependent packages in the automatic testing. 
 
-    **Done with commit f5ac5e021ceeb88796408c6b73adb2c37a2f7f3c**
+    **Done with commit e643502731e0d26f4fe3ddeefbfd97005c3c8c33**
     
 1. The estimation methods should be revised to follow VE conventions. Some of these suggested revisions need to be discussed with the project team since we’re still figuring out how we all work together and incorporate additions.
 
@@ -29,7 +29,7 @@ Below are responses to the comments to the original pull request at https://gith
     
 1. update travis automated testing script to test new package
 
-    **Done with commit f5ac5e021ceeb88796408c6b73adb2c37a2f7f3c**
+    **Done with commit e643502731e0d26f4fe3ddeefbfd97005c3c8c33**
 
 2. revise the documentation/software to let the user know that the NHTS2009, SLD, confidential data for estimation, and estimation script are exceptions to the guidelines for various reasons.
 
