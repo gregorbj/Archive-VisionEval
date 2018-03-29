@@ -10,7 +10,7 @@ if (!exists("Hh_df"))
 
 #' converting household data.frame to a list-column data frame segmented by
 #' metro ("metro" and "non-metro")
-mm_df <- Hh_df %>%
+Model_df <- Hh_df %>%
   filter(AADVMT<quantile(AADVMT, .99, na.rm=T)) %>%
   nest(-metro) %>%
   rename(train=data) %>%
@@ -19,7 +19,7 @@ mm_df <- Hh_df %>%
 #' model formula for each segment as a tibble (data.frame), also include a
 #' `post_func` column with functions de-transforming predictions to the original
 #' scale of the dependent variable
-fmlas_df <- tribble(
+Fmlas_df <- tribble(
   ~metro,  ~step, ~post_func,      ~fmla,
   "metro",    1,  function(y) y,   ~pscl::hurdle(TransitTrips ~ AADVMT+HhSize+LifeCycle+
                                                    Age0to14+D1B+TranRevMiPC+D4c |
@@ -43,21 +43,21 @@ fmlas_df <- tribble(
 
 #' call function to estimate models for each segment and add name for each
 #' segment
-model_df <- mm_df %>%
-  EstModelWith(fmlas_df) %>%
+Model_df <- Model_df %>%
+  EstModelWith(Fmlas_df) %>%
   name_list.cols(name_cols=c("metro", "step"))
 
 #' print model summary and goodness of fit
-model_df$model %>% map(summary)
-model_df #%>%
+Model_df$model %>% map(summary)
+Model_df #%>%
   #dplyr::select(metro, ends_with("rmse"), ends_with("r2")) %>%
   #group_by(metro) %>%
   #summarize_all(funs(mean))
 
 #' trim model object to save space
-TransitTFLModel_df <- model_df %>%
+TransitTFLModel_df <- Model_df %>%
   dplyr::select(metro, model, post_func) %>%
   mutate(model=map(model, TrimModel))
 
-#' save model_df to `data/`
+#' save Model_df to `data/`
 devtools::use_data(TransitTFLModel_df, overwrite = TRUE)
