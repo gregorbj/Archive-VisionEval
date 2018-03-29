@@ -42,6 +42,7 @@ env:
    - FOLDER=sources/modules/VESyntheticFirms     SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=
    - FOLDER=sources/modules/VETransportSupply    SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=
    - FOLDER=sources/modules/VETransportSupplyUse SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=
+   - FOLDER=sources/modules/VETravelDemandMM     SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=VESimHouseholds,VELandUse,VETransportSupply,VEHouseholdVehicles,VETransportSupplyUse
    - FOLDER=sources/modules/VERoadPerformance    SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=
    - FOLDER=sources/modules/VEEnergyAndEmissions SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=VE2001NHTS,VEHouseholdTravel
    - FOLDER=sources/models/VERPAT                SCRIPT=run_model.R             TYPE=model       DEPENDS=VE2001NHTS,VESimHouseholds,VESyntheticFirms,VELandUse,VETransportSupply,VEHouseholdVehicles,VEHouseholdTravel,VETransportSupplyUse
