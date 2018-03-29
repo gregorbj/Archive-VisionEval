@@ -1,0 +1,55 @@
+---
+title: "Response to Pull Request Comments"
+author: "Liming Wang"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Response to Pull Request Comments}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+Below are responses to the comments to the original pull request at https://github.com/gregorbj/VisionEval/wiki/Example-Review#feedback
+
+1. Travis returns a bunch of R package warnings that should be addressed,  such as ‘DoPredictions: no visible binding for global variable ‘model’.
+
+    **Fixed with commit 24502591e49646a936e0accdd6132c5698060a1e**.
+    
+1. The dependent data packages (NHTS2009 and SLD) should be submitted.
+
+    **They will be included in a new/separate pull request after this PR is merged.**
+    
+1. The overall VE project travis.yaml script should be updated to include the new module and dependent packages in the automatic testing. 
+
+    **Done with commit f5ac5e021ceeb88796408c6b73adb2c37a2f7f3c**
+    
+1. The estimation methods should be revised to follow VE conventions. Some of these suggested revisions need to be discussed with the project team since we’re still figuring out how we all work together and incorporate additions.
+
+    **I revised the variable names in estimation code in `data-raw`/ to follow VE conventions (commit 1b498d5760fac88c383705fd1c7c4bbf04a58080). There may be other places that I am happy to work with the review team and incorporate any apporpriate changes.**
+    
+1. update travis automated testing script to test new package
+
+    **Done with commit f5ac5e021ceeb88796408c6b73adb2c37a2f7f3c**
+
+2. revise the documentation/software to let the user know that the NHTS2009, SLD, confidential data for estimation, and estimation script are exceptions to the guidelines for various reasons.
+
+    **A Data section is added to the Introduction vignette describing the data sources and the fact that confidential NTHS information is not included in the package (commit 6da6125cd696b17cc43302ee2a7df2899f0af871).**
+
+3. add proof of ODOT release of ownership
+
+    **Need Tara and Tony's help here.**
+
+4. vignette and/or cheat sheet summarizing estimated functions and dependent variables
+
+    **A `Variables Used in Models` subsection is added to the "Introduction to VETravelDemandMM" linking to Tara's cheat sheet (commit 6da6125cd696b17cc43302ee2a7df2899f0af871).**
+
+1. For the software revisions, I recommend splitting any functions which alter the VE framework (the ‘helper functions’) as a separate pull request, as Brian Gregor mentioned.
+
+    **I believe there is some confusion here - there is no function in the package that alters the VE framework. We did talk about some functions that are potentially helpful/useful to other packages, which may be better living upstream in the VE framework code. However, we didn't decide where it should be. These functions are all in R/DoPredictions.R (and, potentially, data-raw/EstModels.R), which could be easily moved to another place once we decide it. I am not sure it needs to be a separate pull request. Again I am happy to work with the review team and incorporate any apporpriate changes.**
+
+1. The documentation is really quite thorough, and the inclusion of the submitted manuscript (while I haven’t read it) seems like an excellent addition.
+
+1. I do have one minor comment about the documentation that I noticed in the Overview document of the package: The transit and walk TRFL models are called with the function R/PredictTransitTFL.R, not R/PredictTransitPMT.R (similar for the walk models).
+
+    **Fixed with commit 9232f91bbb47dfa10b2569623c997fd79bb5562f**
+
