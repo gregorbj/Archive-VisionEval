@@ -70,9 +70,9 @@ As a VisionEval module, the package provides 9 functions (in `R` directory) that
 - Bike PMT (Person miles travelled): `R/PredictBikePMT.R`
 - Bike TFL (Trip frequencies and length): `R/PredictBikeTFL.R`
 - Transit PMT: `R/PredictTransitPMT.R`
-- Transit TFL: `R/PredictTransitPMT.R`
+- Transit TFL: `R/PredictTransitTFL.R`
 - Walk PMT: `R/PredictWalkPMT.R`
-- Walk TFL: `R/PredictWalkPMT.R`
+- Walk TFL: `R/PredictWalkTFL.R`
 
 To use modules in the package with the default parameters, a user will add modules to `visioneval::runModule`:
 ```{r, eval=F}
