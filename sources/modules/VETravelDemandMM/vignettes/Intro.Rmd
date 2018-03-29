@@ -52,6 +52,14 @@ More discussion of the model structure can be found in [the manuscript](https://
 
 Technical details of the model structures can be found in the estimation script for corresponding model in `data-raw`. The actual functions doing the prediction for the module in `R` is model structure agnostic - it is determined by the model objects saved in the model data frame in the `data` directory.
 
+### Variables Used in Models
+
+[A Cheat Sheet](https://github.com/gregorbj/VisionEval/wiki/documents/RSPM-TFLmodelVariables_May2017.pdf) created by Tara Weidner summarizes the estimated functions, independent and dependent variables in each model.
+
+## Data
+
+This module provides default model parameters estimated with US nationwide data, and it is also possible to re-estimate model paramters with region-specific data. The main estimation data are drawn from two external data package ([NHTS2009](https://github.com/cities-lab/NHTS2009) and [SLD](https://github.com/cities-lab/SLD), documented therein; the plan is to commit them to the VisionEval repository) and `data-raw/LoadDataforEstimation.R` joins data from different data sources and creates a single household data frame for estimation. `data-raw/LoadDataforEstimation.R` provides code and comments needed to replace the estimation data with region specific data. However, since the residential block group information for households in the 2009 NHTS (essentially providing an additional block group id column to the households data frame and allowing NHTS to be joined with SLD) used in the estimation of the nationwide models is confidential and can not be shared, users will not be able to directly run the estimation scripts in `data-raw`.
+
 ## Usage
 
 ### Installation
