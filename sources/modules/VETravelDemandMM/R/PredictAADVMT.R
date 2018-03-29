@@ -242,7 +242,8 @@ PredictAADVMTSpecifications <- list(
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
-      SIZE = 0
+      SIZE = 0,
+      DESCRIPTION = "Annual average daily vehicle miles traveled by the household"
     )
   )
 )
