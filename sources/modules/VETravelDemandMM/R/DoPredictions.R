@@ -53,12 +53,13 @@ DoPredictions <- function(Model_df, Dataset_df,
   Preds_lcdf <- Dataset_lcdf %>%
     mutate(y=map2(model, data, predict, type="response"))
 
-  # call post_func(y) if post_func column exists
+  # call post_func(y) if a 'post_func' column exists
   if ("post_func" %in% names(Preds_lcdf)) {
     Preds_lcdf <- Preds_lcdf %>%
       mutate(y=map2(y, post_func, `.y(.x)`))
   }
 
+  # apply bias adjustment factor if a 'bias_adj' column exists
   if ("bias_adj" %in% names(Preds_lcdf)) {
     Preds_lcdf <- Preds_lcdf %>%
       mutate(y=map2(y, bias_adj, `*`))
