@@ -138,13 +138,8 @@ CalculateComEnergyAndEmissionsSpecifications <- list(
       GROUP = "Year",
       TYPE = "compound",
       UNITS = "MI/DAY",
-      NAVALUE = -1,
       PROHIBIT = "<= 0",
-      ISELEMENTOF = "",
-      SIZE = 0,
-      DESCRIPTION = items(
-        "Base year Region heavy truck daily vehicle miles of travel in urbanized areas",
-        "Base year Region heavy truck daily vehicle miles of travel in rural (i.e. non-urbanized) areas")
+      ISELEMENTOF = ""
     ),
     item(
       NAME =
@@ -155,15 +150,8 @@ CalculateComEnergyAndEmissionsSpecifications <- list(
       GROUP = "Year",
       TYPE = "compound",
       UNITS = "MI/DAY",
-      NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = "",
-      SIZE = 0,
-      DESCRIPTION = items(
-        "Commercial service daily vehicle miles of travel associated with Marea urbanized household activity",
-        "Commercial service daily vehicle miles of travel associated with Marea rural household activity",
-        "Heavy truck daily vehicle miles of travel on urbanized area roadways in the Marea"
-      )
+      ISELEMENTOF = ""
     ),
     item(
       NAME =
@@ -550,8 +538,8 @@ CalculateComEnergyAndEmissions <- function(L) {
     EnergyMJ_EtVtMa <- Energy_EtVtMa * 0
     for (ma in Ma) {
       EnergyMJ_EtVtMa[,,ma] <- rbind(
-        convertUnits(Energy_EtVtMa[1,,ma], "compound", "GGE", "MJ")$Values,
-        convertUnits(Energy_EtVtMa[2,,ma], "compound", "KWH", "MJ")$Values
+        convertUnits(Energy_EtVtMa[1,,ma], "energy", "GGE", "MJ")$Values,
+        convertUnits(Energy_EtVtMa[2,,ma], "energy", "KWH", "MJ")$Values
       )
     }
     #Calculate CO2e emissions
@@ -598,8 +586,8 @@ CalculateComEnergyAndEmissions <- function(L) {
     HvyTrkEnergyMJ_MaEt <- HvyTrkEnergy_MaEt * 0
     for (ma in Ma) {
       HvyTrkEnergyMJ_MaEt[ma,] <- c(
-        convertUnits(HvyTrkEnergy_MaEt[ma,"GGE"], "compound", "GGE", "MJ")$Values,
-        convertUnits(HvyTrkEnergy_MaEt[ma,"KWH"], "compound", "KWH", "MJ")$Values
+        convertUnits(HvyTrkEnergy_MaEt[ma,"GGE"], "energy", "GGE", "MJ")$Values,
+        convertUnits(HvyTrkEnergy_MaEt[ma,"KWH"], "energy", "KWH", "MJ")$Values
       )
     }
     #Calculate CO2e by Marea and energy type
@@ -642,8 +630,8 @@ CalculateComEnergyAndEmissions <- function(L) {
       names(HvyTrkEnergy_Et) <- Et
       #Convert energy consumption to MJ
       HvyTrkEnergyMJ_Et <- c(
-        convertUnits(HvyTrkEnergy_Et["GGE"], "compound", "GGE", "MJ")$Values,
-        convertUnits(HvyTrkEnergy_Et["KWH"], "compound", "KWH", "MJ")$Values
+        convertUnits(HvyTrkEnergy_Et["GGE"], "energy", "GGE", "MJ")$Values,
+        convertUnits(HvyTrkEnergy_Et["KWH"], "energy", "KWH", "MJ")$Values
         )
       #Calculate CO2e
       HvyTrkCI_Et <- c(HvyTrkFuelCI, ElectricityCI)
