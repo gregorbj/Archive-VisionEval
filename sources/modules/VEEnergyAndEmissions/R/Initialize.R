@@ -314,6 +314,27 @@ InitializeSpecifications <- list(
           "Proportion of heavy truck travel powered by battery electric powertrains"
         ),
       OPTIONAL = TRUE
+    ),
+    item(
+      NAME = items(
+        "ComSvcLtTrkProp",
+        "CarSvcLtTrkProp"),
+      FILE = "region_comsvc_carsvc_lttrk_prop.csv",
+      TABLE = "Region",
+      GROUP = "Year",
+      TYPE = "double",
+      UNITS = "proportion",
+      NAVALUE = -1,
+      SIZE = 0,
+      PROHIBIT = c("NA", "< 0", "> 1"),
+      ISELEMENTOF = "",
+      UNLIKELY = "",
+      TOTAL = "",
+      DESCRIPTION =
+        items(
+          "Proportion of commercial service vehicles that are light trucks (i.e. pickup, SUV, van)",
+          "Proportion of car service vehicles that are light trucks (i.e. pickup, SUV, van)"
+        )
     )
   )
 )
