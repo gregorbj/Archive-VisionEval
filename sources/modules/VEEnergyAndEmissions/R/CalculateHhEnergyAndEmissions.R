@@ -422,9 +422,9 @@ CalculateHhEnergyAndEmissionsSpecifications <- list(
 
 #Save the data specifications list
 #---------------------------------
-#' Specifications list for CalculateHouseholdEnergyAndEmissions module
+#' Specifications list for CalculateHhEnergyAndEmissions module
 #'
-#' A list containing specifications for the CalculateHouseholdEnergyAndEmissions
+#' A list containing specifications for the CalculateHhEnergyAndEmissions
 #' module.
 #'
 #' @format A list containing 3 components:
