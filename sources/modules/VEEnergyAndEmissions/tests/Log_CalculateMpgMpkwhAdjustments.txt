@@ -1,32 +1,32 @@
 Test
 Test of VESimHouseholds package modules
-2018-03-27_10:14:26
+2018-03-30_11:39:04
 
-2018-03-27 10:14:26 : Testing CalculateMpgMpkwhAdjustments. 
+2018-03-30 11:39:04 : Testing CalculateMpgMpkwhAdjustments. 
 
-2018-03-27 10:14:26 : Attempting to load datastore. 
+2018-03-30 11:39:04 : Attempting to load datastore. 
 
-2018-03-27 10:14:26 : Datastore loaded. 
+2018-03-30 11:39:04 : Datastore loaded. 
 
-2018-03-27 10:14:26 : Attempting to load and check specifications. 
+2018-03-30 11:39:04 : Attempting to load and check specifications. 
 
-2018-03-27 10:14:26 : Module specifications successfully loaded and checked for errors. 
+2018-03-30 11:39:04 : Module specifications successfully loaded and checked for errors. 
 
-2018-03-27 10:14:26 : Attempting to process, check and load module inputs. 
+2018-03-30 11:39:04 : Attempting to process, check and load module inputs. 
 
-2018-03-27 10:14:27 : Module inputs successfully checked and loaded into datastore. 
+2018-03-30 11:39:04 : Module inputs successfully checked and loaded into datastore. 
 
-2018-03-27 10:14:27 : Checking whether datastore contains all datasets in Get specifications. 
+2018-03-30 11:39:04 : Checking whether datastore contains all datasets in Get specifications. 
 
-2018-03-27 10:14:27 : Datastore contains all datasets identified in module Get specifications. 
+2018-03-30 11:39:04 : Datastore contains all datasets identified in module Get specifications. 
 
-2018-03-27 10:14:27 : Running module and checking whether outputs meet Set specifications. 
+2018-03-30 11:39:04 : Running module and checking whether outputs meet Set specifications. 
 
-2018-03-27 10:14:27 : Also saving module outputs to datastore. 
+2018-03-30 11:39:04 : Also saving module outputs to datastore. 
 
-2018-03-27 10:14:29 : Module run successfully and outputs meet Set specifications. 
+2018-03-30 11:39:07 : Module run successfully and outputs meet Set specifications. 
 
-2018-03-27 10:14:29 : Module outputs saved to datastore. 
+2018-03-30 11:39:07 : Module outputs saved to datastore. 
 
-2018-03-27 10:14:29 : Congratulations. Module CalculateMpgMpkwhAdjustments passed all tests. 
+2018-03-30 11:39:07 : Congratulations. Module CalculateMpgMpkwhAdjustments passed all tests. 
 
