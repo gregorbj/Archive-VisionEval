@@ -124,7 +124,7 @@ AssignDevTypesSpecifications <- list(
       TABLE = "Household",
       GROUP = "Year",
       TYPE = "character",
-      UNITS = "dwelling type",
+      UNITS = "ID",
       PROHIBIT = "",
       ISELEMENTOF = ""
     ),
