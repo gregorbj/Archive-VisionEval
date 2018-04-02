@@ -58,6 +58,15 @@ testModule(
   DoRun = TRUE
 )
 
+#Test AssignParkingRestrictions module
+source("R/AssignParkingRestrictions.R")
+testModule(
+  ModuleName = "AssignParkingRestrictions",
+  LoadDatastore = TRUE,
+  SaveDatastore = TRUE,
+  DoRun = TRUE
+)
+
 #Finish up
 setwd("tests")
 tar("Datastore.tar", "Datastore")
