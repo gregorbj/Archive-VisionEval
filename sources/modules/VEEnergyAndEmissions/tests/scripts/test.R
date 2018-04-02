@@ -75,6 +75,24 @@ testModule(
   DoRun = TRUE
 )
 
+#Test CalculateComEnergyAndEmissions module
+source("R/CalculateComEnergyAndEmissions.R")
+testModule(
+  ModuleName = "CalculateComEnergyAndEmissions",
+  LoadDatastore = TRUE,
+  SaveDatastore = TRUE,
+  DoRun = TRUE
+)
+
+#Test CalculatePtranEnergyAndEmissions module
+source("R/CalculatePtranEnergyAndEmissions.R")
+testModule(
+  ModuleName = "CalculatePtranEnergyAndEmissions",
+  LoadDatastore = TRUE,
+  SaveDatastore = TRUE,
+  DoRun = TRUE
+)
+
 #Finish up
 setwd("tests")
 tar("Datastore.tar", "Datastore")

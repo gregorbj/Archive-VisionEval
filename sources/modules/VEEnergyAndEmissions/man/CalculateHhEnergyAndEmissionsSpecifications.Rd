@@ -3,7 +3,7 @@
 \docType{data}
 \name{CalculateHhEnergyAndEmissionsSpecifications}
 \alias{CalculateHhEnergyAndEmissionsSpecifications}
-\title{Specifications list for CalculateHouseholdEnergyAndEmissions module}
+\title{Specifications list for CalculateHhEnergyAndEmissions module}
 \format{A list containing 3 components:
 \describe{
  \item{RunBy}{the level of geography that the module is run at}
@@ -17,7 +17,7 @@ CalculateHhEnergyAndEmissions.R script.
 CalculateHhEnergyAndEmissionsSpecifications
 }
 \description{
-A list containing specifications for the CalculateHouseholdEnergyAndEmissions
+A list containing specifications for the CalculateHhEnergyAndEmissions
 module.
 }
 \keyword{datasets}

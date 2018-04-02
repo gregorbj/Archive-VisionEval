@@ -51,4 +51,6 @@ for(Year in getYears()) {
   runModule("CalculateCarbonIntensity",      "VEEnergyAndEmissions", RunFor = "AllYears",    RunYear = Year)
   runModule("CalculateMpgMpkwhAdjustments",  "VEEnergyAndEmissions", RunFor = "AllYears",    RunYear = Year)
   runModule("CalculateHhEnergyAndEmissions", "VEEnergyAndEmissions", RunFor = "AllYears",    RunYear = Year)
+  runModule("CalculateComEnergyAndEmissions", "VEEnergyAndEmissions", RunFor = "AllYears",    RunYear = Year)
+  runModule("CalculatePtranEnergyAndEmissions", "VEEnergyAndEmissions", RunFor = "AllYears",    RunYear = Year)
 }

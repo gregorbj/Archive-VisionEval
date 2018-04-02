@@ -31,4 +31,6 @@ Collate:
     'CalculateCarbonIntensity.R'
     'CalculateMpgMpkwhAdjustments.R'
     'CalculateHhEnergyAndEmissions.R'
+    'CalculateComEnergyAndEmissions.R'
+    'CalculatePtranEnergyAndEmissions.R'
     
