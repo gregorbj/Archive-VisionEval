@@ -61,6 +61,7 @@ CalculateCongestionBaseSpecifications <- list(
   ),
   #Specify data to be loaded from data store
   Get = items(
+    # Azone variables
     item(
       NAME = "ITS",
       TABLE = "Azone",
@@ -72,6 +73,7 @@ CalculateCongestionBaseSpecifications <- list(
       PROHIBIT = c("NA", "< 0", "> 1"),
       ISELEMENTOF = ""
     ),
+    # Global variables
     item(
       NAME = "Type",
       TABLE = "Vmt",
@@ -125,6 +127,17 @@ CalculateCongestionBaseSpecifications <- list(
       ISELEMENTOF = ""
     ),
     item(
+      NAME = "TranRevMiAdjFactor",
+      TABLE = "Model",
+      GROUP = "Global",
+      TYPE = "double",
+      UNITS = "multiplier",
+      PROHIBIT = c('NA', '< 0'),
+      SIZE = 0,
+      ISELEMENTOF = ""
+    ),
+    # Bzone variables
+    item(
       NAME = "Bzone",
       TABLE = "Bzone",
       GROUP = "Year",
@@ -176,6 +189,7 @@ CalculateCongestionBaseSpecifications <- list(
       SIZE = 0,
       ISELEMENTOF = ""
     ),
+    # Marea variables
     item(
       NAME = "Marea",
       TABLE = "Marea",
@@ -220,20 +234,28 @@ CalculateCongestionBaseSpecifications <- list(
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = ""
-    ),
-    item(
-      NAME = "TranRevMiAdjFactor",
-      TABLE = "Model",
-      GROUP = "Global",
-      TYPE = "double",
-      UNITS = "multiplier",
-      PROHIBIT = c('NA', '< 0'),
-      SIZE = 0,
-      ISELEMENTOF = ""
     )
   ),
   #Specify data to saved in the data store
   Set = items(
+    # Marea variables
+    item(
+      NAME = items(
+        "LtVehDvmt",
+        "BusDvmt"
+      ),
+      TABLE = "Marea",
+      GROUP = "Year",
+      TYPE = "compound",
+      UNITS = "MI/DAY",
+      PROHIBIT = c("NA", "< 0"),
+      SIZE = 0,
+      ISELEMENTOF = "",
+      DESCRIPTION = items(
+        "Daily vehicle miles travelled by light vehicles",
+        "Daily vehicle miles travelled by bus"
+      )
+    ),
     item(
       NAME = items(
         "MpgAdjLtVeh",
@@ -340,6 +362,7 @@ CalculateCongestionBaseSpecifications <- list(
       ISELEMENTOF = "",
       DESCRIPTION = "Fuel efficiency adjustment for households"
     ),
+    # Global variables
     item(
       NAME = "LtVehDvmtFactor",
       TABLE = "Model",
@@ -712,7 +735,6 @@ CalculateCongestionBase <- function(L) {
   #------------------------------------------
   DvmtType_Ma <- cbind( LtVeh=LtVehDvmt_Ma, Truck=L$Year$Marea$TruckDvmt, Bus=BusDvmt_Ma )
   rownames(DvmtType_Ma) <- L$Year$Marea$Marea
-  rm(LtVehDvmt_Ma, BusDvmt_Ma )
 
   # Sum population by metropolitan area
   #------------------------------------
@@ -771,6 +793,8 @@ CalculateCongestionBase <- function(L) {
   #Return the outputs list
   Out_ls$Year <- list(
     Marea = list(
+      LtVehDvmt = LtVehDvmt_Ma,
+      BusDvmt = BusDvmt_Ma,
       MpgAdjLtVeh = MpgAdjByMaVehType_vc[Marea_vc, "LtVeh"],
       MpgAdjBus = MpgAdjByMaVehType_vc[Marea_vc, "Bus"],
       MpgAdjTruck = MpgAdjByMaVehType_vc[Marea_vc, "Truck"],

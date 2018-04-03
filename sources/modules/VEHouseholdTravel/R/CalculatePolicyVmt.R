@@ -1594,12 +1594,6 @@ calcParkCostAdj <- function( Data__, Park_ ) {
 }
 
 
-
-
-
-
-
-
 #Main module function that adjusts DVMT
 #------------------------------------------------------
 #' Function to adjusts DVMT for the policies entered for the scenario
