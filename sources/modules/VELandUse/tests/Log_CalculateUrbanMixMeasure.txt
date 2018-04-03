@@ -1,64 +1,32 @@
 Test
 Test of VESimHouseholds package modules
-2017-11-08_07:23:50
+2018-04-02_20:02:55
 
-2017-11-08 07:23:50 : Testing CalculateUrbanMixMeasure. 
+2018-04-02 20:02:55 : Testing CalculateUrbanMixMeasure. 
 
-2017-11-08 07:23:50 : Attempting to load datastore. 
+2018-04-02 20:02:55 : Attempting to load datastore. 
 
-2017-11-08 07:23:50 : Datastore loaded. 
+2018-04-02 20:02:55 : Datastore loaded. 
 
-2017-11-08 07:23:50 : Attempting to load and check specifications. 
+2018-04-02 20:02:55 : Attempting to load and check specifications. 
 
-2017-11-08 07:23:50 : Module specifications successfully loaded and checked. 
+2018-04-02 20:02:55 : Module specifications successfully loaded and checked for errors. 
 
-2017-11-08 07:23:50 : Attempting to process, check and load module inputs. 
+2018-04-02 20:02:55 : Attempting to process, check and load module inputs. 
 
-2017-11-08 07:23:51 : Module inputs successfully checked and loaded into datastore. 
+2018-04-02 20:02:55 : Module inputs successfully checked and loaded into datastore. 
 
-2017-11-08 07:23:52 : Checking whether datastore contains all datasets in Get specifications. 
+2018-04-02 20:02:55 : Checking whether datastore contains all datasets in Get specifications. 
 
-2017-11-08 07:23:52 : Datastore contains all datasets identified in module Get specifications. 
+2018-04-02 20:02:55 : Datastore contains all datasets identified in module Get specifications. 
 
-2017-11-08 07:23:52 : Running module and checking whether outputs meet Set specifications. 
+2018-04-02 20:02:55 : Running module and checking whether outputs meet Set specifications. 
 
-2017-11-08 07:23:52 : Also saving module outputs to datastore. 
+2018-04-02 20:02:55 : Also saving module outputs to datastore. 
 
-2017-11-08 07:23:54 : Module run successfully and outputs meet Set specifications. 
+2018-04-02 20:02:55 : Module run successfully and outputs meet Set specifications. 
 
-2017-11-08 07:23:54 : Module outputs saved to datastore. 
+2018-04-02 20:02:55 : Module outputs saved to datastore. 
 
-2017-11-08 07:23:54 : Congratulations. Module CalculateUrbanMixMeasure passed all tests. 
-
-Test
-Test of VESimHouseholds package modules
-2018-01-14_14:58:17
-
-2018-01-14 14:58:17 : Testing CalculateUrbanMixMeasure. 
-
-2018-01-14 14:58:17 : Attempting to load datastore. 
-
-2018-01-14 14:58:17 : Datastore loaded. 
-
-2018-01-14 14:58:17 : Attempting to load and check specifications. 
-
-2018-01-14 14:58:18 : Module specifications successfully loaded and checked. 
-
-2018-01-14 14:58:18 : Attempting to process, check and load module inputs. 
-
-2018-01-14 14:58:18 : Module inputs successfully checked and loaded into datastore. 
-
-2018-01-14 14:58:18 : Checking whether datastore contains all datasets in Get specifications. 
-
-2018-01-14 14:58:18 : Datastore contains all datasets identified in module Get specifications. 
-
-2018-01-14 14:58:18 : Running module and checking whether outputs meet Set specifications. 
-
-2018-01-14 14:58:18 : Also saving module outputs to datastore. 
-
-2018-01-14 14:58:20 : Module run successfully and outputs meet Set specifications. 
-
-2018-01-14 14:58:20 : Module outputs saved to datastore. 
-
-2018-01-14 14:58:20 : Congratulations. Module CalculateUrbanMixMeasure passed all tests. 
+2018-04-02 20:02:55 : Congratulations. Module CalculateUrbanMixMeasure passed all tests. 
 

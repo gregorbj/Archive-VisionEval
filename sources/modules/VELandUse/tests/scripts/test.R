@@ -67,6 +67,15 @@ testModule(
   DoRun = TRUE
 )
 
+#Test AssignDemandManagement module
+source("R/AssignDemandManagement.R")
+testModule(
+  ModuleName = "AssignDemandManagement",
+  LoadDatastore = TRUE,
+  SaveDatastore = TRUE,
+  DoRun = TRUE
+)
+
 #Finish up
 setwd("tests")
 tar("Datastore.tar", "Datastore")

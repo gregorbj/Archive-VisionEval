@@ -1,0 +1,38 @@
+Test
+Test of VESimHouseholds package modules
+2018-04-02_20:02:55
+
+2018-04-02 20:02:55 : Testing AssignParkingRestrictions. 
+
+2018-04-02 20:02:55 : Attempting to load datastore. 
+
+2018-04-02 20:02:55 : Datastore loaded. 
+
+2018-04-02 20:02:55 : Attempting to load and check specifications. 
+
+2018-04-02 20:02:55 : Module specifications successfully loaded and checked for errors. 
+
+2018-04-02 20:02:55 : Warning note to module developer. The Get specification for dataset PkgCost in table Bzone does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
+
+2018-04-02 20:02:55 : Warning note to module developer. The Set specification for dataset ParkingUnitCost in table Household does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
+
+2018-04-02 20:02:55 : Warning note to module developer. The Set specification for dataset ParkingCost in table Worker does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
+
+2018-04-02 20:02:55 : Attempting to process, check and load module inputs. 
+
+2018-04-02 20:02:56 : Module inputs successfully checked and loaded into datastore. 
+
+2018-04-02 20:02:56 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-04-02 20:02:56 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-04-02 20:02:56 : Running module and checking whether outputs meet Set specifications. 
+
+2018-04-02 20:02:56 : Also saving module outputs to datastore. 
+
+2018-04-02 20:02:57 : Module run successfully and outputs meet Set specifications. 
+
+2018-04-02 20:02:57 : Module outputs saved to datastore. 
+
+2018-04-02 20:02:57 : Congratulations. Module AssignParkingRestrictions passed all tests. 
+
