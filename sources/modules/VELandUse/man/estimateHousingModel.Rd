@@ -10,8 +10,7 @@ estimateHousingModel(Data_df, StartTerms_)
 \item{Data_df}{A data frame containing estimation data.}
 
 \item{StartTerms_}{A character vector of the terms of the model to be
-tested in the model. The function estimates the model using these terms
-and then drops all terms whose p value is greater than 0.05.}
+tested in the model.}
 }
 \value{
 A list which has the following components:
