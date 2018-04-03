@@ -148,6 +148,7 @@ rm(TourMiles_df, TourMiles_ls, TourMiles_SzX, HhSizeCat_, PropMilesPerWkr_Sz)
 #' \describe{
 #'  \item{PropDvmtReduce}{named vector of the proportional reduction in DVMT due to TDM program participation (names are ECO and IMP)}
 #'  \item{PropMilesPerWkr}{named vector of the ratio of work tour DVMT per worker to total DVMT (names are household size 1 to 8)}
+#'  }
 #' @source AssignDemandManagement.R
 "TdmModel_ls"
 devtools::use_data(TdmModel_ls, overwrite = TRUE)

@@ -4,7 +4,11 @@
 \name{TdmModel_ls}
 \alias{TdmModel_ls}
 \title{Travel demand management models}
-\format{An object of class \code{list} of length 2.}
+\format{A list containing two vectors:
+\describe{
+ \item{PropDvmtReduce}{named vector of the proportional reduction in DVMT due to TDM program participation (names are ECO and IMP)}
+ \item{PropMilesPerWkr}{named vector of the ratio of work tour DVMT per worker to total DVMT (names are household size 1 to 8)}
+ }}
 \source{
 AssignDemandManagement.R
 }

@@ -126,7 +126,7 @@ AssignParkingRestrictionsSpecifications <- list(
           "PkgSpacesPerGQ"),
       TABLE = "Bzone",
       GROUP = "Year",
-      TYPE = "integer",
+      TYPE = "double",
       UNITS = "parking spaces",
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = ""
