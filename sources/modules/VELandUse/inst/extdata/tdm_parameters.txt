@@ -1,0 +1,14 @@
+====================================
+Documentation for tdm_parameters.csv
+====================================
+
+File Structure
+--------------
+Each row is a record for a travel demand management (TDM) parameter
+Column names as follows:
+Parameter: The name of the parameter. There are two parameters, EcoReduction and ImpReduction. The EcoReduction parameter corresponds to the participation in an employee commute options (ECO) program. The ImpReduction parameter corresponds to the participation of a household in an individualized marketing program (IMP).
+Value: The proportional reduction in daily vehicle miles of travel (DVMT) due to participation in the TDM program. The proportional reduction for ECO programs is a proportional reduction in work tour DVMT. The proportional reduction for IMP programs is a proportional reduction in total household DVMT.
+
+Source:
+-------
+The rate of reduction in household VMT for IMP programs is the rate found from Oregon studies (9%). The rate of reduction for ECO programs on commute VMT is taken from the "Moving Cooler" technical appendix (Table 5.13, p. B-54) for medium size urban areas, 5.4%.
