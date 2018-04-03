@@ -176,10 +176,8 @@ AssignParkingRestrictionsSpecifications <- list(
       GROUP = "Year",
       TYPE = "character",
       UNITS = "ID",
-      NAVALUE = -1,
       PROHIBIT = "",
-      ISELEMENTOF = "",
-      DESCRIPTION = "Bzone ID of worker job location"
+      ISELEMENTOF = ""
     )
   ),
   #Specify data to saved in the data store
