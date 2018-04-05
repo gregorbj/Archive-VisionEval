@@ -251,16 +251,15 @@ devtools::use_data(LocateEmploymentSpecifications, overwrite = TRUE)
 #=======================================================
 #SECTION 3: DEFINE FUNCTIONS THAT IMPLEMENT THE SUBMODEL
 #=======================================================
-#This function locates households in Bzones based on the housing type of each
-#household, the supply of housing of that housing type in each Bzone, the
-#income of the household, and the Bzone location weight of each household.
-#First housing supply and demand are balanced to assure that there are
-#sufficient housing units of each type in the Azone. Then households are ordered
-#by income from highest to lowest. Each household is assign a Bzone in that
-#order. The probability of a household being assigned to a Bzone is a function
-#of the supply of housing of the type in the Bzone and the location weight of
-#the Bzone. After a household has been assigned to a Bzone, the housing
-#inventory of the Bzone is decremented and the next household is then assigned.
+#This module places employment in Bzones based on input assumptions of
+#employment by type and Bzone. The model adjusts the employment numbers to
+#balance with the number of workers in the region. The module assigns workers
+#to jobs as a function of the number of jobs in each Bzone and the inverse of
+#distance between residence and employment Bzones. An iterative proportional
+#fitting process is used to allocate the number of workers between each pair of
+#Bzones. A worker table is created and workers are assigned randomly to
+#employment Bzones based on the balanced matrix of number of workers by
+#residence and employment Bzones.
 
 #Function to adjust employment to match workers
 #----------------------------------------------
@@ -295,15 +294,17 @@ adjustEmployment <- function(EmpTarget, Emp_, Names = NULL) {
   RevEmp_
 }
 
-#Main module function that assigns employment by type to Bzones
-#--------------------------------------------------------------
+#Main module function that assigns workers to Bzone employment locations
+#-----------------------------------------------------------------------
 #' Main module function to assign employment by type to Bzones.
 #'
-#' \code{LocateHouseholds} assigns employment by type to Bzones.
+#' \code{LocateEmployment} assigns workers to Bzones.
 #'
-#' This function assigns employment by type to Bzones based on inputs of
-#' employment by type by Bzone with adjustment of employment to equal region-
-#' wide total of workers.
+#' This function assigns workers to Bzone employment based on inputs of
+#' employment by type by Bzone, adjustment of employment to equal regionwide
+#' total of workers, and identify Bzone employment location for each worker as
+#' a function of the number of jobs in each Bzone and the inverse of distance
+#' between Bzones.
 #'
 #' @param L A list containing the components listed in the Get specifications
 #' for the module.
@@ -345,7 +346,10 @@ LocateEmployment <- function(L) {
   #Tabulate workers by residence Bzone
   Wkr_Bz <- tapply(L$Year$Household$Workers, L$Year$Household$Bzone, sum)[Bz]
   Wkr_Bz[is.na(Wkr_Bz)] <- 0
+
   #Allocate workers by origin and destination using IPF
+  #----------------------------------------------------
+  #Use IPF with seed matrix that is inverse of distance between Bzones
   WkrOD_BzBz <-
     ipf(1 / Dist_BzBz, list(Wkr_Bz, TotEmp_Bz), list(1, 2))$Units_ar
   rownames(WkrOD_BzBz) <- Bz
