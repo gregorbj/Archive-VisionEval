@@ -153,6 +153,15 @@ AssignParkingRestrictionsSpecifications <- list(
       ISELEMENTOF = ""
     ),
     item(
+      NAME = "D1D",
+      TABLE = "Bzone",
+      GROUP = "Year",
+      TYPE = "compound",
+      UNITS = "HHJOB/ACRE",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = ""
+    ),
+    item(
       NAME = "HouseType",
       TABLE = "Household",
       GROUP = "Year",
@@ -205,6 +214,18 @@ AssignParkingRestrictionsSpecifications <- list(
       ISELEMENTOF = "",
       SIZE = 0,
       DESCRIPTION = "Daily cost for long-term parking (e.g. paid on monthly basis)"
+    ),
+    item(
+      NAME = "OtherParkingCost",
+      TABLE = "Household",
+      GROUP = "Year",
+      TYPE = "currency",
+      UNITS = "USD",
+      NAVALUE = "NA",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      SIZE = 0,
+      DESCRIPTION = "Daily cost for parking at shopping locations or other locations of paid parking not including work"
     ),
     item(
       NAME = "PaysForParking",
@@ -273,7 +294,12 @@ devtools::use_data(AssignParkingRestrictionsSpecifications, overwrite = TRUE)
 #free parking spaces the household may use, the charge for household parking per
 #vehicle if they exceed the number of free spaces, how many household workers
 #pay for parking, the charge they have to pay, and the amount of the work
-#parking charges that are 'cash-out-buy-back'.
+#parking charges that are 'cash-out-buy-back'. The module also calculates a
+#simple placeholder value for other daily parking charges (e.g. paying for
+#parking at shopping). These are calculated as a weighted average of daily
+#parking cost in each Bzone weighted by the portion of total aggregate activity
+#in the region that is in each Bzone (D1D measure calculated by the
+#Calculate4DMeasures module)
 
 #Main module function that assigns parking restrictions to each household
 #------------------------------------------------------------------------
@@ -340,12 +366,19 @@ AssignParkingRestrictions <- function(L) {
   #Clean up
   rm(PropPay_Wk, PropCashOut_Wk)
 
+  #Other household parking cost
+  #----------------------------
+  #Parking cost exclusive of parking for work or for household vehicles
+  PkgCostWts_Bz <- L$Year$Bzone$D1D / sum(L$Year$Bzone$D1D)
+  OtherPkgCost <- sum(PkgCostWts_Bz * L$Year$Bzone$PkgCost)
+
   #Return list of results
   #----------------------
   Out_ls <- initDataList()
   Out_ls$Year$Household <- list(
     FreeParkingSpaces = as.integer(PkgSp_Hh),
-    ParkingUnitCost = CostPerSpace_Hh
+    ParkingUnitCost = CostPerSpace_Hh,
+    OtherParkingCost = OtherPkgCost
   )
   Out_ls$Year$Worker <- list(
     PaysForParking = as.integer(DoesPay_Wk),
