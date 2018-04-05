@@ -76,6 +76,15 @@ testModule(
   DoRun = TRUE
 )
 
+#Test AssignCarSvcCharacteristics module
+source("R/AssignCarSvcCharacteristics.R")
+testModule(
+  ModuleName = "AssignCarSvcCharacteristics",
+  LoadDatastore = TRUE,
+  SaveDatastore = TRUE,
+  DoRun = TRUE
+)
+
 #Finish up
 setwd("tests")
 tar("Datastore.tar", "Datastore")
