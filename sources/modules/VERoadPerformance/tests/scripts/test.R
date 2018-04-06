@@ -11,7 +11,7 @@ setwd("..")
 #Load default data used in calculating road DVMT
 source("R/LoadDefaultRoadDvmtValues.R")
 ModelFiles_ <-
-  c("data/RoadDvmtModel_ls.rda", "data/Access_df.rda", "data/BaseSpeeds_df.Rda",
+  c("data/RoadDvmtModel_ls.rda", "data/Access_df.rda", "data/BaseSpeeds_df.rda",
     "data/Delay_df.rda", "data/Incident_df.rda", "data/Ramp_df.rda",
     "data/Signal_df.rda")
 for (File in ModelFiles_) {
