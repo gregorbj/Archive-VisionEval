@@ -45,3 +45,4 @@ VETravelCosts,AssignUnitCosts,"Input unit cost assumptions for vehicle travel, e
 VETravelCosts,AssignPAYDInsurance,Identifies which households have pay-as-you-drive insurance,,X,
 VETravelCosts,CalculateHouseholdCosts,Calculates household costs for owning and operating vehicles,,X,
 VETravelCosts,CalculateRoadCostsAndRevenues,Calculates roadway costs and revenues and additional taxes to balance,,X,
+VEReports,ReportRPATMetrics,Calculates performance metrics for RPAT,IT,,X
