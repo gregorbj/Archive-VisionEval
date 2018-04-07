@@ -1,8 +1,8 @@
 Package: VELandUse
 Type: Package
 Title: Create Land Use Attributes for VE
-Version: 0.9.1
-Date: 10/28/17
+Version: 0.9.5
+Date: 4/6/18
 Author: Brian Gregor [aut, cre], Aditya Gore <aditya.gore@rsginc.com> [cre]
 Maintainer: Brian Gregor <gregorb@or-analytics.com>, Aditya Gore <aditya.gore@rsginc.com>
 Copyright: AASHTO
@@ -12,7 +12,10 @@ Description: This package contains several modules which establish land use
     network design, and accessibility. Modules also identify the housing type
     and Bzone location of each household, create a Worker table and assign each
     worker to a Bzone job location, and identify whether each household is 
-    located in an urbanized area or rural area.
+    located in an urbanized area or rural area. In addition, modules are
+    included for processing several policy inputs related to land use that are
+    applied at the Bzone level. These include parking, travel demand management
+    programs, and car services.
 License: Apache License 2.0
 LazyData: TRUE
 Depends: R (>= 3.1.0)
