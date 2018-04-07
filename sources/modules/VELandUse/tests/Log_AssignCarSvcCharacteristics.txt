@@ -1,32 +1,32 @@
 Test
 Test of VESimHouseholds package modules
-2018-04-04_20:49:47
+2018-04-06_17:59:39
 
-2018-04-04 20:49:47 : Testing AssignCarSvcCharacteristics. 
+2018-04-06 17:59:39 : Testing AssignCarSvcCharacteristics. 
 
-2018-04-04 20:49:47 : Attempting to load datastore. 
+2018-04-06 17:59:39 : Attempting to load datastore. 
 
-2018-04-04 20:49:47 : Datastore loaded. 
+2018-04-06 17:59:39 : Datastore loaded. 
 
-2018-04-04 20:49:47 : Attempting to load and check specifications. 
+2018-04-06 17:59:39 : Attempting to load and check specifications. 
 
-2018-04-04 20:49:47 : Module specifications successfully loaded and checked for errors. 
+2018-04-06 17:59:39 : Module specifications successfully loaded and checked for errors. 
 
-2018-04-04 20:49:47 : Attempting to process, check and load module inputs. 
+2018-04-06 17:59:39 : Attempting to process, check and load module inputs. 
 
-2018-04-04 20:49:47 : Module inputs successfully checked and loaded into datastore. 
+2018-04-06 17:59:39 : Module inputs successfully checked and loaded into datastore. 
 
-2018-04-04 20:49:47 : Checking whether datastore contains all datasets in Get specifications. 
+2018-04-06 17:59:39 : Checking whether datastore contains all datasets in Get specifications. 
 
-2018-04-04 20:49:47 : Datastore contains all datasets identified in module Get specifications. 
+2018-04-06 17:59:39 : Datastore contains all datasets identified in module Get specifications. 
 
-2018-04-04 20:49:47 : Running module and checking whether outputs meet Set specifications. 
+2018-04-06 17:59:39 : Running module and checking whether outputs meet Set specifications. 
 
-2018-04-04 20:49:47 : Also saving module outputs to datastore. 
+2018-04-06 17:59:39 : Also saving module outputs to datastore. 
 
-2018-04-04 20:49:47 : Module run successfully and outputs meet Set specifications. 
+2018-04-06 17:59:41 : Module run successfully and outputs meet Set specifications. 
 
-2018-04-04 20:49:47 : Module outputs saved to datastore. 
+2018-04-06 17:59:41 : Module outputs saved to datastore. 
 
-2018-04-04 20:49:47 : Congratulations. Module AssignCarSvcCharacteristics passed all tests. 
+2018-04-06 17:59:41 : Congratulations. Module AssignCarSvcCharacteristics passed all tests. 
 
