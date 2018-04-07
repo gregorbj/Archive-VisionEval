@@ -26,7 +26,7 @@
 #Packages used in code development
 #=================================
 #Uncomment following lines during code development. Recomment when done.
-library(visioneval)
+# library(visioneval)
 
 
 #=============================================
@@ -48,65 +48,6 @@ AssignCarSvcCharacteristicsSpecifications <- list(
   #Specify new tables to be created by Set if any
   #Specify input data
   Inp = items(
-    item(
-      NAME =
-        items(
-          "HighCarSvcAccessTime",
-          "LowCarSvcAccessTime"),
-      FILE = "azone_carsvc_characteristics.csv",
-      TABLE = "Azone",
-      GROUP = "Year",
-      TYPE = "time",
-      UNITS = "MIN",
-      NAVALUE = -1,
-      SIZE = 0,
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = "",
-      UNLIKELY = "",
-      TOTAL = "",
-      DESCRIPTION =
-        items(
-          "Average amount of time in minutes required to access a high service level car service to begin a trip",
-          "Average amount of time in minutes required to access a low service level car service to begin a trip"
-        )
-    ),
-    item(
-      NAME =
-        items(
-          "HighCarSvcCost",
-          "LowCarSvcCost"),
-      FILE = "azone_carsvc_characteristics.csv",
-      TABLE = "Azone",
-      GROUP = "Year",
-      TYPE = "currency",
-      UNITS = "USD",
-      NAVALUE = -1,
-      SIZE = 0,
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = "",
-      UNLIKELY = "",
-      TOTAL = "",
-      DESCRIPTION =
-        items(
-          "Average cost in dollars per mile for travel by high service level car service",
-          "Average cost in dollars per mile for travel by low service level car service"
-        )
-    ),
-    item(
-      NAME = "AveCarSvcVehicleAge",
-      FILE = "azone_carsvc_characteristics.csv",
-      TABLE = "Azone",
-      GROUP = "Year",
-      TYPE = "time",
-      UNITS = "YR",
-      NAVALUE = -1,
-      SIZE = 0,
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = "",
-      UNLIKELY = "",
-      TOTAL = "",
-      DESCRIPTION = "Average age of car service vehicles in years"
-    ),
     item(
       NAME = "CarSvcLevel",
       FILE = "bzone_carsvc_availability.csv",
