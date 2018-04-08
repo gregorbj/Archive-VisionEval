@@ -1068,7 +1068,8 @@ CalculateRoadPerformanceSpecifications <- list(
         "ArtHvyCongSpeed",
         "ArtSevCongSpeed",
         "ArtExtCongSpeed",
-        "OthSpd"),
+        "OthSpd",
+        "AveLdvSpd"),
       TABLE = "Marea",
       GROUP = "Year",
       TYPE = "compound",
@@ -1088,7 +1089,8 @@ CalculateRoadPerformanceSpecifications <- list(
         "Average arterial speed (miles per hour) when congestion is heavy",
         "Average arterial speed (miles per hour) when congestion is severe",
         "Average arterial speed (miles per hour) when congestion is extreme",
-        "Average speed (miles per hour) on other roadways")
+        "Average speed (miles per hour) on other roadways",
+        "Average light-duty vehicle speed (miles per hour) on all roadways weighted by the proportions of light-duty vehicle travel")
     ),
     item(
       NAME = items(
@@ -1222,8 +1224,11 @@ CalculateRoadPerformance <- function(L) {
 
   #Set up
   #------
+  #Define naming vectors for Mareas and congestion levels
   Ma <- L$Year$Marea$Marea
   Cl <- c("None", "Mod", "Hvy", "Sev", "Ext")
+  #Define default speed for other roads (not freeway or arterial)
+  OthSpeed <- 25
 
   #Calculate Lambda value for metropolitan area
   #--------------------------------------------
@@ -1363,6 +1368,27 @@ CalculateRoadPerformance <- function(L) {
     BalanceResults_ls[[ma]] <- balanceFwyArtDvmt(ma)
   }
 
+  #Calculate daily average light-duty vehicle speed
+  #------------------------------------------------
+  #Calculate average speed by metropolitan area and road class
+  AveLdvSpd_MaRc <-
+    array(0, dim = c(length(Ma), 3), dimnames = list(Ma, c("Fwy", "Art", "Oth")))
+  for (ma in Ma) {
+    FwySpd_Cl <- SpeedAndDelay_ls[[ma]]$Speed[,"Fwy"]
+    FwyDvmt_Cl <- BalanceResults_ls[[ma]]$FwyDvmt
+    AveLdvSpd_MaRc[ma, "Fwy"] <- sum(FwySpd_Cl * FwyDvmt_Cl / sum(FwyDvmt_Cl))
+    rm(FwySpd_Cl, FwyDvmt_Cl)
+    ArtSpd_Cl <- SpeedAndDelay_ls[[ma]]$Speed[,"Art"]
+    ArtDvmt_Cl <- BalanceResults_ls[[ma]]$ArtDvmt
+    AveLdvSpd_MaRc[ma, "Art"] <- sum(ArtSpd_Cl * ArtDvmt_Cl / sum(ArtDvmt_Cl))
+    rm(ArtSpd_Cl, ArtDvmt_Cl)
+    AveLdvSpd_MaRc[ma, "Oth"] <- OthSpeed
+  }
+  #Calculate overall average speed by metropolitan area
+  LdvDvmt_MaRc <-
+    do.call(rbind, lapply(BalanceResults_ls, function(x) x$LdvDvmt))
+  LdvDvmtProp_MaRc <- sweep(LdvDvmt_MaRc, 1, rowSums(LdvDvmt_MaRc), "/")
+  AveLdvSpd_Ma <- rowSums(AveLdvSpd_MaRc * LdvDvmtProp_MaRc)
 
   #Calculate performance measures
   #------------------------------
@@ -1388,7 +1414,9 @@ CalculateRoadPerformance <- function(L) {
   names(Data_ls) <- paste0("Art", names(Data_ls), "CongSpeed")
   Out_ls$Year$Marea <- c(Out_ls$Year$Marea, Data_ls); rm(Data_ls)
   #Average other road speed
-  Out_ls$Year$Marea$OthSpd <- 25
+  Out_ls$Year$Marea$OthSpd <- OthSpeed
+  #Average light-duty vehicle speed
+  Out_ls$Year$Marea$AveLdvSpd <- unname(AveLdvSpd_Ma)
   #Average freeway delay by congestion level
   Data_ls <-
     as.list(data.frame(
