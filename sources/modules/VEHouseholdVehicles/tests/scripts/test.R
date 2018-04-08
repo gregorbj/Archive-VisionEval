@@ -59,6 +59,24 @@ testModule(
   DoRun = TRUE
 )
 
+#Test CalculateVehicleOwnCost module
+source("R/CalculateVehicleOwnCost.R")
+testModule(
+  ModuleName = "CalculateVehicleOwnCost",
+  LoadDatastore = TRUE,
+  SaveDatastore = TRUE,
+  DoRun = TRUE
+)
+
+#Test AdjustVehicleOwnership module
+source("R/AdjustVehicleOwnership.R")
+testModule(
+  ModuleName = "AdjustVehicleOwnership",
+  LoadDatastore = TRUE,
+  SaveDatastore = TRUE,
+  DoRun = TRUE
+)
+
 #Finish up
 setwd("tests")
 tar("Datastore.tar", "Datastore")
