@@ -14,8 +14,6 @@
 #dataset to be used in model estimation. Data on freeway lane miles and
 #bus equivalent transit revenue miles are added. A household dataframe (Hh_df)
 #containing travel and other relevant data for each survey household.
-
-
 library(visioneval)
 
 
@@ -91,10 +89,11 @@ if (!file.exists("data-raw/Hh_df.rda")) {
              "HBHRESDN", "HBHUR", "HBPPOPDN", "HHC_MSA", "HHFAMINC", "HHINCTTL",
              "HHNUMBIK", "HHR_AGE", "HHR_DRVR", "HHR_RACE", "HHR_SEX", "HHSIZE",
              "HHVEHCNT", "HOMETYPE", "HTEEMPDN", "HTHRESDN", "HTHUR",
-             "HTPPOPDN", "LIF_CYC", "MSACAT", "MSASIZE", "RAIL", "RATIO16V",
-             "URBAN", "URBRUR", "WRKCOUNT", "WKR_P1", "WKR_P2", "WKR_P3",
-             "WKR_P4", "WKR_P5", "WKR_P6", "WKR_P7", "WKR_P8", "WKR_P9",
-             "WKR_P10", "WKR_P11", "WKR_P12", "WKR_P13", "WKR_P14", "CNTTDHH")
+             "HTPPOPDN", "LIF_CYC", "MSAPOP", "MSACAT", "MSASIZE", "RAIL",
+             "RATIO16V", "URBAN", "URBRUR", "WRKCOUNT", "WKR_P1", "WKR_P2",
+             "WKR_P3", "WKR_P4", "WKR_P5", "WKR_P6", "WKR_P7", "WKR_P8",
+             "WKR_P9", "WKR_P10", "WKR_P11", "WKR_P12", "WKR_P13", "WKR_P14",
+             "CNTTDHH")
   Hh_df <- Hh_df[, Keep_]
   save(Hh_df, file = "data-raw/Hh_df.rda", compress = TRUE)
 } else {
@@ -790,7 +789,7 @@ rm(Dt_df, toProperName, toVecFrom1DAry)
 #' travel models derived from the 2001 National Household Travel Survey, USDOT
 #' Highway Statistics reports, and the National Transit Database.
 #'
-#' @format A data frame with 60521 rows and 90 variables
+#' @format A data frame with 60521 rows and 85 variables
 #' \describe{
 #'   \item{Houseid}{Unique household ID}
 #'   \item{Census_d}{Household Census division}
@@ -818,6 +817,7 @@ rm(Dt_df, toProperName, toVecFrom1DAry)
 #'   \item{Hthur}{Urban / Rural indicator - Tract level}
 #'   \item{Htppopdn}{Population per sq mile - Tract level}
 #'   \item{Lif_cyc}{HH Life Cycle}
+#'   \item{Msapop}{Number of persons residing in the MSA}
 #'   \item{Msacat}{MSA category}
 #'   \item{Msasize}{MSA size}
 #'   \item{Rail}{Rail (subway) category}
