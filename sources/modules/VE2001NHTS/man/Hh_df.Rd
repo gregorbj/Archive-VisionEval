@@ -4,7 +4,7 @@
 \name{Hh_df}
 \alias{Hh_df}
 \title{Household travel from the 2001 National Household Travel Survey}
-\format{A data frame with 60521 rows and 85 variables
+\format{A data frame with 60521 rows and 86 variables
 \describe{
   \item{Houseid}{Unique household ID}
   \item{Census_d}{Household Census division}
@@ -80,10 +80,11 @@
   \item{WalkDpmt}{Household person miles of walking on survey day}
   \item{BikeDpmt}{Household person miles of bicycling on survey day}
   \item{TransitDpmt}{Household person miles of public transit travel on survey day}
+  \item{TransitTrips}{Household transit trips on survey day}
   \item{ZeroDvmt}{Flag identifying whether household had no DVMT on survey day}
   \item{Numcommdrvr}{Number of commercial drivers in household}
-  \item{Nbiketrp}{Number of bike trips on travel survey day}
-  \item{Nwalktrp}{Number of walk trips on travel survey day}
+  \item{Nbiketrp}{Number of bike trips in past week}
+  \item{Nwalktrp}{Number of walk trips in past week}
   \item{Usepubtr}{Whether any household members used public transportation on travel survey day}
   \item{Numwrkdrvr}{Number of persons whose work requires driving a vehicle}
   \item{RoadMiPC}{Ratio of urbanized area road miles to thousands of persons}

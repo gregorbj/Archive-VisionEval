@@ -653,7 +653,11 @@ TransitDpmt_Hh <- unlist(tapply(HhTours_df$Distance[IsTransitTravel_], HhTours_d
 # sum(TransitDpmt_Hh) / nrow(HhTours_df)
 Hh_df$TransitDpmt <- as.vector(TransitDpmt_Hh[Hh_df$Houseid])
 Hh_df$TransitDpmt[is.na(Hh_df$TransitDpmt)] <- 0
-rm(IsTransitTravel_, TransitDpmt_Hh)
+TransitTrips_Hh <-
+  unlist(tapply(HhTours_df$Trips[IsTransitTravel_], HhTours_df$Houseid[IsTransitTravel_], sum))
+Hh_df$TransitTrips <- as.vector(TransitTrips_Hh[Hh_df$Houseid])
+Hh_df$TransitTrips[is.na(Hh_df$TransitTrips)] <- 0
+rm(IsTransitTravel_, TransitDpmt_Hh, TransitTrips_Hh)
 
 #Identifies households that did no private or shared vehicle travel
 #------------------------------------------------------------------
@@ -789,7 +793,7 @@ rm(Dt_df, toProperName, toVecFrom1DAry)
 #' travel models derived from the 2001 National Household Travel Survey, USDOT
 #' Highway Statistics reports, and the National Transit Database.
 #'
-#' @format A data frame with 60521 rows and 85 variables
+#' @format A data frame with 60521 rows and 86 variables
 #' \describe{
 #'   \item{Houseid}{Unique household ID}
 #'   \item{Census_d}{Household Census division}
@@ -865,10 +869,11 @@ rm(Dt_df, toProperName, toVecFrom1DAry)
 #'   \item{WalkDpmt}{Household person miles of walking on survey day}
 #'   \item{BikeDpmt}{Household person miles of bicycling on survey day}
 #'   \item{TransitDpmt}{Household person miles of public transit travel on survey day}
+#'   \item{TransitTrips}{Household transit trips on survey day}
 #'   \item{ZeroDvmt}{Flag identifying whether household had no DVMT on survey day}
 #'   \item{Numcommdrvr}{Number of commercial drivers in household}
-#'   \item{Nbiketrp}{Number of bike trips on travel survey day}
-#'   \item{Nwalktrp}{Number of walk trips on travel survey day}
+#'   \item{Nbiketrp}{Number of bike trips in past week}
+#'   \item{Nwalktrp}{Number of walk trips in past week}
 #'   \item{Usepubtr}{Whether any household members used public transportation on travel survey day}
 #'   \item{Numwrkdrvr}{Number of persons whose work requires driving a vehicle}
 #'   \item{RoadMiPC}{Ratio of urbanized area road miles to thousands of persons}
