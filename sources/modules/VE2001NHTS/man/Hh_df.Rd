@@ -4,7 +4,7 @@
 \name{Hh_df}
 \alias{Hh_df}
 \title{Household travel from the 2001 National Household Travel Survey}
-\format{A data frame with 60521 rows and 90 variables
+\format{A data frame with 60521 rows and 85 variables
 \describe{
   \item{Houseid}{Unique household ID}
   \item{Census_d}{Household Census division}
@@ -32,6 +32,7 @@
   \item{Hthur}{Urban / Rural indicator - Tract level}
   \item{Htppopdn}{Population per sq mile - Tract level}
   \item{Lif_cyc}{HH Life Cycle}
+  \item{Msapop}{Number of persons residing in the MSA}
   \item{Msacat}{MSA category}
   \item{Msasize}{MSA size}
   \item{Rail}{Rail (subway) category}
