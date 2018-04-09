@@ -607,21 +607,28 @@ rm(IncludesWork_)
 IsPvtVehTravel_ <-
   HhTours_df$Mode %in% c("Auto", "LtTrk", "OthTrk", "RV", "Motorcycle") & HhTours_df$HhVehUsed == 1
 PvtVehDvmt_Hh <- unlist(tapply(HhTours_df$Distance[IsPvtVehTravel_], HhTours_df$Houseid[IsPvtVehTravel_], sum))
+PvtVehTrips_Hh <- unlist(tapply(HhTours_df$Trips[IsPvtVehTravel_], HhTours_df$Houseid[IsPvtVehTravel_], sum))
 # sum(PvtVehDvmt_Hh)
 # sum(PvtVehDvmt_Hh) / nrow(HhTours_df)
+# summary(PvtVehDvmt_Hh / PvtVehTrips_Hh)
 Hh_df$PvtVehDvmt <- as.vector(PvtVehDvmt_Hh[Hh_df$Houseid])
 Hh_df$PvtVehDvmt[is.na(Hh_df$PvtVehDvmt)] <- 0
-rm(IsPvtVehTravel_, PvtVehDvmt_Hh)
+Hh_df$PvtVehTrips <- as.vector(PvtVehTrips_Hh[Hh_df$Houseid])
+Hh_df$PvtVehTrips[is.na(Hh_df$PvtVehTrips)] <- 0
+rm(IsPvtVehTravel_, PvtVehDvmt_Hh, PvtVehTrips_Hh)
 #Travel in non-household 'shared' vehicles
 IsShrVehTravel_ <-
   HhTours_df$Mode %in% c("Taxi") |
   (HhTours_df$Mode %in% c("Auto", "LtTrk", "OthTrk", "RV", "Motorcycle") & (HhTours_df$HhVehUsed == 2))
 ShrVehDvmt_Hh <- unlist(tapply(HhTours_df$Distance[IsShrVehTravel_], HhTours_df$Houseid[IsShrVehTravel_], sum))
+ShrVehTrips_Hh <- unlist(tapply(HhTours_df$Trips[IsShrVehTravel_], HhTours_df$Houseid[IsShrVehTravel_], sum))
 # sum(ShrVehDvmt_Hh)
 # sum(ShrVehDvmt_Hh) / nrow(HhTours_df)
 Hh_df$ShrVehDvmt <- as.vector(ShrVehDvmt_Hh[Hh_df$Houseid])
 Hh_df$ShrVehDvmt[is.na(Hh_df$ShrVehDvmt)] <- 0
-rm(IsShrVehTravel_, ShrVehDvmt_Hh)
+Hh_df$ShrVehTrips <- as.vector(ShrVehTrips_Hh[Hh_df$Houseid])
+Hh_df$ShrVehTrips[is.na(Hh_df$ShrVehTrips)] <- 0
+rm(IsShrVehTravel_, ShrVehDvmt_Hh, ShrVehTrips_Hh)
 #Travel by walking
 IsWalkTravel_ <- HhTours_df$Mode == "Walk"
 WalkDpmt_Hh <-
@@ -783,7 +790,7 @@ rm(Dt_df, toProperName, toVecFrom1DAry)
 #' travel models derived from the 2001 National Household Travel Survey, USDOT
 #' Highway Statistics reports, and the National Transit Database.
 #'
-#' @format A data frame with 60521 rows and 88 variables
+#' @format A data frame with 60521 rows and 90 variables
 #' \describe{
 #'   \item{Houseid}{Unique household ID}
 #'   \item{Census_d}{Household Census division}
@@ -852,7 +859,9 @@ rm(Dt_df, toProperName, toVecFrom1DAry)
 #'   \item{Gscostmile}{Average cost of gasoline per mile of household vehicle travel}
 #'   \item{Gscostmile2}{Average cost of gasoline per mile using EIA derived miles per equivalent-gallon}
 #'   \item{PvtVehDvmt}{Household vehicle miles of travel on survey day using household (i.e. private) vehicles}
+#'   \item{PvtVehTrips}{Household vehicle trips on survey day using household (i.e. private) vehicles}
 #'   \item{ShrVehDvmt}{Household vehicle miles of travel on survey day using non-household (i.e. shared) vehicles}
+#'   \item{ShrVehTrips}{Household vehicle trips on survey day using non-household (i.e. shared) vehicles}
 #'   \item{WalkDpmt}{Household person miles of walking on survey day}
 #'   \item{BikeDpmt}{Household person miles of bicycling on survey day}
 #'   \item{TransitDpmt}{Household person miles of public transit travel on survey day}

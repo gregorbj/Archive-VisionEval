@@ -4,7 +4,7 @@
 \name{Hh_df}
 \alias{Hh_df}
 \title{Household travel from the 2001 National Household Travel Survey}
-\format{A data frame with 60521 rows and 88 variables
+\format{A data frame with 60521 rows and 90 variables
 \describe{
   \item{Houseid}{Unique household ID}
   \item{Census_d}{Household Census division}
@@ -73,7 +73,9 @@
   \item{Gscostmile}{Average cost of gasoline per mile of household vehicle travel}
   \item{Gscostmile2}{Average cost of gasoline per mile using EIA derived miles per equivalent-gallon}
   \item{PvtVehDvmt}{Household vehicle miles of travel on survey day using household (i.e. private) vehicles}
+  \item{PvtVehTrips}{Household vehicle trips on survey day using household (i.e. private) vehicles}
   \item{ShrVehDvmt}{Household vehicle miles of travel on survey day using non-household (i.e. shared) vehicles}
+  \item{ShrVehTrips}{Household vehicle trips on survey day using non-household (i.e. shared) vehicles}
   \item{WalkDpmt}{Household person miles of walking on survey day}
   \item{BikeDpmt}{Household person miles of bicycling on survey day}
   \item{TransitDpmt}{Household person miles of public transit travel on survey day}
