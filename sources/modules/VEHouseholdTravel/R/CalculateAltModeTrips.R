@@ -15,7 +15,7 @@
 #SECTION 1: ESTIMATE AND SAVE MODEL PARAMETERS
 #=============================================
 #Load the alternative mode trip models from GreenSTEP
-load("inst/extdata/AltModeModels_ls.RData")
+load("inst/extdata/AltModeModels_ls.rda")
 #Save the model
 #' Alternative mode trip models
 #'
