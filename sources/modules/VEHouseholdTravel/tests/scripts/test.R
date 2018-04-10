@@ -2,6 +2,7 @@
 library(filesstrings)
 library(visioneval)
 library(data.table)
+library(pscl)
 
 ##################################################
 ## Section 1. Tests for modules used in VERSPM
@@ -27,6 +28,15 @@ testModule(
 source("R/CalculateAltModeTrips.R")
 testModule(
   ModuleName = "CalculateAltModeTrips",
+  LoadDatastore = TRUE,
+  SaveDatastore = TRUE,
+  DoRun = TRUE
+)
+
+#Test CalculateVehicleTrips module
+source("R/CalculateVehicleTrips.R")
+testModule(
+  ModuleName = "CalculateVehicleTrips",
   LoadDatastore = TRUE,
   SaveDatastore = TRUE,
   DoRun = TRUE
