@@ -48,28 +48,44 @@ Hh_df$LogDensity <- log(Hh_df$Hbppopdn)
 Hh_df$NonDrivers <- Hh_df$Hhsize - Hh_df$Drivers
 Hh_df$HhSize <- Hh_df$Hhsize
 
-#Define function to make model formula strings for hurdle model
-#--------------------------------------------------------------
-#' Make hurdle model formula strings
+#Define function to estimate vehicle trip model
+#----------------------------------------------
+#' Estimate a hurdle for vehicle trips
 #'
-#' \code{makeHurdleStrings} makes strings which describe the zero and count
-#' model components of the hurdle model.
+#' \code{estimateVehicleTripModel} estimates a hurdle model for calculating
+#' vehicle trips.
 #'
-#' The Hurdle regression models that are used to calculate trips are stored as
-#' text strings. This follows the approach used in other modules. The
-#' 'makeHurdleStrings' function creates text strings for the zero trip and count
-#' model components of an estimated Hurdle model object and outputs them in a
-#' list. The function takes one argument, a hurdle model object created by the
-#' 'hurdle' function. It returns a list having two components: 'Count' which
-#' contains a string representation of the count model component, and 'Zero'
-#' which contains a string representation of the zero model component.
-#' @param HurdleModel_ls a list returned by the application of the 'hurdle'
-#' function in the 'pscl' package
-#' @return a list having two components: 'Count' which contains a string
-#' representation of the count model component, and 'Zero' which contains a
-#' string representation of the zero model component.
-makeHurdleStrings <- function(HurdleModel_ls) {
-  Coeff. <- coefficients(HurdleModel_ls)
+#' The function estimates a Hurdle regression model for calculating vehicle
+#' trips. The function estimates the model and outputs the model in the form of
+#' text strings, one for the zero trip model and one for the count model. It
+#' returns a list having three components: 'Count' which contains a string
+#' representation of the count model component, 'Zero' which contains a string
+#' representation of the zero model component, and 'Summary' which contains
+#' summary information about the model.
+#' @param Data_df a data frame containing the model estimation data
+#' @param DepVar a string that is the dependent variable name
+#' @param IndepVars_ a string vector of the names of the independent variables
+#' @return a list having three components: 'Count' which contains a string
+#' representation of the count model component, 'Zero' which contains a
+#' string representation of the zero model component, 'Summary' which contains
+#' the model summary.
+#' @import pscl
+#' @export
+estimateVehicleTripModel <- function(Data_df, DepVar, IndepVars_) {
+
+  #Estimate hurdle model
+  #---------------------
+  #Make model formula
+  ModelFormula <-
+    as.formula(paste(DepVar, " ~ ", paste(IndepVars_, collapse = "+")))
+  #Estimate a hurdle model
+  Model_HM <- hurdle(ModelFormula, data = Data_df, dist = "poisson",
+                     zero.dist = "binomial", link = "logit")
+
+  #Make string representations of the model
+  #----------------------------------------
+  #Extract the coefficients
+  Coeff. <- coefficients(Model_HM)
   #Make formula string for count model
   CountCoeff. <- Coeff.[grep("count", names(Coeff.))]
   names(CountCoeff.) <- gsub("count_", "", names(CountCoeff.))
@@ -80,72 +96,40 @@ makeHurdleStrings <- function(HurdleModel_ls) {
   names(ZeroCoeff.) <- gsub("zero_", "", names(ZeroCoeff.))
   names(ZeroCoeff.)[1] <- "Intercept"
   ZeroFormula <- paste(paste(ZeroCoeff., names(ZeroCoeff.), sep = " * "), collapse = " + ")
-  #Return the formulas in a list
-  list(Count = CountFormula, Zero = ZeroFormula)
-}
 
-#Define a function to apply a hurdle trip model to calculate household trips
-#---------------------------------------------------------------------------
-#' Apply a hurdle trip model
-#'
-#' \code{applyHurdleTripModel} applies a hurdle model to calculate the number
-#' of trips for each household.
-#'
-#' This function takes a list of strings representing an estimated hurdle model
-#' and applies it to a data frame that contains data of independent variables
-#' for household records. it returns a vector of modeled trips corresponding to
-#' the rows of the data frame.
-#' @param Data_df a data frame containing the independent variables needed to
-#' calculate trips
-#' @param Model_ls a list created by the estimateHurdleTripModel which contains
-#' 'Count' and 'Zero' model components.
-#' @return a numeric vector of the number of trips for each household in the
-#' same order as Data_df
-applyHurdleTripModel <- function(Data_df, Model_ls) {
-  #Add the intercept
-  Data_df$Intercept <- 1
-  #Calculate zero term
-  Odds_ <- exp(eval(parse(text = Model_ls$Zero), envir = Data_df))
-  Prob_ <- Odds_ / (1 + Odds_)
-  PZero_ <- log(Prob_)
-  #Calculate count term
-  Mu_ <- exp(eval(parse(text = Model_ls$Count), envir = Data_df))
-  PCount_ <- ppois(0, lambda = Mu_, lower.tail = FALSE, log.p = TRUE)
-  #Return the number of trips
-  exp((PZero_ - PCount_) + log(Mu_))
+  #Return results
+  #--------------
+  list(Count = CountFormula, Zero = ZeroFormula, Summary = summary(Model_HM))
 }
 
 #Estimate vehicle trip models
 #----------------------------
-#Select metropolitan households
+#Select metropolitan household dataset
 Vars_ <- c("NumVehTrp", "HhSize", "LogIncome", "LogDensity",
            "BusEqRevMiPC", "Urban", "LogDvmt", "Drivers", "NonDrivers")
 MetroHh_df <- Hh_df[IsMetro_, Vars_]
 MetroHh_df <- MetroHh_df[complete.cases(MetroHh_df),]
 #Estimate metropolitan vehicle trip model
-MetroVehTripModel_HM <-
-  hurdle(NumVehTrp ~ NonDrivers + Drivers + LogIncome + LogDensity + Urban +
-           BusEqRevMiPC + LogDvmt,
-         data = MetroHh_df,
-         dist = "poisson", zero.dist = "binomial", link = "logit")
-rm(Vars_, MetroHh_df)
-#Select non-metropolitan households
+DepVars_ <- c("NonDrivers", "Drivers", "LogIncome", "LogDensity", "Urban",
+              "BusEqRevMiPC", "LogDvmt")
+MetroVehTripModel_ls <-
+  estimateVehicleTripModel(MetroHh_df, "NumVehTrp", DepVars_)
+#Select non-metropolitan household dataset
 Vars_ <- c("NumVehTrp", "HhSize", "LogIncome", "LogDensity",
            "LogDvmt", "Drivers", "NonDrivers")
 NonMetroHh_df <- Hh_df[!IsMetro_, Vars_]
 NonMetroHh_df <- NonMetroHh_df[complete.cases(NonMetroHh_df),]
-#Estimate walk model
-NonMetroVehTripModel_HM <-
-  hurdle(NumVehTrp ~ NonDrivers + Drivers + LogIncome + LogDensity + LogDvmt,
-         data = NonMetroHh_df,
-         dist = "poisson", zero.dist = "binomial", link = "logit")
+#Estimate non-metropolitan vehicle trip model
+DepVars_ <- c("NonDrivers", "Drivers", "LogIncome", "LogDensity", "LogDvmt")
+NonMetroVehTripModel_ls <-
+  estimateVehicleTripModel(NonMetroHh_df, "NumVehTrp", DepVars_)
 
 #Save alternative mode trip models
 #---------------------------------
 #Put models in a list
 VehTripModels_ls <- list(
-  Metro = makeHurdleStrings(MetroVehTripModel_HM),
-  NonMetro = makeHurdleStrings(NonMetroVehTripModel_HM)
+  Metro = MetroVehTripModel_ls[c("Count", "Zero")],
+  NonMetro = NonMetroVehTripModel_ls[c("Count", "Zero")]
 )
 #Save the model
 #' Household vehicle trip models
@@ -159,8 +143,8 @@ VehTripModels_ls <- list(
 "VehTripModels_ls"
 devtools::use_data(VehTripModels_ls, overwrite = TRUE)
 
-rm(DvmtModel_ls, Hh_df, MetroVehTripModel_HM, NonMetroHh_df,
-   NonMetroVehTripModel_HM, IsMetro_, Vars_, makeHurdleStrings)
+rm(DvmtModel_ls, Hh_df, MetroHh_df, MetroVehTripModel_ls, NonMetroHh_df,
+   NonMetroVehTripModel_ls, DepVars_, IsMetro_, Vars_, estimateVehicleTripModel)
 
 #================================================
 #SECTION 2: DEFINE THE MODULE DATA SPECIFICATIONS
@@ -366,7 +350,24 @@ CalculateVehicleTrips <- function(L) {
   Hh_df$Urban <- Hh_df$IsUrbanMixNbrhd
   Hh_df$NonDrivers <- Hh_df$HhSize - Hh_df$Drivers
 
+  #Function to apply a Hurdle model
+  #--------------------------------
+  applyHurdleTripModel <- function(Data_df, Model_ls) {
+    #Add the intercept
+    Data_df$Intercept <- 1
+    #Calculate zero term
+    Odds_ <- exp(eval(parse(text = Model_ls$Zero), envir = Data_df))
+    Prob_ <- Odds_ / (1 + Odds_)
+    PZero_ <- log(Prob_)
+    #Calculate count term
+    Mu_ <- exp(eval(parse(text = Model_ls$Count), envir = Data_df))
+    PCount_ <- ppois(0, lambda = Mu_, lower.tail = FALSE, log.p = TRUE)
+    #Return the number of trips
+    exp((PZero_ - PCount_) + log(Mu_))
+  }
+
   #Define function to calculate trips
+  #----------------------------------
   calcTrips <- function() {
     Trips_ <- nrow(Hh_df)
     IsMetro_ <- Hh_df$DevType == "Urban"
@@ -376,7 +377,9 @@ CalculateVehicleTrips <- function(L) {
       applyHurdleTripModel(Hh_df[!IsMetro_,], VehTripModels_ls$NonMetro)
     Trips_
   }
+
   #Calculate trips and return results
+  #----------------------------------
   Out_ls <- initDataList()
   Out_ls$Year$Household$VehicleTrips = calcTrips()
   Out_ls
