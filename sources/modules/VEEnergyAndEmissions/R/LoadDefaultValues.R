@@ -19,6 +19,43 @@
 
 EnergyEmissionsDefaults_ls <- list()
 
+#---------------------
+#Congestion efficiency
+#---------------------
+#Specify input file attributes
+Inp_ls <- items(
+  item(
+    NAME = "Year",
+    TYPE = "integer",
+    PROHIBIT = c("NA", "< 0"),
+    ISELEMENTOF = "",
+    UNLIKELY = "",
+    TOTAL = ""
+  ),
+  item(
+    NAME =
+      items("LdIce",
+            "LdHev",
+            "LdEv",
+            "LdFcv",
+            "HdIce"),
+    TYPE = "double",
+    PROHIBIT = c("NA", "< 0"),
+    ISELEMENTOF = "",
+    UNLIKELY = "",
+    TOTAL = ""
+  )
+)
+#Load and process data
+CongestionEfficiency_df <-
+  processEstimationInputs(
+    Inp_ls,
+    "congestion_efficiency.csv",
+    "LoadDefaultValues.R")
+#Add to EnergyEmissionsDefaults_ls and clean up
+EnergyEmissionsDefaults_ls$CongestionEfficiency_df <- CongestionEfficiency_df
+rm(Inp_ls, CongestionEfficiency_df)
+
 #----------------
 #Carbon intensity
 #----------------
@@ -1080,6 +1117,12 @@ rm(Inp_ls, Names_, Cols_, Years_, Msg_, ty, pt, TransitPowertrain_df)
 #'
 #' @format A list containing 17 data frames:
 #' \describe{
+#'   \item{CongestionEfficiency_df}{the relative efficiency of vehicle types in congestion by year}
+#'     \item{LdIce}{congestion efficiency of light-duty internal combustion engine vehicles}
+#'     \item{LdHev}{congestion efficiency of light-duty hybrid-electric engine vehicles}
+#'     \item{LdEv}{congestion efficiency of light-duty battery electric vehicles}
+#'     \item{LdFcv}{congestion efficiency of light-duty fuel cell vehicles}
+#'     \item{HdIce}{congestion efficiency of heavy-duty internal combustion engine vehicles}
 #'   \item{CarbonIntensity_df}{a data frame of the carbon intensities of vehicle energy sources by year}
 #'     \item{Year}{calendar year}
 #'     \item{Gasoline}{carbon intensity of gasoline}

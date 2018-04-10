@@ -1,0 +1,25 @@
+===============================================================================================
+Documentation for functional_class_vmt_split_rural.csv and functional_class_vmt_split_urban.csv
+===============================================================================================
+Data in this file is used along with other datasets in the LoadDefaultRoadDvmtValues.R script to calculate default values for vehicle miles traveled by vehicle type (light-duty, heavy truck, bus) and urban and rural road class (freeway, arterial, other) for urban and rural areas by state and by urbanized area for the year 2010.
+
+File Structure
+--------------
+Rows contain data by state and the District of Columbia and Puerto Rico.
+Column names as follows:
+State: 2-letter postal code designation for the state
+Interstate: Interstate highway annual vehicle miles traveled (VMT) in millions
+OthFwyExp: Other freeways and expressways annual VMT in millions
+OthPrinArt: Other principal arterial annual VMT in millions
+MinArt: Minor arterial annual VMT in millions
+MajColl: Major collector annual VMT in millions
+MinColl: Minor collector annual VMT in millions
+Local: Local road (i.e. other roads) annual VMT in millions
+Total: Total road annual VMT in millions
+
+Source:
+-------
+Highway Statistics 2010, Federal Highway Administration, Office of Highway Policy Information, Table VM-2: Functional System Travel - 2010, Annual Vehicle-Miles.
+Table VM-2 includes VMT tabulated for rural roadways and for urban roadways separately. The 'functional_class_vmt_split_rural.csv' file includes the rural highway data. The 'functional_class_vmt_split_urban.csv' file includes the urban highway data. Urban roadways are roads located within a census designated urbanized area. Rural roadways are roads located outside of census designated urbanized areas.
+
+

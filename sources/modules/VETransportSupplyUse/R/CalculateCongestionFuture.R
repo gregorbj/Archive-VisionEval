@@ -228,6 +228,23 @@ CalculateCongestionFutureSpecifications <- list(
   Set = items(
     item(
       NAME = items(
+        "LtVehDvmtFuture",
+        "BusDvmtFuture"
+      ),
+      TABLE = "Marea",
+      GROUP = "Year",
+      TYPE = "compound",
+      UNITS = "MI/DAY",
+      PROHIBIT = c("NA", "< 0"),
+      SIZE = 0,
+      ISELEMENTOF = "",
+      DESCRIPTION = items(
+        "Daily vehicle miles travelled by light vehicles",
+        "Daily vehicle miles travelled by bus"
+      )
+    ),
+    item(
+      NAME = items(
         "MpgAdjLtVehFuture",
         "MpgAdjBusFuture",
         "MpgAdjTruckFuture"

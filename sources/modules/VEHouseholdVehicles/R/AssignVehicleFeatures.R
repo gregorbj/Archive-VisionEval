@@ -434,6 +434,7 @@ AssignVehicleFeaturesSpecifications <- list(
   #Specify input data
   #Specify data to be loaded from data store
   Get = items(
+    # Marea variables
     item(
       NAME = "Marea",
       TABLE = "Marea",
@@ -454,6 +455,7 @@ AssignVehicleFeaturesSpecifications <- list(
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = ""
     ),
+    # Bzone variables
     item(
       NAME = "Marea",
       TABLE = "Bzone",
@@ -472,6 +474,7 @@ AssignVehicleFeaturesSpecifications <- list(
       PROHIBIT = "",
       ISELEMENTOF = ""
     ),
+    # Household variables
     item(
       NAME =
         items("HhId",
@@ -540,6 +543,7 @@ AssignVehicleFeaturesSpecifications <- list(
       PROHIBITED = "NA",
       ISELEMENTOF = c("Drv1", "Drv2", "Drv3Plus")
     ),
+    # Global variables
     item(
       NAME = "Region",
       TABLE = "Lt1Prop",
@@ -737,6 +741,7 @@ AssignVehicleFeaturesSpecifications <- list(
   #---------------------------
   #Specify data to saved in the data store
   Set = items(
+    # Vehicle variables
     item(
       NAME =
         items("HhId",
@@ -755,18 +760,6 @@ AssignVehicleFeaturesSpecifications <- list(
               "Unique vehicle ID",
               "Azone ID",
               "Marea ID")
-    ),
-    item(
-      NAME = "Vehicles",
-      TABLE = "Household",
-      GROUP = "Year",
-      TYPE = "vehicles",
-      UNITS = "VEH",
-      NAVALUE = -1,
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = "",
-      SIZE = 0,
-      DESCRIPTION = "Number of automobiles and light trucks owned or leased by the household"
     ),
     item(
       NAME = "Type",
@@ -793,23 +786,6 @@ AssignVehicleFeaturesSpecifications <- list(
       DESCRIPTION = "Vehicle age in years"
     ),
     item(
-      NAME = items(
-        "NumLtTrk",
-        "NumAuto"),
-      TABLE = "Household",
-      GROUP = "Year",
-      TYPE = "vehicles",
-      UNITS = "VEH",
-      NAVALUE = -1,
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = "",
-      SIZE = 0,
-      DESCRIPTION = items(
-        "Number of light trucks (pickup, sport-utility vehicle, and van) owned or leased by household",
-        "Number of automobiles (i.e. 4-tire passenger vehicles that are not light trucks) owned or leased by household"
-      )
-    ),
-    item(
       NAME = "Mileage",
       TABLE = "Vehicle",
       GROUP = "Year",
@@ -828,6 +804,36 @@ AssignVehicleFeaturesSpecifications <- list(
       PROHIBIT = c("NA", "<0", "> 1"),
       ISELEMENTOF = "",
       DESCRIPTION = "Proportion of average household DVMT"
+    ),
+    # Household variables
+    item(
+      NAME = "Vehicles",
+      TABLE = "Household",
+      GROUP = "Year",
+      TYPE = "vehicles",
+      UNITS = "VEH",
+      NAVALUE = -1,
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      SIZE = 0,
+      DESCRIPTION = "Number of automobiles and light trucks owned or leased by the household"
+    ),
+    item(
+      NAME = items(
+        "NumLtTrk",
+        "NumAuto"),
+      TABLE = "Household",
+      GROUP = "Year",
+      TYPE = "vehicles",
+      UNITS = "VEH",
+      NAVALUE = -1,
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      SIZE = 0,
+      DESCRIPTION = items(
+        "Number of light trucks (pickup, sport-utility vehicle, and van) owned or leased by household",
+        "Number of automobiles (i.e. 4-tire passenger vehicles that are not light trucks) owned or leased by household"
+      )
     )
   )
 )

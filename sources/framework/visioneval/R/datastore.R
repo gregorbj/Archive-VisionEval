@@ -245,17 +245,19 @@ initDatasetRD <- function(Spec_ls, Group) {
 #'
 #' @param Name A string identifying the name of the dataset to be read from.
 #' @param Table A string identifying the complete name of the table where the
-#'   dataset is located.
+#' dataset is located.
 #' @param Group a string representation of the name of the datastore group the
 #' data is to be read from.
 #' @param DstoreLoc a string representation of the file path of the datastore.
 #' NULL if the datastore is the current directory.
 #' @param Index A numeric vector identifying the positions the data is to be
-#'   written to. NULL if the entire dataset is to be read.
+#' written to. NULL if the entire dataset is to be read.
+#' @param ReadAttr A logical identifying whether to return the attributes of
+#' the stored dataset. The default value is FALSE.
 #' @return A vector of the same type stored in the datastore and specified in
-#'   the TYPE attribute.
+#' the TYPE attribute.
 #' @export
-readFromTableRD <- function(Name, Table, Group, DstoreLoc = NULL, Index = NULL) {
+readFromTableRD <- function(Name, Table, Group, DstoreLoc = NULL, Index = NULL, ReadAttr = FALSE) {
   #Get the directory where the datastore is located from DstoreLoc
   if (is.null(DstoreLoc)) {
     DstoreDir <- ""
@@ -306,7 +308,9 @@ readFromTableRD <- function(Name, Table, Group, DstoreLoc = NULL, Index = NULL) 
     }
   }
   #Return results
-  attributes(Dataset) <- NULL
+  if (!ReadAttr) {
+    attributes(Dataset) <- NULL
+  }
   Dataset
 }
 #readFromTableRD("Azone", "Azone", "2010")
@@ -602,11 +606,13 @@ initDatasetH5 <- function(Spec_ls, Group) {
 #' @param File a string representation of the file path of the datastore
 #' @param Index A numeric vector identifying the positions the data is to be
 #'   written to. NULL if the entire dataset is to be read.
+#' @param ReadAttr A logical identifying whether to return the attributes of
+#' the stored dataset. The default value is FALSE.
 #' @return A vector of the same type stored in the datastore and specified in
 #'   the TYPE attribute.
 #' @export
 #' @import rhdf5
-readFromTableH5 <- function(Name, Table, Group, File = NULL, Index = NULL) {
+readFromTableH5 <- function(Name, Table, Group, File = NULL, Index = NULL, ReadAttr = FALSE) {
   #Get the directory where the datastore is located from File
   if (is.null(File)) {
     DstoreDir <- ""
@@ -648,10 +654,10 @@ readFromTableH5 <- function(Name, Table, Group, File = NULL, Index = NULL) {
   }
   #Read data
   if (is.null(Index)) {
-    Data_ <- h5read(File, DatasetName, read.attributes = TRUE)
+    Data_ <- h5read(File, DatasetName, read.attributes = ReadAttr)
   } else {
     Data_ <-
-      h5read(File, DatasetName, index = list(Index), read.attributes = TRUE)
+      h5read(File, DatasetName, index = list(Index), read.attributes = ReadAttr)
   }
   #Convert NA values
   NAValue <- as.vector(attributes(Data_)$NAVALUE)
@@ -815,12 +821,20 @@ createGeoIndexList <-
       Index_ls[[nm]] <- list()
       for(tab in TablesToIndex_ls[[nm]]) {
         Index_ls[[nm]][[tab]] <- list()
-        if (tab == "Marea") {
-          Index_ls[[nm]]$Marea$Marea <- readFromTable("Marea", "Marea", nm)
-        } else {
+        if (!(tab %in% c("Marea", "Region"))) {
           Index_ls[[nm]][[tab]]$Marea <- readFromTable("Marea", tab, nm)
           Index_ls[[nm]][[tab]]$Azone <- readFromTable("Azone", tab, nm)
+        } else {
+          if (tab == "Marea") {
+            Index_ls[[nm]]$Marea$Marea <- readFromTable("Marea", "Marea", nm)
+          }
         }
+        # if (tab == "Marea") {
+        #   Index_ls[[nm]]$Marea$Marea <- readFromTable("Marea", "Marea", nm)
+        # } else {
+        #   Index_ls[[nm]][[tab]]$Marea <- readFromTable("Marea", tab, nm)
+        #   Index_ls[[nm]][[tab]]$Azone <- readFromTable("Azone", tab, nm)
+        # }
       }
     }
     Index_ls
@@ -855,13 +869,18 @@ createGeoIndexList <-
 #'   location of the supplied value in the index field.
 #' @export
 createGeoIndex <- function(Table, Group, RunBy, Geo, GeoIndex_ls) {
-  if (Table == "Marea") {
-    #Identify the Marea from the 'RunBy' table
-    GeoIdxNames_ <- GeoIndex_ls[[Group]][[RunBy]][[RunBy]]
-    Marea <-
-      GeoIndex_ls[[Group]][[RunBy]]$Marea[GeoIdxNames_ == Geo]
-    GeoIdxNames_ <- GeoIndex_ls[[Group]]$Marea$Marea
-    Idx_ <- which(GeoIdxNames_ == Marea)
+  if (Table %in% c("Region", "Marea")) {
+    if (Table == "Region") {
+      Idx_ <- 1
+    }
+    if (Table == "Marea") {
+      #Identify the Marea from the 'RunBy' table
+      GeoIdxNames_ <- GeoIndex_ls[[Group]][[RunBy]][[RunBy]]
+      Marea <-
+        GeoIndex_ls[[Group]][[RunBy]]$Marea[GeoIdxNames_ == Geo]
+      GeoIdxNames_ <- GeoIndex_ls[[Group]]$Marea$Marea
+      Idx_ <- which(GeoIdxNames_ == Marea)
+    }
   } else {
     #Get the index from the table
     GeoIdxNames_ <- GeoIndex_ls[[Group]][[Table]][[RunBy]]

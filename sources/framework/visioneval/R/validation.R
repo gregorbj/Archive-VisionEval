@@ -604,7 +604,7 @@ Types <- function(){
       units = list(
         LB = c(LB = 1, TON = 0.0005, MT = 0.000453592, KG = 0.453592, GM = 453.592),
         TON = c(LB = 2000, TON = 1, MT = 0.907185, KG = 907.185, GM = 907185),
-        MT = c(LB = 2204.62, TON = 1.10231, MT = 1, KG = 1000, M = 1e+6),
+        MT = c(LB = 2204.62, TON = 1.10231, MT = 1, KG = 1000, GM = 1e+6),
         KG = c(LB = 2.20462, TON = 0.00110231, MT = 0.001, KG = 1, GM = 1000),
         GM = c(LB = 0.00220462, TON = 1.1023e-6, MT = 1e-6, KG = 0.001, GM = 1)),
       mode = "double"

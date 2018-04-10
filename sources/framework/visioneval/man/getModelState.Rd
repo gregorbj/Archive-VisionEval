@@ -4,13 +4,11 @@
 \alias{getModelState}
 \title{Get values from model state list.}
 \usage{
-getModelState(Names_ = "All", FileName = "ModelState.Rda")
+getModelState(Names_ = "All")
 }
 \arguments{
 \item{Names_}{A string vector of the components to extract from the
-ModelState_ls list.}
-
-\item{FileName}{A string that is the file name of the model state file. The
+ModelState_ls list.
 default value is ModelState.Rda.}
 }
 \value{

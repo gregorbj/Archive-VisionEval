@@ -89,7 +89,7 @@ readDatastoreTables <- function(Tables_ls, Group, DstoreLocs_, DstoreType) {
           HasDataset <- checkDataset(ds, tb, Group, MS_ls[[Loc]])
           if (HasDataset) {
             if (is.null(Out_ls[[tb]][[ds]])) {
-              Out_ls[[tb]][[ds]] <- readFromTable(ds, tb, Group, Loc)
+              Out_ls[[tb]][[ds]] <- readFromTable(ds, tb, Group, Loc, ReadAttr = TRUE)
             }
           }
         }

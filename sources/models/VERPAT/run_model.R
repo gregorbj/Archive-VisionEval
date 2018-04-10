@@ -111,4 +111,9 @@ for(Year in getYears()) {
     PackageName = "VEHouseholdTravel",
     RunFor = "NotBaseYear",
     RunYear = Year)
+  runModule(
+    ModuleName = "ReportRPATMetrics",
+    PackageName = "VEReports",
+    RunFor = "NotBaseYear",
+    RunYear = Year)
 }

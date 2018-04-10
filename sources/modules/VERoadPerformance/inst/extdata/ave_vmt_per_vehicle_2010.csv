@@ -1,0 +1,9 @@
+Category,AnnualVmtPerVehicle,Year,Source,Table
+All Cars,11853,2010,TEDB,4.1
+All Light Trucks,11011,2010,TEDB,4.2
+Fleet Compact Cars,24684,2010,TEDB,7.3
+Fleet Intermediate Cars,24384,2010,TEDB,7.3
+Fleet Pickup Trucks,27396,2010,TEDB,7.3
+Fleet Minivans,26760,2010,TEDB,7.3
+Fleet Sport utility vehicles,26916,2010,TEDB,7.3
+Fleet Full-size vans,29616,2010,TEDB,7.3

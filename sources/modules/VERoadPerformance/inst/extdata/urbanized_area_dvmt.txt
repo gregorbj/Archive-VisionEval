@@ -1,0 +1,26 @@
+=========================================
+Documentation for urbanized_area_dvmt.txt
+=========================================
+Data in this file is used along with other datasets in the LoadDefaultRoadDvmtValues.R script to calculate default values for vehicle miles traveled by vehicle type (light-duty, heavy truck, bus) and road class (freeway, arterial, other) by urbanized area for the year 2010.
+
+File Structure
+--------------
+Rows contain data by urbanized area.
+Column names as follows:
+UrbanizedArea: Urbanized area name
+PrimaryState: Two-digit postal code of the state that the urbanized area primarily located in
+Population: Population
+Interstate: Daily vehicle miles of travel (DVMT) on interstate highways in thousands
+OthFwyExp: DVMT on other freeways and expressways
+OthPrinArt: DVMT on other principal arterials
+MinArt: DVMT on minor arterials
+MajColl: DVMT on major collectors
+MinColl: DVMT on minor collectors
+Local: DVMT on local roads (i.e. other minor roads)
+Total: Total DVMT on all roads
+
+Source:
+-------
+Highway Statistics 2010, Federal Highway Administration, Office of Highway Policy Information, Table HM-71: Urbanized Areas - 2010, Miles and Daily Vehicle - Miles of Travel.
+
+

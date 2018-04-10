@@ -612,7 +612,7 @@ AssignVehicleFeaturesFuture <- function(L) {
           names(noList) <- paste0(names(noList),suffix)
         }
         # Repeat the function for elements that are list
-        yesList <- lapply(x[isElementList], AddSuffixFuture)
+        yesList <- lapply(x[isElementList], AddSuffixFuture, suffix = suffix)
         x <- unlist(list(noList,yesList), recursive = FALSE)
         return(x)
       }
@@ -635,7 +635,7 @@ AssignVehicleFeaturesFuture <- function(L) {
           names(noList) <- gsub(suffix,"",names(noList))
         }
         # Repeat the function for elements that are list
-        yesList <- lapply(x[isElementList], RemoveSuffixFuture)
+        yesList <- lapply(x[isElementList], RemoveSuffixFuture, suffix = suffix)
         x <- unlist(list(noList,yesList), recursive = FALSE)
         return(x)
       }

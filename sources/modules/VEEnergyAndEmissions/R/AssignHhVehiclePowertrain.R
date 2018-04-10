@@ -374,23 +374,22 @@ AssignHhVehiclePowertrain <- function(L, M) {
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions
 #-------------------------------------------------------------------------------
-# load("data/EnergyEmissionsDefaults_ls$HhPowertrain_df.rda")
-# load("data/EnergyEmissionsDefaults_ls$LdvPowertrainCharacteristics_df.rda")
+# load("data/EnergyEmissionsDefaults_ls.rda")
 # TestDat_ <- testModule(
-#   ModuleName = "AssignVehiclePowertrain",
+#   ModuleName = "AssignHhVehiclePowertrain",
 #   LoadDatastore = TRUE,
 #   SaveDatastore = TRUE,
 #   DoRun = FALSE
 # )
 # L <- TestDat_$L
 # M <- TestDat_$M
-# TestOut_ls <- AssignVehiclePowertrain(L, M)
+# TestOut_ls <- AssignHhVehiclePowertrain(L, M)
 
 #Test code to check everything including running the module and checking whether
 #the outputs are consistent with the 'Set' specifications
 #-------------------------------------------------------------------------------
 # TestDat_ <- testModule(
-#   ModuleName = "AssignVehiclePowertrain",
+#   ModuleName = "AssignHhVehiclePowertrain",
 #   LoadDatastore = TRUE,
 #   SaveDatastore = TRUE,
 #   DoRun = TRUE

@@ -2,8 +2,8 @@ library(visioneval)
 library(data.table)
 library(filesstrings)
 
-#Load datastore from VECommercialTravel package
-file.copy("../VECommercialTravel/tests/Datastore.tar", "tests/Datastore.tar")
+#Load datastore from VERoadPerformance package
+file.copy("../VERoadPerformance/tests/Datastore.tar", "tests/Datastore.tar")
 setwd("tests")
 untar("Datastore.tar")
 file.remove("Datastore.tar")
@@ -18,7 +18,7 @@ testModule(
   ModuleName = "Initialize",
   LoadDatastore = TRUE,
   SaveDatastore = TRUE,
-  DoRun = FALSE
+  DoRun = TRUE
 )
 
 #Test AssignHhVehiclePowertrain module
@@ -43,6 +43,51 @@ testModule(
 source("R/AssignHhVehicleDvmt.R")
 testModule(
   ModuleName = "AssignHhVehicleDvmt",
+  LoadDatastore = TRUE,
+  SaveDatastore = TRUE,
+  DoRun = TRUE
+)
+
+#Test CalculateCarbonIntensity module
+source("R/CalculateCarbonIntensity.R")
+testModule(
+  ModuleName = "CalculateCarbonIntensity",
+  LoadDatastore = TRUE,
+  SaveDatastore = TRUE,
+  DoRun = TRUE
+)
+
+#Test CalculateMpgMpkwhAdjustments module
+source("R/CalculateMpgMpkwhAdjustments.R")
+testModule(
+  ModuleName = "CalculateMpgMpkwhAdjustments",
+  LoadDatastore = TRUE,
+  SaveDatastore = TRUE,
+  DoRun = TRUE
+)
+
+#Test CalculateHhEnergyAndEmissions module
+source("R/CalculateHhEnergyAndEmissions.R")
+testModule(
+  ModuleName = "CalculateHhEnergyAndEmissions",
+  LoadDatastore = TRUE,
+  SaveDatastore = TRUE,
+  DoRun = TRUE
+)
+
+#Test CalculateComEnergyAndEmissions module
+source("R/CalculateComEnergyAndEmissions.R")
+testModule(
+  ModuleName = "CalculateComEnergyAndEmissions",
+  LoadDatastore = TRUE,
+  SaveDatastore = TRUE,
+  DoRun = TRUE
+)
+
+#Test CalculatePtranEnergyAndEmissions module
+source("R/CalculatePtranEnergyAndEmissions.R")
+testModule(
+  ModuleName = "CalculatePtranEnergyAndEmissions",
   LoadDatastore = TRUE,
   SaveDatastore = TRUE,
   DoRun = TRUE

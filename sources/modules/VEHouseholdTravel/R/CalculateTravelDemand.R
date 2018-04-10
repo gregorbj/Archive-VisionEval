@@ -237,6 +237,7 @@ CalculateTravelDemandSpecifications <- list(
   ),
   #Specify data to be loaded from data store
   Get = items(
+    # Bzone variables
     item(
       NAME = "Bzone",
       TABLE = "Bzone",
@@ -265,6 +266,7 @@ CalculateTravelDemandSpecifications <- list(
       ISELEMENTOF = "",
       OPTIONAL = TRUE
     ),
+    # Household variables
     item(
       NAME = item(
         "HhId",
@@ -319,6 +321,7 @@ CalculateTravelDemandSpecifications <- list(
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = ""
     ),
+    # Vehicle variables
     item(
       NAME = items("HhId",
                    "VehId"),
@@ -357,6 +360,7 @@ CalculateTravelDemandSpecifications <- list(
       PROHIBIT = c("NA", "< 0", "> 1"),
       ISELEMENTOF = ""
     ),
+    # Marea variables
     item(
       NAME = items(
         "FwyLaneMiPC",
@@ -369,6 +373,7 @@ CalculateTravelDemandSpecifications <- list(
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = ""
     ),
+    # Global variables
     item(
       NAME = "BaseCostPerMile",
       TABLE = "Model",
@@ -548,6 +553,7 @@ CalculateTravelDemandSpecifications <- list(
   ),
   #Specify data to saved in the data store
   Set = items(
+    # Marea variables
     item(
       NAME = "TruckDvmt",
       TABLE = "Marea",
@@ -560,6 +566,7 @@ CalculateTravelDemandSpecifications <- list(
       SIZE = 0,
       DESCRIPTION = "Average daily vehicle miles traveled by trucks"
     ),
+    # Bzone variables
     item(
       NAME = "Dvmt",
       TABLE = "Bzone",
@@ -572,6 +579,7 @@ CalculateTravelDemandSpecifications <- list(
       SIZE = 0,
       DESCRIPTION = "Average daily vehicle miles traveled"
     ),
+    # Household variables
     item(
       NAME = "Dvmt",
       TABLE = "Household",
@@ -630,8 +638,9 @@ CalculateTravelDemandSpecifications <- list(
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
       SIZE = 0,
-      DESCRIPTION = "Total fuel cost per mile"
+      DESCRIPTION = "Total fuel cost per mile for future"
     ),
+    # Vehicle variables
     item(
       NAME = "Dvmt",
       TABLE = "Vehicle",
@@ -688,6 +697,7 @@ devtools::use_data(CalculateTravelDemandSpecifications, overwrite = TRUE)
 #' @param Type A string indicating the region type. ("Metro": Default, or "NonMetro")
 #' @return A matrix containing average, maximum, and 95th percentile of daily
 #' vehicle miles traveled.
+#' @export
 predictAveDvmt <- function( Hh_df, Model_ls, Type ) {
   # Check if proper Type specified
   if( !( Type %in% c( "Metro", "NonMetro" ) ) ) {
@@ -743,6 +753,7 @@ predictAveDvmt <- function( Hh_df, Model_ls, Type ) {
 #' @param AnnVmtInflator A numeric indicating annual VMT inflator.
 #' @param TrnstnProp A numeric indicating the transportation proportion.
 #' @return A list containing adjusted average DVMT and budget for each household.
+#' @export
 calculateAdjAveDvmt <- function( Hh_df, Model_ls, Type, BudgetProp, AnnVmtInflator=365, TrnstnProp ) {
   # Calculate the household DVMT without budget considerations
   AveDvmtHh <- predictAveDvmt( Hh_df, Model_ls, Type )[,1]
@@ -811,6 +822,7 @@ calculateAdjAveDvmt <- function( Hh_df, Model_ls, Type, BudgetProp, AnnVmtInflat
 #' @param Hh_df A household data frame consisting average DVMT and household id.
 #' @param Vehicles_df A vehicle data frame consisting of variables used for DVMT assignment.
 #' @return A numeric vector of DVMT.
+#' @export
 calculateVehDvmt <- function( Hh_df, Vehicles_df ) {
   VehDvmt_ <- Hh_df[match(Vehicles_df$HhId, Hh_df$HhId),"Dvmt"] * Vehicles_df$DvmtProp
   return(VehDvmt = VehDvmt_)
@@ -834,6 +846,7 @@ calculateVehDvmt <- function( Hh_df, Vehicles_df ) {
 #' @param MJPerGallon A numeric indicating the energy per gallon of fuel. (Default: 121)
 #' @param OutputType A string indicating the units of the output. ("MetricTons":Default or "Pounds")
 #' @return A named array indicating the average Co2 equivalent gas emissions by vehicle type.
+#' @export
 calculateAveFuelCo2e <- function( ForecastYear = NULL, FuelProp = NULL, FuelComp = NULL,
                                   FuelCo2Ft = NULL, MJPerGallon = 121, OutputType="MetricTons" ) {
   # Check that OutputType is proper values
@@ -922,6 +935,7 @@ calculateAveFuelCo2e <- function( ForecastYear = NULL, FuelProp = NULL, FuelComp
 #' @param AveFuelCo2e A named array indicating the average Co2 equivalent gas emissions
 #' by vehicle type.
 #' @return A list containing assignment of gas emissions.
+#' @export
 calculateVehFuelCo2 <- function(Hh_df, Vehicles_df, AveFuelCo2e) {
 
   # Calculate fuel consumption & CO2e for households with vehicles
@@ -981,6 +995,7 @@ calculateVehFuelCo2 <- function(Hh_df, Vehicles_df, AveFuelCo2e) {
 #' @param Costs A named numeric consisting of the costs, and/or tax  information.
 #' @param NonPrivateFactor A numeric.
 #' @return A list containing various fuel costs.
+#' @export
 calculateCosts <- function( Hh_df, Costs, NonPrivateFactor=5 ) {
   # Calculate total daily fuel cost
   FuelCostHh <- Hh_df$FuelGallons * Costs[ "FuelCost" ]
