@@ -67,7 +67,6 @@ CalculateBasePlaceTypesSpecifications <- list(
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
       UNLIKELY = "",
-      TOTAL = 2,
       DESCRIPTION =
         items(
           "Proportion of Bzone Population in the entire Azone",
