@@ -41,8 +41,8 @@ VEEnergyAndEmissions,AssignVehicleDvmtSplit,Determines how household DVMT is spl
 VEEnergyAndEmissions,AssignVehicleDvmt,Assigns household DVMT to household vehicles,EIT,X,
 VEEnergyAndEmissions,CalculateCarbonIntensity,"Calculates carbon intensity of fuels used by transportation category (e.g. household, heavy truck) and vehicle type (e.g. auto, bus)",EIT,X,
 VEEnergyAndEmissions,CalculateEnergyAndEmissions,Calculates fuel and electricity consumption and greenhouse gas production by transportation category and vehicle type,,X,
-VETravelCosts,AssignUnitCosts,"Input unit cost assumptions for vehicle travel, energy, emissions, etc.",,X,
-VETravelCosts,AssignPAYDInsurance,Identifies which households have pay-as-you-drive insurance,,X,
-VETravelCosts,CalculateHouseholdCosts,Calculates household costs for owning and operating vehicles,,X,
-VETravelCosts,CalculateRoadCostsAndRevenues,Calculates roadway costs and revenues and additional taxes to balance,,X,
+VETravelCost,AssignUnitCosts,"Input unit cost assumptions for vehicle travel, energy, emissions, etc.",,X,
+VETravelCost,AssignPAYDInsurance,Identifies which households have pay-as-you-drive insurance,,X,
+VETravelCost,CalculateHouseholdCosts,Calculates household costs for owning and operating vehicles,,X,
+VETravelCost,CalculateRoadCostsAndRevenues,Calculates roadway costs and revenues and additional taxes to balance,,X,
 VEReports,ReportRPATMetrics,Calculates performance metrics for RPAT,IT,,X
