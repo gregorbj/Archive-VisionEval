@@ -586,8 +586,8 @@ devtools::use_data(CalculateHouseholdDvmtSpecifications, overwrite = TRUE)
 #This function calculates average DVMT, 95th percentile day DVMT, and maximum
 #DVMT.
 
-#Main module function that calculates vehicle ownership
-#------------------------------------------------------
+#Main module function that calculates vehicle travel
+#---------------------------------------------------
 #' Calculate the average household DVMT, 95th percentile household DVMT, and
 #' maximum household DVMT.
 #'
@@ -615,6 +615,8 @@ CalculateHouseholdDvmt <- function(L) {
   Bz <- L$Year$Bzone$Bzone
   #Calculate number of households
   NumHh <- length(L$Year$Household[[1]])
+  #Assign the DvmtModel_ls so that it is in scope when module is called
+  DvmtModel_ls <- VEHouseholdTravel::DvmtModel_ls
 
   #Set up data frame of household data needed for model
   #----------------------------------------------------
