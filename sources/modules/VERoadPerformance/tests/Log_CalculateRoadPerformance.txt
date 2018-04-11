@@ -1,52 +1,52 @@
 Test
 Test of VERoadPerformance package modules
-2018-04-10_08:28:28
+2018-04-11_14:03:32
 
-2018-04-10 08:28:28 : Testing CalculateRoadPerformance. 
+2018-04-11 14:03:32 : Testing CalculateRoadPerformance. 
 
-2018-04-10 08:28:28 : Attempting to load datastore. 
+2018-04-11 14:03:32 : Attempting to load datastore. 
 
-2018-04-10 08:28:28 : Datastore loaded. 
+2018-04-11 14:03:32 : Datastore loaded. 
 
-2018-04-10 08:28:28 : Attempting to load and check specifications. 
+2018-04-11 14:03:32 : Attempting to load and check specifications. 
 
-2018-04-10 08:28:28 : Module specifications successfully loaded and checked for errors. 
+2018-04-11 14:03:32 : Module specifications successfully loaded and checked for errors. 
 
-2018-04-10 08:28:28 : Warning note to module developer. The Get specification for dataset FwyNoneCongChg in table Marea does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
+2018-04-11 14:03:32 : Warning note to module developer. The Get specification for dataset FwyNoneCongChg in table Marea does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
 
-2018-04-10 08:28:28 : Warning note to module developer. The Get specification for dataset FwyModCongChg in table Marea does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
+2018-04-11 14:03:32 : Warning note to module developer. The Get specification for dataset FwyModCongChg in table Marea does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
 
-2018-04-10 08:28:28 : Warning note to module developer. The Get specification for dataset FwyHvyCongChg in table Marea does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
+2018-04-11 14:03:32 : Warning note to module developer. The Get specification for dataset FwyHvyCongChg in table Marea does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
 
-2018-04-10 08:28:28 : Warning note to module developer. The Get specification for dataset FwySevCongChg in table Marea does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
+2018-04-11 14:03:32 : Warning note to module developer. The Get specification for dataset FwySevCongChg in table Marea does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
 
-2018-04-10 08:28:28 : Warning note to module developer. The Get specification for dataset FwyExtCongChg in table Marea does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
+2018-04-11 14:03:32 : Warning note to module developer. The Get specification for dataset FwyExtCongChg in table Marea does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
 
-2018-04-10 08:28:28 : Warning note to module developer. The Get specification for dataset ArtNoneCongChg in table Marea does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
+2018-04-11 14:03:32 : Warning note to module developer. The Get specification for dataset ArtNoneCongChg in table Marea does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
 
-2018-04-10 08:28:28 : Warning note to module developer. The Get specification for dataset ArtModCongChg in table Marea does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
+2018-04-11 14:03:32 : Warning note to module developer. The Get specification for dataset ArtModCongChg in table Marea does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
 
-2018-04-10 08:28:28 : Warning note to module developer. The Get specification for dataset ArtHvyCongChg in table Marea does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
+2018-04-11 14:03:32 : Warning note to module developer. The Get specification for dataset ArtHvyCongChg in table Marea does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
 
-2018-04-10 08:28:28 : Warning note to module developer. The Get specification for dataset ArtSevCongChg in table Marea does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
+2018-04-11 14:03:32 : Warning note to module developer. The Get specification for dataset ArtSevCongChg in table Marea does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
 
-2018-04-10 08:28:28 : Warning note to module developer. The Get specification for dataset ArtExtCongChg in table Marea does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
+2018-04-11 14:03:32 : Warning note to module developer. The Get specification for dataset ArtExtCongChg in table Marea does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
 
-2018-04-10 08:28:28 : Warning note to module developer. The Get specification for dataset ValueOfTime in table Model does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
+2018-04-11 14:03:32 : Warning note to module developer. The Get specification for dataset ValueOfTime in table Model does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
 
-2018-04-10 08:28:28 : No inputs to process. 
+2018-04-11 14:03:32 : No inputs to process. 
 
-2018-04-10 08:28:28 : Checking whether datastore contains all datasets in Get specifications. 
+2018-04-11 14:03:32 : Checking whether datastore contains all datasets in Get specifications. 
 
-2018-04-10 08:28:28 : Datastore contains all datasets identified in module Get specifications. 
+2018-04-11 14:03:32 : Datastore contains all datasets identified in module Get specifications. 
 
-2018-04-10 08:28:28 : Running module and checking whether outputs meet Set specifications. 
+2018-04-11 14:03:32 : Running module and checking whether outputs meet Set specifications. 
 
-2018-04-10 08:28:28 : Also saving module outputs to datastore. 
+2018-04-11 14:03:32 : Also saving module outputs to datastore. 
 
-2018-04-10 08:28:38 : Module run successfully and outputs meet Set specifications. 
+2018-04-11 14:03:46 : Module run successfully and outputs meet Set specifications. 
 
-2018-04-10 08:28:38 : Module outputs saved to datastore. 
+2018-04-11 14:03:46 : Module outputs saved to datastore. 
 
-2018-04-10 08:28:38 : Congratulations. Module CalculateRoadPerformance passed all tests. 
+2018-04-11 14:03:46 : Congratulations. Module CalculateRoadPerformance passed all tests. 
 
