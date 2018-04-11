@@ -1,11 +1,10 @@
 #==================
 #AssignVehicleAge.R
 #==================
-#This module assigns vehicle ages to each household vehicle. A 'Vehicle' table
-#Is created which has a record for each household vehicle. The type and age
-#of each vehicle owned or leased by households is assigned to this table along
-#with the household ID (HhId)to enable this table to be joined with the
-#household table.
+#This module assigns vehicle ages to each household vehicle. The type and age
+#of each vehicle owned or leased by households is assigned to the Vehicle table.
+#It is assumed that for vehicles whose access type is car service rather than
+#own, the vehicle type is Auto.
 
 
 #=================================
