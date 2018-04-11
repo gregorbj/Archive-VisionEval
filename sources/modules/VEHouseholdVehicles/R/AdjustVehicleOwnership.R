@@ -402,6 +402,7 @@ AdjustVehicleOwnership <- function(L) {
   Out_ls$Year$Household <- list()
   VehCat_Ve <- L$Year$Vehicle$Type
   VehCat_Ve[Out_ls$Year$Vehicle$VehicleAccess == "HighCarSvc"] <- "HighCarSvc"
+  VehCat_Ve[Out_ls$Year$Vehicle$VehicleAccess == "LowCarSvc"] <- "LowCarSvc"
   Out_ls$Year$Household$NumAuto <-
     tapply(VehCat_Ve == "Auto", L$Year$Vehicle$HhId, sum)[L$Year$Household$HhId]
   Out_ls$Year$Household$NumLtTrk <-
