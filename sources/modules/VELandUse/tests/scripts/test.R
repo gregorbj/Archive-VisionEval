@@ -76,10 +76,10 @@ testModule(
   DoRun = TRUE
 )
 
-#Test AssignCarSvcCharacteristics module
-source("R/AssignCarSvcCharacteristics.R")
+#Test AssignCarSvcAvailability module
+source("R/AssignCarSvcAvailability.R")
 testModule(
-  ModuleName = "AssignCarSvcCharacteristics",
+  ModuleName = "AssignCarSvcAvailability",
   LoadDatastore = TRUE,
   SaveDatastore = TRUE,
   DoRun = TRUE

@@ -1,32 +1,32 @@
 Test
 Test of VESimHouseholds package modules
-2018-04-06_17:59:21
+2018-04-10_19:23:00
 
-2018-04-06 17:59:21 : Testing CalculateUrbanMixMeasure. 
+2018-04-10 19:23:00 : Testing CalculateUrbanMixMeasure. 
 
-2018-04-06 17:59:21 : Attempting to load datastore. 
+2018-04-10 19:23:00 : Attempting to load datastore. 
 
-2018-04-06 17:59:21 : Datastore loaded. 
+2018-04-10 19:23:00 : Datastore loaded. 
 
-2018-04-06 17:59:21 : Attempting to load and check specifications. 
+2018-04-10 19:23:00 : Attempting to load and check specifications. 
 
-2018-04-06 17:59:21 : Module specifications successfully loaded and checked for errors. 
+2018-04-10 19:23:00 : Module specifications successfully loaded and checked for errors. 
 
-2018-04-06 17:59:21 : Attempting to process, check and load module inputs. 
+2018-04-10 19:23:00 : Attempting to process, check and load module inputs. 
 
-2018-04-06 17:59:21 : Module inputs successfully checked and loaded into datastore. 
+2018-04-10 19:23:00 : Module inputs successfully checked and loaded into datastore. 
 
-2018-04-06 17:59:21 : Checking whether datastore contains all datasets in Get specifications. 
+2018-04-10 19:23:00 : Checking whether datastore contains all datasets in Get specifications. 
 
-2018-04-06 17:59:21 : Datastore contains all datasets identified in module Get specifications. 
+2018-04-10 19:23:00 : Datastore contains all datasets identified in module Get specifications. 
 
-2018-04-06 17:59:21 : Running module and checking whether outputs meet Set specifications. 
+2018-04-10 19:23:00 : Running module and checking whether outputs meet Set specifications. 
 
-2018-04-06 17:59:21 : Also saving module outputs to datastore. 
+2018-04-10 19:23:00 : Also saving module outputs to datastore. 
 
-2018-04-06 17:59:22 : Module run successfully and outputs meet Set specifications. 
+2018-04-10 19:23:01 : Module run successfully and outputs meet Set specifications. 
 
-2018-04-06 17:59:22 : Module outputs saved to datastore. 
+2018-04-10 19:23:01 : Module outputs saved to datastore. 
 
-2018-04-06 17:59:22 : Congratulations. Module CalculateUrbanMixMeasure passed all tests. 
+2018-04-10 19:23:01 : Congratulations. Module CalculateUrbanMixMeasure passed all tests. 
 

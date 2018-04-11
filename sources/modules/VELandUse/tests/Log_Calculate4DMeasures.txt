@@ -1,32 +1,32 @@
 Test
 Test of VESimHouseholds package modules
-2018-04-06_17:59:09
+2018-04-10_19:22:53
 
-2018-04-06 17:59:09 : Testing Calculate4DMeasures. 
+2018-04-10 19:22:53 : Testing Calculate4DMeasures. 
 
-2018-04-06 17:59:09 : Attempting to load datastore. 
+2018-04-10 19:22:53 : Attempting to load datastore. 
 
-2018-04-06 17:59:09 : Datastore loaded. 
+2018-04-10 19:22:53 : Datastore loaded. 
 
-2018-04-06 17:59:09 : Attempting to load and check specifications. 
+2018-04-10 19:22:53 : Attempting to load and check specifications. 
 
-2018-04-06 17:59:09 : Module specifications successfully loaded and checked for errors. 
+2018-04-10 19:22:53 : Module specifications successfully loaded and checked for errors. 
 
-2018-04-06 17:59:09 : Attempting to process, check and load module inputs. 
+2018-04-10 19:22:53 : Attempting to process, check and load module inputs. 
 
-2018-04-06 17:59:09 : Module inputs successfully checked and loaded into datastore. 
+2018-04-10 19:22:54 : Module inputs successfully checked and loaded into datastore. 
 
-2018-04-06 17:59:09 : Checking whether datastore contains all datasets in Get specifications. 
+2018-04-10 19:22:54 : Checking whether datastore contains all datasets in Get specifications. 
 
-2018-04-06 17:59:09 : Datastore contains all datasets identified in module Get specifications. 
+2018-04-10 19:22:54 : Datastore contains all datasets identified in module Get specifications. 
 
-2018-04-06 17:59:09 : Running module and checking whether outputs meet Set specifications. 
+2018-04-10 19:22:54 : Running module and checking whether outputs meet Set specifications. 
 
-2018-04-06 17:59:09 : Also saving module outputs to datastore. 
+2018-04-10 19:22:54 : Also saving module outputs to datastore. 
 
-2018-04-06 17:59:17 : Module run successfully and outputs meet Set specifications. 
+2018-04-10 19:22:56 : Module run successfully and outputs meet Set specifications. 
 
-2018-04-06 17:59:17 : Module outputs saved to datastore. 
+2018-04-10 19:22:56 : Module outputs saved to datastore. 
 
-2018-04-06 17:59:17 : Congratulations. Module Calculate4DMeasures passed all tests. 
+2018-04-10 19:22:56 : Congratulations. Module Calculate4DMeasures passed all tests. 
 
