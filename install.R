@@ -1,8 +1,7 @@
 
 #Download and Install VisionEval Resources
 
-library(httr)
-
+#library(httr)
 #If working within a proxy server, run the following commands to enable install from GitHub
 #set_config(use_proxy(url="proxynew.odot.state.or.us", port=8080))
 #set_config( config( ssl_verifypeer = 0L ) )
