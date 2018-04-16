@@ -1,32 +1,32 @@
 Test
 Test of VESimHouseholds package modules
-2018-04-11_13:16:41
+2018-04-15_11:26:23
 
-2018-04-11 13:16:41 : Testing AssignVehicleAge. 
+2018-04-15 11:26:23 : Testing AssignVehicleAge. 
 
-2018-04-11 13:16:41 : Attempting to load datastore. 
+2018-04-15 11:26:23 : Attempting to load datastore. 
 
-2018-04-11 13:16:41 : Datastore loaded. 
+2018-04-15 11:26:23 : Datastore loaded. 
 
-2018-04-11 13:16:41 : Attempting to load and check specifications. 
+2018-04-15 11:26:23 : Attempting to load and check specifications. 
 
-2018-04-11 13:16:41 : Module specifications successfully loaded and checked for errors. 
+2018-04-15 11:26:23 : Module specifications successfully loaded and checked for errors. 
 
-2018-04-11 13:16:41 : Attempting to process, check and load module inputs. 
+2018-04-15 11:26:23 : Attempting to process, check and load module inputs. 
 
-2018-04-11 13:16:41 : Module inputs successfully checked and loaded into datastore. 
+2018-04-15 11:26:23 : Module inputs successfully checked and loaded into datastore. 
 
-2018-04-11 13:16:41 : Checking whether datastore contains all datasets in Get specifications. 
+2018-04-15 11:26:23 : Checking whether datastore contains all datasets in Get specifications. 
 
-2018-04-11 13:16:41 : Datastore contains all datasets identified in module Get specifications. 
+2018-04-15 11:26:23 : Datastore contains all datasets identified in module Get specifications. 
 
-2018-04-11 13:16:41 : Running module and checking whether outputs meet Set specifications. 
+2018-04-15 11:26:23 : Running module and checking whether outputs meet Set specifications. 
 
-2018-04-11 13:16:41 : Also saving module outputs to datastore. 
+2018-04-15 11:26:23 : Also saving module outputs to datastore. 
 
-2018-04-11 13:16:45 : Module run successfully and outputs meet Set specifications. 
+2018-04-15 11:26:26 : Module run successfully and outputs meet Set specifications. 
 
-2018-04-11 13:16:45 : Module outputs saved to datastore. 
+2018-04-15 11:26:26 : Module outputs saved to datastore. 
 
-2018-04-11 13:16:45 : Congratulations. Module AssignVehicleAge passed all tests. 
+2018-04-15 11:26:26 : Congratulations. Module AssignVehicleAge passed all tests. 
 
