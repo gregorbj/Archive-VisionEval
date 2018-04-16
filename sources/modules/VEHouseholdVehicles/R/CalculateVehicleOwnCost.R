@@ -7,7 +7,18 @@
 #parking is not available for all household vehicles. The ownership cost is
 #converted into an average ownership cost per mile by predicting the household
 #DVMT given the number of owned vehicles and splitting the miles equally among
-#the vehicles.
+#the vehicles. Vehicle ownership costs are used by the AdjustVehicleOwnership
+#module to determine whether it would be more cost-effective for a household to
+#substitute the use of car services for one or more of vehicles that they
+#otherwise would own.
+#
+#The module also assigns pay-as-you-drive (PAYD) insurance to households based
+#on household characteristics and input assumption about the proportion of
+#households who have PAYD insurance. PAYD insurance does not affect the cost of
+#vehicle ownership when determining whether a household will substitute car
+#services for one or more of their vehicles. It does affect the operating cost
+#of the vehicle and determination of whether the amount of vehicle travel is
+#fits within the household's vehicle operations budget.
 
 
 #=================================
@@ -169,6 +180,55 @@ rm(Depr_AgVt, Depr_MiVt, DeprAdjModel_ls, DeprProp_MiVt, FinCost_AgVt,
 "VehOwnCost_ls"
 devtools::use_data(VehOwnCost_ls, overwrite = TRUE)
 
+#---------------------------------
+#Pay-as-you-drive insurance choice
+#---------------------------------
+
+#Define PAYD weights
+#-------------------
+#Define the relative weights for choosing which households are most likely to
+#use PAYD insurance. Following are the weighting factors:
+#HasTeenDrv - households with one or more teenage drivers are more likely to have
+#because of the advantage for monitoring and providing feedback on teenage
+#driver behavior.
+#LowerMileage - PAYD insurance is relatively more economical for households that
+#have relatively low annual mileage (less than 15,000 miles per vehicle).
+#OlderDrvProp - Households with older drivers (30 or older) are more likely to
+#use than households with younger drivers.
+#LowerIncome - Lower income households are more likely to use because of the lower
+#costs and ability to moderate behavior to save additional money. Low income
+#threshold is an annual household income of $45,000 in 2005 dollars.
+#AutoProp - Households owning automobiles are more likely than households
+#owning light trucks (i.e. sport-utility, pickup, van) to use PAYD
+#InMetroArea - Households in metropolitan areas are more likely to use PAYD
+PaydWts_ <- c(
+  HasTeenDrv = 2,
+  LowerMileage = 3,
+  OlderDrvProp = 2,
+  LowerIncome = 2,
+  AutoProp = 2,
+  InMetroArea = 3)
+
+#Save the PAYD weights
+#---------------------
+#' Household attributes weights for PAYD insurance
+#'
+#' Identifies household attributes associated with higher probability of PAYD
+#' insurance and the relative weights of those attributes.
+#'
+#' @format A named vector of weights used for determining household weight for selecting PAYD insurance
+#' \describe{
+#'   \item{HasTeenDrv}{weight for households having one or more teenage drivers},
+#'   \item{LowerMileage}{weight for households driving lower mileage (< 15,000 per vehicle)}
+#'   \item{OlderDrvProp}{weight for proportion of drivers in the household who are 30 or older}
+#'   \item{LowerIncome}{weight for lower income households (< 45,000 year 2005 dollars)}
+#'   \item{AutoProp}{weight for automobile proportion of vehicles owned by household}
+#'   \item{InMetroArea}{weight for household being located in a metropolitan (urbanized) area}
+#' }
+#' @source CalculateVehicleOwnCost.R script.
+"PaydWts_"
+devtools::use_data(PaydWts_, overwrite = TRUE)
+
 
 #================================================
 #SECTION 2: DEFINE THE MODULE DATA SPECIFICATIONS
@@ -214,6 +274,22 @@ CalculateVehicleOwnCostSpecifications <- list(
       TOTAL = "",
       DESCRIPTION =
         "Annual proportion of vehicle value paid in taxes"
+    ),
+    item(
+      NAME = "PaydHhProp",
+      FILE = "azone_payd_insurance_prop.csv",
+      TABLE = "Azone",
+      GROUP = "Year",
+      TYPE = "double",
+      UNITS = "proportion",
+      NAVALUE = -1,
+      SIZE = 0,
+      PROHIBIT = c("NA", "< 0", "> 1"),
+      ISELEMENTOF = "",
+      UNLIKELY = "",
+      TOTAL = "",
+      DESCRIPTION =
+        "Proportion of households in the Azone who have pay-as-you-drive insurance for their vehicles"
     )
   ),
   #Specify data to be loaded from data store
@@ -229,6 +305,15 @@ CalculateVehicleOwnCostSpecifications <- list(
     ),
     item(
       NAME = "VehOwnAdValoremTax",
+      TABLE = "Azone",
+      GROUP = "Year",
+      TYPE = "double",
+      UNITS = "proportion",
+      PROHIBIT = c("NA", "< 0", "> 1"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "PaydHhProp",
       TABLE = "Azone",
       GROUP = "Year",
       TYPE = "double",
@@ -316,6 +401,51 @@ CalculateVehicleOwnCostSpecifications <- list(
       UNITS = "USD.2017",
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = ""
+    ),
+    item(
+      NAME = items(
+        "Drivers",
+        "Drv15to19",
+        "Drv20to29",
+        "Drv30to54",
+        "Drv55to64",
+        "Drv65Plus"
+      ),
+      TABLE = "Household",
+      GROUP = "Year",
+      TYPE = "people",
+      UNITS = "PRSN",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "Income",
+      TABLE = "Household",
+      GROUP = "Year",
+      TYPE = "currency",
+      UNITS = "USD.2005",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "DevType",
+      TABLE = "Household",
+      GROUP = "Year",
+      TYPE = "character",
+      UNITS = "category",
+      PROHIBIT = "NA",
+      ISELEMENTOF = c("Urban", "Rural")
+    ),
+    item(
+      NAME = items(
+        "NumLtTrk",
+        "NumAuto"),
+      TABLE = "Household",
+      GROUP = "Year",
+      TYPE = "vehicles",
+      UNITS = "VEH",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = ""
     )
   ),
   #Specify data to saved in the data store
@@ -355,6 +485,18 @@ CalculateVehicleOwnCostSpecifications <- list(
       ISELEMENTOF = "",
       SIZE = 0,
       DESCRIPTION = "Annual vehicle insurance cost in dollars"
+    ),
+    item(
+      NAME = "HasPaydIns",
+      TABLE = "Household",
+      GROUP = "Year",
+      TYPE = "integer",
+      UNITS = "binary",
+      NAVALUE = -1,
+      PROHIBIT = "",
+      ISELEMENTOF = c(0, 1),
+      SIZE = 0,
+      DESCRIPTION = "Identifies whether household has pay-as-you-drive insurance for vehicles: 1 = Yes, 0 = no"
     )
   ),
   #Specify call status of module
@@ -499,6 +641,95 @@ calcAdValoremTax <- function(Type_, Age_, TaxRate) {
   with(VehOwnCost_ls, Value_AgVt[ValueIdx_mx]) * TaxRate
 }
 
+#Define function to assign PAYD propensity weights to households
+#-----------------------------------------------------------------------
+#' Assign pay-as-you-drive insurance propensity weights to households
+#'
+#' \code{calcPaydWeights} Calculates household weight that reflect the relative
+#' propensity of a household to purchase pay-as-you-drive insurance based on the
+#' household characteristics
+#'
+#' Household PAYD propensity weights are assigned based on the presence of
+#' teenager drivers, whether the average annual vehicle mileage is low,
+#' the proportion of older drivers in the household,  whether household income
+#' is relatively low, the proportion of household vehicles that are autos, and
+#' whether the household lives in a metropolitan area. All household vehicles
+#' must be a 1996 or later model year.
+#'
+#' @param L A list containing the components listed in the Get specifications
+#' for the module.
+#' @return A numeric vector of weights assigned to each household
+idPaydHh <- function(L) {
+  #Set up
+  #------
+  set.seed(L$G$Seed)
+  NumHh <- length(L$Year$Household$HhId)
+  NumPayd <- round(NumHh * L$Year$Azone$PaydHhProp)
+
+  #Identify qualifying househouseholds
+  #----------------------------------------------------------------------------
+  #Household qualifies if all household vehicles are later than 1995 model year
+  AgeThreshold <- as.numeric(L$G$Year) - 1995
+  Qualifies_Hh <-
+    tapply(L$Year$Vehicle$Age, L$Year$Vehicle$HhId, function(x) {
+      any(x >= AgeThreshold)
+    })[L$Year$Household$HhId]
+  Qualifies_Hh[L$Year$Household$Vehicles == 0] <- FALSE
+
+  #Identify PAYD households
+  #------------------------
+  if (sum(Qualifies_Hh) <= NumPayd) {
+  #Return all qualifying households if less than or equal to NumPayd
+    HasPaydIns_Hh <- as.integer(Qualifies_Hh)
+  } else {
+  #Otherwise calculate PAYD weights and choose based on weights
+    Weight_Hh <- rep(1, length(L$Year$Household$HhId))
+    #Add weight for teenage drivers
+    Weight_Hh <- local({
+      HasTeenDrv_Hh <- with(L$Year$Household, Drv15to19 > 0)
+      Weight_Hh + HasTeenDrv_Hh * PaydWts_["HasTeenDrv"]
+    })
+    #Add weight for average annual vehicle miles is less than 15,000
+    Weight_Hh <- local({
+      VmtPerVeh_Hh <- with(L$Year$Household, 365 * Dvmt / Vehicles)
+      VmtPerVeh_Hh[is.na(VmtPerVeh_Hh)] <- 0
+      LowerMileage_Hh <- VmtPerVeh_Hh < 15000
+      Weight_Hh + LowerMileage_Hh * PaydWts_["LowerMileage"]
+    })
+    #Add weight for the proportion of drivers 30 or older
+    Weight_Hh <- local({
+      OlderDrvProp_Hh <-
+        with(L$Y$Household, (Drivers - Drv15to19 - Drv20to29) / Drivers)
+      OlderDrvProp_Hh[is.na(OlderDrvProp_Hh)] <- 0
+      Weight_Hh + OlderDrvProp_Hh * PaydWts_["OlderDrvProp"]
+    })
+    #Add weight for lower income households
+    Weight_Hh <- local({
+      LowerIncome_Hh <- L$Year$Household$Income < 45000
+      Weight_Hh + LowerIncome_Hh * PaydWts_["LowerIncome"]
+    })
+    #Add weight for the proportion of vehicles that are autos
+    Weight_Hh <- local({
+      AutoProp_Hh <- with(L$Year$Household, NumAuto / Vehicles)
+      AutoProp_Hh[is.na(AutoProp_Hh)] <- 0
+      Weight_Hh + AutoProp_Hh * PaydWts_["AutoProp"]
+    })
+    #Add weight for households that are located within a metropolitan area
+    Weight_Hh <- local({
+      InMetroArea <- L$Y$Household$DevType == "Urban"
+      Weight_Hh + PaydWts_["InMetroArea"]
+    })
+    #Use weights to identify PAYD households
+    HasPaydIns_Hh <- integer(NumHh)
+    HhIdx_ <- (1:NumHh)[Qualifies_Hh]
+    Wts_ <- Weight_Hh[Qualifies_Hh]
+    PaydIdx_ <- sample(HhIdx_, NumPayd, prob = Wts_ / max(Wts_))
+    HasPaydIns_Hh[PaydIdx_] <- 1L
+  }
+  #Return the result where only qualifying households have weights
+  unname(HasPaydIns_Hh)
+}
+
 #Main module function to calculate household vehicle ownership cost
 #------------------------------------------------------------------
 #' Calculate household vehicle ownership cost
@@ -524,6 +755,7 @@ CalculateVehicleOwnCost <- function(L,M) {
   #Estimate the household DVMT
   Dvmt_ls <- M$CalcDvmt(L$CalcDvmt)
   Dvmt_Hh <- Dvmt_ls$Year$Household$Dvmt
+  L$Year$Household$Dvmt <- Dvmt_Hh
 
   #Create an index between the household data and vehicle table
   HasVeh <- L$Year$Household$Vehicles > 0
@@ -583,12 +815,18 @@ CalculateVehicleOwnCost <- function(L,M) {
   TotCostPerMi_Ve <- TotCost_Ve / AnnVmt_Ve
   TotCostPerMi_Ve[is.na(TotCostPerMi_Ve)] <- 0
 
+  #Assign PAYD insurance
+  HasPaydIns_Hh <- idPaydHh(L)
+
   #Return the results
   Out_ls <- initDataList()
   Out_ls$Year$Vehicle <- list(
     OwnCost = TotCost_Ve,
     OwnCostPerMile = TotCostPerMi_Ve,
     InsCost = InsCost_Ve
+  )
+  Out_ls$Year$Household <- list(
+    HasPaydIns = HasPaydIns_Hh
   )
   Out_ls
 }
