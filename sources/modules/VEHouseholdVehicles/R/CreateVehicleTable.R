@@ -50,28 +50,6 @@ CreateVehicleTableSpecifications <- list(
     item(
       NAME =
         items(
-          "HighCarSvcAccessTime",
-          "LowCarSvcAccessTime"),
-      FILE = "azone_carsvc_characteristics.csv",
-      TABLE = "Azone",
-      GROUP = "Year",
-      TYPE = "time",
-      UNITS = "MIN",
-      NAVALUE = -1,
-      SIZE = 0,
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = "",
-      UNLIKELY = "",
-      TOTAL = "",
-      DESCRIPTION =
-        items(
-          "Average amount of time in minutes required to access a high service level car service to begin a trip",
-          "Average amount of time in minutes required to access a low service level car service to begin a trip"
-        )
-    ),
-    item(
-      NAME =
-        items(
           "HighCarSvcCost",
           "LowCarSvcCost"),
       FILE = "azone_carsvc_characteristics.csv",
