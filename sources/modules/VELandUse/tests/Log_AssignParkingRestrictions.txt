@@ -1,40 +1,40 @@
 Test
 Test of VESimHouseholds package modules
-2018-04-18_08:48:40
+2018-04-18_16:02:41
 
-2018-04-18 08:48:40 : Testing AssignParkingRestrictions. 
+2018-04-18 16:02:41 : Testing AssignParkingRestrictions. 
 
-2018-04-18 08:48:40 : Attempting to load datastore. 
+2018-04-18 16:02:41 : Attempting to load datastore. 
 
-2018-04-18 08:48:40 : Datastore loaded. 
+2018-04-18 16:02:41 : Datastore loaded. 
 
-2018-04-18 08:48:40 : Attempting to load and check specifications. 
+2018-04-18 16:02:41 : Attempting to load and check specifications. 
 
-2018-04-18 08:48:40 : Module specifications successfully loaded and checked for errors. 
+2018-04-18 16:02:41 : Module specifications successfully loaded and checked for errors. 
 
-2018-04-18 08:48:40 : Warning note to module developer. The Get specification for dataset PkgCost in table Bzone does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
+2018-04-18 16:02:41 : Warning note to module developer. The Get specification for dataset PkgCost in table Bzone does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
 
-2018-04-18 08:48:40 : Warning note to module developer. The Set specification for dataset ParkingUnitCost in table Household does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
+2018-04-18 16:02:41 : Warning note to module developer. The Set specification for dataset ParkingUnitCost in table Household does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
 
-2018-04-18 08:48:40 : Warning note to module developer. The Set specification for dataset OtherParkingCost in table Household does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
+2018-04-18 16:02:41 : Warning note to module developer. The Set specification for dataset OtherParkingCost in table Household does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
 
-2018-04-18 08:48:40 : Warning note to module developer. The Set specification for dataset ParkingCost in table Worker does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
+2018-04-18 16:02:41 : Warning note to module developer. The Set specification for dataset ParkingCost in table Worker does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
 
-2018-04-18 08:48:40 : Attempting to process, check and load module inputs. 
+2018-04-18 16:02:41 : Attempting to process, check and load module inputs. 
 
-2018-04-18 08:48:40 : Module inputs successfully checked and loaded into datastore. 
+2018-04-18 16:02:43 : Module inputs successfully checked and loaded into datastore. 
 
-2018-04-18 08:48:40 : Checking whether datastore contains all datasets in Get specifications. 
+2018-04-18 16:02:43 : Checking whether datastore contains all datasets in Get specifications. 
 
-2018-04-18 08:48:40 : Datastore contains all datasets identified in module Get specifications. 
+2018-04-18 16:02:43 : Datastore contains all datasets identified in module Get specifications. 
 
-2018-04-18 08:48:40 : Running module and checking whether outputs meet Set specifications. 
+2018-04-18 16:02:43 : Running module and checking whether outputs meet Set specifications. 
 
-2018-04-18 08:48:40 : Also saving module outputs to datastore. 
+2018-04-18 16:02:43 : Also saving module outputs to datastore. 
 
-2018-04-18 08:48:42 : Module run successfully and outputs meet Set specifications. 
+2018-04-18 16:02:44 : Module run successfully and outputs meet Set specifications. 
 
-2018-04-18 08:48:42 : Module outputs saved to datastore. 
+2018-04-18 16:02:44 : Module outputs saved to datastore. 
 
-2018-04-18 08:48:42 : Congratulations. Module AssignParkingRestrictions passed all tests. 
+2018-04-18 16:02:44 : Congratulations. Module AssignParkingRestrictions passed all tests. 
 
