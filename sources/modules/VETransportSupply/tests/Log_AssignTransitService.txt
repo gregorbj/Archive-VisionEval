@@ -1,32 +1,32 @@
 Test
 Test of VESimHouseholds package modules
-2018-04-08_08:59:59
+2018-04-18_08:59:00
 
-2018-04-08 08:59:59 : Testing AssignTransitService. 
+2018-04-18 08:59:00 : Testing AssignTransitService. 
 
-2018-04-08 08:59:59 : Attempting to load datastore. 
+2018-04-18 08:59:00 : Attempting to load datastore. 
 
-2018-04-08 08:59:59 : Datastore loaded. 
+2018-04-18 08:59:00 : Datastore loaded. 
 
-2018-04-08 08:59:59 : Attempting to load and check specifications. 
+2018-04-18 08:59:00 : Attempting to load and check specifications. 
 
-2018-04-08 08:59:59 : Module specifications successfully loaded and checked for errors. 
+2018-04-18 08:59:00 : Module specifications successfully loaded and checked for errors. 
 
-2018-04-08 08:59:59 : Attempting to process, check and load module inputs. 
+2018-04-18 08:59:00 : Attempting to process, check and load module inputs. 
 
-2018-04-08 09:00:00 : Module inputs successfully checked and loaded into datastore. 
+2018-04-18 08:59:02 : Module inputs successfully checked and loaded into datastore. 
 
-2018-04-08 09:00:00 : Checking whether datastore contains all datasets in Get specifications. 
+2018-04-18 08:59:02 : Checking whether datastore contains all datasets in Get specifications. 
 
-2018-04-08 09:00:00 : Datastore contains all datasets identified in module Get specifications. 
+2018-04-18 08:59:02 : Datastore contains all datasets identified in module Get specifications. 
 
-2018-04-08 09:00:00 : Running module and checking whether outputs meet Set specifications. 
+2018-04-18 08:59:02 : Running module and checking whether outputs meet Set specifications. 
 
-2018-04-08 09:00:00 : Also saving module outputs to datastore. 
+2018-04-18 08:59:02 : Also saving module outputs to datastore. 
 
-2018-04-08 09:00:02 : Module run successfully and outputs meet Set specifications. 
+2018-04-18 08:59:03 : Module run successfully and outputs meet Set specifications. 
 
-2018-04-08 09:00:02 : Module outputs saved to datastore. 
+2018-04-18 08:59:03 : Module outputs saved to datastore. 
 
-2018-04-08 09:00:02 : Congratulations. Module AssignTransitService passed all tests. 
+2018-04-18 08:59:03 : Congratulations. Module AssignTransitService passed all tests. 
 

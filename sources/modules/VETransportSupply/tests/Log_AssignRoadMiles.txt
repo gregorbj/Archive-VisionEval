@@ -1,32 +1,32 @@
 Test
 Test of VESimHouseholds package modules
-2018-04-08_09:00:03
+2018-04-18_08:59:03
 
-2018-04-08 09:00:03 : Testing AssignRoadMiles. 
+2018-04-18 08:59:03 : Testing AssignRoadMiles. 
 
-2018-04-08 09:00:03 : Attempting to load datastore. 
+2018-04-18 08:59:03 : Attempting to load datastore. 
 
-2018-04-08 09:00:03 : Datastore loaded. 
+2018-04-18 08:59:03 : Datastore loaded. 
 
-2018-04-08 09:00:03 : Attempting to load and check specifications. 
+2018-04-18 08:59:03 : Attempting to load and check specifications. 
 
-2018-04-08 09:00:03 : Module specifications successfully loaded and checked for errors. 
+2018-04-18 08:59:04 : Module specifications successfully loaded and checked for errors. 
 
-2018-04-08 09:00:03 : Attempting to process, check and load module inputs. 
+2018-04-18 08:59:04 : Attempting to process, check and load module inputs. 
 
-2018-04-08 09:00:03 : Module inputs successfully checked and loaded into datastore. 
+2018-04-18 08:59:04 : Module inputs successfully checked and loaded into datastore. 
 
-2018-04-08 09:00:03 : Checking whether datastore contains all datasets in Get specifications. 
+2018-04-18 08:59:04 : Checking whether datastore contains all datasets in Get specifications. 
 
-2018-04-08 09:00:03 : Datastore contains all datasets identified in module Get specifications. 
+2018-04-18 08:59:04 : Datastore contains all datasets identified in module Get specifications. 
 
-2018-04-08 09:00:03 : Running module and checking whether outputs meet Set specifications. 
+2018-04-18 08:59:04 : Running module and checking whether outputs meet Set specifications. 
 
-2018-04-08 09:00:03 : Also saving module outputs to datastore. 
+2018-04-18 08:59:04 : Also saving module outputs to datastore. 
 
-2018-04-08 09:00:03 : Module run successfully and outputs meet Set specifications. 
+2018-04-18 08:59:04 : Module run successfully and outputs meet Set specifications. 
 
-2018-04-08 09:00:03 : Module outputs saved to datastore. 
+2018-04-18 08:59:04 : Module outputs saved to datastore. 
 
-2018-04-08 09:00:03 : Congratulations. Module AssignRoadMiles passed all tests. 
+2018-04-18 08:59:04 : Congratulations. Module AssignRoadMiles passed all tests. 
 
