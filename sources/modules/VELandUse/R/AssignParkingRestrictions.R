@@ -451,14 +451,14 @@ AssignParkingRestrictions <- function(L) {
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions
 #-------------------------------------------------------------------------------
-TestDat_ <- testModule(
-  ModuleName = "AssignParkingRestrictions",
-  LoadDatastore = TRUE,
-  SaveDatastore = TRUE,
-  DoRun = FALSE
-)
-L <- TestDat_$L
-R <- AssignParkingRestrictions(L)
+# TestDat_ <- testModule(
+#   ModuleName = "AssignParkingRestrictions",
+#   LoadDatastore = TRUE,
+#   SaveDatastore = TRUE,
+#   DoRun = FALSE
+# )
+# L <- TestDat_$L
+# R <- AssignParkingRestrictions(L)
 
 #Test code to check everything including running the module and checking whether
 #the outputs are consistent with the 'Set' specifications
