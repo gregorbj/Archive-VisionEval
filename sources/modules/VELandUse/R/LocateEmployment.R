@@ -310,7 +310,7 @@ adjustEmployment <- function(EmpTarget, Emp_, Names = NULL) {
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
-#' @import visioneval
+#' @import visioneval fields
 #' @export
 LocateEmployment <- function(L) {
   #Set up
