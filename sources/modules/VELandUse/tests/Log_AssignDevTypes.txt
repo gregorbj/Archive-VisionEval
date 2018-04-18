@@ -1,32 +1,32 @@
 Test
 Test of VESimHouseholds package modules
-2018-04-10_19:22:52
+2018-04-18_08:48:30
 
-2018-04-10 19:22:52 : Testing AssignDevTypes. 
+2018-04-18 08:48:30 : Testing AssignDevTypes. 
 
-2018-04-10 19:22:52 : Attempting to load datastore. 
+2018-04-18 08:48:30 : Attempting to load datastore. 
 
-2018-04-10 19:22:52 : Datastore loaded. 
+2018-04-18 08:48:30 : Datastore loaded. 
 
-2018-04-10 19:22:52 : Attempting to load and check specifications. 
+2018-04-18 08:48:30 : Attempting to load and check specifications. 
 
-2018-04-10 19:22:52 : Module specifications successfully loaded and checked for errors. 
+2018-04-18 08:48:30 : Module specifications successfully loaded and checked for errors. 
 
-2018-04-10 19:22:52 : Attempting to process, check and load module inputs. 
+2018-04-18 08:48:30 : Attempting to process, check and load module inputs. 
 
-2018-04-10 19:22:52 : Module inputs successfully checked and loaded into datastore. 
+2018-04-18 08:48:31 : Module inputs successfully checked and loaded into datastore. 
 
-2018-04-10 19:22:52 : Checking whether datastore contains all datasets in Get specifications. 
+2018-04-18 08:48:31 : Checking whether datastore contains all datasets in Get specifications. 
 
-2018-04-10 19:22:52 : Datastore contains all datasets identified in module Get specifications. 
+2018-04-18 08:48:31 : Datastore contains all datasets identified in module Get specifications. 
 
-2018-04-10 19:22:52 : Running module and checking whether outputs meet Set specifications. 
+2018-04-18 08:48:31 : Running module and checking whether outputs meet Set specifications. 
 
-2018-04-10 19:22:52 : Also saving module outputs to datastore. 
+2018-04-18 08:48:31 : Also saving module outputs to datastore. 
 
-2018-04-10 19:22:53 : Module run successfully and outputs meet Set specifications. 
+2018-04-18 08:48:32 : Module run successfully and outputs meet Set specifications. 
 
-2018-04-10 19:22:53 : Module outputs saved to datastore. 
+2018-04-18 08:48:32 : Module outputs saved to datastore. 
 
-2018-04-10 19:22:53 : Congratulations. Module AssignDevTypes passed all tests. 
+2018-04-18 08:48:32 : Congratulations. Module AssignDevTypes passed all tests. 
 
