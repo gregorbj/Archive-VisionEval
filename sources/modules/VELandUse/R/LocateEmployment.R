@@ -96,7 +96,10 @@ LocateEmploymentSpecifications <- list(
   #Specify data to be loaded from data store
   Get = items(
     item(
-      NAME = "Bzone",
+      NAME = items(
+        "Bzone",
+        "Azone",
+        "Marea"),
       TABLE = "Bzone",
       GROUP = "Year",
       TYPE = "character",
@@ -204,7 +207,10 @@ LocateEmploymentSpecifications <- list(
               "Unique worker ID")
     ),
     item(
-      NAME = "Bzone",
+      NAME = items(
+        "Bzone",
+        "Azone",
+        "Marea"),
       TABLE = "Worker",
       GROUP = "Year",
       TYPE = "character",
@@ -212,7 +218,10 @@ LocateEmploymentSpecifications <- list(
       NAVALUE = -1,
       PROHIBIT = "",
       ISELEMENTOF = "",
-      DESCRIPTION = "Bzone ID of worker job location"
+      DESCRIPTION = items(
+        "Bzone ID of worker job location",
+        "Azone ID of worker job location",
+        "Marea ID of worker job location")
     ),
     item(
       NAME = "DistanceToWork",
@@ -389,6 +398,12 @@ LocateEmployment <- function(L) {
   }
   #Identify distance to work
   DistToWork_ <- Dist_BzBz[cbind(ResBzone_, WrkBzone_)]
+  #Identify work Azone
+  WrkAzone_ <-
+    L$Year$Bzone$Azone[match(WrkBzone_, L$Year$Bzone$Bzone)]
+  #Identify work Marea
+  WrkMarea_ <-
+    L$Year$Bzone$Marea[match(WrkBzone_, L$Year$Bzone$Bzone)]
 
   #Return list of results
   #----------------------
@@ -408,6 +423,10 @@ LocateEmployment <- function(L) {
   attributes(Out_ls$Year$Worker$WkrId)$SIZE <- max(nchar(WkrId_))
   Out_ls$Year$Worker$Bzone <- WrkBzone_
   attributes(Out_ls$Year$Worker$Bzone)$SIZE <- max(nchar(WrkBzone_))
+  Out_ls$Year$Worker$Azone <- WrkAzone_
+  attributes(Out_ls$Year$Worker$Azone)$SIZE <- max(nchar(WrkAzone_))
+  Out_ls$Year$Worker$Marea <- WrkMarea_
+  attributes(Out_ls$Year$Worker$Marea)$SIZE <- max(nchar(WrkMarea_))
   Out_ls$Year$Worker$DistanceToWork <- DistToWork_
   #Return the outputs list
   Out_ls
@@ -428,6 +447,7 @@ LocateEmployment <- function(L) {
 #   DoRun = FALSE
 # )
 # L <- TestDat_$L
+# R <- LocateEmployment(L)
 
 #Test code to check everything including running the module and checking whether
 #the outputs are consistent with the 'Set' specifications
