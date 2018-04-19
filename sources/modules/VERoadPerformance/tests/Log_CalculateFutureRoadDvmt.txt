@@ -1,34 +1,34 @@
 Test
 Test of VERoadPerformance package modules
-2018-04-18_15:12:47
+2018-04-18_18:35:26
 
-2018-04-18 15:12:47 : Testing CalculateFutureRoadDvmt. 
+2018-04-18 18:35:26 : Testing CalculateFutureRoadDvmt. 
 
-2018-04-18 15:12:47 : Attempting to load datastore. 
+2018-04-18 18:35:26 : Attempting to load datastore. 
 
-2018-04-18 15:12:48 : Datastore loaded. 
+2018-04-18 18:35:26 : Datastore loaded. 
 
-2018-04-18 15:12:48 : Attempting to load and check specifications. 
+2018-04-18 18:35:26 : Attempting to load and check specifications. 
 
-2018-04-18 15:12:48 : Module specifications successfully loaded and checked for errors. 
+2018-04-18 18:35:26 : Module specifications successfully loaded and checked for errors. 
 
-2018-04-18 15:12:48 : Warning note to module developer. The Get specification for dataset RuralIncome in table Marea does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
+2018-04-18 18:35:26 : Warning note to module developer. The Get specification for dataset RuralIncome in table Marea does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
 
-2018-04-18 15:12:48 : Warning note to module developer. The Get specification for dataset UrbanIncome in table Marea does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
+2018-04-18 18:35:26 : Warning note to module developer. The Get specification for dataset UrbanIncome in table Marea does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
 
-2018-04-18 15:12:48 : No inputs to process. 
+2018-04-18 18:35:26 : No inputs to process. 
 
-2018-04-18 15:12:48 : Checking whether datastore contains all datasets in Get specifications. 
+2018-04-18 18:35:26 : Checking whether datastore contains all datasets in Get specifications. 
 
-2018-04-18 15:12:48 : Datastore contains all datasets identified in module Get specifications. 
+2018-04-18 18:35:26 : Datastore contains all datasets identified in module Get specifications. 
 
-2018-04-18 15:12:48 : Running module and checking whether outputs meet Set specifications. 
+2018-04-18 18:35:26 : Running module and checking whether outputs meet Set specifications. 
 
-2018-04-18 15:12:48 : Also saving module outputs to datastore. 
+2018-04-18 18:35:26 : Also saving module outputs to datastore. 
 
-2018-04-18 15:12:48 : Module run successfully and outputs meet Set specifications. 
+2018-04-18 18:35:28 : Module run successfully and outputs meet Set specifications. 
 
-2018-04-18 15:12:48 : Module outputs saved to datastore. 
+2018-04-18 18:35:28 : Module outputs saved to datastore. 
 
-2018-04-18 15:12:48 : Congratulations. Module CalculateFutureRoadDvmt passed all tests. 
+2018-04-18 18:35:28 : Congratulations. Module CalculateFutureRoadDvmt passed all tests. 
 
