@@ -370,7 +370,9 @@ CalculateAltModeTripsSpecifications <- list(
           "Average number of public transit trips per year by household members"
         )
     )
-  )
+  ),
+  #Make module callable
+  Call = TRUE
 )
 
 #Save the data specifications list
