@@ -560,6 +560,7 @@ CalculateHouseholdDvmtSpecifications <- list(
       DESCRIPTION = "Average daily vehicle miles traveled in autos or light trucks by households residing in the non-urbanized portion of the Marea"
     )
   ),
+  #Make module callable
   Call = TRUE
 )
 
