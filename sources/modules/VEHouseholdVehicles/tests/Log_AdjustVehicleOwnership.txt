@@ -1,46 +1,46 @@
 Test
 Test of VESimHouseholds package modules
-2018-04-18_09:09:39
+2018-04-18_18:25:39
 
-2018-04-18 09:09:39 : Testing AdjustVehicleOwnership. 
+2018-04-18 18:25:39 : Testing AdjustVehicleOwnership. 
 
-2018-04-18 09:09:39 : Attempting to load datastore. 
+2018-04-18 18:25:39 : Attempting to load datastore. 
 
-2018-04-18 09:09:39 : Datastore loaded. 
+2018-04-18 18:25:39 : Datastore loaded. 
 
-2018-04-18 09:09:39 : Attempting to load and check specifications. 
+2018-04-18 18:25:39 : Attempting to load and check specifications. 
 
-2018-04-18 09:09:39 : Module specifications successfully loaded and checked for errors. 
+2018-04-18 18:25:39 : Module specifications successfully loaded and checked for errors. 
 
-2018-04-18 09:09:39 : Warning note to module developer. The Get specification for dataset HighCarSvcCost in table Azone does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
+2018-04-18 18:25:39 : Warning note to module developer. The Get specification for dataset HighCarSvcCost in table Azone does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
 
-2018-04-18 09:09:39 : Warning note to module developer. The Get specification for dataset LowCarSvcCost in table Azone does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
+2018-04-18 18:25:39 : Warning note to module developer. The Get specification for dataset LowCarSvcCost in table Azone does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
 
-2018-04-18 09:09:39 : Warning note to module developer. The Get specification for dataset OwnCost in table Vehicle does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
+2018-04-18 18:25:39 : Warning note to module developer. The Get specification for dataset OwnCost in table Vehicle does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
 
-2018-04-18 09:09:39 : Warning note to module developer. The Get specification for dataset OwnCostPerMile in table Vehicle does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
+2018-04-18 18:25:39 : Warning note to module developer. The Get specification for dataset OwnCostPerMile in table Vehicle does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
 
-2018-04-18 09:09:39 : Warning note to module developer. The Get specification for dataset InsCost in table Vehicle does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
+2018-04-18 18:25:39 : Warning note to module developer. The Get specification for dataset InsCost in table Vehicle does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
 
-2018-04-18 09:09:39 : Warning note to module developer. The Set specification for dataset OwnCost in table Vehicle does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
+2018-04-18 18:25:39 : Warning note to module developer. The Set specification for dataset OwnCost in table Vehicle does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
 
-2018-04-18 09:09:39 : Warning note to module developer. The Set specification for dataset OwnCostSavings in table Household does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
+2018-04-18 18:25:39 : Warning note to module developer. The Set specification for dataset OwnCostSavings in table Household does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
 
-2018-04-18 09:09:39 : Warning note to module developer. The Set specification for dataset OwnCost in table Household does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
+2018-04-18 18:25:39 : Warning note to module developer. The Set specification for dataset OwnCost in table Household does not specify a currency year. The model user's base year will be assumed when the module is called. If this is not the intended behavior, include the intended currency year in the UNITS specification as described in the VisionEval module developer documentation. 
 
-2018-04-18 09:09:39 : No inputs to process. 
+2018-04-18 18:25:39 : No inputs to process. 
 
-2018-04-18 09:09:39 : Checking whether datastore contains all datasets in Get specifications. 
+2018-04-18 18:25:39 : Checking whether datastore contains all datasets in Get specifications. 
 
-2018-04-18 09:09:39 : Datastore contains all datasets identified in module Get specifications. 
+2018-04-18 18:25:39 : Datastore contains all datasets identified in module Get specifications. 
 
-2018-04-18 09:09:39 : Running module and checking whether outputs meet Set specifications. 
+2018-04-18 18:25:39 : Running module and checking whether outputs meet Set specifications. 
 
-2018-04-18 09:09:39 : Also saving module outputs to datastore. 
+2018-04-18 18:25:39 : Also saving module outputs to datastore. 
 
-2018-04-18 09:09:52 : Module run successfully and outputs meet Set specifications. 
+2018-04-18 18:25:53 : Module run successfully and outputs meet Set specifications. 
 
-2018-04-18 09:09:52 : Module outputs saved to datastore. 
+2018-04-18 18:25:53 : Module outputs saved to datastore. 
 
-2018-04-18 09:09:52 : Congratulations. Module AdjustVehicleOwnership passed all tests. 
+2018-04-18 18:25:53 : Congratulations. Module AdjustVehicleOwnership passed all tests. 
 
