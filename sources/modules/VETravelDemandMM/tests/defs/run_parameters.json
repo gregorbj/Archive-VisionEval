@@ -1,0 +1,11 @@
+{
+  "Model": "VETravelDemandMM Tests",
+  "Scenario": "Test",
+  "Description": "Test of VETravelDemandMM package modules",
+  "Region": "RVMPO",
+  "BaseYear": "2010",
+  "Years": ["2010", "2038"],
+  "DatastoreName": "datastore.h5",
+  "DatastoreType": "H5",
+  "Seed": 1
+}

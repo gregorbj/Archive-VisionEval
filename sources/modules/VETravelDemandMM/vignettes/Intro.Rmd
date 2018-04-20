@@ -1,0 +1,236 @@
+---
+title: "Introduction to VETravelDemandMM"
+author: "Liming Wang"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to VETravelDemandMM}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Overview
+
+The VETravelDemandMM module is a R package that implements a module for [the VisionEval framework](https://gregorbj.github.io/VisionEval/) to simulate multi-modal travel demand for individual households including:
+- Annual Average Daily VMT (AADVMT)
+- Transit trips and PMT
+- Biking trips and PMT
+- Walking trips and PMT
+
+It supersedes the Daily VMT and non-driving trips models in RSPM/GreenSTEP (and re-implemented for VisionEval as [the VETravelDemand module](https://github.com/gregorbj/VisionEval/tree/master/sources/modules/VETravelDemand)). 
+
+The motivations of developing the new package includes better policy sensitivities for non-driving modes and taking advantage of newer and better data sources available since the implementation of the RSPM/GreenSTEP model. More specifically, the objectives of the new module include the following:
+
+### Better Representation of Multi-Modal Travel
+Since the primary focus of GreenSTEP is green-house gas emission, its travel demand module has minimum representation of non-driving modes. As more non-driving travel and its associated benefits attracts more attentin from the public and policy-makers, there is need to understand the key drivers of multi-modal transportation choice and how non-driving travel reponds to policies and investment decisions and to develop models that better represent the multi-modal travel for strategic planning. This module is developed in response to this demand.
+
+### Updating Models with the Latest and Best Data Available 
+The current implementation of travel demand module uses for model estimation the latest 2009 NHTS data joined with EPA's Smart Location Database (SLD) for built environment information, the National Transit Database (NTD) for region-level transit supply, and HPMS for region-level road network. Access to the confidential block group of household's residential location allow these nationwide datasets to be joined at a very high resolution. In addition to refresh the model estimation with the latest nationwide datasets, this new data provide a rich set of high-resolution built environment variables (the SLD includes more than a hundred block group-level built environment measures covering most of US).
+
+Since NHTS2009 have Annual VMT data for most households surveyed (more than half of them missing in NHTS2001), we took advantage of the data and model the AADVMT for household, instead of the VMT in the survey day as what the GreenSTEP used.
+
+### Rigorous Benchmark and Selection of Different Model Structures
+There are various model structures used in the research literature to model non-driving travel. We reviewed the various model structures and used theoretical vigorousness and cross-validation to benchmark and select model structures. More details of the cross-validation and model selection can be found in [a manuscript currently under review](https://www.dropbox.com/s/y594fz44achoqkq/jtlu_rspm.pdf?dl=0). 
+
+### Taking advantage of the R infrastructure and new packages
+The current implementation of the module takes advantage of [the `tidyverse` suite of R packages](http://www.tidyverse.org/), in particular, `dplyr`, for efficiency, concision and code readability. It also uses the `purrr` package for functional programming where feasible. Comparing with  RSPM/GreenSTEP, the package uses model objects and method dispatch for `predict` calls, which eliminates the need to implement different model structures in the package.
+
+## Methods and Model Structure
+
+More discussion of the model structure can be found in [the manuscript](https://www.dropbox.com/s/y594fz44achoqkq/jtlu_rspm.pdf?dl=0). Here is a  summary of existing and selected model structures:
+
+- GreenSTEP Daily VMT (DVMT) Models (2-step models)
+    1. binomial logit ZeroDVMT
+    2. power-transformed linear regression of DVMT (for DVMT > 0)
+- AADVMT Model for Annual Average Daily VMT (AADVMT)
+    - power-transformed linear regression of AADVMT
+- TFL models for non-driving modes (2-step models)
+    1. hurdle model of trip frequncies by modes (transit, walk, and bike)
+    2. power-transformed linear regression of average trip length
+- Daily person mile traveled (PMT) by (non-driving) modes models
+    - hurdle models of DPMT by modes (transit, walk, and bike)
+
+Technical details of the model structures can be found in the estimation script for corresponding model in `data-raw`. The actual functions doing the prediction for the module in `R` is model structure agnostic - it is determined by the model objects saved in the model data frame in the `data` directory.
+
+### Variables Used in Models
+
+[A Cheat Sheet](https://github.com/gregorbj/VisionEval/wiki/documents/RSPM-TFLmodelVariables_May2017.pdf) created by Tara Weidner summarizes the estimated functions, independent and dependent variables in each model.
+
+## Data
+
+This module provides default model parameters estimated with US nationwide data, and it is also possible to re-estimate model paramters with region-specific data. The main estimation data are drawn from two external data package ([NHTS2009](https://github.com/cities-lab/NHTS2009) and [SLD](https://github.com/cities-lab/SLD), documented therein; the plan is to commit them to the VisionEval repository) and `data-raw/LoadDataforEstimation.R` joins data from different data sources and creates a single household data frame for estimation. `data-raw/LoadDataforEstimation.R` provides code and comments needed to replace the estimation data with region specific data. However, since the residential block group information for households in the 2009 NHTS (essentially providing an additional block group id column to the households data frame and allowing NHTS to be joined with SLD) used in the estimation of the nationwide models is confidential and can not be shared, users will not be able to directly run the estimation scripts in `data-raw`.
+
+## Usage
+
+### Installation
+
+The package can be installed from github using the [`devtools` package](https://cran.r-project.org/web/packages/devtools/index.html):
+```{r, eval=FALSE}
+devtools::install_github("gregorbj/VisionEval/sources/modules/VETravelDemandMM@develop")
+# OR
+devtools::install_github("cities-lab/VETravelDemandMM")
+```
+
+### Model Prediction
+As a VisionEval module, the package provides 9 functions (in `R` directory) that predict an arrange of travel outcomes for driving and non-driving modes:
+
+- AADVMT (Annual Average Daily VMT): `R/PredictAADVMT.R`
+- Bike PMT (Person miles travelled): `R/PredictBikePMT.R`
+- Bike TFL (Trip frequencies and length): `R/PredictBikeTFL.R`
+- Transit PMT: `R/PredictTransitPMT.R`
+- Transit TFL: `R/PredictTransitTFL.R`
+- Walk PMT: `R/PredictWalkPMT.R`
+- Walk TFL: `R/PredictWalkTFL.R`
+
+To use modules in the package with the default parameters, a user will add modules to `visioneval::runModule`:
+```{r, eval=F}
+#' @source \url{https://github.com/gregorbj/VisionEval/blob/9869880c26802b57447c87c8e7a317df89171498/sources/models/VERSPM/Test1/run_model.R}
+
+library(visioneval)
+
+#Initialize model
+#----------------
+initializeModel(
+  ParamDir = "defs",
+  RunParamFile = "run_parameters.json",
+  GeoFile = "geo.csv",
+  ModelParamFile = "model_parameters.json",
+  LoadDatastore = FALSE,
+  DatastoreName = NULL,
+  SaveDatastore = TRUE
+  )  
+
+#Run all demo module for all years
+#---------------------------------
+for(Year in getYears()) {
+  runModule(ModuleName = "CreateHouseholds", 
+            PackageName = "VESimHouseholds",
+            RunFor = "AllYears",
+            RunYear = Year)
+  runModule(ModuleName = "PredictWorkers", 
+            PackageName = "VESimHouseholds",
+            RunFor = "AllYears",
+            RunYear = Year)
+  runModule(ModuleName = "AssignLifeCycle", 
+            PackageName = "VESimHouseholds",
+            RunFor = "AllYears",
+            RunYear = Year)
+  runModule(ModuleName = "PredictIncome", 
+            PackageName = "VESimHouseholds",
+            RunFor = "AllYears",
+            RunYear = Year)
+  runModule(ModuleName = "PredictHousing", 
+            PackageName = "VESimHouseholds",
+            RunFor = "AllYears",
+            RunYear = Year)
+  runModule(ModuleName = "LocateHouseholds",
+            PackageName = "VELandUse",
+            RunFor = "AllYears",
+            RunYear = Year)
+  runModule(ModuleName = "LocateEmployment",
+            PackageName = "VELandUse",
+            RunFor = "AllYears",
+            RunYear = Year)
+  runModule(ModuleName = "AssignDevTypes",
+            PackageName = "VELandUse",
+            RunFor = "AllYears",
+            RunYear = Year)
+  runModule(ModuleName = "Calculate4DMeasures",
+            PackageName = "VELandUse",
+            RunFor = "AllYears",
+            RunYear = Year)
+  runModule(ModuleName = "CalculateUrbanMixMeasure",
+            PackageName = "VELandUse",
+            RunFor = "AllYears",
+            RunYear = Year)
+  runModule(ModuleName = "AssignTransitService",
+            PackageName = "VETransportSupply",
+            RunFor = "AllYears",
+            RunYear = Year)
+  runModule(ModuleName = "AssignRoadMiles",
+            PackageName = "VETransportSupply",
+            RunFor = "AllYears",
+            RunYear = Year)
+  runModule(ModuleName = "AssignVehicleOwnership",
+            PackageName = "VEVehicleOwnership",
+            RunFor = "AllYears",
+            RunYear = Year)
+  runModule(ModuleName = "PredictVehicles",
+            PackageName = "VETravelDemandMM",
+            RunFor = "AllYears",
+            RunYear = Year)
+  runModule(ModuleName = "PredictDrivers",
+            PackageName = "VETravelDemandMM",
+            RunFor = "AllYears",
+            RunYear = Year)  
+  runModule(ModuleName = "PredictAADVMT",
+            PackageName = "VETravelDemandMM",
+            RunFor = "AllYears",
+            RunYear = Year)
+  runModule(ModuleName = "PredictBikePMT",
+            PackageName = "VETravelDemandMM",
+            RunFor = "AllYears",
+            RunYear = Year)
+  runModule(ModuleName = "PredictWalkPMT",
+            PackageName = "VETravelDemandMM",
+            RunFor = "AllYears",
+            RunYear = Year)
+  runModule(ModuleName = "PredictTransitPMT",
+            PackageName = "VETravelDemandMM",
+            RunFor = "AllYears",
+            RunYear = Year)  
+}
+
+```
+
+### Model Estimation
+If a user needs to replace the default model parameters and/or structures, s/he will use the scripts in `data-raw`, following these steps:
+
+1. Prepare data 
+
+    Replace `data-raw/LoadDataforModelEst.R` with their own script that loads and processes their own household data frame. The variables used in the current estimation are documented in the comments of `data-raw/LoadDataforModelEst.R`. Users can add, remove, or replace most of the variables.
+    
+2. Customize model formula
+    
+    Edit the corresponding model estimation script in `data-raw/` to cutomize model formula for re-estimation. For example, if a user wants to re-estimate the AADVMT model, s/he would edit `data-raw/AADVMTModel_df.R`. Before modifying the formula, replace the line in the script `source("data-raw/LoadDataforModelEst.R")` with your own script created in step 1.
+    
+    The estimation script uses standard R model formula to specify models. Users can change the independent variables, transformation of dependent variables, even model structure (model type) by modifying the formula. 
+    
+    It is also possible (and recommended if the re-estimation is a specific region) to change the segmentation scheme. Most models in the package use `metro` status to segment data and estimate different models for each segment. The user can replace `metro` with any other desired variable for segmentation. If no model segmentation is needed, see `data-raw/DriversModel_df.R` and `data-raw/VehiclesModel_df.R` for examples of disabling segmentation.
+
+3. Re-estimate and save estimation results
+
+    After modifying the model formula, save the script and source it in RStudio (recommended) or a R console. This should re-estimate the model with the new formula and save the estimation results to `data/`. It is likely to take many iterations and troubleshootings before the model formula is ideal.
+    
+4. Modify prediction specification
+
+    Once an ideal model formula is found and estimation results saved to `data/`, the user needs to edit the specifications in the `R/Predict*.R` script corresponding to the model being modified to be consistent with the model formula.
+    
+5. Rebuild and reinstall package
+
+    Finally, the package is ready for **Build and Reload**. Once the Build and Reload finishes successfully, the re-estimated module to ready to use with `visioneval::runModule` (see section above).
+
+## Code Repository and Automated Tests
+
+The source code of the VETravelDemandMM package is available on github: https://github.com/cities-lab/VETravelDemandMM 
+
+Automated tests of the package including:
+
+- package check with `devtools::check()`,
+- package build and installation with `R CMD INSTALL`, and
+- package tests in tests/scripts/test.R (with Rogue Valley data).
+
+The automated tests are handled by [Travis-CI](https://travis-ci.org/) and the current status of automated tests for the package is [![Travis-CI Build Status](https://travis-ci.org/cities-lab/VETravelDemandMM.svg)](https://travis-ci.org/cities-lab/VETravelDemandMM).
+
+## Additional Documents
+
+A report from the project that develops the module is to be released by Oregon DOT by the end of September, 2017. Parts of the report (work-in-progress) that document the literature reivew, model structure, model estimation and sensivity tests are available:
+
+- [SPR 788 Project Report for Task 2 Model Design and Estimation Report](https://cities-lab.github.io/SPR788/Task2_Report.html)
+- [SPR 788 Project Report for Task 3 VETravelDemand (VisionEval Travel Demand) Implementation](https://cities-lab.github.io/SPR788/Task3_Report.html)
+- [SPR 788 Project Report for Task 4 Model Testing](https://cities-lab.github.io/SPR788/Task4_Report.html)
+
+A link to the final report will be provided here once it is available.
+
+A manuscript is currently under review:
+- [Development of a Multi-modal Travel Demand Module for the Regional Strategic Planning Model (manuscript under review)](https://www.dropbox.com/s/y594fz44achoqkq/jtlu_rspm.pdf?dl=0)
