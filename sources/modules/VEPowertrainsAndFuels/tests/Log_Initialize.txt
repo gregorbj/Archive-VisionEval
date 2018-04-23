@@ -1,0 +1,18 @@
+Test
+Test of VESimHouseholds package modules
+2018-04-23_08:47:49
+
+2018-04-23 08:47:49 : Testing Initialize. 
+
+2018-04-23 08:47:49 : Attempting to load datastore. 
+
+2018-04-23 08:47:49 : Datastore loaded. 
+
+2018-04-23 08:47:49 : Attempting to load and check specifications. 
+
+2018-04-23 08:47:51 : Module specifications successfully loaded and checked for errors. 
+
+2018-04-23 08:47:51 : Attempting to process, check and load module inputs. 
+
+2018-04-23 08:48:52 : Module inputs successfully checked and loaded into datastore. 
+
