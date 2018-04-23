@@ -505,8 +505,6 @@ CalculateMpgMpkwhAdjustments <- function(L) {
 
   #Function to calculate average adjustment for a vehicle/powertrain type
   #----------------------------------------------------------------------
-  VehPtType <- "LdIce"
-  Marea <- "RVMPO"
   calcMpgMpkwhAdj <- function(VehPtType, Marea) {
     CoeffNames_ <- c("a1", "a2", "a3", "a4")
     if (VehPtType %in% c("LdIce", "LdHev", "LdEv", "LdFcv")) {
