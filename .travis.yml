@@ -28,7 +28,7 @@ install:
   - Rscript -e 'install.packages(c("curl","devtools", "roxygen2", "stringr", "knitr", "data.table", "ordinal", "geosphere", "fields", "car", "pbkrtest", "quantreg", "reshape"))'
   - Rscript -e 'devtools::install_bioc(c("BiocInstaller", "rhdf5"))'
   # Packages required for VEGUI  
-  - Rscript -e 'install.packages(c("shiny", "shinyjs", "shinyFiles", "data.table", "DT", "shinyBS", "future", "testit", "jsonlite", "shinyAce", "envDocument", "rhandsontable", "shinyTree"))'
+  - Rscript -e 'install.packages(c("shiny", "shinyjs", "shinyFiles", "DT", "shinyBS", "future", "testit", "jsonlite", "shinyAce", "envDocument", "rhandsontable", "shinyTree"))'
   - Rscript -e 'devtools::install_github(c("tdhock/namedCapture", "rstudio/webdriver", "rstudio/shinytest"))'
 
 # setup a different environment variable for each Travis build environment (in the matrix) to run in parallel
@@ -65,21 +65,17 @@ script:
       if ( [ $element != "." ] ); then
         cd sources/modules/$element
         Rscript -e 'devtools::install_deps(".")'
+        Rscript -e 'devtools::document()'
         R CMD INSTALL .
         cd ../../..
       fi
     done
     
     #run module or model tests
+  - |
     cd $FOLDER
-    if ( [ $TYPE == "module" ] ); then
-      Rscript -e 'devtools::install_deps(".")'
-      Rscript -e 'devtools::check(".")'
-      Rscript -e "tryCatch( source( '$SCRIPT' ) )"
-      R CMD INSTALL .
-      exit_status=$?
-    else
-      Rscript -e "tryCatch( source( '$SCRIPT' ) )"
-      exit_status=$?
-    fi
-    exit $exit_status
+    if ( [ $TYPE == "module" ] ); then  Rscript -e 'devtools::install_deps(".")'; fi  
+  - if ( [ $TYPE == "module" ] ); then  Rscript -e 'devtools::check(".")'; fi
+  - if ( [ $TYPE == "module" ] ); then  Rscript -e "tryCatch( source( '$SCRIPT' ) )"; fi
+  - if ( [ $TYPE == "module" ] ); then  R CMD INSTALL .; fi
+  - if ( [ $TYPE == "model" ] ); then  Rscript -e "tryCatch( source( '$SCRIPT' ) )"; fi
