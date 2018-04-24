@@ -1,0 +1,31 @@
+==============================================
+Documentation for ave_vmt_per_vehicle_2010.csv
+==============================================
+Data in this file is used in the LoadDefaultRoadDvmtValues.R along with data in the ldv_numbers_2010.csv to calculate the ratio between commercial light-duty vehicle (LDV) vehicle miles traveled (VMT) and household VMT.
+
+File Structure
+--------------
+Rows contain data for vehicle categories.
+Column names as follows:
+Category: Light-duty vehicle category as follows:
+    All Cars: passenger cars including household and commercial fleet vehicles
+    All Light Trucks: light trucks including household and fleet vehicles
+    Fleet Compact Cars: compact cars in fleets
+    Fleet Intermediate Cars: intermediate cars in fleets
+    Fleet Pickup Trucks: pickup trucks in fleets
+    Fleet Minivans: minivans trucks in fleets
+    Fleet Sport utility vehicles: sport utility vehicles in fleets
+    Fleet Full-size vans: full-size vans in fleets
+AnnualVmtPerVehicle: The average annual vehicle miles traveled by vehicles in the category
+Year: Year the data represents
+Source: The data source. TEDB = Transportation Energy Data Book (see source below)
+Table: Table number in the source document
+
+Source:
+-------
+Transportation Energy Data Book, Edition 31. Accessed from:
+https://cta.ornl.gov/data/editions/Edition31_Full_Doc.pdf
+Table 4.1, Summary Statistics for Cars, 1970-2010
+Table 4.2, Summary Statistics for Two-Axle, Four-Tire Trucks, 1970-2010
+Table 7.3, Average Annual Vehicle-Miles of Travel for Commercial Fleet Vehicles, 2010
+

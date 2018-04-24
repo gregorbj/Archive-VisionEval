@@ -1,0 +1,6 @@
+CostCategory,UnitCost
+AirPollution,0.014
+OtherResource,0.003
+EnergySecurity,0.45
+Safety,0.005
+Noise,0.001

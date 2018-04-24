@@ -1,0 +1,27 @@
+=================================================
+Documentation for aaa_vehicle_operating_costs.csv
+=================================================
+Data in this file is used in the CalculateVehicleOperatingCost module to compute vehicle maintenance, repair and tire costs as a function of vehicle age and type.
+
+File Structure
+--------------
+Rows contain cost data by vehicle type category.
+Column names as follows:
+VehicleType: vehicle type category
+    SmallSedan: Selected vehicles include Chevrolet Cruze, Ford Focus, Honda Civic, Hyundai Elantra and Toyota Corolla
+    MediumSedan: Selected vehicles include Chevrolet Malibu, Ford Fusion, Honda Accord, Nissan Altima and Toyota Camry 
+    LargeSedan: Selected vehicles include Chevrolet Impala, Chrysler 300, Ford Taurus, Nissan Maxima and Toyota Avalon
+    SmallSUV: Selected vehicles include Chevrolet Equinox, Ford Escape, Honda CR-V, Nissan Rogue and Toyota RAV4
+    MediumSUV: Selected vehicles include Chevrolet Traverse, Ford Explorer, Honda Pilot, Jeep Grand Cherokee and Toyota Highlander
+    Minivan: Selected vehicles include Dodge Grand Caravan, Kia Sedona, Honda Odyssey, Nissan Quest and Toyota Sienna
+    Pickup: Selected vehicles include Chevrolet Silverado 1500, Ford F-150, Nissan Titan, Ram 1500 and Toyota Tundra
+    Hybrid: Selected vehicles include Ford Fusion, Honda Accord, Hyundai Sonata, Toyota Prius Liftback and Toyota RAV4
+    Electric: Selected vehicles include  BMW i3, Chevrolet Bolt, Fiat 500e, Kia Soul and Nissan Leaf
+
+Notes:
+Costs are averages for vehicles that are purchased new and owned for 5 years.
+
+Source:
+-------
+Your Driving Costs: How much are you really paying to drive, American Automobile Association, 2017. Accessed from:
+http://exchange.aaa.com/wp-content/uploads/2017/08/17-0013_Your-Driving-Costs-Brochure-2017-FNL-CX-1.pdf

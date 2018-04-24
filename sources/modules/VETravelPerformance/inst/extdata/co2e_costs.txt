@@ -1,0 +1,19 @@
+===========================================
+Documentation for co2e_costs.csv
+===========================================
+Data in this file is used in the CalculateVehicleOperatingCost module to compute externality costs from greenhouse gas emissions for the purpose of calculating social costs and for the purpose of calculating carbon taxes based on whether the user specifies that users should pay for greenhouse gas emissions.
+
+File Structure
+--------------
+Rows contain data by year.
+Column names as follows:
+Year: Forecast year
+DiscRate5Pct: Dollars per metric ton of carbon dioxide equivalent emissions in 2007 dollars assuming a discount rate of 5%
+DiscRate3Pct: Dollars per metric ton of carbon dioxide equivalent emissions in 2007 dollars assuming a discount rate of 3%
+DiscRate2.5Pct: Dollars per metric ton of carbon dioxide equivalent emissions in 2007 dollars assuming a discount rate of 2.5%
+HighImpact: Dollars per metric ton of carbon dioxide equivalent emissions in 2007 dollars assuming high impact and a discount rate of 3%
+
+Source:
+-------
+Table ES-1. Interagency Working Group on Social Cost of Greenhouse Gases, United States Government. Technical Support Document: Technical Update of the Social Cost of Carbon for Regulatory Impact Analysis Under Executive Order 12866. August 2016
+

@@ -1,0 +1,22 @@
+=================================
+Documentation for base_speeds.csv
+=================================
+Data in this file is used in the CalculateRoadPerformance.R script to specify the base speeds for freeways and for arterials by congestion category. Base speeds are the average trip speeds when there are no freeway or arterial operations programs such as ramp metering, incident management, signal coordination, or access management in place. Congestion categories are those defined by the Texas Transportation Institute for the Urban Mobility Study and include the following: None = none, Mod = moderate, Hvy = heavy, Sev = severe, Ext = extreme. Data are provided for base speeds in consideration of both recurring and non-recurring congestion, and base speeds in consideration of only recurring congestion. Recurring congestion is congestion that occurs in the absence of traffic accidents and other incidents (e.g. disabled vehicle on shoulder, object on roadway). Non-recurring congestion is congestion that occurs because of traffic accidents or other incidents.
+
+File Structure
+--------------
+Rows contain data by congestion category
+Column names as follows:
+Level: Congestion level: None, Mod, Hvy, Sev, Ext 
+Fwy: Average freeway speed by congestion level considering the effects of both recurring and non-recurring congestion
+Art: Average arterial speed by congestion level considering the effects of both recurring and non-recurring congestion
+Fwy_Rcr: Average freeway speed by congestion level considering only the effects of recurring congestion
+Art_Rcr: Average arterial speed by congestion level considering only the effects of recurring congestion
+
+Source:
+-------
+Alex Bigazzi and Kelly Clifton, Refining GreenSTEP: Impacts of Vehicle Technologies and ITS/Operational Improvements on Travel Speed and Fuel Consumption Curves, Report on Task 2: Incorporation of Operations and ITS Improvements, Portland State University, November 2011.
+Bigazzi_GreenSTEP_estimate_ops_impacts.xls
+
+
+

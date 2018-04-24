@@ -1,0 +1,25 @@
+======================================
+Documentation for ldv_numbers_2010.csv
+======================================
+
+File Structure
+--------------
+Rows contain data for vehicle categories.
+Column names as follows:
+Category: Light-duty vehicle category as follows:
+    LDV Short Wheel Base: Light duty vehicles classified as having short wheel base
+    LDV Long Wheel Base: Light duty vehicles classified as having long wheel base
+    All LDV: All light duty vehicles
+    Fleet Automobiles: Automobiles in private or public fleets of 4 or more vehicles
+Number: Number of vehicles in the category
+Year: Year the data represents
+Source: The data source. BTSNTS = Bureau of Transportation Statistics National Transportation Statistics (see sources below)
+Table: Table number in the source document
+
+Source:
+-------
+Bureau of Transportation Statistics, National Transportation Statistics. Accessed from:
+https://www.rita.dot.gov/bts/sites/rita.dot.gov.bts/files/publications/national_transportation_statistics/index.html
+Table 1-11: Number of U.S. Aircraft, Vehicles, Vessels, and Other Conveyances
+Table 1-14: U.S. Automobile and Truck Fleets by Use (Thousands)
+
