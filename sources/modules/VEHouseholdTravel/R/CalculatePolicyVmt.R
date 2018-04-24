@@ -134,7 +134,7 @@ CalculatePolicyVmtSpecifications <- list(
       ),
       TABLE = "CommuteOptions",
       GROUP = "Global",
-      FILE = "model_commute_options.csv",
+      FILE = "region_commute_options.csv",
       TYPE = "character",
       UNITS = "category",
       SIZE = 31,
@@ -149,7 +149,7 @@ CalculatePolicyVmtSpecifications <- list(
       NAME = "DataValue",
       TABLE = "CommuteOptions",
       GROUP = "Global",
-      FILE = "model_commute_options.csv",
+      FILE = "region_commute_options.csv",
       TYPE = "double",
       UNITS = "multiplier",
       SIZE = 0,
@@ -161,7 +161,7 @@ CalculatePolicyVmtSpecifications <- list(
       NAME = "DataItem",
       TABLE = "LightVehiclesInfo",
       GROUP = "Global",
-      FILE = "model_light_vehicles.csv",
+      FILE = "region_light_vehicles.csv",
       TYPE = "character",
       UNITS = "category",
       SIZE = 12,
@@ -173,7 +173,7 @@ CalculatePolicyVmtSpecifications <- list(
       NAME = "DataValue",
       TABLE = "LightVehiclesInfo",
       GROUP = "Global",
-      FILE = "model_light_vehicles.csv",
+      FILE = "region_light_vehicles.csv",
       TYPE = "double",
       UNITS = "multiplier",
       SIZE = 0,
@@ -979,32 +979,16 @@ CalculatePolicyVmtSpecifications <- list(
       ISELEMENTOF = ""
     ),
     item(
-      NAME = "VmtCharge",
-      TABLE = "Model",
-      GROUP = "Global",
-      TYPE = "compound",
-      UNITS = "USD/MI",
-      SIZE = 0,
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = ""
-    ),
-    item(
-      NAME = "FuelCost",
+      NAME = item(
+        "FuelCost",
+        "GasTax",
+        "CarbonCost",
+        "VmtCost"
+      ),
       TABLE = "Model",
       GROUP = "Global",
       TYPE = "compound",
       UNITS = "USD/GAL",
-      SIZE = 0,
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = ""
-    ),
-    item(
-      NAME = "GasTax",
-      TABLE = "Model",
-      GROUP = "Global",
-      TYPE = "compound",
-      UNITS = "USD/GAL",
-      SIZE = 0,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = ""
     ),
@@ -1857,7 +1841,10 @@ CalculatePolicyVmt <- function(L) {
   #================================
 
   #Gather cost parameters into costs.
-  Costs_ <- c(L$Global$Model$FuelCost,L$Global$Model$GasTax,0,L$Global$Model$VmtCharge)
+  Costs_ <- c(L$Global$Model$FuelCost,
+              L$Global$Model$GasTax,
+              L$Global$Model$CarbonCost,
+              L$Global$Model$VmtCost)
   names(Costs_) <- c("FuelCost","GasTax","CarbonCost","VmtCost")
 
   #Apply auto operating cost growth
