@@ -51,6 +51,15 @@ testModule(
   DoRun = TRUE
 )
 
+#Test ApplyDvmtReductions module
+source("R/ApplyDvmtReductions.R")
+testModule(
+  ModuleName = "ApplyDvmtReductions",
+  LoadDatastore = TRUE,
+  SaveDatastore = TRUE,
+  DoRun = TRUE
+)
+
 #Finish up
 setwd("tests")
 tar("Datastore.tar", "Datastore")

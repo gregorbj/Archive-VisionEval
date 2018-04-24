@@ -1,30 +1,30 @@
 Test
 Test of VESimHouseholds package modules
-2018-04-18_18:29:46
+2018-04-23_07:44:17
 
-2018-04-18 18:29:46 : Testing CalculateAltModeTrips. 
+2018-04-23 07:44:17 : Testing CalculateAltModeTrips. 
 
-2018-04-18 18:29:46 : Attempting to load datastore. 
+2018-04-23 07:44:17 : Attempting to load datastore. 
 
-2018-04-18 18:29:46 : Datastore loaded. 
+2018-04-23 07:44:17 : Datastore loaded. 
 
-2018-04-18 18:29:46 : Attempting to load and check specifications. 
+2018-04-23 07:44:17 : Attempting to load and check specifications. 
 
-2018-04-18 18:29:46 : Module specifications successfully loaded and checked for errors. 
+2018-04-23 07:44:17 : Module specifications successfully loaded and checked for errors. 
 
-2018-04-18 18:29:46 : No inputs to process. 
+2018-04-23 07:44:17 : No inputs to process. 
 
-2018-04-18 18:29:46 : Checking whether datastore contains all datasets in Get specifications. 
+2018-04-23 07:44:17 : Checking whether datastore contains all datasets in Get specifications. 
 
-2018-04-18 18:29:46 : Datastore contains all datasets identified in module Get specifications. 
+2018-04-23 07:44:17 : Datastore contains all datasets identified in module Get specifications. 
 
-2018-04-18 18:29:46 : Running module and checking whether outputs meet Set specifications. 
+2018-04-23 07:44:17 : Running module and checking whether outputs meet Set specifications. 
 
-2018-04-18 18:29:46 : Also saving module outputs to datastore. 
+2018-04-23 07:44:17 : Also saving module outputs to datastore. 
 
-2018-04-18 18:29:49 : Module run successfully and outputs meet Set specifications. 
+2018-04-23 07:44:19 : Module run successfully and outputs meet Set specifications. 
 
-2018-04-18 18:29:49 : Module outputs saved to datastore. 
+2018-04-23 07:44:19 : Module outputs saved to datastore. 
 
-2018-04-18 18:29:49 : Congratulations. Module CalculateAltModeTrips passed all tests. 
+2018-04-23 07:44:19 : Congratulations. Module CalculateAltModeTrips passed all tests. 
 
