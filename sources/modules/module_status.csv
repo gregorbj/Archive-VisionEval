@@ -9,7 +9,10 @@ VELandUse,PredictHousing,"Predict household housing (single-family, multifamily,
 VELandUse,LocateEmployment,"Allocate number of jobs by Bzone and type (total, retail, service) & assign jobsite Bzone to workers and create worker table",EIT,X,
 VELandUse,AssignDevTypes,"Assign development type to household (urban, rural)",EIT,X,
 VELandUse,Calculate4DMeasures,"Calculate Bzone density, diversity, design, and accessibility measures",EIT,X,
-VELandUse,CalculateUrbanMixMeasure,Assign urban mixed use attribute to households,EIT,X,
+VELandUse,CalculateUrbanMixMeasure,Assign urban mixed use attribute to households,,,
+VELandUse,AssignParkingRestrictions,Identifies Bzones that have parking restrictions and prices,,,
+VELandUse,AssignDemandManagement,Identifies proportions of households participating in individualized marketing by Bzone and proportions of worker participating in employee commute options by Bzone,,,
+VELandUse,AssignCarSvcAvailability,"Identifies the level of car service (e.g. carshare, TNC) available by Bzone",EIT,X,
 VELandUse,CalculateBasePlaceTypes,Assign households and firms to the place types (bzones) for the base year,IT,,X
 VELandUse,CalculateFuturePlaceTypes,Assign households and firms to the place types (bzones) for the years that are not base year,IT,,X
 VETransportSupply,AssignTransitService,Calculates transit revenue miles per capita for region and Bzone transit service level,EIT,X,
@@ -24,25 +27,28 @@ VEHouseholdVehicles,AssignVehicleOwnership,Assign number of vehicles owned by ho
 VEHouseholdVehicles,AssignVehicleType,Assigns numbers autos and light trucks owned by each household,EIT,X,
 VEHouseholdVehicles,CreateVehicleTable,"Creates vehicle table and populates with household and vehicle IDs, geography, and vehicle type",EIT,X,
 VEHouseholdVehicles,AssignVehicleAge,Assign age to each household vehicle,EIT,X,
+VEHouseholdVehicles,CalculateVehicleOwnCost,Calculates the annual ownership cost of each household vehicles,,,
+VEHouseholdVehicles,AdjustVehicleOwnership,Compares approximate vehicle ownership cost per mile of travel with the cost of high level car services and substitutes car service where less expensive,,,
 VEHouseholdVehicles,AssignVehicleFeatures,"Assigns number of vehicles, vehicle type, and age by households using run year data",IT,,X
 VEHouseholdVehicles,AssignVehicleFeatures,"Assigns number of vehicles, vehicle type, and age by households using future year data",IT,,X
 VEHouseholdTravel,CalculateHouseholdDVMT,Calculate household DVMT on household vehicles and carshare vehicles,EIT,X,
 VEHouseholdTravel,CalculateAltModeTrips,"Calculate household walk trips, bike trips, and transit trips",IT,X,
+VEHouseholdTravel,CalculateVehicleTrips,Calculates household vehicle trips,,,
 VEHouseholdTravel,DivertSovTravel,"Calculate proportional reduction of DVMT based on user-established goals for shifting short-range SOV tours to bike or similar ""slow"" modes",EIT,X,
+VEHouseholdTravel,ApplyDvmtReductions,Reduces household DVMT to reflect travel demand management and SOV trip diversion,,,
 VEHouseholdTravel,CalculateTravelDemand,"Calculate household, bus, truck, and vehicles dvmt using run year data",IT,,X
 VEHouseholdTravel,CalculateTravelDemandFuture,"Calculate household, bus, truck, and vehicles dvmt using future year data",IT,,X
 VEHouseholdTravel,CalculateInducedDemand,"Calculate changes in household dvmt, vehicle ownership, and vehicle dvmt induced due to changes in transportation supply",IT,,X
 VEHouseholdTravel,CalculatePolicyVmt,"Calculate changes in household dvmt, vehicle ownership, and vehicle dvmt caused by changes the policy by placetypes (Bzone)",IT,,X
-VERoadPerformance,CalculateBaseRoadDvmt,"Calculates base year roadway DVMT by urbanized area, vehicle type and road class, and factors for computing future year commercial DVMT",EIT,X,
-VERoadPerformance,CalculateFutureRoadDvmt,"Calculates future year roadway DVMT by urbanized area, vehicle type and road class",EIT,X,
-VERoadPerformance,CalculateRoadPerformance,"Calculates urbanized area roadway congestion, speeds, and delay, and splits LDV travel between freeways and arterials based on congestion and pricing",EIT,X,
-VEEnergyAndEmissions,AssignHhVehiclePowertrain,"Assigns powertrain type (ICE, HEV, PHEV, EV) to each household vehicle",EIT,X,
-VEEnergyAndEmissions,AssignVehicleDvmtSplit,Determines how household DVMT is split between household vehicles,EIT,X,
-VEEnergyAndEmissions,AssignVehicleDvmt,Assigns household DVMT to household vehicles,EIT,X,
-VEEnergyAndEmissions,CalculateCarbonIntensity,"Calculates carbon intensity of fuels used by transportation category (e.g. household, heavy truck) and vehicle type (e.g. auto, bus)",EIT,X,
-VEEnergyAndEmissions,CalculateEnergyAndEmissions,Calculates fuel and electricity consumption and greenhouse gas production by transportation category and vehicle type,,X,
-VETravelCost,AssignUnitCosts,"Input unit cost assumptions for vehicle travel, energy, emissions, etc.",,X,
-VETravelCost,AssignPAYDInsurance,Identifies which households have pay-as-you-drive insurance,,X,
-VETravelCost,CalculateHouseholdCosts,Calculates household costs for owning and operating vehicles,,X,
-VETravelCost,CalculateRoadCostsAndRevenues,Calculates roadway costs and revenues and additional taxes to balance,,X,
+VEPowertrainsAndFuels,CalculateCarbonIntensity,Calculates the average carbon intensity of vehicle fuel by vehicle type and the carbon intensity of electricity,,,
+VEPowertrainsAndFuels,AssignHhVehiclePowertrain,Assigns powertrains and their characteristics to household vehicles. Assigns powertrain characteristics to car services.,,,
+VETravelPerformance,CalculateBaseRoadDvmt,"Calculates base year roadway DVMT by urbanized area, vehicle type and road class, and factors for computing future year commercial DVMT",,,
+VETravelPerformance,CalculateFutureRoadDvmt,"Calculates future year roadway DVMT by urbanized area, vehicle type and road class",EIT,X,
+VETravelPerformance,CalculateRoadPerformance,"Calculates urbanized area roadway congestion, speeds, and delay, and splits LDV travel between freeways and arterials based on congestion and pricing",EIT,X,
+VETravelPerformance,CalculateMpgMpkwhAdjustments,Calculates factors to adjust vehicle MPG and MPKWH by vehicle type and powertrain type to reflect the effects of travel speeds,EIT,X,
+VETravelPerformance,AdjustHhVehicleMpgMpkwh,Apply MPG and MPKWH adjustment factors to household vehicles,,,
+VETravelPerformance,CalculateVehicleOperatingCost,Calculates vehicle operating costs. Uses composite cost to allocate household DVMT among vehicles. Calculates household average cost per vehicle mile,,,
+VETravelPerformance,BudgetHouseholdDvmt,Adjust household DVMT when necessary to fit within household budget. Calculate total household fuel and electricity consumption and CO2e production,,,
+VETravelPerformance,CalculateComEnergyAndEmissions,Calculate energy consumption and emissions of light-duty commercial service vehicles and heavy trucks,,,
+VETravelPerformance,CalculatePtranEnergyAndEmissions,Calculate energy consumption and emissions from public transit vehicles,,,
 VEReports,ReportRPATMetrics,Calculates performance metrics for RPAT,IT,,X
