@@ -30,7 +30,7 @@ VEHouseholdVehicles,AssignVehicleAge,Assign age to each household vehicle,EIT,X,
 VEHouseholdVehicles,CalculateVehicleOwnCost,Calculates the annual ownership cost of each household vehicles,,,
 VEHouseholdVehicles,AdjustVehicleOwnership,Compares approximate vehicle ownership cost per mile of travel with the cost of high level car services and substitutes car service where less expensive,,,
 VEHouseholdVehicles,AssignVehicleFeatures,"Assigns number of vehicles, vehicle type, and age by households using run year data",IT,,X
-VEHouseholdVehicles,AssignVehicleFeatures,"Assigns number of vehicles, vehicle type, and age by households using future year data",IT,,X
+VEHouseholdVehicles,AssignVehicleFeaturesFuture,"Assigns number of vehicles, vehicle type, and age by households using future year data",IT,,X
 VEHouseholdTravel,CalculateHouseholdDVMT,Calculate household DVMT on household vehicles and carshare vehicles,EIT,X,
 VEHouseholdTravel,CalculateAltModeTrips,"Calculate household walk trips, bike trips, and transit trips",IT,X,
 VEHouseholdTravel,CalculateVehicleTrips,Calculates household vehicle trips,,,
