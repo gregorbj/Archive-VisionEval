@@ -1549,7 +1549,7 @@ AssignVehicleFeatures <- function(L) {
   Hh_df$LogDen <- log( Hh_df$Htppopdn )
   # Density_ <- L$Year$Bzone$D1B[match(L$Year$Household$HhPlaceTypes, L$Year$Bzone$Bzone)]
   # Hh_df$LogDensity <- log(Density_)
-  FwyLaneMiPC_Bz <- L$Year$Marea$FwyLaneMiPC[match(L$Year$Bzone$Marea, L$Year$Marea$Marea)]*1000 # To match RPAT numbers
+  FwyLaneMiPC_Bz <- L$Year$Marea$FwyLaneMiPC[match(L$Year$Bzone$Marea, L$Year$Marea$Marea)]
   Hh_df$FwyLaneMiPC <- FwyLaneMiPC_Bz[match(L$Year$Household$HhPlaceTypes, L$Year$Bzone$Bzone)]
   TranRevMiPC_Bz <- L$Year$Marea$TranRevMiPC[match(L$Year$Bzone$Marea, L$Year$Marea$Marea)]
   Hh_df$TranRevMiPC <- TranRevMiPC_Bz[match(L$Year$Household$HhPlaceTypes, L$Year$Bzone$Bzone)]

@@ -74,9 +74,9 @@ setwd("..")
 setwd("tests")
 # Copy and save the results from previous module tests
 zip("ModelState.zip","ModelState.Rda")
-file.remove("ModelState.Rda")
 tar("defs.tar","defs")
 tar("inputs.tar","inputs")
+file.remove("ModelState.Rda")
 dir.remove("defs")
 dir.remove("inputs")
 untar("Datastore_AssignVehicleFeatures.tar")
@@ -91,7 +91,8 @@ testModule(
   ModuleName = "AssignVehicleFeatures",
   LoadDatastore = TRUE,
   SaveDatastore = TRUE,
-  DoRun = TRUE
+  DoRun = TRUE,
+  RunFor = "NotBaseYear"
 )
 
 # Reorganize folder for next VERPAT module test
