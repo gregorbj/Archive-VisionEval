@@ -254,7 +254,7 @@ CalculateInducedDemandSpecifications <- list(
       TABLE = "Household",
       GROUP = "Year",
       TYPE = "currency",
-      UNITS = "USD.1999",
+      UNITS = "USD.2000",
       NAVALUE = -1,
       PROHIBIT = c("NA","< 0"),
       ISELEMENTOF = ""
@@ -271,7 +271,7 @@ CalculateInducedDemandSpecifications <- list(
       UNLIKELY = ""
     ),
     item(
-      NAME = "Dvmt",
+      NAME = "DvmtFuture",
       TABLE = "Household",
       GROUP = "Year",
       TYPE = "compound",
@@ -285,7 +285,7 @@ CalculateInducedDemandSpecifications <- list(
   #Specify data to saved in the data store
   Set = items(
     item(
-      NAME = "Dvmt",
+      NAME = "DvmtFuture",
       TABLE = "Household",
       GROUP = "Year",
       TYPE = "compound",
@@ -309,7 +309,7 @@ CalculateInducedDemandSpecifications <- list(
       DESCRIPTION = "Dvmt adjustment by place types"
     ),
     item(
-      NAME = "Dvmt",
+      NAME = "DvmtFuture",
       TABLE = "Bzone",
       GROUP = "Year",
       TYPE = "compound",
@@ -442,6 +442,55 @@ devtools::use_data(CalculateInducedDemandSpecifications, overwrite = TRUE)
 CalculateInducedDemand <- function(L) {
   #Set up
   #------
+
+  # Function to add suffix 'Future' at the end of all the variable names
+  AddSuffixFuture <- function(x, suffix = "Future"){
+    # Check if x is a list
+    if(is.list(x)){
+      if(length(x) > 0){
+        # Check if elements of x is a list
+        isElementList <- unlist(lapply(x,is.list))
+        # Modify the names of elements that are not the list
+        noList <- x[!isElementList]
+        if(!identical(names(noList),character(0))){
+          names(noList) <- paste0(names(noList),suffix)
+        }
+        # Repeat the function for elements that are list
+        yesList <- lapply(x[isElementList], AddSuffixFuture, suffix = suffix)
+        x <- unlist(list(noList,yesList), recursive = FALSE)
+        return(x)
+      }
+      return(x)
+    }
+    return(NULL)
+  }
+
+
+  # Function to remove suffix 'Future' from all the variable names
+  RemoveSuffixFuture <- function(x, suffix = "Future"){
+    # Check if x is a list
+    if(is.list(x)){
+      if(length(x) > 0){
+        # Check if elements of x is a list
+        isElementList <- unlist(lapply(x,is.list))
+        # Modify the names of elements that are not the list
+        noList <- x[!isElementList]
+        if(length(noList)>0){
+          names(noList) <- gsub(suffix,"",names(noList))
+        }
+        # Repeat the function for elements that are list
+        yesList <- lapply(x[isElementList], RemoveSuffixFuture, suffix = suffix)
+        x <- unlist(list(noList,yesList), recursive = FALSE)
+        return(x)
+      }
+      return(x)
+    }
+    return(NULL)
+  }
+
+  # Modify the input data set
+  L <- RemoveSuffixFuture(L)
+
   #Fix seed
   set.seed(L$G$Seed)
 
@@ -534,13 +583,13 @@ CalculateInducedDemand <- function(L) {
   )
   # Bzone results
   Out_ls$Year$Bzone <- list(
-    Dvmt = DvmtByPt,
+    DvmtFuture = DvmtByPt,
     VehicleTrips = VehicleTripsByPt,
     TransitTrips = TransitTripsByPt
   )
   # Household results
   Out_ls$Year$Household <- list(
-    Dvmt = Hh_df$Dvmt,
+    DvmtFuture = Hh_df$Dvmt,
     DvmtPtAdj = Hh_df$DvmtPtAdj
   )
   # Vehicle results

@@ -73,7 +73,8 @@ testModule(
   ModuleName = "CalculateTravelDemand",
   LoadDatastore = TRUE,
   SaveDatastore = TRUE,
-  DoRun = TRUE
+  DoRun = TRUE,
+  RunFor = "NotBaseYear"
 )
 
 # Reorganize folder for next VERPAT module test
