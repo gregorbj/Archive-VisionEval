@@ -168,7 +168,7 @@ CalculateCongestionPolicySpecifications <- list(
       ISELEMENTOF = ""
     ),
     item(
-      NAME = "TruckDvmt",
+      NAME = "TruckDvmtFuture",
       TABLE = "Marea",
       GROUP = "Year",
       TYPE = "compound",
