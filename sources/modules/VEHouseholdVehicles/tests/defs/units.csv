@@ -5,11 +5,10 @@ area,SQMI
 mass,LB
 volume,GAL
 time,DAY
-time,YR
-speed,MPH
-vehicle_distance,VMT
-passenger_distance,PMT
-payload_distance,TONMI
+energy,MJ
 people,PRSN
-households,HH
 vehicles,VEH
+trips,TRIP
+households,HH
+employment,JOB
+activity,HHJOB

@@ -1,169 +1,62 @@
 [
-  {"NAME": "EmploymentGrowth",
-   "VALUE": "1.5",
+  {"NAME": "BaseTruckVmt", 
+   "VALUE": "2486083805", 
+   "TYPE": "double", 
+   "UNITS": "annual heavy truck vehicle miles traveled"
+  },
+  {"NAME": "TranAdjFactor", 
+   "VALUE": "1.15", 
    "TYPE": "double",
-   "UNITS": "multiplier",
-   "PROHIBIT": "",
-   "ISELEMENTOF": ""},
-  {
-    "NAME": "FwyLaneMiGrowth",
-    "VALUE": "1",
-    "TYPE" : "double",
-    "UNITS" : "multiplier",
-    "PROHIBIT" : "c('NA', '< 0')",
-    "ISELEMENTOF" : ""
+   "UNITS": "none"
   },
-  {
-    "NAME" : "ArtLaneMiGrowth",
-    "VALUE": "1",
-    "TYPE" : "double",
-    "UNITS" : "multiplier",
-    "PROHIBIT" : "c('NA', '< 0')",
-    "ISELEMENTOF" : ""
+  {"NAME": "TruckVmtGrowthMultiplier", 
+   "VALUE": "1", 
+   "TYPE": "double", 
+   "UNITS": "none"
   },
-  {
-    "NAME" : "BusRevMiPCGrowth",
-    "VALUE": "1",
-    "TYPE" : "double",
-    "UNITS" : "multiplier",
-    "PROHIBIT" : "c('NA', '< 0')",
-    "ISELEMENTOF" : ""
+  {"NAME": "MjPerGallon", 
+   "VALUE": "121", 
+   "TYPE": "double", 
+   "UNITS": "megajoules per gasoline-equivalent gallon"
   },
-  {
-    "NAME" : "RailRevMiPCGrowth",
-    "VALUE": "1",
-    "TYPE" : "double",
-    "UNITS" : "multiplier",
-    "PROHIBIT" : "c('NA', '< 0')",
-    "ISELEMENTOF" : ""
+  {"NAME": "PoundToKilogram", 
+   "VALUE": "0.45", 
+   "TYPE": "double", 
+   "UNITS": "pounds per kilogram"
   },
-  {
-    "NAME" : "LtTruckProp",
-    "VALUE": "0.45",
-    "TYPE" : "double",
-    "UNITS" : "multiplier",
-    "PROHIBIT" : "c('NA', '< 0')",
-    "ISELEMENTOF" : ""
+  {"NAME": "AnnVmtInflator", 
+   "VALUE": "365", 
+   "TYPE": "double", 
+   "UNITS": "none"
   },
-  {
-    "NAME" : "BaseCostPerMile",
-    "VALUE": "0.04",
-    "TYPE" : "compound",
-    "UNITS" : "USD/MI",
-    "PROHIBIT" : "c('NA', '< 0')",
-    "ISELEMENTOF" : ""
+  {"NAME": "BaseCostPerMile", 
+   "VALUE": "0.04", 
+   "TYPE": "double", 
+   "UNITS": "base cost year dollars per mile"
   },
-  {
-    "NAME" : "FutureCostPerMile",
-    "VALUE": "0.04",
-    "TYPE" : "compound",
-    "UNITS" : "USD/MI",
-    "PROHIBIT" : "c('NA', '< 0')",
-    "ISELEMENTOF" : ""
+  {"NAME": "BaseCostYear", 
+   "VALUE": "2001", 
+   "TYPE": "character", 
+   "UNITS": "year"
   },
-  {
-    "NAME" : "DvmtBudgetProp",
-    "VALUE": "0.1",
-    "TYPE" : "double",
-    "UNITS" : "multiplier",
-    "PROHIBIT" : "c('NA', '< 0', '> 1')",
-    "ISELEMENTOF" : ""
+  {"NAME": "BudgetProp", 
+   "VALUE": "0.1", 
+   "TYPE": "double", 
+   "UNITS": "none"
   },
-  {
-    "NAME" : "AnnVmtInflator",
-    "VALUE": "365",
-    "TYPE" : "integer",
-    "UNITS" : "DAYS",
-    "PROHIBIT" : "c('NA', '< 0')",
-    "ISELEMENTOF" : ""
+  {"NAME": "CommVmtFactor", 
+   "VALUE": "0.09", 
+   "TYPE": "double", 
+   "UNITS": "none"
   },
-  {
-    "NAME" : "TrnstnProp",
-    "VALUE": "1",
-    "TYPE" : "double",
-    "UNITS" : "multiplier",
-    "PROHIBIT" : "c('NA', '< 0', '> 1')",
-    "ISELEMENTOF" : ""
+  {"NAME": "ValueOfTime", 
+   "VALUE": "16", 
+   "TYPE": "double", 
+   "UNITS": "base cost year dollars per hour"
   },
-  {
-    "NAME" : "FuelCost",
-    "VALUE": "1.82",
-    "TYPE" : "compound",
-    "UNITS" : "USD/GAL",
-    "PROHIBIT" : "c('NA', '< 0')",
-    "ISELEMENTOF" : ""
-  },
-  {
-    "NAME" : "GasTax",
-    "VALUE": "0.424",
-    "TYPE" : "compound",
-    "UNITS" : "USD/GAL",
-    "PROHIBIT" : "c('NA', '< 0')",
-    "ISELEMENTOF" : ""
-  },
-  {
-    "NAME" : "CarbonCost",
-    "VALUE": "0",
-    "TYPE" : "compound",
-    "UNITS" : "USD/GAL",
-    "PROHIBIT" : "c('NA', '< 0')",
-    "ISELEMENTOF" : ""
-  },
-  {
-    "NAME" : "VmtCost",
-    "VALUE": "0",
-    "TYPE" : "compound",
-    "UNITS" : "USD/GAL",
-    "PROHIBIT" : "c('NA', '< 0')",
-    "ISELEMENTOF" : ""
-  },
-  {
-    "NAME" : "BaseLtVehDvmt",
-    "VALUE": "27244",
-    "TYPE" : "compound",
-    "UNITS" : "MI/DAY",
-    "PROHIBIT" : "c('NA', '< 0')",
-    "ISELEMENTOF" : ""
-  },
-  {
-    "NAME" : "BaseFwyArtProp",
-    "VALUE": "0.77",
-    "TYPE" : "double",
-    "UNITS" : "proportion",
-    "PROHIBIT" : "c('NA', '< 0', '> 1')",
-    "ISELEMENTOF" : ""
-  },
-  {
-    "NAME" : "TruckVmtGrowthMultiplier",
-    "VALUE": "1",
-    "TYPE" : "double",
-    "UNITS" : "multiplier",
-    "PROHIBIT" : "c('NA', '< 0')",
-    "ISELEMENTOF" : ""
-  },
-  {
-    "NAME" : "TranRevMiAdjFactor",
-    "VALUE": "1.12",
-    "TYPE" : "double",
-    "UNITS" : "multiplier",
-    "PROHIBIT" : "c('NA', '< 0')",
-    "ISELEMENTOF" : ""
-  },
-  {
-    "NAME" : "WorkVmtProp",
-    "VALUE": "0.25",
-    "TYPE" : "double",
-    "UNITS" : "proportion",
-    "PROHIBIT" : "c('NA', '< 0', '> 1')",
-    "ISELEMENTOF" : ""
-  },
-  {
-    "NAME" : "HhDvmtToRoadDvmt",
-    "VALUE": "0.95",
-    "TYPE" : "double",
-    "UNITS" : "proportion",
-    "PROHIBIT" : "c('NA', '< 0', '> 1')",
-    "ISELEMENTOF" : ""
+  {"NAME": "AreaUnits", 
+   "VALUE": "acres", 
+   "TYPE": "character", 
+   "UNITS": "none"
   }
-
 ]
