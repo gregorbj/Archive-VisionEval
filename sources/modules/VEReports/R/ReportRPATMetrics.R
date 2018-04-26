@@ -186,10 +186,10 @@ ReportRPATMetricsSpecifications <- list(
     ),
     item(
       NAME = items(
-        "MpgAdjHhFuture",
-        "MpgAdjLtVehFuture",
-        "MpgAdjTruckFuture",
-        "MpgAdjBusFuture"),
+        "MpgAdjHhPolicy",
+        "MpgAdjLtVehPolicy",
+        "MpgAdjTruckPolicy",
+        "MpgAdjBusPolicy"),
       TABLE = "Marea",
       GROUP = "Year",
       TYPE = "double",
@@ -200,9 +200,9 @@ ReportRPATMetricsSpecifications <- list(
     ),
     item(
       NAME = items(
-        "LtVehDvmtFuture",
+        "LtVehDvmtPolicy",
         "TruckDvmtFuture",
-        "BusDvmtFuture"),
+        "BusDvmtPolicy"),
       TABLE = "Marea",
       GROUP = "Year",
       TYPE = "double",
@@ -284,18 +284,26 @@ ReportRPATMetricsSpecifications <- list(
     ),
     # Gather Global data
     item(
-      NAME = item(
-        "FuelCost",
-        "GasTax",
-        "CarbonCost",
-        "VmtCost"
-      ),
+      NAME = "CostsPolicy",
       TABLE = "Model",
       GROUP = "Global",
-      TYPE = "integer",
-      UNITS = "DAYS",
+      TYPE = "currency",
+      UNITS = "USD.2000",
+      NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = ""
+      ISELEMENTOF = "",
+      SIZE = 0
+    ),
+    item(
+      NAME = "CostsIdPolicy",
+      TABLE = "Model",
+      GROUP = "Global",
+      TYPE = "character",
+      UNITS = "ID",
+      NAVALUE = -1,
+      PROHIBIT = c("NA"),
+      ISELEMENTOF = "",
+      SIZE = 10
     ),
     item(
       NAME = "AnnVmtInflator",
@@ -666,7 +674,7 @@ ReportRPATMetricsSpecifications <- list(
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
       SIZE = 0,
-      DESCRIPTION = "Annual power conumption by rail"
+      DESCRIPTION = "Annual power consumption by rail"
     ),
     item(
       NAME = items(
@@ -701,9 +709,9 @@ ReportRPATMetricsSpecifications <- list(
       ISELEMENTOF = "",
       SIZE = 0,
       DESCRIPTION = items(
-        "Annual greenhouse gas emmisions by truck",
-        "Annual greenhouse gas emmisions by bus",
-        "Annual greenhouse gas emmisions by rail"
+        "Annual greenhouse gas emissions by truck",
+        "Annual greenhouse gas emissions by bus",
+        "Annual greenhouse gas emissions by rail"
       )
     ),
     item(
@@ -986,11 +994,8 @@ ReportRPATMetrics <- function(L) {
   rownames(MpgAdj_MaTy) <- "Metro"
   Dvmt_MaTy <- cbind(LtVeh=L$Year$Marea$LtVehDvmt, Truck=L$Year$Marea$TruckDvmt, Bus=L$Year$Marea$BusDvmt)
   rownames(Dvmt_MaTy) <- "Metro"
-  Costs_ <- c(L$Global$Model$FuelCost,
-              L$Global$Model$GasTax,
-              L$Global$Model$CarbonCost,
-              L$Global$Model$VmtCost)
-  names(Costs_) <- c("FuelCost","GasTax","CarbonCost","VmtCost")
+  Costs_ <- L$Global$Model$Costs
+  names(Costs_) <- L$Global$Model$CostsId
 
   # Load houshold data
   Hh_df <- data.frame(L$Year$Household)
