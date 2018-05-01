@@ -1,11 +1,10 @@
 #==================
 #AssignVehicleAge.R
 #==================
-#This module assigns vehicle ages to each household vehicle. A 'Vehicle' table
-#Is created which has a record for each household vehicle. The type and age
-#of each vehicle owned or leased by households is assigned to this table along
-#with the household ID (HhId)to enable this table to be joined with the
-#household table.
+#This module assigns vehicle ages to each household vehicle. The type and age
+#of each vehicle owned or leased by households is assigned to the Vehicle table.
+#It is assumed that for vehicles whose access type is car service rather than
+#own, the vehicle type is Auto.
 
 
 #=================================
@@ -206,12 +205,39 @@ AssignVehicleAgeSpecifications <- list(
       ISELEMENTOF = ""
     ),
     item(
+      NAME = "HhId",
+      TABLE = "Vehicle",
+      GROUP = "Year",
+      TYPE = "character",
+      UNITS = "ID",
+      PROHIBIT = "NA",
+      ISELEMENTOF = ""
+    ),
+    item(
       NAME = "VehId",
       TABLE = "Vehicle",
       GROUP = "Year",
       TYPE = "character",
       UNITS = "ID",
       PROHIBIT = "NA",
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "VehicleAccess",
+      TABLE = "Vehicle",
+      GROUP = "Year",
+      TYPE = "character",
+      UNITS = "category",
+      PROHIBIT = "",
+      ISELEMENTOF = c("Own", "LowCarSvc", "HighCarSvc")
+    ),
+    item(
+      NAME = "AveCarSvcVehicleAge",
+      TABLE = "Azone",
+      GROUP = "Year",
+      TYPE = "time",
+      UNITS = "YR",
+      PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = ""
     )
   ),
@@ -440,10 +466,11 @@ AssignVehicleAge <- function(L) {
   #------
   #Fix seed as synthesis involves sampling
   set.seed(L$G$Seed)
-
-  #Make vehicle records
-  #--------------------
-  #Make vector to match order of vehicle data to vehicle table
+  #Calculate the total number of vehicle entries
+  VehId_Ve <- L$Year$Vehicle$VehId
+  VehAccess_Ve <- L$Year$Vehicle$VehicleAccess
+  NumVeh <- length(VehId_Ve)
+  #Make vector to match order of household owned vehicles to vehicle table
   HasVeh <- L$Year$Household$Vehicles > 0
   DataID_ <-
     with(L$Year$Household,
@@ -453,6 +480,21 @@ AssignVehicleAge <- function(L) {
            sep = "-"
          ))
   DatOrd <- match(DataID_, L$Year$Vehicle$VehId)
+
+  #Create vehicle type dataset
+  #---------------------------
+  #Initialize values with Autos
+  Type_Ve <- rep("Auto", NumVeh)
+  #Insert values for household-owned vehicles
+  assignVehType <- function(NumLtTrk, NumAuto) {
+    c(rep("LtTrk", NumLtTrk), rep("Auto", NumAuto))
+  }
+  Type_ <-
+    with(L$Year$Household, unlist(mapply(assignVehType, NumLtTrk, NumAuto)))
+  Type_Ve[DatOrd] <- Type_
+
+  #Calculate vehicle age distributions
+  #-----------------------------------
   #Create an income group dataset
   Ig <- c("0to20K", "20Kto40K", "40Kto60K", "60Kto80K", "80Kto100K", "100KPlus")
   IncGrp_Hh <-
@@ -463,18 +505,9 @@ AssignVehicleAge <- function(L) {
                labels = Ig,
                include.lowest = TRUE))
     )
-  IncGrp_ <- rep(IncGrp_Hh[HasVeh], L$Year$Household$Vehicles[HasVeh])[DatOrd]
-  #Create vehicle type dataset
-  Data_df <- data.frame(L$Year$Household[c("NumLtTrk", "NumAuto")])[HasVeh,]
-  Type_ <-
-    do.call(c, apply(Data_df, 1, function(x) {
-      c(rep("LtTrk", x["NumLtTrk"]), rep("Auto", x["NumAuto"]))}))[DatOrd]
-  Age_ <- integer(length(DataID_))
-
-  #Calculate vehicle age distributions
-  #-----------------------------------
+  IncGrp_ <- rep(IncGrp_Hh[HasVeh], L$Year$Household$Vehicles[HasVeh])
   #Calculate income group proportions by vehicle type
-  NumVeh_IgTy <- table(IncGrp_, Type_)
+  NumVeh_IgTy <- table(IncGrp_, Type_Ve[DatOrd])
   IncProp_IgTy <- sweep(NumVeh_IgTy, 2, colSums(NumVeh_IgTy), "/")
   #Calculate cumulative age distributions by type
   AutoAgeProp_Ag <-
@@ -501,6 +534,8 @@ AssignVehicleAge <- function(L) {
 
   #Sample vehicle ages and assign to vehicles
   #------------------------------------------
+  #Create vector to hold ages of owned vehicles
+  Age_ <- integer(length(DataID_))
   #Assign ages for automobiles
   for (ig in Ig) {
     Ages_ <-
@@ -521,18 +556,22 @@ AssignVehicleAge <- function(L) {
         prob = LtTrkAgePropByInc_AgIg[,ig])
     Age_[IncGrp_ == ig & Type_ == "LtTrk"] <- Ages_
   }
+  #Initialize values for vehicle ages with the average car service age
+  Age_Ve <- rep(as.integer(L$Year$Azone$AveCarSvcVehicleAge), NumVeh)
+  Age_Ve[DatOrd] <- Age_
 
   #Return the results
   #------------------
   #Initialize output list
   Out_ls <- initDataList()
-  Out_ls$Year$Vehicle <- list()
-  attributes(Out_ls$Year$Vehicle)$LENGTH <- length(DataID_)
-  Out_ls$Year$Vehicle$Type <- Type_
-  Out_ls$Year$Vehicle$Age <- Age_
+  Out_ls$Year$Vehicle <- list(
+    Type = Type_Ve,
+    Age = Age_Ve
+  )
   #Return the outputs list
   Out_ls
 }
+
 
 #================================
 #Code to aid development and test
@@ -548,6 +587,7 @@ AssignVehicleAge <- function(L) {
 #   DoRun = FALSE
 # )
 # L <- TestDat_$L
+# R <- AssignVehicleAge(L)
 
 #Test code to check everything including running the module and checking whether
 #the outputs are consistent with the 'Set' specifications

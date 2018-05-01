@@ -1,0 +1,10 @@
+VehicleType,CentsPerMile
+SmallSedan,6.83
+MediumSedan,7.94
+LargeSedan,8.44
+SmallSUV,8.09
+MediumSUV,8.27
+Minivan,7.81
+PickupTruck,8.33
+HybridCar,6.99
+ElectricCar,6.55

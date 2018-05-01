@@ -1,0 +1,265 @@
+-----------------------------
+ENERGY AND EMISSIONS DEFAULTS
+-----------------------------
+
+congestion_efficiency.csv
+CongestionEfficiency_df
+- LdIce
+- LdHev
+- LdEv
+- LdFcv
+- HdIce
+
+carbon_intensity.csv
+CarbonIntensity_df
+- Gasoline
+- Diesel
+- Cng
+- Lng
+- Ethanol
+- Biodiesel
+- Rng
+- Electricity
+
+carsvc_fuel.csv
+CarSvcFuel_df
+- AutoPropGasoline
+- AutoPropDiesel
+- AutoPropCng
+- LtTrkPropGasoline
+- LtTrkPropDiesel
+- LtTrkPropCng
+
+comsvc_fuel.csv
+ComSvcFuel_df
+- AutoPropGasoline
+- AutoPropDiesel
+- AutoPropCng
+- LtTrkPropGasoline
+- LtTrkPropDiesel
+- LtTrkPropCng
+
+hh_fuel.csv
+HhFuel_df
+- AutoPropGasoline
+- AutoPropDiesel
+- AutoPropCng
+- LtTrkPropGasoline
+- LtTrkPropDiesel
+- LtTrkPropCng
+
+ldv_biofuel_mix.csv
+LdvBiofuelMix_df
+- EthanolPropGasoline
+- BiodieselPropDiesel
+- RngPropCng
+
+ldv_powertrain_characteristics
+LdvPowertrainCharacteristics_df
+- AutoIcevMpg
+- LtTrkIcevMpg
+- AutoHevMpg
+- LtTrkHevMpg
+- AutoPhevMpg
+- AutoPhevMpkwh
+- AutoPhevRange
+- LtTrkPhevMpg
+- LtTrkPhevMpkwh
+- LtTrkPhevRange
+- AutoBevMpkwh
+- AutoBevRange
+- LtTrkBevMpkwh
+- LtTrkBevRange
+
+hh_powertrain_prop.csv
+HhPowertrain_df
+- AutoPropIcev
+- AutoPropHev
+- AutoPropPhev
+- AutoPropBev
+- LtTrkPropIcev
+- LtTrkPropHev
+- LtTrkPropPhev
+- LtTrkPropBev
+
+carsvc_powertrain_prop.csv
+CarSvcPowertrain_df
+- AutoPropIcev
+- AutoPropHev
+- AutoPropBev
+- LtTrkPropIcev
+- LtTrkPropHev
+- LtTrkPropPhev
+
+comsvc_powertrain_prop.csv
+ComSvcPowertrain_df
+- AutoPropIcev
+- AutoPropHev
+- AutoPropBev
+- LtTrkPropIcev
+- LtTrkPropHev
+- LtTrkPropPhev
+
+hvytrk_fuel.csv
+HvyTrkFuel_df
+- PropDiesel
+- PropGasoline
+- PropLng
+
+hvytrk_biofuel_mix.csv
+HvyTrkBioFuelMix_df
+- EthanolPropGasoline
+- BiodieselPropDiesel
+- RngPropLng
+
+hvytrk_powertrain_characteristics.csv
+HvyTrkPowertrainCharacteristics_df
+HvyTrkIcevMpg
+HvyTrkHevMpg
+HvyTrkBevMpkwh
+
+hvytrk_powertrain_prop.csv
+HvyTrkPowertrain_df
+- HvyTrkPropIcev
+- HvyTrkPropHev
+- HvyTrkPropBev
+
+transit_fuel.csv
+TransitFuel_df
+- VanPropDiesel
+- VanPropGasoline
+- VanPropCng
+- BusPropDiesel
+- BusPropGasoline
+- BusPropCng
+- RailPropDiesel
+- RailPropGasoline
+
+transit_biofuel_mix.csv
+TransitBiofuelMix_df
+- EthanolPropGasoline
+- BiodieselPropDiesel
+- RngPropCng
+
+transit_powertrain_characteristics.csv
+TransitPowertrainCharacteristics_df
+- VanIcevMpg
+- VanHevMpg
+- VanBevMpkwh
+- BusIcevMpg
+- BusHevMpg
+- BusBevMpkwh
+- RailIcevMpg
+- RailHevMpg
+- RailEvMpkwh
+
+transit_powertrain_prop.csv
+TransitPowertrain_df
+- VanPropIcev
+- VanPropHev
+- VanPropBev
+- BusPropIcev
+- BusPropHev
+- BusPropBev
+- RailPropIcev
+- RailPropHev
+- RailPropEv
+
+
+-----------------
+INITIALIZE INPUTS
+-----------------
+
+FILE = azone_electricity_carbon_intensity.csv
+TABLE = Azone
+GROUP = Year
+NAMES
+- ElectricityCI
+
+FILE = marea_transit_ave_fuel_carbon_intensity.csv
+TABLE = Marea
+GROUP = Year
+NAMES
+- TransitVanFuelCI
+- TransitBusFuelCI
+- TransitRailFuelCI
+
+FILE = marea_transit_biofuel_mix.csv
+TABLE = Marea
+GROUP = Year
+NAMES
+- TransitEthanolPropGasoline
+- TransitBiodieselPropDiesel
+- TransitRngPropCng
+
+FILE = marea_transit_fuel.csv
+TABLE = Marea
+GROUP = Year
+NAMES
+- VanPropDiesel
+- VanPropGasoline
+- VanPropCng
+- BusPropDiesel
+- BusPropGasoline
+- BusPropCng
+- RailPropDiesel
+- RailPropGasoline
+
+FILE = marea_transit_powertrain_prop.csv
+TABLE = Marea
+GROUP = Year
+NAMES
+- VanPropIcev
+- VanPropHev
+- VanPropBev
+- BusPropIcev
+- BusPropHev
+- BusPropBev
+- RailPropIcev
+- RailPropHev
+- RailPropEv
+
+FILE = region_ave_fuel_carbon_intensity.csv
+TABLE = Region
+GROUP = Year
+NAMES
+- HhFuelCI
+- CarSvcFuelCI
+- ComSvcFuelCI
+- HvyTrkFuelCI
+- TransitVanFuelCI
+- TransitBusFuelCI
+- TransitRailFuelCI
+
+FILE = region_carsvc_powertrain_prop.csv
+TABLE = Region
+GROUP = Year
+NAMES
+- CarSvcAutoPropIcev
+- CarSvcAutoPropHev
+- CarSvcAutoPropBev
+- CarSvcLtTrkPropIcev
+- CarSvcLtTrkPropHev
+- CarSvcLtTrkPropBev
+
+FILE = region_comsvc_powertrain_prop.csv
+TABLE = Region
+GROUP = Year
+NAMES
+- ComSvcAutoPropIcev
+- ComSvcAutoPropHev
+- ComSvcAutoPropBev
+- ComSvcLtTrkPropIcev
+- ComSvcLtTrkPropHev
+- ComSvcLtTrkPropBev
+
+FILE = region_hvytrk_powertrain_prop.csv
+TABLE = Region
+GROUP = Year
+NAMES
+- HvyTrkPropIcev
+- HvyTrkPropHev
+- HvyTrkPropBev
+
+
+

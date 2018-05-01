@@ -11,7 +11,7 @@ Bike: a hurdle model of bike trips having Count and Zero components;
 Transit: a hurdle model of public transit trips having Count and Zero
 components;}
 \source{
-GreenSTEP version 3.6 model.
+CalculateAltModeTrips.R.
 }
 \usage{
 AltModeModels_ls

@@ -96,7 +96,10 @@ LocateEmploymentSpecifications <- list(
   #Specify data to be loaded from data store
   Get = items(
     item(
-      NAME = "Bzone",
+      NAME = items(
+        "Bzone",
+        "Azone",
+        "Marea"),
       TABLE = "Bzone",
       GROUP = "Year",
       TYPE = "character",
@@ -204,7 +207,10 @@ LocateEmploymentSpecifications <- list(
               "Unique worker ID")
     ),
     item(
-      NAME = "Bzone",
+      NAME = items(
+        "Bzone",
+        "Azone",
+        "Marea"),
       TABLE = "Worker",
       GROUP = "Year",
       TYPE = "character",
@@ -212,7 +218,10 @@ LocateEmploymentSpecifications <- list(
       NAVALUE = -1,
       PROHIBIT = "",
       ISELEMENTOF = "",
-      DESCRIPTION = "Bzone ID of worker job location"
+      DESCRIPTION = items(
+        "Bzone ID of worker job location",
+        "Azone ID of worker job location",
+        "Marea ID of worker job location")
     ),
     item(
       NAME = "DistanceToWork",
@@ -251,16 +260,15 @@ devtools::use_data(LocateEmploymentSpecifications, overwrite = TRUE)
 #=======================================================
 #SECTION 3: DEFINE FUNCTIONS THAT IMPLEMENT THE SUBMODEL
 #=======================================================
-#This function locates households in Bzones based on the housing type of each
-#household, the supply of housing of that housing type in each Bzone, the
-#income of the household, and the Bzone location weight of each household.
-#First housing supply and demand are balanced to assure that there are
-#sufficient housing units of each type in the Azone. Then households are ordered
-#by income from highest to lowest. Each household is assign a Bzone in that
-#order. The probability of a household being assigned to a Bzone is a function
-#of the supply of housing of the type in the Bzone and the location weight of
-#the Bzone. After a household has been assigned to a Bzone, the housing
-#inventory of the Bzone is decremented and the next household is then assigned.
+#This module places employment in Bzones based on input assumptions of
+#employment by type and Bzone. The model adjusts the employment numbers to
+#balance with the number of workers in the region. The module assigns workers
+#to jobs as a function of the number of jobs in each Bzone and the inverse of
+#distance between residence and employment Bzones. An iterative proportional
+#fitting process is used to allocate the number of workers between each pair of
+#Bzones. A worker table is created and workers are assigned randomly to
+#employment Bzones based on the balanced matrix of number of workers by
+#residence and employment Bzones.
 
 #Function to adjust employment to match workers
 #----------------------------------------------
@@ -295,21 +303,23 @@ adjustEmployment <- function(EmpTarget, Emp_, Names = NULL) {
   RevEmp_
 }
 
-#Main module function that assigns employment by type to Bzones
-#--------------------------------------------------------------
+#Main module function that assigns workers to Bzone employment locations
+#-----------------------------------------------------------------------
 #' Main module function to assign employment by type to Bzones.
 #'
-#' \code{LocateHouseholds} assigns employment by type to Bzones.
+#' \code{LocateEmployment} assigns workers to Bzones.
 #'
-#' This function assigns employment by type to Bzones based on inputs of
-#' employment by type by Bzone with adjustment of employment to equal region-
-#' wide total of workers.
+#' This function assigns workers to Bzone employment based on inputs of
+#' employment by type by Bzone, adjustment of employment to equal regionwide
+#' total of workers, and identify Bzone employment location for each worker as
+#' a function of the number of jobs in each Bzone and the inverse of distance
+#' between Bzones.
 #'
 #' @param L A list containing the components listed in the Get specifications
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
-#' @import visioneval
+#' @import visioneval fields
 #' @export
 LocateEmployment <- function(L) {
   #Set up
@@ -345,7 +355,10 @@ LocateEmployment <- function(L) {
   #Tabulate workers by residence Bzone
   Wkr_Bz <- tapply(L$Year$Household$Workers, L$Year$Household$Bzone, sum)[Bz]
   Wkr_Bz[is.na(Wkr_Bz)] <- 0
+
   #Allocate workers by origin and destination using IPF
+  #----------------------------------------------------
+  #Use IPF with seed matrix that is inverse of distance between Bzones
   WkrOD_BzBz <-
     ipf(1 / Dist_BzBz, list(Wkr_Bz, TotEmp_Bz), list(1, 2))$Units_ar
   rownames(WkrOD_BzBz) <- Bz
@@ -385,6 +398,12 @@ LocateEmployment <- function(L) {
   }
   #Identify distance to work
   DistToWork_ <- Dist_BzBz[cbind(ResBzone_, WrkBzone_)]
+  #Identify work Azone
+  WrkAzone_ <-
+    L$Year$Bzone$Azone[match(WrkBzone_, L$Year$Bzone$Bzone)]
+  #Identify work Marea
+  WrkMarea_ <-
+    L$Year$Bzone$Marea[match(WrkBzone_, L$Year$Bzone$Bzone)]
 
   #Return list of results
   #----------------------
@@ -404,6 +423,10 @@ LocateEmployment <- function(L) {
   attributes(Out_ls$Year$Worker$WkrId)$SIZE <- max(nchar(WkrId_))
   Out_ls$Year$Worker$Bzone <- WrkBzone_
   attributes(Out_ls$Year$Worker$Bzone)$SIZE <- max(nchar(WrkBzone_))
+  Out_ls$Year$Worker$Azone <- WrkAzone_
+  attributes(Out_ls$Year$Worker$Azone)$SIZE <- max(nchar(WrkAzone_))
+  Out_ls$Year$Worker$Marea <- WrkMarea_
+  attributes(Out_ls$Year$Worker$Marea)$SIZE <- max(nchar(WrkMarea_))
   Out_ls$Year$Worker$DistanceToWork <- DistToWork_
   #Return the outputs list
   Out_ls
@@ -424,6 +447,7 @@ LocateEmployment <- function(L) {
 #   DoRun = FALSE
 # )
 # L <- TestDat_$L
+# R <- LocateEmployment(L)
 
 #Test code to check everything including running the module and checking whether
 #the outputs are consistent with the 'Set' specifications

@@ -1,0 +1,26 @@
+=================================================
+Documentation for bls_vehicle_operating_costs.csv
+=================================================
+Data in this file is used in the CalculateVehicleOperatingCost module to compute vehicle maintenance, repair and tire costs as a function of vehicle age and type.
+
+File Structure
+--------------
+Rows contain data for vehicle ages.
+Column names as follows:
+VehicleAge: vehicle age categories
+    0-5:     Vehicles 0 to 5 years old
+    6-10:    Vehicles 6 to 10 years old
+    11-15:   Vehicles 11 to 15 years old
+    16-20:   Vehicles 16 to 20 years old
+    21-25:   Vehicles 21 to 25 years old
+    26+:     Vehicles 26 years old or older
+    Average: Average of all vehicles
+DollarsPerYear: Average annual cost of vehicle maintenance, repair, and tires for vehicle age category in 2012
+
+Source:
+-------
+Ryan Pfirrmann-Powell. Americans’ Aging Autos. Beyond the Numbers, Prices and Spending. Vol.3 / No. 9. Bureau of Labor Statistics. May 2014
+Table 1, Average expenditure and frequency reported for various types of maintenance and repair, by average
+age of vehicle(s), 2012
+Accessed from:
+https://www.bls.gov/opub/btn/volume-3/pdf/americans-aging-autos.pdf

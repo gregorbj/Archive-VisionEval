@@ -15,10 +15,12 @@ A list containing the components specified in the Set
 specifications for the module.
 }
 \description{
-\code{LocateHouseholds} assigns employment by type to Bzones.
+\code{LocateEmployment} assigns workers to Bzones.
 }
 \details{
-This function assigns employment by type to Bzones based on inputs of
-employment by type by Bzone with adjustment of employment to equal region-
-wide total of workers.
+This function assigns workers to Bzone employment based on inputs of
+employment by type by Bzone, adjustment of employment to equal regionwide
+total of workers, and identify Bzone employment location for each worker as
+a function of the number of jobs in each Bzone and the inverse of distance
+between Bzones.
 }

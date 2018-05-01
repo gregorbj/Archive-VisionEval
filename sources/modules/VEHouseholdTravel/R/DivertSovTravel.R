@@ -464,7 +464,26 @@ devtools::use_data(DivertSovTravelSpecifications, overwrite = TRUE)
 #Azone, the amount of SOV travel within the 20 mile tour distance range for each
 #household, and the allocation of the reduction to households. The reduction is
 #allocated to households as a function of their SOV travel and their predicted
-#alternative modes tripmaking.
+#alternative modes tripmaking. The logic is that ceteris paribus, households
+#with more SOV travel would be more likely to divert, and households that are
+#more inclined to use alternative modes would also be more inclined to divert
+#travel. A diversion utility function is specified for determining how much
+#diversion would occur for each household. This utility has two terms. The first
+#is the log of the ratio of the SOV DVMT for the household and the mean SOV DVMT
+#for all households in the Azone. The second term is the log of the ratio of the
+#number of alternative mode trips for the household and the mean number of
+#alternative mode trips for all households in the Azone. The second term is
+#multiplied by a scaling factor which determines the relative importance of
+#alternative mode trip-making in determining the allocation of SOV mileage
+#diversion. The magnitude of this scaling factor is calculated using a binary
+#search method where the constraint on the search is a maximum SOV diversion. It
+#is assumed in the function that the maximum proportion of SOV travel that would
+#occur for any household is midway between the Azone objective and 1. For
+#example, if the Azone objective was 0.2 (20%), then no household would have a
+#diversion of greater than 0.6 (60%). Once the scaling factor has been in this
+#way calculated, the utility is applied to allocate the SOV diversion to each
+#household. Then the proportion of total household DVMT that is diverted is
+#calculated.
 
 #Main module function that calculates proportion DVMT diverted
 #-------------------------------------------------------------

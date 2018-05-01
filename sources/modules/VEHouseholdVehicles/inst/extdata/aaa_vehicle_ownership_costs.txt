@@ -1,0 +1,30 @@
+=================================================
+Documentation for aaa_vehicle_ownership_costs.csv
+=================================================
+Data in this file is used in the CalculateVehicleOwnCost module to compute the cost of owning a vehicle. These costs are used to assess whether households will substitute the use of car services for one or more household vehicle and to compute the ownership cost of the vehicles they own.
+
+File Structure
+--------------
+Rows contain data for cost categories.
+Column names as follows:
+Category: ownership cost categories which include the following
+    Insurance: annual cost of a full-coverage insurance policy for personal use of the vehicle
+    License/Registration/Taxes: cost of all vehicle purchase taxes and annual license and registration fees
+    Depreciation10KPerYear: value of depreciation for vehicle driven 10,000 miles per year
+    Depreciation15KPerYear: value of depreciation for vehicle driven 15,000 miles per year
+    Depreciation20KPerYear: value of depreciation for vehicle driven 20,000 miles per year
+SmallSedan: annual cost in dollars for small sedans 
+MediumSedan: annual cost in dollars for medium sedans 
+LargeSedan: annual cost in dollars for large sedans 
+SmallSUV: annual cost in dollars for small sport utility vehicles
+MediumSUV: annual cost in dollars for medium sport utility vehicles
+Minivan: annual cost in dollars for minivans
+Pickup: annual cost in dollars for pickup trucks
+
+Notes:
+Costs are annual averages for vehicles that are purchased new and owned for 5 years.
+
+Source:
+-------
+Your Driving Costs: How much are you really paying to drive, American Automobile Association, 2017. Accessed from:
+http://exchange.aaa.com/wp-content/uploads/2017/08/17-0013_Your-Driving-Costs-Brochure-2017-FNL-CX-1.pdf

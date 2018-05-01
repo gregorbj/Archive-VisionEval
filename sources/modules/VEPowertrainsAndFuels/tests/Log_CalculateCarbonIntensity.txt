@@ -1,0 +1,30 @@
+Test
+Test of VESimHouseholds package modules
+2018-04-24_07:52:15
+
+2018-04-24 07:52:15 : Testing CalculateCarbonIntensity. 
+
+2018-04-24 07:52:15 : Attempting to load datastore. 
+
+2018-04-24 07:52:15 : Datastore loaded. 
+
+2018-04-24 07:52:15 : Attempting to load and check specifications. 
+
+2018-04-24 07:52:15 : Module specifications successfully loaded and checked for errors. 
+
+2018-04-24 07:52:15 : No inputs to process. 
+
+2018-04-24 07:52:15 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-04-24 07:52:15 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-04-24 07:52:15 : Running module and checking whether outputs meet Set specifications. 
+
+2018-04-24 07:52:15 : Also saving module outputs to datastore. 
+
+2018-04-24 07:52:18 : Module run successfully and outputs meet Set specifications. 
+
+2018-04-24 07:52:18 : Module outputs saved to datastore. 
+
+2018-04-24 07:52:18 : Congratulations. Module CalculateCarbonIntensity passed all tests. 
+
