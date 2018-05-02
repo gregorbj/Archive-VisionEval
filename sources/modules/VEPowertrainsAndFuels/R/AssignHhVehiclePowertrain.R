@@ -56,6 +56,9 @@ library(visioneval)
 #powered by each will differ depending on how much travel is powered by fuel
 #vs electricity. A model is estimated to calculate those proportions.
 
+#Load PowertrainFuelDefaults_ls to make it available as a global variable
+load("./data/PowertrainFuelDefaults_ls.rda")
+
 #-------------------------------------------------------
 #Model proportions of PHEV travel powered by electricity
 #-------------------------------------------------------
@@ -599,7 +602,6 @@ AssignHhVehiclePowertrain <- function(L, M) {
   #------
   #Fix seed as synthesis involves sampling
   set.seed(L$G$Seed)
-  PowertrainFuelDefaults_ls <- VEPowertrainsAndFuels::PowertrainFuelDefaults_ls
   #Match index from households to vehicles
   HhToVehIdx_Ve <- match(L$Year$Vehicle$HhId, L$Year$Household$HhId)
 

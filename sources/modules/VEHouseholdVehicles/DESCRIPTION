@@ -25,7 +25,8 @@ Imports:
     reshape2,
     stats,
     devtools,
-    VE2001NHTS
+    VE2001NHTS,
+    VEHouseholdTravel
 Suggests:
     knitr
 VignetteBuilder: knitr

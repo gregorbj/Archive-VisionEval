@@ -337,9 +337,6 @@ devtools::use_data(CalculateVehicleTripsSpecifications, overwrite = TRUE)
 #' @export
 CalculateVehicleTrips <- function(L) {
 
-  #Assign VehTripModels_ls within function so it is in scope for module call
-  VehTripModels_ls <- VEHouseholdTravel::VehTripModels_ls
-
   #Set up data frame of household data needed for model
   #----------------------------------------------------
   Hh_df <- data.frame(L$Year$Household)

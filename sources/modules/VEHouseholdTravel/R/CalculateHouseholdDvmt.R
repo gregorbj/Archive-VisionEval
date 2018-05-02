@@ -616,8 +616,6 @@ CalculateHouseholdDvmt <- function(L) {
   Bz <- L$Year$Bzone$Bzone
   #Calculate number of households
   NumHh <- length(L$Year$Household[[1]])
-  #Assign the DvmtModel_ls so that it is in scope when module is called
-  DvmtModel_ls <- VEHouseholdTravel::DvmtModel_ls
 
   #Set up data frame of household data needed for model
   #----------------------------------------------------
