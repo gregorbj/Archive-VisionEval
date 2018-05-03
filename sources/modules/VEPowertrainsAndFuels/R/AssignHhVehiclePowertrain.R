@@ -40,6 +40,8 @@
 #=================================
 #Packages used in code development
 #=================================
+#Load other packages that this module uses using CALL function
+library(VEHouseholdTravel)
 #Uncomment following lines during code development. Recomment when done.
 library(visioneval)
 
