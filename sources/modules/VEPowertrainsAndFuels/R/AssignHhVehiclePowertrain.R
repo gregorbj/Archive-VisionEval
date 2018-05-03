@@ -40,8 +40,6 @@
 #=================================
 #Packages used in code development
 #=================================
-#Load other packages that this module uses using CALL function
-library(VEHouseholdTravel)
 #Uncomment following lines during code development. Recomment when done.
 library(visioneval)
 
@@ -60,6 +58,7 @@ library(visioneval)
 
 #Load PowertrainFuelDefaults_ls to make it available as a global variable
 load("./data/PowertrainFuelDefaults_ls.rda")
+
 
 #-------------------------------------------------------
 #Model proportions of PHEV travel powered by electricity
@@ -604,6 +603,9 @@ AssignHhVehiclePowertrain <- function(L, M) {
   #------
   #Fix seed as synthesis involves sampling
   set.seed(L$G$Seed)
+  if(!exists("PowertrainFuelDefaults_ls")){
+    PowertrainFuelDefaults_ls <- VEPowertrainsAndFuels::PowertrainFuelDefaults_ls
+  }
   #Match index from households to vehicles
   HhToVehIdx_Ve <- match(L$Year$Vehicle$HhId, L$Year$Household$HhId)
 

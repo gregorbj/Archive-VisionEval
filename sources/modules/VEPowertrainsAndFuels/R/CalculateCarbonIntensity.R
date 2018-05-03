@@ -19,10 +19,9 @@
 #SECTION 1: ESTIMATE AND SAVE MODEL PARAMETERS
 #=============================================
 #No module parameters are estimated in this module.
-
-#Load PowertrainFuelDefaults_ls to make it available as a global
-#variable
+#Load PowertrainFuelDefaults_ls to make it available as a global variable
 load("./data/PowertrainFuelDefaults_ls.rda")
+
 
 #================================================
 #SECTION 2: DEFINE THE MODULE DATA SPECIFICATIONS
@@ -479,6 +478,9 @@ CalculateCarbonIntensity <- function(L) {
 
   #Get carbon intensity of fuels and electricity for the year
   #----------------------------------------------------------
+  if(!exists("PowertrainFuelDefaults_ls")){
+    PowertrainFuelDefaults_ls <- VEPowertrainsAndFuels::PowertrainFuelDefaults_ls
+  }
   CI_ <- interpolateDfVals(PowertrainFuelDefaults_ls$CarbonIntensity_df, Year)
   ElectricityCI <- CI_["Electricity"]
   AllFuelCI_ <- CI_[names(CI_) != "Electricity"]
