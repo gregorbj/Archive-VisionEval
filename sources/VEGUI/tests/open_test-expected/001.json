@@ -1,1 +1,22 @@
-{"input":{"DATASTORE_TABLE_CLOSE_BUTTON":[0],"innerWidth":[992],"MODEL_PARAMETERS_FILE":["[\"\"]"],"navlist":["Scenario"],"REVERT_MODEL_PARAMETERS_FILE":[0],"REVERT_RUN_PARAMETERS_FILE":[0],"RUN_MODEL_BUTTON":[0],"RUN_PARAMETERS_FILE":["[\"\"]"],"SAVE_MODEL_PARAMETERS_FILE":[0],"SAVE_RUN_PARAMETERS_FILE":[0]},"output":{"SCRIPT_NAME":{"message":[""],"call":["NULL"],"type":["shiny.silent.error","validation"]}},"export":{}}
+{
+  "input": {
+    "DATASTORE_TABLE_CLOSE_BUTTON": [0],
+    "innerWidth": [992],
+    "MODEL_PARAMETERS_FILE": ["[\"\"]"],
+    "navlist": ["Scenario"],
+    "REVERT_MODEL_PARAMETERS_FILE": [0],
+    "REVERT_RUN_PARAMETERS_FILE": [0],
+    "RUN_MODEL_BUTTON": [0],
+    "RUN_PARAMETERS_FILE": ["[\"\"]"],
+    "SAVE_MODEL_PARAMETERS_FILE": [0],
+    "SAVE_RUN_PARAMETERS_FILE": [0]
+  },
+  "output": {
+    "SCRIPT_NAME": {
+      "message": [""],
+      "call": ["NULL"],
+      "type": ["shiny.silent.error", "validation"]
+    }
+  },
+  "export": {}
+}
