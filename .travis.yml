@@ -45,9 +45,9 @@ env:
    - FOLDER=sources/modules/VETravelPerformance     SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=VE2001NHTS,VEHouseholdTravel,VEPowertrainsAndFuels
    - FOLDER=sources/modules/VEPowertrainsAndFuels   SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=VE2001NHTS,VEHouseholdTravel
    - FOLDER=sources/modules/VEReports               SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=VE2001NHTS,VEHouseholdTravel
-   - FOLDER=sources/models/VERPAT                   SCRIPT=run_model.R             TYPE=model       DEPENDS=VE2001NHTS,VESimHouseholds,VESyntheticFirms,VELandUse,VETransportSupply,VEHouseholdVehicles,VEHouseholdTravel,VETransportSupplyUse,VEReports
-   - FOLDER=sources/models/VERSPM/Test1             SCRIPT=run_model.R             TYPE=model       DEPENDS=VE2001NHTS,VESimHouseholds,VELandUse,VETransportSupply,VEHouseholdVehicles,VEHouseholdTravel,VETravelPerformance,VEPowertrainsAndFuels
-   - FOLDER=sources/VEGUI                           SCRIPT=run_vegui_test.R        TYPE=model       DEPENDS=VE2001NHTS,VESimHouseholds,VESyntheticFirms,VELandUse,VETransportSupply,VEHouseholdVehicles,VEHouseholdTravel,VETransportSupplyUse,VEReports
+   - FOLDER=sources/models/VERPAT                   SCRIPT=run_model.R             TYPE=model       DEPENDS=VE2001NHTS,VESimHouseholds,VESyntheticFirms,VELandUse,VETransportSupply,VEHouseholdTravel,VEHouseholdVehicles,VETransportSupplyUse,VEReports
+   - FOLDER=sources/models/VERSPM/Test1             SCRIPT=run_model.R             TYPE=model       DEPENDS=VE2001NHTS,VESimHouseholds,VELandUse,VETransportSupply,VEHouseholdTravel,VEHouseholdVehicles,VETravelPerformance,VEPowertrainsAndFuels
+   - FOLDER=sources/VEGUI                           SCRIPT=run_vegui_test.R        TYPE=model       DEPENDS=VE2001NHTS,VESimHouseholds,VESyntheticFirms,VELandUse,VETransportSupply,VEHouseholdTravel,VEHouseholdVehicles,VETransportSupplyUse,VEReports
 
 # install and test framework, modules, models, GUI
 script:
