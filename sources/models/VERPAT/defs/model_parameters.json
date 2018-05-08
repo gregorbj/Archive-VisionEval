@@ -78,14 +78,6 @@
     "ISELEMENTOF" : ""
   },
   {
-    "NAME" : "TrnstnProp",
-    "VALUE": "1",
-    "TYPE" : "double",
-    "UNITS" : "multiplier",
-    "PROHIBIT" : "c('NA', '< 0', '> 1')",
-    "ISELEMENTOF" : ""
-  },
-  {
     "NAME" : "FuelCost",
     "VALUE": "1.82",
     "TYPE" : "compound",

@@ -136,3 +136,57 @@ Pilot RPAT module in VisionEval
 
 2018-02-27 22:02:06 : Congratulations. Module AssignVehicleFeaturesFuture passed all tests. 
 
+RPAT Pilot
+Pilot RPAT module in VisionEval
+2018-04-26_04:21:31
+
+2018-04-26 04:21:31 : Testing AssignVehicleFeaturesFuture. 
+
+2018-04-26 04:21:31 : Attempting to load datastore. 
+
+2018-04-26 04:21:31 : Datastore loaded. 
+
+2018-04-26 04:21:31 : Attempting to load and check specifications. 
+
+2018-04-26 04:21:33 : Module specifications successfully loaded and checked for errors. 
+
+2018-04-26 04:21:33 : No inputs to process. 
+
+2018-04-26 04:21:33 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-04-26 04:21:33 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-04-26 04:21:33 : Running module and checking whether outputs meet Set specifications. 
+
+2018-04-26 04:21:33 : Also saving module outputs to datastore. 
+
+RPAT Pilot
+Pilot RPAT module in VisionEval
+2018-04-26_04:21:50
+
+2018-04-26 04:21:50 : Testing AssignVehicleFeaturesFuture. 
+
+2018-04-26 04:21:50 : Attempting to load datastore. 
+
+2018-04-26 04:21:50 : Datastore loaded. 
+
+2018-04-26 04:21:50 : Attempting to load and check specifications. 
+
+2018-04-26 04:21:54 : Module specifications successfully loaded and checked for errors. 
+
+2018-04-26 04:21:54 : No inputs to process. 
+
+2018-04-26 04:21:54 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-04-26 04:21:54 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-04-26 04:21:54 : Running module and checking whether outputs meet Set specifications. 
+
+2018-04-26 04:21:54 : Also saving module outputs to datastore. 
+
+2018-04-26 04:23:37 : Module run successfully and outputs meet Set specifications. 
+
+2018-04-26 04:23:37 : Module outputs saved to datastore. 
+
+2018-04-26 04:23:37 : Congratulations. Module AssignVehicleFeaturesFuture passed all tests. 
+

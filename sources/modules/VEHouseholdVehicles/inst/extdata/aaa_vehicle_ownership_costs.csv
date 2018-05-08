@@ -1,0 +1,7 @@
+Category,SmallSedan,MediumSedan,LargeSedan,SmallSUV,MediumSUV,Minivan,Pickup
+Insurance,1288,1202,1200,1076,1089,1075,1229
+License/Registration/Taxes,454,639,757,607,831,726,984
+Finance,396,597,706,567,806,692,922
+Depreciation10KPerYear,1969,3028,3601,2646,3479,3654,3308
+Depreciation15KPerYear,2114,3187,3799,2840,3720,3839,3587
+Depreciation20KPerYear,2489,3592,4300,3319,4309,4298,4258

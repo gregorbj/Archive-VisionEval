@@ -188,7 +188,7 @@ AssignVehicleFeaturesSpecifications <- list(
   Inp = items(
     item(
       NAME = "Region",
-      FILE = "region_lt1_veh_prop.csv",
+      FILE = "model_lt1_veh_prop.csv",
       TABLE = "Lt1Prop",
       GROUP = "Global",
       TYPE = "character",
@@ -200,7 +200,7 @@ AssignVehicleFeaturesSpecifications <- list(
     ),
     item(
       NAME = "DrvAgePop",
-      FILE = "region_lt1_veh_prop.csv",
+      FILE = "model_lt1_veh_prop.csv",
       TABLE = "Lt1Prop",
       GROUP = "Global",
       TYPE = "people",
@@ -211,7 +211,7 @@ AssignVehicleFeaturesSpecifications <- list(
     ),
     item(
       NAME = "NumVeh",
-      FILE = "region_lt1_veh_prop.csv",
+      FILE = "model_lt1_veh_prop.csv",
       TABLE = "Lt1Prop",
       GROUP = "Global",
       TYPE = "vehicles",
@@ -222,7 +222,7 @@ AssignVehicleFeaturesSpecifications <- list(
     ),
     item(
       NAME = "Prob",
-      FILE = "region_lt1_veh_prop.csv",
+      FILE = "model_lt1_veh_prop.csv",
       TABLE = "Lt1Prop",
       GROUP = "Global",
       TYPE = "double",
@@ -234,7 +234,7 @@ AssignVehicleFeaturesSpecifications <- list(
     ),
     item(
       NAME = "Region",
-      FILE = "region_gt1_veh_prop.csv",
+      FILE = "model_gt1_veh_prop.csv",
       TABLE = "Gt1Prop",
       GROUP = "Global",
       TYPE = "character",
@@ -246,7 +246,7 @@ AssignVehicleFeaturesSpecifications <- list(
     ),
     item(
       NAME = "DrvAgePop",
-      FILE = "region_gt1_veh_prop.csv",
+      FILE = "model_gt1_veh_prop.csv",
       TABLE = "Gt1Prop",
       GROUP = "Global",
       TYPE = "people",
@@ -257,7 +257,7 @@ AssignVehicleFeaturesSpecifications <- list(
     ),
     item(
       NAME = "NumVeh",
-      FILE = "region_gt1_veh_prop.csv",
+      FILE = "model_gt1_veh_prop.csv",
       TABLE = "Gt1Prop",
       GROUP = "Global",
       TYPE = "vehicles",
@@ -268,7 +268,7 @@ AssignVehicleFeaturesSpecifications <- list(
     ),
     item(
       NAME = "Prob",
-      FILE = "region_gt1_veh_prop.csv",
+      FILE = "model_gt1_veh_prop.csv",
       TABLE = "Gt1Prop",
       GROUP = "Global",
       TYPE = "double",
@@ -280,7 +280,7 @@ AssignVehicleFeaturesSpecifications <- list(
     ),
     item(
       NAME = "VehAge",
-      FILE = "region_veh_cumprop_by_vehage.csv",
+      FILE = "model_veh_cumprop_by_vehage.csv",
       TABLE = "VehAgeCumProp",
       GROUP = "Global",
       TYPE = "vehicles",
@@ -293,7 +293,7 @@ AssignVehicleFeaturesSpecifications <- list(
       NAME = items(
         "AutoCumProp",
         "LtTruckCumProp"),
-      FILE = "region_veh_cumprop_by_vehage.csv",
+      FILE = "model_veh_cumprop_by_vehage.csv",
       TABLE = "VehAgeCumProp",
       GROUP = "Global",
       TYPE = "double",
@@ -305,7 +305,7 @@ AssignVehicleFeaturesSpecifications <- list(
     ),
     item(
       NAME = "VehAge",
-      FILE = "region_veh_prop_by_vehage_vehtype_inc.csv",
+      FILE = "model_veh_prop_by_vehage_vehtype_inc.csv",
       TABLE = "VehAgeTypeProp",
       GROUP = "Global",
       TYPE = "vehicles",
@@ -316,7 +316,7 @@ AssignVehicleFeaturesSpecifications <- list(
     ),
     item(
       NAME = "IncGrp",
-      FILE = "region_veh_prop_by_vehage_vehtype_inc.csv",
+      FILE = "model_veh_prop_by_vehage_vehtype_inc.csv",
       TABLE = "VehAgeTypeProp",
       GROUP = "Global",
       TYPE = "character",
@@ -328,7 +328,7 @@ AssignVehicleFeaturesSpecifications <- list(
     ),
     item(
       NAME = "VehType",
-      FILE = "region_veh_prop_by_vehage_vehtype_inc.csv",
+      FILE = "model_veh_prop_by_vehage_vehtype_inc.csv",
       TABLE = "VehAgeTypeProp",
       GROUP = "Global",
       TYPE = "character",
@@ -340,7 +340,7 @@ AssignVehicleFeaturesSpecifications <- list(
     ),
     item(
       NAME = "Prop",
-      FILE = "region_veh_prop_by_vehage_vehtype_inc.csv",
+      FILE = "model_veh_prop_by_vehage_vehtype_inc.csv",
       TABLE = "VehAgeTypeProp",
       GROUP = "Global",
       TYPE = "double",
@@ -358,7 +358,7 @@ AssignVehicleFeaturesSpecifications <- list(
         "BusMpg",
         "TrainMpg"
       ),
-      FILE = "region_veh_mpg_by_year.csv",
+      FILE = "model_veh_mpg_by_year.csv",
       TABLE = "Vehicles",
       GROUP = "Global",
       TYPE = "compound",
@@ -374,7 +374,7 @@ AssignVehicleFeaturesSpecifications <- list(
     ),
     item(
       NAME = "ModelYear",
-      FILE = "region_veh_mpg_by_year.csv",
+      FILE = "model_veh_mpg_by_year.csv",
       TABLE = "Vehicles",
       GROUP = "Global",
       TYPE = "time",
@@ -391,7 +391,7 @@ AssignVehicleFeaturesSpecifications <- list(
         "Veh4Value",
         "Veh5PlusValue"
       ),
-      FILE = "region_veh_mpg_dvmt_prop.csv",
+      FILE = "model_veh_mpg_dvmt_prop.csv",
       TABLE = "VehicleMpgProp",
       GROUP = "Global",
       TYPE = "double",
@@ -413,7 +413,7 @@ AssignVehicleFeaturesSpecifications <- list(
         "Veh4Prob",
         "Veh5PlusProb"
       ),
-      FILE = "region_veh_mpg_dvmt_prop.csv",
+      FILE = "model_veh_mpg_dvmt_prop.csv",
       TABLE = "VehicleMpgProp",
       GROUP = "Global",
       TYPE = "double",
@@ -1549,7 +1549,7 @@ AssignVehicleFeatures <- function(L) {
   Hh_df$LogDen <- log( Hh_df$Htppopdn )
   # Density_ <- L$Year$Bzone$D1B[match(L$Year$Household$HhPlaceTypes, L$Year$Bzone$Bzone)]
   # Hh_df$LogDensity <- log(Density_)
-  FwyLaneMiPC_Bz <- L$Year$Marea$FwyLaneMiPC[match(L$Year$Bzone$Marea, L$Year$Marea$Marea)]*1000 # To match RPAT numbers
+  FwyLaneMiPC_Bz <- L$Year$Marea$FwyLaneMiPC[match(L$Year$Bzone$Marea, L$Year$Marea$Marea)]
   Hh_df$FwyLaneMiPC <- FwyLaneMiPC_Bz[match(L$Year$Household$HhPlaceTypes, L$Year$Bzone$Bzone)]
   TranRevMiPC_Bz <- L$Year$Marea$TranRevMiPC[match(L$Year$Bzone$Marea, L$Year$Marea$Marea)]
   Hh_df$TranRevMiPC <- TranRevMiPC_Bz[match(L$Year$Household$HhPlaceTypes, L$Year$Bzone$Bzone)]

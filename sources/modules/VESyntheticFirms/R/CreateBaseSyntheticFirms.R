@@ -85,7 +85,7 @@ CreateBaseSyntheticFirmsSpecifications <- list(
   Inp = items(
     item(
       NAME = "county",
-      FILE = "employment.csv",
+      FILE = "azone_employment_by_naics.csv",
       TABLE = "Employment",
       GROUP = "Global",
       TYPE = "character",
@@ -100,7 +100,7 @@ CreateBaseSyntheticFirmsSpecifications <- list(
     ),
     item(
       NAME = "year",
-      FILE = "employment.csv",
+      FILE = "azone_employment_by_naics.csv",
       TABLE = "Employment",
       GROUP = "Global",
       TYPE = "integer",
@@ -115,7 +115,7 @@ CreateBaseSyntheticFirmsSpecifications <- list(
     ),
     item(
       NAME = "naics",
-      FILE = "employment.csv",
+      FILE = "azone_employment_by_naics.csv",
       TABLE = "Employment",
       GROUP = "Global",
       TYPE = "integer",
@@ -145,7 +145,7 @@ CreateBaseSyntheticFirmsSpecifications <- list(
               "n1000_2",
               "n1000_3",
               "n1000_4"),
-      FILE = "employment.csv",
+      FILE = "azone_employment_by_naics.csv",
       TABLE = "Employment",
       GROUP = "Global",
       TYPE = "integer",

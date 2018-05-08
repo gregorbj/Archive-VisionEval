@@ -1,32 +1,32 @@
 Test
 Test of VESimHouseholds package modules
-2018-04-02_20:02:28
+2018-04-18_16:01:13
 
-2018-04-02 20:02:28 : Testing PredictHousing. 
+2018-04-18 16:01:13 : Testing PredictHousing. 
 
-2018-04-02 20:02:28 : Attempting to load datastore. 
+2018-04-18 16:01:13 : Attempting to load datastore. 
 
-2018-04-02 20:02:28 : Datastore loaded. 
+2018-04-18 16:01:13 : Datastore loaded. 
 
-2018-04-02 20:02:28 : Attempting to load and check specifications. 
+2018-04-18 16:01:13 : Attempting to load and check specifications. 
 
-2018-04-02 20:02:28 : Module specifications successfully loaded and checked for errors. 
+2018-04-18 16:01:13 : Module specifications successfully loaded and checked for errors. 
 
-2018-04-02 20:02:28 : Attempting to process, check and load module inputs. 
+2018-04-18 16:01:13 : Attempting to process, check and load module inputs. 
 
-2018-04-02 20:02:31 : Module inputs successfully checked and loaded into datastore. 
+2018-04-18 16:01:13 : Module inputs successfully checked and loaded into datastore. 
 
-2018-04-02 20:02:31 : Checking whether datastore contains all datasets in Get specifications. 
+2018-04-18 16:01:13 : Checking whether datastore contains all datasets in Get specifications. 
 
-2018-04-02 20:02:32 : Datastore contains all datasets identified in module Get specifications. 
+2018-04-18 16:01:13 : Datastore contains all datasets identified in module Get specifications. 
 
-2018-04-02 20:02:32 : Running module and checking whether outputs meet Set specifications. 
+2018-04-18 16:01:13 : Running module and checking whether outputs meet Set specifications. 
 
-2018-04-02 20:02:32 : Also saving module outputs to datastore. 
+2018-04-18 16:01:13 : Also saving module outputs to datastore. 
 
-2018-04-02 20:02:40 : Module run successfully and outputs meet Set specifications. 
+2018-04-18 16:01:21 : Module run successfully and outputs meet Set specifications. 
 
-2018-04-02 20:02:40 : Module outputs saved to datastore. 
+2018-04-18 16:01:21 : Module outputs saved to datastore. 
 
-2018-04-02 20:02:40 : Congratulations. Module PredictHousing passed all tests. 
+2018-04-18 16:01:21 : Congratulations. Module PredictHousing passed all tests. 
 

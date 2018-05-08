@@ -1,0 +1,32 @@
+Test
+Test of VERoadPerformance package modules
+2018-04-24_07:56:41
+
+2018-04-24 07:56:41 : Testing CalculateMpgMpkwhAdjustments. 
+
+2018-04-24 07:56:41 : Attempting to load datastore. 
+
+2018-04-24 07:56:41 : Datastore loaded. 
+
+2018-04-24 07:56:41 : Attempting to load and check specifications. 
+
+2018-04-24 07:56:41 : Module specifications successfully loaded and checked for errors. 
+
+2018-04-24 07:56:41 : Attempting to process, check and load module inputs. 
+
+2018-04-24 07:56:44 : Module inputs successfully checked and loaded into datastore. 
+
+2018-04-24 07:56:45 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-04-24 07:56:45 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-04-24 07:56:45 : Running module and checking whether outputs meet Set specifications. 
+
+2018-04-24 07:56:45 : Also saving module outputs to datastore. 
+
+2018-04-24 07:56:47 : Module run successfully and outputs meet Set specifications. 
+
+2018-04-24 07:56:47 : Module outputs saved to datastore. 
+
+2018-04-24 07:56:47 : Congratulations. Module CalculateMpgMpkwhAdjustments passed all tests. 
+

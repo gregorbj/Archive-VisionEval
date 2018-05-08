@@ -1,0 +1,34 @@
+=================================================================
+Documentation for ces-trans-exp-by-category-income-2003to2015.csv
+=================================================================
+Data in this file is used in the BudgetHouseholdDvmt module to determine the proportion of household income budgeted for the operation of motor vehicles.
+
+File Structure
+--------------
+Rows contain data for combined expense category and income group.
+Column names as follows:
+SeriesId: Consumer expenditure series ID for the combination of the expense category and income category
+ExpenseCategory: Description of the expense category. Categories include:
+    Insurance: includes the premium paid for insuring cars, trucks, and other vehicles.
+    Maintenance/Repair: includes tires, batteries, tubes, lubrication, filters, coolant, additives, brake and transmission fluids, oil change, brake work including adjustment, front-end alignment, wheel balancing, steering repair, shock absorber replacement, clutch and transmission repair, electrical system repair, exhaust system repair, body work and painting, motor repair, repair to cooling system, drive train repair, drive shaft and rear-end repair, tire repair, audio equipment, other maintenance and services, and auto repair policies.
+    Gas/Oil: includes gasoline, diesel fuel, and motor oil.
+    NewVehiclePurchase: includes the net outlay (purchase price minus trade-in value) on new domestic and imported cars and trucks.
+    OtherVehiclePurchase: includes the net outlay (purchase price minus trade-in value) on other vehicles, including motorcycles and private planes.
+    Public Transportation: includes fares for mass transit, buses, trains, airlines, taxis, school buses for which a fee is charged, and boats.
+    AllTransportation: total of all transportation expenditures.
+    FinanceCharges: includes the dollar amount of interest paid for a loan contracted for the purchase of vehicles described above.
+    OtherExpenses: includes the sum of the Maintenance/Repair, Rent/Leasing/Licensing/Other, Insurance, and FinanceCharges categories.
+    VehiclePurchases: includes the net outlay (purchase price minus trade-in value) on new and used domestic and imported cars and trucks and other vehicles, including motorcycles and private planes.
+    Rent/Leasing/Licensing/Other: includes leased and rented cars, trucks, motorcycles, and aircraft; inspection fees; State and local registration; driver's license fees; parking fees; towing charges; tolls; and automobile service clubs. 
+IncomeGroup: Name of the income group
+BottomIncome: Bottom income of the income group in nominal dollars
+TopIncome: Top income of the income group in nominal dollars. Note that for the top income group - $150,000 or more - there is no top value. For this group, the top value has been coded as $200,000.
+Remaining Columns: The remaining columns contain the nominal expenditures in dollars in each category by year for the years 2003 to 2015
+
+Source:
+-------
+Ryan Pfirrmann-Powell. Americans’ Aging Autos. Beyond the Numbers, Prices and Spending. Vol.3 / No. 9. Bureau of Labor Statistics. May 2014
+Table 1, Average expenditure and frequency reported for various types of maintenance and repair, by average
+age of vehicle(s), 2012
+Accessed from:
+https://www.bls.gov/opub/btn/volume-3/pdf/americans-aging-autos.pdf

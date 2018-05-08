@@ -149,7 +149,7 @@ CalculateCongestionFutureSpecifications <- list(
       OPTIONAL = TRUE
     ),
     item(
-      NAME = "Dvmt",
+      NAME = "DvmtFuture",
       TABLE = "Bzone",
       GROUP = "Year",
       TYPE = "compound",
@@ -169,7 +169,7 @@ CalculateCongestionFutureSpecifications <- list(
       ISELEMENTOF = ""
     ),
     item(
-      NAME = "TruckDvmt",
+      NAME = "TruckDvmtFuture",
       TABLE = "Marea",
       GROUP = "Year",
       TYPE = "compound",

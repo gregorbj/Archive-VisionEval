@@ -153,6 +153,46 @@ AssignParkingRestrictionsSpecifications <- list(
       ISELEMENTOF = ""
     ),
     item(
+      NAME = "NumHh",
+      TABLE = "Bzone",
+      GROUP = "Year",
+      TYPE = "households",
+      UNITS = "HH",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "RetEmp",
+      TABLE = "Bzone",
+      GROUP = "Year",
+      TYPE = "people",
+      UNITS = "PRSN",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "SvcEmp",
+      TABLE = "Bzone",
+      GROUP = "Year",
+      TYPE = "people",
+      UNITS = "PRSN",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME =
+        items(
+          "Latitude",
+          "Longitude"),
+      TABLE = "Bzone",
+      GROUP = "Year",
+      TYPE = "double",
+      UNITS = "NA",
+      NAVALUE = -9999,
+      PROHIBIT = "NA",
+      ISELEMENTOF = ""
+    ),
+    item(
       NAME = "HouseType",
       TABLE = "Household",
       GROUP = "Year",
@@ -205,6 +245,18 @@ AssignParkingRestrictionsSpecifications <- list(
       ISELEMENTOF = "",
       SIZE = 0,
       DESCRIPTION = "Daily cost for long-term parking (e.g. paid on monthly basis)"
+    ),
+    item(
+      NAME = "OtherParkingCost",
+      TABLE = "Household",
+      GROUP = "Year",
+      TYPE = "currency",
+      UNITS = "USD",
+      NAVALUE = "NA",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      SIZE = 0,
+      DESCRIPTION = "Daily cost for parking at shopping locations or other locations of paid parking not including work (not adjusted for number of vehicle trips)"
     ),
     item(
       NAME = "PaysForParking",
@@ -273,7 +325,12 @@ devtools::use_data(AssignParkingRestrictionsSpecifications, overwrite = TRUE)
 #free parking spaces the household may use, the charge for household parking per
 #vehicle if they exceed the number of free spaces, how many household workers
 #pay for parking, the charge they have to pay, and the amount of the work
-#parking charges that are 'cash-out-buy-back'.
+#parking charges that are 'cash-out-buy-back'. The module also calculates a
+#simple placeholder value for other daily parking charges (e.g. paying for
+#parking at shopping). These are calculated as a weighted average of daily
+#parking cost in each Bzone weighted by the portion of total aggregate activity
+#in the region that is in each Bzone (D1D measure calculated by the
+#Calculate4DMeasures module)
 
 #Main module function that assigns parking restrictions to each household
 #------------------------------------------------------------------------
@@ -295,7 +352,7 @@ devtools::use_data(AssignParkingRestrictionsSpecifications, overwrite = TRUE)
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
-#' @import visioneval stats
+#' @import visioneval stats fields
 #' @export
 AssignParkingRestrictions <- function(L) {
   #Set up
@@ -340,12 +397,44 @@ AssignParkingRestrictions <- function(L) {
   #Clean up
   rm(PropPay_Wk, PropCashOut_Wk)
 
+  #Other household parking cost
+  #----------------------------
+  #Calculated as function of inverse of distance to attractions from home and
+  #amount of retail and service employment
+  OtherPkgCost_Bz <- local({
+    #Calculate distances between Bzones
+    LngLat_df <-
+      data.frame(
+        lng = L$Year$Bzone$Longitude,
+        lat = L$Year$Bzone$Latitude)
+    Dist_BzBz <- rdist.earth(LngLat_df, LngLat_df, miles = TRUE, R = 6371)
+    diag(Dist_BzBz) <- 0
+    diag(Dist_BzBz) <- apply(Dist_BzBz, 1, function(x) min(x[x != 0]) / 2)
+    #Create attraction term to determine relative attractiveness to non-work trips
+    Attr_Bz <- L$Year$Bzone$RetEmp + L$Year$Bzone$SvcEmp
+    Attr_Bz[Attr_Bz == 0] <- 1
+    #Create production term
+    NumHh_Bz <- L$Year$Bzone$NumHh
+    #Scale relative attractions to equal number of households
+    Attr_Bz <- sum(NumHh_Bz) * Attr_Bz / sum(Attr_Bz)
+    #Calculate relative attractiveness
+    Attr_BzBz <-
+      ipf(1 / Dist_BzBz, list(NumHh_Bz, Attr_Bz), list(1, 2))$Units_ar
+    #Calculate attraction probabilities
+    AttrProb_BzBz <- sweep(Attr_BzBz, 1, rowSums(Attr_BzBz), "/")
+    #Calculate the weighted parking cost
+    rowSums(sweep(AttrProb_BzBz, 2, L$Year$Bzone$PkgCost, "*"))
+  })
+  #Assign other parking cost to households
+  OtherPkgCost_Hh <- OtherPkgCost_Bz[BzToHh_]
+
   #Return list of results
   #----------------------
   Out_ls <- initDataList()
   Out_ls$Year$Household <- list(
     FreeParkingSpaces = as.integer(PkgSp_Hh),
-    ParkingUnitCost = CostPerSpace_Hh
+    ParkingUnitCost = CostPerSpace_Hh,
+    OtherParkingCost = OtherPkgCost_Hh
   )
   Out_ls$Year$Worker <- list(
     PaysForParking = as.integer(DoesPay_Wk),
@@ -369,6 +458,7 @@ AssignParkingRestrictions <- function(L) {
 #   DoRun = FALSE
 # )
 # L <- TestDat_$L
+# R <- AssignParkingRestrictions(L)
 
 #Test code to check everything including running the module and checking whether
 #the outputs are consistent with the 'Set' specifications

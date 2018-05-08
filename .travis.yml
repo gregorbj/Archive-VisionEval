@@ -33,21 +33,21 @@ install:
 
 # setup a different environment variable for each Travis build environment (in the matrix) to run in parallel
 env:
-   - FOLDER=sources/framework/visioneval         SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=
-   - FOLDER=sources/modules/VE2001NHTS           SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=
-   - FOLDER=sources/modules/VEHouseholdTravel    SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=VE2001NHTS
-   - FOLDER=sources/modules/VEHouseholdVehicles  SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=VE2001NHTS
-   - FOLDER=sources/modules/VELandUse            SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=VE2001NHTS,VESimHouseholds
-   - FOLDER=sources/modules/VESimHouseholds      SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=
-   - FOLDER=sources/modules/VESyntheticFirms     SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=
-   - FOLDER=sources/modules/VETransportSupply    SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=
-   - FOLDER=sources/modules/VETransportSupplyUse SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=
-   - FOLDER=sources/modules/VERoadPerformance    SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=
-   - FOLDER=sources/modules/VEEnergyAndEmissions SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=VE2001NHTS,VEHouseholdTravel
-   - FOLDER=sources/modules/VEReports            SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=VE2001NHTS,VEHouseholdTravel
-   - FOLDER=sources/models/VERPAT                SCRIPT=run_model.R             TYPE=model       DEPENDS=VE2001NHTS,VESimHouseholds,VESyntheticFirms,VELandUse,VETransportSupply,VEHouseholdVehicles,VEHouseholdTravel,VETransportSupplyUse,VEReports
-   - FOLDER=sources/models/VERSPM/Test1          SCRIPT=run_model.R             TYPE=model       DEPENDS=VE2001NHTS,VESimHouseholds,VELandUse,VETransportSupply,VEHouseholdVehicles,VEHouseholdTravel,VERoadPerformance,VEEnergyAndEmissions
-   - FOLDER=sources/VEGUI                        SCRIPT=run_vegui_test.R        TYPE=model       DEPENDS=VE2001NHTS,VESimHouseholds,VESyntheticFirms,VELandUse,VETransportSupply,VEHouseholdVehicles,VEHouseholdTravel,VETransportSupplyUse,VEReports
+   - FOLDER=sources/framework/visioneval            SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=
+   - FOLDER=sources/modules/VE2001NHTS              SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=
+   - FOLDER=sources/modules/VEHouseholdTravel       SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=VE2001NHTS
+   - FOLDER=sources/modules/VEHouseholdVehicles     SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=VE2001NHTS,VEHouseholdTravel
+   - FOLDER=sources/modules/VELandUse               SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=VE2001NHTS,VESimHouseholds
+   - FOLDER=sources/modules/VESimHouseholds         SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=
+   - FOLDER=sources/modules/VESyntheticFirms        SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=
+   - FOLDER=sources/modules/VETransportSupply       SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=
+   - FOLDER=sources/modules/VETransportSupplyUse    SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=
+   - FOLDER=sources/modules/VETravelPerformance     SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=VE2001NHTS,VEHouseholdTravel,VEPowertrainsAndFuels
+   - FOLDER=sources/modules/VEPowertrainsAndFuels   SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=VE2001NHTS,VEHouseholdTravel
+   - FOLDER=sources/modules/VEReports               SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=VE2001NHTS,VEHouseholdTravel
+   - FOLDER=sources/models/VERPAT                   SCRIPT=run_model.R             TYPE=model       DEPENDS=VE2001NHTS,VESimHouseholds,VESyntheticFirms,VELandUse,VETransportSupply,VEHouseholdTravel,VEHouseholdVehicles,VETransportSupplyUse,VEReports
+   - FOLDER=sources/models/VERSPM/Test1             SCRIPT=run_model.R             TYPE=model       DEPENDS=VE2001NHTS,VESimHouseholds,VELandUse,VETransportSupply,VEHouseholdTravel,VEHouseholdVehicles,VEPowertrainsAndFuels,VETravelPerformance
+   - FOLDER=sources/VEGUI                           SCRIPT=run_vegui_test.R        TYPE=model       DEPENDS=VE2001NHTS,VESimHouseholds,VESyntheticFirms,VELandUse,VETransportSupply,VEHouseholdTravel,VEHouseholdVehicles,VETransportSupplyUse,VEReports
 
 # install and test framework, modules, models, GUI
 script:

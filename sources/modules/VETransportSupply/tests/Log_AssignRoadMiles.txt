@@ -1,64 +1,32 @@
 Test
 Test of VESimHouseholds package modules
-2017-11-08_07:26:15
+2018-04-18_18:19:24
 
-2017-11-08 07:26:16 : Testing AssignRoadMiles. 
+2018-04-18 18:19:24 : Testing AssignRoadMiles. 
 
-2017-11-08 07:26:16 : Attempting to load datastore. 
+2018-04-18 18:19:24 : Attempting to load datastore. 
 
-2017-11-08 07:26:16 : Datastore loaded. 
+2018-04-18 18:19:25 : Datastore loaded. 
 
-2017-11-08 07:26:16 : Attempting to load and check specifications. 
+2018-04-18 18:19:25 : Attempting to load and check specifications. 
 
-2017-11-08 07:26:16 : Module specifications successfully loaded and checked. 
+2018-04-18 18:19:25 : Module specifications successfully loaded and checked for errors. 
 
-2017-11-08 07:26:16 : Attempting to process, check and load module inputs. 
+2018-04-18 18:19:25 : Attempting to process, check and load module inputs. 
 
-2017-11-08 07:26:19 : Module inputs successfully checked and loaded into datastore. 
+2018-04-18 18:19:25 : Module inputs successfully checked and loaded into datastore. 
 
-2017-11-08 07:26:19 : Checking whether datastore contains all datasets in Get specifications. 
+2018-04-18 18:19:25 : Checking whether datastore contains all datasets in Get specifications. 
 
-2017-11-08 07:26:19 : Datastore contains all datasets identified in module Get specifications. 
+2018-04-18 18:19:25 : Datastore contains all datasets identified in module Get specifications. 
 
-2017-11-08 07:26:19 : Running module and checking whether outputs meet Set specifications. 
+2018-04-18 18:19:25 : Running module and checking whether outputs meet Set specifications. 
 
-2017-11-08 07:26:20 : Also saving module outputs to datastore. 
+2018-04-18 18:19:25 : Also saving module outputs to datastore. 
 
-2017-11-08 07:26:21 : Module run successfully and outputs meet Set specifications. 
+2018-04-18 18:19:25 : Module run successfully and outputs meet Set specifications. 
 
-2017-11-08 07:26:21 : Module outputs saved to datastore. 
+2018-04-18 18:19:25 : Module outputs saved to datastore. 
 
-2017-11-08 07:26:21 : Congratulations. Module AssignRoadMiles passed all tests. 
-
-Test
-Test of VESimHouseholds package modules
-2018-01-14_15:34:38
-
-2018-01-14 15:34:38 : Testing AssignRoadMiles. 
-
-2018-01-14 15:34:38 : Attempting to load datastore. 
-
-2018-01-14 15:34:38 : Datastore loaded. 
-
-2018-01-14 15:34:38 : Attempting to load and check specifications. 
-
-2018-01-14 15:34:39 : Module specifications successfully loaded and checked. 
-
-2018-01-14 15:34:39 : Attempting to process, check and load module inputs. 
-
-2018-01-14 15:34:40 : Module inputs successfully checked and loaded into datastore. 
-
-2018-01-14 15:34:40 : Checking whether datastore contains all datasets in Get specifications. 
-
-2018-01-14 15:34:40 : Datastore contains all datasets identified in module Get specifications. 
-
-2018-01-14 15:34:40 : Running module and checking whether outputs meet Set specifications. 
-
-2018-01-14 15:34:40 : Also saving module outputs to datastore. 
-
-2018-01-14 15:34:41 : Module run successfully and outputs meet Set specifications. 
-
-2018-01-14 15:34:42 : Module outputs saved to datastore. 
-
-2018-01-14 15:34:42 : Congratulations. Module AssignRoadMiles passed all tests. 
+2018-04-18 18:19:25 : Congratulations. Module AssignRoadMiles passed all tests. 
 

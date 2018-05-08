@@ -1,0 +1,21 @@
+===========================================
+Documentation for ldv_externality_costs.csv
+===========================================
+Data in this file is used in the CalculateVehicleOperatingCost module to compute externality costs from light-duty vehicle travel. Externality costs are costs that are costs that are borne by the public but are not paid by the people or businesses who impose the costs. For example, air pollution creates health costs in borne by the public in the form of increased illness and associated health care costs. Note that these costs do not include climate change costs.
+
+File Structure
+--------------
+Rows contain data by cost impact category.
+Column names as follows:
+CostCategory: externality cost category
+    AirPollution:   Cost of air pollution impacts in 2010 dollars per vehicle mile traveled
+    OtherResource:  Cost of other resources impacts (e.g. water pollution) in 2010 dollars per vehicle mile traveled
+    EnergySecurity: Cost to pay for energy security in 2010 dollars per gasoline equivalent gallon
+    Safety:         Cost of crashes not covered by vehicle insurance in 2010 dollars per vehicle mile traveled
+    Noise:          Cost of noise impacts in 2010 dollars per vehicle mile traveled
+UnitCost: Unit cost in 2010 dollars in the units described above
+
+Source:
+-------
+Cambridge Systematics Inc. Costs of Motor Vehicle Travel. White paper prepared for the Oregon Department of Transportation to support the ODOT Statewide Transportation Strategy. September 2011
+

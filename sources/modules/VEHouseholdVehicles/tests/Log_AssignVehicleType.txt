@@ -1,32 +1,32 @@
 Test
 Test of VESimHouseholds package modules
-2018-02-17_10:52:24
+2018-04-18_18:25:11
 
-2018-02-17 10:52:24 : Testing AssignVehicleType. 
+2018-04-18 18:25:11 : Testing AssignVehicleType. 
 
-2018-02-17 10:52:24 : Attempting to load datastore. 
+2018-04-18 18:25:11 : Attempting to load datastore. 
 
-2018-02-17 10:52:24 : Datastore loaded. 
+2018-04-18 18:25:11 : Datastore loaded. 
 
-2018-02-17 10:52:24 : Attempting to load and check specifications. 
+2018-04-18 18:25:11 : Attempting to load and check specifications. 
 
-2018-02-17 10:52:24 : Module specifications successfully loaded and checked. 
+2018-04-18 18:25:11 : Module specifications successfully loaded and checked for errors. 
 
-2018-02-17 10:52:24 : Attempting to process, check and load module inputs. 
+2018-04-18 18:25:11 : Attempting to process, check and load module inputs. 
 
-2018-02-17 10:52:28 : Module inputs successfully checked and loaded into datastore. 
+2018-04-18 18:25:11 : Module inputs successfully checked and loaded into datastore. 
 
-2018-02-17 10:52:30 : Checking whether datastore contains all datasets in Get specifications. 
+2018-04-18 18:25:11 : Checking whether datastore contains all datasets in Get specifications. 
 
-2018-02-17 10:52:30 : Datastore contains all datasets identified in module Get specifications. 
+2018-04-18 18:25:11 : Datastore contains all datasets identified in module Get specifications. 
 
-2018-02-17 10:52:30 : Running module and checking whether outputs meet Set specifications. 
+2018-04-18 18:25:11 : Running module and checking whether outputs meet Set specifications. 
 
-2018-02-17 10:52:30 : Also saving module outputs to datastore. 
+2018-04-18 18:25:11 : Also saving module outputs to datastore. 
 
-2018-02-17 10:52:51 : Module run successfully and outputs meet Set specifications. 
+2018-04-18 18:25:21 : Module run successfully and outputs meet Set specifications. 
 
-2018-02-17 10:52:51 : Module outputs saved to datastore. 
+2018-04-18 18:25:21 : Module outputs saved to datastore. 
 
-2018-02-17 10:52:51 : Congratulations. Module AssignVehicleType passed all tests. 
+2018-04-18 18:25:21 : Congratulations. Module AssignVehicleType passed all tests. 
 

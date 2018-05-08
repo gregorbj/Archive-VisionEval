@@ -2,6 +2,7 @@
 library(filesstrings)
 library(visioneval)
 library(data.table)
+library(pscl)
 
 ##################################################
 ## Section 1. Tests for modules used in VERSPM
@@ -32,10 +33,28 @@ testModule(
   DoRun = TRUE
 )
 
+#Test CalculateVehicleTrips module
+source("R/CalculateVehicleTrips.R")
+testModule(
+  ModuleName = "CalculateVehicleTrips",
+  LoadDatastore = TRUE,
+  SaveDatastore = TRUE,
+  DoRun = TRUE
+)
+
 #Test DivertSovTravel module
 source("R/DivertSovTravel.R")
 testModule(
   ModuleName = "DivertSovTravel",
+  LoadDatastore = TRUE,
+  SaveDatastore = TRUE,
+  DoRun = TRUE
+)
+
+#Test ApplyDvmtReductions module
+source("R/ApplyDvmtReductions.R")
+testModule(
+  ModuleName = "ApplyDvmtReductions",
   LoadDatastore = TRUE,
   SaveDatastore = TRUE,
   DoRun = TRUE
@@ -73,7 +92,8 @@ testModule(
   ModuleName = "CalculateTravelDemand",
   LoadDatastore = TRUE,
   SaveDatastore = TRUE,
-  DoRun = TRUE
+  DoRun = TRUE,
+  RunFor = "NotBaseYear"
 )
 
 # Reorganize folder for next VERPAT module test

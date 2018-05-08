@@ -1,16 +1,16 @@
 Package: VEHouseholdTravel
 Type: Package
 Title: Calculate Household Walk, Bike, and Transit Trips
-Version: 0.7.0
-Date: 1/14/18
+Version: 0.8.0
+Date: 4/9/18
 Author: Brian Gregor [aut, cre], Aditya Gore <aditya.gore@rsginc.com> [cre]
 Maintainer: Brian Gregor <gregorb@or-analytics.com>, Aditya Gore <aditya.gore@rsginc.com>
 Copyright: AASHTO
 URL: https://github.com/gregorbj/VisionEval/sources/modules/VEAltModes
 Description: Contains modules for predicting household average DVMT, trips by
-    alternative modes (walking, biking, transit), and percentage
-    reduction in household DVMT a result of diversion of SOV DVMT to slower
-    vehicle modes (bike etc.)
+    alternative modes (walking, biking, transit), household vehicle trips, and 
+    percentage reduction in household DVMT a result of diversion of SOV DVMT to 
+    slower vehicle modes (bike etc.)
 License: Apache License 2.0
 LazyData: TRUE
 Depends: R (>= 3.1.0)
@@ -18,7 +18,8 @@ Imports:
     visioneval,
     devtools,
     VE2001NHTS,
-    data.table
+    data.table,
+    pscl
 Suggests:
     knitr
 VignetteBuilder: knitr

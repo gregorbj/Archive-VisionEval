@@ -134,7 +134,7 @@ CalculatePolicyVmtSpecifications <- list(
       ),
       TABLE = "CommuteOptions",
       GROUP = "Global",
-      FILE = "model_commute_options.csv",
+      FILE = "region_commute_options.csv",
       TYPE = "character",
       UNITS = "category",
       SIZE = 31,
@@ -149,7 +149,7 @@ CalculatePolicyVmtSpecifications <- list(
       NAME = "DataValue",
       TABLE = "CommuteOptions",
       GROUP = "Global",
-      FILE = "model_commute_options.csv",
+      FILE = "region_commute_options.csv",
       TYPE = "double",
       UNITS = "multiplier",
       SIZE = 0,
@@ -161,7 +161,7 @@ CalculatePolicyVmtSpecifications <- list(
       NAME = "DataItem",
       TABLE = "LightVehiclesInfo",
       GROUP = "Global",
-      FILE = "model_light_vehicles.csv",
+      FILE = "region_light_vehicles.csv",
       TYPE = "character",
       UNITS = "category",
       SIZE = 12,
@@ -173,7 +173,7 @@ CalculatePolicyVmtSpecifications <- list(
       NAME = "DataValue",
       TABLE = "LightVehiclesInfo",
       GROUP = "Global",
-      FILE = "model_light_vehicles.csv",
+      FILE = "region_light_vehicles.csv",
       TYPE = "double",
       UNITS = "multiplier",
       SIZE = 0,
@@ -428,7 +428,7 @@ CalculatePolicyVmtSpecifications <- list(
       TABLE = "Bzone",
       GROUP = "Year",
       TYPE = "currency",
-      UNITS = "USD.1999",
+      UNITS = "USD.2000",
       SIZE = 0,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = ""
@@ -511,7 +511,7 @@ CalculatePolicyVmtSpecifications <- list(
       TABLE = "Household",
       GROUP = "Year",
       TYPE = "currency",
-      UNITS = "USD.1999",
+      UNITS = "USD.2000",
       SIZE = 0,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = ""
@@ -829,7 +829,7 @@ CalculatePolicyVmtSpecifications <- list(
       TABLE = "Marea",
       GROUP = "Year",
       TYPE = "currency",
-      UNITS = "USD.1999",
+      UNITS = "USD.2000",
       SIZE = 0,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = ""
@@ -895,7 +895,7 @@ CalculatePolicyVmtSpecifications <- list(
       TABLE = "TDMTransitLevels",
       GROUP = "Global",
       TYPE = "currency",
-      UNITS = "USD.1999",
+      UNITS = "USD.2000",
       SIZE = 0,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = ""
@@ -979,32 +979,17 @@ CalculatePolicyVmtSpecifications <- list(
       ISELEMENTOF = ""
     ),
     item(
-      NAME = "VmtCharge",
-      TABLE = "Model",
-      GROUP = "Global",
-      TYPE = "compound",
-      UNITS = "USD/MI",
-      SIZE = 0,
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = ""
-    ),
-    item(
-      NAME = "FuelCost",
+      NAME = item(
+        "FuelCost",
+        "GasTax",
+        "CarbonCost",
+        "VmtCost",
+        "VmtCharge"
+      ),
       TABLE = "Model",
       GROUP = "Global",
       TYPE = "compound",
       UNITS = "USD/GAL",
-      SIZE = 0,
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = ""
-    ),
-    item(
-      NAME = "GasTax",
-      TABLE = "Model",
-      GROUP = "Global",
-      TYPE = "compound",
-      UNITS = "USD/GAL",
-      SIZE = 0,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = ""
     ),
@@ -1045,15 +1030,6 @@ CalculatePolicyVmtSpecifications <- list(
       TYPE = "integer",
       UNITS = "DAYS",
       PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = ""
-    ),
-    item(
-      NAME = "TrnstnProp",
-      TABLE = "Model",
-      GROUP = "Global",
-      TYPE = "double",
-      UNITS = "multiplier",
-      PROHIBIT = c("NA", "< 0", "> 1"),
       ISELEMENTOF = ""
     )
   ),
@@ -1162,7 +1138,7 @@ CalculatePolicyVmtSpecifications <- list(
       TABLE = "Household",
       GROUP = "Year",
       TYPE = "currency",
-      UNITS = "USD.1999",
+      UNITS = "USD.2000",
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
@@ -1174,7 +1150,7 @@ CalculatePolicyVmtSpecifications <- list(
       TABLE = "Household",
       GROUP = "Year",
       TYPE = "currency",
-      UNITS = "USD.1999",
+      UNITS = "USD.2000",
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
@@ -1186,7 +1162,7 @@ CalculatePolicyVmtSpecifications <- list(
       TABLE = "Household",
       GROUP = "Year",
       TYPE = "currency",
-      UNITS = "USD.1999",
+      UNITS = "USD.2000",
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
@@ -1212,7 +1188,7 @@ CalculatePolicyVmtSpecifications <- list(
       TABLE = "Model",
       GROUP = "Global",
       TYPE = "currency",
-      UNITS = "USD.1999",
+      UNITS = "USD.2000",
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
@@ -1857,7 +1833,10 @@ CalculatePolicyVmt <- function(L) {
   #================================
 
   #Gather cost parameters into costs.
-  Costs_ <- c(L$Global$Model$FuelCost,L$Global$Model$GasTax,0,L$Global$Model$VmtCharge)
+  Costs_ <- c(L$Global$Model$FuelCost,
+              L$Global$Model$GasTax,
+              L$Global$Model$CarbonCost,
+              L$Global$Model$VmtCharge)
   names(Costs_) <- c("FuelCost","GasTax","CarbonCost","VmtCost")
 
   #Apply auto operating cost growth
@@ -1878,7 +1857,7 @@ CalculatePolicyVmt <- function(L) {
   PrevDvmt_Hh <- Hh_df$Dvmt
 
   Hh_df$TranRevMiPC <- L$Year$Marea$TranRevMiPC
-  Hh_df$FwyLaneMiPC <- L$Year$Marea$FwyLaneMiPC * 1000
+  Hh_df$FwyLaneMiPC <- L$Year$Marea$FwyLaneMiPC
   Hh_df$BaseCostPerMile <- L$Global$Model$BaseCostPerMile
   ModelVar_ <- c( "Income", "Htppopdn", "Vehicles", "TranRevMiPC",
                   "FwyLaneMiPC", "DrvAgePop", "HhSize", "Age0to14",
@@ -1888,12 +1867,12 @@ CalculatePolicyVmt <- function(L) {
   if( any( IsMetro_ ) ) {
     Hh_df$Dvmt[ IsMetro_ ] <- calculateAdjAveDvmt( Hh_df[ IsMetro_, ModelVar_ ],
                                                    DvmtLmModels_ls, "Metro", BudgetProp=L$Global$Model$DvmtBudgetProp, AnnVmtInflator=L$Global$Model$AnnVmtInflator,
-                                                   TrnstnProp=L$Global$Model$TrnstnProp )[[1]]
+                                                   TrnstnProp=1 )[[1]]
   }
   if( any( !IsMetro_ ) ) {
     Hh_df$Dvmt[ !IsMetro_ ] <- calculateAdjAveDvmt( Hh_df[ IsMetro_, ModelVar_ ],
                                                     DvmtLmModels_ls, "NonMetro", BudgetProp=L$Global$Model$DvmtBudgetProp, AnnVmtInflator=L$Global$Model$AnnVmtInflator,
-                                                    TrnstnProp=L$Global$Model$TrnstnProp )[[1]]
+                                                    TrnstnProp=1 )[[1]]
   }
 
   # Adjust for urban form and TDM

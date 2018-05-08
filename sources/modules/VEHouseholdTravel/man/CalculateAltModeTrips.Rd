@@ -19,5 +19,5 @@ specifications for the module.
 household.
 }
 \details{
-This function calculates walk, bike, and transit tripss for households.
+This function calculates walk, bike, and transit trips for households.
 }

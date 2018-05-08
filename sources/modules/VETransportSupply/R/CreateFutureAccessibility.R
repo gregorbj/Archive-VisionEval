@@ -251,7 +251,7 @@ CreateFutureAccessibility <- function(L) {
   #Calculate the growth in freeway lane-miles
   FwyLaneMiGrowth <- UrbanPopChange_Ma * L$Global$Model$FwyLaneMiGrowth * FwyLaneMi_Ma
   #Calculate freeway lane-miles per capita
-  FwyLaneMiPC_Ma <- (FwyLaneMi_Ma + FwyLaneMiGrowth) / UrbanPop_Ma
+  FwyLaneMiPC_Ma <- 1000 * (FwyLaneMi_Ma + FwyLaneMiGrowth) / UrbanPop_Ma
 
   #Calculate the arterial lane-miles per capita
   #-------------------------------------------
@@ -260,7 +260,7 @@ CreateFutureAccessibility <- function(L) {
   #Calculate the growth in areterial lane-miles
   ArtLaneMiGrowth <- UrbanPopChange_Ma * L$Global$Model$ArtLaneMiGrowth * ArtLaneMi_Ma
   #Calculate arterial lane-miles per capita
-  ArtLaneMiPC_Ma <- (ArtLaneMi_Ma + ArtLaneMiGrowth) / UrbanPop_Ma
+  ArtLaneMiPC_Ma <- 1000 * (ArtLaneMi_Ma + ArtLaneMiGrowth) / UrbanPop_Ma
 
   #Calculate the bus rev-miles
   #-------------------------------------------

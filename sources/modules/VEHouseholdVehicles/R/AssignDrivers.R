@@ -429,6 +429,18 @@ AssignDriversSpecifications <- list(
       ISELEMENTOF = "",
       SIZE = 0,
       DESCRIPTION = "Number of drivers in household"
+    ),
+    item(
+      NAME = "DrvAgePersons",
+      TABLE = "Household",
+      GROUP = "Year",
+      TYPE = "people",
+      UNITS = "PRSN",
+      NAVALUE = -1,
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      SIZE = 0,
+      DESCRIPTION = "Number of people 15 year old or older in the household"
     )
   )
 )
@@ -589,11 +601,18 @@ AssignDrivers <- function(L) {
     rm(NonMetroPer_df, Driver_, NumDrivers_Hh, HhIdx)
   }
 
+  #Tabulate number of driving age persons in each household
+  #--------------------------------------------------------
+  DrvAgePersons_Hh <-
+    with(L$Year$Household,
+         Age15to19 + Age20to29 + Age30to54 + Age55to64 + Age65Plus)
+
   #Return list of results
   #----------------------
   #Calculate total number of drivers by household
   Drivers_ <- rowSums(do.call(cbind, Out_ls$Year$Household[OutBinNames_]))
   Out_ls$Year$Household$Drivers <- Drivers_
+  Out_ls$Year$Household$DrvAgePersons <- DrvAgePersons_Hh
   Out_ls
 }
 
@@ -612,6 +631,7 @@ AssignDrivers <- function(L) {
 #   DoRun = FALSE
 # )
 # L <- TestDat_$L
+# R <- AssignDrivers(L)
 
 #Test code to check everything including running the module and checking whether
 #the outputs are consistent with the 'Set' specifications

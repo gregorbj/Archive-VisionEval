@@ -64,7 +64,7 @@ testModule(
   LoadDatastore = TRUE,
   SaveDatastore = TRUE,
   DoRun = TRUE,
-  RunFor = "AllYears"
+  RunFor = "NotBaseYear"
 )
 
 # Reorganize folder for next VERPAT module test

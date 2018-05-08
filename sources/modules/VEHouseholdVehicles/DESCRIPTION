@@ -1,14 +1,21 @@
 Package: VEHouseholdVehicles
 Type: Package
 Title: Model household vehicles
-Version: 0.7
-Date: 1/14/18
+Version: 0.9
+Date: 4/8/18
 Author: Brian Gregor [aut, cre], Aditya Gore <aditya.gore@rsginc.com> [cre]
 Maintainer: Brian Gregor <gregorb@or-analytics.com>, Aditya Gore <aditya.gore@rsginc.com>
 Copyright: AASHTO
 URL: https://github.com/gregorbj/VisionEval/sources/modules/VEVehicleOwnership
 Description: This package contains modules which predict household vehicle
-    ownership, including the number own, body types, and ages.
+    ownership, including the number owned, body types, and ages. It also
+    identifies car service accessibility by household (High & Low) and
+    substitutes car service (e.g. car sharing or transportation network company)
+    for owning a household vehicle for households that have a high level of car
+    service availability and the cost of owning a car per mile of travel is
+    higher than the cost per mile of using a car service. The cost of owning
+    vehicles is calculated as a function of the vehicle age, type, and vehicle
+    miles traveled.
 License: Apache License 2.0
 LazyData: TRUE
 Depends: R (>= 3.1.0)
@@ -18,7 +25,8 @@ Imports:
     reshape2,
     stats,
     devtools,
-    VE2001NHTS
+    VE2001NHTS,
+    VEHouseholdTravel
 Suggests:
     knitr
 VignetteBuilder: knitr

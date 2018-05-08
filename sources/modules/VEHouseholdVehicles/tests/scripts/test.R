@@ -59,6 +59,24 @@ testModule(
   DoRun = TRUE
 )
 
+#Test CalculateVehicleOwnCost module
+source("R/CalculateVehicleOwnCost.R")
+testModule(
+  ModuleName = "CalculateVehicleOwnCost",
+  LoadDatastore = TRUE,
+  SaveDatastore = TRUE,
+  DoRun = TRUE
+)
+
+#Test AdjustVehicleOwnership module
+source("R/AdjustVehicleOwnership.R")
+testModule(
+  ModuleName = "AdjustVehicleOwnership",
+  LoadDatastore = TRUE,
+  SaveDatastore = TRUE,
+  DoRun = TRUE
+)
+
 #Finish up
 setwd("tests")
 tar("Datastore.tar", "Datastore")
@@ -74,9 +92,9 @@ setwd("..")
 setwd("tests")
 # Copy and save the results from previous module tests
 zip("ModelState.zip","ModelState.Rda")
-file.remove("ModelState.Rda")
 tar("defs.tar","defs")
 tar("inputs.tar","inputs")
+file.remove("ModelState.Rda")
 dir.remove("defs")
 dir.remove("inputs")
 untar("Datastore_AssignVehicleFeatures.tar")
@@ -91,7 +109,8 @@ testModule(
   ModuleName = "AssignVehicleFeatures",
   LoadDatastore = TRUE,
   SaveDatastore = TRUE,
-  DoRun = TRUE
+  DoRun = TRUE,
+  RunFor = "NotBaseYear"
 )
 
 # Reorganize folder for next VERPAT module test

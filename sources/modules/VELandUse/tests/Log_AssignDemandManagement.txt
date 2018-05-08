@@ -1,32 +1,32 @@
 Test
 Test of VESimHouseholds package modules
-2018-04-02_20:02:58
+2018-04-18_16:02:45
 
-2018-04-02 20:02:58 : Testing AssignDemandManagement. 
+2018-04-18 16:02:45 : Testing AssignDemandManagement. 
 
-2018-04-02 20:02:58 : Attempting to load datastore. 
+2018-04-18 16:02:45 : Attempting to load datastore. 
 
-2018-04-02 20:02:58 : Datastore loaded. 
+2018-04-18 16:02:45 : Datastore loaded. 
 
-2018-04-02 20:02:58 : Attempting to load and check specifications. 
+2018-04-18 16:02:45 : Attempting to load and check specifications. 
 
-2018-04-02 20:02:58 : Module specifications successfully loaded and checked for errors. 
+2018-04-18 16:02:45 : Module specifications successfully loaded and checked for errors. 
 
-2018-04-02 20:02:58 : Attempting to process, check and load module inputs. 
+2018-04-18 16:02:45 : Attempting to process, check and load module inputs. 
 
-2018-04-02 20:02:58 : Module inputs successfully checked and loaded into datastore. 
+2018-04-18 16:02:45 : Module inputs successfully checked and loaded into datastore. 
 
-2018-04-02 20:02:58 : Checking whether datastore contains all datasets in Get specifications. 
+2018-04-18 16:02:45 : Checking whether datastore contains all datasets in Get specifications. 
 
-2018-04-02 20:02:58 : Datastore contains all datasets identified in module Get specifications. 
+2018-04-18 16:02:45 : Datastore contains all datasets identified in module Get specifications. 
 
-2018-04-02 20:02:58 : Running module and checking whether outputs meet Set specifications. 
+2018-04-18 16:02:45 : Running module and checking whether outputs meet Set specifications. 
 
-2018-04-02 20:02:58 : Also saving module outputs to datastore. 
+2018-04-18 16:02:45 : Also saving module outputs to datastore. 
 
-2018-04-02 20:03:13 : Module run successfully and outputs meet Set specifications. 
+2018-04-18 16:03:01 : Module run successfully and outputs meet Set specifications. 
 
-2018-04-02 20:03:13 : Module outputs saved to datastore. 
+2018-04-18 16:03:01 : Module outputs saved to datastore. 
 
-2018-04-02 20:03:13 : Congratulations. Module AssignDemandManagement passed all tests. 
+2018-04-18 16:03:01 : Congratulations. Module AssignDemandManagement passed all tests. 
 

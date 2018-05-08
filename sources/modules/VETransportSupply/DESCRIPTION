@@ -1,16 +1,17 @@
 Package: VETransportSupply
 Type: Package
 Title: Create Transportation System Attributes for VE
-Version: 0.5
-Date: 11/03/2017
+Version: 0.7
+Date: 4/08/2018
 Author: Brian Gregor [aut, cre], Aditya Gore <aditya.gore@rsginc.com> [cre]
 Maintainer: Brian Gregor <gregorb@or-analytics.com>, Aditya Gore <aditya.gore@rsginc.com>
 Copyright: AASHTO
 URL: https://github.com/gregorbj/VisionEval/sources/modules/VETransportSupply
 Description: This package contains several modules which attribute the
     metropolitan area and Bzones with transportation supply characteristics
-    including freeway lane miles, public transportation revenue miles, and
-    neighborhood transit accessibility.
+    including freeway lane miles, public transportation revenue miles,
+    neighborhood transit accessibility, and calculation of transit vehicle miles
+    by vehicle type from transit revenue miles.
 License: Apache License 2.0
 LazyData: TRUE
 Depends: R (>= 3.1.0)

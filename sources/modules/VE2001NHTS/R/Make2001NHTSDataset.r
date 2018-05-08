@@ -14,8 +14,6 @@
 #dataset to be used in model estimation. Data on freeway lane miles and
 #bus equivalent transit revenue miles are added. A household dataframe (Hh_df)
 #containing travel and other relevant data for each survey household.
-
-
 library(visioneval)
 
 
@@ -91,10 +89,11 @@ if (!file.exists("data-raw/Hh_df.rda")) {
              "HBHRESDN", "HBHUR", "HBPPOPDN", "HHC_MSA", "HHFAMINC", "HHINCTTL",
              "HHNUMBIK", "HHR_AGE", "HHR_DRVR", "HHR_RACE", "HHR_SEX", "HHSIZE",
              "HHVEHCNT", "HOMETYPE", "HTEEMPDN", "HTHRESDN", "HTHUR",
-             "HTPPOPDN", "LIF_CYC", "MSACAT", "MSASIZE", "RAIL", "RATIO16V",
-             "URBAN", "URBRUR", "WRKCOUNT", "WKR_P1", "WKR_P2", "WKR_P3",
-             "WKR_P4", "WKR_P5", "WKR_P6", "WKR_P7", "WKR_P8", "WKR_P9",
-             "WKR_P10", "WKR_P11", "WKR_P12", "WKR_P13", "WKR_P14", "CNTTDHH")
+             "HTPPOPDN", "LIF_CYC", "MSAPOP", "MSACAT", "MSASIZE", "RAIL",
+             "RATIO16V", "URBAN", "URBRUR", "WRKCOUNT", "WKR_P1", "WKR_P2",
+             "WKR_P3", "WKR_P4", "WKR_P5", "WKR_P6", "WKR_P7", "WKR_P8",
+             "WKR_P9", "WKR_P10", "WKR_P11", "WKR_P12", "WKR_P13", "WKR_P14",
+             "CNTTDHH")
   Hh_df <- Hh_df[, Keep_]
   save(Hh_df, file = "data-raw/Hh_df.rda", compress = TRUE)
 } else {
@@ -607,21 +606,28 @@ rm(IncludesWork_)
 IsPvtVehTravel_ <-
   HhTours_df$Mode %in% c("Auto", "LtTrk", "OthTrk", "RV", "Motorcycle") & HhTours_df$HhVehUsed == 1
 PvtVehDvmt_Hh <- unlist(tapply(HhTours_df$Distance[IsPvtVehTravel_], HhTours_df$Houseid[IsPvtVehTravel_], sum))
+PvtVehTrips_Hh <- unlist(tapply(HhTours_df$Trips[IsPvtVehTravel_], HhTours_df$Houseid[IsPvtVehTravel_], sum))
 # sum(PvtVehDvmt_Hh)
 # sum(PvtVehDvmt_Hh) / nrow(HhTours_df)
+# summary(PvtVehDvmt_Hh / PvtVehTrips_Hh)
 Hh_df$PvtVehDvmt <- as.vector(PvtVehDvmt_Hh[Hh_df$Houseid])
 Hh_df$PvtVehDvmt[is.na(Hh_df$PvtVehDvmt)] <- 0
-rm(IsPvtVehTravel_, PvtVehDvmt_Hh)
+Hh_df$PvtVehTrips <- as.vector(PvtVehTrips_Hh[Hh_df$Houseid])
+Hh_df$PvtVehTrips[is.na(Hh_df$PvtVehTrips)] <- 0
+rm(IsPvtVehTravel_, PvtVehDvmt_Hh, PvtVehTrips_Hh)
 #Travel in non-household 'shared' vehicles
 IsShrVehTravel_ <-
   HhTours_df$Mode %in% c("Taxi") |
   (HhTours_df$Mode %in% c("Auto", "LtTrk", "OthTrk", "RV", "Motorcycle") & (HhTours_df$HhVehUsed == 2))
 ShrVehDvmt_Hh <- unlist(tapply(HhTours_df$Distance[IsShrVehTravel_], HhTours_df$Houseid[IsShrVehTravel_], sum))
+ShrVehTrips_Hh <- unlist(tapply(HhTours_df$Trips[IsShrVehTravel_], HhTours_df$Houseid[IsShrVehTravel_], sum))
 # sum(ShrVehDvmt_Hh)
 # sum(ShrVehDvmt_Hh) / nrow(HhTours_df)
 Hh_df$ShrVehDvmt <- as.vector(ShrVehDvmt_Hh[Hh_df$Houseid])
 Hh_df$ShrVehDvmt[is.na(Hh_df$ShrVehDvmt)] <- 0
-rm(IsShrVehTravel_, ShrVehDvmt_Hh)
+Hh_df$ShrVehTrips <- as.vector(ShrVehTrips_Hh[Hh_df$Houseid])
+Hh_df$ShrVehTrips[is.na(Hh_df$ShrVehTrips)] <- 0
+rm(IsShrVehTravel_, ShrVehDvmt_Hh, ShrVehTrips_Hh)
 #Travel by walking
 IsWalkTravel_ <- HhTours_df$Mode == "Walk"
 WalkDpmt_Hh <-
@@ -647,7 +653,11 @@ TransitDpmt_Hh <- unlist(tapply(HhTours_df$Distance[IsTransitTravel_], HhTours_d
 # sum(TransitDpmt_Hh) / nrow(HhTours_df)
 Hh_df$TransitDpmt <- as.vector(TransitDpmt_Hh[Hh_df$Houseid])
 Hh_df$TransitDpmt[is.na(Hh_df$TransitDpmt)] <- 0
-rm(IsTransitTravel_, TransitDpmt_Hh)
+TransitTrips_Hh <-
+  unlist(tapply(HhTours_df$Trips[IsTransitTravel_], HhTours_df$Houseid[IsTransitTravel_], sum))
+Hh_df$TransitTrips <- as.vector(TransitTrips_Hh[Hh_df$Houseid])
+Hh_df$TransitTrips[is.na(Hh_df$TransitTrips)] <- 0
+rm(IsTransitTravel_, TransitDpmt_Hh, TransitTrips_Hh)
 
 #Identifies households that did no private or shared vehicle travel
 #------------------------------------------------------------------
@@ -783,7 +793,7 @@ rm(Dt_df, toProperName, toVecFrom1DAry)
 #' travel models derived from the 2001 National Household Travel Survey, USDOT
 #' Highway Statistics reports, and the National Transit Database.
 #'
-#' @format A data frame with 60521 rows and 88 variables
+#' @format A data frame with 60521 rows and 86 variables
 #' \describe{
 #'   \item{Houseid}{Unique household ID}
 #'   \item{Census_d}{Household Census division}
@@ -811,6 +821,7 @@ rm(Dt_df, toProperName, toVecFrom1DAry)
 #'   \item{Hthur}{Urban / Rural indicator - Tract level}
 #'   \item{Htppopdn}{Population per sq mile - Tract level}
 #'   \item{Lif_cyc}{HH Life Cycle}
+#'   \item{Msapop}{Number of persons residing in the MSA}
 #'   \item{Msacat}{MSA category}
 #'   \item{Msasize}{MSA size}
 #'   \item{Rail}{Rail (subway) category}
@@ -852,14 +863,17 @@ rm(Dt_df, toProperName, toVecFrom1DAry)
 #'   \item{Gscostmile}{Average cost of gasoline per mile of household vehicle travel}
 #'   \item{Gscostmile2}{Average cost of gasoline per mile using EIA derived miles per equivalent-gallon}
 #'   \item{PvtVehDvmt}{Household vehicle miles of travel on survey day using household (i.e. private) vehicles}
+#'   \item{PvtVehTrips}{Household vehicle trips on survey day using household (i.e. private) vehicles}
 #'   \item{ShrVehDvmt}{Household vehicle miles of travel on survey day using non-household (i.e. shared) vehicles}
+#'   \item{ShrVehTrips}{Household vehicle trips on survey day using non-household (i.e. shared) vehicles}
 #'   \item{WalkDpmt}{Household person miles of walking on survey day}
 #'   \item{BikeDpmt}{Household person miles of bicycling on survey day}
 #'   \item{TransitDpmt}{Household person miles of public transit travel on survey day}
+#'   \item{TransitTrips}{Household transit trips on survey day}
 #'   \item{ZeroDvmt}{Flag identifying whether household had no DVMT on survey day}
 #'   \item{Numcommdrvr}{Number of commercial drivers in household}
-#'   \item{Nbiketrp}{Number of bike trips on travel survey day}
-#'   \item{Nwalktrp}{Number of walk trips on travel survey day}
+#'   \item{Nbiketrp}{Number of bike trips in past week}
+#'   \item{Nwalktrp}{Number of walk trips in past week}
 #'   \item{Usepubtr}{Whether any household members used public transportation on travel survey day}
 #'   \item{Numwrkdrvr}{Number of persons whose work requires driving a vehicle}
 #'   \item{RoadMiPC}{Ratio of urbanized area road miles to thousands of persons}

@@ -138,3 +138,35 @@ Pilot RPAT module in VisionEval
 
 2018-02-27 10:30:35 : Congratulations. Module AssignVehicleFeatures passed all tests. 
 
+RPAT Pilot
+Pilot RPAT module in VisionEval
+2018-04-09_13:56:25
+
+2018-04-09 13:56:25 : Testing AssignVehicleFeatures. 
+
+2018-04-09 13:56:25 : Attempting to load datastore. 
+
+2018-04-09 13:56:25 : Datastore loaded. 
+
+2018-04-09 13:56:25 : Attempting to load and check specifications. 
+
+2018-04-09 13:56:26 : Module specifications successfully loaded and checked for errors. 
+
+2018-04-09 13:56:26 : Attempting to process, check and load module inputs. 
+
+2018-04-09 13:56:39 : Module inputs successfully checked and loaded into datastore. 
+
+2018-04-09 13:56:39 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-04-09 13:56:39 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-04-09 13:56:39 : Running module and checking whether outputs meet Set specifications. 
+
+2018-04-09 13:56:39 : Also saving module outputs to datastore. 
+
+2018-04-09 13:58:14 : Module run successfully and outputs meet Set specifications. 
+
+2018-04-09 13:58:15 : Module outputs saved to datastore. 
+
+2018-04-09 13:58:15 : Congratulations. Module AssignVehicleFeatures passed all tests. 
+
