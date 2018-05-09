@@ -53,11 +53,11 @@ env:
 script:
   - |
     #install framework
-    bin/install_framework.sh
+    sudo bash bin/install_framework.sh
     
   - |
     #install dependent modules
-    bin/install_module_dependencies.sh    
+    sudo bash bin/install_module_dependencies.sh    
     
 jobs:
   include:

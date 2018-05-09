@@ -43,11 +43,11 @@ body="{
   $MESSAGE,
   \"config\": {
     \"merge_mode\": [\"deep_merge\"],
-	\"script\": [\"bin/install_package_dependencies.sh\",
-	             \"bin/check_package.sh\",
-	             \"bin/run_test.sh\",
-	             \"bin/install_package.sh\",
-	             \"bin/run_model.sh\"]
+	\"script\": [\"sudo bash bin/install_package_dependencies.sh\",
+	             \"sudo bash bin/check_package.sh\",
+	             \"sudo bash bin/run_test.sh\",
+	             \"sudo bash bin/install_package.sh\",
+	             \"sudo bash bin/run_model.sh\"]
   }
   }
 }"
