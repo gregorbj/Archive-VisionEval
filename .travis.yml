@@ -53,29 +53,23 @@ env:
 script:
   - |
     #install framework
-    cd sources/framework/visioneval
-    Rscript -e 'devtools::install_deps(".")'
-    R CMD INSTALL .
-    cd ../../..
+    sh /bin/install_framework.sh
     
-    #install dependent packages
-    IFS=',' read -r -a packages <<< $DEPENDS
-    for element in ${packages[@]}
-    do
-      if ( [ $element != "." ] ); then
-        cd sources/modules/$element
-        Rscript -e 'devtools::install_deps(".")'
-        Rscript -e 'devtools::document()'
-        R CMD INSTALL .
-        cd ../../..
-      fi
-    done
-    
-    #run module or model tests
   - |
-    cd $FOLDER
-    if ( [ $TYPE == "module" ] ); then  Rscript -e 'devtools::install_deps(".")'; fi  
-  - if ( [ $TYPE == "module" ] ); then  Rscript -e 'devtools::check(".")'; fi
-  - if ( [ $TYPE == "module" ] ); then  Rscript -e "tryCatch( source( '$SCRIPT' ) )"; fi
-  - if ( [ $TYPE == "module" ] ); then  R CMD INSTALL .; fi
-  - if ( [ $TYPE == "model" ] ); then  Rscript -e "tryCatch( source( '$SCRIPT' ) )"; fi
+    #install dependent modules
+    sh /bin/install_module_dependencies.sh    
+    
+jobs:
+  include:
+    - stage: trigger-downstream
+      before_install: sudo apt-get update
+      install: Rscript -e 'sessionInfo()'
+      env: RUNTEST=true
+      script: |
+              echo "TRAVIS_BRANCH=$TRAVIS_BRANCH TRAVIS_PULL_REQUEST=$TRAVIS_PULL_REQUEST"
+              if ( [ $TRAVIS_BRANCH == "EVFeature" ] ); then
+                #curl -LO --retry 3 https://raw.githubusercontent.com/goreaditya/VisionEval/travis_experiment/bin/trigger-travis.sh
+                sh /bin/trigger_travis.sh --branch EVFeature RSGInc VisionEval $TRAVIS_ACCESS_TOKEN
+              fi
+git:
+  depth: 9
