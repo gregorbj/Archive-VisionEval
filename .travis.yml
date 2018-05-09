@@ -1,7 +1,6 @@
 # R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
 
 language: r
-r: 3.4
 sudo: true
 dist: trusty
 cache: packages
@@ -58,19 +57,6 @@ script:
     
   - |
     #install dependent modules
-    sh /bin/install_module_dependencies.sh    
-    
-jobs:
-  include:
-    - stage: trigger-downstream
-      before_install: sudo apt-get update
-      install: Rscript -e 'sessionInfo()'
-      env: RUNTEST=true
-      script: |
-              echo "TRAVIS_BRANCH=$TRAVIS_BRANCH TRAVIS_PULL_REQUEST=$TRAVIS_PULL_REQUEST"
-              if ( [ $TRAVIS_BRANCH == "EVFeature" ] ); then
-                #curl -LO --retry 3 https://raw.githubusercontent.com/goreaditya/VisionEval/travis_experiment/bin/trigger-travis.sh
-                sh /bin/trigger_travis.sh --branch EVFeature RSGInc VisionEval $TRAVIS_ACCESS_TOKEN
-              fi
+    sh /bin/install_module_dependencies.sh
 git:
   depth: 9
