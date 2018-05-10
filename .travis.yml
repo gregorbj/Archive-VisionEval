@@ -73,3 +73,8 @@ jobs:
               fi
 git:
   depth: 9
+
+notifications:
+  email:
+    on_success: never
+    on_failure: always

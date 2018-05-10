@@ -42,12 +42,15 @@ body="{
   \"branch\":\"$BRANCH\"
   $MESSAGE,
   \"config\": {
-    \"merge_mode\": [\"deep_merge\"],
-	\"script\": [\"bash bin/install_package_dependencies.sh\",
+	\"script\": [\"bash bin/install_framework.sh\",
+	             \"bash bin/install_module_dependencies.sh\",
+	             \"bash bin/install_package_dependencies.sh\",
 	             \"bash bin/check_package.sh\",
 	             \"bash bin/run_test.sh\",
 	             \"bash bin/install_package.sh\",
-	             \"bash bin/run_model.sh\"]
+	             \"bash bin/run_model.sh\"],
+	\"notifications\": {\"email\": {\"on_success\": \"change\", \"on_failure\": \"always\"}},
+	\"jobs\": []
   }
   }
 }"
