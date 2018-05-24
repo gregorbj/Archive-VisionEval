@@ -67,9 +67,9 @@ jobs:
       env: RUNTEST=true
       script: |
               echo "TRAVIS_BRANCH=$TRAVIS_BRANCH TRAVIS_PULL_REQUEST=$TRAVIS_PULL_REQUEST"
-              if ( [ $TRAVIS_BRANCH == "EVFeature" ] ); then
-                #curl -LO --retry 3 https://raw.githubusercontent.com/goreaditya/VisionEval/travis_experiment/bin/trigger-travis.sh
-                bash bin/trigger_travis.sh --branch EVFeature RSGInc VisionEval $TRAVIS_ACCESS_TOKEN
+              # Trigger travis to run tests only if the branch is pushed
+              if [[ ( $TRAVIS_PULL_REQUEST == false ) ]]; then
+                bash bin/trigger_travis.sh --branch $TRAVIS_BRANCH RSGInc VisionEval $TRAVIS_ACCESS_TOKEN
               fi
 git:
   depth: 9

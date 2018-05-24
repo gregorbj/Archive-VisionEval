@@ -42,13 +42,13 @@ body="{
   \"branch\":\"$BRANCH\"
   $MESSAGE,
   \"config\": {
-	\"script\": [\"bash bin/install_framework.sh\",
-	             \"bash bin/install_module_dependencies.sh\",
-	             \"bash bin/install_package_dependencies.sh\",
-	             \"bash bin/check_package.sh\",
-	             \"bash bin/run_test.sh\",
-	             \"bash bin/install_package.sh\",
-	             \"bash bin/run_model.sh\"],
+	\"script\": [\"# Install framework \nbash bin/install_framework.sh\",
+	             \"# Install VE module dependencies \nbash bin/install_module_dependencies.sh\",
+	             \"# Install package dependencies \nbash bin/install_package_dependencies.sh\",
+	             \"# Check package for problems \nbash bin/check_package.sh\",
+	             \"# Run package tests \nbash bin/run_test.sh\",
+	             \"# Install package \nbash bin/install_package.sh\",
+	             \"# Run model \nbash bin/run_model.sh\"],
 	\"notifications\": {\"email\": {\"on_success\": \"change\", \"on_failure\": \"always\"}},
 	\"jobs\": []
   }
