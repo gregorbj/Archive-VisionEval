@@ -86,6 +86,19 @@ unzip("ModelState_CalculateTravelDemand.zip")
 untar("inputs_CalculateTravelDemand.tar")
 setwd("..")
 
+#Run default data generation for CalculateTravelDemand Module
+source("R/LoadDefaultValues.R")
+
+#Test Initialize module
+source("R/Initialize.R")
+testModule(
+  ModuleName = "Initialize",
+  LoadDatastore = TRUE,
+  SaveDatastore = TRUE,
+  DoRun = TRUE,
+  RunFor = "NotBaseYear"
+)
+
 #Test CalculateTravelDemand module
 source("R/CalculateTravelDemand.R")
 testModule(

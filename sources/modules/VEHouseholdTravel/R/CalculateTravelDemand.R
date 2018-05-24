@@ -78,6 +78,16 @@ DvmtLmModels_ls$NonMetro <- list(
 devtools::use_data(DvmtLmModels_ls, overwrite = TRUE)
 
 
+#Load PHEV/HEV model data
+load("./data/PhevModelData_ls.rda")
+
+#Load EV model data
+load("./data/EvModelData_ls.rda")
+
+#Load default values for Travel Demand module
+load("./data/TravelDemandDefaults_ls.rda")
+
+
 #================================================
 #SECTION 2: DEFINE THE MODULE DATA SPECIFICATIONS
 #================================================
@@ -89,10 +99,6 @@ CalculateTravelDemandSpecifications <- list(
   RunBy = "Region",
   #Specify new tables to be created by Inp if any
   NewInpTable = items(
-    item(
-      TABLE = "Fuel",
-      GROUP = "Global"
-    ),
     item(
       TABLE = "FuelProp",
       GROUP = "Global"
@@ -109,29 +115,6 @@ CalculateTravelDemandSpecifications <- list(
   #Specify new tables to be created by Set if any
   #Specify input data
   Inp = items(
-    item(
-      NAME = "Fuel",
-      TABLE = "Fuel",
-      GROUP = "Global",
-      FILE = "model_fuel_co2.csv",
-      TYPE = "character",
-      UNITS = "category",
-      PROHIBIT = "NA",
-      SIZE = 10,
-      ISELEMENTOF = c("ULSD", "Biodiesel", "RFG", "CARBOB", "Ethanol", "Cng"),
-      DESCRIPTION = "The fuel type for which the CO2 equivalent emissions are calculated"
-    ),
-    item(
-      NAME = "Intensity",
-      TABLE = "Fuel",
-      GROUP = "Global",
-      FILE = "model_fuel_co2.csv",
-      TYPE = "double",
-      UNITS = "multiplier",
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = "",
-      DESCRIPTION = "Multipliers used to convert fuel use to CO2 equivalent emissions"
-    ),
     item(
       NAME = "VehType",
       TABLE = "FuelProp",
@@ -333,6 +316,15 @@ CalculateTravelDemandSpecifications <- list(
       ISELEMENTOF = ""
     ),
     item(
+      NAME = "Age",
+      TABLE = "Vehicle",
+      GROUP = "Year",
+      TYPE = "time",
+      UNITS = "YR",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = ""
+    ),
+    item(
       NAME = "Mileage",
       TABLE = "Vehicle",
       GROUP = "Year",
@@ -404,14 +396,39 @@ CalculateTravelDemandSpecifications <- list(
     item(
       NAME = item(
         "FuelCost",
-        "GasTax",
-        "CarbonCost",
-        "VmtCost"
+        "GasTax"
       ),
       TABLE = "Model",
       GROUP = "Global",
       TYPE = "compound",
       UNITS = "USD/GAL",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "KwhCost",
+      TABLE = "Model",
+      GROUP = "Global",
+      TYPE = "compound",
+      UNITS = "USD/KWH",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "CarbonCost",
+      TABLE = "Model",
+      GROUP = "Global",
+      TYPE = "compound",
+      UNITS = "USD/MT",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "VmtCost",
+      TABLE = "Model",
+      GROUP = "Global",
+      TYPE = "compound",
+      UNITS = "USD/MI",
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = ""
     ),
@@ -422,8 +439,8 @@ CalculateTravelDemandSpecifications <- list(
       TYPE = "character",
       UNITS = "category",
       PROHIBIT = "NA",
-      SIZE = 10,
-      ISELEMENTOF = c("ULSD", "Biodiesel", "RFG", "CARBOB", "Ethanol", "Cng")
+      SIZE = 12,
+      ISELEMENTOF = c("ULSD", "Biodiesel", "RFG", "CARBOB", "Ethanol", "Cng", "Electricity")
     ),
     item(
       NAME = "Intensity",
@@ -725,6 +742,44 @@ predictAveDvmt <- function( Hh_df, Model_ls, Type ) {
   return(cbind( DvmtAve=DvmtAve_, DvmtMax=DvmtMax_, Dvmt95th=Dvmt95th_ ))
 }
 
+#Define a function that predicts max and 95th percentile DVMT for each household
+#---------------------------------------------------------------------------
+#' Function to predict max and 95th percentile DVMT
+#'
+#' \code{predictAveDvmt} predicts max and 95th percentile DVMT for each household.
+#'
+#' This function takes a data frame of households and a list of models which
+#' are used to predict the average daily vehicle miles traveled for each
+#' household.
+#' @param Hh_df A household data frame consisting of household attributes used to
+#' predict average DVMT.
+#' @param Model_ls A list of DVMT assignment models.
+#' @param Type A string indicating the region type. ("Metro": Default, or "NonMetro")
+#' @return A matrix containing maximum and 95th percentile of daily
+#' vehicle miles traveled.
+#' @export
+predictMaxDvmt <- function( Hh_df, Model_ls, Type ) {
+  # Check if proper Type specified
+  if( !( Type %in% c( "Metro", "NonMetro" ) ) ) {
+    stop( "Type must be either 'Metro' or 'NonMetro'" )
+  }
+  # Extract model components for specified type
+  DvmtMaxModel <- Model_ls[[Type]]$DvmtMaxModel
+  Dvmt95thModel <- Model_ls[[Type]]$Dvmt95thModel
+  Pow <- Model_ls[[Type]]$Pow
+
+  # Define Intercept variable
+  Intercept <- 1
+  DvmtAve_ <- Hh_df$Dvmt
+  Hh_df$DvmtAve <- DvmtAve_
+  Hh_df$DvmtAveSq <- DvmtAve_ ^ 2
+  Hh_df$DvmtAveCu <- DvmtAve_ ^ 3
+  DvmtMax_ <- as.vector( eval( parse( text=DvmtMaxModel ), envir=Hh_df ) )
+  Dvmt95th_ <- as.vector( eval( parse( text=Dvmt95thModel ), envir=Hh_df ) )
+  # Return the result
+  return(cbind(DvmtMax=DvmtMax_, Dvmt95th=Dvmt95th_ ))
+}
+
 #Define a function that calculates and adjusts DVMT under budget considerations
 #---------------------------------------------------------------------------
 #' Function to calculate and adjust DVMT
@@ -747,13 +802,14 @@ predictAveDvmt <- function( Hh_df, Model_ls, Type ) {
 #' @export
 calculateAdjAveDvmt <- function( Hh_df, Model_ls, Type, BudgetProp, AnnVmtInflator=365, TrnstnProp ) {
   # Calculate the household DVMT without budget considerations
-  AveDvmtHh <- predictAveDvmt( Hh_df, Model_ls, Type )[,1]
+  AveDvmt_ <- predictAveDvmt( Hh_df, Model_ls, Type )
+  AveDvmtHh <- AveDvmt_[,1]
   # Put in a small value for AveDvmt if 0 or less to avoid negative or infinite calcs
   AveDvmtHh[ AveDvmtHh <= 0 ] <- 1e-6
   Hh_df$AveDvmt <- AveDvmtHh
   # Calculate base and future average costs per mile
   BaseCostPerMiHh <- Hh_df$BaseCostPerMile
-  FutrCostPerMiHh <- Hh_df$BaseCostPerMile
+  FutrCostPerMiHh <- Hh_df$FutureCostPerMile
   # Calculate household budget
   BudgetHh <- Hh_df$Income * BudgetProp / AnnVmtInflator
   # Adjust budget with insurance adjustment if that data is provided
@@ -817,6 +873,348 @@ calculateAdjAveDvmt <- function( Hh_df, Model_ls, Type, BudgetProp, AnnVmtInflat
 calculateVehDvmt <- function( Hh_df, Vehicles_df ) {
   VehDvmt_ <- Hh_df[match(Vehicles_df$HhId, Hh_df$HhId),"Dvmt"] * Vehicles_df$DvmtProp
   return(VehDvmt = VehDvmt_)
+}
+
+
+#TODO
+assignPHEV <- function(Hh_df, Veh_df, PhevRangePropYr_df, CurrYear,
+                       PhevPropModel_ls, HevMpgPropYr_df, OptimProp = 0){
+
+  # Create array of PHEV input data
+  #--------------------------------
+  Phev_Yr4Ty <- array( 0, dim=c( nrow( PhevRangePropYr_df ), 4, 2 ),
+                       dimnames=list( rownames( PhevRangePropYr_df ),
+                                      c( "Range", "PropPhev", "Mpkwh", "Mpg" ), c( "Auto", "LtTrk" ) ) )
+  Phev_Yr4Ty[,,1] <- as.matrix( PhevRangePropYr_df[,1:4] )
+  Phev_Yr4Ty[,,2] <- as.matrix( PhevRangePropYr_df[,5:8] )
+
+  # Convert PHEV inputs to be indexed by vehicle age
+  #-------------------------------------------------
+  # Calculate the sequence of years to use to index fleet average MPG
+  Years <- rownames( Phev_Yr4Ty )
+  StartYear <- as.numeric( CurrYear ) - 32
+  if( StartYear < 1975 ) {
+    YrSeq_ <- Years[ 1:which( Years == CurrYear ) ]
+    NumMissingYr <- 1975 - StartYear
+    YrSeq_ <- c( rep( "1975", NumMissingYr ), YrSeq_ )
+  } else {
+    YrSeq_ <- Years[ which( Years == StartYear ):which( Years == CurrYear ) ]
+  }
+  # Calculate PHEV data by vehicle age
+  Phev_Ag4Ty <- Phev_Yr4Ty[ rev( YrSeq_ ), , ]
+  rownames( Phev_Ag4Ty ) <- as.character( 0:32 )
+
+  # Create array of HEV input data
+  #-------------------------------
+  Hev_Yr2Ty <- array( 0, dim=c( nrow( HevMpgPropYr_df ), 2, 2 ),
+                      dimnames=list( rownames( HevMpgPropYr_df ), c( "PropHev", "Mpg" ), c( "Auto", "LtTrk" ) ) )
+  Hev_Yr2Ty[,,1] <- as.matrix( HevMpgPropYr_df[,1:2] )
+  Hev_Yr2Ty[,,2] <- as.matrix( HevMpgPropYr_df[,3:4] )
+
+  # Convert the HEV inputs to be indexed by vehicle age
+  #----------------------------------------------------
+  Years <- rownames( Hev_Yr2Ty )
+  StartYear <- as.numeric( CurrYear ) - 32
+  if( StartYear < 1975 ) {
+    YrSeq_ <- Years[ 1:which( Years == CurrYear ) ]
+    NumMissingYr <- 1975 - StartYear
+    YrSeq_ <- c( rep( "1975", NumMissingYr ), YrSeq_ )
+  } else {
+    YrSeq_ <- Years[ which( Years == StartYear ):which( Years == CurrYear ) ]
+  }
+  # Calculate HEV data by vehicle age
+  Hev_Ag2Ty <- Hev_Yr2Ty[ rev( YrSeq_ ), , ]
+  rownames( Hev_Ag2Ty ) <- as.character( 0:32 )
+
+  # Make vehicle dataframe containing information needed for calculations
+  #------------------------------------------------------------------------------
+  Hh_df$DrvAgePop <- Hh_df$HhSize - Hh_df$Age0to14
+  Veh_df <- merge(Veh_df, Hh_df, by = "HhId", all.x=TRUE, all.y=FALSE, sort = FALSE)
+  Veh_df$LogIncome <- log(Veh_df$Income)
+  Veh_df$Age <- as.character(as.integer(Veh_df$Age))
+
+  # Identify PHEV thresholds, probabilities and power consumption for each vehicle
+  #-------------------------------------------------------------------------------
+  InitColumn_ <- numeric( nrow( Veh_df ) )
+  Veh_df$PhevRange <- InitColumn_
+  Veh_df$PhevRange[ Veh_df$Type == "Auto" ] <-
+    Phev_Ag4Ty[ Veh_df$Age[ Veh_df$Type == "Auto" ], "Range", "Auto" ]
+  Veh_df$PhevRange[ Veh_df$Type == "LtTrk" ] <-
+    Phev_Ag4Ty[ Veh_df$Age[ Veh_df$Type == "LtTrk" ], "Range", "LtTrk" ]
+  Veh_df$PhevPropPhev <- InitColumn_
+  Veh_df$PhevPropPhev[ Veh_df$Type == "Auto" ] <-
+    Phev_Ag4Ty[ Veh_df$Age[ Veh_df$Type == "Auto" ], "PropPhev", "Auto" ]
+  Veh_df$PhevPropPhev[ Veh_df$Type == "LtTrk" ] <-
+    Phev_Ag4Ty[ Veh_df$Age[ Veh_df$Type == "LtTrk" ], "PropPhev", "LtTrk" ]
+  Veh_df$PhevMpkwh <- InitColumn_
+  Veh_df$PhevMpkwh[ Veh_df$Type == "Auto" ] <-
+    Phev_Ag4Ty[ Veh_df$Age[ Veh_df$Type == "Auto" ], "Mpkwh", "Auto" ]
+  Veh_df$PhevMpkwh[ Veh_df$Type == "LtTrk" ] <-
+    Phev_Ag4Ty[ Veh_df$Age[ Veh_df$Type == "LtTrk" ], "Mpkwh", "LtTrk" ]
+  Veh_df$PhevMpg <- InitColumn_
+  Veh_df$PhevMpg[ Veh_df$Type == "Auto" ] <-
+    Phev_Ag4Ty[ Veh_df$Age[ Veh_df$Type == "Auto" ], "Mpg", "Auto" ]
+  Veh_df$PhevMpg[ Veh_df$Type == "LtTrk" ] <-
+    Phev_Ag4Ty[ Veh_df$Age[ Veh_df$Type == "LtTrk" ], "Mpg", "LtTrk" ]
+  rm( InitColumn_ )
+
+  # Identify HEV probabilities and MPG for each vehicle
+  #----------------------------------------------------
+  InitColumn_ <- numeric( nrow( Veh_df ) )
+  Veh_df$HevPropHev <- InitColumn_
+  Veh_df$HevPropHev[ Veh_df$Type == "Auto" ] <-
+    Hev_Ag2Ty[ Veh_df$Age[ Veh_df$Type == "Auto" ], "PropHev", "Auto" ]
+  Veh_df$HevPropHev[ Veh_df$Type == "LtTrk" ] <-
+    Hev_Ag2Ty[ Veh_df$Age[ Veh_df$Type == "LtTrk" ], "PropHev", "LtTrk" ]
+  Veh_df$HevMpg <- InitColumn_
+  Veh_df$HevMpg[ Veh_df$Type == "Auto" ] <-
+    Hev_Ag2Ty[ Veh_df$Age[ Veh_df$Type == "Auto" ], "Mpg", "Auto" ]
+  Veh_df$HevMpg[ Veh_df$Type == "LtTrk" ] <-
+    Hev_Ag2Ty[ Veh_df$Age[ Veh_df$Type == "LtTrk" ], "Mpg", "LtTrk" ]
+  rm( InitColumn_ )
+
+  # Identify PHEVs
+  #---------------
+  # These are vehicles that will either be PHEVs or EVs
+  # Initialize a logical vector to identify PHEVs
+  IsPhev_ <- rep( FALSE, nrow( Veh_df ) )
+  # PHEVs identified by sampling
+  if( any( Veh_df$PhevRange > 0 ) ) {
+    IsPhev_ <- unlist( sapply( Veh_df$PhevPropPhev, function(x) {
+      sample( c( TRUE, FALSE ), 1, prob=c( x, 1-x ) )
+    } ) )
+  }
+  names(IsPhev_) <- Veh_df$VehId
+
+  # Identify HEVs
+  #--------------
+  # Non-PHEV/EV vehicles are split into HEV vs. ICE
+  # Initialize a logical vector to identify HEVs
+  IsHev_ <- rep( FALSE, nrow( Veh_df ) )
+  # PHEVs identified by sampling
+  IsHev_ <- unlist( sapply( Veh_df$HevPropHev, function(x) {
+    sample( c( TRUE, FALSE ), 1, prob=c( x, 1-x ) ) } ) )
+  IsHev_ <- IsHev_ & !IsPhev_
+  names(IsHev_) <- Veh_df$VehId
+
+  # Adjust vehicle MPG to reflect PHEVs and HEVs
+  #---------------------------------------------
+  VehMpg_ <- Veh_df$Mileage
+  names(VehMpg_) <- Veh_df$VehId
+  # Get the MPG values for the plug in hybrids (not including the EV portion)
+  VehMpg_[ IsPhev_ ] <- Veh_df$PhevMpg[ IsPhev_ ]
+  VehMpg_[ IsHev_ ] <- Veh_df$HevMpg[ IsHev_ ]
+
+  # Optimize allocation of DVMT to minimize fuel consumption
+  #---------------------------------------------------------
+  if( OptimProp != 0 ) {
+    # Identify which households will optimize based on the optimization factor
+    Optimize_ <- sample( c( TRUE, FALSE ), length(unique(Veh_df$HhId)), replace=TRUE,
+                         prob=c( OptimProp, 1 - OptimProp ) )
+    names(Optimize_) <- unique(Veh_df$HhId)
+    HhIdOp_ <- names(Optimize_[Optimize_])
+    # Make copy of VehMpg_ to use for sorting
+    VehMpgOp_ <- VehMpg_
+    # Adjust MPG of PHEV to account for electrical operation
+    # Use EPA equivalent standard of 33.7 kwh per gallon gas
+    # Use overall average vehicle distance traveled to compute
+    AveVehDvmt <- mean( Veh_df$Dvmt )
+    PropElec_ <- Veh_df$PhevRange / AveVehDvmt
+    PropElec_[ PropElec_ > 1 ] <- 1
+    VehMpgOp_[ IsPhev_ ] <- VehMpg_[ IsPhev_ ] * ( 1 - PropElec_[ IsPhev_ ] ) +
+      Veh_df$PhevMpkwh[ IsPhev_ ] * 33.7 * PropElec_[ IsPhev_ ]
+    # Put VehMpgOp_ into list form
+    # SplitIndex <- rep( 1:nrow( Data.. ), Data..$Hhvehcnt )
+    # VehMpgOp_ <- split( VehMpgOp_, SplitIndex. )
+    # Define an optimization function
+    doOptimize <- function(x, y) {
+      VehDvmt_ <- unlist(x)
+      VehMpg_ <- unlist(y)
+      # Make VehDvmt2_ to use for ordering purposes
+      VehDvmt2_ <- VehDvmt_
+      VehDvmt2_[ is.na( VehMpg_ ) ] <- NA
+      # Put in small sequenced values for NA values (EV positions will not change)
+      VehMpg_[ is.na( VehMpg_ ) ] <- seq( 1:sum( is.na( VehMpg_ ) ) ) / 100
+      VehDvmt2_[ is.na( VehDvmt2_ ) ] <- seq( 1:sum( is.na( VehDvmt2_ ) ) ) / 100
+      # Return DVMT in the order of MPG
+      VehDvmt_[ match( rank( VehMpg_, ties.method="first" ),
+                       rank( VehDvmt2_, ties.method="first" ) ) ]
+    }
+    # Apply the optimization function to the households who optimize
+    OptimDvmt_ <- mapply( doOptimize, split(Veh_df$Dvmt, Veh_df$HhId)[HhIdOp_],
+                          split(VehMpgOp_, Veh_df$HhId)[HhIdOp_] )
+    Veh_df$Dvmt[Optimize_[as.character(Veh_df$HhId)]] <- unlist(OptimDvmt_[HhIdOp_])
+  }
+  # Recalculate DvmtProp to be consistent with the optimized allocation
+  DvmtProp_ <- tapply( Veh_df$Dvmt, INDEX = Veh_df$HhId, FUN = function(x) {
+    x / sum(x) } )[unique(Veh_df$HhId)]
+
+  # Calculate proportion of PHEV mileage using electricity
+  #-------------------------------------------------------
+  # Do only if there is at least one PHEV
+  if( sum( IsPhev_ ) >= 1 ) {
+    # Make subset of only the PHEV
+    Phev_ <- Veh_df[ IsPhev_, ]
+    # Select the appropriate distance proportion model for each vehicle
+    ModelNames_ <- paste( "PropLE", round( Phev_$PhevRange / 5 ) * 5, sep="" )
+    getModel <- function( x ) PhevPropModel_ls[["Metro"]][x]
+    Models_ <- mapply( getModel, ModelNames_ )
+    Phev_$Model <- Models_
+    rm( ModelNames_, getModel )
+    # Apply each model by type to calculate distance proportions
+    Intercept <- 1
+    ElecDvmtProp_ <- by( Phev_, Models_, function(x) {
+      Result_ <- eval( parse( text=unique(x$Model) ), envir=x )
+      names( Result_ ) <- x$VehId
+      Result_ }, simplify=TRUE )
+    # Put the proportions calculations into a vector
+    ElecDvmtProp <- numeric( nrow( Phev_ ) )
+    names( ElecDvmtProp ) <- Phev_$VehId
+    for( i in 1:length( ElecDvmtProp_ ) ) {
+      Prop_ <- ElecDvmtProp_[[i]]
+      Prop_[ Prop_ < 0 ] <- 0
+      Prop_[ Prop_ > 1 ] <- 1
+      ElecDvmtProp[ names( Prop_ ) ] <- Prop_
+    }
+  }
+
+  # Calculate the distances powered by electricity and hydrocarbons
+  #----------------------------------------------------------------
+  # Initialize vector of DVMT assigned to electric grid power
+  EvVehDvmt_ <- Veh_df$Dvmt * 0
+  names( EvVehDvmt_ ) <- Veh_df$VehId
+  # Initialize vector of DVMT assigned to on-board hydrocarbon power
+  HcVehDvmt_ <- Veh_df$Dvmt
+  names( HcVehDvmt_ ) <- Veh_df$VehId
+  # Adjust for PHEVs, if any
+  if( sum( IsPhev_ ) >= 1 ) {
+    # Calculate the average DVMT powered by electricity
+    ElecDvmt_ <- ElecDvmtProp * Phev_$Dvmt
+    # Include PHEV calculations in overall results
+    EvVehDvmt_[ names( ElecDvmt_ ) ] <- ElecDvmt_
+    HcVehDvmt_[ names( ElecDvmt_ ) ] <- HcVehDvmt_[ names( ElecDvmt_ ) ] - ElecDvmt_
+    # Clean up
+    rm( Phev_, Models_, Intercept, ElecDvmtProp_,
+        ElecDvmtProp, Prop_, ElecDvmt_ )
+  }
+
+  # Make vectors for miles per gallon and miles per kilowatt hour
+  #--------------------------------------------------------------
+  VehMpg_ <- Veh_df$Mileage
+  VehMpkwh_ <- VehMpg_ * NA
+  # Get the MPG values for the PHEVs (not including the EV portion)
+  VehMpg_[ IsPhev_ ] <- Veh_df$PhevMpg[ IsPhev_ ]
+  # Put Mpkwh values for PHEVs (NA for non-EV)
+  VehMpkwh_[ IsPhev_ ] <- Veh_df$PhevMpkwh[ IsPhev_ ]
+  # Get the MPG values for the HEVs
+  VehMpg_[ IsHev_ ] <- Veh_df$HevMpg[ IsHev_ ]
+  names(VehMpg_) <- Veh_df$VehId
+  names(VehMpkwh_) <- Veh_df$VehId
+
+  # Make a vector to keep track of powertrain type
+  #-----------------------------------------------
+  Powertrain_ <- rep( "Ice", length( IsPhev_ ) )
+  Powertrain_[ IsPhev_ ] <- "Phev"
+  Powertrain_[ IsHev_ ] <- "Hev"
+  names(Powertrain_) <- Veh_df$VehId
+
+  # Put the results into list form and return the result
+  #-----------------------------------------------------
+  DvmtProp_ <- unlist(DvmtProp_)
+  names(DvmtProp_) <- Veh_df$VehId
+  list( VehDvmt_=Veh_df$Dvmt, DvmtProp_=DvmtProp_, EvVehDvmt_=EvVehDvmt_,
+        HcVehDvmt_=HcVehDvmt_, VehMpg_=VehMpg_, VehMpkwh_=VehMpkwh_,
+        Powertrain_=Powertrain_ )
+}
+
+assignEv <- function( Hh_df, Veh_df, EvRangePropYr_df,
+                      CurrYear, UseMaxDvmtCriterion=FALSE ) {
+
+  # Create arrays of EV input data
+  #-------------------------------
+  # Create an array of EV range and proportion data by year and vehicle type
+  Ev_Yr3Ty <- array( 0, dim=c( nrow( EvRangePropYr_df ), 3, 2 ),
+                     dimnames=list( rownames( EvRangePropYr_df ), c( "Range", "PropEv", "Mpkwh" ),
+                                    c( "Auto", "LtTruck" ) ) )
+  Ev_Yr3Ty[,,1] <- as.matrix( EvRangePropYr_df[,1:3] )
+  Ev_Yr3Ty[,,2] <- as.matrix( EvRangePropYr_df[,4:6] )
+
+  # Convert EV inputs to be indexed by vehicle age
+  #-----------------------------------------------
+  # Calculate the sequence of years to use to index fleet average MPG
+  Years <- rownames( Ev_Yr3Ty )
+  StartYear <- as.numeric( CurrYear ) - 32
+  if( StartYear < 1975 ) {
+    YrSeq_ <- Years[ 1:which( Years == CurrYear ) ]
+    NumMissingYr <- 1975 - StartYear
+    YrSeq_ <- c( rep( "1975", NumMissingYr ), YrSeq_ )
+  } else {
+    YrSeq_ <- Years[ which( Years == StartYear ):which( Years == CurrYear ) ]
+  }
+  # Calculate EV data by vehicle age
+  Ev_Ag3Ty <- Ev_Yr3Ty[ rev( YrSeq_ ), , ]
+  rownames( Ev_Ag3Ty ) <- as.character( 0:32 )
+
+  # Make vehicle dataframe containing information needed for calculations
+  #------------------------------------------------------------------------------
+  Veh_df$Dvmt95 <- Hh_df[match(Veh_df$HhId, Hh_df$HhId), "Dvmt95"] * Veh_df$DvmtProp
+
+  # Identify EV thresholds, market penetration, and power consumption
+  #------------------------------------------------------------------
+  Veh_df$Age <- as.character(as.integer(Veh_df$Age))
+  InitColumn_ <- numeric( nrow(Veh_df ) )
+  Veh_df$EvRange <- InitColumn_
+  Veh_df$EvRange[Veh_df$Type == "Auto" ] <-
+     Ev_Ag3Ty[Veh_df$Age[Veh_df$Type == "Auto" ], "Range", "Auto" ]
+  Veh_df$EvRange[Veh_df$Type == "LtTrk" ] <-
+     Ev_Ag3Ty[Veh_df$Age[Veh_df$Type == "LtTrk" ], "Range", "LtTruck" ]
+  Veh_df$EvPropEv <- InitColumn_
+  Veh_df$EvPropEv[Veh_df$Type == "Auto" ] <-
+     Ev_Ag3Ty[Veh_df$Age[Veh_df$Type == "Auto" ], "PropEv", "Auto" ]
+  Veh_df$EvPropEv[Veh_df$Type == "LtTrk" ] <-
+     Ev_Ag3Ty[Veh_df$Age[Veh_df$Type == "LtTrk" ], "PropEv", "LtTruck" ]
+  Veh_df$EvMpkwh <- InitColumn_
+  Veh_df$EvMpkwh[Veh_df$Type == "Auto" ] <-
+     Ev_Ag3Ty[Veh_df$Age[Veh_df$Type == "Auto" ], "Mpkwh", "Auto" ]
+  Veh_df$EvMpkwh[Veh_df$Type == "LtTrk" ] <-
+     Ev_Ag3Ty[Veh_df$Age[Veh_df$Type == "LtTrk" ], "Mpkwh", "LtTruck" ]
+  rm( InitColumn_ )
+
+  # Identify EVs
+  #-------------
+  # Identify PHEVs whose 95th percentile travel is less than the EV range
+  IsEvCandidate_ <- (Veh_df$Dvmt95 <= Veh_df$EvRange ) & (Veh_df$Powertrain == "Phev" )
+  # Select EVs from candidate vehicles
+  IsEv_ <- logical( length( IsEvCandidate_ ) )
+  if( any( IsEvCandidate_ ) ) {
+    IsEv_[ IsEvCandidate_ ] <- unlist(
+      sapply(Veh_df$EvPropEv[ IsEvCandidate_ ], function(x) {
+        sample( c( TRUE, FALSE ), 1, prob=c( x, 1-x ) )
+      } ) )
+  }
+
+  # Adjust values for EVs
+  #----------------------
+  # EVs have no MPG
+ Veh_df$Mileage[ IsEv_ ] <- NA
+  # All the mileage driven is EV mileage
+ Veh_df$EvDvmt[ IsEv_ ] <- Veh_df$EvDvmt[ IsEv_ ] + Veh_df$HcDvmt[ IsEv_ ]
+  # None of the mileage uses hydrocarbon fuel
+ Veh_df$HcDvmt[ IsEv_ ] <- 0
+  # EV MPKWH are the appropriate EV values
+ Veh_df$Mpkwh[ IsEv_ ] <-Veh_df$EvMpkwh[ IsEv_ ]
+  # Classify powertrain for EVs
+ Veh_df$Powertrain[ IsEv_ ] <- "Ev"
+
+  # Put the results into list form and return the result
+  #-----------------------------------------------------
+  EvDvmt_ <- Veh_df$EvDvmt
+  HcDvmt_ <- Veh_df$HcDvmt
+  VehMpg_ <- Veh_df$Mileage
+  Mpkwh_ <- Veh_df$Mpkwh
+  Powertrain_ <- Veh_df$Powertrain
+  list( EvDvmt_=EvDvmt_, HcDvmt_=HcDvmt_, VehMpg_=VehMpg_,
+        Mpkwh_=Mpkwh_, Powertrain_=Powertrain_ )
 }
 
 #Define a function that calculates average Co2 equivalent gas emissions
@@ -908,12 +1306,52 @@ calculateAveFuelCo2e <- function( ForecastYear = NULL, FuelProp = NULL, FuelComp
   return(c( Auto=AutoCo2e, LtTrk=LtTrkCo2e ))
 }
 
+#Define a function that calculates average Co2 equivalent gas emissions
+#---------------------------------------------------------------------------
+#' Function to calculate average Co2 equivalent gas emissions for electricity
+#' consumed by vehicle type
+#'
+#' \code{calculateAveElectricityCo2e} calculates average Co2 equivalent gas emissions
+#' by vehicle and fuel type.
+#'
+#' This function uses the composition of fuel and the proportion of fuel used
+#' by vehicle type to calculate the average Co2 equivalent gas emissions for
+#' a specific forecast year.
+#' @param ForecastYear An integer indicating the forecast year.
+#' @param PowerCo2Ft A data frame containing the intensity of carbon by fuel types and electricity.
+#' @param OutputType A string indicating the units of the output. ("MetricTons":Default or "Pounds")
+#' @return A named array indicating the average Co2 equivalent gas emissions by vehicle type.
+#' @export
+calculateAveElectricityCo2e <- function( ForecastYear = NULL, PowerCo2Ft = NULL,
+                                         OutputType="MetricTons" ) {
+  # Check that OutputType is proper values
+  #---------------------------------------
+  if( !( OutputType %in% c( "MetricTons", "Pounds" ) ) ) {
+    stop( "OutputType must be MetricTons or Pounds" )
+  }
+  if(is.null(ForecastYear) | is.null(PowerCo2Ft)) {
+    stop( "Missing arguments to the function" )
+  }
+
+  # Calculate average electricity CO2e per KWh
+  if( OutputType == "MetricTons" ) {
+    PowerCo2e_ <- PowerCo2Ft[PowerCo2Ft$Fuel == "Electricity", "Intensity"] / 1000000
+  }
+  if( OutputType == "Pounds" ) {
+    PowerCo2e_ <- PowerCo2Ft[PowerCo2Ft$Fuel == "Electricity", "Intensity"] * 2.20462262 / 1000
+  }
+
+  # Return the result
+  #------------------
+  return(PowerCo2e_)
+}
+
 #Define a function that calculates average Co2 equivalent gas emissions for vehicles
 #---------------------------------------------------------------------------
-#' Function to calculate average Co2 equivalent gas emissions for fuels for
-#' the households and the vehicles
+#' Function to calculate average Co2 equivalent gas emissions for fuels and
+#' electricity for the households and the vehicles
 #'
-#' \code{calculateVehFuelCo2} calculates average Co2 equivalent gas emissions
+#' \code{calculateVehFuelElectricCo2} calculates average Co2 equivalent gas emissions
 #' for the households and the vehicles.
 #'
 #' This function uses Dvmt and fuel efficiency of the vehicles, along with
@@ -924,52 +1362,83 @@ calculateAveFuelCo2e <- function( ForecastYear = NULL, FuelProp = NULL, FuelComp
 #' @param Vehicles_df A vehicle data frame consisting of vehicle attributes used to
 #' assign Co2 equivalent emissions.
 #' @param AveFuelCo2e A named array indicating the average Co2 equivalent gas emissions
-#' by vehicle type.
+#' by vehicle type per gallon of fuel.
+#' @param AveElectricCo2e A numeric indicating the average Co2 equivalent gas emissions
+#' per Kwh of electricity.
 #' @return A list containing assignment of gas emissions.
 #' @export
-calculateVehFuelCo2 <- function(Hh_df, Vehicles_df, AveFuelCo2e) {
+calculateVehFuelElectricCo2 <- function(Hh_df, Vehicles_df, AveFuelCo2e, AveElectricCo2e) {
 
   # Calculate fuel consumption & CO2e for households with vehicles
   #---------------------------------------------------------------
   # Idx. <- rep( 1:sum(HasVeh.Hh), Data..$Hhvehcnt[ HasVeh.Hh ] )
-  Dvmt_ <- Vehicles_df$Dvmt
+  HcDvmt_ <- Vehicles_df$HcDvmt
   Mpg_ <- Vehicles_df$Mileage
   VehType_ <- as.character(Vehicles_df$Type)
-  FuelGallons_ <- as.numeric(Dvmt_ / Mpg_)
+  FuelGallons_ <- as.numeric(HcDvmt_ / Mpg_)
   FuelCo2e_ <- FuelGallons_ * AveFuelCo2e[ VehType_ ]
-  FuelGallonsHh <- rowsum(FuelGallons_, Vehicles_df$HhId)[,1]
-  FuelCo2eHh <- rowsum(FuelCo2e_, Vehicles_df$HhId)[,1]
+  FuelGallonsHh <- rowsum(FuelGallons_, Vehicles_df$HhId, na.rm = TRUE)[,1]
+  FuelCo2eHh <- rowsum(FuelCo2e_, Vehicles_df$HhId, na.rm = TRUE)[,1]
+
+  # Calculate electricity consumption & CO2e for households with vehicles
+  #----------------------------------------------------------------------
+  EvDvmt_ <- Vehicles_df$EvDvmt
+  Mpkwh_ <- Vehicles_df$Mpkwh
+  ElecKwh_ <- as.numeric(EvDvmt_ / Mpkwh_)
+  ElecCo2e_ <- ElecKwh_ * AveElectricCo2e
+  ElecKwhHh <- rowsum(ElecKwh_, Vehicles_df$HhId, na.rm = TRUE)[,1]
+  ElecCo2eHh <- rowsum(ElecCo2e_, Vehicles_df$HhId, na.rm = TRUE)[,1]
 
   # Calculate totals in order to compute proportions and average rates
   #-------------------------------------------------------------------
-  TotDvmt <- sum(Dvmt_)
-  TotFuelGallons <- sum(FuelGallonsHh)
-  TotFuelCo2e <- sum(FuelCo2eHh)
+  TotHcDvmt <- sum( HcDvmt_, na.rm=TRUE )
+  TotEvDvmt <- sum( EvDvmt_, na.rm=TRUE )
+  TotFuelGallons <- sum( FuelGallonsHh )
+  TotFuelCo2e <- sum( FuelCo2eHh )
+  TotElecKwh <- sum( ElecKwhHh )
+  TotElecCo2e <- sum( ElecCo2eHh )
 
   # Calculate proportions and rates for zero-car households
   #--------------------------------------------------------
-  AveGpm <- TotFuelGallons / TotDvmt
-  AveFuelCo2eRate <- TotFuelCo2e / TotDvmt
+  PropHcDvmt <- TotHcDvmt / ( TotHcDvmt + TotEvDvmt )
+  AveGpm <- TotFuelGallons / TotHcDvmt
+  AveFuelCo2eRate <- TotFuelCo2e / TotHcDvmt
+  if( TotEvDvmt == 0 ) {
+    AveKwhpm <- 0
+    AveElecCo2eRate <- 0
+  } else {
+    AveKwhpm <- TotElecKwh / TotEvDvmt
+    AveElecCo2eRate <- TotElecCo2e / TotEvDvmt
+  }
 
   # Calculate consumption and emissions for zero-car households
   #------------------------------------------------------------
-  ZeroVehDvmtHh <- Hh_df[Hh_df$ZeroVeh==1, "Dvmt"]
-  names(ZeroVehDvmtHh) <- Hh_df[Hh_df$ZeroVeh==1, "HhId"]
-  ZeroVehFuelGallonsHh <- ZeroVehDvmtHh * AveGpm
-  ZeroVehFuelCo2eHh <- ZeroVehDvmtHh * AveFuelCo2eRate
+  ZcHcDvmtHh <- Hh_df[Hh_df$ZeroVeh==1, "Dvmt"] * PropHcDvmt
+  ZcEvDvmtHh <- Hh_df[Hh_df$ZeroVeh==1, "Dvmt"] * ( 1 - PropHcDvmt )
+  ZcFuelGallonsHh <- ZcHcDvmtHh * AveGpm
+  ZcFuelCo2eHh <- ZcHcDvmtHh * AveFuelCo2eRate
+  ZcElecKwhHh <- ZcEvDvmtHh * AveKwhpm
+  ZcElecCo2eHh <- ZcEvDvmtHh * AveElecCo2eRate
 
   # Combine all household data together
   #------------------------------------
   AllFuelGallonsHh <- numeric( nrow( Hh_df ) )
   AllFuelGallonsHh[Hh_df$ZeroVeh!=1] <- FuelGallonsHh
-  AllFuelGallonsHh[Hh_df$ZeroVeh==1] <- ZeroVehFuelGallonsHh
+  AllFuelGallonsHh[Hh_df$ZeroVeh==1] <- ZcFuelGallonsHh
   AllFuelCo2eHh <- numeric( nrow( Hh_df ) )
   AllFuelCo2eHh[Hh_df$ZeroVeh!=1] <- FuelCo2eHh
-  AllFuelCo2eHh[Hh_df$ZeroVeh==1] <- ZeroVehFuelCo2eHh
+  AllFuelCo2eHh[Hh_df$ZeroVeh==1] <- ZcFuelCo2eHh
+  AllElecKwhHh <- numeric( nrow( Hh_df ) )
+  AllElecKwhHh[ Hh_df$ZeroVeh!=1 ] <- ElecKwhHh
+  AllElecKwhHh[ Hh_df$ZeroVeh==1 ] <- ZcElecKwhHh
+  AllElecCo2eHh <- numeric( nrow( Hh_df ) )
+  AllElecCo2eHh[ Hh_df$ZeroVeh!=1 ] <- ElecCo2eHh
+  AllElecCo2eHh[ Hh_df$ZeroVeh==1 ] <- ZcElecCo2eHh
 
   # Return the result
   #------------------
-  list( FuelGallons=AllFuelGallonsHh, FuelCo2e=AllFuelCo2eHh )
+  list( FuelGallons=AllFuelGallonsHh, FuelCo2e=AllFuelCo2eHh,
+        ElecKwh=AllElecKwhHh, ElecCo2e=AllElecCo2eHh)
 }
 
 #Define a function that calculates total fuel cost per mile
@@ -990,14 +1459,16 @@ calculateVehFuelCo2 <- function(Hh_df, Vehicles_df, AveFuelCo2e) {
 calculateCosts <- function( Hh_df, Costs, NonPrivateFactor=5 ) {
   # Calculate total daily fuel cost
   FuelCostHh <- Hh_df$FuelGallons * Costs[ "FuelCost" ]
+  # Calculate total daily electricity cost
+  PowerCostHh <- Hh_df$ElecKwh * Costs[ "KwhCost" ]
   # Calculate gas tax cost
   GasTaxCostHh <- Hh_df$FuelGallons * Costs[ "GasTax" ]
   # Calculate total daily carbon cost
-  CarbonCostHh <- ( Hh_df$FuelCo2e ) * Costs[ "CarbonCost" ]
+  CarbonCostHh <- ( Hh_df$FuelCo2e + Hh_df$ElecCo2e ) * Costs[ "CarbonCost" ]
   # Calculate total daily VMT cost
   VmtCostHh <- Hh_df$Dvmt * Costs[ "VmtCost" ]
   # Calculate total vehicle cost
-  BaseCostHh <- FuelCostHh + GasTaxCostHh + CarbonCostHh + VmtCostHh
+  BaseCostHh <- FuelCostHh + PowerCostHh + GasTaxCostHh + CarbonCostHh + VmtCostHh
   TotCostHh <- BaseCostHh + Hh_df$DailyPkgCost
   # Calculate the average cost per mile for households that have vehicles and DVMT
   HasVehHh <- Hh_df$Vehicles >= 1
@@ -1008,6 +1479,7 @@ calculateCosts <- function( Hh_df, Costs, NonPrivateFactor=5 ) {
   HasNoVehOrNoDvmtHh <- !HasVehHh | !HasDvmtHh
   TotCostHh[ HasNoVehOrNoDvmtHh  ] <- Hh_df$Dvmt[ HasNoVehOrNoDvmtHh ] * 5 * AveBaseCostMile
   FuelCostHh[ HasNoVehOrNoDvmtHh ] <- 0
+  PowerCostHh[ HasNoVehOrNoDvmtHh ] <- 0
   GasTaxCostHh[ HasNoVehOrNoDvmtHh ] <- 0
   CarbonCostHh[ HasNoVehOrNoDvmtHh ] <- 0
   VmtCostHh[ HasNoVehOrNoDvmtHh ] <- 0
@@ -1019,9 +1491,10 @@ calculateCosts <- function( Hh_df, Costs, NonPrivateFactor=5 ) {
   Cost95th <- quantile( FutrCostPerMileHh, prob=0.95 )
   FutrCostPerMileHh[ FutrCostPerMileHh > Cost95th ] <- Cost95th
   # Return the result
-  list( FuelCost=FuelCostHh, GasTaxCost=GasTaxCostHh,
-        CarbonCost=CarbonCostHh, VmtCost=VmtCostHh,
-        TotCost=TotCostHh, FutrCostPerMi=FutrCostPerMileHh)
+  list( FuelCost=FuelCostHh, PowerCost=PowerCostHh,
+        GasTaxCost=GasTaxCostHh, CarbonCost=CarbonCostHh,
+        VmtCost=VmtCostHh, TotCost=TotCostHh,
+        FutrCostPerMi=FutrCostPerMileHh)
 }
 
 #Main module function calculates various attributes of travel demand
@@ -1049,7 +1522,7 @@ CalculateTravelDemand <- function(L) {
   set.seed(L$G$Seed)
 
   # Get the household data frame
-  Hh_df <- data.frame(L$Year$Household)
+  Hh_df <- data.frame(L$Year$Household, stringsAsFactors = FALSE)
 
   # Assign household attributes
   ######AG to CS/BS Average Density
@@ -1062,6 +1535,7 @@ CalculateTravelDemand <- function(L) {
   Hh_df$DrvAgePop <- Hh_df$HhSize - Hh_df$Age0to14
   Hh_df$ZeroVeh <- 0
   Hh_df$ZeroVeh[Hh_df$Vehicles==0] <- 1
+  Hh_df$Carshare <- 0
 
   # Identify metropolitan area
   IsMetro_ <- Hh_df$Urban == 1
@@ -1092,33 +1566,171 @@ CalculateTravelDemand <- function(L) {
                                                     TrnstnProp=1 )[[1]]
   }
 
+  # Calculae Max and 95th percentile DVMT
+  #--------------------------------------
+  ModelVar_ <- c("HhId","Dvmt")
+
+  Hh_df$Dvmt95 <- 0
+  if( any( IsMetro_ ) ) {
+    MaxDvmt_ <- predictMaxDvmt( Hh_df[ IsMetro_, ModelVar_ ],
+                                                   DvmtLmModels_ls, "Metro")
+    Hh_df$Dvmt95[ IsMetro_ ] <- MaxDvmt_[,2]
+  }
+  if( any( !IsMetro_ ) ) {
+    MaxDvmt_ <- predictMaxDvmt( Hh_df[ !IsMetro_, ModelVar_ ],
+                                DvmtLmModels_ls, "NonMetro")
+    Hh_df$Dvmt95[ !IsMetro_ ] <- MaxDvmt_[,2]
+  }
+
   # Assign vehicle DVMT
   #====================
 
   # Assign vehicle mileage to household vehicles
-  Vehicles_df <- data.frame(L$Year$Vehicle)
+  Vehicles_df <- data.frame(L$Year$Vehicle, stringsAsFactors = FALSE)
   Vehicles_df$Dvmt <- calculateVehDvmt( Hh_df[,c("HhId","Dvmt")], Vehicles_df )
+
+  # Identify HEVs & PHEVs
+  #======================
+
+  #Apply HEV/PHEV model
+  HhVar_ <- c(
+    "HhId",
+    "Vehicles",
+    "Carshare",
+    "Income",
+    "Htppopdn",
+    "HhSize",
+    "Age0to14",
+    "Age65Plus",
+    "TranRevMiPC",
+    "Urban"
+  )
+
+  VehVar_ <- c(
+    "HhId",
+    "VehId",
+    "Type",
+    "Age",
+    "Mileage",
+    "Dvmt"
+  )
+
+  HasVeh_Hh <- Hh_df$Vehicles > 0
+
+  PhevResults_ <- assignPHEV(Hh_df = Hh_df[HasVeh_Hh, HhVar_],
+                             Veh_df = Vehicles_df[, VehVar_],
+                             PhevRangePropYr_df = PhevModelData_ls$PhevRangePropYr_df,
+                             PhevPropModel_ls = PhevModelData_ls$PhevMilePropModel_ls,
+                             HevMpgPropYr_df = PhevModelData_ls$HevMpgPropYr_df,
+                             OptimProp = PhevModelData_ls$OptimPropYr_ar[L$G$Year],
+                             CurrYear = L$G$Year)
+
+  #Update vehicle data
+  Vehicles_df$Dvmt <- PhevResults_$VehDvmt_
+  Vehicles_df$DvmtProp <- PhevResults_$DvmtProp_
+  Vehicles_df$EvDvmt <- NA
+  Vehicles_df$EvDvmt <- PhevResults_$EvVehDvmt_
+  Vehicles_df$HcDvmt <- NA
+  Vehicles_df$HcDvmt <- PhevResults_$HcVehDvmt_
+  Vehicles_df$Mileage <- PhevResults_$VehMpg_
+  Vehicles_df$Mpkwh <- NA
+  Vehicles_df$Mpkwh <- PhevResults_$VehMpkwh_
+  Vehicles_df$Mpkwh[is.na(Vehicles_df$Mpkwh)] <- 0
+  Vehicles_df$Powertrain <- NA
+  Vehicles_df$Powertrain <- PhevResults_$Powertrain_
+
+  rm(PhevResults_, HhVar_, VehVar_)
+  gc()
+
+  # Identify EVs
+  #===============
+  #Apply EV model
+  HhVar_ <- c(
+    "HhId",
+    "Vehicles",
+    "Dvmt95"
+  )
+
+  VehVar_ <- c(
+    "HhId",
+    "VehId",
+    "Type",
+    "Age",
+    "Mileage",
+    "Dvmt",
+    "DvmtProp",
+    "Mpkwh",
+    "EvDvmt",
+    "HcDvmt",
+    "Powertrain"
+  )
+
+  HasVeh_Hh <- Hh_df$Vehicles > 0
+  HasDvmt_Hh <- Hh_df$Dvmt > 0
+
+  EvResults_ <- assignEv(Hh_df = Hh_df[HasVeh_Hh & HasDvmt_Hh, HhVar_],
+                         Veh_df = Vehicles_df[, VehVar_],
+                         EvRangePropYr_df = EvModelData_ls$EvRangePropYr_df,
+                         CurrYear = L$G$Year)
+
+  Vehicles_df$EvDvmt <- EvResults_$EvDvmt_
+  Vehicles_df$HcDvmt <- EvResults_$HcDvmt_
+  Vehicles_df$Mileage <- EvResults_$VehMpg_
+  Vehicles_df$Mpkwh <- EvResults_$Mpkwh_
+  Vehicles_df$Powertrain <- EvResults_$Powertrain_
+  rm(EvResults_, HasVeh_Hh, HasDvmt_Hh, HhVar_, VehVar_)
+  gc()
 
   # Calculate fuel consumption and CO2e production
   #=============================================================
 
   # Calculate average fuel CO2e per gallon
   #---------------------------------------
-  FuelProp <- data.frame(L$Global$FuelProp)
-  FuelComp <- data.frame(L$Global$FuelComp)
-  FuelCo2Ft <- data.frame(L$Global$Fuel)
+  FuelProp <- data.frame(L$Global$FuelProp, stringsAsFactors = FALSE)
+  FuelComp <- data.frame(L$Global$FuelComp, stringsAsFactors = FALSE)
+  FuelCo2Ft <- data.frame(L$Global$Fuel, stringsAsFactors = FALSE)
   AveFuelCo2e_ <- calculateAveFuelCo2e( L$G$Year, FuelProp=FuelProp, FuelComp=FuelComp,
                                         FuelCo2Ft=FuelCo2Ft,
                                    MJPerGallon=121, OutputType="MetricTons" )
 
+  # Calculate average electricity CO2e per KWh
+  #---------------------------------------------
+  if(!"Electricity" %in% L$Global$Fuel$Fuel){
+    CI_df <- TravelDemandDefaults_ls$CarbonIntensity_df
+    RegionName_ <- strsplit(L$G$Region, " ")[[1]]
+    StateCode_ <- L$G$State
+    CI_ <- NA
+    for(Name_ in RegionName_){
+      Index_ <- (CI_df$County %in% Name_) &
+                (CI_df$State %in% StateCode_)
+      CI_ <- CI_df[Index_,paste0("X",L$G$Year)]
+      if(!is.na(CI_)) break
+    }
+    if(is.na(CI_)) CI_ <- 0.75 # Default value
+    CI_ <- convertUnits(CI_, DataType = "compound",
+                        FromUnits = "LB/KWH",
+                        ToUnits = "GM/MJ")
+    L$Global$Fuel$Fuel <- c(L$Global$Fuel$Fuel, "Electricity")
+    L$Global$Fuel$Intensity <- c(L$Global$Fuel$Intensity,  CI_$Values[1])
+    FuelCo2Ft <- data.frame(L$Global$Fuel, stringsAsFactors = FALSE)
+    rm(CI_df, RegionName_, StateCode_, CI_)
+  }
+  AveElectricCo2e_ <- calculateAveElectricityCo2e( L$G$Year, PowerCo2Ft=FuelCo2Ft,
+                                                   OutputType="MetricTons" )
+
   # Calculate consumption and production at a household level
   #----------------------------------------------------------
 
-  ModelVar_ <- c("HhId" ,"Mileage", "Type", "Dvmt")
-  FuelCo2e_ <- calculateVehFuelCo2(Hh_df[, c("ZeroVeh","HhId", "Dvmt")], Vehicles_df[ , ModelVar_ ], AveFuelCo2e=AveFuelCo2e_ )
-  Hh_df$FuelGallons <- FuelCo2e_$FuelGallons
-  Hh_df$FuelCo2e <- FuelCo2e_$FuelCo2e
-  rm( AveFuelCo2e_, FuelCo2e_ )
+  ModelVar_ <- c("HhId" ,"Mileage", "Mpkwh", "Type", "EvDvmt", "HcDvmt")
+  FuelElecCo2e_ <- calculateVehFuelElectricCo2(Hh_df[, c("ZeroVeh","HhId", "Dvmt")],
+                                           Vehicles_df[ , ModelVar_ ],
+                                           AveFuelCo2e=AveFuelCo2e_,
+                                           AveElectricCo2e = AveElectricCo2e_ )
+  Hh_df$FuelGallons <- FuelElecCo2e_$FuelGallons
+  Hh_df$FuelCo2e <- FuelElecCo2e_$FuelCo2e
+  Hh_df$ElecKwh <- FuelElecCo2e_$ElecKwh
+  Hh_df$ElecCo2e <- FuelElecCo2e_$ElecCo2e
+  rm( AveFuelCo2e_, AveElectricCo2e_, FuelElecCo2e_ )
   rm( ModelVar_ )
   gc()
 
@@ -1132,12 +1744,13 @@ CalculateTravelDemand <- function(L) {
   Hh_df$DailyPkgCost <- 0
   # gathers cost parameters into costs.
   Costs_ <- c(L$Global$Model$FuelCost,
+              L$Global$Model$KwhCost,
               L$Global$Model$GasTax,
               L$Global$Model$CarbonCost,
               L$Global$Model$VmtCost)
-  names(Costs_) <- c("FuelCost","GasTax","CarbonCost","VmtCost")
-  ModelVar_ <- c( "FuelGallons", "FuelCo2e", "Dvmt", "DailyPkgCost", "Vehicles" )
-  Costs_ <- calculateCosts( Hh_df[ , ModelVar_ ], Costs_)
+  names(Costs_) <- c("FuelCost", "KwhCost","GasTax","CarbonCost","VmtCost")
+  ModelVar_ <- c("HhId", "FuelGallons", "FuelCo2e", "ElecKwh", "ElecCo2e", "Dvmt", "DailyPkgCost", "Vehicles" )
+  Costs_ <- calculateCosts( Hh_df[ , ModelVar_ ], Costs = Costs_)
   Hh_df$FutureCostPerMile <- Costs_$FutrCostPerMi
   rm( Costs_, ModelVar_ )
   gc()
@@ -1167,16 +1780,28 @@ CalculateTravelDemand <- function(L) {
   DvmtAdjFactorHh <- Hh_df$Dvmt / PrevDvmtHh
   names(DvmtAdjFactorHh) <- as.character(Hh_df$HhId)
   Vehicles_df$Dvmt <- Vehicles_df$Dvmt * DvmtAdjFactorHh[as.character(Vehicles_df$HhId)]
+  Vehicles_df$EvDvmt <- Vehicles_df$EvDvmt * DvmtAdjFactorHh[as.character(Vehicles_df$HhId)]
+  Vehicles_df$HcDvmt <- Vehicles_df$HcDvmt * DvmtAdjFactorHh[as.character(Vehicles_df$HhId)]
   rm( DvmtAdjFactorHh)
   gc()
 
   # Sum up DVMT by development type
   #================================
 
-  DvmtPt_ <- rowsum( Hh_df$Dvmt, Hh_df$HhPlaceTypes)[,1]
+  DvmtPt_ <- rowsum( Hh_df$Dvmt, Hh_df$HhPlaceTypes, reorder = FALSE)[,1]
   DvmtPt_ <- DvmtPt_[as.character(L$Year$Bzone$Bzone)]
   DvmtPt_[is.na(DvmtPt_)] <- 0
   names(DvmtPt_) <- as.character(L$Year$Bzone$Bzone)
+
+  EvDvmtPt_ <- rowsum( Vehicles_df$EvDvmt, Hh_df$HhPlaceTypes[match(Vehicles_df$HhId, Hh_df$HhId)], reorder = FALSE)[,1]
+  EvDvmtPt_ <- EvDvmtPt_[as.character(L$Year$Bzone$Bzone)]
+  EvDvmtPt_[is.na(EvDvmtPt_)] <- 0
+  names(EvDvmtPt_) <- as.character(L$Year$Bzone$Bzone)
+
+  HcDvmtPt_ <- rowsum( Vehicles_df$HcDvmt, Hh_df$HhPlaceTypes[match(Vehicles_df$HhId, Hh_df$HhId)], reorder = FALSE)[,1]
+  HcDvmtPt_ <- HcDvmtPt_[as.character(L$Year$Bzone$Bzone)]
+  HcDvmtPt_[is.na(HcDvmtPt_)] <- 0
+  names(HcDvmtPt_) <- as.character(L$Year$Bzone$Bzone)
 
   #CALCULATE HEAVY TRUCK VMT
   #=========================
@@ -1225,19 +1850,27 @@ CalculateTravelDemand <- function(L) {
   )
   # Bzone results
   Out_ls$Year$Bzone <- list(
-    Dvmt = DvmtPt_
+    Dvmt = DvmtPt_,
+    EvDvmt = EvDvmtPt_,
+    HcDvmt = HcDvmtPt_
   )
   # Household results
   Out_ls$Year$Household <- list(
     Dvmt = Hh_df$Dvmt,
     FuelGallons = Hh_df$FuelGallons,
     FuelCo2e = Hh_df$FuelCo2e,
+    ElecKwh = Hh_df$ElecKwh,
+    ElecCo2e = Hh_df$ElecCo2e,
     DailyParkingCost = Hh_df$DailyPkgCost,
     FutureCostPerMile = Hh_df$FutureCostPerMile
   )
   # Vehicle results
     Out_ls$Year$Vehicle <-list(
-      Dvmt = as.numeric(Vehicles_df$Dvmt)
+      Dvmt = as.numeric(Vehicles_df$Dvmt),
+      EvDvmt = as.numeric(Vehicles_df$EvDvmt),
+      HcDvmt = as.numeric(Vehicles_df$HcDvmt),
+      Mpkwh = as.numeric(Vehicles_df$Mpkwh),
+      Powertrain = as.character(Vehicles_df$Powertrain)
     )
   #Return the outputs list
   Out_ls
