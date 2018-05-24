@@ -19,10 +19,10 @@ A matrix containing maximum and 95th percentile of daily
 vehicle miles traveled.
 }
 \description{
-\code{predictAveDvmt} predicts max and 95th percentile DVMT for each household.
+\code{predictMaxDvmt} predicts max and 95th percentile DVMT for each household.
 }
 \details{
 This function takes a data frame of households and a list of models which
-are used to predict the average daily vehicle miles traveled for each
+are used to predict the max and 95th percentile daily vehicle miles traveled for each
 household.
 }

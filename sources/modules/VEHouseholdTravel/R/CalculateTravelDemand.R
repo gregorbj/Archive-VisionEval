@@ -587,6 +587,30 @@ CalculateTravelDemandSpecifications <- list(
       SIZE = 0,
       DESCRIPTION = "Average daily vehicle miles traveled"
     ),
+    item(
+      NAME = "EvDvmt",
+      TABLE = "Bzone",
+      GROUP = "Year",
+      TYPE = "compound",
+      UNITS = "MI/DAY",
+      NAVALUE = -1,
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      SIZE = 0,
+      DESCRIPTION = "Average daily vehicle miles traveled by electric vehicles"
+    ),
+    item(
+      NAME = "HcDvmt",
+      TABLE = "Bzone",
+      GROUP = "Year",
+      TYPE = "compound",
+      UNITS = "MI/DAY",
+      NAVALUE = -1,
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      SIZE = 0,
+      DESCRIPTION = "Average daily vehicle miles traveled by ICE vehicles"
+    ),
     # Household variables
     item(
       NAME = "Dvmt",
@@ -622,7 +646,33 @@ CalculateTravelDemandSpecifications <- list(
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
       SIZE = 0,
-      DESCRIPTION = "Average daily Co2 equivalent greenhouse gas emissions"
+      DESCRIPTION = "Average daily Co2 equivalent greenhouse gas emissions by
+      consumption of fuel"
+    ),
+    item(
+      NAME = "ElecKwh",
+      TABLE = "Household",
+      GROUP = "Year",
+      TYPE = "compound",
+      UNITS = "KWH/DAY",
+      NAVALUE = -1,
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      SIZE = 0,
+      DESCRIPTION = "Average daily fuel consumption in gallons"
+    ),
+    item(
+      NAME = "ElecCo2e",
+      TABLE = "Household",
+      GROUP = "Year",
+      TYPE = "mass",
+      UNITS = "GM",
+      NAVALUE = -1,
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      SIZE = 0,
+      DESCRIPTION = "Average daily Co2 equivalent greenhouse gas emissions by
+      consumption of electricity"
     ),
     item(
       NAME = "DailyParkingCost",
@@ -660,6 +710,54 @@ CalculateTravelDemandSpecifications <- list(
       ISELEMENTOF = "",
       SIZE = 0,
       DESCRIPTION = "Average daily vehicle miles traveled"
+    ),
+    item(
+      NAME = "EvDvmt",
+      TABLE = "Vehicle",
+      GROUP = "Year",
+      TYPE = "compound",
+      UNITS = "MI/DAY",
+      NAVALUE = -1,
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      SIZE = 0,
+      DESCRIPTION = "Average daily vehicle miles traveled by electric vehicles"
+    ),
+    item(
+      NAME = "HcDvmt",
+      TABLE = "Vehicle",
+      GROUP = "Year",
+      TYPE = "compound",
+      UNITS = "MI/DAY",
+      NAVALUE = -1,
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      SIZE = 0,
+      DESCRIPTION = "Average daily vehicle miles traveled by ICE vehicles"
+    ),
+    item(
+      NAME = "MpKwh",
+      TABLE = "Vehicle",
+      GROUP = "Year",
+      TYPE = "compound",
+      UNITS = "MI/KWH",
+      NAVALUE = -1,
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      SIZE = 0,
+      DESCRIPTION = "Power efficiency of electric vehicles"
+    ),
+    item(
+      NAME = "Powertrain",
+      TABLE = "Vehicle",
+      GROUP = "Year",
+      TYPE = "character",
+      UNITS = "category",
+      NAVALUE = -1,
+      PROHIBIT = c("NA"),
+      ISELEMENTOF = c("Ice", "Hev", "Phev", "Ev"),
+      SIZE = 4,
+      DESCRIPTION = "Power train of vehicles"
     )
   ),
   #Module is callable
@@ -746,10 +844,10 @@ predictAveDvmt <- function( Hh_df, Model_ls, Type ) {
 #---------------------------------------------------------------------------
 #' Function to predict max and 95th percentile DVMT
 #'
-#' \code{predictAveDvmt} predicts max and 95th percentile DVMT for each household.
+#' \code{predictMaxDvmt} predicts max and 95th percentile DVMT for each household.
 #'
 #' This function takes a data frame of households and a list of models which
-#' are used to predict the average daily vehicle miles traveled for each
+#' are used to predict the max and 95th percentile daily vehicle miles traveled for each
 #' household.
 #' @param Hh_df A household data frame consisting of household attributes used to
 #' predict average DVMT.
@@ -876,7 +974,27 @@ calculateVehDvmt <- function( Hh_df, Vehicles_df ) {
 }
 
 
-#TODO
+#Define a function that identifies HE/PHE vehicles
+#---------------------------------------------------------------------------
+#' Function to identify HEV/PHEV
+#'
+#' \code{assignPHEV} identifies HEV/PHEV.
+#'
+#' This function takes a data frame of households and vehicles, a list of
+#' proportional model for identiying PHEVs, and a data frame of expected
+#' range of HEVs and PHEVs to identify the powertrains of vehicles.
+#'
+#' @param Hh_df A household data frame consisting of variables required for calculation.
+#' @param Veh_df A vehicle data frame consisting of variables required for calculation.
+#' @param PhevRangePropYr_df A data frame consisting of expected range of PHEV.
+#' @param CurrYear The year for which the assignment of powertrian should be done.
+#' @param PhevPropModel_ls A list of PHEV proportional models
+#' @param HevMpgPropYr_df A data frame consisting of expectedrange of HEV.
+#' @param OptimProp A numeric value indicating the proportion of vehicles that need
+#' to be optimized.
+#' @return A list of identifying the powertrain, dvmt, and efficiency of vehicles by
+#' powertrain.
+#' @export
 assignPHEV <- function(Hh_df, Veh_df, PhevRangePropYr_df, CurrYear,
                        PhevPropModel_ls, HevMpgPropYr_df, OptimProp = 0){
 
@@ -1127,6 +1245,24 @@ assignPHEV <- function(Hh_df, Veh_df, PhevRangePropYr_df, CurrYear,
         Powertrain_=Powertrain_ )
 }
 
+
+#Define a function that identifies electric vehicles
+#---------------------------------------------------------------------------
+#' Function to identify electric vehicles
+#'
+#' \code{assignEv} identifies electric vehicles.
+#'
+#' This function takes a data frame of households and vehicles, and a data frame consisting
+#' of expected range of electric vehicles to identify purely electric vehicles from
+#' HEV/PHEV.
+#'
+#' @param Hh_df A household data frame consisting of variables required for calculation.
+#' @param Veh_df A vehicle data frame consisting of variables required for calculation.
+#' @param EvRangePropYr_df A data frame consisting of expected range of EV.
+#' @param UseMaxDvmtCriterion A logical to indicated whether to use max dvmt criteria.
+#' @return A list of identifying the powertrain, dvmt, and efficiency of vehicles by
+#' powertrain.
+#' @export
 assignEv <- function( Hh_df, Veh_df, EvRangePropYr_df,
                       CurrYear, UseMaxDvmtCriterion=FALSE ) {
 
@@ -1869,7 +2005,7 @@ CalculateTravelDemand <- function(L) {
       Dvmt = as.numeric(Vehicles_df$Dvmt),
       EvDvmt = as.numeric(Vehicles_df$EvDvmt),
       HcDvmt = as.numeric(Vehicles_df$HcDvmt),
-      Mpkwh = as.numeric(Vehicles_df$Mpkwh),
+      MpKwh = as.numeric(Vehicles_df$Mpkwh),
       Powertrain = as.character(Vehicles_df$Powertrain)
     )
   #Return the outputs list
