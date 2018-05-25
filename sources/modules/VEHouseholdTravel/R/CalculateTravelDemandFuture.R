@@ -172,6 +172,7 @@ CalculateTravelDemandFutureSpecifications <- list(
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = ""
     ),
+    # Vehicle variables
     item(
       NAME = items("HhIdFuture",
                    "VehIdFuture"),
@@ -180,6 +181,15 @@ CalculateTravelDemandFutureSpecifications <- list(
       TYPE = "character",
       UNITS = "ID",
       PROHIBIT = "NA",
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "AgeFuture",
+      TABLE = "Vehicle",
+      GROUP = "Year",
+      TYPE = "time",
+      UNITS = "YR",
+      PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = ""
     ),
     item(
@@ -252,14 +262,39 @@ CalculateTravelDemandFutureSpecifications <- list(
     item(
       NAME = item(
         "FuelCost",
-        "GasTax",
-        "CarbonCost",
-        "VmtCost"
+        "GasTax"
       ),
       TABLE = "Model",
       GROUP = "Global",
       TYPE = "compound",
       UNITS = "USD/GAL",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "KwhCost",
+      TABLE = "Model",
+      GROUP = "Global",
+      TYPE = "compound",
+      UNITS = "USD/KWH",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "CarbonCost",
+      TABLE = "Model",
+      GROUP = "Global",
+      TYPE = "compound",
+      UNITS = "USD/MT",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "VmtCost",
+      TABLE = "Model",
+      GROUP = "Global",
+      TYPE = "compound",
+      UNITS = "USD/MI",
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = ""
     ),
@@ -270,8 +305,8 @@ CalculateTravelDemandFutureSpecifications <- list(
       TYPE = "character",
       UNITS = "category",
       PROHIBIT = "NA",
-      SIZE = 10,
-      ISELEMENTOF = c("ULSD", "Biodiesel", "RFG", "CARBOB", "Ethanol", "Cng")
+      SIZE = 12,
+      ISELEMENTOF = c("ULSD", "Biodiesel", "RFG", "CARBOB", "Ethanol", "Cng", "Electricity")
     ),
     item(
       NAME = "Intensity",
@@ -392,6 +427,7 @@ CalculateTravelDemandFutureSpecifications <- list(
   ),
   #Specify data to saved in the data store
   Set = items(
+    # Marea variables
     item(
       NAME = "TruckDvmtFuture",
       TABLE = "Marea",
@@ -404,6 +440,7 @@ CalculateTravelDemandFutureSpecifications <- list(
       SIZE = 0,
       DESCRIPTION = "Average daily vehicle miles traveled by trucks"
     ),
+    # Bzone variables
     item(
       NAME = "DvmtFuture",
       TABLE = "Bzone",
@@ -416,6 +453,31 @@ CalculateTravelDemandFutureSpecifications <- list(
       SIZE = 0,
       DESCRIPTION = "Average daily vehicle miles traveled"
     ),
+    item(
+      NAME = "EvDvmtFuture",
+      TABLE = "Bzone",
+      GROUP = "Year",
+      TYPE = "compound",
+      UNITS = "MI/DAY",
+      NAVALUE = -1,
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      SIZE = 0,
+      DESCRIPTION = "Average daily vehicle miles traveled by electric vehicles"
+    ),
+    item(
+      NAME = "HcDvmtFuture",
+      TABLE = "Bzone",
+      GROUP = "Year",
+      TYPE = "compound",
+      UNITS = "MI/DAY",
+      NAVALUE = -1,
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      SIZE = 0,
+      DESCRIPTION = "Average daily vehicle miles traveled by ICE vehicles"
+    ),
+    # Household variables
     item(
       NAME = "DvmtFuture",
       TABLE = "Household",
@@ -453,6 +515,31 @@ CalculateTravelDemandFutureSpecifications <- list(
       DESCRIPTION = "Average daily Co2 equivalent greenhouse gass emissions"
     ),
     item(
+      NAME = "ElecKwhFuture",
+      TABLE = "Household",
+      GROUP = "Year",
+      TYPE = "compound",
+      UNITS = "KWH/DAY",
+      NAVALUE = -1,
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      SIZE = 0,
+      DESCRIPTION = "Average daily fuel consumption in gallons"
+    ),
+    item(
+      NAME = "ElecCo2eFuture",
+      TABLE = "Household",
+      GROUP = "Year",
+      TYPE = "mass",
+      UNITS = "GM",
+      NAVALUE = -1,
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      SIZE = 0,
+      DESCRIPTION = "Average daily Co2 equivalent greenhouse gas emissions by
+      consumption of electricity"
+    ),
+    item(
       NAME = "DailyParkingCostFuture",
       TABLE = "Household",
       GROUP = "Year",
@@ -476,6 +563,7 @@ CalculateTravelDemandFutureSpecifications <- list(
       SIZE = 0,
       DESCRIPTION = "Total fuel cost per mile"
     ),
+    # Vehicle variables
     item(
       NAME = "DvmtFuture",
       TABLE = "Vehicle",
@@ -487,10 +575,56 @@ CalculateTravelDemandFutureSpecifications <- list(
       ISELEMENTOF = "",
       SIZE = 0,
       DESCRIPTION = "Average daily vehicle miles traveled"
+    ),
+    item(
+      NAME = "EvDvmtFuture",
+      TABLE = "Vehicle",
+      GROUP = "Year",
+      TYPE = "compound",
+      UNITS = "MI/DAY",
+      NAVALUE = -1,
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      SIZE = 0,
+      DESCRIPTION = "Average daily vehicle miles traveled by electric vehicles"
+    ),
+    item(
+      NAME = "HcDvmtFuture",
+      TABLE = "Vehicle",
+      GROUP = "Year",
+      TYPE = "compound",
+      UNITS = "MI/DAY",
+      NAVALUE = -1,
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      SIZE = 0,
+      DESCRIPTION = "Average daily vehicle miles traveled by ICE vehicles"
+    ),
+    item(
+      NAME = "MpKwhFuture",
+      TABLE = "Vehicle",
+      GROUP = "Year",
+      TYPE = "compound",
+      UNITS = "MI/KWH",
+      NAVALUE = -1,
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      SIZE = 0,
+      DESCRIPTION = "Power efficiency of electric vehicles"
+    ),
+    item(
+      NAME = "PowertrainFuture",
+      TABLE = "Vehicle",
+      GROUP = "Year",
+      TYPE = "character",
+      UNITS = "category",
+      NAVALUE = -1,
+      PROHIBIT = c("NA"),
+      ISELEMENTOF = c("Ice", "Hev", "Phev", "Ev"),
+      SIZE = 4,
+      DESCRIPTION = "Power train of vehicles"
     )
-  ),
-  #Module is callable
-  Call = TRUE
+  )
 )
 
 #Save the data specifications list
@@ -554,7 +688,7 @@ CalculateTravelDemandFuture <- function(L) {
           names(noList) <- paste0(names(noList),suffix)
         }
         # Repeat the function for elements that are list
-        yesList <- lapply(x[isElementList], AddSuffixFuture)
+        yesList <- lapply(x[isElementList], AddSuffixFuture, suffix=suffix)
         x <- unlist(list(noList,yesList), recursive = FALSE)
         return(x)
       }
@@ -577,7 +711,7 @@ CalculateTravelDemandFuture <- function(L) {
           names(noList) <- gsub(suffix,"",names(noList))
         }
         # Repeat the function for elements that are list
-        yesList <- lapply(x[isElementList], RemoveSuffixFuture)
+        yesList <- lapply(x[isElementList], RemoveSuffixFuture, suffix=suffix)
         x <- unlist(list(noList,yesList), recursive = FALSE)
         return(x)
       }
