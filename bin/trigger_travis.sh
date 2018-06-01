@@ -42,9 +42,7 @@ body="{
   \"branch\":\"$BRANCH\"
   $MESSAGE,
   \"config\": {
-	\"script\": [\"# Install framework \nbash bin/install_framework.sh\",
-	             \"# Install VE module dependencies \nbash bin/install_module_dependencies.sh\",
-	             \"# Install package dependencies \nbash bin/install_package_dependencies.sh\",
+	\"script\": [\"# Install package dependencies \nbash bin/install_package_dependencies.sh\",
 	             \"# Check package for problems \nbash bin/check_package.sh\",
 	             \"# Run package tests \nbash bin/run_test.sh\",
 	             \"# Install package \nbash bin/install_package.sh\",
