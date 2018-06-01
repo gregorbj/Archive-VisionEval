@@ -386,7 +386,7 @@ CalculatePolicyVmtSpecifications <- list(
       ISELEMENTOF = "",
       DESCRIPTION = "Proportions of employees participating at the level"
     )
-  ),
+    ),
   #Specify data to be loaded from data store
   Get = items(
     # Load Bzone variables
@@ -468,7 +468,11 @@ CalculatePolicyVmtSpecifications <- list(
       ISELEMENTOF = ""
     ),
     item(
-      NAME = "DvmtFuture",
+      NAME = items(
+        "DvmtFuture",
+        "EvDvmtFuture",
+        "HcDvmtFuture"
+      ),
       TABLE = "Vehicle",
       GROUP = "Year",
       TYPE = "compound",
@@ -545,6 +549,28 @@ CalculatePolicyVmtSpecifications <- list(
       SIZE = 0,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "ElecCo2eFuture",
+      TABLE = "Household",
+      GROUP = "Year",
+      TYPE = "mass",
+      UNITS = "GM",
+      NAVALUE = -1,
+      SIZE = 0,
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "ElecKwhFuture",
+      TABLE = "Household",
+      GROUP = "Year",
+      TYPE = "compound",
+      UNITS = "KWH/DAY",
+      NAVALUE = -1,
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      SIZE = 0
     ),
     item(
       NAME = "FuelCo2eFuture",
@@ -679,6 +705,21 @@ CalculatePolicyVmtSpecifications <- list(
     ),
     item(
       NAME = items(
+        "MpKwhAdjLtVehEvFuture",
+        "MpKwhAdjLtVehHevFuture",
+        "MpKwhAdjBusFuture",
+        "MpKwhAdjTruckFuture"
+      ),
+      TABLE = "Marea",
+      GROUP = "Year",
+      TYPE = "double",
+      UNITS = "multiplier",
+      PROHIBIT = c("NA", "< 0"),
+      SIZE = 0,
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = items(
         "VehHrLtVehFuture",
         "VehHrBusFuture",
         "VehHrTruckFuture"
@@ -735,6 +776,20 @@ CalculatePolicyVmtSpecifications <- list(
     ),
     item(
       NAME = "MpgAdjHhFuture",
+      TABLE = "Marea",
+      GROUP = "Year",
+      TYPE = "double",
+      UNITS = "multiplier",
+      PROHIBIT = c('NA', '< 0'),
+      SIZE = 0,
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = item(
+        "MpgAdjHhFuture",
+        "MpKwhAdjEvHhFuture",
+        "MpKwhAdjHevHhFuture"
+      ),
       TABLE = "Marea",
       GROUP = "Year",
       TYPE = "double",
@@ -994,6 +1049,15 @@ CalculatePolicyVmtSpecifications <- list(
       ISELEMENTOF = ""
     ),
     item(
+      NAME = "KwhCost",
+      TABLE = "Model",
+      GROUP = "Global",
+      TYPE = "compound",
+      UNITS = "USD/KWH",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = ""
+    ),
+    item(
       NAME = "AutoCostGrowth",
       TABLE = "Model",
       GROUP = "Global",
@@ -1037,7 +1101,11 @@ CalculatePolicyVmtSpecifications <- list(
   Set = items(
     # Bzone Variable
     item(
-      NAME = "DvmtPolicy",
+      NAME = item(
+        "DvmtPolicy",
+        "EvDvmtPolicy",
+        "HcDvmtPolicy"
+      ),
       TABLE = "Bzone",
       GROUP = "Year",
       TYPE = "compound",
@@ -1046,7 +1114,10 @@ CalculatePolicyVmtSpecifications <- list(
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
       SIZE = 0,
-      DESCRIPTION = "Average daily vehicle miles traveled"
+      DESCRIPTION = item(
+        "Average daily vehicle miles traveled",
+        "Average daily electric vehicle miles traveled",
+        "Average daily ICE vehicle miles traveled")
     ),
     # Household variables
     item(
@@ -1171,7 +1242,10 @@ CalculatePolicyVmtSpecifications <- list(
     ),
     # Vehicles variables
     item(
-      NAME = "DvmtPolicy",
+      NAME = item(
+        "DvmtPolicy",
+        "EvDvmtPolicy",
+        "HcDvmtPolicy"),
       TABLE = "Vehicle",
       GROUP = "Year",
       TYPE = "compound",
@@ -1180,7 +1254,9 @@ CalculatePolicyVmtSpecifications <- list(
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
       SIZE = 0,
-      DESCRIPTION = "Average daily vehicle miles traveled"
+      DESCRIPTION = item("Average daily vehicle miles traveled",
+                         "Average daily electric vehicle miles traveled",
+                         "Average daily ICE vehicle miles traveled")
     ),
     # Global variables
     item(
@@ -1208,7 +1284,7 @@ CalculatePolicyVmtSpecifications <- list(
       DESCRIPTION = "Names of tax/costs"
     )
   )
-)
+  )
 
 #Save the data specifications list
 #---------------------------------
@@ -1668,7 +1744,8 @@ CalculatePolicyVmt <- function(L) {
   #Evaluate effectiveness
 
   #Ridesharing
-  TDMRidesharingEffect_At <- TDMRideSharing[,"Effectiveness"] * TDMPrograms[TDMPrograms$DataItem == "RidesharingParticipation","DataValue"]
+  TDMRidesharingEffect_At <- TDMRideSharing[,"Effectiveness"] *
+    TDMPrograms[TDMPrograms$DataItem == "RidesharingParticipation","DataValue"]
   names(TDMRidesharingEffect_At) <- TDMRideSharing[,"ModelGeo"]
 
   #Transit
@@ -1759,8 +1836,8 @@ CalculatePolicyVmt <- function(L) {
   }
   if( any( !IsMetro_ ) ) {
     LtVehOwn_Hh[ !IsMetro_ ] <- predictLightVehicles( Hh_df[ !IsMetro_, ModelVar_ ],
-                                                     LtVehOwnModels_=LtVehOwnModels_ls, Type="NonMetro",
-                                                     TargetProp=LightVehiclesInfo$DataValue[LightVehiclesInfo$DataItem=="TargetProp"] )
+                                                      LtVehOwnModels_=LtVehOwnModels_ls, Type="NonMetro",
+                                                      TargetProp=LightVehiclesInfo$DataValue[LightVehiclesInfo$DataItem=="TargetProp"] )
   }
   Hh_df$LtVehCnt <- LtVehOwn_Hh
   rm( LtVehOwn_Hh, ModelVar_ )
@@ -1779,13 +1856,21 @@ CalculatePolicyVmt <- function(L) {
   set.seed(L$G$Seed)
   if( any( IsMetro_ ) ) {
     LtVehDvmt_Hh[ IsMetro_ ] <- calcLtVehDvmt( Hh_df[ IsMetro_, ModelVar_ ],
-                                               AveSovPropModels_ls, Threshold=LightVehiclesInfo$DataValue[LightVehiclesInfo$DataItem=="Threshold"],
-                                               PropSuitable=LightVehiclesInfo$DataValue[LightVehiclesInfo$DataItem=="PropSuitable"], Sharing=FALSE )
+                                               AveSovPropModels_ls,
+                                               Threshold=LightVehiclesInfo$DataValue[
+                                                 LightVehiclesInfo$DataItem=="Threshold"],
+                                               PropSuitable=LightVehiclesInfo$DataValue[
+                                                 LightVehiclesInfo$DataItem=="PropSuitable"],
+                                               Sharing=FALSE )
   }
   if( any( !IsMetro_ ) ) {
     LtVehDvmt_Hh[ !IsMetro_ ] <- calcLtVehDvmt( Hh_df[ !IsMetro_, ModelVar_ ],
-                                                AveSovPropModels_ls, Threshold=LightVehiclesInfo$DataValue[LightVehiclesInfo$DataItem=="Threshold"],
-                                                PropSuitable=LightVehiclesInfo$DataValue[LightVehiclesInfo$DataItem=="PropSuitable"], Sharing=FALSE )
+                                                AveSovPropModels_ls,
+                                                Threshold=LightVehiclesInfo$DataValue[
+                                                  LightVehiclesInfo$DataItem=="Threshold"],
+                                                PropSuitable=LightVehiclesInfo$DataValue[
+                                                  LightVehiclesInfo$DataItem=="PropSuitable"],
+                                                Sharing=FALSE )
   }
   # Calculate adjustment factor
   LtVehAdjFactor_Hh <- ( Hh_df$Dvmt - LtVehDvmt_Hh ) / Hh_df$Dvmt
@@ -1836,16 +1921,22 @@ CalculatePolicyVmt <- function(L) {
   Costs_ <- c(L$Global$Model$FuelCost,
               L$Global$Model$GasTax,
               L$Global$Model$CarbonCost,
-              L$Global$Model$VmtCharge)
-  names(Costs_) <- c("FuelCost","GasTax","CarbonCost","VmtCost")
+              L$Global$Model$VmtCharge,
+              L$Global$Model$KwhCost)
+  names(Costs_) <- c("FuelCost","GasTax","CarbonCost","VmtCost", "KwhCost")
 
   #Apply auto operating cost growth
   #This applies to FuelCost and Gas Tax only
   #It does not apply to the separate policy inputs of VmtCost and Carbon Cost
   #Note that CarbonCost is not currently used in the SHRP2C16 model
-  Costs_[c("FuelCost","GasTax")] <- Costs_[c("FuelCost","GasTax")] * L$Global$Model$AutoCostGrowth
+  Costs_[c("FuelCost","GasTax", "KwhCost")] <- Costs_[c("FuelCost","GasTax", "KwhCost")] *
+    L$Global$Model$AutoCostGrowth
 
-  ModelVar_ <- c( "FuelGallons", "FuelCo2e", "Dvmt", "DailyPkgCost", "Vehicles" )
+  ModelVar_ <- c( "FuelGallons", "FuelCo2e",
+                  "ElecCo2e", "ElecKwh", "Income",
+                  "Dvmt", "DailyPkgCost", "Vehicles", "HhId" )
+
+
   Costs_Hh <- calculateCosts( Hh_df[ , ModelVar_ ], Costs_ )
   Hh_df$FutureCostPerMile <- Costs_Hh$FutrCostPerMi
   rm( Costs_Hh, ModelVar_ )
@@ -1866,12 +1957,18 @@ CalculatePolicyVmt <- function(L) {
 
   if( any( IsMetro_ ) ) {
     Hh_df$Dvmt[ IsMetro_ ] <- calculateAdjAveDvmt( Hh_df[ IsMetro_, ModelVar_ ],
-                                                   DvmtLmModels_ls, "Metro", BudgetProp=L$Global$Model$DvmtBudgetProp, AnnVmtInflator=L$Global$Model$AnnVmtInflator,
+                                                   DvmtLmModels_ls,
+                                                   "Metro",
+                                                   BudgetProp=L$Global$Model$DvmtBudgetProp,
+                                                   AnnVmtInflator=L$Global$Model$AnnVmtInflator,
                                                    TrnstnProp=1 )[[1]]
   }
   if( any( !IsMetro_ ) ) {
     Hh_df$Dvmt[ !IsMetro_ ] <- calculateAdjAveDvmt( Hh_df[ IsMetro_, ModelVar_ ],
-                                                    DvmtLmModels_ls, "NonMetro", BudgetProp=L$Global$Model$DvmtBudgetProp, AnnVmtInflator=L$Global$Model$AnnVmtInflator,
+                                                    DvmtLmModels_ls,
+                                                    "NonMetro",
+                                                    BudgetProp=L$Global$Model$DvmtBudgetProp,
+                                                    AnnVmtInflator=L$Global$Model$AnnVmtInflator,
                                                     TrnstnProp=1 )[[1]]
   }
 
@@ -1886,6 +1983,8 @@ CalculatePolicyVmt <- function(L) {
   DvmtAdjFactor_Hh <- Hh_df$Dvmt / PrevDvmt_Hh
   names(DvmtAdjFactor_Hh) <- as.character(Hh_df$HhId)
   Vehicles_df$Dvmt <- Vehicles_df$Dvmt * DvmtAdjFactor_Hh[as.character(Vehicles_df$HhId)]
+  Vehicles_df$EvDvmt <- Vehicles_df$EvDvmt * DvmtAdjFactor_Hh[as.character(Vehicles_df$HhId)]
+  Vehicles_df$HcDvmt <- Vehicles_df$HcDvmt * DvmtAdjFactor_Hh[as.character(Vehicles_df$HhId)]
   rm( DvmtAdjFactor_Hh)
   gc()
 
@@ -1895,6 +1994,19 @@ CalculatePolicyVmt <- function(L) {
   DvmtPt_ <- DvmtPt_[as.character(L$Year$Bzone$Bzone)]
   DvmtPt_[is.na(DvmtPt_)] <- 0
   names(DvmtPt_) <- as.character(L$Year$Bzone$Bzone)
+
+  HhPt_ <- Hh_df$HhPlaceTypes
+  names(HhPt_) <- as.character(Hh_df$HhId)
+
+  EvDvmtPt_ <- rowsum(Vehicles_df$EvDvmt, HhPt_[as.character(Vehicles_df$HhId)])[,1]
+  EvDvmtPt_ <- EvDvmtPt_[as.character(L$Year$Bzone$Bzone)]
+  EvDvmtPt_[is.na(EvDvmtPt_)] <- 0
+  names(EvDvmtPt_) <- as.character(L$Year$Bzone$Bzone)
+
+  HcDvmtPt_ <- rowsum(Vehicles_df$HcDvmt, HhPt_[as.character(Vehicles_df$HhId)])[,1]
+  HcDvmtPt_ <- HcDvmtPt_[as.character(L$Year$Bzone$Bzone)]
+  HcDvmtPt_[is.na(HcDvmtPt_)] <- 0
+  names(HcDvmtPt_) <- as.character(L$Year$Bzone$Bzone)
 
 
   #Return the results
@@ -1913,7 +2025,9 @@ CalculatePolicyVmt <- function(L) {
   )
   # Bzone results
   Out_ls$Year$Bzone <- list(
-    Dvmt = DvmtPt_
+    Dvmt = DvmtPt_,
+    EvDvmt = EvDvmtPt_,
+    HcDvmt = HcDvmtPt_
   )
   # Household results
   Out_ls$Year$Household <- list(
@@ -1930,7 +2044,9 @@ CalculatePolicyVmt <- function(L) {
   )
   # Vehicle results
   Out_ls$Year$Vehicle <-list(
-    Dvmt = as.numeric(Vehicles_df$Dvmt)
+    Dvmt = as.numeric(Vehicles_df$Dvmt),
+    EvDvmt = as.numeric(Vehicles_df$EvDvmt),
+    HcDvmt = as.numeric(Vehicles_df$HcDvmt)
   )
   Out_ls <- AddSuffixFuture(Out_ls, suffix = "Policy")
   #Return the outputs list
