@@ -758,6 +758,28 @@ CalculateTravelDemandSpecifications <- list(
       ISELEMENTOF = c("Ice", "Hev", "Phev", "Ev"),
       SIZE = 4,
       DESCRIPTION = "Power train of vehicles"
+    ),
+    # Global Variables
+    item(
+      NAME = "Fuel",
+      TABLE = "Fuel",
+      GROUP = "Global",
+      TYPE = "character",
+      UNITS = "category",
+      PROHIBIT = "NA",
+      SIZE = 12,
+      ISELEMENTOF = c("ULSD", "Biodiesel", "RFG", "CARBOB", "Ethanol", "Cng", "Electricity"),
+      DESCRIPTION = "The fuel type for which the CO2 equivalent emissions are calculated"
+    ),
+    item(
+      NAME = "Intensity",
+      TABLE = "Fuel",
+      GROUP = "Global",
+      TYPE = "compound",
+      UNITS = "GM/MJ",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      DESCRIPTION = "Multipliers used to convert fuel use to CO2 equivalent emissions"
     )
   ),
   #Module is callable
@@ -2010,6 +2032,11 @@ CalculateTravelDemand <- function(L) {
       HcDvmt = as.numeric(Vehicles_df$HcDvmt),
       MpKwh = as.numeric(Vehicles_df$Mpkwh),
       Powertrain = as.character(Vehicles_df$Powertrain)
+    )
+  # Global results
+    Out_ls$Global$Fuel <- list(
+      Fuel = as.character(FuelCo2Ft$Fuel),
+      Intensity = as.numeric(FuelCo2Ft$Intensity)
     )
   #Return the outputs list
   Out_ls
