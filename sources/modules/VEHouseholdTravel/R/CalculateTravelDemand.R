@@ -415,24 +415,6 @@ CalculateTravelDemandSpecifications <- list(
       ISELEMENTOF = ""
     ),
     item(
-      NAME = "CarbonCost",
-      TABLE = "Model",
-      GROUP = "Global",
-      TYPE = "compound",
-      UNITS = "USD/MT",
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = ""
-    ),
-    item(
-      NAME = "VmtCost",
-      TABLE = "Model",
-      GROUP = "Global",
-      TYPE = "compound",
-      UNITS = "USD/MI",
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = ""
-    ),
-    item(
       NAME = "Fuel",
       TABLE = "Fuel",
       GROUP = "Global",
@@ -1903,6 +1885,12 @@ CalculateTravelDemand <- function(L) {
 
   # assume zero parking cost at this point
   Hh_df$DailyPkgCost <- 0
+  if(is.null(L$Global$Model$VmtCost)){
+    L$Global$Model$VmtCost <- 0
+  }
+  if(is.null(L$Global$Model$CarbonCost)){
+    L$Global$Model$CarbonCost <- 0
+  }
   # gathers cost parameters into costs.
   Costs_ <- c(L$Global$Model$FuelCost,
               L$Global$Model$KwhCost,

@@ -1036,15 +1036,21 @@ CalculatePolicyVmtSpecifications <- list(
     item(
       NAME = item(
         "FuelCost",
-        "GasTax",
-        "CarbonCost",
-        "VmtCost",
-        "VmtCharge"
+        "GasTax"
       ),
       TABLE = "Model",
       GROUP = "Global",
       TYPE = "compound",
       UNITS = "USD/GAL",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "VmtCharge",
+      TABLE = "Model",
+      GROUP = "Global",
+      TYPE = "compound",
+      UNITS = "USD/MI",
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = ""
     ),
@@ -1918,6 +1924,12 @@ CalculatePolicyVmt <- function(L) {
   #================================
 
   #Gather cost parameters into costs.
+  if(is.null(L$Global$Model$VmtCost)){
+    L$Global$Model$VmtCost <- 0
+  }
+  if(is.null(L$Global$Model$CarbonCost)){
+    L$Global$Model$CarbonCost <- 0
+  }
   Costs_ <- c(L$Global$Model$FuelCost,
               L$Global$Model$GasTax,
               L$Global$Model$CarbonCost,

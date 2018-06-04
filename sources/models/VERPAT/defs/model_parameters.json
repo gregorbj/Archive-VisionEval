@@ -94,22 +94,6 @@
     "ISELEMENTOF" : ""
   },
   {
-    "NAME" : "CarbonCost",
-    "VALUE": "0",
-    "TYPE" : "compound",
-    "UNITS" : "USD/GAL",
-    "PROHIBIT" : "c('NA', '< 0')",
-    "ISELEMENTOF" : ""
-  },
-  {
-    "NAME" : "VmtCost",
-    "VALUE": "0",
-    "TYPE" : "compound",
-    "UNITS" : "USD/GAL",
-    "PROHIBIT" : "c('NA', '< 0')",
-    "ISELEMENTOF" : ""
-  },
-  {
     "NAME" : "BaseLtVehDvmt",
     "VALUE": "27244",
     "TYPE" : "compound",

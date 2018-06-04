@@ -23,59 +23,17 @@ library(visioneval)
 ## Use estimation data set to create models
 
 
-#Create a list to store models
-#-----------------------------
-DvmtLmModels_ls <-
-  list(
-    Metro = list(),
-    NonMetro = list()
-  )
+#Load Dvmt assignment models
+load("./data/DvmtLmModels_ls.rda")
 
-#Model metropolitan households
-#--------------------------------
+#Load PHEV/HEV model data
+load("./data/PhevModelData_ls.rda")
 
-#Dvmt assignment models
-DvmtLmModels_ls$Metro <- list(
-  Pow = 0.18,
-  DvmtAveModel =  "0.648385696907611 * Intercept + 0.107316286790836 * LogIncome + -3.16022048698694e-06 * Htppopdn + 0.0579707838751504 * Vehicles + -0.589935044482247 * ZeroVeh + -0.000176072677256818 * TranRevMiPC + 0.0336732396115549 * FwyLaneMiPC + 0.0856778669446854 * DrvAgePop + -0.0767968906327059 * Age65Plus + -0.0612625221264959 * Urban + -1.15438441866039e-07 * Htppopdn * TranRevMiPC",
-  Dvmt95thModel = "7.81647021585773 * Intercept + 3.06391786253308 * DvmtAve + -0.00758871626395843 * DvmtAveSq + 1.83095401204896e-05 * DvmtAveCu",
-  DvmtMaxModel = "50.0119160585495 * Intercept + 5.27906929219219 * DvmtAve + -0.0139035520622472 * DvmtAveSq + 3.0685749202889e-05 * DvmtAveCu"
-)
+#Load EV model data
+load("./data/EvModelData_ls.rda")
 
-
-
-
-#Model nonmetropolitan households
-#--------------------------------
-#Dvmt assignment models
-DvmtLmModels_ls$NonMetro <- list(
-  Pow = 0.15,
-  DvmtAveModel =   "0.82181397246347 * Intercept + 0.0738448153337949 * LogIncome + 0.0324723925210455 * Vehicles + -0.469682614857031 * ZeroVeh + 0.0116516830902325 * DrvAgePop + 0.00895835172329192 * Age0to14 + 0.0291167103525845 * Age15to19 + -5.79611062581841e-06 * Htppopdn + 0.0895171401046532 * Age20to29 + 0.0813624511951732 * Age30to54 + 0.0740207846059698 * Age55to64 + 0.0238611249431384 * Age65Plus + -1.42740338749305e-06 * Htppopdn * Age20to29 + -2.80938849412057e-06 * Htppopdn * Age30to54 + -3.07443537261759e-06 * Htppopdn * Age55to64 + -2.65964935441766e-06 * Htppopdn * Age65Plus",
-  Dvmt95thModel = "15.866574827187 * Intercept + 3.06631274984306 * DvmtAve + -0.00234096496645993 * DvmtAveSq + 1.61936595851656e-06 * DvmtAveCu",
-  DvmtMaxModel = "80.7996943524395 * Intercept + 6.27896645459 * DvmtAve + -0.00688249433543409 * DvmtAveSq + 4.66416294868692e-06 * DvmtAveCu"
-)
-
-
-
-
-#Save Dvmt assignment models
-#-----------------------------
-#' Dvmt assignment model
-#'
-#' A list containing the Dvmnt assignment model equation and other information
-#' needed to implement the Dvmnt assignment model.
-#'
-#' @format A list having the following components:
-#' \describe{
-#'   \item{Metro}{a list containing three models for metropolitan areas: average, 95th
-#'   percentile, and max Dvmt assignment models}
-#'   \item{NonMetro}{a list containing three models for non-metropolitan areas: average, 95th
-#'   percentile, and max Dvmt assignment models}
-#' }
-#' @source CalculateTravelDemandFuture.R script.
-"DvmtLmModels_ls"
-devtools::use_data(DvmtLmModels_ls, overwrite = TRUE)
-
+#Load default values for Travel Demand module
+load("./data/TravelDemandDefaults_ls.rda")
 
 #================================================
 #SECTION 2: DEFINE THE MODULE DATA SPECIFICATIONS
@@ -277,24 +235,6 @@ CalculateTravelDemandFutureSpecifications <- list(
       GROUP = "Global",
       TYPE = "compound",
       UNITS = "USD/KWH",
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = ""
-    ),
-    item(
-      NAME = "CarbonCost",
-      TABLE = "Model",
-      GROUP = "Global",
-      TYPE = "compound",
-      UNITS = "USD/MT",
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = ""
-    ),
-    item(
-      NAME = "VmtCost",
-      TABLE = "Model",
-      GROUP = "Global",
-      TYPE = "compound",
-      UNITS = "USD/MI",
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = ""
     ),
