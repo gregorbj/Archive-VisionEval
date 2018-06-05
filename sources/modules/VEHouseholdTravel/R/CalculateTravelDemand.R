@@ -81,9 +81,6 @@ devtools::use_data(DvmtLmModels_ls, overwrite = TRUE)
 #Load PHEV/HEV model data
 load("./data/PhevModelData_ls.rda")
 
-#Load EV model data
-load("./data/EvModelData_ls.rda")
-
 #Load default values for Travel Demand module
 load("./data/TravelDemandDefaults_ls.rda")
 
@@ -109,6 +106,18 @@ CalculateTravelDemandSpecifications <- list(
     ),
     item(
       TABLE = "Vmt",
+      GROUP = "Global"
+    ),
+    item(
+      TABLE = "PhevRangePropYr",
+      GROUP = "Global"
+    ),
+    item(
+      TABLE = "HevPropMpgYr",
+      GROUP = "Global"
+    ),
+    item(
+      TABLE = "EvRangePropYr",
       GROUP = "Global"
     )
   ),
@@ -215,6 +224,192 @@ CalculateTravelDemandSpecifications <- list(
         "The freeway proportion of Vmt",
         "The arterial proportion of Vmt",
         "The proportion of Vmt in rest of the functional classes"
+      )
+    ),
+    item(
+      NAME = "ModelYear",
+      TABLE = "PhevRangePropYr",
+      GROUP = "Global",
+      FILE = "model_phev_range_prop_mpg_mpkwh.csv",
+      TYPE = "character",
+      UNITS = "YR",
+      PROHIBIT = c("NA"),
+      ISELEMENTOF = "",
+      DESCRIPTION = "Year for which data is modeled"
+    ),
+    item(
+      NAME = item(
+        "AutoPhevRange",
+        "LtTruckPhevRange"
+      ),
+      TABLE = "PhevRangePropYr",
+      GROUP = "Global",
+      FILE = "model_phev_range_prop_mpg_mpkwh.csv",
+      TYPE = "distance",
+      UNITS = "MI",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      DESCRIPTION = item(
+        "The range of plugin hybrid automobile vehicles in miles",
+        "The range of plugin hybrid light truck vehicles in miles"
+      )
+    ),
+    item(
+      NAME = item(
+        "AutoPropPhev",
+        "LtTruckPropPhev"
+      ),
+      TABLE = "PhevRangePropYr",
+      GROUP = "Global",
+      FILE = "model_phev_range_prop_mpg_mpkwh.csv",
+      TYPE = "double",
+      UNITS = "proportion",
+      PROHIBIT = c("NA", "< 0", "> 1"),
+      ISELEMENTOF = "",
+      DESCRIPTION = item(
+        "The proportion of plugin hybrid automobile vehicles of total vehicles",
+        "The proportion of plugin hybrid light truck vehicles of total vehicles"
+      )
+    ),
+    item(
+      NAME = item(
+        "AutoMpg",
+        "LtTruckMpg"
+      ),
+      TABLE = "PhevRangePropYr",
+      GROUP = "Global",
+      FILE = "model_phev_range_prop_mpg_mpkwh.csv",
+      TYPE = "compound",
+      UNITS = "MI/GAL",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      DESCRIPTION = item(
+        "The efficiency of plugin hybrid automobile vehicles when operating on gasoline",
+        "The efficiency of plugin hybrid light truck vehicles when operating on gasonline"
+      )
+    ),
+    item(
+      NAME = item(
+        "AutoMpkwh",
+        "LtTruckMpkwh"
+      ),
+      TABLE = "PhevRangePropYr",
+      GROUP = "Global",
+      FILE = "model_phev_range_prop_mpg_mpkwh.csv",
+      TYPE = "compound",
+      UNITS = "MI/KWH",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      DESCRIPTION = item(
+        "The efficiency of plugin hybrid automobile vehicles when operating on electricity",
+        "The efficiency of plugin hybrid light truck vehicles when operating on electricity"
+      )
+    ),
+    item(
+      NAME = "ModelYear",
+      TABLE = "HevPropMpgYr",
+      GROUP = "Global",
+      FILE = "model_hev_prop_mpg.csv",
+      TYPE = "character",
+      UNITS = "YR",
+      PROHIBIT = c("NA"),
+      ISELEMENTOF = "",
+      DESCRIPTION = "Year for which data is modeled"
+    ),
+    item(
+      NAME = item(
+        "AutoPropHev",
+        "LtTruckPropHev"
+      ),
+      TABLE = "HevPropMpgYr",
+      GROUP = "Global",
+      FILE = "model_hev_prop_mpg.csv",
+      TYPE = "double",
+      UNITS = "proportion",
+      PROHIBIT = c("NA", "< 0", "> 1"),
+      ISELEMENTOF = "",
+      DESCRIPTION = item(
+        "The proportion of hybrid automobile vehicles of total vehicles",
+        "The proportion of hybrid light truck vehicles of total vehicles"
+      )
+    ),
+    item(
+      NAME = item(
+        "AutoHevMpg",
+        "LtTruckHevMpg"
+      ),
+      TABLE = "HevPropMpgYr",
+      GROUP = "Global",
+      FILE = "model_hev_prop_mpg.csv",
+      TYPE = "compound",
+      UNITS = "MI/GAL",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      DESCRIPTION = item(
+        "The efficiency of hybrid automobile vehicles when operating on gasoline",
+        "The efficiency of hybrid light truck vehicles when operating on gasonline"
+      )
+    ),
+    item(
+      NAME = "ModelYear",
+      TABLE = "EvRangePropYr",
+      GROUP = "Global",
+      FILE = "model_ev_range_prop_mpkwh.csv",
+      TYPE = "character",
+      UNITS = "YR",
+      PROHIBIT = c("NA"),
+      ISELEMENTOF = "",
+      DESCRIPTION = "Year for which data is modeled"
+    ),
+    item(
+      NAME = item(
+        "AutoRange",
+        "LtTruckRange"
+      ),
+      TABLE = "EvRangePropYr",
+      GROUP = "Global",
+      FILE = "model_ev_range_prop_mpkwh.csv",
+      TYPE = "distance",
+      UNITS = "MI",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      DESCRIPTION = item(
+        "The range of electric automobile vehicles in miles",
+        "The range of electric light truck vehicles in miles"
+      )
+    ),
+    item(
+      NAME = item(
+        "AutoPropEv",
+        "LtTruckPropEv"
+      ),
+      TABLE = "EvRangePropYr",
+      GROUP = "Global",
+      FILE = "model_ev_range_prop_mpkwh.csv",
+      TYPE = "double",
+      UNITS = "proportion",
+      PROHIBIT = c("NA", "< 0", "> 1"),
+      ISELEMENTOF = "",
+      DESCRIPTION = item(
+        "The proportion of electric automobile vehicles of total vehicles",
+        "The proportion of electric light truck vehicles of total vehicles"
+      )
+    ),
+    item(
+      NAME = item(
+        "AutoMpkwh",
+        "LtTruckMpkwh"
+      ),
+      TABLE = "EvRangePropYr",
+      GROUP = "Global",
+      FILE = "model_ev_range_prop_mpkwh.csv",
+      TYPE = "compound",
+      UNITS = "MI/KWH",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      DESCRIPTION = item(
+        "The efficiency of electric automobile vehicles",
+        "The efficiency of electric light truck vehicles"
       )
     )
   ),
@@ -538,6 +733,141 @@ CalculateTravelDemandSpecifications <- list(
       TYPE = "double",
       UNITS = "proportion",
       PROHIBIT = c("NA", "< 0", "> 1"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "ModelYear",
+      TABLE = "PhevRangePropYr",
+      GROUP = "Global",
+      TYPE = "character",
+      UNITS = "YR",
+      PROHIBIT = c("NA"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = item(
+        "AutoPhevRange",
+        "LtTruckPhevRange"
+      ),
+      TABLE = "PhevRangePropYr",
+      GROUP = "Global",
+      TYPE = "distance",
+      UNITS = "MI",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = item(
+        "AutoPropPhev",
+        "LtTruckPropPhev"
+      ),
+      TABLE = "PhevRangePropYr",
+      GROUP = "Global",
+      TYPE = "double",
+      UNITS = "proportion",
+      PROHIBIT = c("NA", "< 0", "> 1"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = item(
+        "AutoMpg",
+        "LtTruckMpg"
+      ),
+      TABLE = "PhevRangePropYr",
+      GROUP = "Global",
+      TYPE = "compound",
+      UNITS = "MI/GAL",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = item(
+        "AutoMpkwh",
+        "LtTruckMpkwh"
+      ),
+      TABLE = "PhevRangePropYr",
+      GROUP = "Global",
+      TYPE = "compound",
+      UNITS = "MI/KWH",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "ModelYear",
+      TABLE = "HevPropMpgYr",
+      GROUP = "Global",
+      TYPE = "character",
+      UNITS = "YR",
+      PROHIBIT = c("NA"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = item(
+        "AutoPropHev",
+        "LtTruckPropHev"
+      ),
+      TABLE = "HevPropMpgYr",
+      GROUP = "Global",
+      TYPE = "double",
+      UNITS = "proportion",
+      PROHIBIT = c("NA", "< 0", "> 1"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = item(
+        "AutoHevMpg",
+        "LtTruckHevMpg"
+      ),
+      TABLE = "HevPropMpgYr",
+      GROUP = "Global",
+      TYPE = "compound",
+      UNITS = "MI/GAL",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "ModelYear",
+      TABLE = "EvRangePropYr",
+      GROUP = "Global",
+      TYPE = "character",
+      UNITS = "YR",
+      PROHIBIT = c("NA"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = item(
+        "AutoRange",
+        "LtTruckRange"
+      ),
+      TABLE = "EvRangePropYr",
+      GROUP = "Global",
+      TYPE = "distance",
+      UNITS = "MI",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = item(
+        "AutoPropEv",
+        "LtTruckPropEv"
+      ),
+      TABLE = "EvRangePropYr",
+      GROUP = "Global",
+      TYPE = "double",
+      UNITS = "proportion",
+      PROHIBIT = c("NA", "< 0", "> 1"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = item(
+        "AutoMpkwh",
+        "LtTruckMpkwh"
+      ),
+      TABLE = "EvRangePropYr",
+      GROUP = "Global",
+      TYPE = "compound",
+      UNITS = "MI/KWH",
+      PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = ""
     )
   ),
@@ -1757,11 +2087,33 @@ CalculateTravelDemand <- function(L) {
 
   HasVeh_Hh <- Hh_df$Vehicles > 0
 
+  PhevRangePropYr_df <- data.frame(L$Global$PhevRangePropYr)
+  rownames(PhevRangePropYr_df) <- as.character(PhevRangePropYr_df$ModelYear)
+  PhevRangePropYr_df$ModelYear <- NULL
+  RangeNames_ <- grep("Range", colnames(PhevRangePropYr_df), value = TRUE)
+  PhevRangePropYr_df[,RangeNames_] <- apply(PhevRangePropYr_df[,RangeNames_], 2, as.integer)
+  PhevRangePropYr_df <- PhevRangePropYr_df[,  c("AutoPhevRange" , "AutoPropPhev", "AutoMpkwh",
+                                                "AutoMpg", "LtTruckPhevRange", "LtTruckPropPhev",
+                                                "LtTruckMpkwh", "LtTruckMpg") ]
+
+  HevPropMpgYr_df <- data.frame(L$Global$HevPropMpgYr)
+  rownames(HevPropMpgYr_df) <- as.character(HevPropMpgYr_df$ModelYear)
+  HevPropMpgYr_df$ModelYear <- NULL
+  HevPropMpgYr_df <- HevPropMpgYr_df[, c("AutoPropHev", "AutoHevMpg", "LtTruckPropHev", "LtTruckHevMpg")]
+
+  EvRangePropYr_df <- data.frame(L$Global$EvRangePropYr)
+  rownames(EvRangePropYr_df) <- as.character(EvRangePropYr_df$ModelYear)
+  EvRangePropYr_df$ModelYear <- NULL
+  RangeNames_ <- grep("Range", colnames(EvRangePropYr_df), value = TRUE)
+  EvRangePropYr_df[,RangeNames_] <- apply(EvRangePropYr_df[,RangeNames_], 2, as.integer)
+  EvRangePropYr_df <- EvRangePropYr_df[, c("AutoRange", "AutoPropEv", "AutoMpkwh", "LtTruckRange",
+                                           "LtTruckPropEv", "LtTruckMpkwh")]
+
   PhevResults_ <- assignPHEV(Hh_df = Hh_df[HasVeh_Hh, HhVar_],
                              Veh_df = Vehicles_df[, VehVar_],
-                             PhevRangePropYr_df = PhevModelData_ls$PhevRangePropYr_df,
+                             PhevRangePropYr_df = PhevRangePropYr_df,
                              PhevPropModel_ls = PhevModelData_ls$PhevMilePropModel_ls,
-                             HevMpgPropYr_df = PhevModelData_ls$HevMpgPropYr_df,
+                             HevMpgPropYr_df = HevPropMpgYr_df,
                              OptimProp = PhevModelData_ls$OptimPropYr_ar[L$G$Year],
                              CurrYear = L$G$Year)
 
@@ -1810,7 +2162,7 @@ CalculateTravelDemand <- function(L) {
 
   EvResults_ <- assignEv(Hh_df = Hh_df[HasVeh_Hh & HasDvmt_Hh, HhVar_],
                          Veh_df = Vehicles_df[, VehVar_],
-                         EvRangePropYr_df = EvModelData_ls$EvRangePropYr_df,
+                         EvRangePropYr_df = EvRangePropYr_df,
                          CurrYear = L$G$Year)
 
   Vehicles_df$EvDvmt <- EvResults_$EvDvmt_

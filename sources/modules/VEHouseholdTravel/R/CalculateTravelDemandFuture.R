@@ -29,9 +29,6 @@ load("./data/DvmtLmModels_ls.rda")
 #Load PHEV/HEV model data
 load("./data/PhevModelData_ls.rda")
 
-#Load EV model data
-load("./data/EvModelData_ls.rda")
-
 #Load default values for Travel Demand module
 load("./data/TravelDemandDefaults_ls.rda")
 
@@ -362,6 +359,141 @@ CalculateTravelDemandFutureSpecifications <- list(
       TYPE = "double",
       UNITS = "proportion",
       PROHIBIT = c("NA", "< 0", "> 1"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "ModelYear",
+      TABLE = "PhevRangePropYr",
+      GROUP = "Global",
+      TYPE = "character",
+      UNITS = "YR",
+      PROHIBIT = c("NA"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = item(
+        "AutoPhevRange",
+        "LtTruckPhevRange"
+      ),
+      TABLE = "PhevRangePropYr",
+      GROUP = "Global",
+      TYPE = "distance",
+      UNITS = "MI",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = item(
+        "AutoPropPhev",
+        "LtTruckPropPhev"
+      ),
+      TABLE = "PhevRangePropYr",
+      GROUP = "Global",
+      TYPE = "double",
+      UNITS = "proportion",
+      PROHIBIT = c("NA", "< 0", "> 1"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = item(
+        "AutoMpg",
+        "LtTruckMpg"
+      ),
+      TABLE = "PhevRangePropYr",
+      GROUP = "Global",
+      TYPE = "compound",
+      UNITS = "MI/GAL",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = item(
+        "AutoMpkwh",
+        "LtTruckMpkwh"
+      ),
+      TABLE = "PhevRangePropYr",
+      GROUP = "Global",
+      TYPE = "compound",
+      UNITS = "MI/KWH",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "ModelYear",
+      TABLE = "HevPropMpgYr",
+      GROUP = "Global",
+      TYPE = "character",
+      UNITS = "YR",
+      PROHIBIT = c("NA"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = item(
+        "AutoPropHev",
+        "LtTruckPropHev"
+      ),
+      TABLE = "HevPropMpgYr",
+      GROUP = "Global",
+      TYPE = "double",
+      UNITS = "proportion",
+      PROHIBIT = c("NA", "< 0", "> 1"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = item(
+        "AutoHevMpg",
+        "LtTruckHevMpg"
+      ),
+      TABLE = "HevPropMpgYr",
+      GROUP = "Global",
+      TYPE = "compound",
+      UNITS = "MI/GAL",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "ModelYear",
+      TABLE = "EvRangePropYr",
+      GROUP = "Global",
+      TYPE = "character",
+      UNITS = "YR",
+      PROHIBIT = c("NA"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = item(
+        "AutoRange",
+        "LtTruckRange"
+      ),
+      TABLE = "EvRangePropYr",
+      GROUP = "Global",
+      TYPE = "distance",
+      UNITS = "MI",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = item(
+        "AutoPropEv",
+        "LtTruckPropEv"
+      ),
+      TABLE = "EvRangePropYr",
+      GROUP = "Global",
+      TYPE = "double",
+      UNITS = "proportion",
+      PROHIBIT = c("NA", "< 0", "> 1"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = item(
+        "AutoMpkwh",
+        "LtTruckMpkwh"
+      ),
+      TABLE = "EvRangePropYr",
+      GROUP = "Global",
+      TYPE = "compound",
+      UNITS = "MI/KWH",
+      PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = ""
     )
   ),
