@@ -753,7 +753,7 @@ calculateAdjAveDvmt <- function( Hh_df, Model_ls, Type, BudgetProp, AnnVmtInflat
   Hh_df$AveDvmt <- AveDvmtHh
   # Calculate base and future average costs per mile
   BaseCostPerMiHh <- Hh_df$BaseCostPerMile
-  FutrCostPerMiHh <- Hh_df$BaseCostPerMile
+  FutrCostPerMiHh <- Hh_df$FutureCostPerMile
   # Calculate household budget
   BudgetHh <- Hh_df$Income * BudgetProp / AnnVmtInflator
   # Adjust budget with insurance adjustment if that data is provided
