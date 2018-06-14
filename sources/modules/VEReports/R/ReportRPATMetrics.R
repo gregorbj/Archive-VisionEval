@@ -1188,8 +1188,8 @@ ReportRPATMetrics <- function(L) {
 
   #Load the existing and future transportation supply
   #--------------------------------------------------
-  FwyLnMiCap_Ma <- L$Year$Marea$FwyLaneMiPC * 1000
-  ArtLnMiCap_Ma <- L$Year$Marea$ArtLaneMiPC * 1000
+  FwyLnMiCap_Ma <- L$Year$Marea$FwyLaneMiPC
+  ArtLnMiCap_Ma <- L$Year$Marea$ArtLaneMiPC
   #Future supply summaries - transit
   BusRevMi_Ma <- L$Year$Marea$BusRevMi
   RailRevMi_Ma <- L$Year$Marea$RailRevMi
