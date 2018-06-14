@@ -608,7 +608,7 @@ ReportRPATMetricsSpecifications <- list(
       TABLE = "Bzone",
       GROUP = "Year",
       TYPE = "compound",
-      UNITS = "USD/DAY",
+      UNITS = "USD/YR",
       PROHIBIT = c("NA", "< 0"),
       SIZE = 0,
       ISELEMENTOF = "",
