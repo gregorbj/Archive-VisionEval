@@ -126,22 +126,6 @@
     "ISELEMENTOF" : ""
   },
   {
-    "NAME" : "WorkVmtProp",
-    "VALUE": "0.25",
-    "TYPE" : "double",
-    "UNITS" : "proportion",
-    "PROHIBIT" : "c('NA', '< 0', '> 1')",
-    "ISELEMENTOF" : ""
-  },
-  {
-    "NAME" : "HhDvmtToRoadDvmt",
-    "VALUE": "0.95",
-    "TYPE" : "double",
-    "UNITS" : "proportion",
-    "PROHIBIT" : "c('NA', '< 0', '> 1')",
-    "ISELEMENTOF" : ""
-  },
-  {
     "NAME" : "VmtCharge",
     "VALUE": "0.05",
     "TYPE" : "compound",
