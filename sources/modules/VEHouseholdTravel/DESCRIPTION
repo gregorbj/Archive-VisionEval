@@ -1,7 +1,7 @@
 Package: VEHouseholdTravel
 Type: Package
 Title: Calculate Household Walk, Bike, and Transit Trips
-Version: 0.9.0
+Version: 0.9.1
 Date: 4/9/18
 Author: Brian Gregor [aut, cre], Aditya Gore <aditya.gore@rsginc.com> [cre]
 Maintainer: Brian Gregor <gregorb@or-analytics.com>, Aditya Gore <aditya.gore@rsginc.com>
