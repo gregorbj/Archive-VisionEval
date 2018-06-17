@@ -1777,7 +1777,7 @@ AssignVehicleFeatures <- function(L) {
   HhHasVeh <- Hh_df$Hhvehcnt > 0
   Hh_df$VehMpg <- NA
   ModelVar_ <- c( "VehType", "VehAge", "Hhvehcnt" )
-  VehMpgYr <- cbind(Year = as.integer(L$Global$Vehicles$ModelYear), Auto = L$Global$Vehicles$AutoMpg, LtTruck = L$Global$Vehicles$LtTruckMpg)
+  VehMpgYr <- cbind(Year = ceiling(L$Global$Vehicles$ModelYear), Auto = L$Global$Vehicles$AutoMpg, LtTruck = L$Global$Vehicles$LtTruckMpg)
   Hh_df$VehMpg[HhHasVeh] <- assignFuelEconomy( Hh_df[HhHasVeh, ModelVar_],
                                                      VehMpgYr = VehMpgYr, CurrentYear = L$G$Year)
   rm( ModelVar_ )
