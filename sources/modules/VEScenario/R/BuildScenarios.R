@@ -1,5 +1,5 @@
 #=================
-#BuildScenario.R
+#BuildScenarios.R
 #=================
 # This module builds scenarios from the combinations scenario input levels.
 
@@ -43,14 +43,46 @@ BuildScenariosSpecifications <- list(
   # Specify data to be loaded from the datastore
   Get = items(
     item(
-      NAME = "ScnearioInputPath",
+      NAME = "ScenarioInputFolder",
       TABLE = "Model",
       GROUP = "Global",
       TYPE = "character",
       UNITS = "NA",
-      SIZE = 30,
+      SIZE = 20,
       PROHIBIT = "NA",
       ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "ScenarioOutputFolder",
+      TABLE = "Model",
+      GROUP = "Global",
+      TYPE = "character",
+      UNITS = "NA",
+      SIZE = 20,
+      PROHIBIT = "NA",
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "ModelFolder",
+      TABLE = "Model",
+      GROUP = "Global",
+      TYPE = "character",
+      UNITS = "NA",
+      SIZE = 20,
+      PROHIBIT = "NA",
+      ISELEMENTOF = ""
+    )
+  ),
+  Set = items(
+    item(
+      NAME = "CompleteBuild",
+      TABLE = "Model",
+      GROUP = "Global",
+      TYPE = "integer",
+      UNITS = "NA",
+      PROHIBIT = "NA",
+      ISELEMENTOF = "",
+      DESCRIPTION = "Returns 1 if completes build"
     )
   )
 )
@@ -84,7 +116,7 @@ devtools::use_data(BuildScenariosSpecifications, overwrite = TRUE)
 #------------------------------------------------------------------
 #' Function to build scenarios.
 #'
-#' \code{BuildScenarios} calculates performance metrics.
+#' \code{BuildScenarios} builds structure to run mulitple scenarios.
 #'
 #' This function builds scenarios from scenario input levels. The folder names
 #' in the scenario input folder is used for naming scenarios. The function
@@ -100,57 +132,70 @@ BuildScenarios <- function(L){
   # Setup
   # -------------
   # Set input directory
-  ModelPath <- getwd()
-  ScenarioInputPath <- file.path(ModelPath, L$Global$Model$ScenarioInputPath)
-
-}
-
-
-
-ScenarioFiles_ar <- list.files(path = ScenarioInputPath, recursive = TRUE)
-LevelDef_ar <- dirname(ScenarioFiles_ar)
-if(any(table(LevelDef_ar)>1)){
-  stop("More than one file exis in the scenario inputs.")
-}
-LevelDef_ls <- split(LevelDef_ar, dirname(LevelDef_ar), drop = TRUE)
-ScenarioDef_df <- expand.grid(LevelDef_ls, stringsAsFactors = FALSE)
-ScenarioNames_ar <- apply(ScenarioDef_df, 1, function(x) {
-  Name <- paste(x, collapse = "/")
-  gsub("/", "", Name)
-})
-rownames(ScenarioDef_df) <- ScenarioNames_ar
-
-#Iterate through scenarios and build inputs
-dir.create(file.path(ModelPath, "scenarios"))
-commonfiles_ar <- file.path(ModelPath, c("defs", "inputs", "run_model.R"))
-for (sc_ in ScenarioNames_ar) {
-  cat(paste0(sc_, "\n"))
-  #Make scenario directory
-  ScenarioPath <- file.path(ModelPath, "scenarios", sc_)
-  dir.create(ScenarioPath)
-  #Copy common files into scenario directory
-  file.copy(commonfiles_ar, ScenarioPath, recursive = TRUE)
-  # Read model_parameters.json file to replace the content
-  ModelParameterJsonPath <- file.path(ScenarioPath, "defs", "model_parameters.json")
-  ModelParameterContent <- fromJSON(ModelParameterJsonPath)
-  #Copy each specialty file into scenario directory
-  ScenarioInputPath_ar <- file.path(ScenarioInputPath, ScenarioDef_df[sc_,])
-  for (Path in ScenarioInputPath_ar) {
-    File <- list.files(Path, full.names = TRUE)
-    # If a csv file then copy and overwrite existing file
-    # If a json file then replace the existing values with new values
-    if(grepl("\\.csv$", File)){
-      file.copy(File, file.path(ScenarioPath, "inputs"), overwrite = TRUE)
-    } else if (grepl("\\.json$", File)){
-      NewModelParameterContent <- fromJSON(File)
-      ModelParameterContent[match(NewModelParameterContent$NAME,
-                                  ModelParameterContent$NAME), "VALUE"] <-
-        NewModelParameterContent$VALUE
-      rm(NewModelParameterContent)
-    } else {
-      stop(paste0("Scenario input file not recognized: ", basename(File)))
-    }
+  RunDir <- getwd()
+  ModelPath <- file.path(RunDir, L$Global$Model$ModelFolder)
+  ScenarioInputPath <- file.path(RunDir, L$Global$Model$ScenarioInputFolder)
+  # Gather Scenario file structure and names
+  ScenarioFiles_ar <- list.files(path = ScenarioInputPath, recursive = TRUE)
+  LevelDef_ar <- dirname(ScenarioFiles_ar)
+  if(any(duplicated(LevelDef_ar))){
+    stop("More than one file exists in the scenario inputs.")
   }
-  write_json(ModelParameterContent, path = file.path(ScenarioPath, "defs", "model_parameters.json"),
-             pretty=TRUE)
+
+  # Create scenario combinations
+  LevelDef_ls <- split(LevelDef_ar, dirname(LevelDef_ar), drop = TRUE)
+  ScenarioDef_df <- expand.grid(LevelDef_ls, stringsAsFactors = FALSE)
+  ScenarioNames_ar <- apply(ScenarioDef_df, 1, function(x) {
+    Name <- paste(x, collapse = "/")
+    gsub("/", "", Name)
+  })
+  rownames(ScenarioDef_df) <- ScenarioNames_ar
+
+  #Iterate through scenarios and build inputs
+  if(dir.exists(file.path(RunDir, L$Global$Model$ScenarioOutputFolder))){
+    unlink(file.path(RunDir, L$Global$Model$ScenarioOutputFolder),
+           recursive = TRUE)
+  }
+  dir.create(file.path(RunDir, L$Global$Model$ScenarioOutputFolder))
+  commonfiles_ar <- file.path(ModelPath, c("defs", "inputs", "run_model.R"))
+  # cat("Bulding Scenarios\n")
+  for (sc_ in ScenarioNames_ar) {
+    # cat(paste0(sc_, "\n"))
+    #Make scenario directory
+    ScenarioPath <- file.path(RunDir, L$Global$Model$ScenarioOutputFolder, sc_)
+    dir.create(ScenarioPath)
+    #Copy common files into scenario directory
+    file.copy(commonfiles_ar, ScenarioPath, recursive = TRUE)
+    # Read model_parameters.json file to replace the content
+    ModelParameterJsonPath <- file.path(ScenarioPath, "defs", "model_parameters.json")
+    ModelParameterContent <- fromJSON(ModelParameterJsonPath)
+    #Copy each specialty file into scenario directory
+    ScenarioInputPath_ar <- file.path(ScenarioInputPath, ScenarioDef_df[sc_,])
+    for (Path in ScenarioInputPath_ar) {
+      File <- list.files(Path, full.names = TRUE)
+      # If a csv file then copy and overwrite existing file
+      # If a json file then replace the existing values with new values
+      if(grepl("\\.csv$", File)){
+        file.copy(File, file.path(ScenarioPath, "inputs"), overwrite = TRUE)
+      } else if (grepl("\\.json$", File)){
+        NewModelParameterContent <- fromJSON(File)
+        ModelParameterContent[match(NewModelParameterContent$NAME,
+                                    ModelParameterContent$NAME), "VALUE"] <-
+          NewModelParameterContent$VALUE
+        rm(NewModelParameterContent)
+      } else {
+        stop(paste0("Scenario input file not recognized: ", basename(File)))
+      }
+    }
+    write_json(ModelParameterContent, path = file.path(ScenarioPath, "defs", "model_parameters.json"),
+               pretty=TRUE)
+  }
+  # Clean up
+  gc()
+  #Return the results
+  #------------------
+  #Initialize output list
+  Out_ls <- initDataList()
+  Out_ls$Global$Model <- list(CompleteBuild = 1L)
+  return(Out_ls)
 }
