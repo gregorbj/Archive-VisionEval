@@ -1225,7 +1225,7 @@ ReportRPATMetrics <- function(L) {
   #-------------------------------------
   # Calculate truck fuel economy
   VehicleMpg_Yr <- data.frame(RemoveSuffix(L$Global$Vehicles, suffix = "Mpg"))
-  ModelYear <- as.character(ceiling(VehicleMpg_Yr$ModelYear))
+  ModelYear <- as.character(as.integer(VehicleMpg_Yr$ModelYear))
   VehicleMpg_Yr <- as.matrix(VehicleMpg_Yr[,c("Truck","Bus","Train","Auto","LtTruck")])
   rownames(VehicleMpg_Yr) <- ModelYear
 
