@@ -1,0 +1,23 @@
+Definition of 1-letter codes for the RPAT Sensitivity Analysis:
+B - BikesOrLightVehicles (region_light_vehicles.csv)
+	1- Base TargetProp and PropSuitable
+	2- Double TargetProp and PropSuitable
+C - Cost (model_parameters.json)
+	1- Base, no charge
+	2- 5 cents per mile
+	3- 9 cents per mile
+D - DemandManagement (region_commute_options.csv)
+	1- Base
+	2- Double all participation rates	
+	3- Double all participation rates and transit subsidy level
+L - LandUse (bzone_pop_emp_prop.csv)
+	1- Base, growth proportions same as base proportions
+	2- Half suburban population and employment growth (-20%, -15%), distribute to urban core R/E (+5%, +3.75%), urban core MU (+10%, +7.5%), and close in communities R/E (+5%, +3.75%)
+P - ParkingGrowth (marea_parking_growth.csv)
+	1- Base, existing costs and proportions paid
+	2- Increase parking fees to 20% of workforce and 20% of other
+	3- Same as 2 but double parking cost
+T - TransportationSupply (model_parameters.json)
+	1- Base, supply stays at present level
+	2- Double transit supply
+	3- Triple transit supply
