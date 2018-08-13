@@ -2199,6 +2199,7 @@ CalculateTravelDemand <- function(L) {
       Index_ <- (CI_df$County %in% Name_) &
                 (CI_df$State %in% StateCode_)
       CI_ <- CI_df[Index_,paste0("X",L$G$Year)]
+      if(length(CI_) < 1) CI_ <- NA
       if(!is.na(CI_)) break
     }
     if(is.na(CI_)) CI_ <- 0.75 # Default value

@@ -1882,6 +1882,9 @@ CalculatePolicyVmt <- function(L) {
   LtVehAdjFactor_Hh <- ( Hh_df$Dvmt - LtVehDvmt_Hh ) / Hh_df$Dvmt
   LtVehAdjFactor_Hh[ Hh_df$Dvmt == 0 ] <- 1
 
+  #Save starting Dvmt for application of adjustments to vehicles
+  PrevDvmt_Hh <- Hh_df$Dvmt
+
   # Calculate overall adjustment factor and apply to adjust DVMT
   #-------------------------------------------------------------
   TdmLtVehAdjFactor_Hh <- TdmAdjFactor_Hh * LtVehAdjFactor_Hh
@@ -1956,8 +1959,7 @@ CalculatePolicyVmt <- function(L) {
 
   # Calculate DVMT with new costs
   #==============================
-  #Save starting Dvmt for application of adjustments to vehicles
-  PrevDvmt_Hh <- Hh_df$Dvmt
+
 
   Hh_df$TranRevMiPC <- L$Year$Marea$TranRevMiPC
   Hh_df$FwyLaneMiPC <- L$Year$Marea$FwyLaneMiPC

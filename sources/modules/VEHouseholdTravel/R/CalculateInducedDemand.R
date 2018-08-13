@@ -249,6 +249,16 @@ CalculateInducedDemandSpecifications <- list(
       PROHIBIT = c("NA"),
       ISELEMENTOF = ""
     ),
+    # Household variables
+    item(
+      NAME = "HhId",
+      TABLE = "Household",
+      GROUP = "Year",
+      TYPE = "character",
+      UNITS = "ID",
+      PROHIBIT = "NA",
+      ISELEMENTOF = ""
+    ),
     item(
       NAME = "Income",
       TABLE = "Household",
@@ -273,6 +283,30 @@ CalculateInducedDemandSpecifications <- list(
     item(
       NAME = "DvmtFuture",
       TABLE = "Household",
+      GROUP = "Year",
+      TYPE = "compound",
+      UNITS = "MI/DAY",
+      NAVALUE = "",
+      PROHIBIT = "NA",
+      ISELEMENTOF = "",
+      UNLIKELY = ""
+    ),
+    # Vehicle variables
+    item(
+      NAME = items("HhIdFuture",
+                   "VehIdFuture"),
+      TABLE = "Vehicle",
+      GROUP = "Year",
+      TYPE = "character",
+      UNITS = "ID",
+      PROHIBIT = "NA",
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = items("DvmtFuture",
+                   "EvDvmtFuture",
+                   "HcDvmtFuture"),
+      TABLE = "Vehicle",
       GROUP = "Year",
       TYPE = "compound",
       UNITS = "MI/DAY",
@@ -319,6 +353,24 @@ CalculateInducedDemandSpecifications <- list(
       ISELEMENTOF = "",
       SIZE = 0,
       DESCRIPTION = "Average daily vehicle miles traveled by automobiles"
+    ),
+    # Vehicles variables
+    item(
+      NAME = item(
+        "DvmtFuture",
+        "EvDvmtFuture",
+        "HcDvmtFuture"),
+      TABLE = "Vehicle",
+      GROUP = "Year",
+      TYPE = "compound",
+      UNITS = "MI/DAY",
+      NAVALUE = -1,
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      SIZE = 0,
+      DESCRIPTION = item("Average daily vehicle miles traveled",
+                         "Average daily electric vehicle miles traveled",
+                         "Average daily ICE vehicle miles traveled")
     ),
     item(
       NAME = "Access",
@@ -557,13 +609,28 @@ CalculateInducedDemand <- function(L) {
   DvmtAdjByPt[is.na(DvmtAdjByPt)] <- 1
   DvmtAdjByPt[DvmtAdjByPt<0.01] <- 0.01
 
+  #Save starting Dvmt for application of adjustments to vehicles
+  PrevDvmt_Hh <- Hh_df$Dvmt
+
+
   #Update Dvmt
   Hh_df$DvmtPtAdj <- DvmtAdjByPt [ as.character(Hh_df$HhPlaceTypes) ]	 #need as.character else it uses factor levels to index into DvmtAdjByPt
   Hh_df$Dvmt <- Hh_df$Dvmt * Hh_df$DvmtPtAdj
 
-  #Recalculate Dvmt tabulation with adjusted Dvmt
+  #Recalculate Dvmt tabulation with adjusted Dvmt for Bzones
   DvmtByPt[L$Year$Bzone$Bzone] <- tapply( Hh_df$Dvmt, Hh_df$HhPlaceTypes, sum )[L$Year$Bzone$Bzone]
   DvmtByPt[is.na(DvmtByPt)] <- 0
+
+  # Split adjusted DVMT among vehicles
+  #===================================
+  Vehicles_df <- data.frame(L$Year$Vehicle)
+  DvmtAdjFactor_Hh <- Hh_df$Dvmt / PrevDvmt_Hh
+  names(DvmtAdjFactor_Hh) <- as.character(Hh_df$HhId)
+  Vehicles_df$Dvmt <- Vehicles_df$Dvmt * DvmtAdjFactor_Hh[as.character(Vehicles_df$HhId)]
+  Vehicles_df$EvDvmt <- Vehicles_df$EvDvmt * DvmtAdjFactor_Hh[as.character(Vehicles_df$HhId)]
+  Vehicles_df$HcDvmt <- Vehicles_df$HcDvmt * DvmtAdjFactor_Hh[as.character(Vehicles_df$HhId)]
+  rm( DvmtAdjFactor_Hh)
+  gc()
 
   #Return the results
   #------------------
@@ -572,6 +639,7 @@ CalculateInducedDemand <- function(L) {
   Out_ls$Year <- list(
     Bzone = list(),
     Household = list(),
+    Vehicle = list(),
     IncomeGroup = list(),
     Marea = list()
   )
@@ -593,6 +661,11 @@ CalculateInducedDemand <- function(L) {
     DvmtPtAdj = Hh_df$DvmtPtAdj
   )
   # Vehicle results
+  Out_ls$Year$Vehicle <-list(
+    DvmtFuture = as.numeric(Vehicles_df$Dvmt),
+    EvDvmtFuture = as.numeric(Vehicles_df$EvDvmt),
+    HcDvmtFuture = as.numeric(Vehicles_df$HcDvmt)
+  )
   Out_ls$Year$IncomeGroup <-list(
     IncomeGroup = names(EquityByIg),
     Equity = EquityByIg
