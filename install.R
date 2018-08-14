@@ -51,7 +51,8 @@ VE_modules <- c(
 	"VEHouseholdVehicles",
 	"VEPowertrainsAndFuels",
 	"VETravelPerformance",
-	"VEReports"
+	"VEReports",
+	"VEScenario"
 )
 
 #Install the required VE framework package
