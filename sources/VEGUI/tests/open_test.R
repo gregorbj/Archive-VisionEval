@@ -47,7 +47,11 @@ if(dir.exists(file.path(save_dir,paste0(name,expected))) & !createExpectedResult
     jsonlite::write_json(app$getAllValues(), path = file.path(save_dir,paste0(name,current),"001.json")) # Take all the values displayed in the browser
   }
 } else {
-  dir.create(file.path(save_dir,paste0(name,expected)))
+  if(dir.exists(file.path(save_dir, paste0(name, expected)))){
+    unlink(file.path(save_dir, paste0(name, expected), "*"))
+  } else {
+    dir.create(file.path(save_dir,paste0(name,expected)))
+  }
   app$takeScreenshot(file = file.path(save_dir,paste0(name,expected),"001.png")) # Take the screenshot of the VEGUI
   jsonlite::write_json(app$getAllValues(), path = file.path(save_dir,paste0(name,expected),"001.json"),pretty=TRUE) # Take all the values displayed in the browser
 } # End check for directory
