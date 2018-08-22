@@ -318,8 +318,7 @@ ScenarioResults <- function(L){
   # Write the output to JSON file
   JSON <- toJSON(ScenTab_dt)
   JSON <- paste("var data = ", JSON, ";", sep="")
-  File <- file(file.path(ModelPath, L$Global$Model$ScenarioOutputFolder,
-                         "metro-measures.js"), "w")
+  File <- file(file.path(ModelPath, L$Global$Model$ScenarioOutputFolder, "verpat.js"), "w")
   writeLines(JSON, con=File)
   close(File)
 

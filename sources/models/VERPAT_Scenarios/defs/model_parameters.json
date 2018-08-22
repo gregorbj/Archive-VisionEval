@@ -28,7 +28,7 @@
   },
   {
     "NAME" : "NWorkers",
-    "VALUE": "1",
+    "VALUE": "2",
     "TYPE" : "integer",
     "UNITS" : "NA",
     "PROHIBIT" : "c('NA', '< 0')",

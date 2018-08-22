@@ -134,26 +134,18 @@ ViewResults <- function(L){
   # -------------
   # Set input directory
   ModelPath <- getwd()
-  JsonFile <- list.files(file.path(ModelPath,
-                                          L$Global$Model$ScenarioOutputFolder),
-                                recursive = FALSE,
-                                pattern = "\\.js",
-                         full.names = TRUE)
+  JsonFile <- list.files(file.path(ModelPath, L$Global$Model$ScenarioOutputFolder), recursive = FALSE, pattern = "\\verpat.js", full.names = TRUE)
   if(dir.exists("Visualizer")){
     unlink("Visualizer", recursive = TRUE, force = TRUE)
   }
   dir.create("Visualizer")
   # Load html files
   if("VEScenario" %in% rownames(installed.packages())){
-    HtmlFilePath <- system.file("extdata",
-                                "htmlpage.tar",
-                                package = "VEScenario")
-    untar(HtmlFilePath,
-          exdir = file.path(ModelPath, "Visualizer"))
+    HtmlFilePath <- system.file("extdata", "VEScenarioViewer.tar", package = "VEScenario")
+    untar(HtmlFilePath, exdir = file.path(ModelPath, "Visualizer"))
   }
-  file.copy(JsonFile, file.path(ModelPath, "Visualizer", "data"),
-            overwrite = TRUE)
-  browseURL("Visualizer/index.html")
+  file.copy(JsonFile, file.path(ModelPath, "Visualizer", "data"), overwrite = TRUE)
+  browseURL(paste0(ModelPath, "/Visualizer/verpat.html"))
   # Clean up
   gc()
   #Return the results
