@@ -1,7 +1,17 @@
 # VERPAT Scenarios 
 VisionEval RPAT Scenario Runs
 
-## Definition of 1-letter codes for sensitivity analysis
+## Run the Example
+  - setwd("C:/projects/development/VisionEval/sources/models/VERPAT_Scenarios")
+  - source("run_model.R")
+
+## Running Multiple Scenarios
+  - The scenario_inputs folder contains the multiple scenarios (see below) to build and run
+  - The scenarios defined by B * C * D * L * P * T equal 324 scenarios 
+  - To test, try just 2 scenarios from B + 1 scenario from each other letter (i.e. 2 scenarios)
+  - Set defs/model_parameters.json *NWorkers* to number of runs to run in parallel
+  
+## Scenario 1-Letter Codes
   - B - BikesOrLightVehicles (region_light_vehicles.csv)
     - 1 - Base TargetProp and PropSuitable
     - 2 - Double TargetProp and PropSuitable
