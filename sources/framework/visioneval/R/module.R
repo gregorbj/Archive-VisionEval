@@ -1428,3 +1428,485 @@ getRegisteredGetSpecs <-
     #Return data frame of identified Get specifications
     Specs_df
   }
+
+
+#DOCUMENT A MODULE
+#=================
+#' Produces markdown documentation for a module
+#'
+#' \code{documentModule} a visioneval framework module developer function
+#' that creates a vignettes directory if one does not exist and produces
+#' module documentation in markdown format which is saved in the vignettes
+#' directory.
+#'
+#' This function produces documentation for a module in markdown format. A
+#' 'vignettes' directory is created if it does not exist and the markdown file
+#' and any associated resources such as image files are saved in that directory.
+#' The function is meant to be called within and at the end of the module
+#' script. The documentation is created from a commented block within the
+#' module script which is enclosed by the opening tag, <doc>, and the closing
+#' tag, </doc>. (Note, these tags must be commented along with all the other
+#' text in the block). This commented block may also include tags which identify
+#' resources to include within the documentation. These tags identify the
+#' type of resource and the name of the resource which is located in the 'data'
+#' directory. A colon (:) is used to separate the resource type and resource
+#' name identifiers. For example:
+#' <txt:DvmtModel_ls$EstimationStats$NonMetroZeroDvmt_GLM$Summary>
+#' is a tag which will insert text which is located in a component of the
+#' DvmtModel_ls list that is saved as an rdata file in the 'data' directory
+#' (i.e. data/DvmtModel_ls.rda). The following 3 resource types are recognized:
+#' * txt - a vector of strings which are inserted as lines of text in a code block
+#' * fig - a png file which is inserted as an image
+#' * tab - a matrix or data frame which is inserted as a table
+#' The function also reads in the module specifications and creates
+#' tables that document user input files, data the module gets from the
+#' datastore, and the data the module produces that is saved in the datastore.
+#' This function is intended to be called in the R script which defines the
+#' module. It is placed near the end of the script (after the portions of the
+#' script which estimate module parameters and define the module specifications)
+#' so that it is run when the package is built. It may not properly in other
+#' contexts.
+#'
+#' @param ModuleName A string identifying the name of the module
+#' (e.g. 'CalculateHouseholdDvmt')
+#' @return None. The function has the side effects of creating a 'vignettes'
+#' directory if one does not exist, copying identified 'fig' resources to the
+#' 'vignettes' directory, and saving the markdown documentation file to the
+#' 'vignettes' directory. The markdown file is named with the module name and
+#' has a 'md' suffix.
+#' @export
+documentModule <- function(ModuleName){
+
+  #Make vignettes directory if doesn't exist
+  #-----------------------------------------
+  if(!file.exists("vignettes")) dir.create("vignettes")
+
+  #Define function to trim strings
+  #-------------------------------
+  trimStr <-
+    function(String, Delimiters = NULL, Indices = NULL, Characters = NULL) {
+      Chars_ <- unlist(strsplit(String, ""))
+      if (!is.null(Delimiters)) {
+        Start <- which(Chars_ == Delimiters[1]) + 1
+        End <- which(Chars_ == Delimiters[2]) - 1
+        Result <- paste(Chars_[Start:End], collapse = "")
+      }
+      if (!is.null(Indices)) {
+        Result <- paste(Chars_[-Indices], collapse = "")
+      }
+      if (!is.null(Characters)) {
+        Result <- paste(Chars_[!(Chars_ %in% Characters)], collapse = "")
+      }
+      Result
+    }
+
+  #Define function to split documentation into list
+  #------------------------------------------------
+  splitDocs <-
+    function(Docs_, Idx_) {
+      Starts_ <- c(1, Idx_ + 1)
+      Ends_ <- c(Idx_ - 1, length(Docs_))
+      apply(cbind(Starts_, Ends_), 1, function(x) Docs_[x[1]:x[2]])
+    }
+
+  #Define function to process documentation tag
+  #--------------------------------------------
+  #Returns list identifying documentation type and reference
+  processDocTag <- function(DocTag) {
+    DocTag <- trimStr(DocTag, Delimiters = c("<", ">"))
+    DocTagParts_ <- unlist(strsplit(DocTag, ":"))
+    if (length(DocTagParts_) != 2) {
+      DocTag_ <- c(Type = "none", Reference = "none")
+    } else {
+      DocTag_ <- DocTagParts_
+      names(DocTag_) <- c("Type", "Reference")
+      DocTag_["Type"] <- tolower(DocTag_["Type"])
+      if (!(DocTag_["Type"] %in% c("txt", "tab", "fig"))) {
+        DocTag_["Type"] <- "none"
+      }
+    }
+    DocTag_
+  }
+
+  #Define function to insert Rmarkdown for 'txt' tags
+  #--------------------------------------------------
+  insertTxtMarkdown <- function(Reference) {
+    Object <- unlist(strsplit(Reference, "\\$"))[1]
+    File <- paste0("data/", Object, ".rda")
+    if (file.exists(File)) {
+      load(File)
+      if (!is.null(eval(parse(text = Reference)))) {
+        Markdown_ <- c(
+          "```",
+          eval(parse(text = Reference)),
+          "```"
+        )
+        rm(list = Object)
+      } else {
+        return("Error in module documentation tag reference")
+      }
+    } else {
+      return("Error in module documentation tag reference")
+    }
+    Markdown_
+  }
+
+  #Define function to insert Rmarkdown for 'fig' tags
+  #--------------------------------------------------
+  insertFigMarkdown <- function(Reference) {
+    FromFile <- paste0("data/", Reference)
+    ToFile <- gsub("data", "vignettes", FromFile)
+    if (file.exists(FromFile)) {
+      file.copy(from = FromFile, to = ToFile)
+      Markdown_ <- paste0("![", Reference, "](", Reference, ")")
+    } else {
+      return("Error in module documentation tag reference")
+    }
+    Markdown_
+  }
+
+  #Define function to insert Rmarkdown for 'tab' tags
+  #--------------------------------------------------
+  insertTabMarkdown <- function(Reference) {
+    Object <- unlist(strsplit(Reference, "\\$"))[1]
+    File <- paste0("data/", Object, ".rda")
+    if (file.exists(File)) {
+      load(File)
+      if (!is.null(eval(parse(text = Reference)))) {
+        Table_df <- eval(parse(text = Reference))
+        ColNames <- colnames(Table_df)
+        Markdown_ <- c(
+          "",
+          kable(
+            eval(Table_df),
+            format = "markdown",
+            col.names = ColNames)
+        )
+        rm(list = Object, Table_df, ColNames)
+      } else {
+        return("Error in module documentation tag reference")
+      }
+    } else {
+      return("Error in module documentation tag reference")
+    }
+    Markdown_
+  }
+
+  #Locate documentation portion of script and strip off leading comments
+  #---------------------------------------------------------------------
+  FilePath <- paste0("R/", ModuleName, ".R")
+  Text_ <- readLines(FilePath)
+  DocStart <- grep("#<doc>", Text_) + 1
+  DocEnd <- grep("#</doc>", Text_) - 1
+  Docs_ <-
+    unlist(lapply(Text_[DocStart:DocEnd], function(x) trimStr(x, Indices = 1)))
+
+  #Define knitr setup code for formatting statistics documentation
+  #---------------------------------------------------------------
+  KnitrSetup_ <- c(
+    "```{r setup, include=FALSE}",
+    "knitr::opts_chunk$set(echo = TRUE)",
+    "```"
+  )
+
+  #Insert knitr code for inserting documentation tag information
+  #-------------------------------------------------------------
+  #Locate statistics documentation tags
+  TagIdx_ <- grep("<", Docs_)
+  #Split documentation into list of components before and after tags
+  Docs_ls <- splitDocs(Docs_, TagIdx_)
+  #Initialize new list into which knitr-processed tags will be inserted
+  RevDocs_ls <- list(
+    list(KnitrSetup_),
+    Docs_ls[1]
+  )
+  #Iterate through tags and insert knitr-processed tags
+  for (n in 1:length(TagIdx_)) {
+    Idx <- TagIdx_[n]
+    DocTag_ <- processDocTag(Docs_[Idx])
+    if (DocTag_["Type"] == "none") {
+      Markdown_ <- "Error in module documentation tag"
+    }
+    if (DocTag_["Type"] == "txt") {
+      Markdown_ <- insertTxtMarkdown(DocTag_["Reference"])
+    }
+    if (DocTag_["Type"] == "fig") {
+      Markdown_ <- insertFigMarkdown(DocTag_["Reference"])
+    }
+    if (DocTag_["Type"] == "tab") {
+      Markdown_ <- insertTabMarkdown(DocTag_["Reference"])
+    }
+    RevDocs_ls <- c(
+      RevDocs_ls,
+      list(Markdown_),
+      Docs_ls[n + 1]
+    )
+  }
+
+  #Load module specifications
+  #--------------------------
+  #Define function to process specifications
+  processModuleSpecs <- function(Spec_ls) {
+    #Define a function to process a component of a specifications list
+    processComponent <- function(Component_ls, ComponentName) {
+      Result_ls <- list()
+      for (i in 1:length(Component_ls)) {
+        Temp_ls <- Component_ls[[i]]
+        Result_ls <- c(Result_ls, expandSpec(Temp_ls, ComponentName))
+      }
+      Result_ls
+    }
+    #Process the list components and return the results
+    Out_ls <- list()
+    Out_ls$RunBy <- Spec_ls$RunBy
+    if (!is.null(Spec_ls$NewInpTable)) {
+      Out_ls$NewInpTable <- Spec_ls$NewInpTable
+    }
+    if (!is.null(Spec_ls$NewSetTable)) {
+      Out_ls$NewSetTable <- Spec_ls$NewSetTable
+    }
+    if (!is.null(Spec_ls$Inp)) {
+      FilteredInpSpec_ls <- doProcessInpSpec(Spec_ls$Inp)
+      if (length(FilteredInpSpec_ls) > 0) {
+        Out_ls$Inp <- processComponent(FilteredInpSpec_ls, "Inp")
+      }
+    }
+    if (!is.null(Spec_ls$Get)) {
+      Out_ls$Get <- processComponent(Spec_ls$Get, "Get")
+    }
+    if (!is.null(Spec_ls$Set)) {
+      Out_ls$Set <- processComponent(Spec_ls$Set, "Set")
+    }
+    if (!is.null(Spec_ls$Call)) {
+      Out_ls$Call <- Spec_ls$Call
+    }
+    Out_ls
+  }
+  #Define a function to load the specifications
+  loadSpecs <- function(ModuleName) {
+    ModuleSpecs <- paste0(ModuleName, "Specifications")
+    ModuleSpecsFile <- paste0("data/", ModuleSpecs, ".rda")
+    load(ModuleSpecsFile)
+    eval(parse(text = ModuleSpecs))
+  }
+  #Define function to creates a data frame from specifications Inp, Get, or Set
+  makeSpecsTable <- function(ModuleName, Component) {
+    Specs_ls <- processModuleSpecs(loadSpecs(ModuleName))[[Component]]
+    Specs_ls <- lapply(Specs_ls, function(x) {
+      data.frame(lapply(x, function(y) {
+        if (length(y) == 1) {
+          y
+        } else {
+          paste(y, collapse = ", ")
+        }
+      }))
+    })
+    do.call(rbind, Specs_ls)
+  }
+  #Define function to break long strings into lines
+  wordWrap <- function(WordString, MaxLength) {
+    Words_ls <- list(
+      "",
+      unlist(strsplit(WordString, " "))
+    )
+    #Define recursive function to peel off first words from string
+    getFirstWords <- function(Words_ls) {
+      if (length(Words_ls[[2]]) == 0) {
+        return(Words_ls[[1]][-1])
+      } else {
+        RemWords_ <- Words_ls[[2]]
+        NumChar_ <- cumsum(nchar(RemWords_))
+        NumChar_ <- NumChar_ + 1
+        IsFirst_ <- NumChar_ < MaxLength
+        AddString <-paste(RemWords_[IsFirst_], collapse = " ")
+        RemWords_ <- RemWords_[!IsFirst_]
+        getFirstWords(list(
+          c(Words_ls[[1]], AddString),
+          RemWords_
+        ))
+      }
+    }
+    paste(getFirstWords(Words_ls), collapse = "<br>")
+  }
+
+  #Insert documentation of user input files
+  #----------------------------------------
+  #Make a table of Inp specifications
+  InpSpecs_df <- makeSpecsTable(ModuleName, "Inp")
+  #Make markdown text
+  if (!is.null(InpSpecs_df)) {
+    InpMarkdown_ <- c(
+      "",
+      "## User Inputs",
+      "The following table(s) document each input file that must be provided in order for the module to run correctly. User input files are comma-separated valued (csv) formatted text files. Each row in the table(s) describes a field (column) in the input file. The table names and their meanings are as follows:",
+      "* NAME - The field (column) name in the input file. Note that if the 'TYPE' is 'currency' the field name must be followed by a period and the year that the currency is denominated in. For example if the NAME is 'HHIncomePC' (household per capita income) and the input values are in 2010 dollars, the field name in the file must be 'HHIncomePC.2010'. The framework uses the embedded date information to convert the currency into base year currency amounts. The user may also embed a magnitude indicator if inputs are in thousand, millions, etc. The VisionEval model system design and users guide should be consulted on how to do that.",
+      "* TYPE - The data type. The framework uses the type to check units and inputs. The user can generally ignore this, but it is important to know whether the 'TYPE' is 'currency'",
+      "* UNITS - The units that input values need to represent. Some data types have defined units that are represented as abbreviations or combinations of abbreviations. For example 'MI/HR' means miles per hour. Many of these abbreviations are self evident, but the VisionEval model system design and users guide should be consulted.",
+      "* PROHIBIT - Values that are prohibited. Values may not meet any of the listed conditions.",
+      "* ISELEMENTOF - Categorical values that are permitted. Value must be one of the listed values.",
+      "* UNLIKELY - Values that are unlikely. Values that meet any of the listed conditions are permitted but a warning message will be given when the input data are processed.",
+      "* DESCRIPTION - A description of the data.",
+      ""
+    )
+    InpSpecs_ls <- split(InpSpecs_df, InpSpecs_df$FILE)
+    FileNames_ <- names(InpSpecs_ls)
+    for (fn in FileNames_) {
+      InpMarkdown_ <- c(
+        InpMarkdown_,
+        paste("###", fn)
+      )
+      ColNames_ <-
+        c("NAME", "TYPE", "UNITS", "PROHIBIT", "ISELEMENTOF", "UNLIKELY", "DESCRIPTION")
+      SpecsTable_df <- InpSpecs_ls[[fn]][, ColNames_]
+      # SpecsTable_df$DESCRIPTION <-
+      #   unname(sapply(as.character(SpecsTable_df$DESCRIPTION), function(x)
+      #   {wordWrap(x, 40)}))
+      Geo <- as.character(unique(InpSpecs_ls[[fn]]$TABLE))
+      HasGeo <- Geo %in% c("Marea", "Azone", "Bzone", "Czone")
+      Year <- as.character(unique(InpSpecs_ls[[fn]]$GROUP))
+      if (HasGeo) {
+        if (Year == "Year") {
+          GeoYearDescription <- wordWrap(paste(
+            "Must contain a record for each", Geo, "and model run year."
+          ), 40)
+        }
+        if (Year == "BaseYear") {
+          GeoYearDescription <- wordWrap(paste(
+            "Must contain a record for each", Geo, "for the base year only."
+          ), 40)
+        }
+        if (Year == "Global") {
+          GeoYearDescription <- wordWrap(paste(
+            "Must contain a record for each", Geo, "which is applied to all years."
+          ), 40)
+        }
+      } else {
+        GeoYearDescription <- wordWrap(paste(
+          "Must contain a record for each model run year"
+        ), 40)
+      }
+      if (Year == "Year") {
+        Year_df <- data.frame(
+          NAME = "Year",
+          UNITS = "",
+          PROHIBIT = "",
+          ISELEMENTOF = "",
+          UNLIKELY = "",
+          DESCRIPTION = GeoYearDescription
+        )
+        SpecsTable_df <- rbind(Year_df, SpecsTable_df)
+      }
+      if (HasGeo) {
+        Geo_df <- data.frame(
+          NAME = "Geo",
+          UNITS = "",
+          PROHIBIT = "",
+          ISELEMENTOF = paste0(Geo, "s"),
+          UNLIKELY = "",
+          DESCRIPTION = GeoYearDescription
+        )
+      }
+      InpMarkdown_ <- c(
+        InpMarkdown_,
+        kable(rbind(Geo_df, SpecsTable_df))
+      )
+    }
+  } else {
+    InpMarkdown_ <- c(
+      "",
+      "## User Inputs",
+      "This module has no user input requirements."
+    )
+  }
+  #Add the markdown text to the documentation list
+  RevDocs_ls <- c(
+    RevDocs_ls,
+    list(InpMarkdown_)
+  )
+
+  #Insert documentation of module inputs
+  #-------------------------------------
+  #Make a table of Get specifications
+  GetSpecs_df <- makeSpecsTable(ModuleName, "Get")
+  #Make markdown text
+  if (!is.null(GetSpecs_df)) {
+    GetMarkdown_ <- c(
+      "",
+      "## Datasets Used by the Module",
+      "The following table documents each dataset that is retrieved from the datastore and used by the module. Each row in the table describes a dataset. All the datasets must be present in the datastore. One or more of these datasets may be entered into the datastore from the user input files. The table names and their meanings are as follows:",
+      "* NAME - The dataset name.",
+      "* TABLE - The table in the datastore that the data is retrieved from.",
+      "* GROUP - The group in the datastore where the table is located. Note that the datastore has a group named 'Global' and groups for every model run year. For example, if the model run years are 2010 and 2050, then the datastore will have a group named '2010' and a group named '2050'. If the value for 'GROUP' is 'Year', then the dataset will exist in each model run year group. If the value for 'GROUP' is 'BaseYear' then the dataset will only exist in the base year group (e.g. '2010'). If the value for 'GROUP' is 'Global' then the dataset will only exist in the 'Global' group.",
+      "* TYPE - The data type. The framework uses the type to check units and inputs. Refer to the model system design and users guide for information on allowed types.",
+      "* UNITS - The units that input values need to represent. Some data types have defined units that are represented as abbreviations or combinations of abbreviations. For example 'MI/HR' means miles per hour. Many of these abbreviations are self evident, but the VisionEval model system design and users guide should be consulted.",
+      "* PROHIBIT - Values that are prohibited. Values in the datastore do not meet any of the listed conditions.",
+      "* ISELEMENTOF - Categorical values that are permitted. Values in the datastore are one or more of the listed values.",
+      ""
+    )
+    ColNames_ <-
+      c("NAME", "TABLE", "GROUP", "TYPE", "UNITS", "PROHIBIT", "ISELEMENTOF")
+    SpecsTable_df <- GetSpecs_df[, ColNames_]
+    GetMarkdown_ <- c(
+      GetMarkdown_,
+      kable(SpecsTable_df)
+    )
+  } else {
+    GetMarkdown_ <- c(
+      "",
+      "## Datasets Used by the Module",
+      "This module uses no datasets that are in the datastore."
+    )
+  }
+  #Add the markdown text to the documentation list
+  RevDocs_ls <- c(
+    RevDocs_ls,
+    list(GetMarkdown_)
+  )
+
+  #Insert documentation of module outputs
+  #--------------------------------------
+  #Make a table of Set specifications
+  SetSpecs_df <- makeSpecsTable(ModuleName, "Set")
+  #Make markdown text
+  if (!is.null(SetSpecs_df)) {
+    SetMarkdown_ <- c(
+      "",
+      "## Datasets Produced by the Module",
+      "The following table documents each dataset that is retrieved from the datastore and used by the module. Each row in the table describes a dataset. All the datasets must be present in the datastore. One or more of these datasets may be entered into the datastore from the user input files. The table names and their meanings are as follows:",
+      "* NAME - The field (column) name in the input file. Note that if the 'TYPE' is 'currency' the field name must be followed by a period and the year that the currency is denominated in. For example if the NAME is 'HHIncomePC' (household per capita income) and the input values are in 2010 dollars, the field name in the file must be 'HHIncomePC.2010'. The framework uses the embedded date information to convert the currency into base year currency amounts. The user may also embed a magnitude indicator is inputs are in thousand, millions, etc. The VisionEval users guide should be consulted on how to do that.",
+      "* TABLE - The table in the datastore that the data is retrieved from.",
+      "* GROUP - The group in the datastore where the table is located. Note that the datastore has a group named 'Global' and groups for every model run year. For example, if the model run years are 2010 and 2050, then the datastore will have a group named '2010' and a group named '2050'. If the value for 'GROUP' is 'Year', then the dataset will exist in each model run year. If the value for 'GROUP' is 'BaseYear' then the dataset will only exist in the base year group (e.g. '2010'). If the value for 'GROUP' is 'Global' then the dataset will only exist in the 'Global' group.",
+      "* TYPE - The data type. The framework uses the type to check units and inputs. Refer to the model system design and users guide for information on allowed types.",
+      "* UNITS - The units that input values need to represent. Some data types have defined units that are represented as abbreviations or combinations of abbreviations. For example 'MI/HR' means miles per hour. Many of these abbreviations are self evident, but the VisionEval model system design and users guide should be consulted.",
+      "* PROHIBIT - Values that are prohibited. Values in the datastore do not meet any of the listed conditions.",
+      "* ISELEMENTOF - Categorical values that are permitted. Values in the datastore are one or more of the listed values.",
+      "* DESCRIPTION - A description of the data.",
+      ""
+    )
+    ColNames_ <-
+      c("NAME", "TABLE", "GROUP", "TYPE", "UNITS", "PROHIBIT", "ISELEMENTOF", "DESCRIPTION")
+    SpecsTable_df <- SetSpecs_df[, ColNames_]
+    # SpecsTable_df$DESCRIPTION <-
+    #   unname(sapply(as.character(SpecsTable_df$DESCRIPTION), function(x)
+    #     {wordWrap(x, 40)}))
+    SetMarkdown_ <- c(
+      SetMarkdown_,
+      kable(SpecsTable_df)
+    )
+  } else {
+    SetMarkdown_ <- c(
+      "",
+      "## Datasets Produced by the Module",
+      "This module produces no datasets to store in the datastore."
+    )
+  }
+  #Add the markdown text to the documentation list
+  RevDocs_ls <- c(
+    RevDocs_ls,
+    list(SetMarkdown_)
+  )
+
+  #Produce markdown file documentation
+  knit(output = paste0("vignettes/", ModuleName, ".md"),
+       text = unlist(RevDocs_ls))
+}
