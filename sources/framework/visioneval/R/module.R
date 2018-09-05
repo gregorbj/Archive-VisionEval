@@ -1475,6 +1475,7 @@ getRegisteredGetSpecs <-
 #' 'vignettes' directory. The markdown file is named with the module name and
 #' has a 'md' suffix.
 #' @export
+#' @import knitr
 documentModule <- function(ModuleName){
 
   #Make vignettes directory if doesn't exist
