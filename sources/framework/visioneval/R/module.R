@@ -1505,9 +1505,14 @@ documentModule <- function(ModuleName){
   #------------------------------------------------
   splitDocs <-
     function(Docs_, Idx_) {
-      Starts_ <- c(1, Idx_ + 1)
-      Ends_ <- c(Idx_ - 1, length(Docs_))
-      apply(cbind(Starts_, Ends_), 1, function(x) Docs_[x[1]:x[2]])
+      if (length(Idx == 0)) {
+        Docs_ls <- list(Docs_)
+      } else {
+        Starts_ <- c(1, Idx_ + 1)
+        Ends_ <- c(Idx_ - 1, length(Docs_))
+        Docs_ls <- apply(cbind(Starts_, Ends_), 1, function(x) Docs_[x[1]:x[2]])
+      }
+      Docs_ls
     }
 
   #Define function to process documentation tag
@@ -1622,26 +1627,29 @@ documentModule <- function(ModuleName){
     Docs_ls[1]
   )
   #Iterate through tags and insert knitr-processed tags
-  for (n in 1:length(TagIdx_)) {
-    Idx <- TagIdx_[n]
-    DocTag_ <- processDocTag(Docs_[Idx])
-    if (DocTag_["Type"] == "none") {
-      Markdown_ <- "Error in module documentation tag"
+  #if there are any tags
+  if (length(TagIdx_ > 0)) {
+    for (n in 1:length(TagIdx_)) {
+      Idx <- TagIdx_[n]
+      DocTag_ <- processDocTag(Docs_[Idx])
+      if (DocTag_["Type"] == "none") {
+        Markdown_ <- "Error in module documentation tag"
+      }
+      if (DocTag_["Type"] == "txt") {
+        Markdown_ <- insertTxtMarkdown(DocTag_["Reference"])
+      }
+      if (DocTag_["Type"] == "fig") {
+        Markdown_ <- insertFigMarkdown(DocTag_["Reference"])
+      }
+      if (DocTag_["Type"] == "tab") {
+        Markdown_ <- insertTabMarkdown(DocTag_["Reference"])
+      }
+      RevDocs_ls <- c(
+        RevDocs_ls,
+        list(Markdown_),
+        Docs_ls[n + 1]
+      )
     }
-    if (DocTag_["Type"] == "txt") {
-      Markdown_ <- insertTxtMarkdown(DocTag_["Reference"])
-    }
-    if (DocTag_["Type"] == "fig") {
-      Markdown_ <- insertFigMarkdown(DocTag_["Reference"])
-    }
-    if (DocTag_["Type"] == "tab") {
-      Markdown_ <- insertTabMarkdown(DocTag_["Reference"])
-    }
-    RevDocs_ls <- c(
-      RevDocs_ls,
-      list(Markdown_),
-      Docs_ls[n + 1]
-    )
   }
 
   #Load module specifications
