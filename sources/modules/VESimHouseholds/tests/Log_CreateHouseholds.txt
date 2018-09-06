@@ -36,3 +36,41 @@ Test of VESimHouseholds package modules
 
 2018-02-17 10:01:04 : Congratulations. Module CreateHouseholds passed all tests. 
 
+Test
+Test of VESimHouseholds package modules
+2018-09-06_09:37:23
+
+2018-09-06 09:37:23 : Testing CreateHouseholds. 
+
+2018-09-06 09:37:23 : Attempting to initialize datastore. 
+
+2018-09-06 09:37:25 : Geographical indices successfully read. 
+
+2018-09-06 09:37:25 : Geography sucessfully added to datastore. 
+
+2018-09-06 09:37:25 : Loading model parameters file. 
+
+2018-09-06 09:37:26 : Datastore initialized. 
+
+2018-09-06 09:37:26 : Attempting to load and check specifications. 
+
+2018-09-06 09:37:26 : Module specifications successfully loaded and checked for errors. 
+
+2018-09-06 09:37:26 : Attempting to process, check and load module inputs. 
+
+2018-09-06 09:37:26 : Module inputs successfully checked and loaded into datastore. 
+
+2018-09-06 09:37:26 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-09-06 09:37:26 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-09-06 09:37:26 : Running module and checking whether outputs meet Set specifications. 
+
+2018-09-06 09:37:26 : Also saving module outputs to datastore. 
+
+2018-09-06 09:37:34 : Module run successfully and outputs meet Set specifications. 
+
+2018-09-06 09:37:34 : Module outputs saved to datastore. 
+
+2018-09-06 09:37:34 : Congratulations. Module CreateHouseholds passed all tests. 
+
