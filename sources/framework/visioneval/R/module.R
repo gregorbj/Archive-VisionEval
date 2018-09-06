@@ -1480,7 +1480,7 @@ documentModule <- function(ModuleName){
 
   #Make vignettes directory if doesn't exist
   #-----------------------------------------
-  if(!file.exists("vignettes")) dir.create("vignettes")
+  if(!file.exists("inst/module_docs")) dir.create("inst/module_docs")
 
   #Define function to trim strings
   #-------------------------------
@@ -1505,14 +1505,9 @@ documentModule <- function(ModuleName){
   #------------------------------------------------
   splitDocs <-
     function(Docs_, Idx_) {
-      if (length(Idx == 0)) {
-        Docs_ls <- list(Docs_)
-      } else {
-        Starts_ <- c(1, Idx_ + 1)
-        Ends_ <- c(Idx_ - 1, length(Docs_))
-        Docs_ls <- apply(cbind(Starts_, Ends_), 1, function(x) Docs_[x[1]:x[2]])
-      }
-      Docs_ls
+      Starts_ <- c(1, Idx_ + 1)
+      Ends_ <- c(Idx_ - 1, length(Docs_))
+      apply(cbind(Starts_, Ends_), 1, function(x) Docs_[x[1]:x[2]])
     }
 
   #Define function to process documentation tag
@@ -1542,9 +1537,10 @@ documentModule <- function(ModuleName){
     if (file.exists(File)) {
       load(File)
       if (!is.null(eval(parse(text = Reference)))) {
+        Text_ <- eval(parse(text = Reference))
         Markdown_ <- c(
           "```",
-          eval(parse(text = Reference)),
+          Text_,
           "```"
         )
         rm(list = Object)
@@ -1561,9 +1557,10 @@ documentModule <- function(ModuleName){
   #--------------------------------------------------
   insertFigMarkdown <- function(Reference) {
     FromFile <- paste0("data/", Reference)
-    ToFile <- gsub("data", "vignettes", FromFile)
+    ToFile <- paste0("inst/module_docs/", Reference)
     if (file.exists(FromFile)) {
       file.copy(from = FromFile, to = ToFile)
+      file.remove(FromFile)
       Markdown_ <- paste0("![", Reference, "](", Reference, ")")
     } else {
       return("Error in module documentation tag reference")
@@ -1607,28 +1604,20 @@ documentModule <- function(ModuleName){
   Docs_ <-
     unlist(lapply(Text_[DocStart:DocEnd], function(x) trimStr(x, Indices = 1)))
 
-  #Define knitr setup code for formatting statistics documentation
-  #---------------------------------------------------------------
-  KnitrSetup_ <- c(
-    "```{r setup, include=FALSE}",
-    "knitr::opts_chunk$set(echo = TRUE)",
-    "```"
-  )
-
   #Insert knitr code for inserting documentation tag information
   #-------------------------------------------------------------
   #Locate statistics documentation tags
   TagIdx_ <- grep("<", Docs_)
-  #Split documentation into list of components before and after tags
-  Docs_ls <- splitDocs(Docs_, TagIdx_)
-  #Initialize new list into which knitr-processed tags will be inserted
-  RevDocs_ls <- list(
-    list(KnitrSetup_),
-    Docs_ls[1]
-  )
-  #Iterate through tags and insert knitr-processed tags
-  #if there are any tags
-  if (length(TagIdx_ > 0)) {
+  #If one or more tags, split Docs_ and insert tag content
+  if (length(TagIdx_) > 0) {
+    #Split documentation into list of components before and after tags
+    Docs_ls <- splitDocs(Docs_, TagIdx_)
+    #Initialize new list into which knitr-processed tags will be inserted
+    RevDocs_ls <- list(
+      Docs_ls[1]
+    )
+    #Iterate through tags and insert knitr-processed tags
+    #if there are any tags
     for (n in 1:length(TagIdx_)) {
       Idx <- TagIdx_[n]
       DocTag_ <- processDocTag(Docs_[Idx])
@@ -1650,10 +1639,14 @@ documentModule <- function(ModuleName){
         Docs_ls[n + 1]
       )
     }
+  } else {
+    RevDocs_ls <- list(
+      list(Docs_)
+    )
   }
 
-  #Load module specifications
-  #--------------------------
+  #Functions to assist in loading and processing module specifications
+  #-------------------------------------------------------------------
   #Define function to process specifications
   processModuleSpecs <- function(Spec_ls) {
     #Define a function to process a component of a specifications list
@@ -1675,10 +1668,7 @@ documentModule <- function(ModuleName){
       Out_ls$NewSetTable <- Spec_ls$NewSetTable
     }
     if (!is.null(Spec_ls$Inp)) {
-      FilteredInpSpec_ls <- doProcessInpSpec(Spec_ls$Inp)
-      if (length(FilteredInpSpec_ls) > 0) {
-        Out_ls$Inp <- processComponent(FilteredInpSpec_ls, "Inp")
-      }
+      Out_ls$Inp <- processComponent(Spec_ls$Inp, "Inp")
     }
     if (!is.null(Spec_ls$Get)) {
       Out_ls$Get <- processComponent(Spec_ls$Get, "Get")
@@ -1699,8 +1689,18 @@ documentModule <- function(ModuleName){
     eval(parse(text = ModuleSpecs))
   }
   #Define function to creates a data frame from specifications Inp, Get, or Set
-  makeSpecsTable <- function(ModuleName, Component) {
+  makeSpecsTable <- function(ModuleName, Component, SpecNames_) {
     Specs_ls <- processModuleSpecs(loadSpecs(ModuleName))[[Component]]
+    if (Component == "Inp") {
+      Specs_ls <- lapply(Specs_ls, function(x) {
+        if (!("OPTIONAL" %in% names(x))) {
+          x$OPTIONAL <- FALSE
+        }
+        x
+      })
+      SpecNames_ <- c(SpecNames_, "OPTIONAL")
+    }
+    Specs_ls <- lapply(Specs_ls, function(x) x[SpecNames_])
     Specs_ls <- lapply(Specs_ls, function(x) {
       data.frame(lapply(x, function(y) {
         if (length(y) == 1) {
@@ -1741,32 +1741,50 @@ documentModule <- function(ModuleName){
   #Insert documentation of user input files
   #----------------------------------------
   #Make a table of Inp specifications
-  InpSpecs_df <- makeSpecsTable(ModuleName, "Inp")
+  SpecNames_ <-
+    c("NAME", "FILE", "TABLE", "GROUP", "TYPE", "UNITS", "PROHIBIT",
+      "ISELEMENTOF", "UNLIKELY", "DESCRIPTION")
+  InpSpecs_df <- makeSpecsTable(ModuleName, "Inp", SpecNames_)
   #Make markdown text
   if (!is.null(InpSpecs_df)) {
     InpMarkdown_ <- c(
       "",
       "## User Inputs",
       "The following table(s) document each input file that must be provided in order for the module to run correctly. User input files are comma-separated valued (csv) formatted text files. Each row in the table(s) describes a field (column) in the input file. The table names and their meanings are as follows:",
-      "* NAME - The field (column) name in the input file. Note that if the 'TYPE' is 'currency' the field name must be followed by a period and the year that the currency is denominated in. For example if the NAME is 'HHIncomePC' (household per capita income) and the input values are in 2010 dollars, the field name in the file must be 'HHIncomePC.2010'. The framework uses the embedded date information to convert the currency into base year currency amounts. The user may also embed a magnitude indicator if inputs are in thousand, millions, etc. The VisionEval model system design and users guide should be consulted on how to do that.",
-      "* TYPE - The data type. The framework uses the type to check units and inputs. The user can generally ignore this, but it is important to know whether the 'TYPE' is 'currency'",
-      "* UNITS - The units that input values need to represent. Some data types have defined units that are represented as abbreviations or combinations of abbreviations. For example 'MI/HR' means miles per hour. Many of these abbreviations are self evident, but the VisionEval model system design and users guide should be consulted.",
-      "* PROHIBIT - Values that are prohibited. Values may not meet any of the listed conditions.",
-      "* ISELEMENTOF - Categorical values that are permitted. Value must be one of the listed values.",
-      "* UNLIKELY - Values that are unlikely. Values that meet any of the listed conditions are permitted but a warning message will be given when the input data are processed.",
-      "* DESCRIPTION - A description of the data.",
+      "",
+      "NAME - The field (column) name in the input file. Note that if the 'TYPE' is 'currency' the field name must be followed by a period and the year that the currency is denominated in. For example if the NAME is 'HHIncomePC' (household per capita income) and the input values are in 2010 dollars, the field name in the file must be 'HHIncomePC.2010'. The framework uses the embedded date information to convert the currency into base year currency amounts. The user may also embed a magnitude indicator if inputs are in thousand, millions, etc. The VisionEval model system design and users guide should be consulted on how to do that.",
+      "",
+      "TYPE - The data type. The framework uses the type to check units and inputs. The user can generally ignore this, but it is important to know whether the 'TYPE' is 'currency'",
+      "",
+      "UNITS - The units that input values need to represent. Some data types have defined units that are represented as abbreviations or combinations of abbreviations. For example 'MI/HR' means miles per hour. Many of these abbreviations are self evident, but the VisionEval model system design and users guide should be consulted.",
+      "",
+      "PROHIBIT - Values that are prohibited. Values may not meet any of the listed conditions.",
+      "",
+      "ISELEMENTOF - Categorical values that are permitted. Value must be one of the listed values.",
+      "",
+      "UNLIKELY - Values that are unlikely. Values that meet any of the listed conditions are permitted but a warning message will be given when the input data are processed.",
+      "",
+      "DESCRIPTION - A description of the data.",
       ""
     )
-    InpSpecs_ls <- split(InpSpecs_df, InpSpecs_df$FILE)
+    InpSpecs_ls <- split(InpSpecs_df[, names(InpSpecs_df) != "FILE"], InpSpecs_df$FILE)
     FileNames_ <- names(InpSpecs_ls)
     for (fn in FileNames_) {
       InpMarkdown_ <- c(
         InpMarkdown_,
         paste("###", fn)
       )
-      ColNames_ <-
-        c("NAME", "TYPE", "UNITS", "PROHIBIT", "ISELEMENTOF", "UNLIKELY", "DESCRIPTION")
-      SpecsTable_df <- InpSpecs_ls[[fn]][, ColNames_]
+      IsOptional <- unique(InpSpecs_ls[[fn]]$OPTIONAL)
+      if (IsOptional) {
+        InpMarkdown_ <- c(
+          InpMarkdown_,
+          paste("This input file is OPTIONAL.",
+                "It is only needed if the user wants to modify the relative employment rates."),
+          ""
+        )
+      }
+      SpecsTable_df <-
+        InpSpecs_ls[[fn]][, !(names(InpSpecs_ls[[fn]]) %in% c("TABLE", "GROUP", "OPTIONAL"))]
       # SpecsTable_df$DESCRIPTION <-
       #   unname(sapply(as.character(SpecsTable_df$DESCRIPTION), function(x)
       #   {wordWrap(x, 40)}))
@@ -1775,28 +1793,29 @@ documentModule <- function(ModuleName){
       Year <- as.character(unique(InpSpecs_ls[[fn]]$GROUP))
       if (HasGeo) {
         if (Year == "Year") {
-          GeoYearDescription <- wordWrap(paste(
+          GeoYearDescription <- paste(
             "Must contain a record for each", Geo, "and model run year."
-          ), 40)
+          )
         }
         if (Year == "BaseYear") {
-          GeoYearDescription <- wordWrap(paste(
+          GeoYearDescription <- paste(
             "Must contain a record for each", Geo, "for the base year only."
-          ), 40)
+          )
         }
         if (Year == "Global") {
-          GeoYearDescription <- wordWrap(paste(
+          GeoYearDescription <- paste(
             "Must contain a record for each", Geo, "which is applied to all years."
-          ), 40)
+          )
         }
       } else {
-        GeoYearDescription <- wordWrap(paste(
+        GeoYearDescription <- paste(
           "Must contain a record for each model run year"
-        ), 40)
+        )
       }
       if (Year == "Year") {
         Year_df <- data.frame(
           NAME = "Year",
+          TYPE = "",
           UNITS = "",
           PROHIBIT = "",
           ISELEMENTOF = "",
@@ -1808,6 +1827,7 @@ documentModule <- function(ModuleName){
       if (HasGeo) {
         Geo_df <- data.frame(
           NAME = "Geo",
+          TYPE = "",
           UNITS = "",
           PROHIBIT = "",
           ISELEMENTOF = paste0(Geo, "s"),
@@ -1836,25 +1856,32 @@ documentModule <- function(ModuleName){
   #Insert documentation of module inputs
   #-------------------------------------
   #Make a table of Get specifications
-  GetSpecs_df <- makeSpecsTable(ModuleName, "Get")
+  SpecNames_ <-
+    c("NAME", "TABLE", "GROUP", "TYPE", "UNITS", "PROHIBIT", "ISELEMENTOF")
+  GetSpecs_df <- makeSpecsTable(ModuleName, "Get", SpecNames_)
   #Make markdown text
   if (!is.null(GetSpecs_df)) {
     GetMarkdown_ <- c(
       "",
       "## Datasets Used by the Module",
       "The following table documents each dataset that is retrieved from the datastore and used by the module. Each row in the table describes a dataset. All the datasets must be present in the datastore. One or more of these datasets may be entered into the datastore from the user input files. The table names and their meanings are as follows:",
-      "* NAME - The dataset name.",
-      "* TABLE - The table in the datastore that the data is retrieved from.",
-      "* GROUP - The group in the datastore where the table is located. Note that the datastore has a group named 'Global' and groups for every model run year. For example, if the model run years are 2010 and 2050, then the datastore will have a group named '2010' and a group named '2050'. If the value for 'GROUP' is 'Year', then the dataset will exist in each model run year group. If the value for 'GROUP' is 'BaseYear' then the dataset will only exist in the base year group (e.g. '2010'). If the value for 'GROUP' is 'Global' then the dataset will only exist in the 'Global' group.",
-      "* TYPE - The data type. The framework uses the type to check units and inputs. Refer to the model system design and users guide for information on allowed types.",
-      "* UNITS - The units that input values need to represent. Some data types have defined units that are represented as abbreviations or combinations of abbreviations. For example 'MI/HR' means miles per hour. Many of these abbreviations are self evident, but the VisionEval model system design and users guide should be consulted.",
-      "* PROHIBIT - Values that are prohibited. Values in the datastore do not meet any of the listed conditions.",
-      "* ISELEMENTOF - Categorical values that are permitted. Values in the datastore are one or more of the listed values.",
+      "",
+      "NAME - The dataset name.",
+      "",
+      "TABLE - The table in the datastore that the data is retrieved from.",
+      "",
+      "GROUP - The group in the datastore where the table is located. Note that the datastore has a group named 'Global' and groups for every model run year. For example, if the model run years are 2010 and 2050, then the datastore will have a group named '2010' and a group named '2050'. If the value for 'GROUP' is 'Year', then the dataset will exist in each model run year group. If the value for 'GROUP' is 'BaseYear' then the dataset will only exist in the base year group (e.g. '2010'). If the value for 'GROUP' is 'Global' then the dataset will only exist in the 'Global' group.",
+      "",
+      "TYPE - The data type. The framework uses the type to check units and inputs. Refer to the model system design and users guide for information on allowed types.",
+      "",
+      "UNITS - The units that input values need to represent. Some data types have defined units that are represented as abbreviations or combinations of abbreviations. For example 'MI/HR' means miles per hour. Many of these abbreviations are self evident, but the VisionEval model system design and users guide should be consulted.",
+      "",
+      "PROHIBIT - Values that are prohibited. Values in the datastore do not meet any of the listed conditions.",
+      "",
+      "ISELEMENTOF - Categorical values that are permitted. Values in the datastore are one or more of the listed values.",
       ""
     )
-    ColNames_ <-
-      c("NAME", "TABLE", "GROUP", "TYPE", "UNITS", "PROHIBIT", "ISELEMENTOF")
-    SpecsTable_df <- GetSpecs_df[, ColNames_]
+    SpecsTable_df <- GetSpecs_df
     GetMarkdown_ <- c(
       GetMarkdown_,
       kable(SpecsTable_df)
@@ -1875,26 +1902,34 @@ documentModule <- function(ModuleName){
   #Insert documentation of module outputs
   #--------------------------------------
   #Make a table of Set specifications
-  SetSpecs_df <- makeSpecsTable(ModuleName, "Set")
+  SpecNames_ <-
+    c("NAME", "TABLE", "GROUP", "TYPE", "UNITS", "PROHIBIT", "ISELEMENTOF", "DESCRIPTION")
+  SetSpecs_df <- makeSpecsTable(ModuleName, "Set", SpecNames_)
   #Make markdown text
   if (!is.null(SetSpecs_df)) {
     SetMarkdown_ <- c(
       "",
       "## Datasets Produced by the Module",
       "The following table documents each dataset that is retrieved from the datastore and used by the module. Each row in the table describes a dataset. All the datasets must be present in the datastore. One or more of these datasets may be entered into the datastore from the user input files. The table names and their meanings are as follows:",
-      "* NAME - The field (column) name in the input file. Note that if the 'TYPE' is 'currency' the field name must be followed by a period and the year that the currency is denominated in. For example if the NAME is 'HHIncomePC' (household per capita income) and the input values are in 2010 dollars, the field name in the file must be 'HHIncomePC.2010'. The framework uses the embedded date information to convert the currency into base year currency amounts. The user may also embed a magnitude indicator is inputs are in thousand, millions, etc. The VisionEval users guide should be consulted on how to do that.",
-      "* TABLE - The table in the datastore that the data is retrieved from.",
-      "* GROUP - The group in the datastore where the table is located. Note that the datastore has a group named 'Global' and groups for every model run year. For example, if the model run years are 2010 and 2050, then the datastore will have a group named '2010' and a group named '2050'. If the value for 'GROUP' is 'Year', then the dataset will exist in each model run year. If the value for 'GROUP' is 'BaseYear' then the dataset will only exist in the base year group (e.g. '2010'). If the value for 'GROUP' is 'Global' then the dataset will only exist in the 'Global' group.",
-      "* TYPE - The data type. The framework uses the type to check units and inputs. Refer to the model system design and users guide for information on allowed types.",
-      "* UNITS - The units that input values need to represent. Some data types have defined units that are represented as abbreviations or combinations of abbreviations. For example 'MI/HR' means miles per hour. Many of these abbreviations are self evident, but the VisionEval model system design and users guide should be consulted.",
-      "* PROHIBIT - Values that are prohibited. Values in the datastore do not meet any of the listed conditions.",
-      "* ISELEMENTOF - Categorical values that are permitted. Values in the datastore are one or more of the listed values.",
-      "* DESCRIPTION - A description of the data.",
+      "",
+      "NAME - The field (column) name in the input file. Note that if the 'TYPE' is 'currency' the field name must be followed by a period and the year that the currency is denominated in. For example if the NAME is 'HHIncomePC' (household per capita income) and the input values are in 2010 dollars, the field name in the file must be 'HHIncomePC.2010'. The framework uses the embedded date information to convert the currency into base year currency amounts. The user may also embed a magnitude indicator is inputs are in thousand, millions, etc. The VisionEval users guide should be consulted on how to do that.",
+      "",
+      "TABLE - The table in the datastore that the data is retrieved from.",
+      "",
+      "GROUP - The group in the datastore where the table is located. Note that the datastore has a group named 'Global' and groups for every model run year. For example, if the model run years are 2010 and 2050, then the datastore will have a group named '2010' and a group named '2050'. If the value for 'GROUP' is 'Year', then the dataset will exist in each model run year. If the value for 'GROUP' is 'BaseYear' then the dataset will only exist in the base year group (e.g. '2010'). If the value for 'GROUP' is 'Global' then the dataset will only exist in the 'Global' group.",
+      "",
+      "TYPE - The data type. The framework uses the type to check units and inputs. Refer to the model system design and users guide for information on allowed types.",
+      "",
+      "UNITS - The units that input values need to represent. Some data types have defined units that are represented as abbreviations or combinations of abbreviations. For example 'MI/HR' means miles per hour. Many of these abbreviations are self evident, but the VisionEval model system design and users guide should be consulted.",
+      "",
+      "PROHIBIT - Values that are prohibited. Values in the datastore do not meet any of the listed conditions.",
+      "",
+      "ISELEMENTOF - Categorical values that are permitted. Values in the datastore are one or more of the listed values.",
+      "",
+      "DESCRIPTION - A description of the data.",
       ""
     )
-    ColNames_ <-
-      c("NAME", "TABLE", "GROUP", "TYPE", "UNITS", "PROHIBIT", "ISELEMENTOF", "DESCRIPTION")
-    SpecsTable_df <- SetSpecs_df[, ColNames_]
+    SpecsTable_df <- SetSpecs_df
     # SpecsTable_df$DESCRIPTION <-
     #   unname(sapply(as.character(SpecsTable_df$DESCRIPTION), function(x)
     #     {wordWrap(x, 40)}))
@@ -1916,6 +1951,6 @@ documentModule <- function(ModuleName){
   )
 
   #Produce markdown file documentation
-  knit(output = paste0("vignettes/", ModuleName, ".md"),
-       text = unlist(RevDocs_ls))
+  #-----------------------------------
+  writeLines(unlist(RevDocs_ls), paste0("inst/module_docs/", ModuleName, ".md"))
 }
