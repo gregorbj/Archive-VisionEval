@@ -88,7 +88,7 @@ An additional step must be carried out in order to predict household income. Bec
 |          | Dollars|
 |:---------|-------:|
 |Observed  |   51924|
-|Estimated |   51803|
+|Estimated |   51928|
 
 The following figure compares the distributions of the observed and predicted incomes of *regular* households.
 
@@ -100,7 +100,7 @@ Following is the comparison of mean values for the observed *group quarters* hou
 |          | Dollars|
 |:---------|-------:|
 |Observed  |    7504|
-|Estimated |    7792|
+|Estimated |    7574|
 
 The following figure compares the distributions of the observed and predicted incomes of *groups quarters* households.
 
@@ -170,7 +170,7 @@ ISELEMENTOF - Categorical values that are permitted. Values in the datastore are
 ## Datasets Produced by the Module
 The following table documents each dataset that is retrieved from the datastore and used by the module. Each row in the table describes a dataset. All the datasets must be present in the datastore. One or more of these datasets may be entered into the datastore from the user input files. The table names and their meanings are as follows:
 
-NAME - The field (column) name in the input file. Note that if the 'TYPE' is 'currency' the field name must be followed by a period and the year that the currency is denominated in. For example if the NAME is 'HHIncomePC' (household per capita income) and the input values are in 2010 dollars, the field name in the file must be 'HHIncomePC.2010'. The framework uses the embedded date information to convert the currency into base year currency amounts. The user may also embed a magnitude indicator is inputs are in thousand, millions, etc. The VisionEval users guide should be consulted on how to do that.
+NAME - The dataset name.
 
 TABLE - The table in the datastore that the data is retrieved from.
 
