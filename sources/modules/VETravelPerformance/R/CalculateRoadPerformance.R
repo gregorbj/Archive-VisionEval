@@ -1235,9 +1235,7 @@ CalculateRoadPerformance <- function(L) {
   #--------------------------------------------
   DvmtSplitData_df <- data.frame(
     LogPop = log(sum(L$Year$Marea$UrbanPop)),
-    FwyLnMiPC = with(L$Year$Marea, FwyLaneMi / UrbanPop),
-    ArtLnMiPC = with(L$Year$Marea, ArtLaneMi / UrbanPop),
-    FwyLnMiSqMi = L$Year$Marea$FwyLaneMi / sum(L$Year$Bzone$UrbanArea)
+    LnMiRatio = L$Year$Marea$FwyLaneMi / L$Year$Marea$ArtLaneMi
   )
   Lambda_Ma <- unname(predict(DvmtSplit_LM, newdata = DvmtSplitData_df))
   names(Lambda_Ma) <- Ma
