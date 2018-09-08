@@ -1266,7 +1266,6 @@ CalculateRoadPerformance <- function(L) {
   for (ma in Ma) {
     SpeedAndDelay_ls[[ma]] <-
       calculateSpeeds(OpsDeployment_MaOp[ma,], OtherOpsEffects_mx)
-    rm(OpsDeployNames_, OpsDeployment_MaOp, OtherOpsEffects_mx)
   }
   #Convert to matrices
   FwySpeed_MaCl <- do.call(rbind, lapply(SpeedAndDelay_ls, function(x) {
