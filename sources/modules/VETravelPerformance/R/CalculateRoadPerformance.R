@@ -859,28 +859,29 @@ rm(DvmtRatio_Ma, SpeedRatio_Ma)
 #A linear model for calculating the computed 'Lambda' values is estimated using
 #independent variables available in the urban mobility study data. Several model
 #specifications were tested. The best performing model (having the highest
-#adjusted R-squared value) is shown below. Highly significant terms are the
-#natural log of urbanized area population, the number of freeway lane miles per
-#capita, the number of arterial lane miles per capita, and the number of
-#freeway lane miles per square mile. Arterial lane miles per square mile and
-#population per square mile were found not to be significant. An intercept is
-#also not in the model because it was found to be statistically insignificant
-#(P = 0.985) and because it should be zero if there are no freeways.
+#adjusted R-squared value) includes as independent variables the natural log of
+#population and the ratio of freeway lane miles to arterial lane miles.
 Lambda_df <- data.frame(
   Lambda = Lambda_Ma,
-  LnMiRatio = with(Ums_df, FwyLnMi / ArtLnMi),
+  Pop = Ums_df$Pop000 * 1000,
+  SqMi = Ums_df$SqMi,
   LogPop = log(Ums_df$Pop000 * 1000),
-  FwyLnMiPC = with(Ums_df, FwyDvmt000 / Pop000),
-  ArtLnMiPC = with(Ums_df, ArtDvmt000 / Pop000),
-  FwyLnMiSqMi = with(Ums_df, 1000 * FwyDvmt000 / SqMi),
-  ArtLnMiSqMi = with(Ums_df, 1000 * FwyDvmt000 / SqMi)
+  LnMiRatio = with(Ums_df, FwyLnMi / ArtLnMi),
+  PopSqMi = with(Ums_df, 1000 * Pop000 / SqMi),
+  FwyLnMi = Ums_df$FwyLnMi,
+  ArtLnMi = Ums_df$ArtLnMi,
+  FwyLnMiPC = with(Ums_df, 1e-3 * FwyLnMi / Pop000),
+  ArtLnMiPC = with(Ums_df, 1e-3 * ArtLnMi / Pop000),
+  FwyLnMiSqMi = with(Ums_df, FwyLnMi / SqMi),
+  ArtLnMiSqMi = with(Ums_df, ArtLnMi / SqMi),
+  LnMiSqMi = with(Ums_df, (FwyLnMi + ArtLnMi) / SqMi)
 )
-DvmtSplit_LM <-
-  lm(Lambda ~ LogPop + FwyLnMiPC + ArtLnMiPC + FwyLnMiSqMi - 1,
-     data = Lambda_df)
+DvmtSplit_LM <-  lm(Lambda ~ LogPop + LnMiRatio, data = Lambda_df)
 #summary(DvmtSplit_LM)
-#plot(Lambda_Ma, fitted(DvmtSplit_LM)
-#cor(Lambda_df[,c("LogPop", "FwyLnMiPC", "ArtLnMiPC", "FwyLnMiSqMi")])
+#plot(DvmtSplit_LM)
+#plot(Lambda_Ma, fitted(DvmtSplit_LM))
+#abline(0, 1, col = "red")
+#cor(Lambda_df[,c("LogPop", "LnMiRatio")])
 rm(Lambda_df, Ums_df)
 
 #Save the model for calculating factor for splitting DVMT based on speeds
@@ -1234,9 +1235,7 @@ CalculateRoadPerformance <- function(L) {
   #--------------------------------------------
   DvmtSplitData_df <- data.frame(
     LogPop = log(sum(L$Year$Marea$UrbanPop)),
-    FwyLnMiPC = with(L$Year$Marea, FwyLaneMi / UrbanPop),
-    ArtLnMiPC = with(L$Year$Marea, ArtLaneMi / UrbanPop),
-    FwyLnMiSqMi = L$Year$Marea$FwyLaneMi / sum(L$Year$Bzone$UrbanArea)
+    LnMiRatio = L$Year$Marea$FwyLaneMi / L$Year$Marea$ArtLaneMi
   )
   Lambda_Ma <- unname(predict(DvmtSplit_LM, newdata = DvmtSplitData_df))
   names(Lambda_Ma) <- Ma
@@ -1266,7 +1265,6 @@ CalculateRoadPerformance <- function(L) {
   for (ma in Ma) {
     SpeedAndDelay_ls[[ma]] <-
       calculateSpeeds(OpsDeployment_MaOp[ma,], OtherOpsEffects_mx)
-    rm(OpsDeployNames_, OpsDeployment_MaOp, OtherOpsEffects_mx)
   }
   #Convert to matrices
   FwySpeed_MaCl <- do.call(rbind, lapply(SpeedAndDelay_ls, function(x) {

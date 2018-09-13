@@ -1,26 +1,31 @@
 #=================
 #AssignLifeCycle.R
 #=================
-#This module assigns a life cycle category to each household. The life cycle
-#categories are similar, but not the same as, those established for the NHTS.
-#Unlike the NHTS, the lifecycle categories used in VisionEval models do not
-#distinguish between children of different ages. Also, the VisionEval categories
-#use age 20 as the breakpoint between the child and adult categories while the
-#NHTS uses age 21 for the breakpoint. The VisionEval age breakpoints are set
-#to correspond to 5-year age cohorts used in standard demographic predictions.
-#The numbering of the categories corresponds to the NHTS categories with the
-#exception that the child categories are combined. There is an added category
-#for children in non-institutional group quarters (e.g. in college). Other
-#non-institutional group quarters persons are treated as either an adult with
-#no children. Following are the categories:
-#00: child in non-institutional group quarters
+
+#<doc>
+## AssignLifeCycle Module
+#### September 6, 2018
+#
+#This module assigns a life cycle category to each household. The life cycle categories are similar, but not the same as, those established for the NHTS. The age categories used in VisionEval models are broader than those used by the NHTS to identify children of different ages. As a result it is not possible for the life cycle designations to reflect child ages as they do in the NHTS. Also, adulthood is determined differently in this module. The NHTS uses age 21 as the threshold age for adulthood. This module uses use 20 as nominal age break for adulthood (the 20-29 age group). Moreover, the module identifies some younger persons to be adults in situations where they are likely to be be living independently as adults or emancipated minors. Persons in the 15 to 19 age group are considered adults when there are no older adults (ages 30+) in the household.
+#
+### Model Parameter Estimation
+#
+#This module has no parameters. A set of rules assigns age group categories based on the age of persons and workers in the household.
+#
+### How the Module Works
+#
+#The module uses datasets on the numbers of persons in each household by age category and the numbers of workers by age category. The age categories are 0-14 years, 15-19 years, 20-29 years, 30-54 years, 55-64 years, and 65+ years. However no workers are in the 0-14 year age category. The household life cycle is determined by the number of children in combination with the number of adults and whether the adults are retired. The categories are as follows:
 #01: one adult, no children
 #02: 2+ adults, no children
 #03: one adult, children (corresponds to NHTS 03, 05, and 07)
 #04: 2+ adults, children (corresponds to NHTS 04, 06, and 08)
 #09: one adult, retired, no children
 #10: 2+ adults, retired, no children
-
+#
+#Because the 15-19 age category can be ambiguous with regard to adult or child status, the status of persons in that age category in the household is determined based on the presence of older adults in the household. If there are no older persons or only persons aged 20-29 in the household, the age 15-19 persons are considered to be adults. Otherwise they are considered to be children.
+#
+#The retirement status of adults is determined based on age and worker status. Households are considered to be populated with retired persons if all the adults are in the 65+ age category and there are no workers. If children are present in the household with retired persons, then the life cycle category is 03 or 04 rather than 09 or 10.
+#</doc>
 
 
 #=================================
@@ -100,7 +105,7 @@ AssignLifeCycleSpecifications <- list(
       UNITS = "category",
       NAVALUE = -1,
       PROHIBIT = "",
-      ISELEMENTOF = c("00", "01", "02", "03", "04", "09", "10"),
+      ISELEMENTOF = c("01", "02", "03", "04", "09", "10"),
       SIZE = 2,
       DESCRIPTION = "Household life cycle as defined by 2009 NHTS LIF_CYC variable"
     )
@@ -161,41 +166,61 @@ AssignLifeCycle <- function(L) {
     list(
       LifeCycle = character(NumHh)
     )
-  #Identify child, adult, and retired age categories
+  #Identify child and adult status by age category
   Ag <- c("Age0to14", "Age15to19", "Age20to29", "Age30to54", "Age55to64", "Age65Plus")
-  HhSize_ <- rowSums(Hh_df[,Ag])
-  Child <- c("Age0to14", "Age15to19")
-  Adult <- c("Age20to29", "Age30to54", "Age55to64", "Age65Plus")
-  Retired <- "Age65Plus"
-  #Identify worker categories
-  Worker <- c("Wkr15to19", "Wkr20to29", "Wkr30to54", "Wkr55to64", "Wkr65Plus")
-  #Determine if there are children
-  HasChildren_ <- rowSums(Hh_df[,Child]) > 0
-  #Determine if there is only one adult
-  OnlyOneAdult_ <- rowSums(Hh_df[,Adult]) == 1
-  #Determine if adults are retired
-  IsRetired_ <-
-    rowSums(Hh_df[,Adult]) == Hh_df[,Retired] & rowSums(Hh_df[,Worker]) == 0
-  #Determine if group quarters
-  IsGrpQtr_ <- Hh_df$HhType == "Grp"
+  HhByAge_mx <- as.matrix(Hh_df[,Ag])
+  StatusByAge_mx <- t(apply(HhByAge_mx, 1, function(x) {
+    HasPeople_Ag <- x != 0
+    Status_Ag <- c(
+      Age0to14 = "Child",
+      Age15to19 = "Child",
+      Age20to29 = "Adult",
+      Age30to54 = "Adult",
+      Age55to64 = "Adult",
+      Age65Plus = "Adult"
+    )
+    HasNoOlderAdults <- sum(Status_Ag[HasPeople_Ag] == "Adult") == 0
+    HasYoungAdult <- HasPeople_Ag["Age15to19"]
+    if (HasNoOlderAdults & HasYoungAdult) Status_Ag["Age15to19"] <- "Adult"
+    Status_Ag
+  }))
+  #Tabulate numbers of persons, adults, children, workers, and retirement age
+  #persons
+  HhSize_ <- rowSums(HhByAge_mx)
+  NumAdults_ <- rowSums(HhByAge_mx * as.numeric(StatusByAge_mx == "Adult"))
+  NumChildren_ <- rowSums(HhByAge_mx * as.numeric(StatusByAge_mx == "Child"))
+  NumWorkers_ <-
+    rowSums(Hh_df[,c("Wkr15to19", "Wkr20to29", "Wkr30to54", "Wkr55to64", "Wkr65Plus")])
+  NumRetireAge_ <- HhByAge_mx[, "Age65Plus"]
+  #Identify retired households
+  IsRetired_ <- (HhSize_ == NumRetireAge_) & (NumWorkers_ == 0)
   #Determine life cycle
   LifeCycle_ <- character(NumHh)
-  LifeCycle_[!HasChildren_ & OnlyOneAdult_ & !IsRetired_] <- "01"
-  LifeCycle_[!HasChildren_ & !OnlyOneAdult_ & !IsRetired_] <- "02"
-  LifeCycle_[HasChildren_ & OnlyOneAdult_] <- "03"
-  LifeCycle_[HasChildren_ & !OnlyOneAdult_ & !IsGrpQtr_] <- "04"
-  LifeCycle_[HasChildren_ & !OnlyOneAdult_ & IsGrpQtr_] <- "00"
-  LifeCycle_[!HasChildren_ & OnlyOneAdult_ & IsRetired_] <- "09"
-  LifeCycle_[!HasChildren_ & !OnlyOneAdult_ & IsRetired_] <- "10"
+  #01: one adult, no children
+  LifeCycle_[(NumChildren_ == 0) & (NumAdults_ == 1) & !IsRetired_] <- "01"
+  #02: 2+ adults, no children
+  LifeCycle_[(NumChildren_ == 0) & (NumAdults_ > 1) & !IsRetired_] <- "02"
+  #03: one adult, children (corresponds to NHTS 03, 05, and 07)
+  LifeCycle_[(NumChildren_ >= 1) & (NumAdults_ == 1)] <- "03"
+  #04: 2+ adults, children (corresponds to NHTS 04, 06, and 08)
+  LifeCycle_[(NumChildren_ >= 1) & (NumAdults_ > 1)] <- "04"
+  #09: one adult, retired, no children
+  LifeCycle_[(NumChildren_ == 0) & (NumAdults_ == 1) & IsRetired_] <- "09"
+  #10: 2+ adults, retired, no children
+  LifeCycle_[(NumChildren_ == 0) & (NumAdults_ > 1) & IsRetired_] <- "10"
   #Assign the results to the outputs list and return the list
   Out_ls$Year$Household$LifeCycle <- LifeCycle_
   Out_ls
 }
 
 
-#================================
-#Code to aid development and test
-#================================
+#===============================================================
+#SECTION 4: MODULE DOCUMENTATION AND AUXILLIARY DEVELOPMENT CODE
+#===============================================================
+#Run module automatic documentation
+#----------------------------------
+documentModule("AssignLifeCycle")
+
 #Test code to check specifications, loading inputs, and whether datastore
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions
