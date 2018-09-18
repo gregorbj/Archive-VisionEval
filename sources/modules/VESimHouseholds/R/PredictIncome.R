@@ -550,21 +550,24 @@ PredictIncome <- function(L) {
     CheckTargetSearchRange = FALSE)
   #Predict income for persons in noninstitutional group quarters
   #-------------------------------------------------------------
-  #Create data frame for group quarters persons
-  Data_df <-
-    data.frame(L$Year$Household)[IsGroupQuarters_,]
-  #Add Azone average per capita income to data frame
-  Data_df$AvePerCapInc <- L$Year$Azone$GQIncomePC
-  #Calculate average household income target to match
-  #is the same as the average per capita income because household size is 1
-  GQIncomeTarget <- L$Year$Azone$GQIncomePC
-  #Predict the income for noninstitutional group quarters population
-  Out_ls$Year$Household$Income[IsGroupQuarters_] <-
-    applyLinearModel(
-      GQIncModel_ls,
-      Data_df,
-      TargetMean = GQIncomeTarget,
-      CheckTargetSearchRange = FALSE)
+  #Only run group quarters model if there is a group quarters population
+  if (sum(IsGroupQuarters_) > 0) {
+    #Create data frame for group quarters persons
+    Data_df <-
+      data.frame(L$Year$Household)[IsGroupQuarters_,]
+    #Add Azone average per capita income to data frame
+    Data_df$AvePerCapInc <- L$Year$Azone$GQIncomePC
+    #Calculate average household income target to match
+    #is the same as the average per capita income because household size is 1
+    GQIncomeTarget <- L$Year$Azone$GQIncomePC
+    #Predict the income for noninstitutional group quarters population
+    Out_ls$Year$Household$Income[IsGroupQuarters_] <-
+      applyLinearModel(
+        GQIncModel_ls,
+        Data_df,
+        TargetMean = GQIncomeTarget,
+        CheckTargetSearchRange = FALSE)
+  }
   #Return the result
   #-----------------
   Out_ls
