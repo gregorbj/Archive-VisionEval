@@ -114,7 +114,7 @@ fwrite(BzoneOutput, file = filename)
 filename <- file.path("output","Marea.csv")
 fwrite(MareaOutput, file = filename)
 
-filename <- file.path("output","FuleType.csv")
+filename <- file.path("output","FuelType.csv")
 fwrite(FuelTypeOutput, file = filename)
 
 filename <- file.path("output","JobAccessibility.csv")
