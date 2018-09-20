@@ -151,13 +151,29 @@ BuildScenarios <- function(L){
   })
   rownames(ScenarioDef_df) <- ScenarioNames_ar
 
-  #Iterate through scenarios and build inputs
+
+  # Iterate through scenarios and build inputs
   if(dir.exists(file.path(RunDir, L$Global$Model$ScenarioOutputFolder))){
     unlink(file.path(RunDir, L$Global$Model$ScenarioOutputFolder),
            recursive = TRUE)
   }
+  tryCatch({
+    if(dir.exists(file.path(RunDir, L$Global$Model$ScenarioOutputFolder))){
+      stop("Cannot delete the scenario output directory. Please delete manually!")
+    }
+  },
+  warning = function(w) print(w),
+  error = function(e) print(e))
   dir.create(file.path(RunDir, L$Global$Model$ScenarioOutputFolder))
   commonfiles_ar <- file.path(ModelPath, c("defs", "inputs", "run_model.R"))
+
+  # Create/Save a file to store the results of scenario builds, runs,
+  # and results
+  Scenarios_df <- data.frame(Name=ScenarioNames_ar,
+                             Build="NA",
+                             Run="NA",
+                             Results="NA", stringsAsFactors = FALSE)
+
   # cat("Bulding Scenarios\n")
   for (sc_ in ScenarioNames_ar) {
     # cat(paste0(sc_, "\n"))
@@ -166,34 +182,64 @@ BuildScenarios <- function(L){
     dir.create(ScenarioPath)
     #Copy common files into scenario directory
     file.copy(commonfiles_ar, ScenarioPath, recursive = TRUE)
+    #Create a flag to make sure files are changed according to scenario
+    #inputs
+    FilesChanged <- FALSE
     # Read model_parameters.json file to replace the content
-    ModelParameterJsonPath <- file.path(ScenarioPath, "defs", "model_parameters.json")
-    ModelParameterContent <- fromJSON(ModelParameterJsonPath)
-    #Copy each specialty file into scenario directory
-    ScenarioInputPath_ar <- file.path(ScenarioInputPath, ScenarioDef_df[sc_,])
-    for (Path in ScenarioInputPath_ar) {
-      File <- list.files(Path, full.names = TRUE)
-      # If a csv file then copy and overwrite existing file
-      # If a json file then replace the existing values with new values
-      if(grepl("\\.csv$", File)){
-        file.copy(File, file.path(ScenarioPath, "inputs"), overwrite = TRUE)
-      } else if (grepl("\\.json$", File)){
-        NewModelParameterContent <- fromJSON(File)
-        ModelParameterContent[match(NewModelParameterContent$NAME,
-                                    ModelParameterContent$NAME), "VALUE"] <-
-          NewModelParameterContent$VALUE
-        rm(NewModelParameterContent)
-      } else {
-        stop(paste0("Scenario input file not recognized: ", basename(File)))
+    tryCatch({
+      ModelParameterJsonPath <- file.path(ScenarioPath, "defs", "model_parameters.json")
+      ModelParameterContent <- fromJSON(ModelParameterJsonPath)
+      #Copy each specialty file into scenario directory
+      ScenarioInputPath_ar <- file.path(ScenarioInputPath, ScenarioDef_df[sc_,])
+      for (Path in ScenarioInputPath_ar) {
+        File <- list.files(Path, full.names = TRUE)
+        # If a csv file then copy and overwrite existing file
+        # If a json file then replace the existing values with new values
+        if(grepl("\\.csv$", File)){
+          if(!file.exists(file.path(ScenarioPath, "inputs", basename(File)))){
+            stop(paste0("Scenario input file not recognized: ", basename(File)))
+          }
+          file.copy(File, file.path(ScenarioPath, "inputs"), overwrite = TRUE)
+        } else if (grepl("\\.json$", File)){
+          if(!file.exists(file.path(ScenarioPath, "defs", basename(File)))){
+            stop(paste0("Scenario defs file not recognized: ", basename(File)))
+          }
+          NewModelParameterContent <- fromJSON(File)
+          if(any(is.na(match(NewModelParameterContent$NAME,
+                             ModelParameterContent$NAME)))){
+            stop(paste0("Scenario defs variable in file not recognized: ",
+                        basename(File)))
+          }
+          ModelParameterContent[match(NewModelParameterContent$NAME,
+                                      ModelParameterContent$NAME), "VALUE"] <-
+            NewModelParameterContent$VALUE
+          rm(NewModelParameterContent)
+        } else {
+          stop(paste0("Scenario input file not recognized: ", basename(File)))
+        }
       }
+      write_json(ModelParameterContent, path = file.path(ScenarioPath, "defs", "model_parameters.json"),
+                 pretty=TRUE)
+      FilesChanged <- TRUE
+    },
+    warning = function(w) print(w),
+    error = function(e) print(e))
+    # Update and save the Scenario Progress to a csv file
+    if(FilesChanged){
+      Scenarios_df$Build[which(Scenarios_df$Name==sc_)] <- "Completed"
+    } else {
+      Scenarios_df$Build[which(Scenarios_df$Name==sc_)] <- "Build Error"
     }
-    write_json(ModelParameterContent, path = file.path(ScenarioPath, "defs", "model_parameters.json"),
-               pretty=TRUE)
   }
   # Clean up
   gc()
   #Return the results
   #------------------
+  # Write/Save Scenario Progress Report
+  write.csv(Scenarios_df, file = file.path(RunDir,
+                                           L$Global$Model$ScenarioOutputFolder,
+                                           "ScenarioProgressReport.csv"),
+            row.names = FALSE)
   #Initialize output list
   Out_ls <- initDataList()
   Out_ls$Global$Model <- list(CompleteBuild = 1L)

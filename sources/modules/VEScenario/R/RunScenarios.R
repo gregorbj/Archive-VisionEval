@@ -175,7 +175,7 @@ startAsyncTask <-  function(asyncTasksRunning = vector(mode = "list"), asyncTask
 #' @return An integer indicating the number of tasks currently running
 #' @import future
 getNumberOfRunningTasks <- function(asyncTasksRunning = vector(mode = "list")) {
-  return(min(length(asyncTasksRunning), nbrOfWorkers()))
+  return(min(length(asyncTasksRunning)-1,nbrOfWorkers()))
 }
 
 # Function that returns the status of tasks running
@@ -215,8 +215,8 @@ getRunningTasksStatus <- function(asyncTasksRunning = vector(mode = "list")) {
                               length(asyncTasksRunning),
                               paste0(collapse = ", ",
                                      lapply(asyncTasksRunning, getRunningTaskStatus)
-                                     )
                               )
+  )
   return(runningTasksStatus)
 } #end getRunningTasksStatus
 
@@ -277,49 +277,55 @@ processRunningTasks <- function(asyncTasksRunning = vector(mode = "list"),
           )
         )
       }
-      taskResult <- NULL
+      taskResult <- NA
       numTasksResolved <- numTasksResolved + 1
       #NOTE future will send any errors it caught when we ask it for the value -- same as if we had evaluated the expression ourselves
       caughtError <- NULL
       caughtWarning <- NULL
-      if (catchErrors) {
-        withCallingHandlers(
-          expr = {
-            taskResult <- value(asyncFutureObject)
-          },
-          warning = function(w) {
-            caughtWarning <- w
-            print(
-              paste0(
-                Sys.time(),
-                ": ***WARNING*** processRunningTasks: '",
-                asyncTaskName,
-                "' returned a warning: ",
-                w
+      # Use try catch to continue running the scenarios w/o
+      # interruptions
+      tryCatch({
+        if (catchErrors) {
+          withCallingHandlers(
+            expr = {
+              taskResult <- value(asyncFutureObject)
+            },
+            warning = function(w) {
+              caughtWarning <- w
+              print(
+                paste0(
+                  Sys.time(),
+                  ": ***WARNING*** processRunningTasks: '",
+                  asyncTaskName,
+                  "' returned a warning: ",
+                  w
+                )
               )
-            )
-            print(sys.calls())
-          },
-          error = function(e) {
-            caughtError <- e
-            print(
-              paste0(
-                Sys.time(),
-                ": ***ERROR*** processRunningTasks: '",
-                asyncTaskName,
-                "' returned an error: ",
-                e
+              print(sys.calls())
+            },
+            error = function(e) {
+              caughtError <- e
+              print(
+                paste0(
+                  Sys.time(),
+                  ": ***ERROR*** processRunningTasks: '",
+                  asyncTaskName,
+                  "' returned an error: ",
+                  e
+                )
               )
-            )
-            print(sys.calls())
-          }
-        )#end withCallingHandlers
-      } #end if catch errors
-      else {
-        #simply fetch the value -- if exceptions happened they will be thrown by the Future library when we call value and
-        #therefore will propagate to the caller
-        taskResult <- value(asyncFutureObject)
-      }
+              print(sys.calls())
+            }
+          )#end withCallingHandlers
+        } #end if catch errors
+        else {
+          #simply fetch the value -- if exceptions happened they will be thrown by the Future library when we call value and
+          #therefore will propagate to the caller
+          taskResult <- value(asyncFutureObject)
+        }},
+        warning = function(w) print(w),
+        error = function(e) print(e)
+      )
       rm(asyncFutureObject)
       submitTime <- asyncTaskObject_ls[["submitTime"]]
       endTime <- Sys.time()
@@ -379,7 +385,7 @@ processRunningTasks <- function(asyncTasksRunning = vector(mode = "list"),
     list(
       RunningTasks = min(length(asyncTasksRunning), nbrOfWorkers()),
       asyncTasksRunning = asyncTasksRunning
-      )
+    )
   )
 } # end processRunningTasks
 
@@ -413,10 +419,38 @@ RunScenarios <- function(L){
   # A list to store currently running scenarios
   ScenarioInProcess_ls <- list()
   NWorkers <- L$Global$Model$NWorkers
+  NWorkers <- min(max(availableCores()-1, 1), NWorkers)
   plan(multiprocess, workers = NWorkers, gc=TRUE)
+
+  # Update the Scenario Progress Report
+  Scenarios_df  <- read.csv(file.path(ModelPath,
+                                      L$Global$Model$ScenarioOutputFolder,
+                                      "ScenarioProgressReport.csv"),
+                            stringsAsFactors = FALSE)
+  RunScenariosFlag_ar <- vector(mode="logical",
+                                length = nrow(Scenarios_df))
+  RunScenariosFlag_ar <- Scenarios_df$Build %in% "Completed"
+  names(RunScenariosFlag_ar) <- Scenarios_df$Name
+
+  RunScenariosFinishFlag_ar <- vector(mode="logical",
+                                      length = nrow(Scenarios_df))
+  names(RunScenariosFinishFlag_ar) <- Scenarios_df$Name
 
   for(index in seq_along(ScenariosPath_ar)){
     ScenarioName_ <- ScenarioNames_ar[index]
+    # Check if Scenario build is completed
+    if(!RunScenariosFlag_ar[ScenarioName_]){
+      ScenarioPath_ <- ScenariosPath_ar[index]
+      if(dir.exists(ScenarioPath_)){
+        unlink(ScenarioPath_, recursive = TRUE)
+      }
+      ScenarioLogFile <- paste0(ScenarioName_, ".txt")
+      ScenarioLogFilePath <- file.path(ScenarioInputPath, ScenarioLogFile)
+      if(file.exists(ScenarioLogFilePath)){
+        file.remove(ScenarioLogFilePath)
+      }
+      next
+    }
     ScenarioPath_ <- ScenariosPath_ar[index]
     ScenarioInProcess_ls[[ScenarioName_]] <- list()
     ScenarioLogFile <- paste0(ScenarioName_, ".txt")
@@ -455,44 +489,58 @@ RunScenarios <- function(L){
                                                                    ".txt")),
                                                 append = TRUE)
                        return(output)
-                       },
-                       label = ScenarioName_,
-                       globals = TRUE),
+                     },
+                     label = ScenarioName_,
+                     globals = TRUE),
                      callback = function(asyncResults){
-                     # asyncResults is: list(asyncTaskName,
-                     #                        taskResult,
-                     #                        startTime,
-                     #                        endTime,
-                     #                        elapsedTime,
-                     #                        caughtError,
-                     #                        caughtWarning)
-                     # Check if the model run is finished by looking at the log
-                     taskName_ <- asyncResults[["asyncTaskName"]]
-                     ScenarioName_ <- gsub("Scenario_", "", taskName_)
-                     # Check if the log file exists
-                     LogFilePath_ <- list.files(file.path(ModelPath, "scenarios", ScenarioName_),
-                                                pattern = "^Log")
-                     if(length(LogFilePath_)==0){
-                       msg <- paste0("***ERROR*** Did not find the expected log file ",
-                                     "for scenario: ", ScenarioName_)
-                       stop(msg)
-                     } else if (length(LogFilePath_) > 1){
-                       msg <- paste0("***ERROR*** More than 1 log file found.")
-                       stop(msg)
-                     }
-                     ScenarioLogFile <- list.files(file.path(ModelPath, "scenarios"),
-                                                   pattern = paste0(ScenarioName_,".txt"))
-                     ScenarioLogFilePath <- file.path(ModelPath, "scenarios",
-                                                      ScenarioLogFile)
-                     write(paste0("Log File: ", LogFilePath_),
-                           file = ScenarioLogFilePath, append = TRUE)
-                     write(print(paste0(Sys.time(),
-                                        ": Completed running scenario '",
-                                        ScenarioName_, "'")),
-                           file = ScenarioLogFilePath, append = TRUE)
-                   },
-                   debug = FALSE
-    ) # end call to startAsyncTask
+                       # asyncResults is: list(asyncTaskName,
+                       #                        taskResult,
+                       #                        startTime,
+                       #                        endTime,
+                       #                        elapsedTime,
+                       #                        caughtError,
+                       #                        caughtWarning)
+                       # Check if the model run is finished by looking at the log
+                       taskName_ <- asyncResults[["asyncTaskName"]]
+                       taskResult <- asyncResults[["taskResult"]]
+                       ScenarioName_ <- gsub("Scenario_", "", taskName_)
+                       # Check if the log file exists
+                       LogFilePath_ <- list.files(file.path(ModelPath,
+                                                            L$Global$Model$ScenarioOutputFolder,
+                                                            ScenarioName_),
+                                                  pattern = "^Log")
+                       msg <- ""
+                       if(length(LogFilePath_)==0){
+                         msg <- paste0("***ERROR*** Did not find the expected log file ",
+                                       "for scenario: ", ScenarioName_)
+                         print(msg)
+                       } else if (length(LogFilePath_) > 1){
+                         msg <- paste0("***ERROR*** More than 1 log file found.")
+                         stop(msg)
+                       }
+                       ScenarioLogFile <- list.files(file.path(ModelPath,
+                                                               L$Global$Model$ScenarioOutputFolder),
+                                                     pattern = paste0(ScenarioName_,".txt"))
+                       ScenarioLogFilePath <- file.path(ModelPath,
+                                                        L$Global$Model$ScenarioOutputFolder,
+                                                        ScenarioLogFile)
+                       write(paste0("Log File: ", LogFilePath_),
+                             file = ScenarioLogFilePath, append = TRUE)
+                       if(is.null(taskResult)){
+                         write(print(paste0(Sys.time(),
+                                            ": Completed running scenario '",
+                                            ScenarioName_, "'")),
+                               file = ScenarioLogFilePath, append = TRUE)
+                         RunScenariosFinishFlag_ar[ScenarioName_] <<- TRUE
+                       } else {
+                         write(print(msg),
+                               file = ScenarioLogFilePath, append = TRUE)
+                       }
+                     },
+                     debug = FALSE
+      ) # end call to startAsyncTask
+    # Update the scenario progress tracker
+    Scenarios_df$Run[which(Scenarios_df$Name==ScenarioName_)] <- "Submitted"
     RunningTaskResults_ls <- processRunningTasks(
       asyncTasksRunning = ScenarioInProcess_ls,
       wait = FALSE,
@@ -500,11 +548,41 @@ RunScenarios <- function(L){
       maximumTasksToResolve = 1
     )
     ScenarioInProcess_ls <- RunningTaskResults_ls[["asyncTasksRunning"]]
+
+    # Update scenarios that are finished
+    ScenarioNames_ <- gsub("Scenario_", "", names(ScenarioInProcess_ls))
+    Scenarios_df$Run[!(Scenarios_df$Name %in% ScenarioNames_) &
+                       Scenarios_df$Run %in% "Submitted" &
+                       RunScenariosFinishFlag_ar[Scenarios_df$Name]] <- "Completed"
+    Scenarios_df$Run[!(Scenarios_df$Name %in% ScenarioNames_) &
+                       Scenarios_df$Run %in% "Submitted" &
+                       !RunScenariosFinishFlag_ar[Scenarios_df$Name]] <- "Run Error"
+
+    write.csv(Scenarios_df, file.path(ModelPath,
+                                      L$Global$Model$ScenarioOutputFolder,
+                                      "ScenarioProgressReport.csv"),
+              row.names = FALSE)
   }
 
   RunningTaskResults_ls <- processRunningTasks(asyncTasksRunning = ScenarioInProcess_ls,
-                      wait = TRUE, debug = TRUE)
+                                               wait = TRUE, debug = TRUE)
+
   ScenarioInProcess_ls <- RunningTaskResults_ls[["asyncTasksRunning"]]
+  # Update scenarios that are finished
+  ScenarioNames_ <- gsub("Scenario_", "", names(ScenarioInProcess_ls))
+  Scenarios_df$Run[!(Scenarios_df$Name %in% ScenarioNames_) &
+                     Scenarios_df$Run %in% "Submitted" &
+                     RunScenariosFinishFlag_ar[Scenarios_df$Name]] <- "Completed"
+  Scenarios_df$Run[!(Scenarios_df$Name %in% ScenarioNames_) &
+                     Scenarios_df$Run %in% "Submitted" &
+                     !RunScenariosFinishFlag_ar[Scenarios_df$Name]] <- "Run Error"
+  write.csv(Scenarios_df, file.path(ModelPath,
+                                    L$Global$Model$ScenarioOutputFolder,
+                                    "ScenarioProgressReport.csv"),
+            row.names = FALSE)
+
+  # Close the future processors
+  closeAllConnections()
 
   #Return the results
   #------------------
@@ -513,158 +591,3 @@ RunScenarios <- function(L){
   Out_ls$Global$Model <- list(CompleteRun = 1L)
   return(Out_ls)
 }
-
-
-
-
-
-
-# resetEnv <- function() {
-#   Objects <- ls(pos = 1)
-#   ToKeep_ <- c("MasterDir", "resetEnv", "Sc", "ScenNames", "assignLoad")
-#   rm(list = Objects[!(Objects %in% ToKeep_)], pos = 1)
-#   detach("Parameters_")
-#   detach("GreenSTEP_")
-#   detach("Abbr_")
-#   detach("Dir_")
-# }
-#
-# assignLoad <- function(filename){
-#   load(filename)
-#   get(ls()[ls() != "filename"])
-# }
-#
-#
-# #Save the master directory and get names of all scenario directories
-# #-------------------------------------------------------------------
-# MasterDir <- getwd()
-# Sc <- list.dirs("scenarios", recursive = FALSE)
-# ScenNames <- unlist(lapply(strsplit(Sc, "/"), function(x) x[2]))
-#
-# #Run all the scenarios in the scenarios directory
-# #------------------------------------------------
-# for (sc in Sc) {
-#   print(sc)
-#   setwd(sc)
-#   source("../../scripts/SmartGAP.r")
-#   resetEnv()
-#   setwd(MasterDir)
-# }
-#
-# #Create summary tables of all the output measures
-# #------------------------------------------------
-# OutputFiles <-
-#   c(
-#     "Access.Ma", "Accidents.As", "AveSpeed.MaTy", "Costs.Pt",
-#     "DelayVehHr.MaTy", "Dvmt.Pt", "Emissions.Pt", "Emp.Pt",
-#     "Equity.Ig", "Fuel.Pt", "HighwayCost.Ma", "Inc.Pt", "Pop.Pt",
-#     "TransitCapCost.Ma", "TransitOpCost.Ma", "TransitTrips.Pt",
-#     "VehHr.MaTy", "VehicleTrips.Pt", "Walking.Ma"
-#   )
-# #Iterate through outputs and scenarios and create tables
-# #-------------------------------------------------------
-# for (i in 1:length(OutputFiles)) {
-#   File <- OutputFiles[i]
-#   Name <- unlist(strsplit(File, "\\."))[1]
-#   for (j in 1:length(Sc)) {
-#     sc <- ScenNames[j]
-#     Path <- paste0("scenarios/", sc, "/outputs/", File, ".RData")
-#     Data <- assignLoad(Path)
-#     Class <- class(Data)
-#     if (Class == "matrix") {
-#       NumRow <- max(dim(Data))
-#       NumCol <- length(Sc)
-#       if (j == 1) {
-#         Results <- matrix(0, nrow = NumRow, ncol = NumCol)
-#         rownames(Results) <- dimnames(Data)[[which(dim(Data) == max(dim(Data)))]]
-#         colnames(Results) <- ScenNames
-#       }
-#       if (dim(Data)[1] == NumRow) {
-#         Results[, sc] <- Data[, 1]
-#       } else {
-#         Results[, sc] <- Data[1, ]
-#       }
-#     }
-#     if (Class == "numeric"){
-#       if (length(Data) > 1) {
-#         NumRow <- length(Data)
-#         NumCol <- length(Sc)
-#         if (j == 1) {
-#           Results <- matrix(0, nrow = NumRow, ncol = NumCol)
-#           rownames(Results) <- names(Data)
-#           colnames(Results) <- ScenNames
-#         }
-#         Results[, sc] <- Data
-#       } else {
-#         if (j == 1) {
-#           Results <- numeric(length(Sc))
-#           names(Results) <- ScenNames
-#         }
-#         Results[sc] <- Data
-#       }
-#     }
-#     rm(sc, Path, Data, Class)
-#     if (exists("NumRow")) rm(NumRow)
-#     if (exists("NumCol")) rm(NumCol)
-#   }
-#   SaveFileName <- paste0("scenarios/", Name, ".csv")
-#   write.table(Results, SaveFileName, row.names = TRUE, col.names = TRUE, sep = ",")
-#   rm(File, Name, Results)
-# }
-#
-# #Create summary comparison js file
-# #---------------------------------
-#
-# #Build data frame of scenario levels
-# LvlDef_ls <- list(Bike = 1:2,
-#                   VmtChrg = 1:3,
-#                   DemandMgt = 1:3,
-#                   LandUse = 1:2,
-#                   Parking = 1:3,
-#                   Transit = 1:3)
-# ScenTab_df <- expand.grid(LvlDef_ls)
-# #Vector of scenario names
-# Sc <- apply(ScenTab_df, 1, function(x) {
-#   paste(paste0(c("B", "C", "D", "L", "P", "T"), x), collapse = "")
-# })
-# #Get the population to compute per capita values
-# Pop_Sc <- colSums(as.matrix(read.csv("scenarios/Pop.csv")))[Sc]
-# #Calculate fatalities and injuries per 1000 persons by scenario
-# FatalityInjury_Sc <- colSums(as.matrix(read.csv("scenarios/Accidents.csv"))[1:2,Sc])
-# ScenTab_df$FatalityInjuryRate <- 1000 * FatalityInjury_Sc / Pop_Sc
-# rm(FatalityInjury_Sc)
-# #Calculate average cost per person
-# Cost_Sc <- colSums(as.matrix(read.csv("scenarios/Costs.csv")))[Sc]
-# ScenTab_df$AveCost <- Cost_Sc / Pop_Sc
-# rm(Cost_Sc)
-# #Calculate average DVMT per person
-# Dvmt_Sc <- colSums(as.matrix(read.csv("scenarios/Dvmt.csv")))[Sc]
-# ScenTab_df$AveDvmt <- Dvmt_Sc / Pop_Sc
-# rm(Dvmt_Sc)
-# #Calculate average emissions per person
-# Emissions_Sc <- colSums(as.matrix(read.csv("scenarios/Emissions.csv")))[Sc]
-# ScenTab_df$AveEmissions <- 365 * Emissions_Sc / Pop_Sc
-# rm(Emissions_Sc)
-# #Calculate average fuel consumed per person
-# Fuel_Sc <- colSums(as.matrix(read.csv("scenarios/Fuel.csv")))[Sc]
-# ScenTab_df$AveFuel <- 365 * Fuel_Sc / Pop_Sc
-# rm(Fuel_Sc)
-# #Calculate average vehicle hours per person
-# VehHr_Sc <- as.matrix(read.csv("scenarios/VehHr.csv"))[1,Sc]
-# ScenTab_df$AveVehHr <- VehHr_Sc / Pop_Sc
-# rm(VehHr_Sc)
-#
-# #Convert to JS format and save
-# #-----------------------------
-# library(jsonlite)
-# rownames(ScenTab_df) <- NULL
-# JSON <- toJSON(ScenTab_df)
-# JSON <- paste("var data = ", JSON, ";", sep="")
-# File <- file("scenarios/metro-measures.js", "w")
-# writeLines(JSON, con=File)
-# close(File)
-#
-# #Save as text file
-# #-----------------
-# write.table(ScenTab_df, file="scenarios/summary_comparison.csv",
-#             row.names = FALSE, col.names = TRUE, sep = ",")
