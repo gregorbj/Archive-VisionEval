@@ -152,10 +152,12 @@ ui <- fluidPage(
         label = "Select scenario run script...",
         title = "Please select model run script",
         multiple = FALSE,
-        list(R = "R")
-        ), #end shinyFilesButton
+        class=list(R = "R")
+      ), #end shinyFilesButton
+      
       h3("Run script: "),
-      verbatimTextOutput(outputId=SCRIPT_NAME, placeholder=TRUE),
+      verbatimTextOutput(SCRIPT_NAME, placeholder=TRUE),
+      
       shinyFiles::shinySaveButton( # Creates a window with a display of directories and files for saving
         id = COPY_MODEL_BUTTON,
         label = "Copy scenario...",
@@ -168,6 +170,7 @@ ui <- fluidPage(
     tabPanel( # Defines the tab for displaying and changing the input parameters to the model.
       title = "Settings",
       value = TAB_SETTINGS,
+
       h3("Model parameters"),
       #shinyAce does not support setting height by lines and the updateAceEditor does not
       #have a height parameter so not sure what to do...
@@ -176,8 +179,10 @@ ui <- fluidPage(
       fluidRow(column(3, actionButton(SAVE_MODEL_PARAMETERS_FILE, "Save Changes")),
                column(3, actionButton(REVERT_MODEL_PARAMETERS_FILE, "Revert Changes"))
                ),
-      h3("Geo File"),
-      DT::dataTableOutput(GEO_CSV_FILE),
+      
+      #h3("Geo File"),
+      #DT::dataTableOutput(GEO_CSV_FILE),
+
       h3("Run parameters"),
       shinyAce::aceEditor(RUN_PARAMETERS_FILE, height = (16 * 11), mode = "json"),
       fluidRow(column(3, actionButton(SAVE_RUN_PARAMETERS_FILE, "Save Changes")),
@@ -380,6 +385,7 @@ server <- function(input, output, session) {
     id = COPY_MODEL_BUTTON,
     session = session,
     roots = volumeRoots,
+    defaultRoot = 'VisionEval',
     #must specify a filetype due to shinyFiles bug https://github.com/thomasp85/shinyFiles/issues/56
     #even though in my case I am creating a folder so don't care about the mime type
     filetypes = c("")
@@ -398,6 +404,7 @@ server <- function(input, output, session) {
     id = SELECT_RUN_SCRIPT_BUTTON,
     session = session,
     roots = volumeRoots,
+    defaultRoot = "VisionEval",
     filetypes = c("R")
   )
 
@@ -548,10 +555,13 @@ server <- function(input, output, session) {
         ) #end call to registerReactiveFileHandler
 
   # Get the information about the scipt like paths to the scripts and input files
-  getScriptInfo <- eventReactive(input[[SELECT_RUN_SCRIPT_BUTTON]], {
+  getScriptInfo <- eventReactive(
+  {!'integer' %in% class(input[[SELECT_RUN_SCRIPT_BUTTON]])},
+  {
     debugConsole("getScriptInfo entered")
     scriptInfo_ls <- list()
     inFile <- parseFilePaths(roots = volumeRoots, input[[SELECT_RUN_SCRIPT_BUTTON]])
+    debugConsole(paste('SELECT_RUN_SCRIPT_BUTTON:', input[[SELECT_RUN_SCRIPT_BUTTON]]))
     scriptInfo_ls$datapath <- normalizePath(as.character(inFile$datapath))
     scriptInfo_ls$fileDirectory <- dirname(scriptInfo_ls$datapath)
     scriptInfo_ls$fileBase <- basename(scriptInfo_ls$datapath)
