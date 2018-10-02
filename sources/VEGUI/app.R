@@ -101,8 +101,8 @@ myFileTypes_ls <- list(
 )
 
 # Get the volumes of local drive
-volumeRoots = getVolumes("")
-
+volumeRoots = c('working directory' = '.', 'models' = '../models', 'VisionEval' = '../..', getVolumes("")())
+# volumeRoots = getVolumes("")()
 #============================================
 #SECTION 3: DEFINE THE UI FOR APPLICATION
 #============================================
@@ -149,13 +149,13 @@ ui <- fluidPage(
       "Scenario",
       shinyFiles::shinyFilesButton( # Creates a window with a display of directories and files for selection of model script
         id = SELECT_RUN_SCRIPT_BUTTON,
-        label = "Select scenario script...",
+        label = "Select scenario run script...",
         title = "Please select model run script",
         multiple = FALSE,
         list(R = "R")
         ), #end shinyFilesButton
       h3("Run script: "),
-      verbatimTextOutput(SCRIPT_NAME, FALSE),
+      verbatimTextOutput(outputId=SCRIPT_NAME, placeholder=TRUE),
       shinyFiles::shinySaveButton( # Creates a window with a display of directories and files for saving
         id = COPY_MODEL_BUTTON,
         label = "Copy scenario...",
