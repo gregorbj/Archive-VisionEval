@@ -31,7 +31,7 @@ library(shinyTree)
 
 scriptDir <- getSrcDirectory(function(x) x )
 source(file.path(scriptDir, "FutureTaskProcessor.R"))
-source(file.path(scriptDir,"ancillaryfunctions.R"))
+#source(file.path(scriptDir,"ancillaryfunctions.R"))
 
 #DT options https://datatables.net/reference/option/dom
 # only display the table, and nothing else
@@ -154,10 +154,10 @@ ui <- fluidPage(
         multiple = FALSE,
         class=list(R = "R")
       ), #end shinyFilesButton
-      
+
       h3("Run script: "),
       verbatimTextOutput(SCRIPT_NAME, placeholder=TRUE),
-      
+
       shinyFiles::shinySaveButton( # Creates a window with a display of directories and files for saving
         id = COPY_MODEL_BUTTON,
         label = "Copy scenario...",
@@ -179,7 +179,7 @@ ui <- fluidPage(
       fluidRow(column(3, actionButton(SAVE_MODEL_PARAMETERS_FILE, "Save Changes")),
                column(3, actionButton(REVERT_MODEL_PARAMETERS_FILE, "Revert Changes"))
                ),
-      
+
       #h3("Geo File"),
       #DT::dataTableOutput(GEO_CSV_FILE),
 
@@ -556,7 +556,7 @@ server <- function(input, output, session) {
 
   # Get the information about the scipt like paths to the scripts and input files
   getScriptInfo <- eventReactive(
-  {!'integer' %in% class(input[[SELECT_RUN_SCRIPT_BUTTON]])},
+  input[[SELECT_RUN_SCRIPT_BUTTON]],
   {
     debugConsole("getScriptInfo entered")
     scriptInfo_ls <- list()
@@ -565,34 +565,38 @@ server <- function(input, output, session) {
     scriptInfo_ls$datapath <- normalizePath(as.character(inFile$datapath))
     scriptInfo_ls$fileDirectory <- dirname(scriptInfo_ls$datapath)
     scriptInfo_ls$fileBase <- basename(scriptInfo_ls$datapath)
-    debugConsole(paste("getScriptInfo:", scriptInfo_ls$datapath))
 
-    #call the first few methods so can find out log file value and get the ModelState_ls global
-    setwd(scriptInfo_ls$fileDirectory)
-    visioneval::initModelStateFile()
-    visioneval::initLog()
-    visioneval::writeLog("VE_GUI called visioneval::initModelStateFile() and visioneval::initLog()")
+    if ( ! 'integer' %in% class(input[[SELECT_RUN_SCRIPT_BUTTON]])){
+
+      debugConsole(paste("getScriptInfo:", scriptInfo_ls$datapath))
+
+      #call the first few methods so can find out log file value and get the ModelState_ls global
+      setwd(scriptInfo_ls$fileDirectory)
+      visioneval::initModelStateFile()
+      visioneval::initLog()
+      visioneval::writeLog("VE_GUI called visioneval::initModelStateFile() and visioneval::initLog()")
 
       #From now on we will get the current ModelState by reading the object stored on disk
-    reactiveFilePaths_rv[[MODEL_STATE_FILE]] <<- file.path(scriptInfo_ls$fileDirectory, "ModelState.Rda")
+      reactiveFilePaths_rv[[MODEL_STATE_FILE]] <- file.path(scriptInfo_ls$fileDirectory, "ModelState.Rda")
 
-    reactiveFilePaths_rv[[VE_LOG]] <<- file.path(scriptInfo_ls$fileDirectory, readModelState()$LogFile)
-    reactiveFilePaths_rv[[DATASTORE]] <<- file.path(scriptInfo_ls$fileDirectory, readModelState()$DatastoreName)
+      reactiveFilePaths_rv[[VE_LOG]] <- file.path(scriptInfo_ls$fileDirectory, readModelState()$LogFile)
+      reactiveFilePaths_rv[[DATASTORE]] <- file.path(scriptInfo_ls$fileDirectory, readModelState()$DatastoreName)
 
-    defsDirectory <- file.path(scriptInfo_ls$fileDirectory, "defs")
+      defsDirectory <- file.path(scriptInfo_ls$fileDirectory, "defs")
 
-    reactiveFilePaths_rv[[MODEL_PARAMETERS_FILE]] <<- file.path(defsDirectory, "model_parameters.json")
+      reactiveFilePaths_rv[[MODEL_PARAMETERS_FILE]] <- file.path(defsDirectory, "model_parameters.json")
 
-    reactiveFilePaths_rv[[RUN_PARAMETERS_FILE]] <<- file.path(defsDirectory, "run_parameters.json")
+      reactiveFilePaths_rv[[RUN_PARAMETERS_FILE]] <- file.path(defsDirectory, "run_parameters.json")
 
-    reactiveFilePaths_rv[[GEO_CSV_FILE]] <<- file.path(defsDirectory, "geo.csv")
+      reactiveFilePaths_rv[[GEO_CSV_FILE]] <- file.path(defsDirectory, "geo.csv")
 
-    #move to the settings tab
-    updateNavlistPanel(session, "navlist", selected = TAB_SETTINGS)
+      #move to the settings tab
+      updateNavlistPanel(session, "navlist", selected = TAB_SETTINGS)
+    }
+
     debugConsole("getScriptInfo exited")
     return(scriptInfo_ls)
-    }
-    ) #end getScriptInfo reactive
+    }) #end getScriptInfo reactive
 
   getModelModules <- reactive({
     datapath <- getScriptInfo()$datapath
