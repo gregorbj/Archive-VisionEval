@@ -285,7 +285,7 @@ CalculatePtranEnergyAndEmissions <- function(L) {
       ))
     }
     rownames(DvmtProp_MaPt) <- Ma
-    Dvmt_MaPt <- sweep(DvmtProp_MaPt, 2, Dvmt_Ma, "*")
+    Dvmt_MaPt <- sweep(DvmtProp_MaPt, 1, Dvmt_Ma, "*")
     #Calculate energy by Marea and powertrain
     if (Type == "Rail") {
       MpgMpkwh_Pt <- c(

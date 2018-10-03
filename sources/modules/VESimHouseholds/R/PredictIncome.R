@@ -1,9 +1,55 @@
 #===============
 #PredictIncome.R
 #===============
-#This module predicts the income for each simulated household given the
-#number of workerss in each age group and the average per capita income for the
-#Azone where the household resides.
+
+#<doc>
+## PredictIncome Module
+#### September 6, 2018
+#
+#This module predicts the income for each simulated household given the number of workers in each age group and the average per capita income for the Azone where the household resides.
+#
+### Model Parameter Estimation
+#Household income models are estimated for *regular* households and for *group quarters* households.
+#
+#The household income models are estimated using Census public use microsample (PUMS) data that are compiled into a R dataset (HhData_df) by the 'CreateEstimationDatasets.R' script when the VESimHouseholds package is built. The data that are supplied with the VESimHouseholds package downloaded from the VisionEval repository may be used, but it is preferrable to use data for the region being modeled. How this is done is explained in the documentation for the *CreateEstimationDatasets.R* script.
+#
+#The household income models are linear regression models in which the dependent variable is a power transformation of income. Power transformation is needed in order to normalize the income data distribution which has a long right-hand tail. The power transform is found which minimizes the skewness of the income distribution. The power transform for *regular* households is:
+#
+#<txt:HHIncModel_ls$Pow>
+#
+#The power transform for *group quarters* households is:
+#
+#<txt:GQIncModel_ls$Pow>
+#
+#The independent variables for the linear models are power transformed per capita income for the area, the number of workers in each of 4 worker age groups (15-19, 20-29, 30-54, 55-64), and the number of persons in the 65+ age group. In addition, power-transformed per capita income is interacted with each of the 4 worker groups and 65+ age group variable. The summary statistics for the *regular* household model are as follows:
+#
+#<txt:HHIncModel_ls$Summary>
+#
+#The summary statistics for the *group quarters* household model are as follows:
+#
+#<txt:GQIncModel_ls$Summary>
+#
+#An additional step must be carried out in order to predict household income. Because the linear model does not account for all of the observed variance, and because income is power distribution, the average of the predicted per capita income is less than the average per capita income of the population. To compensate, random variation needs to be added to each household prediction of power-transformed income by randomly selecting from a normal distribution that is centered on the value predicted by the linear model and has a standard deviation that is calculated so as the resulting average per capita income of households match the input value. A binary search process is used to find the suitable standard deviation. Following is the comparison of mean values for the observed *regular* household income for the estimation dataset and the corresponding predicted values for the estimation dataset.
+#
+#<tab:HHIncModel_ls$MeanCompare>
+#
+#The following figure compares the distributions of the observed and predicted incomes of *regular* households.
+#
+#<fig:reg-hh-inc_obs-vs-est_distributions.png>
+#
+#Following is the comparison of mean values for the observed *group quarters* household income for the estimation dataset and the corresponding predicted values for the estimation dataset.
+#
+#<tab:GQIncModel_ls$MeanCompare>
+#
+#The following figure compares the distributions of the observed and predicted incomes of *groups quarters* households.
+#
+#<fig:gq-hh-inc_obs-vs-est_distributions.png>
+#
+### How the Module Works
+#This module runs at the Azone level. Azone household average per capita income and group quarters average per capita income are user inputs to the model. The other model inputs are in the datastore, having been created by the CreateHouseholds and PredictWorkers modules. Household income is predicted separately for *regular* and *group quarters* households. Per capita income is transformed using the estimated power transform, the model dependent variables are calculated, and the linear model is applied. Random variation is applied so that the per capita mean income for the predicted household income matches the input value.
+#
+
+#</doc>
 
 
 #=================================
@@ -54,16 +100,27 @@
 #' PrepFun: a function that prepares inputs to be applied in the linear model,
 #' OutFun: a function that transforms the result of applying the linear model.
 #' Summary: the summary of the linear model estimation results.
-#' @import visioneval car
+#' @import visioneval
 #' @include CreateEstimationDatasets.R CreateHouseholds.R PredictWorkers.R
 #' @export
 estimateIncomeModel <- function(Data_df, StartTerms_) {
+  #Define function to calculate power transform to minimize skewness
+  findPower <- function(Inc_) {
+    skewness <- function (x)
+    {
+      x <- x[!is.na(x)]
+      n <- length(x)
+      x <- x - mean(x)
+      y <- sqrt(n) * sum(x^3)/(sum(x^2)^(3/2))
+      y * ((1 - 1/n))^(3/2)
+    }
+    checkSkewMatch <- function(Pow) {
+      skewness(Inc_^Pow)
+    }
+    binarySearch(checkSkewMatch, c(0.001,1), Target = 0)
+  }
   #Calculate income power transformation
-  Pow <-
-    car::powerTransform(
-      Income ~ 1,
-      weights = Data_df$HhWeight,
-      data = Data_df)$lambda
+  Pow <- round(findPower(Data_df$Income), 3)
   #Define function to prepare inputs for estimating model
   prepIndepVar <- function(In_df) {
     Out_df <- In_df
@@ -103,7 +160,8 @@ estimateIncomeModel <- function(Data_df, StartTerms_) {
     Formula = makeModelFormulaString(IncModel_LM),
     PrepFun = prepIndepVar,
     OutFun = transformResult,
-    Summary = summary(IncModel_LM)
+    Pow = Pow,
+    Summary = capture.output(summary(IncModel_LM))
   )
 }
 
@@ -129,7 +187,7 @@ StartTerms_ <-
     "PowPerCapInc:Age65Plus")
 #Estimate the model
 HHIncModel_ls <- estimateIncomeModel(Hh_df, StartTerms_)
-rm(StartTerms_, Hh_df)
+rm(StartTerms_)
 
 #Estimate the search range for average household income matching
 #---------------------------------------------------------------
@@ -143,6 +201,42 @@ rm(StartTerms_, Hh_df)
 #Azone. In order for the binary search to be accomplished, a suitable search
 #range needs to be specified.
 HHIncModel_ls$SearchRange <- c(0, 20)
+
+#Compare observed and estimated distributions
+#--------------------------------------------
+IncObs_ <- Hh_df$Income
+HHIncomeTarget <- mean(IncObs_)
+IncEst_ <- applyLinearModel(
+  HHIncModel_ls,
+  Hh_df,
+  TargetMean = HHIncomeTarget,
+  CheckTargetSearchRange = FALSE
+)
+#Compare observed and estimated means
+MeanCompare_df <- data.frame(
+  Dollars = c(
+    "Observed" = round(mean(IncObs_)),
+    "Estimated" = round(mean(IncEst_))
+  )
+)
+HHIncModel_ls$MeanCompare <- MeanCompare_df
+#Plot comparison of observed and estimated income distributions
+png(
+  filename = "data/reg-hh-inc_obs-vs-est_distributions.png",
+  width = 480,
+  height = 480
+)
+plot(
+  density(IncObs_),
+  xlim = c(0, 200000),
+  xlab = "Annual Dollars ($2000)",
+  main = "Distributions of Observed and Predicted Household Income \nRegular Households"
+  )
+lines(density(IncEst_), lty = 2)
+legend("topright", legend = c("Observed", "Predicted"), lty = c(1,2))
+dev.off()
+#Clean up
+rm(Hh_df, IncObs_, HHIncomeTarget, MeanCompare_df)
 
 #Save the household income model
 #-------------------------------
@@ -185,7 +279,7 @@ StartTerms_ <-
     "PowPerCapInc:Age65Plus")
 #Estimate the model
 GQIncModel_ls <- estimateIncomeModel(Hh_df, StartTerms_)
-rm(StartTerms_, Hh_df)
+rm(StartTerms_)
 
 #Estimate the search range for average group quarters income matching
 #--------------------------------------------------------------------
@@ -199,6 +293,42 @@ rm(StartTerms_, Hh_df)
 #Azone. In order for the binary search to be accomplished, a suitable search
 #range needs to be specified.
 GQIncModel_ls$SearchRange <- c(0, 20)
+
+#Compare observed and estimated distributions
+#--------------------------------------------
+IncObs_ <- Hh_df$Income
+HHIncomeTarget <- mean(IncObs_)
+IncEst_ <- applyLinearModel(
+  GQIncModel_ls,
+  Hh_df,
+  TargetMean = HHIncomeTarget,
+  CheckTargetSearchRange = FALSE
+)
+#Compare observed and estimated means
+MeanCompare_df <- data.frame(
+  Dollars = c(
+    "Observed" = round(mean(IncObs_)),
+    "Estimated" = round(mean(IncEst_))
+  )
+)
+GQIncModel_ls$MeanCompare <- MeanCompare_df
+#Plot comparison of observed and estimated income distributions
+png(
+  filename = "data/gq-hh-inc_obs-vs-est_distributions.png",
+  width = 480,
+  height = 480
+)
+plot(
+  density(IncObs_),
+  xlim = c(0, 60000),
+  xlab = "Annual Dollars ($2000)",
+  main = "Distributions of Observed and Predicted Household Income \nGroup Quarters Households"
+)
+lines(density(IncEst_), lty = 2)
+legend("topright", legend = c("Observed", "Predicted"), lty = c(1,2))
+dev.off()
+#Clean up
+rm(Hh_df, IncObs_, HHIncomeTarget, MeanCompare_df)
 
 #Save the group quarters income model
 #------------------------------------
@@ -420,7 +550,8 @@ PredictIncome <- function(L) {
     CheckTargetSearchRange = FALSE)
   #Predict income for persons in noninstitutional group quarters
   #-------------------------------------------------------------
-  if(any(IsGroupQuarters_)){
+  #Only run group quarters model if there is a group quarters population
+  if (sum(IsGroupQuarters_) > 0) {
     #Create data frame for group quarters persons
     Data_df <-
       data.frame(L$Year$Household)[IsGroupQuarters_,]
@@ -443,9 +574,13 @@ PredictIncome <- function(L) {
 }
 
 
-#================================
-#Code to aid development and test
-#================================
+#===============================================================
+#SECTION 4: MODULE DOCUMENTATION AND AUXILLIARY DEVELOPMENT CODE
+#===============================================================
+#Run module automatic documentation
+#----------------------------------
+documentModule("PredictIncome")
+
 #Test code to check specifications, loading inputs, and whether datastore
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions
