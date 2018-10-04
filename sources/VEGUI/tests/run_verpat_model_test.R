@@ -62,9 +62,16 @@ if(dir.exists(file.path(save_dir,paste0(name,expected))) & !createExpectedResult
   if(!dir.exists(file.path(save_dir,paste0(name,current)))){
     dir.create(file.path(save_dir,paste0(name,current)))
   }
+  Sys.sleep(1)
   # Find and press select button
   select_button <- app$findElement(xpath = "//*[@id='SELECT_RUN_SCRIPT_BUTTON']")
   select_button$click()
+  Sys.sleep(4)
+
+  # Click on VERPAT model
+  select_dropdown <- app$findElement(xpath = "//*[@value='VERPAT']")
+  select_dropdown$click()
+  Sys.sleep(2)
 
   # Select run_model.R
   dir_file <- app$findElements(xpath = "//*//div[contains(@class,'sF-file')]//*//div[contains(string(),'run_model.R')]")
@@ -72,6 +79,7 @@ if(dir.exists(file.path(save_dir,paste0(name,expected))) & !createExpectedResult
   index <- match("run_model.R",foldernames)
   run_model_file <- dir_file[[index]]
   run_model_file$click()
+  Sys.sleep(1)
   select_button <- app$findElement(xpath = "//*[@id='sF-selectButton']")
   select_button$click()
   app$expectUpdate(output = "SCRIPT_NAME", timeout = 10e3) # Monitor that the run_model.R is loaded completely
@@ -129,11 +137,21 @@ if(dir.exists(file.path(save_dir,paste0(name,expected))) & !createExpectedResult
   jsonlite::write_json(output, path = file.path(save_dir,paste0(name,current),"004.json"),pretty=TRUE)
 
 } else {
-  dir.create(file.path(save_dir,paste0(name,expected)))
-
+  if(dir.exists(file.path(save_dir, paste0(name, expected)))){
+    unlink(file.path(save_dir, paste0(name, expected), "*"))
+  } else {
+    dir.create(file.path(save_dir,paste0(name,expected)))
+  }
+  Sys.sleep(1)
   # Find and press select button
   select_button <- app$findElement(xpath = "//*[@id='SELECT_RUN_SCRIPT_BUTTON']")
   select_button$click()
+  Sys.sleep(4)
+
+  # Click on VERPAT model
+  select_dropdown <- app$findElement(xpath = "//*[@value='VERPAT']")
+  select_dropdown$click()
+  Sys.sleep(2)
 
   # Select run_model.R
   dir_file <- app$findElements(xpath = "//*//div[contains(@class,'sF-file')]//*//div[contains(string(),'run_model.R')]")
@@ -144,10 +162,12 @@ if(dir.exists(file.path(save_dir,paste0(name,expected))) & !createExpectedResult
   index <- match("run_model.R",foldernames)
   run_model_file <- dir_file[[index]]
   run_model_file$click()
+  Sys.sleep(1)
   select_button <- app$findElement(xpath = "//*[@id='sF-selectButton']")
   select_button$click()
   app$expectUpdate(output = "SCRIPT_NAME", timeout = 10e3) # Monitor that the run_model.R is loaded completely
   Sys.sleep(1)
+
   # Clean the results displayed in the browser (remove the identifiers)
   app$takeScreenshot(file = file.path(save_dir,paste0(name,expected),"001.png"))
   output <- app$getAllValues()
