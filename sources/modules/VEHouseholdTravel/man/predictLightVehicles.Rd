@@ -13,6 +13,9 @@ calculate light vehicle ownership.}
 \item{LtVehOwnModels_}{A list of light vehicle ownership models.}
 
 \item{Type}{A string indicating the region type. ("Metro": Default, or "NonMetro")}
+
+\item{TargetProp}{A numeric indicating the target light vehicle ownership rate (
+average ratio of light vehicles to driver age population)}
 }
 \value{
 An array of integers representing the number of light vehicles for each
