@@ -19,6 +19,8 @@ ui <- fluidPage(
       });'
     ), #end tag$script
 
+    # FIXME: Modify so it also triggers events for Save and Cancel
+    # we want to toggle off the file name and table in those cases too.
     tags$script(
       "$(document).on('click', '#INPUT_FILES button', function () {
       Shiny.onInputChange('EDIT_INPUT_FILE_ID',this.id);
@@ -33,7 +35,7 @@ ui <- fluidPage(
   ),     #end tag$head
 
   # Define title of the page
-  titlePanel(windowTitle = PAGE_TITLE,
+  titlePanel(windowTitle = paste('VisionEval', PAGE_TITLE),
              title = div(
                img(
                  src = "visioneval_logo.png",
@@ -72,7 +74,7 @@ ui <- fluidPage(
       
     ), #end tabPanel
 
-    # Define Settings Tab ----------------------------------------------------
+    # Define Settings Tab ------------------------------------------------
     tabPanel( # Defines the tab for displaying and changing the input parameters to the model.
       title = "Settings",
       value = TAB_SETTINGS,
@@ -102,28 +104,30 @@ ui <- fluidPage(
 
     ), #end tabPanel
 
-    # Define Module Specifications Tab ---------------------------------------
+    # Define Module Specifications Tab -------------------------------------
     tabPanel(
-      "Module Specifications",
+      "Inputs",
       value = TAB_INPUTS,
-      
+
       h3("Input files:"),
       DT::dataTableOutput(INPUT_FILES),
 
       verbatimTextOutput(EDITOR_INPUT_FILE_IDENTIFIER, FALSE),
 
-      # FIXME: This table takes a long time to appear
-      rhandsontable::rHandsontableOutput(EDITOR_INPUT_FILE),
+      rhandsontable::rHandsontableOutput(EDITOR_INPUT_FILE_DT),
 
-      h3("Datastore tables:"),
-      DT::dataTableOutput(HDF5_TABLES),
+      br(),
+      br()
+      
+      # h3("Datastore tables:"),
+      # DT::dataTableOutput(HDF5_TABLES)
 
-      h3("Module specifications:"),
+      # h3("Module specifications:"),
 
       # "Currently Selected:",
       # verbatimTextOutput(INPUTS_TREE_SELECTED_TEXT, placeholder = TRUE),
       
-      shinyTree::shinyTree(INPUTS_TREE)
+      # shinyTree::shinyTree(INPUTS_TREE)
       
     ), #end tabPanel
 

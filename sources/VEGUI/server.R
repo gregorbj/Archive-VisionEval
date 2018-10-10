@@ -33,7 +33,8 @@ server <- function(input, output, session) {
 
   reactiveFileReaders_ls <- list() # A list of reactive variables
 
-
+  # Functions ----------------------------------------------------------------------------------
+  
   # Print all the messages out to the console
   debugConsole <- function(msg) {
     testit::assert("debugConsole was passed NULL!", !is.null(msg))
@@ -120,19 +121,20 @@ server <- function(input, output, session) {
                         paste0(collapse = ", ", names(isolate(reactiveFileReaders_ls)))
                         )
                  )
-    reactiveFileReaders_ls[[reactiveFileNameKey]] <<- reactiveFileReader(DEFAULT_POLL_INTERVAL,
-                                                                         session,
-                                                                         filePath = function() {
-                                                                           returnValue <- reactiveFilePaths_rv[[reactiveFileNameKey]]
-                                                                           if (is.null(returnValue)){
-                                                                             returnValue <- "" #cannot be null since it is used by reactiveFileReader in file.info.
-                                                                           }
-                                                                           return(returnValue)
-                                                                         },
-                                                                         #end filePath function
-                                                                         #use a function so change of filePath will trigger refresh....
-                                                                         readFunc = readFunc
-                                                                         )#end reactiveFileReader
+    reactiveFileReaders_ls[[reactiveFileNameKey]] <<-
+      reactiveFileReader(DEFAULT_POLL_INTERVAL,
+                         session,
+                         filePath = function() {
+                           returnValue <- reactiveFilePaths_rv[[reactiveFileNameKey]]
+                           if (is.null(returnValue)){
+                             returnValue <- "" #cannot be null since it is used by reactiveFileReader in file.info.
+                           }
+                           return(returnValue)
+                         },
+                         #end filePath function
+                         #use a function so change of filePath will trigger refresh....
+                         readFunc = readFunc
+                         )#end reactiveFileReader
   } #end registerReactiveFileHandler
 
   shinyFiles::shinyFileSave(
@@ -450,7 +452,6 @@ server <- function(input, output, session) {
     saveParameterFile(MODEL_PARAMETERS_FILE)
   }, label = SAVE_MODEL_PARAMETERS_FILE)
 
-
   observeEvent(input[[REVERT_MODEL_PARAMETERS_FILE]], handlerExpr = {
     revertParameterFile(MODEL_PARAMETERS_FILE)
   }, label = REVERT_MODEL_PARAMETERS_FILE)
@@ -487,6 +488,7 @@ server <- function(input, output, session) {
 
   # Get a tree structure of inputs to the model
   getInputsTree <- reactive({
+    debugConsole('getInputsTree entered')
     modules <- getModelModules()
     scriptInfo <- getScriptInfo()
 
@@ -507,11 +509,13 @@ server <- function(input, output, session) {
       } #end for moduleName
       root_ls[[packageName]] <- packageNode
     } #end packageName
+    debugConsole('getInputsTree about to exit')
     return(root_ls)
   }) #end getInputsTree
 
   # Flattens the file path to be displayed
   semiFlatten <- function(node, ancestorPath) {
+    #debugConsole('semiFlatten function entered')
     if (is.list(node)) {
       #if a list does not have names, use the index in names as the name
       if (is.null(names(node))) {
@@ -548,10 +552,12 @@ server <- function(input, output, session) {
       leafNode[[nodeString]] <- structure("ignored-type-2", sticon = "asterisk")
       node <- leafNode
     }
+    #debugConsole('semiFlatten function about to exit')
     return(node)
   } #end semiFlatten
 
   getInputFilesTable <- reactive({
+    debugConsole('getInputFilesTable entered')
     getInputsTree()
     fileItems <- extractFromTree("FILE")
     inputFilesDataTable_dt <- unique(data.table::data.table(File = fileItems$resultList))
@@ -586,13 +592,13 @@ server <- function(input, output, session) {
                        fileDataTable <- SafeReadCSV(filePath)
                        otherReactiveValues_rv[[EDITOR_INPUT_FILE_IDENTIFIER]] <- fileName
                        print(paste("nrow(fileDataTable):", nrow(fileDataTable)))
-                       otherReactiveValues_rv[[EDITOR_INPUT_FILE]] <- fileDataTable
+                       otherReactiveValues_rv[[EDITOR_INPUT_FILE_DT]] <- fileDataTable
                        shinyjs::disable(editButtonOnRow, selector = NULL)
                        shinyjs::enable(saveButtonOnRow, selector = NULL)
                        shinyjs::enable(cancelButtonOnRow, selector = NULL)
                      } else {
                        if (action == INPUT_FILE_SAVE_BUTTON_PREFIX) {
-                         editedContent <- rhandsontable::hot_to_r(input[[EDITOR_INPUT_FILE]])
+                         editedContent <- rhandsontable::hot_to_r(input[[EDITOR_INPUT_FILE_DT]])
                          if (!is.null(editedContent) && nchar(editedContent) > 0) {
                            file.rename(filePath, paste0(filePath, "_",
                                                         format(Sys.time(), "%Y-%m-%d_%H-%M"),
@@ -603,9 +609,9 @@ server <- function(input, output, session) {
                                  )
                            data.table::fwrite(editedContent, filePath)
                          }
-                         otherReactiveValues_rv[[EDITOR_INPUT_FILE]] <- FALSE
+                         otherReactiveValues_rv[[EDITOR_INPUT_FILE_DT]] <- FALSE
                        } else if (action == INPUT_FILE_CANCEL_BUTTON_PREFIX) {
-                         otherReactiveValues_rv[[EDITOR_INPUT_FILE]] <- FALSE
+                         otherReactiveValues_rv[[EDITOR_INPUT_FILE_DT]] <- FALSE
                        } else {
                          stop(paste("Got an unexpected button action. buttonId:",
                                     buttonId, " action:", action, "row:", row)
@@ -630,9 +636,10 @@ server <- function(input, output, session) {
 
 
   extractFromTree <- function(target) {
+    debugConsole('extractFromTree function entered')
     resultList <- vector('character') #a zero length vector unlike c() which is NULL
     resultAncestorsList <- vector('character') #a zero length vector unlike c() which is NULL
-    extractFilesFromTree <- function(node) {
+    extractItemFromTree <- function(node) {
       names <- names(node)
       for (name in names) {
         currentNode <- node[[name]]
@@ -642,11 +649,11 @@ server <- function(input, output, session) {
           resultList <<- c(resultList, targetValue)
           resultAncestorsList <<- c(resultAncestorsList, ancestorPath)
         } else {
-          extractFilesFromTree(currentNode) #RECURSIVE
+          extractItemFromTree(currentNode) #RECURSIVE
         }
       } #end for loop over names
     } # end internal function
-    extractFilesFromTree(getInputsTree())
+    extractItemFromTree(getInputsTree())
     return(list(
       "resultList" = resultList,
       "resultAncestorsList" = resultAncestorsList
@@ -655,11 +662,13 @@ server <- function(input, output, session) {
 
 
   getAncestorPath <- function(leaf) {
+    # debugConsole('getAncestorPath entered')
     ancestorPath <- attr(leaf, "ancestorPath")
     return(ancestorPath)
   } #end getAncestorPath
 
   getOutputHDF5_TABLES <- reactive({
+    debugConsole('getOutputHDF5_TABLES entered')
     getInputsTree()
     groupItems <- extractFromTree("GROUP")
     tableItems <- extractFromTree("TABLE")
@@ -674,6 +683,7 @@ server <- function(input, output, session) {
   }) #end getOutputHDF5_TABLES
 
   getOutputINPUT_FILES <- reactive({
+    debugConsole('getOutputINPUT_FILES entered')
     DT <- getInputFilesTable()
     DT[["Actions"]] <- paste0('
         <div class="btn-group" role="group" aria-label="Basic example">
@@ -700,19 +710,22 @@ server <- function(input, output, session) {
   }) #end getOutputINPUT_FILES
 
   output[[EDITOR_INPUT_FILE_IDENTIFIER]] = renderText({
-    debugConsole(paste0('EDITOR_INPUT_FILE_IDENTIFIER: ',
-                        otherReactiveValues_rv[[EDITOR_INPUT_FILE_IDENTIFIER]]))
-    otherReactiveValues_rv[[EDITOR_INPUT_FILE_IDENTIFIER]]
+    fileName <- otherReactiveValues_rv[[EDITOR_INPUT_FILE_IDENTIFIER]]
+    
+    debugConsole(paste0('EDITOR_INPUT_FILE_IDENTIFIER: ', fileName))
+    if ( is.null(fileName) ){
+      fileName <- 'No file selected'
+    }
+    fileName
   })
 
-  output[[EDITOR_INPUT_FILE]] <- rhandsontable::renderRHandsontable({
-    DF <- otherReactiveValues_rv[[EDITOR_INPUT_FILE]]
+  output[[EDITOR_INPUT_FILE_DT]] <- rhandsontable::renderRHandsontable({
+    DF <- otherReactiveValues_rv[[EDITOR_INPUT_FILE_DT]]
     if (is.null(DF) || !data.table::is.data.table(DF)) {
-      DF <- data.table::data.table("foo" = "bar")
+      DF <- data.table::data.table()
     }
-    debugConsole(paste0("nrow(DF): ", nrow(DF), " class(DF): ",
+    debugConsole(paste0("EDITOR_INPUT_FILE_DT: nrow(DF): ", nrow(DF), " class(DF): ",
                         paste0(collapse = ", ", class(DF))))
-    print(paste0("nrow(DF): ", nrow(DF), " class(DF): ", paste0(collapse = ", ", class(DF))))
     rhandsontable(DF, useTypes = TRUE)
   })
 
@@ -826,11 +839,11 @@ server <- function(input, output, session) {
     return(dataTable)
   }, server=FALSE, options = list(dom = 'ftip'), escape = F, selection = 'single')
 
-  output[[GEO_CSV_FILE]] = DT::renderDataTable({
-    getScriptInfo()
-    returnValue <- reactiveFileReaders_ls[[GEO_CSV_FILE]]()
-    return(returnValue)
-  }, server=FALSE, selection = 'none')
+  ## output[[GEO_CSV_FILE]] = DT::renderDataTable({
+  ##   getScriptInfo()
+  ##   returnValue <- reactiveFileReaders_ls[[GEO_CSV_FILE]]()
+  ##   return(returnValue)
+  ## }, server=FALSE, selection = 'none')
 
   output[[MODEL_STATE_FILE]] = renderText({
     getScriptInfo()
@@ -867,7 +880,7 @@ server <- function(input, output, session) {
     return(returnValue)
   }, server=FALSE, selection = 'none')
 
-  ###MODULE_SPECIFICATIONS TAB_INPUTS
+  ###INPUTS TAB_INPUTS
   
   output[[INPUT_FILES]] = DT::renderDataTable({
     debugConsole('Getting Module specifications Input files')
@@ -885,12 +898,12 @@ server <- function(input, output, session) {
   ## }) #end output[[INPUTS_TREE_SELECTED_TEXT]]
 
 
-  output[[INPUTS_TREE]] <- renderTree({
-    debugConsole('Getting Module specifications tree')
-    specTree <- getInputsTree()
-    debugConsole('Finished getting module spec tree')
-    return(specTree)
-  })
+  # output[[INPUTS_TREE]] <- renderTree({
+  #   debugConsole('Getting Module specifications tree')
+  #   specTree <- getInputsTree()
+  #   debugConsole('Finished getting module spec tree')
+  #   return(specTree)
+  # })
 
   ###LOGS TAB_LOGS
   output[[VE_LOG]] = DT::renderDataTable({
