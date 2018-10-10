@@ -171,18 +171,33 @@ server <- function(input, output, session) {
                          selector = NULL)
   })
 
-  observe({
-    debugConsole('EDITOR_INPUT_FILE has tripped toggle')
-    shinyjs::toggle(
-      id = NULL,
-      condition = data.table::is.data.table(otherReactiveValues_rv[[EDITOR_INPUT_FILE]]),
-      anim = TRUE,
-      animType = "Slide",
-      time = 0.25,
-      selector = "#EDITOR_INPUT_FILE, #EDITOR_INPUT_FILE_IDENTIFIER"
-    )
-  })
+  # Inputs tab
 
+    observe({
+
+    dt <- otherReactiveValues_rv[[EDITOR_INPUT_FILE_DT]]
+    debugConsole(paste('EDITOR_INPUT_FILE_DT has', nrow(dt), 'rows'))
+    debugConsole(paste('EDITOR_INPUT_FILE_DT class:',
+                       paste0(collapse = ", ", class(dt))))
+    if (data.table::is.data.table(dt) ){
+      shinyjs::show(
+        id=EDITOR_INPUT_DIV,
+        anim=TRUE,
+        animType="Slide",
+        time=0.25
+        #selector="#EDITOR_INPUT_FILE_DT, #EDITOR_INPUT_FILE_IDENTIFIER"
+      )
+    } else {
+      shinyjs::hide(
+        id=EDITOR_INPUT_DIV,
+        anim=FALSE,
+        time=0.1
+        #selector="#EDITOR_INPUT_FILE_DT, #EDITOR_INPUT_FILE_IDENTIFIER"
+      )
+
+    }
+  })
+    
   observe({
     shinyjs::toggle(
       id = NULL,
@@ -590,8 +605,11 @@ server <- function(input, output, session) {
                      #do the appropriate action
                      if (action == INPUT_FILE_EDIT_BUTTON_PREFIX) {
                        fileDataTable <- SafeReadCSV(filePath)
+                       # TODO: raise error message if file doesn't exist
+
+                       debugConsole(paste("nrow(fileDataTable):", nrow(fileDataTable)))
+                       
                        otherReactiveValues_rv[[EDITOR_INPUT_FILE_IDENTIFIER]] <- fileName
-                       print(paste("nrow(fileDataTable):", nrow(fileDataTable)))
                        otherReactiveValues_rv[[EDITOR_INPUT_FILE_DT]] <- fileDataTable
                        shinyjs::disable(editButtonOnRow, selector = NULL)
                        shinyjs::enable(saveButtonOnRow, selector = NULL)
@@ -726,7 +744,7 @@ server <- function(input, output, session) {
     }
     debugConsole(paste0("EDITOR_INPUT_FILE_DT: nrow(DF): ", nrow(DF), " class(DF): ",
                         paste0(collapse = ", ", class(DF))))
-    rhandsontable(DF, useTypes = TRUE)
+    rhandsontable(DF, useTypes = TRUE, height=200)
   })
 
   # The following reactive object is extremely slow to run.
@@ -887,10 +905,10 @@ server <- function(input, output, session) {
     return(getOutputINPUT_FILES())
   }, server=FALSE) #end output[[INPUT_FILES]]
 
-  output[[HDF5_TABLES]] = DT::renderDataTable({
-    debugConsole('Getting Module specifications Datastore tables')
-    return(getOutputHDF5_TABLES())
-  }, server=FALSE) #end output[[HDF5_TABLES]]
+  ## output[[HDF5_TABLES]] = DT::renderDataTable({
+  ##   debugConsole('Getting Module specifications Datastore tables')
+  ##   return(getOutputHDF5_TABLES())
+  ## }, server=FALSE) #end output[[HDF5_TABLES]]
 
   ## output[[INPUTS_TREE_SELECTED_TEXT]] <- renderText({
   ##   debugConsole('Getting tree selected')

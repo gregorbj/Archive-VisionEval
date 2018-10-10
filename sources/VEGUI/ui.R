@@ -112,10 +112,10 @@ ui <- fluidPage(
       h3("Input files:"),
       DT::dataTableOutput(INPUT_FILES),
 
-      verbatimTextOutput(EDITOR_INPUT_FILE_IDENTIFIER, FALSE),
-
-      rhandsontable::rHandsontableOutput(EDITOR_INPUT_FILE_DT),
-
+      div(id = EDITOR_INPUT_DIV,
+          verbatimTextOutput(EDITOR_INPUT_FILE_IDENTIFIER, FALSE),
+          rhandsontable::rHandsontableOutput(EDITOR_INPUT_FILE_DT)
+      ),
       br(),
       br()
       
