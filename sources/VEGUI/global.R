@@ -13,7 +13,6 @@ library(testit)
 library(jsonlite)
 library(DT)
 library(rhandsontable)
-library(shinyAce)
 library(envDocument)
 library(rhdf5)
 library(namedCapture)
@@ -64,6 +63,7 @@ INPUTS_TREE <- "INPUTS_TREE"
 INPUTS_TREE_SELECTED_TEXT <- "INPUTS_TREE_SELECTED_TEXT"
 MODEL_MODULES <- "MODEL_MODULES"
 MODEL_PARAMETERS_FILE <- "MODEL_PARAMETERS_FILE"
+MODEL_PARAMETERS_RHT <- "MODEL_PARAMETERS_RHT"
 MODEL_STATE_FILE <- "MODEL_STATE_FILE"
 MODEL_STATE_LS <- "ModelState_ls"
 MODULE_PROGRESS <- "MODULE_PROGRESS"
@@ -73,6 +73,7 @@ REVERT_MODEL_PARAMETERS_FILE <- "REVERT_MODEL_PARAMETERS_FILE"
 REVERT_RUN_PARAMETERS_FILE <- "REVERT_RUN_PARAMETERS_FILE"
 RUN_MODEL_BUTTON <- "RUN_MODEL_BUTTON"
 RUN_PARAMETERS_FILE <- "RUN_PARAMETERS_FILE"
+RUN_PARAMETERS_RHT <- "RUN_PARAMETERS_RHT"
 SAVE_MODEL_PARAMETERS_FILE <- "SAVE_MODEL_PARAMETERS_FILE"
 SAVE_RUN_PARAMETERS_FILE <- "SAVE_RUN_PARAMETERS_FILE"
 SCRIPT_NAME <- "SCRIPT_NAME"
@@ -98,3 +99,38 @@ myFileTypes_ls <- list(
 # Get the volumes of local drive
 volumeRoots = c('working directory' = '.', 'models' = '../models', 'VisionEval' = '../..', getVolumes("")())
 # volumeRoots = getVolumes("")()
+
+# Define utility functions ----------------------------------------
+
+convertRunParam2Df <- function(rp_lst){
+  
+  lst2 <- lapply(rp_lst, function(x){
+    if ( length(x) > 1 ){
+      x <- paste(x, collapse=', ')
+    }
+    x
+  })
+  
+  mat <- t(as.data.frame(lst2 ))
+  df <- data.frame(Parameter = row.names(mat),
+                      Value = mat,
+                      stringsAsFactors = FALSE)
+  row.names(df) <- NULL
+  df
+}
+
+convertRunParam2Lst <- function(rp_df){
+  
+  parameters <- rp_df$Parameter
+  values <- rp_df$Value
+  
+  lst <- as.list(values)
+  names(lst) <- parameters
+  
+  lst2 <- lapply(lst, function(x){
+    strsplit(x, split=",[ ]*")[[1]]
+  })
+  
+  lst2
+}
+ 

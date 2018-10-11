@@ -26,12 +26,12 @@ ui <- fluidPage(
       Shiny.onInputChange('EDIT_INPUT_FILE_ID',this.id);
       Shiny.onInputChange('EDIT_INPUT_FILE_LAST_CLICK', Math.random())
       });"
-    ), #end tag$script  
-    
+    ), #end tag$script
+
     tags$meta(charset = "UTF-8"),
     tags$meta(name = "google", content = "notranslate"),
     tags$meta(`http-equiv` = "Content-Language", content = "en")
-    
+
   ),     #end tag$head
 
   # Define title of the page
@@ -59,7 +59,7 @@ ui <- fluidPage(
         title = "Please select model run script",
         multiple = FALSE,
         class=list(R = "R")
-        
+
       ), #end shinyFilesButton
 
       h3("Run script: "),
@@ -71,7 +71,7 @@ ui <- fluidPage(
         title = "Please select location for new folder containing copy of current model",
         list('hidden_mime_type' = c(""))
       ) #end shinySaveButton
-      
+
     ), #end tabPanel
 
     # Define Settings Tab ------------------------------------------------
@@ -79,25 +79,35 @@ ui <- fluidPage(
       title = "Settings",
       value = TAB_SETTINGS,
 
-      # TODO: parse the json file to a data.frame, then display using DT? or
-      # rhandsontable
-      
-      h3("Model parameters"),
-      #shinyAce does not support setting height by lines and the updateAceEditor does not
-      #have a height parameter so not sure what to do...
-      #https://github.com/trestletech/shinyAce/issues/4
-      shinyAce::aceEditor(MODEL_PARAMETERS_FILE, height = (16 * 10), mode = "json"),
-      fluidRow(column(3, actionButton(SAVE_MODEL_PARAMETERS_FILE, "Save Changes")),
-               column(3, actionButton(REVERT_MODEL_PARAMETERS_FILE, "Revert Changes"))
-               ),
-
-      # TODO: parse the json file to a data.frame, then display using
-      # rhandsontable
       h3("Run parameters"),
-      shinyAce::aceEditor(RUN_PARAMETERS_FILE, height = (16 * 11), mode = "json"),
-      fluidRow(column(3, actionButton(SAVE_RUN_PARAMETERS_FILE, "Save Changes")),
-               column(3, actionButton(REVERT_RUN_PARAMETERS_FILE, "Revert Changes") )
-               )
+      'Double click a cell to edit',
+      br(),
+      br(),
+      actionButton(SAVE_RUN_PARAMETERS_FILE,
+                   "Save Changes",
+                   icon=icon('save', lib='glyphicon')),
+      actionButton(REVERT_RUN_PARAMETERS_FILE,
+                   "Revert Changes",
+                   icon = icon('remove', lib='glyphicon')),
+      br(),
+      rhandsontable::rHandsontableOutput(outputId = RUN_PARAMETERS_RHT),
+
+
+      h3("Model parameters"),
+      'Double click a cell to edit',
+      br(),
+      br(),
+      actionButton(SAVE_MODEL_PARAMETERS_FILE,
+                   "Save Changes",
+                   icon = icon('save', lib='glyphicon')),
+      actionButton(REVERT_MODEL_PARAMETERS_FILE,
+                   "Revert Changes",
+                   icon = icon('remove', lib='glyphicon')),
+      br(),
+      rhandsontable::rHandsontableOutput(outputId = MODEL_PARAMETERS_RHT),
+      br(),
+      br()
+
 
       #h3("Geo File"),
       #DT::dataTableOutput(GEO_CSV_FILE)
@@ -118,7 +128,7 @@ ui <- fluidPage(
       ),
       br(),
       br()
-      
+
       # h3("Datastore tables:"),
       # DT::dataTableOutput(HDF5_TABLES)
 
@@ -126,9 +136,9 @@ ui <- fluidPage(
 
       # "Currently Selected:",
       # verbatimTextOutput(INPUTS_TREE_SELECTED_TEXT, placeholder = TRUE),
-      
+
       # shinyTree::shinyTree(INPUTS_TREE)
-      
+
     ), #end tabPanel
 
     # Define Run Tab ---------------------------------------------------------
@@ -136,7 +146,7 @@ ui <- fluidPage(
       "Run",
       value = TAB_RUN,
       actionButton(RUN_MODEL_BUTTON, "Run Model Script"),
-      
+
       h3("Module progress:"),
       DT::dataTableOutput(MODULE_PROGRESS),
 
@@ -153,7 +163,7 @@ ui <- fluidPage(
       "Outputs",
       value = TAB_OUTPUTS,
       verbatimTextOutput(DATASTORE_TABLE_IDENTIFIER, FALSE),
-      
+
       shinyFiles::shinySaveButton(
         id = DATASTORE_TABLE_EXPORT_BUTTON,
         label = "Export displayed datastore data...",
@@ -183,6 +193,6 @@ ui <- fluidPage(
       h3("Console output:"),
       DT::dataTableOutput(DEBUG_CONSOLE_OUTPUT)
     ) #end tabPanel
-    
+
   ) #end navlistPanel
 ) #end ui <- fluid page

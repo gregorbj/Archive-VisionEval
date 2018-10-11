@@ -1,6 +1,3 @@
-#=======
-# app.R
-#=======
 
 # This script builds an application that provides a user with the an interface to select a VE Model script to run, modify the input parameters to the model, run the model, and observe the output of the model.
 
@@ -438,29 +435,64 @@ server <- function(input, output, session) {
     debugConsole("observeEvent input$runModel exited")
   }) #end runModel observeEvent
 
-
+  # Write a function for rhandsontable so parameters are the same
+  # whether it is used to create the table or in revertParameterFile
+  createParamTable <- function(df){
+    rhandsontable::rhandsontable(df,
+                                 #width="700",
+                                 #height="600",
+                                 useTypes=TRUE,
+                                 readOnly=FALSE)
+  } # end createParamTable
 
   # Save the changes made to the parameters to the parameter file
   saveParameterFile <- function(parameterFileIdentifier) {
-    editedContent <- input[[parameterFileIdentifier]]
+    debugConsole('Entered saveParameterFile')
+    
+    parameterTableId <- gsub(pattern = '_FILE',
+                             replacement = '_RHT',
+                             x = parameterFileIdentifier)
+    
+    editedContent <- input[[parameterTableId]]
+    editedDf <- rhandsontable::hot_to_r(editedContent)
+    
     filePath <- reactiveFilePaths_rv[[parameterFileIdentifier]]
-    if (!is.null(editedContent) && nchar(editedContent) > 0) {
+    
+    if (!is.null(editedDf) && nrow(editedDf) > 0) {
       file.rename(filePath, paste0(filePath, "_", format(Sys.time(), "%Y-%m-%d_%H-%M"),
                                    ".bak")
-                  )
-      print(paste0("writing out '", filePath, "' with nrow(editedContent): ",
-                   nrow(editedContent), " ncol(editedContent): ", ncol(editedContent))
-            )
-      write(editedContent, filePath)
+      )
+      debugConsole(paste0("writing out '", filePath, "' with nrows: ",
+                   nrow(editedDf), " ncols: ", ncol(editedDf)))
+    
+      if(basename(filePath) == 'model_parameters.json'){
+        jsonlite::write_json(editedDf, filePath, pretty=TRUE)  
+      } else if ( basename(filePath) == 'run_parameters.json'){
+        jsonlite::write_json(convertRunParam2Lst(editedDf), filePath, pretty=TRUE)
+      } else {
+        stop("File name ", filePath, "not recognized in saveParameterFile")
+      }
+      
     }
   } # end saveParameterFile
 
   # Revert the changes made to the parameter in the display window
   revertParameterFile <- function(parameterFileIdentifier) {
-    shinyAce::updateAceEditor(session, parameterFileIdentifier,
-                              value = jsonlite::toJSON(
-                                reactiveFileReaders_ls[[parameterFileIdentifier]](),
-                                pretty = TRUE))
+    debugConsole("Entered revertParameterFile")
+
+    parameter_obj <- reactiveFileReaders_ls[[parameterFileIdentifier]]()
+
+    if (parameterFileIdentifier == MODEL_PARAMETERS_FILE){
+      df <- parameter_obj
+    } else if ( parameterFileIdentifier == RUN_PARAMETERS_FILE) {
+      df <- convertRunParam2Df(parameter_obj)
+    } else {
+      stop("parameterFileIdentifier: ", parameterFileIdentifier, "not recognized in revertParameterFile")
+    }
+    
+    rhandsontable::renderRHandsontable({
+      createParamTable(df)
+    })
   } # end revertParameterFile
 
   observeEvent(input[[SAVE_MODEL_PARAMETERS_FILE]], handlerExpr = {
@@ -468,7 +500,7 @@ server <- function(input, output, session) {
   }, label = SAVE_MODEL_PARAMETERS_FILE)
 
   observeEvent(input[[REVERT_MODEL_PARAMETERS_FILE]], handlerExpr = {
-    revertParameterFile(MODEL_PARAMETERS_FILE)
+    output[[MODEL_PARAMETERS_RHT]] <- revertParameterFile(MODEL_PARAMETERS_FILE)
   }, label = REVERT_MODEL_PARAMETERS_FILE)
 
   observeEvent(input[[SAVE_RUN_PARAMETERS_FILE]], handlerExpr = {
@@ -476,7 +508,7 @@ server <- function(input, output, session) {
   }, label = SAVE_RUN_PARAMETERS_FILE)
 
   observeEvent(input[[REVERT_RUN_PARAMETERS_FILE]], handlerExpr = {
-    revertParameterFile(RUN_PARAMETERS_FILE)
+    output[[RUN_PARAMETERS_RHT]] <- revertParameterFile(RUN_PARAMETERS_FILE)
   }, label = REVERT_RUN_PARAMETERS_FILE)
 
   observeEvent(input[[DATASTORE_TABLE_CLOSE_BUTTON]], handlerExpr = {
@@ -868,17 +900,15 @@ server <- function(input, output, session) {
     jsonlite::toJSON(reactiveFileReaders_ls[[MODEL_STATE_FILE]](), pretty = TRUE)
   })
 
-  observe({
-    shinyAce::updateAceEditor(
-      session,
-      MODEL_PARAMETERS_FILE,
-      value = jsonlite::toJSON(reactiveFileReaders_ls[[MODEL_PARAMETERS_FILE]](), pretty = TRUE)
-    )
-
-    shinyAce::updateAceEditor(
-      session,
-      RUN_PARAMETERS_FILE,
-      value = jsonlite::toJSON(reactiveFileReaders_ls[[RUN_PARAMETERS_FILE]](), pretty = TRUE)
+  output[[MODEL_PARAMETERS_RHT]] <- rhandsontable::renderRHandsontable({
+    createParamTable(reactiveFileReaders_ls[[MODEL_PARAMETERS_FILE]]())
+  })
+  
+  output[[RUN_PARAMETERS_RHT]] <- rhandsontable::renderRHandsontable({
+    createParamTable(
+      convertRunParam2Df(
+        reactiveFileReaders_ls[[RUN_PARAMETERS_FILE]]()
+      )
     )
   })
 
