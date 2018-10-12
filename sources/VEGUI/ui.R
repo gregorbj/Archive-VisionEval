@@ -114,7 +114,7 @@ ui <- fluidPage(
 
     ), #end tabPanel
 
-    # Define Module Specifications Tab -------------------------------------
+    # Define Inputs Tab -------------------------------------
     tabPanel(
       "Inputs",
       value = TAB_INPUTS,
@@ -151,47 +151,52 @@ ui <- fluidPage(
       DT::dataTableOutput(MODULE_PROGRESS),
 
       h3("Modules in model:"),
-      DT::dataTableOutput(MODEL_MODULES),
+      DT::dataTableOutput(MODEL_MODULES)
+
+    ), #end tabPanel
+
+
+    # Define Log Tab ---------------------------------------------------------
+    tabPanel(
+      "Log and console",
+      value = TAB_LOGS,
+
+      h3("Log (newest first):"),
+      DT::dataTableOutput(VE_LOG),
 
       h3("VisionEval console output:"),
       verbatimTextOutput(CAPTURED_SOURCE, FALSE)
 
+      ## h3("Console output:"),
+      ## DT::dataTableOutput(DEBUG_CONSOLE_OUTPUT)
     ), #end tabPanel
 
     # Define Outputs Tab -----------------------------------------------------
     tabPanel(
       "Outputs",
       value = TAB_OUTPUTS,
-      verbatimTextOutput(DATASTORE_TABLE_IDENTIFIER, FALSE),
 
-      shinyFiles::shinySaveButton(
-        id = DATASTORE_TABLE_EXPORT_BUTTON,
-        label = "Export displayed datastore data...",
-        title = "Please pick location and name for the exported data...",
-        myFileTypes_ls
-      ),
+      "TODO:  Add data.tables of results from export_output_to_csv.R"
 
-      actionButton(DATASTORE_TABLE_CLOSE_BUTTON, "Close Datastore table"),
+      
+      ## verbatimTextOutput(DATASTORE_TABLE_IDENTIFIER, FALSE),
 
-      DT::dataTableOutput(VIEW_DATASTORE_TABLE),
+      ## shinyFiles::shinySaveButton(
+      ##   id = DATASTORE_TABLE_EXPORT_BUTTON,
+      ##   label = "Export displayed datastore data...",
+      ##   title = "Please pick location and name for the exported data...",
+      ##   myFileTypes_ls
+      ## ),
 
-      h3("Datastore: (click row to view and export)"),
-      DT::dataTableOutput(DATASTORE_TABLE),
+      ## actionButton(DATASTORE_TABLE_CLOSE_BUTTON, "Close Datastore table"),
 
-      h3("Model state"),
-      verbatimTextOutput(MODEL_STATE_FILE, FALSE)
-    ), #end tabPanel
+      ## DT::dataTableOutput(VIEW_DATASTORE_TABLE),
 
-    # Define Log Tab ---------------------------------------------------------
-    tabPanel(
-      "Logs (newest first)",
-      value = TAB_LOGS,
+      ## h3("Datastore: (click row to view and export)"),
+      ## DT::dataTableOutput(DATASTORE_TABLE),
 
-      h3("Log:"),
-      DT::dataTableOutput(VE_LOG),
-
-      h3("Console output:"),
-      DT::dataTableOutput(DEBUG_CONSOLE_OUTPUT)
+      ## h3("Model state"),
+      ## verbatimTextOutput(MODEL_STATE_FILE, FALSE)
     ) #end tabPanel
 
   ) #end navlistPanel
