@@ -21,6 +21,275 @@ server <- function(input, output, session) {
   # 6. getOutputHDF5_TABLES
   # 7. getOutputINPUT_FILES
 
+  # FUNCTIONS ----------------------------------------------------------------------------------
+  
+  # Print all the messages out to the console
+  debugConsole <- function(msg) {
+    testit::assert("debugConsole was passed NULL!", !is.null(msg))
+    time <- paste(Sys.time())
+    newRow_dt <- data.table::data.table(time = time, message = msg)
+    existingRows_dt <- isolate(otherReactiveValues_rv[[DEBUG_CONSOLE_OUTPUT]])
+    otherReactiveValues_rv[[DEBUG_CONSOLE_OUTPUT]] <<- rbind(newRow_dt, existingRows_dt)
+    print(paste0(nrow(isolate(otherReactiveValues_rv[[DEBUG_CONSOLE_OUTPUT]])),
+                 ": ", time, ": ", msg))
+    flush.console()
+  } # end debugConsole
+
+  # Read a json file
+  SafeReadJSON <- function(filePath) {
+    debugConsole(paste0("SafeReadJSON function called to load ",
+                        filePath,". Exists? ",file.exists(filePath)))
+    if (file.exists(filePath)) {
+      fileContent_ls <- fromJSON(filePath)
+      return(fileContent_ls)
+    } else {
+      return("")
+    }
+  }# end SafeReadJSON
+
+  # Read an ASCII file
+  SafeReadLines <- function(filePath) {
+    debugConsole(paste0("SafeReadLines called to load ",
+                        filePath,". Exists? ",file.exists(filePath)))
+    result_vc <- ""
+    if (file.exists(filePath)) {
+      result_vc <- readLines(filePath)
+    }
+    return(result_vc)
+  } #end SafeReadLines
+
+  SafeReadAndCleanLines <- function(filePath) {
+    debugConsole(paste0("SafeReadAndCleanLinesfunction called to load ",
+                        filePath, ". Exists? ", file.exists(filePath)
+                        )
+                 ) #end SafeReadAndCleanLines
+    fileContents <- SafeReadLines(filePath)
+    results <- vector('character') #a zero length vector unlike c() which is NULL
+
+    for (line in fileContents) {
+      if (nchar(trimws(line)) > 0) {
+        #remove all leading and/or traiing spaces or quotes
+        cleanLine <- gsub("^[ \"]+|[v\"]+$", "", line)
+        if (nchar(cleanLine) > 0) {
+          results <- c(results, cleanLine)
+        }
+      }
+    } #end loop over lines
+    return(results)
+  } #end SafeReadAndCleanLines
+
+  # Read a csv file
+  SafeReadCSV <- function(filePath) {
+    debugConsole(paste0("SafeReadCSV called to load ",
+                        filePath,". Exists? ",file.exists(filePath)))
+    result_dt <- ""
+    if (file.exists(filePath)) {
+      result_dt <- data.table::fread(filePath)
+    }
+    return(result_dt)
+  } #end SafeReadCSV
+
+  #http://stackoverflow.com/questions/38064038/reading-an-rdata-file-into-shiny-application
+  # This function, borrowed from http://www.r-bloggers.com/safe-loading-of-rdata-files/,
+  #load the Rdata into a new environment to avoid side effects
+  LoadToEnvironment <- function(filePath, env = new.env(parent = emptyenv())) {
+    debugConsole(paste0("LoadToEnvironment called to load ",
+                        filePath,". Exists? ",file.exists(filePath)))
+    if (file.exists(filePath)) {
+      load(filePath, env)
+    }
+    return(env)
+  }
+
+
+  # Function that adds reactive objects that read files to a globally maintained list.
+  registerReactiveFileHandler <- function(reactiveFileNameKey, readFunc = SafeReadLines) {
+    debugConsole(paste0("registerReactiveFileHandler called to register '",
+                        reactiveFileNameKey, "' names(reactiveFileReaders_ls): ",
+                        paste0(collapse = ", ", names(isolate(reactiveFileReaders_ls)))
+                        )
+                 )
+    reactiveFileReaders_ls[[reactiveFileNameKey]] <<-
+      reactiveFileReader(DEFAULT_POLL_INTERVAL,
+                         session,
+                         filePath = function() {
+                           returnValue <- reactiveFilePaths_rv[[reactiveFileNameKey]]
+                           if (is.null(returnValue)){
+                             returnValue <- "" #cannot be null since it is used by reactiveFileReader in file.info.
+                           }
+                           return(returnValue)
+                         },
+                         #end filePath function
+                         #use a function so change of filePath will trigger refresh....
+                         readFunc = readFunc
+                         )#end reactiveFileReader
+  } #end registerReactiveFileHandler
+
+  # Buttons to disable when the model is running
+  disableActionButtons <- function() {
+    disable(id = SELECT_RUN_SCRIPT_BUTTON, selector = NULL)
+    disable(id = RUN_MODEL_BUTTON, selector = NULL)
+    disable(id = COPY_MODEL_BUTTON, selector = NULL)
+  }
+
+  # Buttons to enable when the model has finished running
+  enableActionButtons <- function() {
+    enable(id = SELECT_RUN_SCRIPT_BUTTON, selector = NULL)
+    enable(id = RUN_MODEL_BUTTON, selector = NULL)
+    enable(id = COPY_MODEL_BUTTON, selector = NULL)
+
+  }
+
+  # Gather the output of model run
+  getScriptOutput <- function(datapath, captureFile) {
+    #From now on we will get the current ModelState by reading the object stored on disk
+    #store the current ModelState in the global options
+    #so that the process will use the same log file as the one we have already started tracking...
+    ModelState_ls <- readModelState()
+    options("visioneval.preExistingModelState" = ModelState_ls)
+    debugConsole("getScriptOutput entered")
+    setwd(dirname(datapath))
+    capture.output(source(datapath), file = captureFile)
+    options("visioneval.preExistingModelState" = NULL)
+    debugConsole("getScriptOutput exited")
+    return(NULL)
+  } #end getScriptOutput
+  
+  # Flattens the file path to be displayed
+  semiFlatten <- function(node, ancestorPath) {
+    #debugConsole('semiFlatten function entered')
+    if (is.list(node)) {
+      #if a list does not have names, use the index in names as the name
+      if (is.null(names(node))) {
+        names(node) <- 1:length(node)
+      }
+      for (name in names(node)) {
+        #replace node with semiFlattened node
+        childPath <- paste0(ancestorPath, "-->", name)
+        childNodeValue <- node[[name]]
+        semiFlattenedChildNode <- semiFlatten(childNodeValue, childPath)
+        attr(semiFlattenedChildNode, "ancestorPath") <- childPath
+        #replace the child with the flattened version
+        node[[name]] <- semiFlattenedChildNode
+      } #end for loop over child nodes
+    } # end if list
+    else if (length(node) > 1) {
+      #since not a list this is probably a vector of strings
+      #need to convert to a list with the strings as the key and the value is irrelevant
+      emptyListWithNumbersAsKeys <- lapply(1:length(node), function(i) "ignored-type-1")
+      leafList <- setNames(emptyListWithNumbersAsKeys, node)
+      node <- leafList
+    } else {
+      #must be a leaf but shinyTree requires even these to be lists
+      if (!is.na(node)) {
+        nodeString <- trimws(as.character(node))
+      } else {
+        nodeString = ""
+      }
+      if (nodeString == "") {
+        nodeString <- "{empty}"
+      }
+      #icons https://shiny.rstudio.com/reference/shiny/latest/icon.html
+      leafNode <- structure(list(), sticon = "signal")
+      leafNode[[nodeString]] <- structure("ignored-type-2", sticon = "asterisk")
+      node <- leafNode
+    }
+    #debugConsole('semiFlatten function about to exit')
+    return(node)
+  } #end semiFlatten
+
+  # Write a function for rhandsontable so parameters are the same
+  # whether it is used to create the table or in revertParameterFile
+  createParamTable <- function(df){
+    rhandsontable::rhandsontable(df,
+                                 #width="700",
+                                 #height="600",
+                                 useTypes=TRUE,
+                                 readOnly=FALSE)
+  } # end createParamTable
+
+  # Save the changes made to the parameters to the parameter file
+  saveParameterFile <- function(parameterFileIdentifier) {
+    debugConsole('Entered saveParameterFile')
+    
+    parameterTableId <- gsub(pattern = '_FILE',
+                             replacement = '_RHT',
+                             x = parameterFileIdentifier)
+    
+    editedContent <- input[[parameterTableId]]
+    editedDf <- rhandsontable::hot_to_r(editedContent)
+    
+    filePath <- reactiveFilePaths_rv[[parameterFileIdentifier]]
+    
+    if (!is.null(editedDf) && nrow(editedDf) > 0) {
+      file.rename(filePath, paste0(filePath, "_", format(Sys.time(), "%Y-%m-%d_%H-%M"),
+                                   ".bak")
+      )
+      debugConsole(paste0("writing out '", filePath, "' with nrows: ",
+                   nrow(editedDf), " ncols: ", ncol(editedDf)))
+    
+      if(basename(filePath) == 'model_parameters.json'){
+        jsonlite::write_json(editedDf, filePath, pretty=TRUE)  
+      } else if ( basename(filePath) == 'run_parameters.json'){
+        jsonlite::write_json(convertRunParam2Lst(editedDf), filePath, pretty=TRUE)
+      } else {
+        stop("File name ", filePath, "not recognized in saveParameterFile")
+      }
+      
+    }
+  } # end saveParameterFile
+
+  # Revert the changes made to the parameter in the display window
+  revertParameterFile <- function(parameterFileIdentifier) {
+    debugConsole("Entered revertParameterFile")
+
+    parameter_obj <- reactiveFileReaders_ls[[parameterFileIdentifier]]()
+
+    if (parameterFileIdentifier == MODEL_PARAMETERS_FILE){
+      df <- parameter_obj
+    } else if ( parameterFileIdentifier == RUN_PARAMETERS_FILE) {
+      df <- convertRunParam2Df(parameter_obj)
+    } else {
+      stop("parameterFileIdentifier: ", parameterFileIdentifier, "not recognized in revertParameterFile")
+    }
+    
+    rhandsontable::renderRHandsontable({
+      createParamTable(df)
+    })
+  } # end revertParameterFile
+
+  extractFromTree <- function(target) {
+    debugConsole('extractFromTree function entered')
+    resultList <- vector('character') #a zero length vector unlike c() which is NULL
+    resultAncestorsList <- vector('character') #a zero length vector unlike c() which is NULL
+    extractItemFromTree <- function(node) {
+      names <- names(node)
+      for (name in names) {
+        currentNode <- node[[name]]
+        if (name == target) {
+          targetValue <- names(currentNode)[[1]]
+          ancestorPath <- getAncestorPath(currentNode)
+          resultList <<- c(resultList, targetValue)
+          resultAncestorsList <<- c(resultAncestorsList, ancestorPath)
+        } else {
+          extractItemFromTree(currentNode) #RECURSIVE
+        }
+      } #end for loop over names
+    } # end internal function
+    extractItemFromTree(getInputsTree())
+    return(list(
+      "resultList" = resultList,
+      "resultAncestorsList" = resultAncestorsList
+    ))
+  } #end extractFromTree
+
+  getAncestorPath <- function(leaf) {
+    # debugConsole('getAncestorPath entered')
+    ancestorPath <- attr(leaf, "ancestorPath")
+    return(ancestorPath)
+  } #end getAncestorPath
+
+
   # Reactive values ------------------------------------------------------------------------
   
   otherReactiveValues_rv <- reactiveValues() #WARNING- DON'T USE VARIABLES TO INITIALIZE LIST KEYS - the variable name will be used, not the value
@@ -169,10 +438,12 @@ server <- function(input, output, session) {
 
         reactiveFilePaths_rv[[GEO_CSV_FILE]] <- file.path(defsDirectory, "geo.csv")
 
+        reactiveFilePaths_rv[[OUTPUT_DIR]] <- file.path(scriptInfo_ls$fileDirectory, 'output')
+        
         #move to the settings tab
         updateNavlistPanel(session, "navlist", selected = TAB_SETTINGS)
       }
-
+      
       debugConsole("getScriptInfo exited")
       return(scriptInfo_ls)
     }) #end getScriptInfo reactive
@@ -247,277 +518,6 @@ server <- function(input, output, session) {
     returnValue <- DT::datatable(DT, escape = F, selection = 'none')
     return(returnValue)
   }) #end getOutputINPUT_FILES
-
-  # FUNCTIONS ----------------------------------------------------------------------------------
-  
-  # Print all the messages out to the console
-  debugConsole <- function(msg) {
-    testit::assert("debugConsole was passed NULL!", !is.null(msg))
-    time <- paste(Sys.time())
-    newRow_dt <- data.table::data.table(time = time, message = msg)
-    existingRows_dt <- isolate(otherReactiveValues_rv[[DEBUG_CONSOLE_OUTPUT]])
-    otherReactiveValues_rv[[DEBUG_CONSOLE_OUTPUT]] <<- rbind(newRow_dt, existingRows_dt)
-    print(paste0(nrow(isolate(otherReactiveValues_rv[[DEBUG_CONSOLE_OUTPUT]])),
-                 ": ", time, ": ", msg))
-    flush.console()
-  } # end debugConsole
-
-  # Read a json file
-  SafeReadJSON <- function(filePath) {
-    debugConsole(paste0("SafeReadJSON function called to load ",
-                        filePath,". Exists? ",file.exists(filePath)))
-    if (file.exists(filePath)) {
-      fileContent_ls <- fromJSON(filePath)
-      return(fileContent_ls)
-    } else {
-      return("")
-    }
-  }# end SafeReadJSON
-
-  # Read an ASCII file
-  SafeReadLines <- function(filePath) {
-    debugConsole(paste0("SafeReadLines called to load ",
-                        filePath,". Exists? ",file.exists(filePath)))
-    result_vc <- ""
-    if (file.exists(filePath)) {
-      result_vc <- readLines(filePath)
-    }
-    return(result_vc)
-  } #end SafeReadLines
-
-  SafeReadAndCleanLines <- function(filePath) {
-    debugConsole(paste0("SafeReadAndCleanLinesfunction called to load ",
-                        filePath, ". Exists? ", file.exists(filePath)
-                        )
-                 ) #end SafeReadAndCleanLines
-    fileContents <- SafeReadLines(filePath)
-    results <- vector('character') #a zero length vector unlike c() which is NULL
-
-    for (line in fileContents) {
-      if (nchar(trimws(line)) > 0) {
-        #remove all leading and/or traiing spaces or quotes
-        cleanLine <- gsub("^[ \"]+|[v\"]+$", "", line)
-        if (nchar(cleanLine) > 0) {
-          results <- c(results, cleanLine)
-        }
-      }
-    } #end loop over lines
-    return(results)
-  } #end SafeReadAndCleanLines
-
-  # Read a csv file
-  SafeReadCSV <- function(filePath) {
-    debugConsole(paste0("SafeReadCSV called to load ",
-                        filePath,". Exists? ",file.exists(filePath)))
-    result_dt <- ""
-    if (file.exists(filePath)) {
-      result_dt <- data.table::fread(filePath)
-    }
-    return(result_dt)
-  } #end SafeReadCSV
-
-  #http://stackoverflow.com/questions/38064038/reading-an-rdata-file-into-shiny-application
-  # This function, borrowed from http://www.r-bloggers.com/safe-loading-of-rdata-files/,
-  #load the Rdata into a new environment to avoid side effects
-  LoadToEnvironment <- function(filePath, env = new.env(parent = emptyenv())) {
-    debugConsole(paste0("LoadToEnvironment called to load ",
-                        filePath,". Exists? ",file.exists(filePath)))
-    if (file.exists(filePath)) {
-      load(filePath, env)
-    }
-    return(env)
-  }
-
-
-  # Function that adds reactive objects that read files to a globally maintained list.
-  registerReactiveFileHandler <- function(reactiveFileNameKey, readFunc = SafeReadLines) {
-    debugConsole(paste0("registerReactiveFileHandler called to register '",
-                        reactiveFileNameKey, "' names(reactiveFileReaders_ls): ",
-                        paste0(collapse = ", ", names(isolate(reactiveFileReaders_ls)))
-                        )
-                 )
-    reactiveFileReaders_ls[[reactiveFileNameKey]] <<-
-      reactiveFileReader(DEFAULT_POLL_INTERVAL,
-                         session,
-                         filePath = function() {
-                           returnValue <- reactiveFilePaths_rv[[reactiveFileNameKey]]
-                           if (is.null(returnValue)){
-                             returnValue <- "" #cannot be null since it is used by reactiveFileReader in file.info.
-                           }
-                           return(returnValue)
-                         },
-                         #end filePath function
-                         #use a function so change of filePath will trigger refresh....
-                         readFunc = readFunc
-                         )#end reactiveFileReader
-  } #end registerReactiveFileHandler
-
-  # Buttons to disable when the model is running
-  disableActionButtons <- function() {
-    disable(id = SELECT_RUN_SCRIPT_BUTTON, selector = NULL)
-    disable(id = RUN_MODEL_BUTTON, selector = NULL)
-    disable(id = COPY_MODEL_BUTTON, selector = NULL)
-  }
-
-  # Buttons to enable when the model has finished running
-  enableActionButtons <- function() {
-    enable(id = SELECT_RUN_SCRIPT_BUTTON, selector = NULL)
-    enable(id = RUN_MODEL_BUTTON, selector = NULL)
-    enable(id = COPY_MODEL_BUTTON, selector = NULL)
-
-  }
-
-  # Gather the output of model run
-  getScriptOutput <- function(datapath, captureFile) {
-    #From now on we will get the current ModelState by reading the object stored on disk
-    #store the current ModelState in the global options
-    #so that the process will use the same log file as the one we have already started tracking...
-    ModelState_ls <- readModelState()
-    
-    browser()
-
-    options("visioneval.preExistingModelState" = ModelState_ls)
-    debugConsole("getScriptOutput entered")
-    setwd(dirname(datapath))
-    capture.output(source(datapath), file = captureFile)
-    options("visioneval.preExistingModelState" = NULL)
-    debugConsole("getScriptOutput exited")
-    return(NULL)
-  } #end getScriptOutput
-  
-  # Flattens the file path to be displayed
-  semiFlatten <- function(node, ancestorPath) {
-    #debugConsole('semiFlatten function entered')
-    if (is.list(node)) {
-      #if a list does not have names, use the index in names as the name
-      if (is.null(names(node))) {
-        names(node) <- 1:length(node)
-      }
-      for (name in names(node)) {
-        #replace node with semiFlattened node
-        childPath <- paste0(ancestorPath, "-->", name)
-        childNodeValue <- node[[name]]
-        semiFlattenedChildNode <- semiFlatten(childNodeValue, childPath)
-        attr(semiFlattenedChildNode, "ancestorPath") <- childPath
-        #replace the child with the flattened version
-        node[[name]] <- semiFlattenedChildNode
-      } #end for loop over child nodes
-    } # end if list
-    else if (length(node) > 1) {
-      #since not a list this is probably a vector of strings
-      #need to convert to a list with the strings as the key and the value is irrelevant
-      emptyListWithNumbersAsKeys <- lapply(1:length(node), function(i) "ignored-type-1")
-      leafList <- setNames(emptyListWithNumbersAsKeys, node)
-      node <- leafList
-    } else {
-      #must be a leaf but shinyTree requires even these to be lists
-      if (!is.na(node)) {
-        nodeString <- trimws(as.character(node))
-      } else {
-        nodeString = ""
-      }
-      if (nodeString == "") {
-        nodeString <- "{empty}"
-      }
-      #icons https://shiny.rstudio.com/reference/shiny/latest/icon.html
-      leafNode <- structure(list(), sticon = "signal")
-      leafNode[[nodeString]] <- structure("ignored-type-2", sticon = "asterisk")
-      node <- leafNode
-    }
-    #debugConsole('semiFlatten function about to exit')
-    return(node)
-  } #end semiFlatten
-
-  # Write a function for rhandsontable so parameters are the same
-  # whether it is used to create the table or in revertParameterFile
-  createParamTable <- function(df){
-    rhandsontable::rhandsontable(df,
-                                 #width="700",
-                                 #height="600",
-                                 useTypes=TRUE,
-                                 readOnly=FALSE)
-  } # end createParamTable
-
-  # Save the changes made to the parameters to the parameter file
-  saveParameterFile <- function(parameterFileIdentifier) {
-    debugConsole('Entered saveParameterFile')
-    
-    parameterTableId <- gsub(pattern = '_FILE',
-                             replacement = '_RHT',
-                             x = parameterFileIdentifier)
-    
-    editedContent <- input[[parameterTableId]]
-    editedDf <- rhandsontable::hot_to_r(editedContent)
-    
-    filePath <- reactiveFilePaths_rv[[parameterFileIdentifier]]
-    
-    if (!is.null(editedDf) && nrow(editedDf) > 0) {
-      file.rename(filePath, paste0(filePath, "_", format(Sys.time(), "%Y-%m-%d_%H-%M"),
-                                   ".bak")
-      )
-      debugConsole(paste0("writing out '", filePath, "' with nrows: ",
-                   nrow(editedDf), " ncols: ", ncol(editedDf)))
-    
-      if(basename(filePath) == 'model_parameters.json'){
-        jsonlite::write_json(editedDf, filePath, pretty=TRUE)  
-      } else if ( basename(filePath) == 'run_parameters.json'){
-        jsonlite::write_json(convertRunParam2Lst(editedDf), filePath, pretty=TRUE)
-      } else {
-        stop("File name ", filePath, "not recognized in saveParameterFile")
-      }
-      
-    }
-  } # end saveParameterFile
-
-  # Revert the changes made to the parameter in the display window
-  revertParameterFile <- function(parameterFileIdentifier) {
-    debugConsole("Entered revertParameterFile")
-
-    parameter_obj <- reactiveFileReaders_ls[[parameterFileIdentifier]]()
-
-    if (parameterFileIdentifier == MODEL_PARAMETERS_FILE){
-      df <- parameter_obj
-    } else if ( parameterFileIdentifier == RUN_PARAMETERS_FILE) {
-      df <- convertRunParam2Df(parameter_obj)
-    } else {
-      stop("parameterFileIdentifier: ", parameterFileIdentifier, "not recognized in revertParameterFile")
-    }
-    
-    rhandsontable::renderRHandsontable({
-      createParamTable(df)
-    })
-  } # end revertParameterFile
-
-  extractFromTree <- function(target) {
-    debugConsole('extractFromTree function entered')
-    resultList <- vector('character') #a zero length vector unlike c() which is NULL
-    resultAncestorsList <- vector('character') #a zero length vector unlike c() which is NULL
-    extractItemFromTree <- function(node) {
-      names <- names(node)
-      for (name in names) {
-        currentNode <- node[[name]]
-        if (name == target) {
-          targetValue <- names(currentNode)[[1]]
-          ancestorPath <- getAncestorPath(currentNode)
-          resultList <<- c(resultList, targetValue)
-          resultAncestorsList <<- c(resultAncestorsList, ancestorPath)
-        } else {
-          extractItemFromTree(currentNode) #RECURSIVE
-        }
-      } #end for loop over names
-    } # end internal function
-    extractItemFromTree(getInputsTree())
-    return(list(
-      "resultList" = resultList,
-      "resultAncestorsList" = resultAncestorsList
-    ))
-  } #end extractFromTree
-
-  getAncestorPath <- function(leaf) {
-    # debugConsole('getAncestorPath entered')
-    ancestorPath <- attr(leaf, "ancestorPath")
-    return(ancestorPath)
-  } #end getAncestorPath
 
   
   ### SCENARIO TAB (TAB_SCENARIO) ----------------------------------------------------------
@@ -727,6 +727,10 @@ server <- function(input, output, session) {
   
   ### RUN TAB (TAB_RUN) -------------------------------------------------------------
 
+  # TODO: Add showNotification (https://shiny.rstudio.com/articles/notifications.html)
+  # or modal dialog (https://shiny.rstudio.com/articles/modal-dialogs.html)
+  # to indicate that run has started
+  
   #need to call processRunningTasks so that the callback to the future Function will be hit
   observe(
     label = "processRunningTasks",
@@ -742,8 +746,6 @@ server <- function(input, output, session) {
     req(input[[SELECT_RUN_SCRIPT_BUTTON]])
     debugConsole("observeEvent input$runModel entered")
     datapath <- getScriptInfo()$datapath
-
-    browser()
 
     disableActionButtons()
     startAsyncTask(CAPTURED_SOURCE, future({
@@ -798,7 +800,9 @@ server <- function(input, output, session) {
 
   ### OUTPUTS TAB (TAB_OUTPUTS)--------------------------------------------------
 
+  # observe()
   output[["testAzone"]] <- rhandsontable::renderRHandsontable({
+    #data_table <- file.path(reactiveFilePaths_rv[[OUTPUT_DIR]]
     rhandsontable::hot_context_menu(
       rhandsontable::rhandsontable(data.frame(foo = 'bar'), readOnly=TRUE),
       allowRowEdit=FALSE,

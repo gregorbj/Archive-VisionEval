@@ -176,7 +176,12 @@ ui <- fluidPage(
       "Outputs",
       value = TAB_OUTPUTS,
 
-      "TODO:  Add data.tables of results from export_output_to_csv.R"
+      tabsetPanel(
+        tabPanel('Azone test',
+                 rhandsontable::rHandsontableOutput(outputId='testAzone'),
+                 downloadButton(outputId='btn_outputId', label='Download data')
+                 ),
+        id = 'outputTabset')
 
       
       ## verbatimTextOutput(DATASTORE_TABLE_IDENTIFIER, FALSE),
