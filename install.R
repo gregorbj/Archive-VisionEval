@@ -22,12 +22,12 @@ biocLite(c("rhdf5","zlibbioc"), suppressUpdates=TRUE, quiet=TRUE)
 
 #Download the VE repository
 host <- "https://api.github.com/repos/"
-repo <- "RSGInc/visioneval/"
-ref <- "master" #"develop"
+repo <- "gregorbj/visioneval/"
+ref <- "master"  # "add_scenario" or "develop"
 
 destfile <- tempfile(fileext = paste0(".zip"))
 destdir <- normalizePath(tempdir())
-cat("\nDownloading VE repository\n")
+cat("\nDownloading VE repository to", destdir, "\n")
 request <- httr::GET(paste0(host, repo, "zipball/", ref))
 if(httr::status_code(request) >= 400){
 	stop("\nError downloading the repository\n")
@@ -57,7 +57,8 @@ VE_modules <- c(
 
 #Install the required VE framework package
 cat("\nInstalling VE framework\n")
-devtools::install_local(normalizePath(file.path(destdir, "sources", "framework", VE_framework)))
+devtools::install_local(normalizePath(file.path(destdir, "sources", "framework", VE_framework)),
+                        force=TRUE)
 
 #Download and install the required VE modules for VERPAT and VERSPM
 for(module in VE_modules){
