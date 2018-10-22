@@ -3,9 +3,11 @@
 #==========================
 #The models in the CreateHouseholds, PredictWorkers, PredictIncome, and
 #PredictHousing modules are estimated from Census Public Use Microdata Sample
-#household and person data. This script reads in the data files and creates the
-#datasets needed to estimate these models.
-
+#household and person data. These files are contained in the *inst/extdata*
+#directory of the package. The PUMS household data is in the
+#*pums_households.csv* file and described in the *pums_households.txt* file.
+#The PUMS persons data is in the *pums_persons.csv* file and described in the
+#*pums_persons.txt* file.
 
 
 #=================================

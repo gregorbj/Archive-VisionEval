@@ -54,14 +54,6 @@
     "ISELEMENTOF" : ""
   },
   {
-    "NAME" : "FutureCostPerMile",
-    "VALUE": "0.04",
-    "TYPE" : "compound",
-    "UNITS" : "USD/MI",
-    "PROHIBIT" : "c('NA', '< 0')",
-    "ISELEMENTOF" : ""
-  },
-  {
     "NAME" : "DvmtBudgetProp",
     "VALUE": "0.1",
     "TYPE" : "double",
@@ -86,24 +78,16 @@
     "ISELEMENTOF" : ""
   },
   {
+    "NAME" : "KwhCost",
+    "VALUE": "0.257",
+    "TYPE" : "compound",
+    "UNITS" : "USD/KWH",
+    "PROHIBIT" : "c('NA', '< 0')",
+    "ISELEMENTOF" : ""
+  },
+  {
     "NAME" : "GasTax",
     "VALUE": "0.424",
-    "TYPE" : "compound",
-    "UNITS" : "USD/GAL",
-    "PROHIBIT" : "c('NA', '< 0')",
-    "ISELEMENTOF" : ""
-  },
-  {
-    "NAME" : "CarbonCost",
-    "VALUE": "0",
-    "TYPE" : "compound",
-    "UNITS" : "USD/GAL",
-    "PROHIBIT" : "c('NA', '< 0')",
-    "ISELEMENTOF" : ""
-  },
-  {
-    "NAME" : "VmtCost",
-    "VALUE": "0",
     "TYPE" : "compound",
     "UNITS" : "USD/GAL",
     "PROHIBIT" : "c('NA', '< 0')",
@@ -139,22 +123,6 @@
     "TYPE" : "double",
     "UNITS" : "multiplier",
     "PROHIBIT" : "c('NA', '< 0')",
-    "ISELEMENTOF" : ""
-  },
-  {
-    "NAME" : "WorkVmtProp",
-    "VALUE": "0.25",
-    "TYPE" : "double",
-    "UNITS" : "proportion",
-    "PROHIBIT" : "c('NA', '< 0', '> 1')",
-    "ISELEMENTOF" : ""
-  },
-  {
-    "NAME" : "HhDvmtToRoadDvmt",
-    "VALUE": "0.95",
-    "TYPE" : "double",
-    "UNITS" : "proportion",
-    "PROHIBIT" : "c('NA', '< 0', '> 1')",
     "ISELEMENTOF" : ""
   },
   {

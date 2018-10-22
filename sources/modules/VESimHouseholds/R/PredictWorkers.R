@@ -1,13 +1,25 @@
 #================
 #PredictWorkers.R
 #================
-#This module assigns workers by age to households and to noninstitutional group
-#quarters population. It is a simple model which predicts workers as a function
-#of the household type and age composition. There is no responsiveness to jobs
-#or how changes in the job market and demographics might change the worker age
-#composition, but the user can exogenously adjust the relative employment by
-#age group, Azone, and year. The values are the proportions of persons in the
-#age group who are workers relative to the proportions in the estimation year.
+
+#<doc>
+## PredictWorkers Module
+#### September 6, 2018
+#
+#This module assigns workers by age to households and to noninstitutional group quarters population. It is a simple model which predicts workers as a function of the age composition of household members. There is no responsiveness to jobs or how changes in the job market and demographics might change the worker age composition, but the user may use optional inputs to exogenously adjust relative employment rates by age group, Azone, and year. These optional input values specify by age group, Azone, and year the proportions of persons in the age group and Azone who are workers relative to the proportions in the model estimation year.
+#
+### Model Parameter Estimation
+#This model has just one parameter object, a matrix of the probability that a person in each age group in a specified household type is a worker. The defined household types are the same as the types defined for the CreateHouseholds module.
+#
+#This probability matrix is created from Census public use microsample (PUMS) data that is compiled by the CreateEstimationDatasets.R script into a R dataset (HhData_df) when the VESimHouseholds package is built. The data that is supplied with the VESimHouseholds package downloaded from the official VisionEval repository may be used, but it is preferrable to use data for the region being modeled. How this is done is explained in the documentation for the *CreateEstimationDatasets.R* script.
+#
+#To calculate this probability matrix, the numbers of workers by age group and household type and the numbers of persons by age group and household type are tabulated (weighted by the household weights in the PUMS data). The probability that a person is a worker is calculated by dividing the worker tabulation by the population tabulation.
+#
+### How the Module Works
+#The number of workers in each age group of each household is determined through random sampling using the probability for the age group and household type. For example, if a household is of the type *2-0-2-0-0-0*, and the probability that a person of age 20-29 in this household type is a worker is 0.7, then two random samples are taken for this household with a probability of success of 0.7 to determine the number of workers in this age group in the household.
+#
+#If the user has supplied optional inputs for the ratio of employment for the age group in the forecast year relative to the year of the model estimation dataset, that input is multiplied by the estimated worker probability to determine the sampling probability. For example, if the year of the model estimation data is 2000 and the forecast year is 2010, and if the user specifies that the employment rate of 20-29 year olds in 2010 was 95% of the employment rate of that age group in 2000, then the worker probability in the example above (0.7) is multiplied by 0.95 to calculate the sampling probability.
+#</doc>
 
 
 #=================================
@@ -355,9 +367,13 @@ PredictWorkers <- function(L) {
 }
 
 
-#================================
-#Code to aid development and test
-#================================
+#===============================================================
+#SECTION 4: MODULE DOCUMENTATION AND AUXILLIARY DEVELOPMENT CODE
+#===============================================================
+#Run module automatic documentation
+#----------------------------------
+documentModule("PredictWorkers")
+
 #Test code to check specifications, loading inputs, and whether datastore
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions

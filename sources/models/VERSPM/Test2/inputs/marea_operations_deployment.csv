@@ -1,0 +1,5 @@
+"Geo","Year","RampMeterDeployProp","IncidentMgtDeployProp","SignalCoordDeployProp","AccessMgtDeployProp","OtherFwyOpsDeployProp","OtherArtOpsDeployProp"
+"RVMPOX",2010,0,0.5,0.5,0,0,0
+"RVMPOY",2010,0,0.5,0.5,0,0,0
+"RVMPOX",2038,0.95,0.95,0.95,0.24,0,0
+"RVMPOY",2038,0.95,0.95,0.95,0.24,0,0
