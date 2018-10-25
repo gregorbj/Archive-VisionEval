@@ -30,7 +30,9 @@ ui <- fluidPage(
 
     tags$meta(charset = "UTF-8"),
     tags$meta(name = "google", content = "notranslate"),
-    tags$meta(`http-equiv` = "Content-Language", content = "en")
+    tags$meta(`http-equiv` = "Content-Language", content = "en")#,
+
+    #tags$style(HTML('#btn{background-color:gray}'))
 
   ),     #end tag$head
 
@@ -58,19 +60,24 @@ ui <- fluidPage(
         label = "Select scenario run script...",
         title = "Please select model run script",
         multiple = FALSE,
+        buttonType='primary',
         class=list(R = "R")
 
       ), #end shinyFilesButton
-
-      h3("Run script: "),
-      verbatimTextOutput(SCRIPT_NAME, placeholder=TRUE),
 
       shinyFiles::shinySaveButton( # Creates a window with a display of directories and files for saving
         id = COPY_MODEL_BUTTON,
         label = "Copy scenario...",
         title = "Please select location for new folder containing copy of current model",
+        buttonType='primary',
         list('hidden_mime_type' = c(""))
-      ) #end shinySaveButton
+      ), #end shinySaveButton
+
+      h3("Run script"),
+      verbatimTextOutput(SCRIPT_NAME, placeholder=TRUE),
+
+      h3("Modules in model"),
+      DT::dataTableOutput(MODEL_MODULES)
 
     ), #end tabPanel
 
@@ -80,31 +87,39 @@ ui <- fluidPage(
       value = TAB_SETTINGS,
 
       h3("Run parameters"),
-      'Double click a cell to edit',
-      br(),
-      br(),
+      
+      verbatimTextOutput(RUN_PARAMETERS_FILE),
+
+      rhandsontable::rHandsontableOutput(outputId = RUN_PARAMETERS_RHT),
+      bsTooltip(id=RUN_PARAMETERS_RHT, title='Double-click to edit',
+                placement='left'),
+
       actionButton(SAVE_RUN_PARAMETERS_FILE,
                    "Save Changes",
-                   icon=icon('save', lib='glyphicon')),
+                   icon=icon('save', lib='glyphicon'),
+                   class = 'btn-primary'),
+
       actionButton(REVERT_RUN_PARAMETERS_FILE,
                    "Revert Changes",
-                   icon = icon('remove', lib='glyphicon')),
-      br(),
-      rhandsontable::rHandsontableOutput(outputId = RUN_PARAMETERS_RHT),
+                   icon = icon('remove', lib='glyphicon'), class='btn-primary'),
 
 
       h3("Model parameters"),
-      'Double click a cell to edit',
-      br(),
+      
+      verbatimTextOutput(MODEL_PARAMETERS_FILE),
+
+      rhandsontable::rHandsontableOutput(outputId = MODEL_PARAMETERS_RHT),
+      bsTooltip(id=MODEL_PARAMETERS_RHT, title='Double-click to edit',
+                placement='left'),
+
       br(),
       actionButton(SAVE_MODEL_PARAMETERS_FILE,
                    "Save Changes",
-                   icon = icon('save', lib='glyphicon')),
+                   icon = icon('save', lib='glyphicon'), class='btn-primary'),
+      
       actionButton(REVERT_MODEL_PARAMETERS_FILE,
                    "Revert Changes",
-                   icon = icon('remove', lib='glyphicon')),
-      br(),
-      rhandsontable::rHandsontableOutput(outputId = MODEL_PARAMETERS_RHT),
+                   icon = icon('remove', lib='glyphicon'), class='btn-primary'),
       br(),
       br()
 
@@ -119,7 +134,7 @@ ui <- fluidPage(
       "Inputs",
       value = TAB_INPUTS,
 
-      h3("Input files:"),
+      h3("Input files"),
       DT::dataTableOutput(INPUT_FILES),
 
       div(id = EDITOR_INPUT_DIV,
@@ -145,31 +160,28 @@ ui <- fluidPage(
     tabPanel(
       "Run",
       value = TAB_RUN,
-      actionButton(RUN_MODEL_BUTTON, "Run Model Script"),
+      actionButton(RUN_MODEL_BUTTON, "Run Model", class='btn-primary'),
 
-      h3("Module progress:"),
+      h3("Module progress"),
       DT::dataTableOutput(MODULE_PROGRESS),
 
-      h3("Modules in model:"),
-      DT::dataTableOutput(MODEL_MODULES)
-
-    ), #end tabPanel
-
-
-    # Define Log Tab ---------------------------------------------------------
-    tabPanel(
-      "Log and console",
-      value = TAB_LOGS,
-
-      h3("Log (newest first):"),
-      DT::dataTableOutput(VE_LOG),
-
-      h3("VisionEval console output:"),
+      h3("VisionEval console output"),
       verbatimTextOutput(CAPTURED_SOURCE, FALSE)
 
-      ## h3("Console output:"),
-      ## DT::dataTableOutput(DEBUG_CONSOLE_OUTPUT)
     ), #end tabPanel
+
+
+    ## # Define Log Tab ---------------------------------------------------------
+    ## tabPanel(
+    ##   "Log and console",
+    ##   value = TAB_LOGS,
+
+    ##   h3("Log (newest first)"),
+    ##   DT::dataTableOutput(VE_LOG)
+
+    ##   ## h3("Console output:"),
+    ##   ## DT::dataTableOutput(DEBUG_CONSOLE_OUTPUT)
+    ## ), #end tabPanel
 
     # Define Outputs Tab -----------------------------------------------------
     tabPanel(
@@ -179,7 +191,8 @@ ui <- fluidPage(
       tabsetPanel(
         tabPanel('Azone test',
                  rhandsontable::rHandsontableOutput(outputId='testAzone'),
-                 downloadButton(outputId='btn_outputId', label='Download data')
+                 downloadButton(outputId='btn_outputId', label='Download data',
+                                class='btn-primary')
                  ),
         id = 'outputTabset')
 
