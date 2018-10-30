@@ -1,5 +1,5 @@
 #=============================================
-#SECTION 1: LOAD LIBRARIES
+# LOAD LIBRARIES
 #=============================================
 
 library(visioneval)
@@ -19,7 +19,7 @@ library(namedCapture)
 #library(shinyTree)
 
 #==========================================================
-#SECTION 2: DEFINE CONSTANTS AND DEFINITIONS OF FUNCTIONS
+# DEFINE CONSTANTS AND DEFINITIONS OF FUNCTIONS
 #==========================================================
 
 scriptDir <- getSrcDirectory(function(x) x )

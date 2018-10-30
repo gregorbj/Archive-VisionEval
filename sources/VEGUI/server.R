@@ -7,7 +7,7 @@
 
 
 #============================================
-#SECTION 4: DEFINE THE SERVER FOR APPLICATION
+# DEFINE THE SERVER FOR APPLICATION
 #============================================
 
 server <- function(input, output, session) {
@@ -19,7 +19,7 @@ server <- function(input, output, session) {
   # 4. getModelModules
   # 5. getInputsTree
 
-  # FUNCTIONS ----------------------------------------------------------------------------------
+  # FUNCTIONS ---------------------------------------------------------------
   
   # Print all the messages out to the console
   debugConsole <- function(msg) {
@@ -575,6 +575,8 @@ server <- function(input, output, session) {
 
   observeEvent(input[[SAVE_RUN_PARAMETERS_FILE]], handlerExpr = {
     saveParameterFile(RUN_PARAMETERS_FILE)
+    showNotification('File saved.', type='message', duration=15)
+
   }, label = SAVE_RUN_PARAMETERS_FILE)
 
   observeEvent(input[[REVERT_RUN_PARAMETERS_FILE]], handlerExpr = {
@@ -601,7 +603,7 @@ server <- function(input, output, session) {
     createParamTable(reactiveFileReaders_ls[[MODEL_PARAMETERS_FILE]]())
   })  
   
-  ### INPUTS TAB (TAB_INPUTS) --------------------------------------------------------
+  ### INPUTS TAB (TAB_INPUTS) -------------------------------------------------
 
   observe({
     if ( length(getInputFiles()) > 0 ){
@@ -636,10 +638,8 @@ server <- function(input, output, session) {
                    " ncol(editedContent): ", ncol(editedContent))
                    )
       data.table::fwrite(editedContent, filePath)
-
-    } # !is.null(editedContent)
-    #otherReactiveValues_rv[[EDITOR_INPUT_FILE_DT]] <- FALSE
-    # TODO: Show text - file saved!
+      showNotification('File saved.', type='message', duration=15)
+    } 
   })
 
   observeEvent(input[[INPUT_FILE_REVERT_BUTTON]], handlerExpr={
@@ -707,11 +707,7 @@ server <- function(input, output, session) {
   })
 
   
-  ### RUN TAB (TAB_RUN) -------------------------------------------------------------
-
-  # TODO: Add showNotification (https://shiny.rstudio.com/articles/notifications.html)
-  # or modal dialog (https://shiny.rstudio.com/articles/modal-dialogs.html)
-  # to indicate that run has started
+  ### RUN TAB (TAB_RUN) --------------------------------------------------
   
   #need to call processRunningTasks so that the callback to the future Function will be hit
   observe(
@@ -730,6 +726,8 @@ server <- function(input, output, session) {
     datapath <- getScriptInfo()$datapath
 
     disableActionButtons()
+    showNotification('Model is initializing', type='message', duration=15)
+    
     startAsyncTask(CAPTURED_SOURCE, future({
       # if(file.exists(reactiveFilePaths_rv[[MODEL_STATE_FILE]])){
       #   remove(reactiveFilePaths_rv[[MODEL_STATE_FILE]])

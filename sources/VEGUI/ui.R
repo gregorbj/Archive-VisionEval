@@ -1,5 +1,5 @@
 #============================================
-#SECTION 3: DEFINE THE UI FOR APPLICATION
+# DEFINE THE UI FOR APPLICATION
 #============================================
 
 # Define the webpage
