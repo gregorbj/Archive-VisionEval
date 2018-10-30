@@ -18,8 +18,6 @@ server <- function(input, output, session) {
   # 3. getModuleProgress
   # 4. getModelModules
   # 5. getInputsTree
-  # 6. getOutputHDF5_TABLES
-  # 7. getOutputINPUT_FILES
 
   # FUNCTIONS ----------------------------------------------------------------------------------
   
@@ -405,18 +403,20 @@ server <- function(input, output, session) {
                               ) #end call to registerReactiveFileHandler
 
   # Get the information about the scipt like paths to the scripts and input files
-  getScriptInfo <- eventReactive(
-    input[[SELECT_RUN_SCRIPT_BUTTON]],
-    {
+  getScriptInfo <- eventReactive(input[[SELECT_RUN_SCRIPT_BUTTON]],
+                                 ignoreNULL = TRUE,
+                                 ignoreInit=TRUE, valueExpr={
       debugConsole("getScriptInfo entered")
-      scriptInfo_ls <- list()
-      inFile <- parseFilePaths(roots = volumeRoots, input[[SELECT_RUN_SCRIPT_BUTTON]])
       debugConsole(paste('SELECT_RUN_SCRIPT_BUTTON:', input[[SELECT_RUN_SCRIPT_BUTTON]]))
-      scriptInfo_ls$datapath <- normalizePath(as.character(inFile$datapath))
-      scriptInfo_ls$fileDirectory <- dirname(scriptInfo_ls$datapath)
-      scriptInfo_ls$fileBase <- basename(scriptInfo_ls$datapath)
+
+      scriptInfo_ls <- list()
 
       if ( ! 'integer' %in% class(input[[SELECT_RUN_SCRIPT_BUTTON]])){
+
+        inFile <- parseFilePaths(roots = volumeRoots, input[[SELECT_RUN_SCRIPT_BUTTON]])
+        scriptInfo_ls$datapath <- normalizePath(as.character(inFile$datapath))
+        scriptInfo_ls$fileDirectory <- dirname(scriptInfo_ls$datapath)
+        scriptInfo_ls$fileBase <- basename(scriptInfo_ls$datapath)
 
         debugConsole(paste("getScriptInfo:", scriptInfo_ls$datapath))
 
@@ -440,7 +440,7 @@ server <- function(input, output, session) {
 
         reactiveFilePaths_rv[[GEO_CSV_FILE]] <- file.path(defsDirectory, "geo.csv")
 
-        reactiveFilePaths_rv[[OUTPUT_DIR]] <- file.path(scriptInfo_ls$fileDirectory, 'output')
+        reactiveFilePaths_rv[[OUTPUT_DIR]] <- file.path(scriptInfo_ls$fileDirectory, 'outputs')
         
         #move to the settings tab
         #updateNavlistPanel(session, "navlist", selected = TAB_SETTINGS)
@@ -451,77 +451,65 @@ server <- function(input, output, session) {
     }) #end getScriptInfo reactive
 
   getModelModules <- reactive({
-    datapath <- getScriptInfo()$datapath
-    debugConsole(paste0("getModelModules entered with datapath: ", datapath))
-    setwd(dirname(datapath))
-    modelModules_dt <- data.table::as.data.table(visioneval::parseModelScript(datapath, TestMode = TRUE))
-    debugConsole('getModelModules has finished')
-    return(modelModules_dt)
+    if ( ! 'integer' %in% class(input[[SELECT_RUN_SCRIPT_BUTTON]]) ){
+      datapath <- getScriptInfo()$datapath
+      debugConsole(paste0("getModelModules entered with datapath: ", datapath))
+      setwd(dirname(datapath))
+      modelModules_dt <- data.table::as.data.table(visioneval::parseModelScript(datapath, TestMode = TRUE))
+      debugConsole('getModelModules has finished')
+      return(modelModules_dt)
+    } else {
+      return(NULL)
+    }
   }) #end getModelModules
 
-  getInputFilesTable <- reactive({
-    debugConsole('getInputFilesTable entered')
-    getInputsTree()
-    fileItems <- extractFromTree("FILE")
-    inputFilesDataTable_dt <- unique(data.table::data.table(File = fileItems$resultList))
-    return(inputFilesDataTable_dt)
-  })
-
-  # Get a tree structure of inputs to the model
+    # Get a tree structure of inputs to the model
   getInputsTree <- reactive({
     debugConsole('getInputsTree entered')
     modules <- getModelModules()
     scriptInfo <- getScriptInfo()
 
-    #prepare for calling into visioneval for module specs
-    setwd(scriptInfo$fileDirectory)
-    packages <- sort(unique(modules[, PackageName]))
-
     root_ls <- list()
-    for (packageName in packages) {
-      packageNode <- list()
-      modulesInPackage <- sort(modules[PackageName == (packageName), ModuleName])
-      for (moduleName in modulesInPackage) {
-        ModuleSpecs_ls <- visioneval::processModuleSpecs(
-          visioneval::getModuleSpecs(moduleName, packageName)
-        )
-        semiFlattened <- semiFlatten(ModuleSpecs_ls, "ModuleSpecs_ls")
-        packageNode[[moduleName]] <- semiFlattened
-      } #end for moduleName
-      root_ls[[packageName]] <- packageNode
-    } #end packageName
+
+    if ( length(scriptInfo) > 0 ){
+      
+      #prepare for calling into visioneval for module specs
+      setwd(scriptInfo$fileDirectory)
+      packages <- sort(unique(modules[, PackageName]))
+
+      for (packageName in packages) {
+        packageNode <- list()
+        modulesInPackage <- sort(modules[PackageName == (packageName), ModuleName])
+        for (moduleName in modulesInPackage) {
+          ModuleSpecs_ls <- visioneval::processModuleSpecs(
+            visioneval::getModuleSpecs(moduleName, packageName)
+          )
+          semiFlattened <- semiFlatten(ModuleSpecs_ls, "ModuleSpecs_ls")
+          packageNode[[moduleName]] <- semiFlattened
+        } #end for moduleName
+        root_ls[[packageName]] <- packageNode
+      } #end packageName
+    }
     debugConsole('getInputsTree about to exit')
     return(root_ls)
   }) #end getInputsTree
 
-  getOutputINPUT_FILES <- reactive({
-    debugConsole('getOutputINPUT_FILES entered')
-    DT <- getInputFilesTable()
-    DT[["Actions"]] <- paste0('
-        <div class="btn-group" role="group" aria-label="Basic example">
-        <button type="button" class="btn btn-secondary" id=',
-        INPUT_FILE_EDIT_BUTTON_PREFIX,
-        '_',
-        1:nrow(DT),
-        '>Edit</button>
-        <button type="button" class="btn btn-secondary" disabled id=',
-        INPUT_FILE_CANCEL_BUTTON_PREFIX,
-        '_',
-        1:nrow(DT),
-        '>Cancel</button>
-        <button type="button" class="btn btn-secondary" disabled id=',
-        INPUT_FILE_SAVE_BUTTON_PREFIX,
-        '_',
-        1:nrow(DT),
-        '>Save</button>
-        </div>
-        '
-        )
-    returnValue <- DT::datatable(DT, escape = F, selection = 'none')
-    return(returnValue)
-  }) #end getOutputINPUT_FILES
+  getInputFiles <- reactive({
+    debugConsole('getInputFiles entered')
+    fileItems <- list()
+    if ( ! 'integer' %in% class(input[[SELECT_RUN_SCRIPT_BUTTON]]) ){
+      getInputsTree()
+      fileItems <- extractFromTree("FILE")
+    }
+    return(fileItems)
+  })
 
-  
+  getOutputFiles <- reactive({
+    debugConsole('getOutputFiles entered')
+    files <- Sys.glob(file.path(reactiveFilePaths_rv[[OUTPUT_DIR]], '*.csv')) 
+    return(files)
+  })
+
   ### SCENARIO TAB (TAB_SCENARIO) ----------------------------------------------------------
 
   observe({
@@ -611,165 +599,88 @@ server <- function(input, output, session) {
 
   output[[MODEL_PARAMETERS_RHT]] <- rhandsontable::renderRHandsontable({
     createParamTable(reactiveFileReaders_ls[[MODEL_PARAMETERS_FILE]]())
-  })
-  
-  
+  })  
   
   ### INPUTS TAB (TAB_INPUTS) --------------------------------------------------------
-  # https://antoineguillot.wordpress.com/2017/03/01/three-r-shiny-tricks-to-make-your-shiny-app-shines-33-buttons-to-delete-edit-and-compare-datatable-rowsum
-  observeEvent(input[[EDIT_INPUT_FILE_LAST_CLICK]], label = EDIT_INPUT_FILE_LAST_CLICK,
-               handlerExpr = {
-                 buttonId <- input[[EDIT_INPUT_FILE_ID]]
-                 namedResult <- data.table::as.data.table(
-                   namedCapture::str_match_named(buttonId, "^(?<action>.+)_(?<row>[^_]+)$"))
-                 action <- namedResult[, action]
-                 row <- as.integer(namedResult[, row])
-                 DT <- getInputFilesTable()
-                 fileName <- DT[row, File]
-                 filePath <- file.path(getScriptInfo()$fileDirectory, "inputs", fileName)
-                 
-                 debugConsole(paste("got click inside table.  buttonId:", buttonId,
-                                    " action:", action, "row:", row, "fileName:", fileName)
-                              )
 
-                 # Take the appropriate action
-                 if ( action == INPUT_FILE_EDIT_BUTTON_PREFIX ){
-                   
-                   fileDataTable <- SafeReadCSV(filePath)
-                   debugConsole(paste("nrow(fileDataTable):", nrow(fileDataTable)))
-                   otherReactiveValues_rv[[EDITOR_INPUT_FILE_IDENTIFIER]] <- fileName
-                   otherReactiveValues_rv[[EDITOR_INPUT_FILE_DT]] <- fileDataTable
+  observe({
+    if ( length(getInputFiles()) > 0 ){
+      debugConsole('Getting Module specifications Input files')
+      choices <- sort(getInputFiles()$resultList)
+      updateSelectInput(session, INPUT_FILES, choices=choices)
+    }
+  })
 
-                   # Enable/disable buttons in the table
-                   for ( rowNumber in 1:nrow(DT) ){
-                     editButtonOnRow <- paste0(INPUT_FILE_EDIT_BUTTON_PREFIX, "_", rowNumber)
-                     cancelButtonOnRow <- paste0(INPUT_FILE_CANCEL_BUTTON_PREFIX, "_", rowNumber)
-                     saveButtonOnRow <- paste0(INPUT_FILE_SAVE_BUTTON_PREFIX, "_", rowNumber)
+  observe({
+    fileName <- input[[INPUT_FILES]]
+    if ( fileName != "" ){
+      filePath <- file.path(getScriptInfo()$fileDirectory, "inputs", fileName)
+      
+      fileDataTable <- SafeReadCSV(filePath)
+      debugConsole(paste("nrow(fileDataTable):", nrow(fileDataTable)))
+      otherReactiveValues_rv[[EDITOR_INPUT_FILE_IDENTIFIER]] <- fileName
+      otherReactiveValues_rv[[EDITOR_INPUT_FILE_DT]] <- fileDataTable
+    }
+  })
 
-                     if ( rowNumber == row ){
-                       shinyjs::disable(editButtonOnRow, selector = NULL)
-                       shinyjs::enable(saveButtonOnRow, selector = NULL)
-                       shinyjs::enable(cancelButtonOnRow, selector = NULL)
-                     } else {
-                       shinyjs::disable(editButtonOnRow, selector = NULL)
-                       #debugConsole(paste('Disabling edit button for row', rowNumber))
-                     }
-                     
-                   }
+  observeEvent(input[[INPUT_FILE_SAVE_BUTTON]], handlerExpr={
+    editedContent <- rhandsontable::hot_to_r(input[[EDITOR_INPUT_FILE_RHT]])
+    if (!is.null(editedContent) && nchar(editedContent) > 0) {
+      fileName <- otherReactiveValues_rv[[EDITOR_INPUT_FILE_IDENTIFIER]]
+      filePath <- file.path(getScriptInfo()$fileDirectory, "inputs", fileName)
+      file.rename(filePath, paste0(filePath, "_",
+                                   format(Sys.time(), "%Y-%m-%d_%H-%M"),
+                                   ".bak"))
+      debugConsole(paste0("writing out '", filePath,
+                   "' with nrow(editedContent): ", nrow(editedContent),
+                   " ncol(editedContent): ", ncol(editedContent))
+                   )
+      data.table::fwrite(editedContent, filePath)
 
-                 } else if (action == INPUT_FILE_SAVE_BUTTON_PREFIX){
-                   
-                   editedContent <- rhandsontable::hot_to_r(input[[EDITOR_INPUT_FILE_DT]])
-                   if (!is.null(editedContent) && nchar(editedContent) > 0) {
-                     file.rename(filePath, paste0(filePath, "_",
-                                                  format(Sys.time(), "%Y-%m-%d_%H-%M"),
-                                                  ".bak"))
-                     print(paste0("writing out '", filePath,
-                                  "' with nrow(editedContent): ", nrow(editedContent),
-                                  " ncol(editedContent): ", ncol(editedContent))
-                           )
-                     data.table::fwrite(editedContent, filePath)
+    } # !is.null(editedContent)
+    #otherReactiveValues_rv[[EDITOR_INPUT_FILE_DT]] <- FALSE
+    # TODO: Show text - file saved!
+  })
 
-                   } # !is.null(editedContent)
-                   otherReactiveValues_rv[[EDITOR_INPUT_FILE_DT]] <- FALSE
+  observeEvent(input[[INPUT_FILE_REVERT_BUTTON]], handlerExpr={
+    fileName <- input[[INPUT_FILES]]
+    if ( fileName != "" ){
+      filePath <- file.path(getScriptInfo()$fileDirectory, "inputs", fileName)
+      
+      fileDataTable <- SafeReadCSV(filePath)
+      debugConsole(paste("nrow(fileDataTable):", nrow(fileDataTable)))
+      otherReactiveValues_rv[[EDITOR_INPUT_FILE_IDENTIFIER]] <- fileName
+      otherReactiveValues_rv[[EDITOR_INPUT_FILE_DT]] <- fileDataTable
+    }
+  })
+  
+  output[[EDITOR_INPUT_FILE_IDENTIFIER]] = renderText({
+    fileName <- otherReactiveValues_rv[[EDITOR_INPUT_FILE_IDENTIFIER]]
+    filePath <- file.path(getScriptInfo()$fileDirectory, "inputs", fileName)
+    
+    debugConsole(paste0('EDITOR_INPUT_FILE_IDENTIFIER: ', fileName))
+    if ( is.null(fileName) ){
+      filePath <- 'No file selected'
+    }
+    filePath
+  })
 
-                   # Enable/disable buttons in the table
-                   for ( rowNumber in 1:nrow(DT) ){
-                     editButtonOnRow <- paste0(INPUT_FILE_EDIT_BUTTON_PREFIX, "_", rowNumber)
-                     cancelButtonOnRow <- paste0(INPUT_FILE_CANCEL_BUTTON_PREFIX, "_", rowNumber)
-                     saveButtonOnRow <- paste0(INPUT_FILE_SAVE_BUTTON_PREFIX, "_", rowNumber)
+  output[[EDITOR_INPUT_FILE_RHT]] <- rhandsontable::renderRHandsontable({
+    DF <- otherReactiveValues_rv[[EDITOR_INPUT_FILE_DT]]
+    if (is.null(DF) || !data.table::is.data.table(DF)) {
+      DF <- data.table::data.table(foo='bar')
+    } else {
+      # Convert integers to numeric so edits will take!
+      DF[, names(DF) := lapply(.SD, function(x) if(is.integer(x)){as.numeric(x)} else {x})]
+    }
+    
+    debugConsole(paste0("EDITOR_INPUT_FILE_DT: nrow(DF): ", nrow(DF), " class(DF): ",
+                        paste0(collapse = ", ", class(DF))))
+    
+    rhandsontable(DF, useTypes = FALSE, height=400)
+  })
 
-                     shinyjs::enable(editButtonOnRow, selector = NULL)
-                     
-                     if ( rowNumber == row ){
-                       shinyjs::disable(saveButtonOnRow, selector = NULL)
-                       shinyjs::disable(cancelButtonOnRow, selector = NULL)
-                     }  
-                   } # end for
-
-                 } else if (action == INPUT_FILE_CANCEL_BUTTON_PREFIX) {
-                   
-                   otherReactiveValues_rv[[EDITOR_INPUT_FILE_DT]] <- FALSE
-
-                   # Enable/disable buttons in the table
-                   for ( rowNumber in 1:nrow(DT) ){
-                     editButtonOnRow <- paste0(INPUT_FILE_EDIT_BUTTON_PREFIX, "_", rowNumber)
-                     cancelButtonOnRow <- paste0(INPUT_FILE_CANCEL_BUTTON_PREFIX, "_", rowNumber)
-                     saveButtonOnRow <- paste0(INPUT_FILE_SAVE_BUTTON_PREFIX, "_", rowNumber)
-
-                     shinyjs::enable(editButtonOnRow, selector = NULL)
- 
-                     if ( rowNumber == row ){
-                       shinyjs::disable(saveButtonOnRow, selector = NULL)
-                       shinyjs::disable(cancelButtonOnRow, selector = NULL)
-                     }
-                   } # end for
-
-                 } else {
-                   stop(paste("Got an unexpected button action. buttonId:",
-                              buttonId, " action:", action, "row:", row)
-                        )
-                 }
-
-               }) # end observeEvent click on button in file table
-
-               ##   for (rowNumber in 1:nrow(DT)) {
-               ##     editButtonOnRow <- paste0(INPUT_FILE_EDIT_BUTTON_PREFIX, "_", rowNumber)
-               ##     if (rowNumber == row) {
-               ##       cancelButtonOnRow <- paste0(INPUT_FILE_CANCEL_BUTTON_PREFIX, "_", rowNumber)
-               ##       saveButtonOnRow <- paste0(INPUT_FILE_SAVE_BUTTON_PREFIX, "_", rowNumber)
-               ##       #filePath <- file.path(getScriptInfo()$fileDirectory, "inputs", fileName)
-
-               ##       #do the appropriate action
-               ##       if (action == INPUT_FILE_EDIT_BUTTON_PREFIX) {
-               ##         fileDataTable <- SafeReadCSV(filePath)
-               ##         # TODO: raise error message if file doesn't exist
-
-               ##         debugConsole(paste("nrow(fileDataTable):", nrow(fileDataTable)))
-                       
-               ##         otherReactiveValues_rv[[EDITOR_INPUT_FILE_IDENTIFIER]] <- fileName
-               ##         otherReactiveValues_rv[[EDITOR_INPUT_FILE_DT]] <- fileDataTable
-               ##         shinyjs::disable(editButtonOnRow, selector = NULL)
-               ##         shinyjs::enable(saveButtonOnRow, selector = NULL)
-               ##         shinyjs::enable(cancelButtonOnRow, selector = NULL)
-               ##       } else {
-               ##         if (action == INPUT_FILE_SAVE_BUTTON_PREFIX) {
-               ##           editedContent <- rhandsontable::hot_to_r(input[[EDITOR_INPUT_FILE_DT]])
-               ##           if (!is.null(editedContent) && nchar(editedContent) > 0) {
-               ##             file.rename(filePath, paste0(filePath, "_",
-               ##                                          format(Sys.time(), "%Y-%m-%d_%H-%M"),
-               ##                                          ".bak"))
-               ##             print(paste0("writing out '", filePath,
-               ##                          "' with nrow(editedContent): ", nrow(editedContent),
-               ##                          " ncol(editedContent): ", ncol(editedContent))
-               ##                   )
-               ##             data.table::fwrite(editedContent, filePath)
-               ##           }
-               ##           otherReactiveValues_rv[[EDITOR_INPUT_FILE_DT]] <- FALSE
-               ##         } else if (action == INPUT_FILE_CANCEL_BUTTON_PREFIX) {
-               ##           otherReactiveValues_rv[[EDITOR_INPUT_FILE_DT]] <- FALSE
-               ##         } else {
-               ##           stop(paste("Got an unexpected button action. buttonId:",
-               ##                      buttonId, " action:", action, "row:", row)
-               ##                )
-               ##         }
-               ##         shinyjs::enable(editButtonOnRow, selector = NULL)
-               ##         shinyjs::disable(saveButtonOnRow, selector = NULL)
-               ##         shinyjs::disable(cancelButtonOnRow, selector = NULL)
-               ##       }
-               ##     } else {
-               ##       #if not row clicked on then enable or disable edit button
-               ##       #depending whether we beginning editing (disable all others)
-               ##       #or finishing editing (re-enabling all others)
-               ##       if (action == INPUT_FILE_EDIT_BUTTON_PREFIX) {
-               ##         shinyjs::disable(editButtonOnRow, selector = NULL)
-               ##       } else {
-               ##         shinyjs::enable(editButtonOnRow, selector = NULL)
-               ##       }
-               ##     } #end if not clicked on row
-               ##   } #end for loop over files
-               ## }) #end observeEvent click on button in file table
-
+    # Hide or show the editor_input_file_dt
   observe({
 
     dt <- otherReactiveValues_rv[[EDITOR_INPUT_FILE_DT]]
@@ -793,35 +704,6 @@ server <- function(input, output, session) {
       )
 
     }
-  })
-
-  output[[INPUT_FILES]] = DT::renderDataTable({
-    debugConsole('Getting Module specifications Input files')
-    return(getOutputINPUT_FILES())
-  }, server=FALSE) #end output[[INPUT_FILES]]
-
-  output[[EDITOR_INPUT_FILE_IDENTIFIER]] = renderText({
-    fileName <- otherReactiveValues_rv[[EDITOR_INPUT_FILE_IDENTIFIER]]
-    
-    debugConsole(paste0('EDITOR_INPUT_FILE_IDENTIFIER: ', fileName))
-    if ( is.null(fileName) ){
-      fileName <- 'No file selected'
-    }
-    fileName
-  })
-
-  output[[EDITOR_INPUT_FILE_DT]] <- rhandsontable::renderRHandsontable({
-    DF <- otherReactiveValues_rv[[EDITOR_INPUT_FILE_DT]]
-    if (is.null(DF) || !data.table::is.data.table(DF)) {
-      DF <- data.table::data.table(foo='bar')
-    } else {
-      # Convert integers to numeric so edits will take!
-      DF[, names(DF) := lapply(.SD, function(x) if(is.integer(x)){as.numeric(x)} else {x})]
-    }
-    
-    debugConsole(paste0("EDITOR_INPUT_FILE_DT: nrow(DF): ", nrow(DF), " class(DF): ",
-                        paste0(collapse = ", ", class(DF))))
-    rhandsontable(DF, useTypes = FALSE, height=200)
   })
 
   
@@ -881,37 +763,52 @@ server <- function(input, output, session) {
     reactiveFileReaders_ls[[CAPTURED_SOURCE]]()
   })
   
-  ### LOG TAB (TAB_LOGS) ------------------------------------------------------
-
-  ## output[[VE_LOG]] = DT::renderDataTable({
-  ##   getScriptInfo()
-  ##   logLines <- reactiveFileReaders_ls[[VE_LOG]]()
-  ##   DT <- data.table::data.table(message = logLines)
-  ##   return(DT)
-  ## }, server=FALSE, selection = 'none')
-
-
-
   ### OUTPUTS TAB (TAB_OUTPUTS)--------------------------------------------------
 
-  # observe()
-  output[["testAzone"]] <- rhandsontable::renderRHandsontable({
-    #data_table <- file.path(reactiveFilePaths_rv[[OUTPUT_DIR]]
+  observe({
+    if ( length(getOutputFiles()) > 0){
+      debugConsole("Getting output files")
+      choices <- sort(basename(getOutputFiles()))
+      updateSelectInput(session, OUTPUT_FILE, choices=choices)
+    }
+  })
+
+  output[[OUTPUT_FILE_PATH]] <- renderText({
+    fileName <- input[[OUTPUT_FILE]]
+    filePath <- file.path(reactiveFilePaths_rv[[OUTPUT_DIR]], fileName)
+    debugConsole(paste0('OUTPUT_FILE_PATH: ', filePath))
+    filePath
+  })
+
+    
+  
+  output_rht <- eventReactive(input[[OUTPUT_FILE]],{
+    dataTable <- data.frame()
+    fileName <- input[[OUTPUT_FILE]]
+    if ( fileName != "" ){
+      filePath <- file.path(reactiveFilePaths_rv[[OUTPUT_DIR]], fileName)
+      dataTable <- SafeReadCSV(filePath)
+      debugConsole(paste0('Loaded ', filePath))
+      }
     rhandsontable::hot_context_menu(
-      rhandsontable::rhandsontable(data.frame(foo = 'bar'), readOnly=TRUE),
+      rhandsontable::rhandsontable(dataTable, readOnly=TRUE),
       allowRowEdit=FALSE,
       allowColEdit=FALSE)
+  })
+  
+  output[[OUTPUT_FILE_RHT]] <- rhandsontable::renderRHandsontable({
+    output_rht()
     })
 
-  output[['btn_outputId']] <- downloadHandler(
+  output[[OUTPUT_FILE_SAVE_BUTTON]] <- downloadHandler(
     filename=function() paste0('data.csv'),
     content=function(file){
-      write.csv(rhandsontable::hot_to_r(input[['testAzone']]),
+      write.csv(rhandsontable::hot_to_r(input[[OUTPUT_FILE_RHT]]),
                 file,
                 row.names=FALSE)
     },
     contentType='text/csv'
-    )
+    )   
 
 } #end server
 

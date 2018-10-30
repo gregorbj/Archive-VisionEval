@@ -51,7 +51,7 @@ ui <- fluidPage(
   # Setup a panel to select the model script from a local drive
   navlistPanel(
     id = "navlist",
-
+    widths=c(2,10),
     # Define Scenario Tab ---------------------------------------------------
     tabPanel(
       "Scenario",
@@ -90,10 +90,6 @@ ui <- fluidPage(
       
       verbatimTextOutput(RUN_PARAMETERS_FILE),
 
-      rhandsontable::rHandsontableOutput(outputId = RUN_PARAMETERS_RHT),
-      bsTooltip(id=RUN_PARAMETERS_RHT, title='Double-click to edit',
-                placement='left'),
-
       actionButton(SAVE_RUN_PARAMETERS_FILE,
                    "Save Changes",
                    icon=icon('save', lib='glyphicon'),
@@ -103,16 +99,19 @@ ui <- fluidPage(
                    "Revert Changes",
                    icon = icon('remove', lib='glyphicon'), class='btn-primary'),
 
+      br(),
+      br(),
+      
+      rhandsontable::rHandsontableOutput(outputId = RUN_PARAMETERS_RHT),
+      bsTooltip(id=RUN_PARAMETERS_RHT, title='Double-click to edit',
+                placement='left'),
+
+
 
       h3("Model parameters"),
       
       verbatimTextOutput(MODEL_PARAMETERS_FILE),
 
-      rhandsontable::rHandsontableOutput(outputId = MODEL_PARAMETERS_RHT),
-      bsTooltip(id=MODEL_PARAMETERS_RHT, title='Double-click to edit',
-                placement='left'),
-
-      br(),
       actionButton(SAVE_MODEL_PARAMETERS_FILE,
                    "Save Changes",
                    icon = icon('save', lib='glyphicon'), class='btn-primary'),
@@ -120,10 +119,13 @@ ui <- fluidPage(
       actionButton(REVERT_MODEL_PARAMETERS_FILE,
                    "Revert Changes",
                    icon = icon('remove', lib='glyphicon'), class='btn-primary'),
+
       br(),
-      br()
-
-
+      br(),
+      rhandsontable::rHandsontableOutput(outputId = MODEL_PARAMETERS_RHT),
+      bsTooltip(id=MODEL_PARAMETERS_RHT, title='Double-click to edit',
+                placement='left')
+ 
       #h3("Geo File"),
       #DT::dataTableOutput(GEO_CSV_FILE)
 
@@ -135,25 +137,26 @@ ui <- fluidPage(
       value = TAB_INPUTS,
 
       h3("Input files"),
-      DT::dataTableOutput(INPUT_FILES),
-
+      selectInput(inputId=INPUT_FILES, label="",
+                  choices=""),
       div(id = EDITOR_INPUT_DIV,
           verbatimTextOutput(EDITOR_INPUT_FILE_IDENTIFIER, FALSE),
-          rhandsontable::rHandsontableOutput(EDITOR_INPUT_FILE_DT)
-      ),
-      br(),
-      br()
+                   actionButton(INPUT_FILE_SAVE_BUTTON,
+                       "Save Changes",
+                       icon = icon('save', lib='glyphicon'),
+                       class='btn-primary'),
+      
+          actionButton(INPUT_FILE_REVERT_BUTTON,
+                       "Revert Changes",
+                       icon = icon('remove', lib='glyphicon'),
+                       class='btn-primary'),
+          br(),
+          br(),
+          rhandsontable::rHandsontableOutput(EDITOR_INPUT_FILE_RHT),
+          bsTooltip(id=EDITOR_INPUT_FILE_RHT, title='Double-click to edit',
+                    placement='left')
 
-      # h3("Datastore tables:"),
-      # DT::dataTableOutput(HDF5_TABLES)
-
-      # h3("Module specifications:"),
-
-      # "Currently Selected:",
-      # verbatimTextOutput(INPUTS_TREE_SELECTED_TEXT, placeholder = TRUE),
-
-      # shinyTree::shinyTree(INPUTS_TREE)
-
+          )
     ), #end tabPanel
 
     # Define Run Tab ---------------------------------------------------------
@@ -171,50 +174,18 @@ ui <- fluidPage(
     ), #end tabPanel
 
 
-    ## # Define Log Tab ---------------------------------------------------------
-    ## tabPanel(
-    ##   "Log and console",
-    ##   value = TAB_LOGS,
-
-    ##   h3("Log (newest first)"),
-    ##   DT::dataTableOutput(VE_LOG)
-
-    ##   ## h3("Console output:"),
-    ##   ## DT::dataTableOutput(DEBUG_CONSOLE_OUTPUT)
-    ## ), #end tabPanel
-
     # Define Outputs Tab -----------------------------------------------------
     tabPanel(
       "Outputs",
       value = TAB_OUTPUTS,
 
-      tabsetPanel(
-        tabPanel('Azone test',
-                 rhandsontable::rHandsontableOutput(outputId='testAzone'),
-                 downloadButton(outputId='btn_outputId', label='Download data',
-                                class='btn-primary')
-                 ),
-        id = 'outputTabset')
-
-      
-      ## verbatimTextOutput(DATASTORE_TABLE_IDENTIFIER, FALSE),
-
-      ## shinyFiles::shinySaveButton(
-      ##   id = DATASTORE_TABLE_EXPORT_BUTTON,
-      ##   label = "Export displayed datastore data...",
-      ##   title = "Please pick location and name for the exported data...",
-      ##   myFileTypes_ls
-      ## ),
-
-      ## actionButton(DATASTORE_TABLE_CLOSE_BUTTON, "Close Datastore table"),
-
-      ## DT::dataTableOutput(VIEW_DATASTORE_TABLE),
-
-      ## h3("Datastore: (click row to view and export)"),
-      ## DT::dataTableOutput(DATASTORE_TABLE),
-
-      ## h3("Model state"),
-      ## verbatimTextOutput(MODEL_STATE_FILE, FALSE)
+      h3("Output files"),
+      selectInput(OUTPUT_FILE, label="", choices=""),
+      verbatimTextOutput(OUTPUT_FILE_PATH, placeholder=TRUE),
+      downloadButton(outputId="btn_outputId", label="Download data",
+                     class="btn-primary"),
+      br(),
+      rhandsontable::rHandsontableOutput(OUTPUT_FILE_RHT)
     ) #end tabPanel
 
   ) #end navlistPanel
