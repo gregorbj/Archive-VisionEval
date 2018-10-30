@@ -99,7 +99,7 @@ PropHhWkr_HtAg <- calcWorkerProportions(Hh_df)
 #' for each household type.:
 #' @source PredictWorkers.R script.
 "PropHhWkr_HtAg"
-devtools::use_data(PropHhWkr_HtAg, overwrite = TRUE)
+usethis::use_data(PropHhWkr_HtAg, overwrite = TRUE)
 rm(calcWorkerProportions, Hh_df)
 
 
@@ -269,7 +269,7 @@ PredictWorkersSpecifications <- list(
 #' }
 #' @source PredictWorkers.R script.
 "PredictWorkersSpecifications"
-devtools::use_data(PredictWorkersSpecifications, overwrite = TRUE)
+usethis::use_data(PredictWorkersSpecifications, overwrite = TRUE)
 rm(PredictWorkersSpecifications)
 
 
@@ -300,6 +300,7 @@ rm(PredictWorkersSpecifications)
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name PredictWorkers
 #' @import visioneval
 #' @include CreateEstimationDatasets.R CreateHouseholds.R
 #' @export

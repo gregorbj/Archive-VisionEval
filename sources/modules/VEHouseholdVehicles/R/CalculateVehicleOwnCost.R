@@ -178,7 +178,7 @@ rm(Depr_AgVt, Depr_MiVt, DeprAdjModel_ls, DeprProp_MiVt, FinCost_AgVt,
 #' }
 #' @source AdjustVehicleOwnership.R script.
 "VehOwnCost_ls"
-devtools::use_data(VehOwnCost_ls, overwrite = TRUE)
+usethis::use_data(VehOwnCost_ls, overwrite = TRUE)
 
 #---------------------------------
 #Pay-as-you-drive insurance choice
@@ -227,7 +227,7 @@ PaydWts_ <- c(
 #' }
 #' @source CalculateVehicleOwnCost.R script.
 "PaydWts_"
-devtools::use_data(PaydWts_, overwrite = TRUE)
+usethis::use_data(PaydWts_, overwrite = TRUE)
 
 
 #================================================
@@ -521,7 +521,7 @@ CalculateVehicleOwnCostSpecifications <- list(
 #' }
 #' @source CalculateVehicleOwnCost.R script.
 "CalculateVehicleOwnCostSpecifications"
-devtools::use_data(CalculateVehicleOwnCostSpecifications, overwrite = TRUE)
+usethis::use_data(CalculateVehicleOwnCostSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -558,8 +558,8 @@ devtools::use_data(CalculateVehicleOwnCostSpecifications, overwrite = TRUE)
 #' @param Vmt_ A numeric vector of the annual vehicle miles traveled for the
 #' vehicles
 #' @return A numeric vector of annual depreciation cost in 2017 dollars
+#' @name calcVehDepr
 #' @export
-#'
 calcVehDepr <- function(Type_, Age_, Vmt_) {
   #Calculate index to the vehicle depreciation model table
   TypeToIndex <- c(Auto = 1, LtTrk = 2)
@@ -597,8 +597,8 @@ calcVehDepr <- function(Type_, Age_, Vmt_) {
 #' @param Age_ A numeric vector of vehicle ages
 #' vehicles
 #' @return A numeric vector of annual finance cost in 2017 dollars
+#' @name calcVehFin
 #' @export
-#'
 calcVehFin <- function(Type_, Age_) {
   #Calculate index to the vehicle finance model table
   TypeToIndex <- c(Auto = 1, LtTrk = 2)
@@ -628,8 +628,8 @@ calcVehFin <- function(Type_, Age_) {
 #' @param TaxRate A numeric value that is the annual Ad valorem tax rate in
 #' dollars of tax per dollar of vehicle value
 #' @return A numeric vector of annual Ad valorem tax cost in 2017 dollars
+#' @name calcAdValoremTax
 #' @export
-#'
 calcAdValoremTax <- function(Type_, Age_, TaxRate) {
   #Calculate index to the vehicle value model table
   TypeToIndex <- c(Auto = 1, LtTrk = 2)
@@ -748,9 +748,9 @@ idPaydHh <- function(L) {
 #' @param M A list the module functions of modules called by this module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name CalculateVehicleOwnCost
 #' @import visioneval
 #' @export
-#'
 CalculateVehicleOwnCost <- function(L,M) {
   #Estimate the household DVMT
   Dvmt_ls <- M$CalcDvmt(L$CalcDvmt)

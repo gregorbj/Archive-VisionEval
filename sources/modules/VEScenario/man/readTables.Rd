@@ -5,7 +5,8 @@
 \title{Function to read tables from given scenario
 \code{readTables} reads tables from a specified scenario.}
 \usage{
-readTables(Year = NULL, Scenario = "Base", Output = "All", Table = TRUE)
+readTables(Year = NULL, Scenario = "Base", Output = "All",
+  Table = TRUE)
 }
 \arguments{
 \item{Year}{A string indicating the year for which the output needs to

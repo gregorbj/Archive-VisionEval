@@ -17,12 +17,13 @@ LazyData: TRUE
 Depends: R (>= 3.1.0)
 Imports:
     visioneval,
-    devtools
+    devtools,
+	usethis
 Suggests:
     knitr,
     rmarkdown
 VignetteBuilder: knitr
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0.9000
 Collate: 
     'CreateEstimationDatasets.R'
     'CreateHouseholds.R'

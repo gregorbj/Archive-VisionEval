@@ -36,7 +36,7 @@ rm(HhAllocationModelCoeff)
 #' }
 #' @source CalculateFuturePlaceTypes.R script.
 "HhAllocationModelCoeff_df"
-devtools::use_data(HhAllocationModelCoeff_df, overwrite = TRUE)
+usethis::use_data(HhAllocationModelCoeff_df, overwrite = TRUE)
 
 #================================================
 #SECTION 2: DEFINE THE MODULE DATA SPECIFICATIONS
@@ -250,7 +250,7 @@ CalculateFuturePlaceTypesSpecifications <- list(
 #' }
 #' @source CalculateFuturePlaceTypes.R script.
 "CalculateFuturePlaceTypesSpecifications"
-devtools::use_data(CalculateFuturePlaceTypesSpecifications, overwrite = TRUE)
+usethis::use_data(CalculateFuturePlaceTypesSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -283,6 +283,7 @@ devtools::use_data(CalculateFuturePlaceTypesSpecifications, overwrite = TRUE)
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name CalculateFuturePlaceTypes
 #' @import visioneval
 #' @export
 CalculateFuturePlaceTypes <- function(L) {

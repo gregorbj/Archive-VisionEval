@@ -25,7 +25,7 @@ load("inst/extdata/CongModel_ls.RData")
 #' parameters that are used in the evaluation of aforementioned models.
 #' @source GreenSTEP version ?.? model.
 "CongModel_ls"
-devtools::use_data(CongModel_ls, overwrite = TRUE)
+usethis::use_data(CongModel_ls, overwrite = TRUE)
 
 
 #================================================
@@ -410,7 +410,7 @@ CalculateCongestionPolicySpecifications <- list(
 #' }
 #' @source CalculateCongestionPolicy.R script.
 "CalculateCongestionPolicySpecifications"
-devtools::use_data(CalculateCongestionPolicySpecifications, overwrite = TRUE)
+usethis::use_data(CalculateCongestionPolicySpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -444,6 +444,7 @@ devtools::use_data(CalculateCongestionPolicySpecifications, overwrite = TRUE)
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name CalculateCongestionPolicy
 #' @import visioneval
 #' @export
 CalculateCongestionPolicy <- function(L) {

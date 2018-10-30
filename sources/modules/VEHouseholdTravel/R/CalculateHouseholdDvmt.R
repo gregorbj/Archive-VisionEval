@@ -350,7 +350,7 @@ rm(nm)
 #' Pctl100: the formula for the 100th percentile DVMT model.
 #' @source CalculateHouseholdDVMT.R
 "DvmtModel_ls"
-devtools::use_data(DvmtModel_ls, overwrite = TRUE)
+usethis::use_data(DvmtModel_ls, overwrite = TRUE)
 
 #Clean Up
 #--------
@@ -578,7 +578,7 @@ CalculateHouseholdDvmtSpecifications <- list(
 #' }
 #' @source CalculateHouseholdDvmt.R script.
 "CalculateHouseholdDvmtSpecifications"
-devtools::use_data(CalculateHouseholdDvmtSpecifications, overwrite = TRUE)
+usethis::use_data(CalculateHouseholdDvmtSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -604,6 +604,7 @@ devtools::use_data(CalculateHouseholdDvmtSpecifications, overwrite = TRUE)
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name CalculateHouseholdDvmt
 #' @import visioneval
 #' @export
 CalculateHouseholdDvmt <- function(L) {

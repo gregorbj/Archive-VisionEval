@@ -131,7 +131,7 @@ AssignRoadMilesSpecifications <- list(
 #' }
 #' @source AssignRoadMiles.R script.
 "AssignRoadMilesSpecifications"
-devtools::use_data(AssignRoadMilesSpecifications, overwrite = TRUE)
+usethis::use_data(AssignRoadMilesSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -152,6 +152,7 @@ devtools::use_data(AssignRoadMilesSpecifications, overwrite = TRUE)
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name AssignRoadMiles
 #' @import visioneval
 #' @export
 AssignRoadMiles <- function(L) {

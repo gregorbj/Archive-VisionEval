@@ -14,12 +14,13 @@ LazyData: TRUE
 Depends: R (>= 3.4.2)
 Imports:
     visioneval,
-    devtools
+    devtools,
+	usethis
 Suggests:
     knitr
 VignetteBuilder: knitr
 Encoding: UTF-8
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0.9000
 Collate:
         'CalculateCongestionBase.R'
         'CalculateCongestionFuture.R'

@@ -100,6 +100,7 @@
 #' PrepFun: a function that prepares inputs to be applied in the linear model,
 #' OutFun: a function that transforms the result of applying the linear model.
 #' Summary: the summary of the linear model estimation results.
+#' @name estimateIncomeModel
 #' @import visioneval
 #' @include CreateEstimationDatasets.R CreateHouseholds.R PredictWorkers.R
 #' @export
@@ -256,7 +257,7 @@ rm(Hh_df, IncObs_, HHIncomeTarget, MeanCompare_df)
 #' }
 #' @source PredictIncome.R script.
 "HHIncModel_ls"
-devtools::use_data(HHIncModel_ls, overwrite = TRUE)
+usethis::use_data(HHIncModel_ls, overwrite = TRUE)
 
 #Estimate the group quarters linear income model
 #-----------------------------------------------
@@ -348,7 +349,7 @@ rm(Hh_df, IncObs_, HHIncomeTarget, MeanCompare_df)
 #' }
 #' @source PredictIncome.R script.
 "GQIncModel_ls"
-devtools::use_data(GQIncModel_ls, overwrite = TRUE)
+usethis::use_data(GQIncModel_ls, overwrite = TRUE)
 
 
 #================================================
@@ -486,7 +487,7 @@ PredictIncomeSpecifications <- list(
 #' }
 #' @source PredictIncome.R script.
 "PredictIncomeSpecifications"
-devtools::use_data(PredictIncomeSpecifications, overwrite = TRUE)
+usethis::use_data(PredictIncomeSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -512,6 +513,7 @@ devtools::use_data(PredictIncomeSpecifications, overwrite = TRUE)
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name PredictIncome
 #' @import visioneval
 #' @export
 PredictIncome <- function(L) {

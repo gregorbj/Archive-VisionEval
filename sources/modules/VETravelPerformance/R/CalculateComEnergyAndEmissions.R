@@ -333,7 +333,7 @@ CalculateComEnergyAndEmissionsSpecifications <- list(
 #' }
 #' @source CalculateComEnergyAndEmissions.R script.
 "CalculateComEnergyAndEmissionsSpecifications"
-devtools::use_data(CalculateComEnergyAndEmissionsSpecifications, overwrite = TRUE)
+usethis::use_data(CalculateComEnergyAndEmissionsSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -370,6 +370,7 @@ devtools::use_data(CalculateComEnergyAndEmissionsSpecifications, overwrite = TRU
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name CalculateComEnergyAndEmissions
 #' @import visioneval
 #' @export
 #'

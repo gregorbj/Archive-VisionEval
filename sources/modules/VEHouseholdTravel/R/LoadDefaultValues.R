@@ -102,4 +102,4 @@ rm(Inp_ls, CarbonIntensity_df)
 #' }
 #' @source LoadDefaultValues.R script.
 "TravelDemandDefaults_ls"
-devtools::use_data(TravelDemandDefaults_ls, overwrite = TRUE)
+usethis::use_data(TravelDemandDefaults_ls, overwrite = TRUE)

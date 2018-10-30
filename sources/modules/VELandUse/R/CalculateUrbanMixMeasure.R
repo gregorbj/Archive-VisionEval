@@ -137,7 +137,7 @@ rm(Data_df)
 #' }
 #' @source CalculateUrbanMixMeasure.R script.
 "UrbanMixModel_ls"
-devtools::use_data(UrbanMixModel_ls, overwrite = TRUE)
+usethis::use_data(UrbanMixModel_ls, overwrite = TRUE)
 
 
 #================================================
@@ -275,7 +275,7 @@ CalculateUrbanMixMeasureSpecifications <- list(
 #' }
 #' @source CalculateUrbanMixMeasure.R script.
 "CalculateUrbanMixMeasureSpecifications"
-devtools::use_data(CalculateUrbanMixMeasureSpecifications, overwrite = TRUE)
+usethis::use_data(CalculateUrbanMixMeasureSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -301,6 +301,7 @@ devtools::use_data(CalculateUrbanMixMeasureSpecifications, overwrite = TRUE)
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name CalculateUrbanMixMeasure
 #' @import visioneval
 #' @export
 CalculateUrbanMixMeasure <- function(L) {

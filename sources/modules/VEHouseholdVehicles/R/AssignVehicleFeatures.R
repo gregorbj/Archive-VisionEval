@@ -629,7 +629,7 @@ VehOwnModels_ls$VehicleMpgProp <- list(
 #' }
 #' @source AssignVehicleFeatures.R script.
 "VehOwnModels_ls"
-devtools::use_data(VehOwnModels_ls, overwrite = TRUE)
+usethis::use_data(VehOwnModels_ls, overwrite = TRUE)
 
 # Model LtTrk Ownership
 #-------------------------
@@ -649,7 +649,7 @@ LtTruckModels_ls <- list(OwnModel = "-0.786596031795022 * Intercept + 5.00962836
 #' }
 #' @source AssignVehicleFeatures.R script.
 "LtTruckModels_ls"
-devtools::use_data(LtTruckModels_ls, overwrite = TRUE)
+usethis::use_data(LtTruckModels_ls, overwrite = TRUE)
 
 
 #================================================
@@ -975,7 +975,7 @@ AssignVehicleFeaturesSpecifications <- list(
 #' }
 #' @source AssignVehicleFeatures.R script.
 "AssignVehicleFeaturesSpecifications"
-devtools::use_data(AssignVehicleFeaturesSpecifications, overwrite = TRUE)
+usethis::use_data(AssignVehicleFeaturesSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -1000,6 +1000,7 @@ devtools::use_data(AssignVehicleFeaturesSpecifications, overwrite = TRUE)
 #' of vehicles by driving age population for each region type.
 #' @param Type A string indicating the region type ("Metro": Default, or "NonMetro")
 #' @return A list containing number of vehicles and ownership ratio for each household
+#' @name predictVehicleOwnership
 #' @export
 #'
 predictVehicleOwnership <- function( Hh_df, ModelType=VehOwnModels_ls, VehProp = NA, Type="Metro" ) {
@@ -1133,6 +1134,7 @@ predictVehicleOwnership <- function( Hh_df, ModelType=VehOwnModels_ls, VehProp =
 #' @param  TruckProp A numeric indicating the target proportion for light truck
 #' ownership.
 #' @return A list containing vehicle types for each household.
+#' @name predictLtTruckOwn
 #' @export
 #'
 predictLtTruckOwn <- function( Hh_df, ModelType=LtTruckModels_ls, TruckProp=NA) {
@@ -1216,6 +1218,7 @@ predictLtTruckOwn <- function( Hh_df, ModelType=LtTruckModels_ls, TruckProp=NA) 
 #' @param Hh_df A household data frame consisting of household characteristics.
 #' @return A data frame containing the distribution of vehicle types by income
 #' groups.
+#' @name calcVehPropByIncome
 #' @import reshape2
 #' @export
 #'
@@ -1244,6 +1247,7 @@ calcVehPropByIncome <- function( Hh_df ) {
 #' be an ordered sequence from 0 to 32.
 #' @param AdjRatio A number that is the target ratio value.
 #' @return A numeric vector of adjusted distribution.
+#' @name adjAgeDistribution
 #' @import stats
 #' @export
 #'
@@ -1331,6 +1335,7 @@ adjAgeDistribution <- function( CumDist, AdjRatio ) {
 #' @param MaxIter A numeric indicating maximum number of iterations. (Default: 100)
 #' @param Closure A numeric indicating the tolerance level for conversion. (Default: 1e-3)
 #' @return A numeric vector of joint probabilities of vehicle by age and income group.
+#' @name calcVehAgePropByInc
 #' @export
 #'
 calcVehAgePropByInc <- function(VehAgIgProp, AgeGrp, AgeMargin, IncGrp, IncMargin, MaxIter=100, Closure=0.001){
@@ -1381,6 +1386,7 @@ calcVehAgePropByInc <- function(VehAgIgProp, AgeGrp, AgeMargin, IncGrp, IncMargi
 #' the household.
 #' @param AdjRatio A number that is the target ratio value.
 #' @return A list containing the vehicle types and ages for each household.
+#' @name calcVehicleAges
 #' @import reshape2
 #' @export
 #'
@@ -1468,6 +1474,7 @@ calcVehicleAges <- function(Hh_df, VProp=NULL, AdjRatio = c(Auto = 1, LtTruck = 
 #' @param VehMpgYr A data frame of mileage of vehicles by type and year.
 #' @param CurrentYear A integer indicating the current year.
 #' @return A numeric vector that indicates the mileage of vehicles.
+#' @name assignFuelEconomy
 #' @export
 #'
 assignFuelEconomy <- function( Hh_df, VehMpgYr=NULL, CurrentYear ) {
@@ -1515,6 +1522,7 @@ assignFuelEconomy <- function( Hh_df, VehMpgYr=NULL, CurrentYear ) {
 #' @param DvmtProp A data frame of distribution of VMT proportion by number of
 #' vehicles in a household.
 #' @return A list containing number of vehicles and ownership ratio for each household
+#' @name apportionDvmt
 #' @export
 #'
 apportionDvmt <- function( Hh_df, DvmtProp=NULL ) {
@@ -1635,6 +1643,7 @@ apportionDvmt <- function( Hh_df, DvmtProp=NULL ) {
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
 #' @import visioneval
+#' @name AssignVehicleFeatures
 #' @import stats
 #' @export
 AssignVehicleFeatures <- function(L) {

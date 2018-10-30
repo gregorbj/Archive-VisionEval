@@ -62,6 +62,7 @@ Hh_df$HhSize <- Hh_df$Hhsize
 #' representation of the count model component, 'Zero' which contains a string
 #' representation of the zero model component, and 'Summary' which contains
 #' summary information about the model.
+#'
 #' @param Data_df a data frame containing the model estimation data
 #' @param DepVar a string that is the dependent variable name
 #' @param IndepVars_ a string vector of the names of the independent variables
@@ -70,7 +71,6 @@ Hh_df$HhSize <- Hh_df$Hhsize
 #' string representation of the zero model component, 'Summary' which contains
 #' the model summary.
 #' @import pscl
-#' @export
 estimateVehicleTripModel <- function(Data_df, DepVar, IndepVars_) {
 
   #Estimate hurdle model
@@ -141,7 +141,7 @@ VehTripModels_ls <- list(
 #' contains a string representing a hurdle model for computing household trips;
 #' @source CalculateVehicleTrips.R script.
 "VehTripModels_ls"
-devtools::use_data(VehTripModels_ls, overwrite = TRUE)
+usethis::use_data(VehTripModels_ls, overwrite = TRUE)
 
 rm(DvmtModel_ls, Hh_df, MetroHh_df, MetroVehTripModel_ls, NonMetroHh_df,
    NonMetroVehTripModel_ls, DepVars_, IsMetro_, Vars_, estimateVehicleTripModel)
@@ -313,7 +313,7 @@ CalculateVehicleTripsSpecifications <- list(
 #' }
 #' @source CalculateVehicleTrips.R script.
 "CalculateVehicleTripsSpecifications"
-devtools::use_data(CalculateVehicleTripsSpecifications, overwrite = TRUE)
+usethis::use_data(CalculateVehicleTripsSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -333,6 +333,7 @@ devtools::use_data(CalculateVehicleTripsSpecifications, overwrite = TRUE)
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name CalculateVehicleTrips
 #' @import visioneval
 #' @export
 CalculateVehicleTrips <- function(L) {

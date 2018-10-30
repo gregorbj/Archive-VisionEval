@@ -418,7 +418,7 @@ CalculateBaseRoadDvmtSpecifications <- list(
 #' }
 #' @source CalculateBaseRoadDvmt.R script.
 "CalculateBaseRoadDvmtSpecifications"
-devtools::use_data(CalculateBaseRoadDvmtSpecifications, overwrite = TRUE)
+usethis::use_data(CalculateBaseRoadDvmtSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -471,6 +471,7 @@ devtools::use_data(CalculateBaseRoadDvmtSpecifications, overwrite = TRUE)
 #' @param L A list containing data defined by the module specification.
 #' @return A list containing data produced by the function consistent with the
 #' module specifications.
+#' @name CalculateBaseRoadDvmt
 #' @import visioneval
 #' @export
 CalculateBaseRoadDvmt <- function(L) {

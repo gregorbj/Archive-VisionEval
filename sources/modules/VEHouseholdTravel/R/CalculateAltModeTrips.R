@@ -86,7 +86,6 @@ Hh_df$HhSize <- Hh_df$Hhsize
 #' string representation of the zero model component, 'Summary' which contains
 #' the model summary.
 #' @import pscl
-#' @export
 estimateAltModeTripModel <- function(Data_df, DepVar, IndepVars_) {
 
   #Estimate hurdle model
@@ -194,7 +193,7 @@ AltModeModels_ls$NonMetro <-
 #' components;
 #' @source CalculateAltModeTrips.R.
 "AltModeModels_ls"
-devtools::use_data(AltModeModels_ls, overwrite = TRUE)
+usethis::use_data(AltModeModels_ls, overwrite = TRUE)
 
 rm(DvmtModel_ls, Hh_df, MetroBikeModel_ls, MetroHh_df, MetroTransitModel_ls,
    MetroWalkModel_ls, NonMetroBikeModel_ls, NonMetroHh_df,
@@ -391,7 +390,7 @@ CalculateAltModeTripsSpecifications <- list(
 #' }
 #' @source CalculateAltModeTrips.R script.
 "CalculateAltModeTripsSpecifications"
-devtools::use_data(CalculateAltModeTripsSpecifications, overwrite = TRUE)
+usethis::use_data(CalculateAltModeTripsSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -412,6 +411,7 @@ devtools::use_data(CalculateAltModeTripsSpecifications, overwrite = TRUE)
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name CalculateAltModeTrips
 #' @import visioneval
 #' @export
 CalculateAltModeTrips <- function(L) {

@@ -75,7 +75,7 @@ DvmtLmModels_ls$NonMetro <- list(
 #' }
 #' @source CalculateTravelDemand.R script.
 "DvmtLmModels_ls"
-devtools::use_data(DvmtLmModels_ls, overwrite = TRUE)
+usethis::use_data(DvmtLmModels_ls, overwrite = TRUE)
 
 
 #Load PHEV/HEV model data
@@ -1112,7 +1112,7 @@ CalculateTravelDemandSpecifications <- list(
 #' }
 #' @source CalculateTravelDemand.R script.
 "CalculateTravelDemandSpecifications"
-devtools::use_data(CalculateTravelDemandSpecifications, overwrite = TRUE)
+usethis::use_data(CalculateTravelDemandSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -1137,6 +1137,7 @@ devtools::use_data(CalculateTravelDemandSpecifications, overwrite = TRUE)
 #' @param Type A string indicating the region type. ("Metro": Default, or "NonMetro")
 #' @return A matrix containing average, maximum, and 95th percentile of daily
 #' vehicle miles traveled.
+#' @name predictAveDvmt
 #' @export
 predictAveDvmt <- function( Hh_df, Model_ls, Type ) {
   # Check if proper Type specified
@@ -1189,6 +1190,7 @@ predictAveDvmt <- function( Hh_df, Model_ls, Type ) {
 #' @param Type A string indicating the region type. ("Metro": Default, or "NonMetro")
 #' @return A matrix containing maximum and 95th percentile of daily
 #' vehicle miles traveled.
+#' @name predictMaxDvmt
 #' @export
 predictMaxDvmt <- function( Hh_df, Model_ls, Type ) {
   # Check if proper Type specified
@@ -1231,6 +1233,7 @@ predictMaxDvmt <- function( Hh_df, Model_ls, Type ) {
 #' @param AnnVmtInflator A numeric indicating annual VMT inflator.
 #' @param TrnstnProp A numeric indicating the transportation proportion.
 #' @return A list containing adjusted average DVMT and budget for each household.
+#' @name calculateAdjAveDvmt
 #' @export
 calculateAdjAveDvmt <- function( Hh_df, Model_ls, Type, BudgetProp, AnnVmtInflator=365, TrnstnProp ) {
   # Calculate the household DVMT without budget considerations
@@ -1301,6 +1304,7 @@ calculateAdjAveDvmt <- function( Hh_df, Model_ls, Type, BudgetProp, AnnVmtInflat
 #' @param Hh_df A household data frame consisting average DVMT and household id.
 #' @param Vehicles_df A vehicle data frame consisting of variables used for DVMT assignment.
 #' @return A numeric vector of DVMT.
+#' @name calculateVehDvmt
 #' @export
 calculateVehDvmt <- function( Hh_df, Vehicles_df ) {
   VehDvmt_ <- Hh_df[match(Vehicles_df$HhId, Hh_df$HhId),"Dvmt"] * Vehicles_df$DvmtProp
@@ -1328,6 +1332,7 @@ calculateVehDvmt <- function( Hh_df, Vehicles_df ) {
 #' to be optimized.
 #' @return A list of identifying the powertrain, dvmt, and efficiency of vehicles by
 #' powertrain.
+#' @name assignPHEV
 #' @export
 assignPHEV <- function(Hh_df, Veh_df, PhevRangePropYr_df, CurrYear,
                        PhevPropModel_ls, HevMpgPropYr_df, OptimProp = 0){
@@ -1596,6 +1601,7 @@ assignPHEV <- function(Hh_df, Veh_df, PhevRangePropYr_df, CurrYear,
 #' @param UseMaxDvmtCriterion A logical to indicated whether to use max dvmt criteria.
 #' @return A list of identifying the powertrain, dvmt, and efficiency of vehicles by
 #' powertrain.
+#' @name assignEv
 #' @export
 assignEv <- function( Hh_df, Veh_df, EvRangePropYr_df,
                       CurrYear, UseMaxDvmtCriterion=FALSE ) {
@@ -1705,6 +1711,7 @@ assignEv <- function( Hh_df, Veh_df, EvRangePropYr_df,
 #' @param MJPerGallon A numeric indicating the energy per gallon of fuel. (Default: 121)
 #' @param OutputType A string indicating the units of the output. ("MetricTons":Default or "Pounds")
 #' @return A named array indicating the average Co2 equivalent gas emissions by vehicle type.
+#' @name calculateAveFuelCo2e
 #' @export
 calculateAveFuelCo2e <- function( ForecastYear = NULL, FuelProp = NULL, FuelComp = NULL,
                                   FuelCo2Ft = NULL, MJPerGallon = 121, OutputType="MetricTons" ) {
@@ -1791,6 +1798,7 @@ calculateAveFuelCo2e <- function( ForecastYear = NULL, FuelProp = NULL, FuelComp
 #' @param PowerCo2Ft A data frame containing the intensity of carbon by fuel types and electricity.
 #' @param OutputType A string indicating the units of the output. ("MetricTons":Default or "Pounds")
 #' @return A named array indicating the average Co2 equivalent gas emissions by vehicle type.
+#' @name calculateAveElectricityCo2e
 #' @export
 calculateAveElectricityCo2e <- function( ForecastYear = NULL, PowerCo2Ft = NULL,
                                          OutputType="MetricTons" ) {
@@ -1836,6 +1844,7 @@ calculateAveElectricityCo2e <- function( ForecastYear = NULL, PowerCo2Ft = NULL,
 #' @param AveElectricCo2e A numeric indicating the average Co2 equivalent gas emissions
 #' per Kwh of electricity.
 #' @return A list containing assignment of gas emissions.
+#' @name calculateVehFuelElectricCo2
 #' @export
 calculateVehFuelElectricCo2 <- function(Hh_df, Vehicles_df, AveFuelCo2e, AveElectricCo2e) {
 
@@ -1925,6 +1934,7 @@ calculateVehFuelElectricCo2 <- function(Hh_df, Vehicles_df, AveFuelCo2e, AveElec
 #' @param Costs A named numeric consisting of the costs, and/or tax  information.
 #' @param NonPrivateFactor A numeric.
 #' @return A list containing various fuel costs.
+#' @name calculateCosts
 #' @export
 calculateCosts <- function( Hh_df, Costs, NonPrivateFactor=5 ) {
   # Calculate total daily fuel cost
@@ -1983,6 +1993,7 @@ calculateCosts <- function( Hh_df, Costs, NonPrivateFactor=5 ) {
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name CalculateTravelDemand
 #' @import visioneval
 #' @export
 CalculateTravelDemand <- function(L) {

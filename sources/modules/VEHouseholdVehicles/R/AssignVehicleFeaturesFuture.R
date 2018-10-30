@@ -306,7 +306,7 @@ AssignVehicleFeaturesFutureSpecifications <- list(
 #' }
 #' @source AssignVehicleFeaturesFuture.R script.
 "AssignVehicleFeaturesFutureSpecifications"
-devtools::use_data(AssignVehicleFeaturesFutureSpecifications, overwrite = TRUE)
+usethis::use_data(AssignVehicleFeaturesFutureSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -328,8 +328,8 @@ devtools::use_data(AssignVehicleFeaturesFutureSpecifications, overwrite = TRUE)
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
-#' @import visioneval
-#' @import stats
+#' @name AssignVehicleFeaturesFuture
+#' @import visioneval stats
 #' @export
 AssignVehicleFeaturesFuture <- function(L) {
   #Set up

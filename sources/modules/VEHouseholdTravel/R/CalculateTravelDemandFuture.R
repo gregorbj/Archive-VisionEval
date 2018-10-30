@@ -713,7 +713,7 @@ CalculateTravelDemandFutureSpecifications <- list(
 #' }
 #' @source CalculateTravelDemandFuture.R script.
 "CalculateTravelDemandFutureSpecifications"
-devtools::use_data(CalculateTravelDemandFutureSpecifications, overwrite = TRUE)
+usethis::use_data(CalculateTravelDemandFutureSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -739,6 +739,7 @@ devtools::use_data(CalculateTravelDemandFutureSpecifications, overwrite = TRUE)
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name CalculateTravelDemandFuture
 #' @import visioneval
 #' @export
 CalculateTravelDemandFuture <- function(L) {

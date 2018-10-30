@@ -153,7 +153,7 @@ rm(Inp_ls, SpeedSmoothEffect_df)
 #' }
 #' @source CalculateMpgMpkwhAdjustments.R script.
 "MpgMpkwhAdj_ls"
-devtools::use_data(MpgMpkwhAdj_ls, overwrite = TRUE)
+usethis::use_data(MpgMpkwhAdj_ls, overwrite = TRUE)
 
 
 #================================================
@@ -332,7 +332,7 @@ CalculateMpgMpkwhAdjustmentsSpecifications <- list(
 #' }
 #' @source CalculateMpgMpkwhAdjustments.R script.
 "CalculateMpgMpkwhAdjustmentsSpecifications"
-devtools::use_data(CalculateMpgMpkwhAdjustmentsSpecifications, overwrite = TRUE)
+usethis::use_data(CalculateMpgMpkwhAdjustmentsSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -359,6 +359,7 @@ devtools::use_data(CalculateMpgMpkwhAdjustmentsSpecifications, overwrite = TRUE)
 #'
 #' @param L A list containing data requested by the module from the datastore.
 #' @return A list containing data identified in the module Set specifications.
+#' @name CalculateMpgMpkwhAdjustments
 #' @import visioneval stats
 #' @export
 CalculateMpgMpkwhAdjustments <- function(L) {

@@ -463,7 +463,7 @@ CalculateInducedDemandSpecifications <- list(
 #' }
 #' @source CalculateInducedDemand.R script.
 "CalculateInducedDemandSpecifications"
-devtools::use_data(CalculateInducedDemandSpecifications, overwrite = TRUE)
+usethis::use_data(CalculateInducedDemandSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -489,6 +489,7 @@ devtools::use_data(CalculateInducedDemandSpecifications, overwrite = TRUE)
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name CalculateInducedDemand
 #' @import visioneval
 #' @export
 CalculateInducedDemand <- function(L) {

@@ -42,7 +42,7 @@ load("inst/extdata/TruckBusAgeDist_.RData")
 #' }
 #' @source CalculateTravelDemand.R script.
 "TruckBusAgeDist_mx"
-devtools::use_data(TruckBusAgeDist_mx, overwrite = TRUE)
+usethis::use_data(TruckBusAgeDist_mx, overwrite = TRUE)
 #================================================
 #SECTION 2: DEFINE THE MODULE DATA SPECIFICATIONS
 #================================================
@@ -906,7 +906,7 @@ ReportRPATMetricsSpecifications <- list(
 #' }
 #' @source ReportRPATMetrics.R script.
 "ReportRPATMetricsSpecifications"
-devtools::use_data(ReportRPATMetricsSpecifications, overwrite = TRUE)
+usethis::use_data(ReportRPATMetricsSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -929,6 +929,7 @@ devtools::use_data(ReportRPATMetricsSpecifications, overwrite = TRUE)
 #' be an ordered sequence from 0 to 32.
 #' @param AdjRatio A number that is the target ratio value.
 #' @return A numeric vector of adjusted distribution.
+#' @name adjustHvyVehAgeDistribution
 #' @import stats
 #' @export
 adjustHvyVehAgeDistribution <- function( CumDist_, AdjRatio ) {
@@ -981,6 +982,7 @@ adjustHvyVehAgeDistribution <- function( CumDist_, AdjRatio ) {
 #' @param Type A string identifying the type of vehicle ("Truck" or "Bus").
 #' @param CurrentYear A integer indicating the current year.
 #' @return A numeric vector that indicates the mileage of vehicles.
+#' @name assignHvyVehFuelEconomy
 #' @export
 #'
 assignHvyVehFuelEconomy <- function( AgeDist_Ag, Mpg__Yr=TrkBusMpg__Yr, Type, CurrYear ) {
@@ -1020,6 +1022,7 @@ assignHvyVehFuelEconomy <- function( AgeDist_Ag, Mpg__Yr=TrkBusMpg__Yr, Type, Cu
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name ReportRPATMetrics
 #' @import visioneval VEHouseholdTravel
 #' @export
 ReportRPATMetrics <- function(L) {

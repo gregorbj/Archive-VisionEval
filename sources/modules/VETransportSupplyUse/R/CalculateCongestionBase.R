@@ -27,7 +27,7 @@ load("inst/extdata/CongModel_ls.RData")
 #' parameters that are used in the evaluation of aforementioned models.
 #' @source GreenSTEP version ?.? model.
 "CongModel_ls"
-devtools::use_data(CongModel_ls, overwrite = TRUE)
+usethis::use_data(CongModel_ls, overwrite = TRUE)
 
 
 #================================================
@@ -437,7 +437,7 @@ CalculateCongestionBaseSpecifications <- list(
 #' }
 #' @source CalculateCongestionBase.R script.
 "CalculateCongestionBaseSpecifications"
-devtools::use_data(CalculateCongestionBaseSpecifications, overwrite = TRUE)
+usethis::use_data(CalculateCongestionBaseSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -475,6 +475,7 @@ devtools::use_data(CalculateCongestionBaseSpecifications, overwrite = TRUE)
 #' @param CurrYear A character indicating current run year
 #' @return A list containing mpg adjustments, travel time, and travel delay hours
 #' by vehicle types.
+#' @name calcCongestion
 #' @export
 calcCongestion <- function(Model_ls, DvmtByVehType, PerCapFwyLnMi, PerCapArtLnMi,
                            Population, BasePopulation, CongPrice_ClFc,
@@ -1007,6 +1008,7 @@ calcCongestion <- function(Model_ls, DvmtByVehType, PerCapFwyLnMi, PerCapArtLnMi
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name CalculateCongestionBase
 #' @import visioneval
 #' @export
 CalculateCongestionBase <- function(L) {

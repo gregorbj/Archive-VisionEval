@@ -169,7 +169,7 @@ BudgetModel_ls <- list(
 #' }
 #' @source BudgetHouseholdDvmt.R script.
 "BudgetModel_ls"
-devtools::use_data(BudgetModel_ls, overwrite = TRUE)
+usethis::use_data(BudgetModel_ls, overwrite = TRUE)
 rm(Exp_df, ExpProp_ls, NormOpProp_IgYr, OpProp_IgYr, ExpProp_df, Inc_,
    Ig, MaxOpProp_Ig, MaxRatio, MeanOpProp_Ig, MidInc_, NormOpProp_, Yr,
    MaxOpProp_SS, MaxValue, MinValue)
@@ -463,7 +463,7 @@ BudgetHouseholdDvmtSpecifications <- list(
 #' }
 #' @source BudgetHouseholdDvmt.R script.
 "BudgetHouseholdDvmtSpecifications"
-devtools::use_data(BudgetHouseholdDvmtSpecifications, overwrite = TRUE)
+usethis::use_data(BudgetHouseholdDvmtSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -491,6 +491,7 @@ devtools::use_data(BudgetHouseholdDvmtSpecifications, overwrite = TRUE)
 #' @param M A list the module functions of modules called by this module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name BudgetHouseholdDvmt
 #' @import visioneval
 #' @export
 BudgetHouseholdDvmt <- function(L, M) {

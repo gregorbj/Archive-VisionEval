@@ -5,7 +5,8 @@
 \title{Function to calculate average Co2 equivalent gas emissions for fuels and
 electricity for the households and the vehicles}
 \usage{
-calculateVehFuelElectricCo2(Hh_df, Vehicles_df, AveFuelCo2e, AveElectricCo2e)
+calculateVehFuelElectricCo2(Hh_df, Vehicles_df, AveFuelCo2e,
+  AveElectricCo2e)
 }
 \arguments{
 \item{Hh_df}{A household data frame consisting of household attributes used to

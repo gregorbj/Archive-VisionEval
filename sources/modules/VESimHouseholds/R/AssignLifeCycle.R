@@ -126,7 +126,7 @@ AssignLifeCycleSpecifications <- list(
 #' }
 #' @source AssignLifeCycle.R script.
 "AssignLifeCycleSpecifications"
-devtools::use_data(AssignLifeCycleSpecifications, overwrite = TRUE)
+usethis::use_data(AssignLifeCycleSpecifications, overwrite = TRUE)
 rm(AssignLifeCycleSpecifications)
 
 
@@ -154,6 +154,7 @@ rm(AssignLifeCycleSpecifications)
 #' specifications for the module.
 #' @import visioneval
 #' @include CreateEstimationDatasets.R CreateHouseholds.R PredictWorkers.R PredictIncome.R
+#' @name AssignLifeCycle
 #' @export
 AssignLifeCycle <- function(L) {
   #Convert inputs to data frame

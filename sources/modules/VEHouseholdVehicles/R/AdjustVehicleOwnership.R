@@ -316,7 +316,7 @@ AdjustVehicleOwnershipSpecifications <- list(
 #' }
 #' @source AdjustVehicleOwnership.R script.
 "AdjustVehicleOwnershipSpecifications"
-devtools::use_data(AdjustVehicleOwnershipSpecifications, overwrite = TRUE)
+usethis::use_data(AdjustVehicleOwnershipSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -358,6 +358,7 @@ devtools::use_data(AdjustVehicleOwnershipSpecifications, overwrite = TRUE)
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name AdjustVehicleOwnership
 #' @import visioneval
 #' @export
 #'

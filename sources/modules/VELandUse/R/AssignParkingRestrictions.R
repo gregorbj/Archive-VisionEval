@@ -313,7 +313,7 @@ AssignParkingRestrictionsSpecifications <- list(
 #' }
 #' @source AssignParkingRestrictions.R script.
 "AssignParkingRestrictionsSpecifications"
-devtools::use_data(AssignParkingRestrictionsSpecifications, overwrite = TRUE)
+usethis::use_data(AssignParkingRestrictionsSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -352,6 +352,7 @@ devtools::use_data(AssignParkingRestrictionsSpecifications, overwrite = TRUE)
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name AssignParkingRestrictions
 #' @import visioneval stats fields
 #' @export
 AssignParkingRestrictions <- function(L) {

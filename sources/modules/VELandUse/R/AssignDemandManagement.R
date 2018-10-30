@@ -151,7 +151,7 @@ rm(TourMiles_df, TourMiles_ls, TourMiles_SzX, HhSizeCat_, PropMilesPerWkr_Sz)
 #'  }
 #' @source AssignDemandManagement.R
 "TdmModel_ls"
-devtools::use_data(TdmModel_ls, overwrite = TRUE)
+usethis::use_data(TdmModel_ls, overwrite = TRUE)
 
 
 #================================================
@@ -322,7 +322,7 @@ AssignDemandManagementSpecifications <- list(
 #' }
 #' @source AssignDemandManagement.R script.
 "AssignDemandManagementSpecifications"
-devtools::use_data(AssignDemandManagementSpecifications, overwrite = TRUE)
+usethis::use_data(AssignDemandManagementSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -349,6 +349,7 @@ devtools::use_data(AssignDemandManagementSpecifications, overwrite = TRUE)
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name AssignDemandManagement
 #' @import visioneval stats
 #' @export
 AssignDemandManagement <- function(L) {

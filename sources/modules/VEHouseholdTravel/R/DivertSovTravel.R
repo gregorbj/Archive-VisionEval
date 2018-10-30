@@ -260,7 +260,7 @@ SovModel_ls <-
 #' Prop: a string representation of the model formula;
 #' @source DivertSovTravel.R
 "SovModel_ls"
-devtools::use_data(SovModel_ls, overwrite = TRUE)
+usethis::use_data(SovModel_ls, overwrite = TRUE)
 
 
 #================================================
@@ -452,7 +452,7 @@ DivertSovTravelSpecifications <- list(
 #' }
 #' @source DivertSovTravel.R script.
 "DivertSovTravelSpecifications"
-devtools::use_data(DivertSovTravelSpecifications, overwrite = TRUE)
+usethis::use_data(DivertSovTravelSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -506,6 +506,7 @@ devtools::use_data(DivertSovTravelSpecifications, overwrite = TRUE)
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name DivertSovTravel
 #' @import visioneval
 #' @export
 DivertSovTravel <- function(L) {
