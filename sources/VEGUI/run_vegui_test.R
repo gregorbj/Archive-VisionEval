@@ -30,7 +30,7 @@ myapp <- readLines("app.R")
 # Function to replace the volumeroots command in the app.R script with the model directory
 replaceVolumeroots <- function(mystr,modelname,first=TRUE){
   if(first){
-    mystr <- gsub("volumeRoots = getVolumes.*",paste0("volumeRoots = c(\"",modelname,"\"=file.path(getwd(),\"..\",\"models\",\"",modelname,"\"))"),mystr)
+    mystr <- gsub("^volumeRoots = .*",paste0("volumeRoots = c(\"",modelname,"\"=file.path(getwd(),\"..\",\"models\",\"",modelname,"\"))"),mystr)
   } else {
     mystr <- gsub("volumeRoots = c(.*","volumeRoots = getVolumes(\"\")",mystr)
   }
