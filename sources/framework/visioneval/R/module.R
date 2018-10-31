@@ -1685,8 +1685,12 @@ documentModule <- function(ModuleName){
   loadSpecs <- function(ModuleName) {
     ModuleSpecs <- paste0(ModuleName, "Specifications")
     ModuleSpecsFile <- paste0("data/", ModuleSpecs, ".rda")
-    load(ModuleSpecsFile)
-    eval(parse(text = ModuleSpecs))
+    if (file.exists(ModuleSpecsFile)) {
+      load(ModuleSpecsFile)
+      eval(parse(text = ModuleSpecs))
+    } else {
+      list()
+    }
   }
   #Define function to creates a data frame from specifications Inp, Get, or Set
   makeSpecsTable <- function(ModuleName, Component, SpecNames_) {
