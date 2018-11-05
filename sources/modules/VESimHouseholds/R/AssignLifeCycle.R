@@ -126,7 +126,7 @@ AssignLifeCycleSpecifications <- list(
 #' }
 #' @source AssignLifeCycle.R script.
 "AssignLifeCycleSpecifications"
-devtools::use_data(AssignLifeCycleSpecifications, overwrite = TRUE)
+usethis::use_data(AssignLifeCycleSpecifications, overwrite = TRUE)
 rm(AssignLifeCycleSpecifications)
 
 
