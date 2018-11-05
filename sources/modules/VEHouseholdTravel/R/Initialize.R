@@ -56,8 +56,8 @@ InitializeSpecifications <- list(
       TABLE = "Fuel",
       GROUP = "Global",
       FILE = "model_fuel_co2.csv",
-      TYPE = "compound",
-      UNITS = "GM/MJ",
+      TYPE = "double",
+      UNITS = "multiplier",
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
       DESCRIPTION = "Multipliers used to convert fuel use to CO2 equivalent emissions"
