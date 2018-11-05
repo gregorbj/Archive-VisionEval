@@ -105,7 +105,7 @@ HtProb_HtAp <- calcHhAgeTypes(Hh_df)
 #' @format A matrix having 950 rows (for Oregon data) and 6 colums:
 #' @source CreateHouseholds.R script.
 "HtProb_HtAp"
-devtools::use_data(HtProb_HtAp, overwrite = TRUE)
+usethis::use_data(HtProb_HtAp, overwrite = TRUE)
 rm(calcHhAgeTypes, Hh_df)
 
 
@@ -298,6 +298,18 @@ CreateHouseholdsSpecifications <- list(
       DESCRIPTION = "Number of households (non-group quarters)"
     ),
     item(
+      NAME = "NumGq",
+      TABLE = "Azone",
+      GROUP = "Year",
+      TYPE = "people",
+      UNITS = "PRSN",
+      NAVALUE = -1,
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      SIZE = 0,
+      DESCRIPTION = "Number of people in non-institutional group quarters"
+    ),
+    item(
       NAME =
         items("HhId",
               "Azone",
@@ -382,7 +394,7 @@ CreateHouseholdsSpecifications <- list(
 #' }
 #' @source CreateHouseholds.R script.
 "CreateHouseholdsSpecifications"
-devtools::use_data(CreateHouseholdsSpecifications, overwrite = TRUE)
+usethis::use_data(CreateHouseholdsSpecifications, overwrite = TRUE)
 rm(CreateHouseholdsSpecifications)
 
 
@@ -700,8 +712,9 @@ CreateHouseholds <- function(L) {
                     TargetProp1PerHh = TargetProp1PerHh_Az[az])
     GrpHh_ls <-
       createGrpHhByAge(Prsn_AzAg[az,])
-    NumHh <-
-      length(RegHh_ls[[1]]) + length(GrpHh_ls[[1]])
+    NumRegHh <- length(RegHh_ls[[1]])
+    NumGrpHh <- length(GrpHh_ls[[1]])
+    NumHh <- NumRegHh + NumGrpHh
     Marea <- L$Year$Azone$Marea[L$Year$Azone$Azone == az]
     Out_ls$Year$Household$Azone <-
       c(Out_ls$Year$Household$Azone, rep(az, NumHh))
@@ -725,8 +738,8 @@ CreateHouseholds <- function(L) {
       c(Out_ls$Year$Household$Age55to64, RegHh_ls$Age55to64, GrpHh_ls$Age55to64)
     Out_ls$Year$Household$Age65Plus <-
       c(Out_ls$Year$Household$Age65Plus, RegHh_ls$Age65Plus, GrpHh_ls$Age65Plus)
-    Out_ls$Year$Azone$NumHh <-
-      c(Out_ls$Year$Azone$NumHh, NumHh)
+    Out_ls$Year$Azone$NumHh <- c(Out_ls$Year$Azone$NumHh, NumRegHh)
+    Out_ls$Year$Azone$NumGq <- c(Out_ls$Year$Azone$NumGq, NumGrpHh)
   }
   Out_ls$Year$Household$HhSize <- as.integer(Out_ls$Year$Household$HhSize)
   Out_ls$Year$Household$Age0to14 <- as.integer(Out_ls$Year$Household$Age0to14)
@@ -736,6 +749,7 @@ CreateHouseholds <- function(L) {
   Out_ls$Year$Household$Age55to64 <- as.integer(Out_ls$Year$Household$Age55to64)
   Out_ls$Year$Household$Age65Plus <- as.integer(Out_ls$Year$Household$Age65Plus)
   Out_ls$Year$Azone$NumHh <- as.integer(Out_ls$Year$Azone$NumHh)
+  Out_ls$Year$Azone$NumGq <- as.integer(Out_ls$Year$Azone$NumGq)
   #Calculate LENGTH attribute for Household table
   attributes(Out_ls$Year$Household)$LENGTH <-
     length(Out_ls$Year$Household$HhId)
@@ -766,18 +780,19 @@ documentModule("CreateHouseholds")
 #-------------------------------------------------------------------------------
 # TestDat_ <- testModule(
 #   ModuleName = "CreateHouseholds",
-#   LoadDatastore = TRUE,
+#   LoadDatastore = FALSE,
 #   SaveDatastore = TRUE,
 #   DoRun = FALSE
 # )
 # L <- TestDat_$L
+# R <- CreateHouseholds(L)
 
 #Test code to check everything including running the module and checking whether
 #the outputs are consistent with the 'Set' specifications
 #-------------------------------------------------------------------------------
 # TestDat_ <- testModule(
 #   ModuleName = "CreateHouseholds",
-#   LoadDatastore = TRUE,
+#   LoadDatastore = FALSE,
 #   SaveDatastore = TRUE,
 #   DoRun = TRUE
 # )
