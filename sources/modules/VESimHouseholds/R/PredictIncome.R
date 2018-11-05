@@ -256,7 +256,7 @@ rm(Hh_df, IncObs_, HHIncomeTarget, MeanCompare_df)
 #' }
 #' @source PredictIncome.R script.
 "HHIncModel_ls"
-devtools::use_data(HHIncModel_ls, overwrite = TRUE)
+usethis::use_data(HHIncModel_ls, overwrite = TRUE)
 
 #Estimate the group quarters linear income model
 #-----------------------------------------------
@@ -348,7 +348,7 @@ rm(Hh_df, IncObs_, HHIncomeTarget, MeanCompare_df)
 #' }
 #' @source PredictIncome.R script.
 "GQIncModel_ls"
-devtools::use_data(GQIncModel_ls, overwrite = TRUE)
+usethis::use_data(GQIncModel_ls, overwrite = TRUE)
 
 
 #================================================
@@ -486,7 +486,7 @@ PredictIncomeSpecifications <- list(
 #' }
 #' @source PredictIncome.R script.
 "PredictIncomeSpecifications"
-devtools::use_data(PredictIncomeSpecifications, overwrite = TRUE)
+usethis::use_data(PredictIncomeSpecifications, overwrite = TRUE)
 
 
 #=======================================================
