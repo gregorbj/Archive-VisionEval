@@ -132,6 +132,7 @@ DESCRIPTION - A description of the data.
 |NAME      |TABLE     |GROUP |TYPE       |UNITS    |PROHIBIT |ISELEMENTOF |DESCRIPTION                                                                  |
 |:---------|:---------|:-----|:----------|:--------|:--------|:-----------|:----------------------------------------------------------------------------|
 |NumHh     |Azone     |Year  |households |HH       |NA, < 0  |            |Number of households (non-group quarters)                                    |
+|NumGq     |Azone     |Year  |people     |PRSN     |NA, < 0  |            |Number of people in non-institutional group quarters                         |
 |HhId      |Household |Year  |character  |ID       |         |            |Unique household ID                                                          |
 |Azone     |Household |Year  |character  |ID       |         |            |Azone ID                                                                     |
 |Marea     |Household |Year  |character  |ID       |         |            |Marea ID                                                                     |
