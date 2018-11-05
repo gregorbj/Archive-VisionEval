@@ -255,5 +255,5 @@ Hh_df$UNITTYPE <- NULL
 #' }
 #' @source CreateEstimationDatasets.R script.
 "Hh_df"
-devtools::use_data(Hh_df, overwrite = TRUE)
+usethis::use_data(Hh_df, overwrite = TRUE)
 rm(Hh_df)
