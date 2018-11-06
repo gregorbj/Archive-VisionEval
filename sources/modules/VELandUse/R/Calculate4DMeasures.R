@@ -106,21 +106,6 @@ Calculate4DMeasuresSpecifications <- list(
         )
     ),
     item(
-      NAME = "D3apo",
-      FILE = "bzone_network_design.csv",
-      TABLE = "Bzone",
-      GROUP = "Year",
-      TYPE = "double",
-      UNITS = "pedestrian-oriented links per square mile",
-      NAVALUE = -9999,
-      SIZE = 0,
-      PROHIBIT = "NA",
-      ISELEMENTOF = "",
-      UNLIKELY = "",
-      TOTAL = "",
-      DESCRIPTION = "Network density in terms of facility miles of pedestrian-oriented links per square mile (Ref: EPA 2010 Smart Location Database)"
-    ),
-    item(
       NAME = "D3bpo4",
       FILE = "bzone_network_design.csv",
       TABLE = "Bzone",
@@ -134,21 +119,6 @@ Calculate4DMeasuresSpecifications <- list(
       UNLIKELY = "",
       TOTAL = "",
       DESCRIPTION = "Intersection density in terms of pedestrian-oriented intersections having four or more legs per square mile (Ref: EPA 2010 Smart Location Database)"
-    ),
-    item(
-      NAME = "D3bmm4",
-      FILE = "bzone_network_design.csv",
-      TABLE = "Bzone",
-      GROUP = "Year",
-      TYPE = "double",
-      UNITS = "multimodal intersections per square mile",
-      NAVALUE = -9999,
-      SIZE = 0,
-      PROHIBIT = "NA",
-      ISELEMENTOF = "",
-      UNLIKELY = "",
-      TOTAL = "",
-      DESCRIPTION = "Intersection density in terms of multi-modal intersections having four or more legs per square mile (Ref: EPA 2010 Smart Location Database)"
     )
   ),
   #Specify data to be loaded from data store
