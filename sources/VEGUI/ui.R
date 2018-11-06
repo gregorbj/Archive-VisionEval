@@ -8,8 +8,8 @@ ui <- fluidPage(
   useShinyjs(),
 
   tags$head(
-    # resize to window: http://stackoverflow.com/a/37060206/283973
 
+    # resize to window: http://stackoverflow.com/a/37060206/283973
     tags$script(
       '$(document).on("shiny:connected", function(e) {
       Shiny.onInputChange("innerWidth", window.innerWidth);
@@ -19,14 +19,28 @@ ui <- fluidPage(
       });'
     ), #end tag$script
 
-    # FIXME: Modify so it also triggers events for Save and Cancel
-    # we want to toggle off the file name and table in those cases too.
-    tags$script(
-      "$(document).on('click', '#INPUT_FILES button', function () {
-      Shiny.onInputChange('EDIT_INPUT_FILE_ID',this.id);
-      Shiny.onInputChange('EDIT_INPUT_FILE_LAST_CLICK', Math.random())
-      });"
-    ), #end tag$script
+    # Modify appearance of notifications
+    tags$style(
+      HTML(".shiny-notification {
+            position:fixed;
+            top: 35%;
+            left: 35%;
+            font-size: larger;
+            font-weight: bold;
+            width: 15em;
+            opacity: 0.8;
+            }
+            "
+           )
+      ),
+    # # FIXME: Modify so it also triggers events for Save and Cancel
+    # # we want to toggle off the file name and table in those cases too.
+    # tags$script(
+    #   "$(document).on('click', '#INPUT_FILES button', function () {
+    #   Shiny.onInputChange('EDIT_INPUT_FILE_ID',this.id);
+    #   Shiny.onInputChange('EDIT_INPUT_FILE_LAST_CLICK', Math.random())
+    #   });"
+    # ), #end tag$script
 
     tags$meta(charset = "UTF-8"),
     tags$meta(name = "google", content = "notranslate"),

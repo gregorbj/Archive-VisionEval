@@ -17,6 +17,7 @@ library(envDocument)
 library(rhdf5)
 library(namedCapture)
 #library(shinyTree)
+#library(shinyAce)
 
 #==========================================================
 # DEFINE CONSTANTS AND DEFINITIONS OF FUNCTIONS
@@ -42,11 +43,11 @@ if (interactive()) {
 CAPTURED_SOURCE <- "CAPTURED_SOURCE"
 COPY_MODEL_BUTTON <- "COPY_MODEL_BUTTON"
 DATASTORE <- "DATASTORE"
-DATASTORE_TABLE <- "DATASTORE_TABLE"
-DATASTORE_TABLE_CLOSE_BUTTON <- "DATASTORE_TABLE_CLOSE_BUTTON"
-DATASTORE_TABLE_EXPORT_BUTTON <- "DATASTORE_TABLE_EXPORT_BUTTON"
-DATASTORE_TABLE_IDENTIFIER <- "DATASTORE_TABLE_IDENTIFIER"
-DATASTORE_TABLE_VIEW_BUTTON_PREFIX <- "datastore_view"
+# DATASTORE_TABLE <- "DATASTORE_TABLE"
+# DATASTORE_TABLE_CLOSE_BUTTON <- "DATASTORE_TABLE_CLOSE_BUTTON"
+# DATASTORE_TABLE_EXPORT_BUTTON <- "DATASTORE_TABLE_EXPORT_BUTTON"
+# DATASTORE_TABLE_IDENTIFIER <- "DATASTORE_TABLE_IDENTIFIER"
+# DATASTORE_TABLE_VIEW_BUTTON_PREFIX <- "datastore_view"
 DEBUG_CONSOLE_OUTPUT <- "DEBUG_CONSOLE_OUTPUT"
 ## EDIT_INPUT_FILE_ID <- "EDIT_INPUT_FILE_ID"
 ## EDIT_INPUT_FILE_LAST_CLICK <- "EDIT_INPUT_FILE_LAST_CLICK"
@@ -55,11 +56,11 @@ EDITOR_INPUT_FILE_RHT <- "EDITOR_INPUT_FILE_RHT"
 EDITOR_INPUT_FILE_IDENTIFIER <- "EDITOR_INPUT_FILE_IDENTIFIER"
 EDITOR_INPUT_DIV <- "EDITOR_INPUT_DIV"
 GEO_CSV_FILE <- "GEO_CSV_FILE"
-HDF5_TABLES <- "HDF5_TABLES"
+# HDF5_TABLES <- "HDF5_TABLES"
 INPUT_FILE_SAVE_BUTTON <- "INPUT_FILE_SAVE_BUTTON"
 INPUT_FILE_REVERT_BUTTON <- "INPUT_FILE_REVERT_BUTTON"
 INPUT_FILES <- "INPUT_FILES"
-INPUTS_TREE <- "INPUTS_TREE"
+# INPUTS_TREE <- "INPUTS_TREE"
 MODEL_MODULES <- "MODEL_MODULES"
 MODEL_PARAMETERS_FILE <- "MODEL_PARAMETERS_FILE"
 MODEL_PARAMETERS_RHT <- "MODEL_PARAMETERS_RHT"
@@ -81,13 +82,13 @@ SAVE_MODEL_PARAMETERS_FILE <- "SAVE_MODEL_PARAMETERS_FILE"
 SAVE_RUN_PARAMETERS_FILE <- "SAVE_RUN_PARAMETERS_FILE"
 SCRIPT_NAME <- "SCRIPT_NAME"
 SELECT_RUN_SCRIPT_BUTTON <- "SELECT_RUN_SCRIPT_BUTTON"
-TAB_LOGS <- "TAB_LOGS"
+# TAB_LOGS <- "TAB_LOGS"
 TAB_INPUTS <- "TAB_INPUTS"
 TAB_OUTPUTS <- "TAB_OUTPUTS"
 TAB_RUN <- "TAB_RUN"
 TAB_SETTINGS <- "TAB_SETTINGS"
 VE_LOG <- "VE_LOG"
-VIEW_DATASTORE_TABLE <- "VIEW_DATASTORE_TABLE"
+# VIEW_DATASTORE_TABLE <- "VIEW_DATASTORE_TABLE"
 
 
 # Time between the checks for the result of the model output
@@ -106,14 +107,14 @@ volumeRoots = c('working directory' = '.', 'models' = '../models', 'VisionEval' 
 # Define utility functions ----------------------------------------
 
 convertRunParam2Df <- function(rp_lst){
-  
+
   lst2 <- lapply(rp_lst, function(x){
     if ( length(x) > 1 ){
       x <- paste(x, collapse=', ')
     }
     x
   })
-  
+
   mat <- t(as.data.frame(lst2 ))
   df <- data.frame(Parameter = row.names(mat),
                       Value = mat,
@@ -123,17 +124,17 @@ convertRunParam2Df <- function(rp_lst){
 }
 
 convertRunParam2Lst <- function(rp_df){
-  
+
   parameters <- rp_df$Parameter
   values <- rp_df$Value
-  
+
   lst <- as.list(values)
   names(lst) <- parameters
-  
+
   lst2 <- lapply(lst, function(x){
     strsplit(x, split=",[ ]*")[[1]]
   })
-  
+
   lst2
 }
- 
+
