@@ -1,14 +1,29 @@
 #==========================
 #CalculateUrbanMixMeasure.R
 #==========================
-#This module calculates an urban mixed-use measure based on the 2001 National
-#Household Travel Survey measure of the tract level urban/rural indicator. This
-#measure developed by Claritas uses the density of the tract and surrounding
-#tracts to identify the urban/rural context of the tract. The categories include
-#urban, suburban, second city, town and rural. Mapping of example metropolitan
-#areas shows that places shown as urban correspond to central city and inner
-#neighborhoods characterized by mixed use, higher levels of urban accessibility,
-#and higher levels of walk/bike/transit accessibility.
+
+#<doc>
+#
+## CalculateUrbanMixMeasure Module
+#### November 6, 2018
+#
+#This module calculates an urban mixed-use measure based on the 2001 National Household Travel Survey measure of the tract level urban/rural indicator. This measure developed by Claritas uses the density of the tract and surrounding tracts to identify the urban/rural context of the tract. The categories include urban, suburban, second city, town and rural. Mapping of example metropolitan areas shows that places shown as urban correspond to central city and inner neighborhoods characterized by mixed use, higher levels of urban accessibility, and higher levels of walk/bike/transit accessibility.
+#
+### Model Parameter Estimation
+#
+#A binary logit model is used to calculate the probability that a household is located in an urban mixed-use neighborhood as a function of the population density of the Bzone that household resides in and the housing type of the household.
+#
+#This model is estimated using a household dataset prepared from 2001 National Household Travel Survey public use datasets by the VE2001NHTS package. The HhData_df data frame is loaded from that package and used to estimate the model. Following are the summary statistics for the estimated model:
+#
+#<txt:UrbanMixModel_ls$Summary>
+#
+#The results of applying the binomial logit model are optionally constrained to match a target proportion that the user may input for the Bzone. This is done by successively adjusting the intercept of the model using a binary search algorithm.
+#
+### How the Module Works
+#
+#For each household in each Bzone, the binomial logit model predicts the probability that the household resides in an urban mixed-use neighborhood. Random sampling using the probability determines whether the household is identified as residing in an urban mixed-use neighborhood. If a target proportion for the Bzone has been supplied by the user, the model is run repeatedly for households in the Bzone using a binary search algorithm to adjust the model intercept so that the modeled proportion is equal to the target.
+#
+#</doc>
 
 
 #=================================
@@ -67,7 +82,7 @@ estimateUrbanMixModel <- function(EstData_df, StartTerms_) {
     Formula = makeModelFormulaString(UrbanMixModel),
     Choices = c(1, 0),
     PrepFun = prepIndepVar,
-    Summary = summary(UrbanMixModel)
+    Summary = capture.output(summary(UrbanMixModel))
   )
 }
 
@@ -137,7 +152,7 @@ rm(Data_df)
 #' }
 #' @source CalculateUrbanMixMeasure.R script.
 "UrbanMixModel_ls"
-devtools::use_data(UrbanMixModel_ls, overwrite = TRUE)
+usethis::use_data(UrbanMixModel_ls, overwrite = TRUE)
 
 
 #================================================
@@ -275,7 +290,7 @@ CalculateUrbanMixMeasureSpecifications <- list(
 #' }
 #' @source CalculateUrbanMixMeasure.R script.
 "CalculateUrbanMixMeasureSpecifications"
-devtools::use_data(CalculateUrbanMixMeasureSpecifications, overwrite = TRUE)
+usethis::use_data(CalculateUrbanMixMeasureSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -348,9 +363,13 @@ CalculateUrbanMixMeasure <- function(L) {
 }
 
 
-#================================
-#Code to aid development and test
-#================================
+#===============================================================
+#SECTION 4: MODULE DOCUMENTATION AND AUXILLIARY DEVELOPMENT CODE
+#===============================================================
+#Run module automatic documentation
+#----------------------------------
+documentModule("CalculateUrbanMixMeasure")
+
 #Test code to check specifications, loading inputs, and whether datastore
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions
