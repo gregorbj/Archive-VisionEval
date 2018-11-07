@@ -1,22 +1,42 @@
 #===========================
 #AssignParkingRestrictions.R
 #===========================
-#This module assigns residential and employment parking restrictions.
-#Residential parking restrictions are specified by the average number of free
-#parking spaces available to households by Bzone and the average daily long-term
-#parking cost. The average number of free parking spaces is specified separately
-#for single family dwellings and multifamily dwellings. Parking restrictions are
-#assigned to households. These restrictions are used in the calculation of
-#household vehicle ownership cost and the adjustment of vehicle ownership as a
-#consequence of those costs (by other modules). Parking restrictions at
-#employment locations are established as the proportion of workers who have to
-#pay for parking, the average daily long-term parking cost by Bzone, and the
-#proportion of paid worker parking that is made available on a cash-out-buy-back
-#basis. Worker parking costs are applied to households based on the Bzone
-#parking restrictions and what Bzones the household workers are located in.
-#These costs are treated as part of the household vehicle use cost and are used
-#in other modules to adjust household vehicle travel as a function of budget
-#constraints.
+#
+#<doc>
+#
+## AssignParkingRestrictions Module
+#### November 6, 2018
+#
+#This module identifies parking restrictions and prices affecting households at their residences, workplaces, and other places they are likely to visit in the urban area. The module takes user inputs on parking restrictions and prices by Bzone and calculates for each household the number of free parking spaces available at the household's residence, which workers pay for parking and whether their payment is part of a *cash-out-buy-back* program, the cost of residential parking for household vehicles that can't be parked in a free space, the cost for workplace parking, and the cost of parking for other activities such as shopping. The parking restriction/cost information is used by other modules in calculating the cost of vehicle ownership and the cost of vehicle use.
+#
+### Model Parameter Estimation
+#
+#This module has no estimated parameters.
+#
+### How the Module Works
+#
+#The user provides inputs by Bzone which provide the basis for calculating
+#parking restrictions/costs. These include:
+#
+#- Average number of free parking spaces per single-family dwelling unit
+#
+#- Average number of free parking spaces per multifamily dwelling unit
+#
+#- Average number of free parking spaces per group quarters resident
+#
+#- Proportion of workers working at jobs in the Bzone who pay for parking
+#
+#- Proportion of worker paid parking in *cash-out_buy-back* program
+#
+#- Average daily parking cost
+#
+#Residential Bzone parking restrictions are applied to each household based on the Bzone and dwelling type of the household and the supplied inputs on the average number of parking spaces per household by Bzone and dwelling type. If the average number of parking spaces is not an integer, the household is assigned the integer amount of spaces and a possible additional space determined through a random draw with the decimal portion serving as the probability of success. For example, if the average is 1.75 spaces, all households would be assigned at least 1 space and 75% of the households would be assigned 2 spaces. The daily parking cost assigned to the Bzone is assigned to the household to use in vehicle ownership cost calculations.
+#
+#A worker is assigned as paying or not paying for parking through a random draw with the probability of paying equal to the proportion of paying workers that is input for the Bzone of the worker's job location. A worker identified as paying for parking is identified as being in a *cash-out-buy-back* program through a random draw with the participation probability being the input value for the Bzone of the worker's job location. The daily parking cost assigned to the worker's job site Bzone is assigned to the work to use in vehicle use calculations.
+#
+#Other household parking costs (e.g. shopping) are assigned to households based on the daily parking cost assigned to each Bzone and the assumption that the likelihood that a household would visit the Bzone is directly proportional to the relative number of activities in the Bzone and the inverse of the distance to the Bzone from the household residence Bzone. The activity in the Bzone is measured with the total number of retail and service jobs in the Bzone. As with the LocateEmployment and Calculate4DMeasures modules, a centroid-to-centroid distance matrix is calculated from user supplied data on the latitude and longitude of each Bzone centroid. Next, the number of Bzone attractions is scaled to equal the number of households. Then an iterative proportional fitting process (IPF) is used to allocate households to attractions where the margins are the numbers of households by Bzone and the scaled attractions by Bzone, and the seed matrix is the inverse of the values of the distance matrix. After a balanced matrix has been computed, the proportions of attractions from each residence Bzone to each attraction Bzone is calculated such that the total for each residence Bzone adds to 1. Finally, the average daily parking cost for residents of a Bzone is the sum of the product of the attraction proportion to each Bzone and the daily parking cost in each Bzone. Households are assigned the cost calculated for their Bzone of residence. This cost is adjusted to account for the number of household vehicle trips when the household's vehicle use costs are calculated.
+#
+#</doc>
 
 
 #=================================
@@ -313,7 +333,7 @@ AssignParkingRestrictionsSpecifications <- list(
 #' }
 #' @source AssignParkingRestrictions.R script.
 "AssignParkingRestrictionsSpecifications"
-devtools::use_data(AssignParkingRestrictionsSpecifications, overwrite = TRUE)
+usethis::use_data(AssignParkingRestrictionsSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -444,9 +464,13 @@ AssignParkingRestrictions <- function(L) {
   Out_ls
 }
 
-#================================
-#Code to aid development and test
-#================================
+#===============================================================
+#SECTION 4: MODULE DOCUMENTATION AND AUXILLIARY DEVELOPMENT CODE
+#===============================================================
+#Run module automatic documentation
+#----------------------------------
+documentModule("AssignParkingRestrictions")
+
 #Test code to check specifications, loading inputs, and whether datastore
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions
