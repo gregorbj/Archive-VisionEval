@@ -20,12 +20,19 @@
 ### How the Module Works
 #
 #The module carries out the following series of calculations to assign a housing type (SF or MF) to each *regular* household and to assign each household to a Bzone location.
+#
 #1) The proportions of SF and MF dwelling units in the Azone are calculated.
+#
 #2) The binomial logit is applied to each household in the Azone to determine the household's housing type. The model is applied multiple times using a binary search algorithm to successively adjust the model intercept until the housing type *choice* proportions equal the housing unit proportions in the Azone.
+#
 #3) The income quartile of each household in the Azone is calculated and a tabulation of households by income quartile and housing type is made.
+#
 #4) A matrix of the number of housing units by Bzone and housing type is created from the user inputs (e.g. resulting from a land use model or other allocation process). Because the number of housing units may not equal the number of households, the number of units by type and Bzone are adjusted so that the total number by type equals the number of households by housing type.
+#
 #5) A matrix of the proportions of households by income quartile and Bzone is created from the user inputs (e.g. resulting from Census tabulation with adjustments as deemed appropriate) and the tabulation of housing units by Bzone.
+#
 #6) An iterative proportional fitting (IPF) process is used to balance the number of housing units over 3 dimensions: Bzone, unit type, and income quartile. Two matrixes are used as margin control totals for the balancing process. The first is the matrix of demand by housing type and income quartile (step #3). The second is a matrix of units by Bzone and housing type (step #4). The seed matrix for the IPF uses the matrix of household proportions by Bzone and income quartile. The IPF is constrained to produce whole numbers.
+#
 #7) After the number of housing units is allocated to each Bzone, housing type, and income quartile, households are allocated to Bzones to fill those units. This is done by iterating through each housing type and income quartile combination and doing the following: Extracting a vector of units by Bzone for the type and quartile combination;  Using the vector as replication weights to replicate the Bzone names; Randomizing the Bzone name vector; Assigning the randomized Bzone name vector to households matching the type and quartile combination.
 
 #Non-institutionalized group-quarters *households* are assigned randomly to Bzones based on the number of group-quarters *housing units* in each Bzone.
