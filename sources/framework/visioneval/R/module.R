@@ -1851,11 +1851,16 @@ documentModule <- function(ModuleName){
           UNLIKELY = "",
           DESCRIPTION = GeoYearDescription
         )
+        InpMarkdown_ <- c(
+          InpMarkdown_,
+          kable(rbind(Geo_df, SpecsTable_df))
+        )
+      } else {
+        InpMarkdown_ <- c(
+          InpMarkdown_,
+          kable(SpecsTable_df)
+        )
       }
-      InpMarkdown_ <- c(
-        InpMarkdown_,
-        kable(rbind(Geo_df, SpecsTable_df))
-      )
     }
   } else {
     InpMarkdown_ <- c(
