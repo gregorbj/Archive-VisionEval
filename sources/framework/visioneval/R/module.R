@@ -1649,6 +1649,19 @@ documentModule <- function(ModuleName){
   #-------------------------------------------------------------------
   #Define function to process specifications
   processModuleSpecs <- function(Spec_ls) {
+    #Define a function to expand a specification having multiple NAMEs
+    expandSpec <- function(SpecToExpand_ls, ComponentName) {
+      Names_ <- unlist(SpecToExpand_ls$NAME)
+      Descriptions_ <- unlist(SpecToExpand_ls$DESCRIPTION)
+      Expanded_ls <- list()
+      for (i in 1:length(Names_)) {
+        Temp_ls <- SpecToExpand_ls
+        Temp_ls$NAME <- Names_[i]
+        Temp_ls$DESCRIPTION <- Descriptions_[i]
+        Expanded_ls <- c(Expanded_ls, list(Temp_ls))
+      }
+      Expanded_ls
+    }
     #Define a function to process a component of a specifications list
     processComponent <- function(Component_ls, ComponentName) {
       Result_ls <- list()
