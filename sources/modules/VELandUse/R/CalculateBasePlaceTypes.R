@@ -37,7 +37,7 @@ rm(HhAllocationModelCoeff)
 #' }
 #' @source CalculateBasePlaceTypes.R script.
 "HhAllocationModelCoeff_df"
-devtools::use_data(HhAllocationModelCoeff_df, overwrite = TRUE)
+usethis::use_data(HhAllocationModelCoeff_df, overwrite = TRUE)
 
 #================================================
 #SECTION 2: DEFINE THE MODULE DATA SPECIFICATIONS
@@ -264,7 +264,7 @@ CalculateBasePlaceTypesSpecifications <- list(
 #' }
 #' @source CalculateBasePlaceTypes.R script.
 "CalculateBasePlaceTypesSpecifications"
-devtools::use_data(CalculateBasePlaceTypesSpecifications, overwrite = TRUE)
+usethis::use_data(CalculateBasePlaceTypesSpecifications, overwrite = TRUE)
 
 
 #=======================================================
