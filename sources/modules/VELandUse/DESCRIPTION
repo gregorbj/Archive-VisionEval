@@ -1,8 +1,8 @@
 Package: VELandUse
 Type: Package
 Title: Create Land Use Attributes for VE
-Version: 0.9.5
-Date: 4/6/18
+Version: 0.9.6
+Date: 11/6/18
 Author: Brian Gregor [aut, cre], Aditya Gore <aditya.gore@rsginc.com> [cre]
 Maintainer: Brian Gregor <gregorb@or-analytics.com>, Aditya Gore <aditya.gore@rsginc.com>
 Copyright: AASHTO
@@ -22,6 +22,7 @@ Depends: R (>= 3.1.0)
 Imports:
     visioneval,
     devtools,
+    usethis,
     geosphere,
     fields,
     stats,
