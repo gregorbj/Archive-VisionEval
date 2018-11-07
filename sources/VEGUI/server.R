@@ -20,7 +20,7 @@ server <- function(input, output, session) {
   # 5. getInputsTree
 
   # FUNCTIONS ---------------------------------------------------------------
-  
+
   # Print all the messages out to the console
   debugConsole <- function(msg) {
     testit::assert("debugConsole was passed NULL!", !is.null(msg))
@@ -143,17 +143,21 @@ server <- function(input, output, session) {
     #From now on we will get the current ModelState by reading the object stored on disk
     #store the current ModelState in the global options
     #so that the process will use the same log file as the one we have already started tracking...
+    debugConsole('Calling readModelState')
     ModelState_ls <- readModelState()
     options("visioneval.preExistingModelState" = ModelState_ls)
     debugConsole("getScriptOutput entered")
     debugConsole(paste("Model output is captured in", captureFile))
     setwd(dirname(datapath))
+    debugConsole(paste('Working directory is', getwd()))
+    debugConsole(paste('Calling source on', datapath))
     capture.output(source(datapath), file = captureFile)
+    debugConsole(paste('Captured source from', datapath))
     options("visioneval.preExistingModelState" = NULL)
     debugConsole("getScriptOutput exited")
     return(NULL)
   } #end getScriptOutput
-  
+
   # Flattens the file path to be displayed
   semiFlatten <- function(node, ancestorPath) {
     #debugConsole('semiFlatten function entered')
@@ -212,31 +216,31 @@ server <- function(input, output, session) {
   # Save the changes made to the parameters to the parameter file
   saveParameterFile <- function(parameterFileIdentifier) {
     debugConsole('Entered saveParameterFile')
-    
+
     parameterTableId <- gsub(pattern = '_FILE',
                              replacement = '_RHT',
                              x = parameterFileIdentifier)
-    
+
     editedContent <- input[[parameterTableId]]
     editedDf <- rhandsontable::hot_to_r(editedContent)
-    
+
     filePath <- reactiveFilePaths_rv[[parameterFileIdentifier]]
-    
+
     if (!is.null(editedDf) && nrow(editedDf) > 0) {
       file.rename(filePath, paste0(filePath, "_", format(Sys.time(), "%Y-%m-%d_%H-%M"),
                                    ".bak")
       )
       debugConsole(paste0("writing out '", filePath, "' with nrows: ",
                    nrow(editedDf), " ncols: ", ncol(editedDf)))
-    
+
       if(basename(filePath) == 'model_parameters.json'){
-        jsonlite::write_json(editedDf, filePath, pretty=TRUE)  
+        jsonlite::write_json(editedDf, filePath, pretty=TRUE)
       } else if ( basename(filePath) == 'run_parameters.json'){
         jsonlite::write_json(convertRunParam2Lst(editedDf), filePath, pretty=TRUE)
       } else {
         stop("File name ", filePath, "not recognized in saveParameterFile")
       }
-      
+
     }
   } # end saveParameterFile
 
@@ -253,7 +257,7 @@ server <- function(input, output, session) {
     } else {
       stop("parameterFileIdentifier: ", parameterFileIdentifier, "not recognized in revertParameterFile")
     }
-    
+
     rhandsontable::renderRHandsontable({
       createParamTable(df)
     })
@@ -292,7 +296,7 @@ server <- function(input, output, session) {
 
 
   # Functions for writing output data to a CSV
-  
+
   # Create a function to check if a specified attributes
   # belongs to the variable
   attributeExist <- function(variable, attr_name){
@@ -307,11 +311,11 @@ server <- function(input, output, session) {
 
   makeDataFrame <- function(Table, GroupTableName, OutputData, OutputAttr){
     OutputAllYr <- data.frame()
-    
+
     for ( year in getYears()){
       OutputIndex <- GroupTableName$Table %in% Table & GroupTableName$Group %in% year
       Output <- OutputData[OutputIndex]
-      
+
       if ( Table %in% c('Azone', 'Bzone', 'Marea') ){
         names(Output) <- paste0(GroupTableName$Name[OutputIndex], "_",
                                 OutputAttr[OutputIndex], "_")
@@ -320,7 +324,7 @@ server <- function(input, output, session) {
       } else {
         stop(Table, 'not found')
       }
-      
+
       Output <- data.frame(Output, stringsAsFactors = FALSE)
       if( Table %in% c('Azone', 'Bzone', 'Marea') | year != ModelState_ls$BaseYear ){
         Output$Year <- year
@@ -344,7 +348,7 @@ server <- function(input, output, session) {
     colnames(GroupTableName) <- c("Group", "Table", "Name")
     GroupTableName <- GroupTableName[complete.cases(GroupTableName),]
 
-    
+
     OutputData <- apply(GroupTableName, 1, function(x){
       readFromTableRD(Name = x[3], Table = x[2], Group = x[1],
                       DstoreLoc=reactiveFilePaths_rv[[DATASTORE]],
@@ -363,11 +367,11 @@ server <- function(input, output, session) {
       system(paste("rm -rf", output_dir))
       dir.create(output_dir)
     }
-
     for ( tbl in c("Azone", "Bzone", "Marea", "FuelType", "IncomeGroup") ){
+      if ( ! tbl %in% GroupTableName$Table ) next()
       debugConsole(paste('Writing out', tbl, '\n'))
       OutDf <- makeDataFrame(tbl, GroupTableName, OutputData, OutputAttr)
-      
+
       if ( tbl == "IncomeGroup" ) tbl <- "JobAccessibility"
       filename <- file.path(output_dir, paste0(tbl, ".csv"))
       fwrite(OutDf, file = filename)
@@ -382,7 +386,7 @@ server <- function(input, output, session) {
 
 
   # Reactive values ------------------------------------------------------------------------
-  
+
   otherReactiveValues_rv <- reactiveValues() #WARNING- DON'T USE VARIABLES TO INITIALIZE LIST KEYS - the variable name will be used, not the value
 
   otherReactiveValues_rv[[DEBUG_CONSOLE_OUTPUT]] <- data.table::data.table(time = character(), message = character())
@@ -395,7 +399,7 @@ server <- function(input, output, session) {
 
   reactiveFileReaders_ls <- list() # A list of reactive variables
 
-  
+
   # Get the progress of modules
   getModuleProgress <- reactive({
     pattern <- "(?<date>^20[0-9]{2}(?:-[0-9]{2}){2}) (?<time>[^ ]+) :.*-- (?<actionType>(?:Finish|Start)(?:ing)?) module '(?<moduleName>[^']+)' for year '(?<year>[^']+)'"
@@ -532,11 +536,11 @@ server <- function(input, output, session) {
         reactiveFilePaths_rv[[GEO_CSV_FILE]] <- file.path(defsDirectory, "geo.csv")
 
         reactiveFilePaths_rv[[OUTPUT_DIR]] <- file.path(scriptInfo_ls$fileDirectory, 'outputs')
-        
+
         #move to the settings tab
         #updateNavlistPanel(session, "navlist", selected = TAB_SETTINGS)
       }
-      
+
       debugConsole("getScriptInfo exited")
       return(scriptInfo_ls)
     }) #end getScriptInfo reactive
@@ -563,7 +567,7 @@ server <- function(input, output, session) {
     root_ls <- list()
 
     if ( length(scriptInfo) > 0 ){
-      
+
       #prepare for calling into visioneval for module specs
       setwd(scriptInfo$fileDirectory)
       packages <- sort(unique(modules[, PackageName]))
@@ -597,7 +601,7 @@ server <- function(input, output, session) {
 
   getOutputFiles <- reactive({
     debugConsole('getOutputFiles entered')
-    files <- Sys.glob(file.path(reactiveFilePaths_rv[[OUTPUT_DIR]], '*.csv')) 
+    files <- Sys.glob(file.path(reactiveFilePaths_rv[[OUTPUT_DIR]], '*.csv'))
     return(files)
   })
 
@@ -681,7 +685,7 @@ server <- function(input, output, session) {
   output[[MODEL_PARAMETERS_FILE]] <- renderText({
     reactiveFilePaths_rv[[MODEL_PARAMETERS_FILE]]
   })
-  
+
   output[[RUN_PARAMETERS_RHT]] <- rhandsontable::renderRHandsontable({
     createParamTable(
       convertRunParam2Df(
@@ -692,8 +696,8 @@ server <- function(input, output, session) {
 
   output[[MODEL_PARAMETERS_RHT]] <- rhandsontable::renderRHandsontable({
     createParamTable(reactiveFileReaders_ls[[MODEL_PARAMETERS_FILE]]())
-  })  
-  
+  })
+
   ### INPUTS TAB (TAB_INPUTS) -------------------------------------------------
 
   observe({
@@ -708,7 +712,7 @@ server <- function(input, output, session) {
     fileName <- input[[INPUT_FILES]]
     if ( fileName != "" ){
       filePath <- file.path(getScriptInfo()$fileDirectory, "inputs", fileName)
-      
+
       fileDataTable <- SafeReadCSV(filePath)
       debugConsole(paste("nrow(fileDataTable):", nrow(fileDataTable)))
       otherReactiveValues_rv[[EDITOR_INPUT_FILE_IDENTIFIER]] <- fileName
@@ -730,25 +734,25 @@ server <- function(input, output, session) {
                    )
       data.table::fwrite(editedContent, filePath)
       showNotification('File saved.', type='message', duration=10)
-    } 
+    }
   })
 
   observeEvent(input[[INPUT_FILE_REVERT_BUTTON]], handlerExpr={
     fileName <- input[[INPUT_FILES]]
     if ( fileName != "" ){
       filePath <- file.path(getScriptInfo()$fileDirectory, "inputs", fileName)
-      
+
       fileDataTable <- SafeReadCSV(filePath)
       debugConsole(paste("nrow(fileDataTable):", nrow(fileDataTable)))
       otherReactiveValues_rv[[EDITOR_INPUT_FILE_IDENTIFIER]] <- fileName
       otherReactiveValues_rv[[EDITOR_INPUT_FILE_DT]] <- fileDataTable
     }
   })
-  
+
   output[[EDITOR_INPUT_FILE_IDENTIFIER]] = renderText({
     fileName <- otherReactiveValues_rv[[EDITOR_INPUT_FILE_IDENTIFIER]]
     filePath <- file.path(getScriptInfo()$fileDirectory, "inputs", fileName)
-    
+
     debugConsole(paste0('EDITOR_INPUT_FILE_IDENTIFIER: ', fileName))
     if ( is.null(fileName) ){
       filePath <- 'No file selected'
@@ -764,10 +768,10 @@ server <- function(input, output, session) {
       # Convert integers to numeric so edits will take!
       DF[, names(DF) := lapply(.SD, function(x) if(is.integer(x)){as.numeric(x)} else {x})]
     }
-    
+
     debugConsole(paste0("EDITOR_INPUT_FILE_DT: nrow(DF): ", nrow(DF), " class(DF): ",
                         paste0(collapse = ", ", class(DF))))
-    
+
     rhandsontable(DF, useTypes = FALSE, height=400)
   })
 
@@ -797,9 +801,9 @@ server <- function(input, output, session) {
     }
   })
 
-  
+
   ### RUN TAB (TAB_RUN) --------------------------------------------------
-  
+
   #need to call processRunningTasks so that the callback to the future Function will be hit
   observe(
     label = "processRunningTasks",
@@ -818,7 +822,7 @@ server <- function(input, output, session) {
 
     disableActionButtons()
     showNotification('Model is initializing', type='message', duration=10)
-    
+
     startAsyncTask(CAPTURED_SOURCE, future({
       # if(file.exists(reactiveFilePaths_rv[[MODEL_STATE_FILE]])){
       #   remove(reactiveFilePaths_rv[[MODEL_STATE_FILE]])
@@ -838,7 +842,7 @@ server <- function(input, output, session) {
       enableActionButtons()
       exportOutputData(dirname(datapath))
     },
-    debug = TRUE) # end startAsyncTask 
+    debug = TRUE) # end startAsyncTask
     # updateNavlistPanel(session, "navlist", selected = TAB_LOGS)
     debugConsole("observeEvent input$runModel exited")
   }) #end runModel observeEvent
@@ -851,7 +855,7 @@ server <- function(input, output, session) {
   output[[CAPTURED_SOURCE]] <- renderText({
     reactiveFileReaders_ls[[CAPTURED_SOURCE]]()
   })
-  
+
   ### OUTPUTS TAB (TAB_OUTPUTS)------------------------------------------
 
   observe({
@@ -869,7 +873,7 @@ server <- function(input, output, session) {
     filePath
   })
 
-   
+
   output_rht <- eventReactive(input[[OUTPUT_FILE]],{
     dataTable <- data.frame()
     fileName <- input[[OUTPUT_FILE]]
@@ -883,7 +887,7 @@ server <- function(input, output, session) {
       allowRowEdit=FALSE,
       allowColEdit=FALSE)
   })
-  
+
   output[[OUTPUT_FILE_RHT]] <- rhandsontable::renderRHandsontable({
     output_rht()
     })
@@ -896,208 +900,8 @@ server <- function(input, output, session) {
                 row.names=FALSE)
     },
     contentType='text/csv'
-    )   
+    )
 
 } #end server
 
 
-### UNUSED ------------------------------------------------------------------
-
-    
-  ## observe({
-  ##   shinyjs::toggle(
-  ##     id = NULL,
-  ##     condition = data.table::is.data.table(otherReactiveValues_rv[[VIEW_DATASTORE_TABLE]]),
-  ##     anim = TRUE,
-  ##     animType = "Slide",
-  ##     time = 0.25,
-  ##     selector = "#VIEW_DATASTORE_TABLE, #DATASTORE_TABLE_EXPORT_BUTTON, #DATASTORE_TABLE_IDENTIFIER, #DATASTORE_TABLE_CLOSE_BUTTON"
-  ##   )
-  ## })
-
-
-  ## observeEvent(input[[DATASTORE_TABLE_CLOSE_BUTTON]], handlerExpr = {
-  ##   otherReactiveValues_rv[[VIEW_DATASTORE_TABLE]] <- FALSE
-  ## },  label = DATASTORE_TABLE_CLOSE_BUTTON)
-
-  ## observeEvent(input[[DATASTORE_TABLE_EXPORT_BUTTON]], label = DATASTORE_TABLE_EXPORT_BUTTON,
-  ##              handlerExpr = {
-  ##                debugConsole("observeEvent input[[DATASTORE_TABLE_EXPORT_BUTTON]] entered")
-  ##                fileInfo = shinyFiles::parseSavePath(roots = volumeRoots,
-  ##                                                     input[[DATASTORE_TABLE_EXPORT_BUTTON]])
-  ##                datapath <- as.character(fileInfo$datapath)
-  ##                dataTable <- otherReactiveValues_rv[[VIEW_DATASTORE_TABLE]]
-  ##                print(paste("Saving exported HDF5 table with", nrow(dataTable),
-  ##                            "rows and ", ncol(dataTable), "to:", datapath)
-  ##                      )
-  ##                separator <- if (endsWith(datapath, ".tsv")) "\t" else ","
-  ##                data.table::fwrite(dataTable, datapath, sep = separator)
-  ##                if (!file.exists(datapath)) {
-  ##                  stop(paste("Right after saving file it is missing:", datapath))
-  ##                }
-  ##                debugConsole("observeEvent(input[[DATASTORE_TABLE_EXPORT_BUTTON]], exited")
-  ##              }) #end  observeEvent(input[[DATASTORE_TABLE_EXPORT_BUTTON]],
-
-  ## getOutputHDF5_TABLES <- reactive({
-  ##   debugConsole('getOutputHDF5_TABLES entered')
-  ##   getInputsTree()
-  ##   groupItems <- extractFromTree("GROUP")
-  ##   tableItems <- extractFromTree("TABLE")
-  ##   tables <- unique(data.table::data.table(
-  ##     Group = groupItems$resultList,
-  ##     Table = tableItems$resultList
-  ##   )
-  ##   )
-  ##   # TreePath = tableItems$resultAncestorsList))
-  ##   returnValue <- DT::datatable(tables, selection = 'none')
-  ##   return(returnValue)
-  ## }) #end getOutputHDF5_TABLES
-
-  # The following reactive object is extremely slow to run.
-  ## getOutputINPUTS_TREE_SELECTED_TEXT <- reactive({
-  ##   tree <- input[[INPUTS_TREE]]
-  ##   results <- ""
-  ##   if (!is.null(tree)) {
-  ##     selectedItemPaths <- list()
-  ##     selectedItems <- get_selected(tree)
-  ##     if (length(selectedItems) > 0) {
-  ##       for (selectedItemNumber in 1:length(selectedItems)) {
-  ##         selectedItem <- selectedItems[[selectedItemNumber]]
-  ##         #https://rdrr.io/cran/shinyTree/man/get_selected.html
-  ##         ancestry <- attr(selectedItem, "ancestry") # character vector
-  ##         selectedNode <- as.character(selectedItem)
-  ##         totalPath <- c(ancestry, selectedNode)
-  ##         isFile <- length(ancestry) > 0 && (ancestry[[length(ancestry)]] == "FILE")
-  ##         pathInfo <- list(
-  ##           "ancestry" = ancestry,
-  ##           "finalNode" = selectedNode,
-  ##           "fullPath" = paste0(collapse = "-->", totalPath),
-  ##           "isFile" = isFile
-  ##         )
-  ##         selectedItemPaths[[selectedItemNumber]] <- pathInfo
-  ##       } #end for over selected items
-  ##       results <- paste0(collapse = "\n", lapply(selectedItemPaths, function(x) x$fullPath))
-  ##     } # end if tree has a selection
-  ##   } #end if tree exists
-  ##   return(results)
-  ## }) #end getOutputINPUTS_TREE_SELECTED_TEXT
-
-
-  ## # Function to load data from visioneval readFromTable function
-  ## loadVERPAT <- function(filepaths, datastore_type = "RD"){
-  ##   # Ancillary function
-  ##   mbasename <- function(filepath,n=1){
-  ##     for(i in seq_len(n-1)){
-  ##       filepath <- dirname(filepath)
-  ##     }
-  ##     return(basename(filepath))
-  ##   }
-
-  ##   if(datastore_type == "RD"){
-  ##     readFromTable <- visioneval::readFromTableRD
-  ##   } else {
-  ##     readFromTable <- visioneval::readFromTableH5
-  ##   }
-  ##   ModelState_ls <<- readModelState()
-  ##   verpatoutput <- filepaths[,.(value = list(readFromTable(Name=mbasename(groupname, 1), Table = mbasename(groupname, 2), Group = mbasename(groupname, 3)))), by = .(name)]
-  ##   finaloutput <- as.data.table(verpatoutput$value)
-  ##   setnames(finaloutput, colnames(finaloutput), verpatoutput$name)
-  ##   return(finaloutput)
-  ## }
-
-  ## observeEvent(input$DATASTORE_TABLE_row_last_clicked,{
-  ##   selection <- input$DATASTORE_TABLE_row_last_clicked
-  ##   print(paste0("input$DATASTORE_TABLE_row_last_clicked: ", selection))
-  ##   if (!is.null(selection)) {
-  ##     row <- as.integer(selection)
-  ##     DataPathTable <- reactiveFileReaders_ls[[DATASTORE]]()
-  ##     DataRow <- DataPathTable[row]
-  ##     G <- readModelState()
-  ##     filepaths <- data.table::data.table(G$Datastore)
-  ##     otherReactiveValues_rv[[DATASTORE_TABLE_IDENTIFIER]] <- paste0(DataRow$Group, "/",
-  ##                                                                    DataRow$Name)
-  ##     if(nrow(filepaths) > 0){
-  ##       filepaths <- filepaths[group %in% otherReactiveValues_rv[[DATASTORE_TABLE_IDENTIFIER]]]
-  ##     }
-
-  ##     if(nrow(filepaths) > 0){
-  ##       table_dt <- loadVERPAT(filepaths,G$DatastoreType)
-  ##       otherReactiveValues_rv[[VIEW_DATASTORE_TABLE]] <- table_dt
-  ##     } else {
-  ##       otherReactiveValues_rv[[DATASTORE_TABLE_IDENTIFIER]] <- ""
-  ##       otherReactiveValues_rv[[VIEW_DATASTORE_TABLE]] <- FALSE
-  ##     }
-  ##   } else {
-  ##     otherReactiveValues_rv[[DATASTORE_TABLE_IDENTIFIER]] <- ""
-  ##     otherReactiveValues_rv[[VIEW_DATASTORE_TABLE]] <- FALSE
-  ##   }
-  ## }, label = "DATASTORE_TABLE_row_last_clicked")
-
-  ## output[[DATASTORE_TABLE_IDENTIFIER]] = renderText({
-  ##   otherReactiveValues_rv[[DATASTORE_TABLE_IDENTIFIER]]
-  ## })
-
-  ## output[[VIEW_DATASTORE_TABLE]] = DT::renderDataTable({
-  ##   hdf5DataTable <- otherReactiveValues_rv[[VIEW_DATASTORE_TABLE]]
-  ##   if (data.table::is.data.table(hdf5DataTable) && nrow(hdf5DataTable) > 0) {
-  ##     returnValue <- hdf5DataTable
-  ##   } else {
-  ##     returnValue <- data.table::data.table(
-  ##       Message = c(paste("There is no data for '",
-  ##                         otherReactiveValues_rv[[DATASTORE_TABLE_IDENTIFIER]], "'."))
-  ##     )
-  ##   }
-  ##   return(returnValue)
-  ## }, server=TRUE, options = list(dom = 'ftip'), selection='none')
-
-  ## output[[DATASTORE_TABLE]] <- DT::renderDataTable({
-  ##   result <- reactiveFileReaders_ls[[DATASTORE]]()
-  ##   if (is.null(result)) {
-  ##     dataTable <- data.table::data.table()
-  ##   } else {
-  ##     dataTable <- result
-  ##   }
-  ##   return(dataTable)
-  ## }, server=FALSE, options = list(dom = 'ftip'), escape = F, selection = 'single')
-
-  ## output[[GEO_CSV_FILE]] = DT::renderDataTable({
-  ##   getScriptInfo()
-  ##   returnValue <- reactiveFileReaders_ls[[GEO_CSV_FILE]]()
-  ##   return(returnValue)
-  ## }, server=FALSE, selection = 'none')
-
-  ## output[[HDF5_TABLES]] = DT::renderDataTable({
-  ##   debugConsole('Getting Module specifications Datastore tables')
-  ##   return(getOutputHDF5_TABLES())
-  ## }, server=FALSE) #end output[[HDF5_TABLES]]
-
-  ## output[[INPUTS_TREE_SELECTED_TEXT]] <- renderText({
-  ##   debugConsole('Getting tree selected')
-  ##   return(getOutputINPUTS_TREE_SELECTED_TEXT())
-  ## }) #end output[[INPUTS_TREE_SELECTED_TEXT]]
-
-
-  # output[[INPUTS_TREE]] <- renderTree({
-  #   debugConsole('Getting Module specifications tree')
-  #   specTree <- getInputsTree()
-  #   debugConsole('Finished getting module spec tree')
-  #   return(specTree)
-  # })
-
-
-  ## output[[DEBUG_CONSOLE_OUTPUT]] = DT::renderDataTable({
-  ##   return(otherReactiveValues_rv[[DEBUG_CONSOLE_OUTPUT]])
-  ## }, server=FALSE, options = list(dom = 'ftip'), selection = 'none')
-
-  ## output[[MODEL_STATE_FILE]] = renderText({
-  ##   getScriptInfo()
-  ##   jsonlite::toJSON(reactiveFileReaders_ls[[MODEL_STATE_FILE]](), pretty = TRUE)
-  ## })
-
-  ## shinyFiles::shinyFileSave(
-  ##   input = input,
-  ##   id = DATASTORE_TABLE_EXPORT_BUTTON,
-  ##   session = session,
-  ##   roots = volumeRoots,
-  ##   filetypes = myFileTypes_ls
-  ## )

@@ -14,8 +14,12 @@ options(repos = currentRepo)
 
 # Download and install the required libraries and their dependencies
 cat("\nInstalling dependencies\n")
-install.packages(c("curl","devtools", "roxygen2", "stringr", "knitr", "digest"), dependencies = TRUE, quiet=TRUE)
-install.packages(c("shiny", "shinyjs", "shinyFiles", "data.table", "DT", "shinyBS", "future", "testit", "jsonlite", "shinyAce", "envDocument", "rhandsontable","shinyTree"), dependencies = TRUE, quiet=TRUE)
+install.packages(c("curl","devtools", "roxygen2", "stringr", "knitr", "digest"),
+                 dependencies = TRUE, quiet=TRUE)
+install.packages(c("shiny", "shinyjs", "shinyFiles", "data.table", "DT",
+                   "shinyBS", "future", "testit", "jsonlite",
+                   "envDocument", "rhandsontable"),
+                 dependencies = TRUE, quiet=TRUE)
 devtools::install_github("tdhock/namedCapture", quiet=TRUE)
 source("https://bioconductor.org/biocLite.R")
 biocLite(c("rhdf5","zlibbioc"), suppressUpdates=TRUE, quiet=TRUE)
