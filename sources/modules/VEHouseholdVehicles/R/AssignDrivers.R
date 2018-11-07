@@ -1,9 +1,25 @@
 #===============
 #AssignDrivers.R
 #===============
-# This module assigns drivers by age group to each household as a function of
-# the numbers of persons and workers by age group, the household income, land
-# use characteristics, and public transit availability.
+#
+#<doc>
+#
+## AssignDrivers Module
+#### September 6, 2018
+#
+#This module assigns drivers by age group to each household as a function of the numbers of persons and workers by age group, the household income, land use characteristics, and public transit availability. Users may specify the relative driver licensing rate relative to the model estimation data year in order to account for observed or projected changes in licensing rates.
+#
+### Model Parameter Estimation
+#
+#Binary logit models are estimated to predict the probability that a person has a drivers license. Two versions of the model are estimated, one for persons in an urbanized area, and another for persons located outside of urbanized areas. There are different versions because the estimation data have more information about transportation system and land use characteristics for households located in urbanized areas. In both versions, the probability that a person has a drivers license is a function of the age group of the person, whether the person is a worker, the number of persons in the household, the income and squared income of the household, whether the household lives in a single-family dwelling, and the population density of the Bzone where the person lives. In the urbanized area model, the bus-equivalent transit revenue miles and whether the household resides in an urban mixed-use neighborhood are significant factors.
+#
+#The models are estimated using the *Hh_df* (household) and *Per_df* (person) datasets in the VE2001NHTS package. Information about these datasets and how they were developed from the 2001 National Household Travel Survey public use dataset is included in that package.
+#
+### How the Module Works
+#
+#The module iterates through each age group excluding the 0-14 year age group and creates a temporary set of person records for households in the region. For each household there are as many person records as there are persons in the age group in the household. A worker status attribute is added to each record based on the number of workers in the age group in the household. For example, if a household has 2 persons and 1 worker in the 20-29 year age group, one of the records would have its worker status attribute equal to 1 and the other would have its worker status attribute equal to 0. The person records are also populated with the household characteristics used in the model. The binomial logit model is applied to the person records to determine the probability that each person is a driver. The driver status of each person is determined by random draws with the modeled probability determining the likelihood that the person is determined to be a driver. The resulting number of drivers in the age group is then tabulated by household.
+#
+#</doc>
 
 
 #=================================
@@ -192,7 +208,7 @@ DriverModel_ls <- list(
 #' }
 #' @source AssignDrivers.R script.
 "DriverModel_ls"
-devtools::use_data(DriverModel_ls, overwrite = TRUE)
+usethis::use_data(DriverModel_ls, overwrite = TRUE)
 
 
 #================================================
@@ -461,7 +477,7 @@ AssignDriversSpecifications <- list(
 #' }
 #' @source AssignDrivers.R script.
 "AssignDriversSpecifications"
-devtools::use_data(AssignDriversSpecifications, overwrite = TRUE)
+usethis::use_data(AssignDriversSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -617,9 +633,13 @@ AssignDrivers <- function(L) {
 }
 
 
-#================================
-#Code to aid development and test
-#================================
+#===============================================================
+#SECTION 4: MODULE DOCUMENTATION AND AUXILLIARY DEVELOPMENT CODE
+#===============================================================
+#Run module automatic documentation
+#----------------------------------
+documentModule("AssignDrivers")
+
 #Test code to check specifications, loading inputs, and whether datastore
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions
