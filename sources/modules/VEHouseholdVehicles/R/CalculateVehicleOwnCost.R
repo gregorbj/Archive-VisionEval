@@ -1,24 +1,75 @@
 #=========================
 #CalculateVehicleOwnCost.R
 #=========================
-#This module calculates average vehicle ownership cost for each vehicle based on
-#the vehicle type and age using data from the American Automobile Association
-#(AAA). To this are added the cost of parking at the vehicle residence if free
-#parking is not available for all household vehicles. The ownership cost is
-#converted into an average ownership cost per mile by predicting the household
-#DVMT given the number of owned vehicles and splitting the miles equally among
-#the vehicles. Vehicle ownership costs are used by the AdjustVehicleOwnership
-#module to determine whether it would be more cost-effective for a household to
-#substitute the use of car services for one or more of vehicles that they
-#otherwise would own.
 #
-#The module also assigns pay-as-you-drive (PAYD) insurance to households based
-#on household characteristics and input assumption about the proportion of
-#households who have PAYD insurance. PAYD insurance does not affect the cost of
-#vehicle ownership when determining whether a household will substitute car
-#services for one or more of their vehicles. It does affect the operating cost
-#of the vehicle and determination of whether the amount of vehicle travel is
-#fits within the household's vehicle operations budget.
+#<doc>
+#
+## AssignVehicleType Module
+#### September 9, 2018
+#
+#This module calculates average vehicle ownership cost for each vehicle based on the vehicle type and age using data from the American Automobile Association (AAA). To this are added the cost of parking at the vehicle residence if free parking is not available for all household vehicles. The ownership cost is converted into an average ownership cost per mile by predicting the household DVMT given the number of owned vehicles and splitting the miles equally among the vehicles. Vehicle ownership costs are used by the AdjustVehicleOwnership module to determine whether it would be more cost-effective for a household to substitute the use of car services for one or more of vehicles that they otherwise would own.
+#
+#The module also assigns pay-as-you-drive (PAYD) insurance to households based on household characteristics and input assumption about the proportion of households who have PAYD insurance. PAYD insurance does not affect the cost of vehicle ownership when determining whether a household will substitute car services for one or more of their vehicles. It does affect the operating cost of the vehicle and determination of whether the amount of vehicle travel fits within the household's vehicle operations budget.
+#
+### Model Parameter Estimation
+#
+#Vehicle ownership cost data from the American Automobile Association (AAA) are used along with information on vehicle depreciation rates to develop a model of vehicle ownership cost as a function of vehicle type, vehicle age, and miles driven.
+#
+#The AAA cost data is described in the *aaa_vehicle_ownership_costs.txt* file in the *inst/extdata* directory of this package. Data are included on insurance, license/registration/taxes, finance, and depreciation (at 3 annual mileage rates) for 7 light duty body types (small sedan, medium sedan, large sedan, small SUV, medium SUV, minivan, and pickup). Data are also included for hybrids and electric vehicles but these are not used in the model because these vehicle types are relatively new (especially electric vehicles) and are not split out by body type. The following table show these data which are for the year [2017](http://exchange.aaa.com/wp-content/uploads/2017/08/17-0013_Your-Driving-Costs-Brochure-2017-FNL-CX-1.pdf).
+#
+#<tab:VehOwnCost_ls$AAAOwnCost_df>
+#
+#The AAA data body type values are aggregated into vehicle type (auto, light truck) values by taking the midpoint of the range of values for the body types corresponding to each vehicle type. The values for the 3 sedan body types are aggregated to calculate the auto type value. Likewise, the values for the 4 other body types are aggregated to calculate the light truck type value.
+#
+#Building an ownership cost model requires additional information because the AAA data only address cost during the first 5 years of a vehicle's life and only 3 levels for annual miles driven whereas the cost model needs to address vehicles up to 30 years old and a continuous range of annual vehicle miles driven. The model is created by combining the AAA data with average vehicle depreciation rate data from the [National Automobile Dealers Association *Used Vehicle Price Report: Age-level Analysis and Forecast, Q3 2013*](https://www.nada.com/b2b/Portals/0/assets/pdf/Q3%20Whitepaper%20Age-level%20Analysis%20and%20Forecast.pdf). This report estimates that light-duty vehicles depreciate at an average rate of 15% per year.
+#
+#The first step in building a model is to calculate the average vehicle value by year and body type for vehicles having a midrange value for annual mileage (15,000). This starts with calculating the new car value for each of the body types. To do this, the total depreciation for the first five years is calculated by multiplying the reported annual depreciation values by 5 since the AAA data represent annual costs over the first 5 years of the vehicle life. From that, the corresponding new vehicle value is calculated using the assumed annual depreciation rate of 15%. The new vehicle values by vehicle type (auto, light truck) are computed by taking the midpoint of the ranges of the the corresponding body types. The following table shows the estimated 2017 new car prices by body type and vehicle type.
+#
+#<tab:VehOwnCost_ls$BasePrice_df>
+#
+#Once the new car value by vehicle type has been calculated, the values by vehicle age are computed by applying the annual depreciation rate. Then the annual depreciation values are computed as the differences in annual vehicle values. The following figure illustrates the annual depreciation for auto and light truck that are driven 15,000 miles per year.
+#
+#<fig:depreciation_expense.png>
+#
+#The depreciation models adjusts depreciation to account for the effect of miles driven. As can be seen from the examination of the AAA data, depreciation increases at an increasing rate as annual mileage increases. To account for the effect of miles driven on depreciation, a linear model is estimated to predict the ratio of depreciation at the annual mileage driven to depreciation at 15,000 miles driven. This model is used to adjust the depreciation schedule shown in the figure above. The steps in creating this depreciation adjustment model are as follows:
+#
+#* The AAA data on depreciation by body type and mileage is aggregated to the vehicle types (auto, light truck) by taking the midpoint of the range of values for the corresponding body types.
+#
+#* The ratios of annual depreciation to depreciation at 15,000 miles are calculated.
+#
+#* The relationship between mileage and depreciation ratio is linearized by power-transforming the mileage. Mileage is divided by 1000 to reduce the size of the power-transformed result. The linearizing power transform is estimated using binary search to find the value at which the slopes are equal.
+#
+#* A linear regression model is estimated to find the slope and intercept of the line describing the relationship between mileage and relative depreciation.
+#
+#The following figure illustrates the resulting estimated relationship between depreciation and miles driven for 5-year old autos and light trucks.
+#
+#<fig:depreciation_by_annual_miles.png>
+#
+#A finance cost model calculates finance cost as a function of the vehicle age. To estimate this model, first the AAA values for finance cost by body type are aggregated to vehicle types. This is done by taking the midpoint values of the body types that correspond to each vehicle type. Since the AAA data represent the first 5 years of a vehicle's life and since auto loans typically have a duration of 5 years, it is assumed that the AAA data represent the average finance cost for a new vehicle. Therefore the annual finance cost for different vehicle can be calculated by multiplying the new car finance cost by the estimated proportion of new car value for the vehicle age. It is important to note that finance cost is the cost of financing the vehicle loan, not the cost of purchasing the car. Depreciation accounts for purchase cost and residual value.
+#
+#To calculate the cost of insurance, the AAA values for insurance cost by body type are aggregated to vehicle types in the manner described above. Since insurance cost is largely a function of driver characteristics (e.g. age) and weakly related to vehicle value, no adjustments are made to the AAA values as a function of vehicle value.
+#
+#The module also identifies which households are assigned to pay-as-you-drive (PAYD) insurance to satisfy user input on the proportion of households having that type of insurance. PAYD insurance is limited to 1996 or later model years because it requires OBD-II ports that were made mandatory on all vehicles in that year. This model has no estimated parameters, rather it weights various household characteristics based on judgements regarding the relative value of PAYD insurance to different users based on reviewing the literature. Undoubtedly there are correlations between the factors and therefore potential for double-counting, but substantially more data and study is required to sort out the effects. The characteristics and relative weights are as follows:
+#
+#* Teen Drivers (2 points) - households with one or more teenage drivers are benefitted by the monitoring and feedback provided by the technology;
+#
+#* Lower Mileage (3 points) - PAYD insurance is relatively more economical for households that have relatively low annual mileage (less than 15,000 miles per vehicle);
+#
+#* Older Adult Drivers (2 points) - Households with older adult drivers (30 or older) are more likely to use than households with younger adult drivers;
+#
+#* Lower Income (2 points) - Lower income households are more likely to use because of the lower costs and ability to moderate behavior to save additional money. Low income threshold is an annual household income of $45,000 in 2005 dollars.
+#
+#* Auto Proportion (2 points) - Households owning automobiles are more likely to use than households owning light trucks; and,
+#
+#* In Metropolitan Area (3 points) - Households in metropolitan areas are more likely to use.
+#
+### How the Module Works
+#
+#The module loads data on the type and age of each vehicle. It calls the CalculateHouseholdVmt module to calculate average daily vehicle miles traveled for each household. This is converted to annual miles and split equally among household vehicles. The depreciation model is applied to calculate vehicle depreciation cost as a function of the vehicle type, the vehicle age, and annual miles driven. The finance cost model is applied to calculate the finance cost as a function of the vehicle type and age. The insurance cost is calculated as a function of the vehicle type. Vehicle licensing/registration/tax costs are not calculated from the AAA values because these values can vary substantially by state and because they may changed to implement policy objectives. The user provides inputs for flat fees/taxes (i.e. annual cost per vehicle) and ad valorem taxes (i.e. percentage of vehicle value paid in taxes). The flat fees/taxes are applied to each vehicle. The ad valorem taxes are calculated by multiplying the vehicle value, which varies by type and age, by the tax rate. The module also loads household residential parking cost data calculated by the AssignParkingRestrictions module. The household parking costs are split equally among vehicles. Total ownership cost for each vehicle is then calculated by summing the depreciation, finance, insurance, fees/taxes, and parking costs. Total ownership cost is divided by vehicle miles to calculate the cost of ownership per mile of travel.
+#
+#The module also identifies which households will be assigned PAYD insurance given user inputs on the proportion of households having PAYD insurance. The module identifies which households qualify for PAYD insurance based on whether any of their vehicles are 1996 model year vehicles or later. The vehicle and household characteristics (identified above) are evaluated and points assigned. The total points are calculated for each households. Random sampling is used to choose a number of households to equal the input proportion where the probability that each household is chosen is a function of the ratio of the household weight to the maximum household weight.
+#
+#</doc>
 
 
 #=================================
@@ -39,6 +90,10 @@ library(visioneval)
 #used along with information on vehicle depreciation rates to develop a model of
 #vehicle ownership cost as a function of vehicle type, vehicle age, and miles
 #driven.
+
+#Create a list for retaining ownership cost model information
+#------------------------------------------------------------
+VehOwnCost_ls <- list()
 
 #AAA vehicle ownership cost data
 #-------------------------------
@@ -77,6 +132,8 @@ OwnCost_df <-
 rownames(OwnCost_df) <- OwnCost_df$Category
 OwnCost_df <- OwnCost_df[,-1]
 rm(Inp_ls)
+#Save the AAA ownership cost information for documentation purposes
+VehOwnCost_ls$AAAOwnCost_df <- OwnCost_df
 
 #Vehicle depreciation rate
 #-------------------------
@@ -89,16 +146,32 @@ DeprRate <- 0.15
 
 #Calculate annual depreciation cost by vehicle age and vehicle type
 #------------------------------------------------------------------
-#Aggregate in auto and light truck categories
-Depr_MiVt <- cbind(
-  Auto = rowMeans(OwnCost_df[4:6, c("SmallSedan", "MediumSedan", "LargeSedan")]),
-  LtTrk = rowMeans(OwnCost_df[4:6, c("SmallSUV", "MediumSUV", "Minivan", "Pickup")])
-)
-rownames(Depr_MiVt) <- c("10K", "15K", "20K")
+#Identify the body types assigned to each vehicle type
+AutoBodyTypes_ <- c("SmallSedan", "MediumSedan", "LargeSedan")
+LtTrkBodyTypes_ <- c("SmallSUV", "MediumSUV", "Minivan", "Pickup")
+#Depreciation by body type
+Depr_MiBt <- as.matrix(OwnCost_df[
+  c("Depreciation10KPerYear", "Depreciation15KPerYear", "Depreciation20KPerYear"),
+  c(AutoBodyTypes_ , LtTrkBodyTypes_)
+])
+rownames(Depr_MiBt) <- c("10K", "15K", "20K")
 #Calculate baseline (15K annual miles) depreciation for 5 years
-BaseDepr_Vt <- unlist(Depr_MiVt["15K",]) * 5
+BaseDepr_Bt <- unlist(Depr_MiBt["15K",]) * 5
+#Calculate the proportion of new value after 5 years assuming 15% dep. rate
+Dep5YrProp <- (1 - DeprRate) ^ 5
 #Calculate the new price given 15% depreciation by year
-BasePrice_Vt <- BaseDepr_Vt / (1 - DeprRate)^4
+BasePrice_Bt <- BaseDepr_Bt / (1 - Dep5YrProp)
+#Calculate the base price by vehicle type as the midpoint of the body types
+BasePrice_Vt <- c(
+  Auto = mean(range(BasePrice_Bt[AutoBodyTypes_])),
+  LtTrk = mean(range(BasePrice_Bt[LtTrkBodyTypes_]))
+)
+#Document base price in a table
+VehOwnCost_ls$BasePrice_df <- data.frame(
+  Body = names(c(BasePrice_Bt, BasePrice_Vt)),
+  Price = paste0("$",
+                 formatC(c(BasePrice_Bt, BasePrice_Vt), format = "f", digits = 0, big.mark = ","))
+)
 #Calculate proportion of new car value by age given 15% depreciation rate
 Ag <- 1:31
 PropNewValue_Ag <- sapply(Ag, function(x) (1 - DeprRate)^(x - 1))
@@ -106,61 +179,164 @@ PropNewValue_Ag <- sapply(Ag, function(x) (1 - DeprRate)^(x - 1))
 Value_AgVt <- outer(PropNewValue_Ag, BasePrice_Vt, "*")
 #Calculate depreciation by vehicle age and vehicle type
 Depr_AgVt <- round(-apply(Value_AgVt, 2, diff))
+#Document depreciation by year
+png("data/depreciation_expense.png", width = 480, height = 480)
+matplot(Depr_AgVt, type = "l", lty = c(1,2), col = "black",
+        xlab = "Vehicle Age (years)", ylab = "Depreciation (2017 dollars)",
+        main = "Average Auto and Light Truck Depreciation\nBy Vehicle Age")
+legend("topright", legend = c("Auto", "Light Truck"), lty = c(1,2))
+dev.off()
+#Save car value and annual depreciation expense by age and vehicle type
+VehOwnCost_ls$Value_AgVt <- Value_AgVt
+VehOwnCost_ls$Depr_AgVt <- Depr_AgVt
 
 #Estimate model to adjust depreciation to account for vehicle mileage
 #--------------------------------------------------------------------
-#Calculate mileage adjustments
-DeprProp_MiVt <- sweep(Depr_MiVt, 2, Depr_MiVt[2,], "/")
-#Define function to calculate 2nd order polynomial to fit mileage adjustments
-estDeprAdjModel <- function(AdjProp_) {
-  Miles <- c(10, 15, 20)
-  Data_df <- data.frame(
-    AdjProp = AdjProp_,
-    Mi = Miles,
-    MiSq = Miles^2,
-    MiCu = Miles^3
-  )
-  coefficients(lm(AdjProp ~ Mi + MiSq, data = Data_df))
-}
-#Estimate coefficients to match depreciation adjustments
-DeprAdjModel_ls <- list(
-  Auto = estDeprAdjModel(DeprProp_MiVt[,"Auto"]),
-  LtTrk = estDeprAdjModel(DeprProp_MiVt[,"LtTrk"])
+#Calculate proportional rate of depreciation relative to base
+Depr_MiVt <- cbind(
+  Auto = apply(Depr_MiBt[,AutoBodyTypes_], 1, function(x) mean(range(x))),
+  LtTrk = apply(Depr_MiBt[,LtTrkBodyTypes_], 1, function(x) mean(range(x)))
 )
+DeprProp_MiVt <- sweep(Depr_MiVt, 2, Depr_MiVt[2,], "/")
+#Define function to model depreciation adjustment as function of mileage
+estDeprAdjModel <- function(Depr_, Mi_) {
+  #Function to calculate linearizing power
+  findPower <- function() {
+    checkPower <- function(Pow) {
+      PowMi_ <- Mi_ ^ Pow
+      unname(diff(diff(Depr_) / diff(PowMi_)))
+    }
+    binarySearch(checkPower, c(1,5), Target = 0)
+  }
+  #Calculate power and transform mileage
+  Pow <- findPower()
+  #Data frame of estimation data
+  Data_df <- data.frame(
+    Depr = Depr_,
+    PowMi = Mi_ ^ Pow
+  )
+  #Estimate model
+  Depr_LM <- lm(Depr ~ PowMi, data = Data_df)
+  #Create summary text which combines model summary with power transform
+  Summary_ <- c(
+    paste("Power Transform:", Pow),
+    capture.output(summary(Depr_LM))
+    )
+  #Return the results
+  list(
+    Pow = Pow,
+    Coeff = coefficients(Depr_LM),
+    Summary = Summary_
+  )
+}
+#Estimate and save depreciation adjustment models for autos and light trucks
+VehOwnCost_ls$DeprAdjModel_ls <- list(
+  Auto = estDeprAdjModel(DeprProp_MiVt[,"Auto"], c(10, 15, 20)),
+  LtTrk = estDeprAdjModel(DeprProp_MiVt[,"LtTrk"], c(10, 15, 20))
+)
+
+#Define function to calculate vehicle depreciation
+#-------------------------------------------------
+#' Calculate vehicle depreciation
+#'
+#' \code{calcVehDepr} calculates vehicle depreciation given vehicle type, age,
+#' and annual mileage
+#'
+#' This function calculates the annual depreciation cost (in 2017 dollars) of
+#' vehicles as a function of the vehicle type (Auto, LtTrk), age, and annual
+#' mileage. A base depreciation value is calculated using the depreciation cost
+#' matrix (VehOwnCost_ls$Depr_AgVt) calculated from AAA data in the module
+#' script. The base depreciation is a function of vehicle type and age. The
+#' base depreciation is adjusted based on the vehicle's annual mileage using the
+#' depreciation adjustment models (VehOwnCost_ls$DeprAdjModel_ls). The models,
+#' one for each vehicle type (Auto, LtTrk) are quadratic polynomials with
+#' minimum values at 10,000 miles so the minimum vehicle VMT is constrained to
+#' 10,000 miles for use in the model.
+#'
+#' @param Type_ A character vector of vehicle types (Auto, LtTrk)
+#' @param Age_ A numeric vector of vehicle ages
+#' @param Vmt_ A numeric vector of the annual vehicle miles traveled for the
+#' vehicles
+#' @return A numeric vector of annual depreciation cost in 2017 dollars
+#' @export
+#'
+calcVehDepr <- function(Type_, Age_, Vmt_) {
+  #Calculate index to the vehicle depreciation model table
+  TypeToIndex <- c(Auto = 1, LtTrk = 2)
+  DeprIdx_mx <- cbind(
+    pmin(as.integer(Age_) + 1, 30),
+    TypeToIndex[Type_]
+  )
+  #Apply the index to calculate base vehicle depreciation
+  BaseDepr_Ve <- with(VehOwnCost_ls, Depr_AgVt[DeprIdx_mx])
+  #Put depreciation adjustment model coefficients into matrix
+  Coeff_mx <- rbind(
+    Auto = VehOwnCost_ls$DeprAdjModel_ls[["Auto"]]$Coeff,
+    LtTrk = VehOwnCost_ls$DeprAdjModel_ls[["LtTrk"]]$Coeff
+  )[Type_,]
+  #Scale the Vmt to form of depreciation adjustment model
+  Mi_ <- Vmt_ / 1000
+  #Power transform the mileage
+  Pow_Vt <- c(
+    Auto = VehOwnCost_ls$DeprAdjModel_ls$Auto$Pow,
+    LtTrk = VehOwnCost_ls$DeprAdjModel_ls$LtTrk$Pow
+    )
+  PowMi_ <- Mi_ ^ (Pow_Vt[Type_])
+  #Create model input matrix
+  Inp_mx <- cbind(rep(1, length(PowMi_)), PowMi_)
+  #Apply the depreciation adjustment model to calculate adjustment factors
+  DeprAdj_Ve <- rowSums(Coeff_mx * Inp_mx)
+  #Multiply the base depreciation by mileage adjustment factors for result
+  BaseDepr_Ve * DeprAdj_Ve
+}
+
+#Document model for adjusting depreciation to account for mileage
+#----------------------------------------------------------------
+Vmt_ <- seq(5000, 30000, 1000)
+AutoDep_ <- calcVehDepr(
+  rep("Auto", length(Vmt_)),
+  Age_ <- rep(5, length(Vmt_)),
+  Vmt_
+)
+LtTrkDep_ <- calcVehDepr(
+  rep("LtTrk", length(Vmt_)),
+  Age_ <- rep(5, length(Vmt_)),
+  Vmt_
+)
+png("data/depreciation_by_annual_miles.png", width = 480, height = 480)
+plot(Vmt_, AutoDep_, type = "l", ylim = range(c(AutoDep_, LtTrkDep_)),
+     xlab = "Annual Miles", ylab = "Annual Depreciation (2017 dollars)",
+     main = "Annual Depreciation by Annual Miles Driven\n5-Year Old Auto and Light Truck")
+lines(Vmt_, LtTrkDep_, lty = 2)
+legend("topleft", legend = c("Auto", "Light Truck"), lty = c(1,2))
+dev.off()
 
 #Calculate financing cost by vehicle age and type
 #------------------------------------------------
 #Calculate average new finance cost for autos and light trucks
 FinCost_ <- unlist(OwnCost_df["Finance",])
 FinCost_Vt <- c(
-  Auto = mean(FinCost_[c("SmallSedan", "MediumSedan", "LargeSedan")]),
-  LtTrk = mean(FinCost_[c("SmallSUV", "MediumSUV", "Minivan", "Pickup")])
+  Auto = mean(range(FinCost_[AutoBodyTypes_])),
+  LtTrk = mean(range(FinCost_[LtTrkBodyTypes_]))
 )
 #Calculate finance cost by vehicle age
-FinCost_AgVt <- outer(PropNewValue_Ag, FinCost_Vt, "*")
+VehOwnCost_ls$FinCost_AgVt <- outer(PropNewValue_Ag, FinCost_Vt, "*")
+
 
 #Calculate insurance cost by vehicle type
 #----------------------------------------
 #Note, vehicle insurance cost is not strongly related to vehicle value. It is
 #mostly related to driver characteristics.
-InsCost_Vt <- c(
-  Auto = mean(unlist(OwnCost_df["Insurance", c("SmallSedan", "MediumSedan", "LargeSedan")])),
-  LtTrk = mean(unlist(OwnCost_df["Insurance", c("SmallSUV", "MediumSUV", "Minivan", "Pickup")]))
+VehOwnCost_ls$InsCost_Vt <- c(
+  Auto = mean(range(unlist(OwnCost_df["Insurance", AutoBodyTypes_]))),
+  LtTrk = mean(range(unlist(OwnCost_df["Insurance", LtTrkBodyTypes_])))
 )
 
-#Make a list of vehicle ownership cost components
-#------------------------------------------------
-VehOwnCost_ls <- list(
-  Depr_AgVt = Depr_AgVt,
-  DeprAdjModel_ls = DeprAdjModel_ls,
-  FinCost_AgVt = FinCost_AgVt,
-  InsCost_Vt = InsCost_Vt,
-  Value_AgVt = Value_AgVt
-)
 #Clean up
-rm(Depr_AgVt, Depr_MiVt, DeprAdjModel_ls, DeprProp_MiVt, FinCost_AgVt,
-   OwnCost_df, Value_AgVt, Ag, BaseDepr_Vt, BasePrice_Vt, DeprRate, FinCost_,
-   FinCost_Vt, InsCost_Vt, PropNewValue_Ag, estDeprAdjModel)
+rm(Depr_AgVt, Depr_MiBt, Depr_MiVt, DeprProp_MiVt, OwnCost_df, Value_AgVt,
+   Ag, Age_, AutoBodyTypes_, AutoDep_, BaseDepr_Bt, BasePrice_Bt, BasePrice_Vt,
+   Dep5YrProp, DeprRate, FinCost_, FinCost_Vt, LtTrkBodyTypes_, LtTrkDep_,
+   PropNewValue_Ag, Vmt_, estDeprAdjModel)
 
 #Save the vehicle ownership cost model
 #-------------------------------------
@@ -178,7 +354,7 @@ rm(Depr_AgVt, Depr_MiVt, DeprAdjModel_ls, DeprProp_MiVt, FinCost_AgVt,
 #' }
 #' @source AdjustVehicleOwnership.R script.
 "VehOwnCost_ls"
-devtools::use_data(VehOwnCost_ls, overwrite = TRUE)
+usethis::use_data(VehOwnCost_ls, overwrite = TRUE)
 
 #---------------------------------
 #Pay-as-you-drive insurance choice
@@ -227,7 +403,7 @@ PaydWts_ <- c(
 #' }
 #' @source CalculateVehicleOwnCost.R script.
 "PaydWts_"
-devtools::use_data(PaydWts_, overwrite = TRUE)
+usethis::use_data(PaydWts_, overwrite = TRUE)
 
 
 #================================================
@@ -521,7 +697,7 @@ CalculateVehicleOwnCostSpecifications <- list(
 #' }
 #' @source CalculateVehicleOwnCost.R script.
 "CalculateVehicleOwnCostSpecifications"
-devtools::use_data(CalculateVehicleOwnCostSpecifications, overwrite = TRUE)
+usethis::use_data(CalculateVehicleOwnCostSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -535,52 +711,6 @@ devtools::use_data(CalculateVehicleOwnCostSpecifications, overwrite = TRUE)
 #DVMT given the number of owned vehicles and splitting the miles equally among
 #the vehicles.
 
-#Function to calculate vehicle depreciation
-#------------------------------------------
-#' Calculate vehicle depreciation
-#'
-#' \code{calcVehDepr} calculates vehicle depreciation given vehicle type, age,
-#' and annual mileage
-#'
-#' This function calculates the annual depreciation cost (in 2017 dollars) of
-#' vehicles as a function of the vehicle type (Auto, LtTrk), age, and annual
-#' mileage. A base depreciation value is calculated using the depreciation cost
-#' matrix (VehOwnCost_ls$Depr_AgVt) calculated from AAA data in the module
-#' script. The base depreciation is a function of vehicle type and age. The
-#' base depreciation is adjusted based on the vehicle's annual mileage using the
-#' depreciation adjustment models (VehOwnCost_ls$DeprAdjModel_ls). The models,
-#' one for each vehicle type (Auto, LtTrk) are quadratic polynomials with
-#' minimum values at 10,000 miles so the minimum vehicle VMT is constrained to
-#' 10,000 miles for use in the model.
-#'
-#' @param Type_ A character vector of vehicle types (Auto, LtTrk)
-#' @param Age_ A numeric vector of vehicle ages
-#' @param Vmt_ A numeric vector of the annual vehicle miles traveled for the
-#' vehicles
-#' @return A numeric vector of annual depreciation cost in 2017 dollars
-#' @export
-#'
-calcVehDepr <- function(Type_, Age_, Vmt_) {
-  #Calculate index to the vehicle depreciation model table
-  TypeToIndex <- c(Auto = 1, LtTrk = 2)
-  DeprIdx_mx <- cbind(
-    pmin(as.integer(Age_) + 1, 30),
-    TypeToIndex[Type_]
-  )
-  #Apply the index to calculate base vehicle depreciation
-  BaseDepr_Ve <- with(VehOwnCost_ls, Depr_AgVt[DeprIdx_mx])
-  #Put depreciation adjustment model coefficients into matrix
-  Coeff_mx <-
-    do.call(rbind, VehOwnCost_ls$DeprAdjModel_ls[Type_])
-  #Adjust Vmt_ to fit form of depreciation adjustment model
-  DeprAdjVmt_Ve <- pmax(Vmt_, 10000) / 1000
-  #Create model input matrix
-  Inp_mx <- cbind(rep(1, length(BaseDepr_Ve)), DeprAdjVmt_Ve, DeprAdjVmt_Ve^2)
-  #Apply the depreciation adjustment model to calculate adjustment factors
-  DeprAdj_Ve <- rowSums(Coeff_mx * Inp_mx)
-  #Multiply the base depreciation by mileage adjustment factors for result
-  BaseDepr_Ve * DeprAdj_Ve
-}
 
 #Function to calculate vehicle finance cost
 #------------------------------------------
@@ -669,7 +799,7 @@ idPaydHh <- function(L) {
   #Identify qualifying househouseholds
   #----------------------------------------------------------------------------
   #Household qualifies if all household vehicles are later than 1995 model year
-  AgeThreshold <- as.numeric(L$G$Year) - 1995
+  AgeThreshold <- as.numeric(L$G$Year) - 1996
   Qualifies_Hh <-
     tapply(L$Year$Vehicle$Age, L$Year$Vehicle$HhId, function(x) {
       any(x >= AgeThreshold)
@@ -832,9 +962,13 @@ CalculateVehicleOwnCost <- function(L,M) {
 }
 
 
-#================================
-#Code to aid development and test
-#================================
+#===============================================================
+#SECTION 4: MODULE DOCUMENTATION AND AUXILLIARY DEVELOPMENT CODE
+#===============================================================
+#Run module automatic documentation
+#----------------------------------
+documentModule("CalculateVehicleOwnCost")
+
 #Test code to check specifications, loading inputs, and whether datastore
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions
