@@ -11,7 +11,13 @@
 #
 ### Model Parameter Estimation
 #
-#Binary logit models are estimated to predict the probability that a person has a drivers license. Two versions of the model are estimated, one for persons in an urbanized area, and another for persons located outside of urbanized areas. There are different versions because the estimation data have more information about transportation system and land use characteristics for households located in urbanized areas. In both versions, the probability that a person has a drivers license is a function of the age group of the person, whether the person is a worker, the number of persons in the household, the income and squared income of the household, whether the household lives in a single-family dwelling, and the population density of the Bzone where the person lives. In the urbanized area model, the bus-equivalent transit revenue miles and whether the household resides in an urban mixed-use neighborhood are significant factors.
+#Binary logit models are estimated to predict the probability that a person has a drivers license. Two versions of the model are estimated, one for persons in a metropolitan (i.e. urbanized) area, and another for persons located in non-metropolitan areas. There are different versions because the estimation data have more information about transportation system and land use characteristics for households located in urbanized areas. In both versions, the probability that a person has a drivers license is a function of the age group of the person, whether the person is a worker, the number of persons in the household, the income and squared income of the household, whether the household lives in a single-family dwelling, and the population density of the Bzone where the person lives. In the metropolitan area model, the bus-equivalent transit revenue miles and whether the household resides in an urban mixed-use neighborhood are significant factors. Following are the summary statistics for the metropolitan model:
+#
+#<txt:DriverModel_ls$Metro$Summary>
+#
+#Following are the summary statistics for the non-metropolitan model:
+#
+#<txt:DriverModel_ls$NonMetro$Summary>
 #
 #The models are estimated using the *Hh_df* (household) and *Per_df* (person) datasets in the VE2001NHTS package. Information about these datasets and how they were developed from the 2001 National Household Travel Survey public use dataset is included in that package.
 #
@@ -107,7 +113,7 @@ estimateDriverModel <- function(Data_df, StartTerms_, ValidationProp) {
     Formula = makeModelFormulaString(DriverModel),
     Choices = c(1, 0),
     PrepFun = prepIndepVar,
-    Summary = summary(DriverModel),
+    Summary = capture.output(summary(DriverModel)),
     Anova = anova(DriverModel, test = "Chisq"),
     PropCorrectlyPredicted = sum(diag(Compare_tbl)) / sum(Compare_tbl)
   )
@@ -405,7 +411,7 @@ AssignDriversSpecifications <- list(
       GROUP = "Year",
       TYPE = "character",
       UNITS = "category",
-      PROHIBITED = "NA",
+      PROHIBIT = "NA",
       ISELEMENTOF = c("Urban", "Rural")
     )
   ),
