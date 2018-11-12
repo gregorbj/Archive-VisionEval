@@ -706,10 +706,6 @@ rm(Per_ls, Numcommdrvr_Hh, Nbiketrp_Hh, Nwalktrp_Hh, Usepubtr_Hh, Numwrkdrvr_Hh)
 #---------------------------
 #Change Hhc_msa to character variable to link up highway data properly
 Hh_df$Hhc_msa <- as.character(Hh_df$Hhc_msa)
-#Load data file
-# Hwy2001_df <-
-#   read.csv("data-raw/HighwayStatistics2.csv",
-#            colClasses = c(rep("character", 2), rep("numeric", 8)))
 #Sum quantities by Msa Code
 RoadMi_Mc <- toVecFrom1DAry(tapply(Hwy2001_df$RoadMiles, Hwy2001_df$MsaCode, sum))
 Pop_Mc <- toVecFrom1DAry(tapply(Hwy2001_df$Population, Hwy2001_df$MsaCode, sum))
@@ -730,8 +726,6 @@ rm(RoadMi_Mc, Pop_Mc, FwyLnMi_Mc, Area_Mc, RoadMiCap_Mc, FwyLnMiCap_Mc,
 
 #Add the transit supply data
 #---------------------------
-#Load the data file
-# Transit2001_df <- read.csv("data-raw/uza_bus_eq_rev_mi.csv", as.is = TRUE)
 Transit2001_df$MSACode <- as.character(Transit2001_df$MSACode)
 Transit2001_df$MSACode[Transit2001_df$MSACode == "520"] <- "0520"
 Transit2001_df$MSACode[Transit2001_df$MSACode == "640"] <- "0640"
