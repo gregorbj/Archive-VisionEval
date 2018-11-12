@@ -117,7 +117,7 @@ VehOwnModels_ls$NonMetro$Gt1Veh <- list(
 #' }
 #' @source AssignVehicleFeatures.R script.
 "VehOwnModels_ls"
-devtools::use_data(VehOwnModels_ls, overwrite = TRUE)
+usethis::use_data(VehOwnModels_ls, overwrite = TRUE)
 
 # Model LtTrk Ownership
 #-------------------------
@@ -137,7 +137,7 @@ LtTruckModels_ls <- list(OwnModel = "-0.786596031795022 * Intercept + 5.00962836
 #' }
 #' @source AssignVehicleFeatures.R script.
 "LtTruckModels_ls"
-devtools::use_data(LtTruckModels_ls, overwrite = TRUE)
+usethis::use_data(LtTruckModels_ls, overwrite = TRUE)
 
 
 #================================================
@@ -852,7 +852,7 @@ AssignVehicleFeaturesSpecifications <- list(
 #' }
 #' @source AssignVehicleFeatures.R script.
 "AssignVehicleFeaturesSpecifications"
-devtools::use_data(AssignVehicleFeaturesSpecifications, overwrite = TRUE)
+usethis::use_data(AssignVehicleFeaturesSpecifications, overwrite = TRUE)
 
 
 #=======================================================
