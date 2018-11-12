@@ -1,20 +1,23 @@
-#=======================
+#=====================
 #ApplyDvmtReductions.R
-#=======================
-#This module applies the computed proportional reductions in household DVMT due
-#to the application of travel demand management programs and the diversion of
-#single-occupant vehicle travel to bicycles, electric bicycles, or other
-#light-weight vehicles. The AssignDemandManagement module assigns travel demand
-#management programs to workers and households (based on user inputs regarding
-#assumed participation rates) and calculates the proportional reduction in
-#household DVMT from the programs. The DivertSovTravel module models the amount
-#of SOV travel of households and diverts some of that travel to light-weight
-#vehicle travel (bikes, electric bikes, etc.) based on user input goals for
-#diversion, the amount of household SOV travel and the propensity of the
-#household to use other modes. It calculates proportion of each household travel
-#that is diverted. The ApplyTravelReductions module gets the DVMT diversions
-#that these modules calculated and placed in the datastore and adjusts the
-#household DVMT accordingly, saving the adjusted household DVMT.
+#=====================
+#
+#<doc>
+#
+## ApplyDvmtReductions Module
+#### November 12, 2018
+#
+#This module applies the computed proportional reductions in household DVMT due to the application of travel demand management programs and the diversion of single-occupant vehicle travel to bicycles, electric bicycles, or other light-weight vehicles.
+#
+### Model Parameter Estimation
+#
+#This module has no estimated model parameters.
+#
+### How the Module Works
+#
+#The module loads from the datastore the proportional reductions in household DVMT calculated by the AssignDemandManagement module and DivertSovTravel module. It converts the proportional reductions to proportions of DVMT (i.e. 1 - proportional reduction), multiplies them, and multiplies by household DVMT to arrive at a revised household DVMT which is saved to the datastore.
+#
+#</doc>
 
 
 #=================================
@@ -105,7 +108,7 @@ ApplyDvmtReductionsSpecifications <- list(
 #' }
 #' @source ApplyDvmtReductions.R script.
 "ApplyDvmtReductionsSpecifications"
-devtools::use_data(ApplyDvmtReductionsSpecifications, overwrite = TRUE)
+usethis::use_data(ApplyDvmtReductionsSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -152,9 +155,13 @@ ApplyDvmtReductions <- function(L) {
 }
 
 
-#================================
-#Code to aid development and test
-#================================
+#===============================================================
+#SECTION 4: MODULE DOCUMENTATION AND AUXILLIARY DEVELOPMENT CODE
+#===============================================================
+#Run module automatic documentation
+#----------------------------------
+documentModule("ApplyDvmtReductions")
+
 #Test code to check specifications, loading inputs, and whether datastore
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions
