@@ -33,20 +33,10 @@ ui <- fluidPage(
             "
            )
       ),
-    # # FIXME: Modify so it also triggers events for Save and Cancel
-    # # we want to toggle off the file name and table in those cases too.
-    # tags$script(
-    #   "$(document).on('click', '#INPUT_FILES button', function () {
-    #   Shiny.onInputChange('EDIT_INPUT_FILE_ID',this.id);
-    #   Shiny.onInputChange('EDIT_INPUT_FILE_LAST_CLICK', Math.random())
-    #   });"
-    # ), #end tag$script
 
     tags$meta(charset = "UTF-8"),
     tags$meta(name = "google", content = "notranslate"),
     tags$meta(`http-equiv` = "Content-Language", content = "en")#,
-
-    #tags$style(HTML('#btn{background-color:gray}'))
 
   ),     #end tag$head
 
@@ -101,7 +91,7 @@ ui <- fluidPage(
       value = TAB_SETTINGS,
 
       h3("Run parameters"),
-      
+
       verbatimTextOutput(RUN_PARAMETERS_FILE),
 
       actionButton(SAVE_RUN_PARAMETERS_FILE,
@@ -115,7 +105,7 @@ ui <- fluidPage(
 
       br(),
       br(),
-      
+
       rhandsontable::rHandsontableOutput(outputId = RUN_PARAMETERS_RHT),
       bsTooltip(id=RUN_PARAMETERS_RHT, title='Double-click to edit',
                 placement='left'),
@@ -123,13 +113,13 @@ ui <- fluidPage(
 
 
       h3("Model parameters"),
-      
+
       verbatimTextOutput(MODEL_PARAMETERS_FILE),
 
       actionButton(SAVE_MODEL_PARAMETERS_FILE,
                    "Save Changes",
                    icon = icon('save', lib='glyphicon'), class='btn-primary'),
-      
+
       actionButton(REVERT_MODEL_PARAMETERS_FILE,
                    "Revert Changes",
                    icon = icon('remove', lib='glyphicon'), class='btn-primary'),
@@ -139,7 +129,7 @@ ui <- fluidPage(
       rhandsontable::rHandsontableOutput(outputId = MODEL_PARAMETERS_RHT),
       bsTooltip(id=MODEL_PARAMETERS_RHT, title='Double-click to edit',
                 placement='left')
- 
+
       #h3("Geo File"),
       #DT::dataTableOutput(GEO_CSV_FILE)
 
@@ -159,7 +149,7 @@ ui <- fluidPage(
                        "Save Changes",
                        icon = icon('save', lib='glyphicon'),
                        class='btn-primary'),
-      
+
           actionButton(INPUT_FILE_REVERT_BUTTON,
                        "Revert Changes",
                        icon = icon('remove', lib='glyphicon'),
