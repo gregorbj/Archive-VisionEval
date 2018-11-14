@@ -88,6 +88,18 @@ ApplyDvmtReductionsSpecifications <- list(
       ISELEMENTOF = "",
       SIZE = 0,
       DESCRIPTION = "Average daily vehicle miles traveled by the household in autos or light trucks"
+    ),
+    item(
+      NAME = "SovToBikeTrip",
+      TABLE = "Household",
+      GROUP = "Year",
+      TYPE = "compound",
+      UNITS = "TRIP/YR",
+      NAVALUE = -1,
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      SIZE = 0,
+      DESCRIPTION = "Annual extra trips allocated to bicycle model as a result of SOV diversion"
     )
   ),
   #Specify call status of module
@@ -145,11 +157,19 @@ ApplyDvmtReductions <- function(L) {
   #Adjusted household DVMT
   AdjDvmt_Hh <- L$Year$Household$Dvmt * TdmAdj_Hh * SovDivertAdj_Hh
 
+  #Calculate extra bike trip adjustment
+  #------------------------------------
+  #Daily miles diverted
+  SovMilesDivert_Hh <- L$Year$Household$PropDvmtDiverted * L$Year$Household$Dvmt
+  #Yearly trips diverted
+  SovToBikeTrip_Hh <- SovModel_ls$TripsPerMile * SovMilesDivert_Hh * 365
+
   #Return the results
   #------------------
   Out_ls <- initDataList()
   Out_ls$Year$Household <-
-    list(Dvmt = AdjDvmt_Hh)
+    list(Dvmt = AdjDvmt_Hh,
+         SovToBikeTrip = SovToBikeTrip_Hh)
   #Return the outputs list
   Out_ls
 }
