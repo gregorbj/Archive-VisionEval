@@ -1,5 +1,5 @@
 
-# FutureTaskProcessor.R 
+# FutureTaskProcessor.R
 # https://gist.github.com/PeterVermont/a4a29d2c6b88e4ee012a869dedb5099c#file-futuretaskprocessor-r
 
 # The file that 'source's this should also call plan(multiprocess, workers=<desired number of workers>)
@@ -170,6 +170,7 @@ processRunningTasks <-
                 )
               )
               print(sys.calls())
+              backtrace(asyncFutureObject)
             }
           )#end withCallingHandlers
         } #end if catch errors

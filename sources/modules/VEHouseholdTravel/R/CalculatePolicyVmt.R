@@ -4,7 +4,7 @@
 #This module models adjusts the VMT for the policies entered for the scenario.
 #The outputs form this module contains 'Policy' as the suffix in their names.
 
-library(visioneval)
+# library(visioneval)
 
 #=============================================
 #SECTION 1: ESTIMATE AND SAVE MODEL PARAMETERS

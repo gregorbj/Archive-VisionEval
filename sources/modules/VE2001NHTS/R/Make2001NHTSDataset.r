@@ -14,7 +14,7 @@
 #dataset to be used in model estimation. Data on freeway lane miles and
 #bus equivalent transit revenue miles are added. A household dataframe (Hh_df)
 #containing travel and other relevant data for each survey household.
-library(visioneval)
+# library(visioneval)
 
 
 #==================
