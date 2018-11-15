@@ -46,7 +46,7 @@ initModelStateFile <-
     Message <- paste("Missing", ParamFilePath, "file.")
     stop(Message)
   } else {
-    ModelState_ls <- fromJSON(ParamFilePath)
+    ModelState_ls <- jsonlite::fromJSON(ParamFilePath)
     ModelState_ls$LastChanged <- Sys.time()
     ModelState_ls$Deflators <- read.csv(DeflatorFilePath, as.is = TRUE)
     ModelState_ls$Units <- read.csv(UnitsFilePath, as.is = TRUE)
@@ -143,6 +143,7 @@ setModelState <-
 #' @export
 readModelState <- function(Names_ = "All", FileName = "ModelState.Rda") {
   if (file.exists(FileName)) {
+    #writeLog(paste0('readModelState: loading', file.path(getwd(), FileName)))
     load(FileName)
   }
   if ("ModelState_ls" %in% ls()) State_ls <- get("ModelState_ls")
