@@ -12,26 +12,7 @@
 #=====================================================================
 #SECTION 1: INITIATE THE APP AND DEFINE THE CONSTANTS AND FUNCTIONS
 #=====================================================================
-# Check if creating expected results or comparing current results.
-if(!exists("createExpectedResults")){
-  createExpectedResults <- FALSE
-}
-
-# Start the browser
-suppressWarnings(app <- ShinyDriver$new("."))
-name <- "run_verpat_model_test"
-save_dir <- file.path(app$getAppDir(),"tests")
-save_dir <- normalizePath(save_dir)
-
-# Directory name to store the results
-expected <- "-expected"
-current <- "-current"
-
-if(!dir.exists(save_dir)){
-  dir.create(save_dir)
-}
-
-# Function to remove user, platform, and/or time dependent identifiers in the results from the model run.
+# Functions to remove user, platform, and/or time dependent identifiers in the results from the model run.
 
 # Removes time-stamp from the results
 removeDates <- function(modeldate){
@@ -50,157 +31,113 @@ getname <- function(divclass){
   return(divclass$getText())
 } # end getname
 
-# Set the model and run parameters to nothing to ensure consistency in the tests.
-app$setInputs(MODEL_PARAMETERS_FILE = "[\"\"]")
-app$setInputs(RUN_PARAMETERS_FILE = "[\"\"]")
 
+# Check if creating expected results or comparing current results.
+if(!exists("createExpectedResults")){
+  createExpectedResults <- FALSE
+}
+
+name <- "run_verpat_model_test"
+
+if ( !exists(tests_dir) ){
+  tests_dir <- file.path(app$getAppDir(),"tests")
+  tests_dir <- normalizePath(tests_dir)
+}
+
+# Directory name to store the results
+if ( createExpectedResults ){
+  save_dir <- file.path(tests_dir, paste0(name, '-expected'))
+} else {
+  save_dir <- file.path(tests_dir, paste0(name, '-current'))
+}
+
+if(!dir.exists(save_dir)){
+  dir.create(save_dir, recursive = TRUE)
+}
 
 #===========================
 #SECTION 2: CREATE RESULTS
 #===========================
-if(dir.exists(file.path(save_dir,paste0(name,expected))) & !createExpectedResults){
-  if(!dir.exists(file.path(save_dir,paste0(name,current)))){
-    dir.create(file.path(save_dir,paste0(name,current)))
-  }
-  # Find and press select button
-  select_button <- app$findElement(xpath = "//*[@id='SELECT_RUN_SCRIPT_BUTTON']")
-  select_button$click()
 
-  # Select run_model.R
-  dir_file <- app$findElements(xpath = "//*//div[contains(@class,'sF-file')]//*//div[contains(string(),'run_model.R')]")
-  foldernames <- sapply(dir_file,getname)
-  index <- match("run_model.R",foldernames)
-  run_model_file <- dir_file[[index]]
-  run_model_file$click()
-  select_button <- app$findElement(xpath = "//*[@id='sF-selectButton']")
-  select_button$click()
-  app$expectUpdate(output = "SCRIPT_NAME", timeout = 10e3) # Monitor that the run_model.R is loaded completely
-  Sys.sleep(1)
-  app$takeScreenshot(file = file.path(save_dir,paste0(name,current),"001.png"))
+# Start the app
+suppressWarnings(
+  app <- ShinyDriver$new(".", debug = 'all')
+)
 
-  # Clean the results displayed in the browser (remove the identifiers)
-  output <- app$getAllValues()
-  output$output$SCRIPT_NAME <- NULL
-  jsonlite::write_json(output, path = file.path(save_dir,paste0(name,current),"001.json"),pretty=TRUE)
+# Set the model and run parameters to nothing to ensure consistency in the tests.
+#app$setInputs(MODEL_PARAMETERS_FILE = "[\"\"]")
+#app$setInputs(RUN_PARAMETERS_FILE = "[\"\"]")
 
-  # Move to the run model tab
-  run_button <- app$findElement(xpath = "//*//a[@data-value='TAB_RUN']")
-  run_button$click()
-  app$expectUpdate(output = "CAPTURED_SOURCE", timeout = 10e3)
-  Sys.sleep(1)
+# Find and press select button
+select_button <- app$findElement(xpath = "//*[@id='SELECT_RUN_SCRIPT_BUTTON']")
+select_button$click()
 
-  # Clean the results displayed in the browser (remove the identifiers)
-  output <- app$getAllValues()
-  output$output$SCRIPT_NAME <- NULL
-  app$takeScreenshot(file = file.path(save_dir,paste0(name,current),"002.png"))
-  jsonlite::write_json(output, path = file.path(save_dir,paste0(name,current),"002.json"),pretty=TRUE)
+# Select run_model.R
+dir_file <- app$findElements(xpath = "//*//div[contains(@class,'sF-file')]//*//div[contains(string(),'run_model.R')]")
+foldernames <- sapply(dir_file,getname)
+index <- match("run_model.R",foldernames)
+run_model_file <- dir_file[[index]]
+run_model_file$click()
+select_button <- app$findElement(xpath = "//*[@id='sF-selectButton']")
+select_button$click()
 
-  # Run the model
-  run_model_script_button <- app$findElement(xpath = "//*[@id='RUN_MODEL_BUTTON']")
-  run_model_script_button$click()
-  while(!run_model_script_button$isEnabled()) {
-    Sys.sleep(30)
-    print(paste0("Running Model: ",!run_model_script_button$isEnabled()))
-    print(paste0("Time: ", Sys.time()))
-  }
-  Sys.sleep(1)
-  # Screenshot not take as the displayed value contains timestamp and other identifiers
-  # app$takeScreenshot(file = file.path(save_dir,paste0(name,current),"003.png"))
+# Get results of selecting run_model.R
+app$expectUpdate(output = "SCRIPT_NAME", timeout = 10e3) # Monitor that the run_model.R is loaded completely
+Sys.sleep(10)
+app$takeScreenshot(file = file.path(save_dir,"001.png"))
 
-  # Clean the results displayed in the browser (remove the identifiers)
-  output <- app$getAllValues()
-  output$output <- lapply(output$output,removeDates)
-  output$output$SCRIPT_NAME <- NULL
-  jsonlite::write_json(output, path = file.path(save_dir,paste0(name,current),"003.json"),pretty=TRUE)
+# Clean the results displayed in the browser (remove the identifiers)
+output <- app$getAllValues()
+output$output$SCRIPT_NAME <- NULL
+jsonlite::write_json(output, path = file.path(save_dir,"001.json"),pretty=TRUE)
 
-  # Move to the output tab
-  outputs_button <- app$findElement(xpath = "//*//a[@data-value='TAB_OUTPUTS']")
-  outputs_button$click()
-  app$expectUpdate(output = "MODEL_STATE_FILE", timeout = 10e3)
-  Sys.sleep(1)
-  # Screenshot not take as the displayed value contains timestamp and other identifiers
-  # app$takeScreenshot(file = file.path(save_dir,paste0(name,current),"004.png"))
+# Move to the run model tab
+run_tab <- app$findElement(xpath = "//*//a[@data-value='TAB_RUN']")
+run_tab$click()
+app$expectUpdate(output = "CAPTURED_SOURCE", timeout = 10e3)
+Sys.sleep(1)
 
-  # Clean the results displayed in the browser (remove the identifiers)
-  output <- app$getAllValues()
-  output$output <- lapply(output$output,removeDates)
-  output$output <- lapply(output$output,removeLogs)
-  output$output$SCRIPT_NAME <- NULL
-  jsonlite::write_json(output, path = file.path(save_dir,paste0(name,current),"004.json"),pretty=TRUE)
+# Clean the results displayed in the browser (remove the identifiers)
+output <- app$getAllValues()
+output$output$SCRIPT_NAME <- NULL
+app$takeScreenshot(file = file.path(save_dir,"002.png"))
+jsonlite::write_json(output, path = file.path(save_dir,"002.json"),pretty=TRUE)
 
-} else {
-  dir.create(file.path(save_dir,paste0(name,expected)))
+# Run the model
+run_model_script_button <- app$findElement(xpath = "//*[@id='RUN_MODEL_BUTTON']")
+run_model_script_button$click()
 
-  # Find and press select button
-  select_button <- app$findElement(xpath = "//*[@id='SELECT_RUN_SCRIPT_BUTTON']")
-  select_button$click()
-
-  # Select run_model.R
-  dir_file <- app$findElements(xpath = "//*//div[contains(@class,'sF-file')]//*//div[contains(string(),'run_model.R')]")
-  getname <- function(divclass){
-    return(divclass$getText())
-  }
-  foldernames <- sapply(dir_file,getname)
-  index <- match("run_model.R",foldernames)
-  run_model_file <- dir_file[[index]]
-  run_model_file$click()
-  select_button <- app$findElement(xpath = "//*[@id='sF-selectButton']")
-  select_button$click()
-  app$expectUpdate(output = "SCRIPT_NAME", timeout = 10e3) # Monitor that the run_model.R is loaded completely
-  Sys.sleep(1)
-  # Clean the results displayed in the browser (remove the identifiers)
-  app$takeScreenshot(file = file.path(save_dir,paste0(name,expected),"001.png"))
-  output <- app$getAllValues()
-  output$output$SCRIPT_NAME <- NULL
-  jsonlite::write_json(output, path = file.path(save_dir,paste0(name,expected),"001.json"),pretty=TRUE)
-
-  # Move to the run model tab
-  run_button <- app$findElement(xpath = "//*//a[@data-value='TAB_RUN']")
-  run_button$click()
-  app$expectUpdate(output = "CAPTURED_SOURCE", timeout = 10e3)
-  Sys.sleep(1)
-  app$takeScreenshot(file = file.path(save_dir,paste0(name,expected),"002.png"))
-
-  # Clean the results displayed in the browser (remove the identifiers)
-  output <- app$getAllValues()
-  output$output$SCRIPT_NAME <- NULL
-  jsonlite::write_json(output, path = file.path(save_dir,paste0(name,expected),"002.json"),pretty=TRUE)
-
-  # Run the model
+# FIXME: if the script stops, the run_model_script_button will still not be enabled
+while(!run_model_script_button$isEnabled()) {
   Sys.sleep(30)
-  run_model_script_button <- app$findElement(xpath = "//*[@id='RUN_MODEL_BUTTON']")
-  run_model_script_button$click()
-  while(!run_model_script_button$isEnabled()) {
-    Sys.sleep(30)
-    print(paste0("Running Model: ",!run_model_script_button$isEnabled()))
-    print(paste0("Time: ", Sys.time()))
-  }
-  Sys.sleep(1)
-  # Screenshot not take as the displayed value contains timestamp and other identifiers
-  # app$takeScreenshot(file = file.path(save_dir,paste0(name,expected),"003.png"))
+  print(paste0("Running Model: ",!run_model_script_button$isEnabled()))
+  print(paste0("Time: ", Sys.time()))
+}
+Sys.sleep(1)
 
-  # Clean the results displayed in the browser (remove the identifiers)
-  output <- app$getAllValues()
-  output$output <- lapply(output$output,removeDates)
-  output$output$SCRIPT_NAME <- NULL
-  jsonlite::write_json(output, path = file.path(save_dir,paste0(name,expected),"003.json"),pretty=TRUE)
+# Screenshot not take as the displayed value contains timestamp and other identifiers
+# app$takeScreenshot(file = file.path(save_dir,"003.png"))
 
-  # Move to the output tab
-  outputs_button <- app$findElement(xpath = "//*//a[@data-value='TAB_OUTPUTS']")
-  outputs_button$click()
-  app$expectUpdate(output = "MODEL_STATE_FILE", timeout = 10e3)
-  Sys.sleep(1)
+# Clean the results displayed in the browser (remove the identifiers)
+output <- app$getAllValues()
+output$output <- lapply(output$output,removeDates)
+output$output$SCRIPT_NAME <- NULL
+jsonlite::write_json(output, path = file.path(save_dir,"003.json"),pretty=TRUE)
 
-  # Screenshot not take as the displayed value contains timestamp and other identifiers
-  # app$takeScreenshot(file = file.path(save_dir,paste0(name,expected),"004.png"))
+# Move to the output tab
+outputs_button <- app$findElement(xpath = "//*//a[@data-value='TAB_OUTPUTS']")
+outputs_button$click()
+app$expectUpdate(output = "MODEL_STATE_FILE", timeout = 10e3)
+Sys.sleep(1)
+# Screenshot not take as the displayed value contains timestamp and other identifiers
+# app$takeScreenshot(file = file.path(save_dir,"004.png"))
 
-  # Clean the results displayed in the browser (remove the identifiers)
-  output <- app$getAllValues()
-  output$output <- lapply(output$output,removeDates)
-  output$output <- lapply(output$output,removeLogs)
-  output$output$SCRIPT_NAME <- NULL
-  jsonlite::write_json(output, path = file.path(save_dir,paste0(name,expected),"004.json"),pretty=TRUE)
-} # End check for directory
+# Clean the results displayed in the browser (remove the identifiers)
+output <- app$getAllValues()
+output$output <- lapply(output$output,removeDates)
+output$output <- lapply(output$output,removeLogs)
+output$output$SCRIPT_NAME <- NULL
+jsonlite::write_json(output, path = file.path(save_dir,"004.json"),pretty=TRUE)
 
 #=============================
 #SECTION 3: COMPARE RESULTS
@@ -208,7 +145,6 @@ if(dir.exists(file.path(save_dir,paste0(name,expected))) & !createExpectedResult
 if(!createExpectedResults){
   snapshotCompare(app$getAppDir(),name)
 }
-
 
 #=============================
 #SECTION 4: STOP THE APP

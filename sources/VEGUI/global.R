@@ -86,8 +86,8 @@ myFileTypes_ls <- list(
 )
 
 # Get the volumes of local drive
+# Changes to this line may affect tests. See run_vegui_test.R
 volumeRoots = c('working directory' = '.', 'models' = '../models', 'VisionEval' = '../..', getVolumes("")())
-# volumeRoots = getVolumes("")()
 
 # Define utility functions ----------------------------------------
 

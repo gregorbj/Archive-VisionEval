@@ -631,7 +631,7 @@ server <- function(input, output, session) {
     id = SELECT_RUN_SCRIPT_BUTTON,
     session = session,
     roots = volumeRoots,
-    defaultRoot = "VisionEval",
+    #defaultRoot = "VisionEval",
     filetypes = c("R")
   )
 

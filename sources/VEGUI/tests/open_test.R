@@ -16,11 +16,16 @@ if(!exists("createExpectedResults")){
 }
 
 # Start the browser
-suppressWarnings(app <- ShinyDriver$new("."))
+suppressWarnings(
+  app <- ShinyDriver$new(".")
+)
 
 name <- "open_test"
-tests_dir <- file.path(app$getAppDir(),"tests")
-tests_dir <- normalizePath(tests_dir)
+
+if ( !exists(tests_dir) ){
+  tests_dir <- file.path(app$getAppDir(),"tests")
+  tests_dir <- normalizePath(tests_dir)
+}
 
 # Directory name to store the results
 if ( createExpectedResults ){
@@ -42,6 +47,7 @@ if(!dir.exists(save_dir)){
 #===========================
 
 # Take the screenshot of the VEGUI
+Sys.sleep(time = 5) # Give the app time to hide tabs etc.
 app$takeScreenshot(file = file.path(save_dir, "001.png"))
 
 # Take all the values displayed in the browser
