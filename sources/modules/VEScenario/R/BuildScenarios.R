@@ -104,7 +104,7 @@ BuildScenariosSpecifications <- list(
 #' }
 #' @source BuildScenarios.R script.
 "BuildScenariosSpecifications"
-devtools::use_data(BuildScenariosSpecifications, overwrite = TRUE)
+usethis::use_data(BuildScenariosSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -127,6 +127,7 @@ devtools::use_data(BuildScenariosSpecifications, overwrite = TRUE)
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name BuildScenarios
 #' @export
 BuildScenarios <- function(L){
   # Setup

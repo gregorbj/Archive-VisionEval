@@ -99,6 +99,518 @@ VehOwnModels_ls$NonMetro$Gt1Veh <- list(
   Drv3Plus = "-1.89372144360687 * Intercept + 1.03322804417105e-05 * Income + -0.000128048150374047 * Htppopdn"
 )
 
+VehOwnModels_ls$Lt1Prop <- list(Region = c("Metro", "Metro", "Metro", "Metro", "Metro", "Metro",
+                                           "Metro", "Metro", "Metro", "Metro", "Metro", "Metro",
+                                           "Metro", "Metro", "Metro", "Metro", "Metro", "Metro",
+                                           "Metro", "Metro", "Metro", "Metro", "Metro", "Metro",
+                                           "Metro", "Metro", "Metro", "Metro", "Metro", "Metro",
+                                           "Metro", "Metro", "Metro", "Metro", "Metro", "Metro",
+                                           "Metro", "Metro", "Metro", "Metro", "Metro", "Metro",
+                                           "Metro", "Metro", "Metro", "Metro", "Metro", "Metro",
+                                           "Metro", "Metro", "Metro", "Metro", "Metro", "Metro",
+                                           "Metro", "Metro", "Metro", "Metro", "Metro", "Metro",
+                                           "Metro", "Metro", "Metro", "Metro", "Metro", "Metro",
+                                           "Metro", "Metro", "Metro", "Metro", "Metro", "Metro",
+                                           "Metro", "Metro", "Metro", "Metro", "Metro", "Metro",
+                                           "Metro", "Metro", "Metro", "NonMetro", "NonMetro",
+                                           "NonMetro", "NonMetro", "NonMetro", "NonMetro", "NonMetro",
+                                           "NonMetro", "NonMetro", "NonMetro", "NonMetro", "NonMetro",
+                                           "NonMetro", "NonMetro", "NonMetro", "NonMetro", "NonMetro",
+                                           "NonMetro", "NonMetro", "NonMetro", "NonMetro", "NonMetro",
+                                           "NonMetro", "NonMetro", "NonMetro", "NonMetro", "NonMetro",
+                                           "NonMetro", "NonMetro", "NonMetro", "NonMetro", "NonMetro",
+                                           "NonMetro", "NonMetro", "NonMetro", "NonMetro", "NonMetro",
+                                           "NonMetro", "NonMetro", "NonMetro", "NonMetro", "NonMetro",
+                                           "NonMetro", "NonMetro", "NonMetro", "NonMetro", "NonMetro",
+                                           "NonMetro", "NonMetro", "NonMetro", "NonMetro", "NonMetro",
+                                           "NonMetro", "NonMetro", "NonMetro", "NonMetro", "NonMetro",
+                                           "NonMetro", "NonMetro", "NonMetro", "NonMetro", "NonMetro",
+                                           "NonMetro", "NonMetro", "NonMetro", "NonMetro", "NonMetro",
+                                           "NonMetro", "NonMetro", "NonMetro", "NonMetro", "NonMetro",
+                                           "NonMetro", "NonMetro", "NonMetro", "NonMetro", "NonMetro",
+                                           "NonMetro", "NonMetro", "NonMetro", "NonMetro"),
+                                DrvAgePop = c(2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4,
+                                              4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6,
+                                              6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 8, 8,
+                                              8, 8, 8, 8, 8, 8, 9, 9, 9, 9, 9, 9, 9, 9, 9, 10, 10, 10,
+                                              10, 10, 10, 10, 10, 10, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3,
+                                              3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5,
+                                              5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7,
+                                              7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8, 8, 8, 9, 9, 9, 9, 9,
+                                              9, 9, 9, 9, 10, 10, 10, 10, 10, 10, 10, 10, 10),
+                                NumVeh = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2,
+                                           3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4,
+                                           5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6,
+                                           7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8,
+                                           9, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1,
+                                           2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3,
+                                           4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5,
+                                           6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7,
+                                           8, 9),
+                                Prob = c(1, 0, 0, 0, 0, 0, 0, 0, 0, 0.183231171, 0.816768829, 0, 0, 0,
+                                         0, 0, 0, 0, 0.12420466, 0.268025187, 0.607770154, 0, 0, 0, 0,
+                                         0, 0, 0.096819919, 0.201427563, 0.339206509, 0.36254601, 0, 0,
+                                         0, 0, 0, 0.092307692, 0.131405437, 0.263930806, 0.390372785,
+                                         0.12198328, 0, 0, 0, 0, 0, 0.112268915, 0.156849382, 0.309075249,
+                                         0.421806454, 0, 0, 0, 0, 0, 0, 0.117035892, 0.161650327,
+                                         0.314736954, 0.406576827, 0, 0, 0, 0, 0, 0, 0.120445326,
+                                         0.165084054, 0.318786314, 0.395684306, 0, 0, 0, 0, 0, 0,
+                                         0.123004839, 0.167661805, 0.321826229, 0.387507127, 0, 1, 0, 0,
+                                         0, 0, 0, 0, 0, 0, 0.16946333, 0.83053667, 0, 0, 0, 0, 0, 0, 0,
+                                         0.136026313, 0.256328159, 0.607645528, 0, 0, 0, 0, 0, 0,
+                                         0.039726027, 0.233880892, 0.34112275, 0.385270332, 0, 0, 0, 0, 0,
+                                         0.04, 0.056, 0.323977401, 0.416610169, 0.163412429, 0, 0, 0, 0,
+                                         0, 0.050882254, 0.069963099, 0.400994203, 0.478160444, 0, 0, 0,
+                                         0, 0, 0, 0.052920317, 0.071971631, 0.410114516, 0.464993537, 0, 0,
+                                         0, 0, 0, 0, 0.054372218, 0.073402494, 0.41661176, 0.455613528, 0,
+                                         0, 0, 0, 0, 0, 0.055459041, 0.074473569, 0.421475284, 0.448592106, 0))
+
+
+VehOwnModels_ls$Gt1Prop <- list(Region = c("Metro", "Metro", "Metro", "Metro", "Metro", "Metro", "Metro",
+                                           "Metro", "Metro", "Metro", "Metro", "Metro", "Metro", "Metro",
+                                           "Metro", "Metro", "Metro", "Metro", "Metro", "Metro", "Metro",
+                                           "Metro", "Metro", "Metro", "Metro", "Metro", "Metro", "Metro",
+                                           "Metro", "Metro", "Metro", "Metro", "Metro", "Metro", "Metro",
+                                           "Metro", "Metro", "Metro", "Metro", "Metro", "Metro", "Metro",
+                                           "Metro", "Metro", "Metro", "Metro", "Metro", "Metro", "Metro",
+                                           "Metro", "Metro", "Metro", "Metro", "Metro", "Metro", "Metro",
+                                           "Metro", "Metro", "Metro", "Metro", "Metro", "Metro", "Metro",
+                                           "Metro", "Metro", "Metro", "Metro", "Metro", "Metro", "Metro",
+                                           "Metro", "Metro", "Metro", "Metro", "Metro", "Metro", "Metro",
+                                           "Metro", "Metro", "Metro", "Metro", "Metro", "Metro", "Metro",
+                                           "Metro", "Metro", "Metro", "Metro", "Metro", "Metro", "Metro",
+                                           "Metro", "Metro", "Metro", "Metro", "Metro", "Metro", "Metro",
+                                           "Metro", "Metro", "Metro", "Metro", "Metro", "Metro", "Metro",
+                                           "Metro", "Metro", "Metro", "Metro", "Metro", "Metro", "Metro",
+                                           "Metro", "Metro", "Metro", "Metro", "Metro", "Metro", "Metro",
+                                           "Metro", "Metro", "Metro", "Metro", "Metro", "Metro", "Metro",
+                                           "Metro", "Metro", "Metro", "Metro", "Metro", "Metro", "Metro",
+                                           "Metro", "Metro", "Metro", "Metro", "Metro", "Metro", "Metro",
+                                           "Metro", "Metro", "Metro", "Metro", "Metro", "Metro", "Metro",
+                                           "Metro", "Metro", "Metro", "NonMetro", "NonMetro", "NonMetro",
+                                           "NonMetro", "NonMetro", "NonMetro", "NonMetro", "NonMetro",
+                                           "NonMetro", "NonMetro", "NonMetro", "NonMetro", "NonMetro",
+                                           "NonMetro", "NonMetro", "NonMetro", "NonMetro", "NonMetro",
+                                           "NonMetro", "NonMetro", "NonMetro", "NonMetro", "NonMetro",
+                                           "NonMetro", "NonMetro", "NonMetro", "NonMetro", "NonMetro",
+                                           "NonMetro", "NonMetro", "NonMetro", "NonMetro", "NonMetro",
+                                           "NonMetro", "NonMetro", "NonMetro", "NonMetro", "NonMetro",
+                                           "NonMetro", "NonMetro", "NonMetro", "NonMetro", "NonMetro",
+                                           "NonMetro", "NonMetro", "NonMetro", "NonMetro", "NonMetro",
+                                           "NonMetro", "NonMetro", "NonMetro", "NonMetro", "NonMetro",
+                                           "NonMetro", "NonMetro", "NonMetro", "NonMetro", "NonMetro",
+                                           "NonMetro", "NonMetro", "NonMetro", "NonMetro", "NonMetro",
+                                           "NonMetro", "NonMetro", "NonMetro", "NonMetro", "NonMetro",
+                                           "NonMetro", "NonMetro", "NonMetro", "NonMetro", "NonMetro",
+                                           "NonMetro", "NonMetro", "NonMetro", "NonMetro", "NonMetro",
+                                           "NonMetro", "NonMetro", "NonMetro", "NonMetro", "NonMetro",
+                                           "NonMetro", "NonMetro", "NonMetro", "NonMetro", "NonMetro",
+                                           "NonMetro", "NonMetro", "NonMetro", "NonMetro", "NonMetro",
+                                           "NonMetro", "NonMetro", "NonMetro", "NonMetro", "NonMetro",
+                                           "NonMetro", "NonMetro", "NonMetro", "NonMetro", "NonMetro",
+                                           "NonMetro", "NonMetro", "NonMetro", "NonMetro", "NonMetro",
+                                           "NonMetro", "NonMetro", "NonMetro", "NonMetro", "NonMetro",
+                                           "NonMetro", "NonMetro", "NonMetro", "NonMetro", "NonMetro",
+                                           "NonMetro", "NonMetro", "NonMetro", "NonMetro", "NonMetro",
+                                           "NonMetro", "NonMetro", "NonMetro", "NonMetro", "NonMetro",
+                                           "NonMetro", "NonMetro", "NonMetro", "NonMetro", "NonMetro",
+                                           "NonMetro", "NonMetro", "NonMetro", "NonMetro", "NonMetro",
+                                           "NonMetro", "NonMetro", "NonMetro", "NonMetro", "NonMetro",
+                                           "NonMetro", "NonMetro", "NonMetro", "NonMetro", "NonMetro",
+                                           "NonMetro", "NonMetro"),
+                                DrvAgePop = c(1, 1, 1, 1, 1,1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2,
+                                              2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+                                              3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
+                                              5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6,
+                                              6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+                                              7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+                                              9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 10, 10, 10, 10,
+                                              10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 1, 1, 1, 1, 1, 1,
+                                              1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+                                              2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4,
+                                              4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,5, 5, 5, 5, 5, 5, 5, 5, 5,
+                                              5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+                                              7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8,
+                                              8, 8, 8, 8, 8, 8, 8, 8, 8, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
+                                              9, 9, 9, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
+                                              10, 10),
+                                NumVeh = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 1, 2, 3, 4, 5,
+                                           6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+                                           11, 12, 13, 14, 15, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
+                                           15, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 1, 2, 3, 4,
+                                           5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+                                           10, 11, 12, 13, 14, 15, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,
+                                           14, 15, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 1, 2, 3,
+                                           4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+                                           10, 11, 12, 13, 14, 15, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,
+                                           14, 15, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 1, 2, 3,
+                                           4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 1, 2, 3, 4, 5, 6, 7, 8,
+                                           9, 10, 11, 12, 13, 14, 15, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
+                                           13, 14, 15, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 1,
+                                           2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 1, 2, 3, 4, 5, 6,
+                                           7, 8, 9, 10, 11, 12, 13, 14, 15, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
+                                           12, 13, 14, 15),
+                                Prob = c(0, 0.775279374, 0.162294427, 0.052671587, 0.005884979, 0.003869632, 0,
+                                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.757435732, 0.171245803, 0.047837229,
+                                         0.018166133, 0.005315104, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.739651341,
+                                         0.180167454, 0.043018924, 0.030406505, 0.006755776, 0, 0, 0, 0, 0, 0,
+                                         0, 0, 0, 0, 0, 0.721925907, 0.18905953, 0.038216592, 0.042606299,
+                                         0.008191672, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.704259138, 0.197922177,
+                                         0.033430153, 0.054765717, 0.009622816, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                         0.686650742, 0.206755539, 0.02865953, 0.066884958, 0.011049231, 0, 0,
+                                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0.669100431, 0.215559764, 0.023904644,
+                                         0.078964221, 0.01247094, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                         0.651607918, 0.224334993, 0.019165417, 0.091003704, 0.013887968, 0, 0, 0,
+                                         0, 0, 0, 0, 0, 0, 0, 0, 0.634172918, 0.233081371, 0.014441772,
+                                         0.103003603, 0.015300337, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.616795147,
+                                         0.24179904, 0.009733631, 0.114964113, 0.016708069, 0, 0.730629429,
+                                         0.19399416, 0.046990461, 0.018239586, 0.010146364, 0, 0, 0, 0, 0, 0,
+                                         0, 0, 0, 0, 0, 0.705375095, 0.197029044, 0.066418387, 0.021235067,
+                                         0.009942406, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.679876149, 0.200093323,
+                                         0.086034492, 0.024259563, 0.009736473, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                         0.654129018, 0.203187428, 0.105841523, 0.027313496, 0.009528535, 0, 0,
+                                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0.628130062, 0.206311795, 0.12584228, 0.0303973,
+                                         0.009318563, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.601875569, 0.20946687,
+                                         0.14603962, 0.033511413, 0.009106528, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                         0.575361751, 0.21265311, 0.166436456, 0.036656285, 0.008892398, 0, 0,
+                                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0.548584749, 0.215870977, 0.187035758,
+                                         0.039832374, 0.008676143, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.521540622,
+                                         0.219120945, 0.207840555, 0.043040148, 0.00845773, 0, 0, 0, 0, 0, 0, 0,
+                                         0, 0, 0, 0, 0.494225356, 0.222403496, 0.228853938, 0.046280082,
+                                         0.008237128))
+
+VehOwnModels_ls$VehAgeCumProp <- list(
+  VehAge = c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+              25, 26, 27, 28, 29, 30, 31, 32),
+  AutoCumProp = c(0.00724546108586627, 0.0633739867828944, 0.119650972204074, 0.17611122166644,
+                  0.232667582964325, 0.289199954803858, 0.345617046159784, 0.401737816752557,
+                  0.457237242995719, 0.511652012961637, 0.564438982852735, 0.615095740239273,
+                  0.663196422706258, 0.708413717884405, 0.750527299266295, 0.789346447215604,
+                  0.824733327139707, 0.856591128291726, 0.884862169633443, 0.909512678464861,
+                  0.930571533414323, 0.948161069415711, 0.962492561634571, 0.973843661565155,
+                  0.982540832889983, 0.98894634671769, 0.993442489536914, 0.996413562605098,
+                  0.998226715786565, 0.999219121039642, 0.999694273408949, 0.999897830319654,
+                  1),
+  LtTruckCumProp = c(0, 0.048277482736719, 0.107670020148356, 0.167527807358529, 0.227700646451007,
+                     0.287846652232274, 0.347541228736457, 0.406363143639488, 0.463882006009692,
+                     0.519622882139033, 0.573035876335912, 0.62356258341566, 0.670766808493439,
+                     0.71433657362547, 0.754117353917857, 0.790045820369363, 0.82214023489062,
+                     0.850562311494895, 0.875613461230561, 0.897628382073419, 0.916911315076227,
+                     0.933705656901347, 0.948213197450025, 0.960581641231327, 0.970894255427227,
+                     0.979229359810599, 0.985708983591426, 0.99053128989766, 0.993954610499349,
+                     0.996282138540566, 0.997858849151264, 0.99901290898164, 1))
+
+VehOwnModels_ls$VehAgeTypeProp <- list(
+  VehAge = c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+                       21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 0, 1, 2, 3, 4, 5, 6, 7, 8,
+                       9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27,
+                       28, 29, 30, 31, 32, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
+                       16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 0, 1,
+                       2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
+                       23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+                       11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+                       30, 31, 32, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
+                       18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 0, 1, 2, 3, 4,
+                       5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+                       25, 26, 27, 28, 29, 30, 31, 32, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
+                       13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
+                        32, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+                       20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 0, 1, 2, 3, 4, 5, 6, 7,
+                       8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26,
+                       27, 28, 29, 30, 31, 32, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
+                       15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 0,
+                       1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
+                       22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32),
+                     IncGrp = c("0to20K", "0to20K", "0to20K", "0to20K", "0to20K", "0to20K", "0to20K",
+                                "0to20K", "0to20K", "0to20K", "0to20K", "0to20K", "0to20K", "0to20K",
+                                "0to20K", "0to20K", "0to20K", "0to20K", "0to20K", "0to20K", "0to20K",
+                                "0to20K", "0to20K", "0to20K", "0to20K", "0to20K", "0to20K", "0to20K",
+                                 "0to20K", "0to20K", "0to20K", "0to20K", "0to20K", "20Kto40K",
+                                "20Kto40K", "20Kto40K", "20Kto40K", "20Kto40K", "20Kto40K", "20Kto40K",
+                                "20Kto40K", "20Kto40K", "20Kto40K", "20Kto40K", "20Kto40K", "20Kto40K",
+                                "20Kto40K", "20Kto40K", "20Kto40K", "20Kto40K", "20Kto40K", "20Kto40K",
+                                "20Kto40K", "20Kto40K", "20Kto40K", "20Kto40K", "20Kto40K", "20Kto40K",
+                                "20Kto40K", "20Kto40K", "20Kto40K", "20Kto40K", "20Kto40K", "20Kto40K",
+                                "20Kto40K", "20Kto40K", "40Kto60K", "40Kto60K", "40Kto60K", "40Kto60K",
+                                "40Kto60K", "40Kto60K", "40Kto60K", "40Kto60K", "40Kto60K", "40Kto60K",
+                                "40Kto60K", "40Kto60K", "40Kto60K", "40Kto60K", "40Kto60K", "40Kto60K",
+                                "40Kto60K", "40Kto60K", "40Kto60K", "40Kto60K", "40Kto60K", "40Kto60K",
+                                "40Kto60K", "40Kto60K", "40Kto60K", "40Kto60K", "40Kto60K", "40Kto60K",
+                                "40Kto60K", "40Kto60K", "40Kto60K", "40Kto60K", "40Kto60K", "60Kto80K",
+                                "60Kto80K", "60Kto80K", "60Kto80K", "60Kto80K", "60Kto80K", "60Kto80K",
+                                "60Kto80K", "60Kto80K", "60Kto80K", "60Kto80K", "60Kto80K", "60Kto80K",
+                                "60Kto80K", "60Kto80K", "60Kto80K", "60Kto80K", "60Kto80K", "60Kto80K",
+                                "60Kto80K", "60Kto80K", "60Kto80K", "60Kto80K", "60Kto80K", "60Kto80K",
+                                "60Kto80K", "60Kto80K", "60Kto80K", "60Kto80K", "60Kto80K", "60Kto80K",
+                                "60Kto80K", "60Kto80K", "80Kto100K", "80Kto100K", "80Kto100K", "80Kto100K",
+                                "80Kto100K", "80Kto100K", "80Kto100K", "80Kto100K", "80Kto100K", "80Kto100K",
+                                "80Kto100K", "80Kto100K", "80Kto100K", "80Kto100K", "80Kto100K", "80Kto100K",
+                                "80Kto100K", "80Kto100K", "80Kto100K", "80Kto100K", "80Kto100K", "80Kto100K",
+                                "80Kto100K", "80Kto100K", "80Kto100K", "80Kto100K", "80Kto100K", "80Kto100K",
+                                "80Kto100K", "80Kto100K", "80Kto100K", "80Kto100K", "80Kto100K", "100KPlus",
+                                "100KPlus", "100KPlus", "100KPlus", "100KPlus", "100KPlus", "100KPlus",
+                                "100KPlus", "100KPlus", "100KPlus", "100KPlus", "100KPlus", "100KPlus",
+                                "100KPlus", "100KPlus", "100KPlus", "100KPlus", "100KPlus", "100KPlus",
+                                "100KPlus", "100KPlus", "100KPlus", "100KPlus", "100KPlus", "100KPlus",
+                                "100KPlus", "100KPlus", "100KPlus", "100KPlus", "100KPlus", "100KPlus",
+                                "100KPlus", "100KPlus", "0to20K", "0to20K", "0to20K", "0to20K", "0to20K",
+                                "0to20K", "0to20K", "0to20K", "0to20K", "0to20K", "0to20K", "0to20K",
+                                "0to20K", "0to20K", "0to20K", "0to20K", "0to20K", "0to20K", "0to20K",
+                                "0to20K", "0to20K", "0to20K", "0to20K", "0to20K", "0to20K", "0to20K",
+                                "0to20K", "0to20K", "0to20K", "0to20K", "0to20K", "0to20K", "0to20K",
+                                "20Kto40K", "20Kto40K", "20Kto40K", "20Kto40K", "20Kto40K", "20Kto40K",
+                                "20Kto40K", "20Kto40K", "20Kto40K", "20Kto40K", "20Kto40K", "20Kto40K",
+                                "20Kto40K", "20Kto40K", "20Kto40K", "20Kto40K", "20Kto40K", "20Kto40K",
+                                "20Kto40K", "20Kto40K", "20Kto40K", "20Kto40K", "20Kto40K", "20Kto40K",
+                                "20Kto40K", "20Kto40K", "20Kto40K", "20Kto40K", "20Kto40K", "20Kto40K",
+                                "20Kto40K", "20Kto40K", "20Kto40K", "40Kto60K", "40Kto60K", "40Kto60K",
+                                "40Kto60K", "40Kto60K", "40Kto60K", "40Kto60K", "40Kto60K", "40Kto60K",
+                                "40Kto60K", "40Kto60K", "40Kto60K", "40Kto60K", "40Kto60K", "40Kto60K",
+                                "40Kto60K", "40Kto60K", "40Kto60K", "40Kto60K", "40Kto60K", "40Kto60K",
+                                "40Kto60K", "40Kto60K", "40Kto60K", "40Kto60K", "40Kto60K", "40Kto60K",
+                                "40Kto60K", "40Kto60K", "40Kto60K", "40Kto60K", "40Kto60K", "40Kto60K",
+                                "60Kto80K", "60Kto80K", "60Kto80K", "60Kto80K", "60Kto80K", "60Kto80K",
+                                "60Kto80K", "60Kto80K", "60Kto80K", "60Kto80K", "60Kto80K", "60Kto80K",
+                                "60Kto80K", "60Kto80K", "60Kto80K", "60Kto80K", "60Kto80K", "60Kto80K",
+                                "60Kto80K", "60Kto80K", "60Kto80K", "60Kto80K", "60Kto80K", "60Kto80K",
+                                "60Kto80K", "60Kto80K", "60Kto80K", "60Kto80K", "60Kto80K", "60Kto80K",
+                                "60Kto80K", "60Kto80K", "60Kto80K", "80Kto100K", "80Kto100K", "80Kto100K",
+                                "80Kto100K", "80Kto100K", "80Kto100K", "80Kto100K", "80Kto100K", "80Kto100K",
+                                "80Kto100K", "80Kto100K", "80Kto100K", "80Kto100K", "80Kto100K", "80Kto100K",
+                                "80Kto100K", "80Kto100K", "80Kto100K", "80Kto100K", "80Kto100K", "80Kto100K",
+                                "80Kto100K", "80Kto100K", "80Kto100K", "80Kto100K", "80Kto100K", "80Kto100K",
+                                "80Kto100K", "80Kto100K", "80Kto100K", "80Kto100K", "80Kto100K", "80Kto100K",
+                                "100KPlus", "100KPlus", "100KPlus", "100KPlus", "100KPlus", "100KPlus",
+                                "100KPlus", "100KPlus", "100KPlus", "100KPlus", "100KPlus", "100KPlus",
+                                "100KPlus", "100KPlus", "100KPlus", "100KPlus", "100KPlus", "100KPlus",
+                                "100KPlus", "100KPlus", "100KPlus", "100KPlus", "100KPlus", "100KPlus",
+                                "100KPlus", "100KPlus", "100KPlus", "100KPlus", "100KPlus", "100KPlus",
+                                "100KPlus", "100KPlus", "100KPlus"),
+                     VehType = c("Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto",
+                                 "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto",
+                                 "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto",
+                                 "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto",
+                                 "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto",
+                                 "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto",
+                                 "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto",
+                                 "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto",
+                                 "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto",
+                                 "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto",
+                                 "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto",
+                                 "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto",
+                                 "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto",
+                                 "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto",
+                                 "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto",
+                                 "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto",
+                                 "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto",
+                                 "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto",
+                                 "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto",
+                                 "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto",
+                                 "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto",
+                                 "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto",
+                                 "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck",
+                                 "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck",
+                                 "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck",
+                                 "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck",
+                                 "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck",
+                                 "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck",
+                                 "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck",
+                                 "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck",
+                                 "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck",
+                                 "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck",
+                                 "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck",
+                                 "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck",
+                                 "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck",
+                                 "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck",
+                                 "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck",
+                                 "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck",
+                                 "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck",
+                                 "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck",
+                                 "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck",
+                                 "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck",
+                                 "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck",
+                                 "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck",
+                                 "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck",
+                                 "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck",
+                                 "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck",
+                                 "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck",
+                                 "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck",
+                                 "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck",
+                                 "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck",
+                                 "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck",
+                                 "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck",
+                                 "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck",
+                                 "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck", "LtTruck"),
+                     Prop = c(0.000689072418377973, 0.00544718672262607, 0.005573820659, 0.00585448452531851,
+                              0.00622764779157281, 0.00663688404144811, 0.00707275808142761, 0.00753381782978767,
+                              0.00802094057368739, 0.00852243254487315, 0.00899898461766469, 0.00939565546417493,
+                              0.00965283760217326, 0.00972982281734327, 0.00961575904600694, 0.00931081773253509,
+                              0.00884747097809898, 0.00826948080813357, 0.00761973701780499, 0.00694496549095473,
+                              0.0062614006265815, 0.00554210815999331, 0.00473226538269605, 0.00379957776442596,
+                              0.00279556279083542, 0.0018549655573974, 0.00111250396673203, 0.000615524709362564,
+                              0.000327306801354976, 0.000151632625162581, 8.44419095554236e-05,
+                              3.90822402062035e-05, 2.15289324199488e-05, 0.00154477949197307, 0.0119987272716887,
+                              0.0120600755118829, 0.0121646829184045, 0.0122733615086917,
+                              0.0123779523758167, 0.0125107524604092, 0.0126924853138579,
+                              0.0129240178443009, 0.0131728701987043, 0.0133690115413486,
+                              0.0134343150707507, 0.0132989312713844, 0.0129288951138399,
+                              0.0123322075873495, 0.0115264157581094, 0.0105562553545474,
+                              0.00946996011443553, 0.00830690496406319, 0.00710811637147281,
+                              0.00591167080366636, 0.00476543997464743, 0.00373282850817056,
+                              0.00287377764242896, 0.00221187342627564, 0.00171484583605701,
+                              0.00131690805009472, 0.000966385624679437, 0.00063560033659038,
+                              0.000313561345913695, 0.000163899715492605, 6.71530330193876e-05,
+                              3.1484585411017e-05, 0.0014644798767914, 0.0114933927882837,
+                              0.0116778235722275, 0.0120721385160842, 0.0125639651049267,
+                              0.0130264242861832, 0.0133703278273087, 0.013498895260568,
+                              0.0133439442312416, 0.0128939771165672, 0.0122025703260565,
+                              0.0113761102307059, 0.0105146070553252, 0.00968242909110126,
+                              0.00890220388122561, 0.00814868505520557, 0.00738623207838935,
+                              0.00657879516245823, 0.00570302755733387, 0.00476850085541675,
+                              0.00381884743407404, 0.00293037693692254, 0.00218749705203173,
+                              0.00163594775781987, 0.00125407757378175, 0.000974727158501654,
+                              0.000739376190271886, 0.000529056875051061, 0.000343368611644409,
+                              0.000173260045179539, 9.65481203738654e-05, 4.3329730301833e-05,
+                              2.2964896572695e-05, 0.00095417537936037, 0.00739518459593728,
+                              0.00741659342440686, 0.00744016137343708, 0.00744009365088951,
+                              0.00739962695884749, 0.00731008734034471, 0.00715166139179415,
+                              0.0069061326803548, 0.00656834630151501, 0.00615413299844917,
+                              0.00570133921654266, 0.00524858661736029, 0.0048254379474942,
+                              0.00444806762402621, 0.00411079009667912, 0.00379849897082272,
+                              0.00348539682537693, 0.0031401395345377, 0.00274094339102433,
+                              0.00227996792618167, 0.00177475062033578, 0.0012732143806921,
+                              0.000837570514917397, 0.000512673368711242, 0.000303525969365387,
+                              0.00018173024434768, 0.000111143512905326, 6.68194523435672e-05,
+                              3.30276458640684e-05, 1.85330500377375e-05, 8.46599671831481e-06,
+                              4.59293402964135e-06, 0.00106559084677346, 0.00821084871497576,
+                              0.00818777052670301, 0.00811076753095241, 0.00798350743039848,
+                              0.00782354863335691, 0.00763909953395199, 0.00740956224350541,
+                              0.00709949684423723, 0.00667771425731305, 0.00613737118201954,
+                              0.00550714773842063, 0.00483255530570131, 0.00416191162287883,
+                              0.00353630330958244, 0.00297960594794979, 0.00250487872305621,
+                              0.0021152748409312, 0.00180497501618103, 0.00156400598931214,
+                              0.00138303727359732, 0.00125318111310512, 0.00116072568039656,
+                              0.0010806589390157, 0.000980050017070183, 0.000834526539526742,
+                              0.00064711044025921, 0.000447898599864268, 0.000268568591526738,
+                              0.00012050860482331, 5.79458874188376e-05, 2.22645280338573e-05,
+                              9.78316728219075e-06, 0.00152736007753238, 0.0115831631604587,
+                              0.0113608799969323, 0.0108179945806139, 0.0100677681679991,
+                              0.00926792052077688, 0.00851405378515784, 0.00783433901695236,
+                              0.00720488754575223, 0.00657942635233526, 0.00592489960032226,
+                              0.00524219359475168, 0.00455317175975956, 0.00388880834088468,
+                              0.00327905154750631, 0.00274284603155715, 0.00229355682243919,
+                              0.00193890613349032, 0.00167888556238174, 0.00150532505468082,
+                              0.00140001207333737, 0.00133066209866674, 0.00125369100566968,
+                              0.00113018389787124, 0.000948730108133019, 0.000732390519008171,
+                              0.000520808229420525, 0.000343924963271416, 0.000208741011034989,
+                              0.000100417130507469, 5.37837458633503e-05, 2.32614140023132e-05,
+                              1.18151840190084e-05, 3.8077810976786e-06, 0.00203680796025813,
+                              0.00275317795045612, 0.00326530683967088, 0.00397157513355646,
+                              0.00478398402103242, 0.00562578617174339, 0.00642151401310924,
+                              0.00710516325352591, 0.0076233342504205, 0.00792887143290408,
+                              0.007991853586444, 0.00782057732263926, 0.00744897956546535,
+                              0.0069384929144641, 0.00635256579898413, 0.00575528039409075,
+                              0.00521584903924697, 0.00478705837160902, 0.00446912054264909,
+                              0.00429139585416747, 0.00412091585089795, 0.00386808048288927,
+                              0.00345176198581435, 0.00286804842828961, 0.00219838127364229,
+                              0.00155999682928675, 0.00104493105814636, 0.000682246486858844,
+                              0.000445389414575203, 0.000276111329793337, 0.000219845167876759,
+                              0.000195898059926785, 1.67697787762053e-05, 0.00823823412294483,
+                              0.010300971664961, 0.0106918924283215, 0.0111558219792024,
+                              0.0115993796398055, 0.0119732134422882, 0.0122666538757871,
+                              0.0124892234715882, 0.012651495759782, 0.0127416422251206,
+                              0.0127279556232876, 0.0125780562745348, 0.0122472574709892,
+                              0.0117097691886179, 0.0109505135974579, 0.00998951428102941,
+                              0.00890070291738937, 0.00777378297439372, 0.00665135320789356,
+                              0.00564931737119188, 0.00472017955740638, 0.0039339230683199,
+                              0.00330374055047746, 0.00279213830951485, 0.00234623900606025,
+                              0.00192976642506856, 0.00153410845928905, 0.00117132184677085,
+                              0.000850318166057567, 0.000552417062083501, 0.00044328212045939,
+                              0.00039111186736149, 2.00923576308709e-05, 0.0098793171804847,
+                              0.012367942720638, 0.0128660038266763, 0.0134475512060206,
+                              0.0139580538500004, 0.0142745175130101, 0.0143146686464285,
+                              0.014040433755922, 0.0134595627047652, 0.0126190358957302,
+                              0.0116122156983839, 0.0105648025041402, 0.00957377039163472,
+                              0.00869732826120665, 0.00793350361283225, 0.00724850032695823,
+                              0.00661719861511309, 0.00601869089817581, 0.00540510112388933,
+                              0.00481253409630462, 0.00415849490479005, 0.00348840357011957,
+                              0.00284905541470924, 0.00227298328162639, 0.00177168511507378,
+                              0.00134362941882846, 0.000985207340511637, 0.000694914991234696,
+                              0.000468501147337864, 0.000286178704138945, 0.000219746731405481,
+                              0.000184460511741507, 1.70607010745472e-05, 0.00819276784203495,
+                              0.0100092174833612, 0.00992300727401238, 0.00970331686957488,
+                              0.00932415307409835, 0.00879752021805181, 0.00817767595846068,
+                              0.00753052599411138, 0.00691171973868216, 0.00635526816232545,
+                              0.00587614779655191, 0.00547138548757523, 0.00511134981115888,
+                              0.00475963196140319, 0.00437824652465188, 0.00394591271909734,
+                              0.00347026255541421, 0.00297644154048512, 0.00248220808641527,
+                              0.00204001550926865, 0.00164981842675658, 0.00135437090720464,
+                              0.00115915903465269, 0.00103093837428987, 0.000922092365862811,
+                              0.000797487988842931, 0.000648350066112093, 0.000489900167404267,
+                              0.000342619762315172, 0.00021193520192232, 0.000162668441960372,
+                              0.000135540920990262, 1.87950455592698e-05, 0.00889839576809104,
+                              0.0107488052903663, 0.0104780582428893, 0.0100997389261222,
+                              0.00967880908873081, 0.00926822738690466, 0.00889538263699053,
+                              0.00853971499137703, 0.00814418924063882, 0.00764177299963316,
+                              0.00699402527205009, 0.00621411386607842, 0.0053481190553384,
+                              0.00446701784460852, 0.00363654594591005, 0.00290762509356047,
+                              0.00231000634693226, 0.00185784759491956, 0.00154003031112137,
+                              0.00134626194282073, 0.00121686199927685, 0.00111025914397686,
+                              0.000985817218466332, 0.00082703868799364, 0.000645472882576886,
+                              0.000466270144004584, 0.000312104302077052, 0.000194295685170027,
+                              0.000113223263092296, 5.97935561392987e-05, 4.06772446348605e-05,
+                              2.90490243861773e-05, 2.34641811423485e-05, 0.0110270613114104,
+                              0.0132064006401036, 0.0126274587818172, 0.0117887554163134,
+                              0.0107955628445567, 0.00974930775957254, 0.00874011644299915,
+                              0.00780803995343969, 0.00694500185418791, 0.00612107278163661,
+                              0.00531947460531039, 0.00455059332896231, 0.00383596022414174,
+                              0.00320459290626052, 0.00267352984678448, 0.00224440348938561,
+                              0.00190524483247748, 0.00163485157304456, 0.00139921904320423,
+                              0.00118571410990477, 0.00096505007551202, 0.000759393123547956,
+                              0.000598551063862228, 0.000495391155333501, 0.000434264139223431,
+                              0.000383577627813608, 0.000319583192778069, 0.000241241114014662,
+                              0.000162668586814352, 9.44685371321714e-05, 6.77263612231927e-05,
+                              5.09334702999125e-05))
+
+VehOwnModels_ls$VehicleMpgProp <- list(
+  Veh1Value = c(0.05, 0.1, 0.15, 0.2,
+                0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75,
+                0.8, 0.85, 0.9, 0.95, 1),
+  Veh2Value = c(0.05,
+                0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65,
+                0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1),
+  Veh3Value = c(0.05,
+                0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65,
+                0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1),
+  Veh4Value = c(0.05,
+                0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65,
+                0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1),
+  Veh5PlusValue = c(0.05,
+                    0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65,
+                    0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1),
+  Veh1Prob = c(0L,
+               0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L,
+               0L, 0L, 1L),
+  Veh2Prob = c(0.019114158,
+               0.022607435, 0.027814395, 0.034339573, 0.046401265, 0.054574216,
+               0.06380174, 0.071381492, 0.081531769, 0.078763511, 0.078104403,
+               0.08159768, 0.071315581, 0.06380174, 0.054640127, 0.046401265,
+               0.034273662, 0.027814395, 0.022673346, 0.019048247),
+  Veh3Prob = c(0.053135889, 0.05937863, 0.069541231,
+               0.088704994, 0.095092915, 0.100464576, 0.097996516, 0.094802555,
+               0.079268293, 0.065476189, 0.058217189, 0.042682927, 0.031504065,
+               0.022357724, 0.016114983, 0.011469222, 0.006097561, 0.004500581,
+               0.00261324, 0.00058072),
+  Veh4Prob = c(0.073743922,
+               0.102917342, 0.111426256, 0.129659643, 0.142625608, 0.112641815,
+               0.090356564, 0.070502431, 0.055510535, 0.036871963, 0.029578606,
+               0.016207455, 0.010534846, 0.007698541, 0.002025932, 0.006077796,
+               0.000810373, 0, 0.000405186, 0.000405186),
+  Veh5PlusProb = c(0.131578947, 0.148421053, 0.187368421,
+                   0.124210526, 0.128421053, 0.098947368, 0.074736842, 0.037894737,
+                   0.022105263, 0.021052631, 0.010526316, 0.002105263, 0.008421053,
+                   0.001052632, 0.003157895, 0, 0, 0, 0, 0))
+
 
 
 #Save the vehicle ownership model
@@ -117,7 +629,7 @@ VehOwnModels_ls$NonMetro$Gt1Veh <- list(
 #' }
 #' @source AssignVehicleFeatures.R script.
 "VehOwnModels_ls"
-devtools::use_data(VehOwnModels_ls, overwrite = TRUE)
+usethis::use_data(VehOwnModels_ls, overwrite = TRUE)
 
 # Model LtTrk Ownership
 #-------------------------
@@ -137,7 +649,7 @@ LtTruckModels_ls <- list(OwnModel = "-0.786596031795022 * Intercept + 5.00962836
 #' }
 #' @source AssignVehicleFeatures.R script.
 "LtTruckModels_ls"
-devtools::use_data(LtTruckModels_ls, overwrite = TRUE)
+usethis::use_data(LtTruckModels_ls, overwrite = TRUE)
 
 
 #================================================
@@ -155,26 +667,6 @@ AssignVehicleFeaturesSpecifications <- list(
     item(
       TABLE = "Vehicles",
       GROUP = "Global"
-    ),
-    item(
-      TABLE = "Gt1Prop",
-      GROUP = "Global"
-    ),
-    item(
-      TABLE = "Lt1Prop",
-      GROUP = "Global"
-    ),
-    item(
-      TABLE = "VehAgeCumProp",
-      GROUP = "Global"
-    ),
-    item(
-      TABLE = "VehAgeTypeProp",
-      GROUP = "Global"
-    ),
-    item(
-      TABLE = "VehicleMpgProp",
-      GROUP = "Global"
     )
   ),
   NewSetTable = items(
@@ -186,170 +678,6 @@ AssignVehicleFeaturesSpecifications <- list(
   #---------------------------
   #Specify new tables to be created by Inp if any
   Inp = items(
-    item(
-      NAME = "Region",
-      FILE = "model_lt1_veh_prop.csv",
-      TABLE = "Lt1Prop",
-      GROUP = "Global",
-      TYPE = "character",
-      UNITS = "category",
-      PROHIBIT = "NA",
-      ISELEMENTOF = c("Metro","NonMetro"),
-      SIZE = 8,
-      DESCRIPTION = "Lt1 region type"
-    ),
-    item(
-      NAME = "DrvAgePop",
-      FILE = "model_lt1_veh_prop.csv",
-      TABLE = "Lt1Prop",
-      GROUP = "Global",
-      TYPE = "people",
-      UNITS = "PRSN",
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = "",
-      DESCRIPTION = "Lt1 driver age population"
-    ),
-    item(
-      NAME = "NumVeh",
-      FILE = "model_lt1_veh_prop.csv",
-      TABLE = "Lt1Prop",
-      GROUP = "Global",
-      TYPE = "vehicles",
-      UNITS = "VEH",
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = "",
-      DESCRIPTION = "Lt1 number of vehicles"
-    ),
-    item(
-      NAME = "Prob",
-      FILE = "model_lt1_veh_prop.csv",
-      TABLE = "Lt1Prop",
-      GROUP = "Global",
-      TYPE = "double",
-      UNITS = "multiplier",
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = "",
-      DESCRIPTION = "Distribution of number of vehicles when the number of
-      vehicles in a household is less than driver population of the household"
-    ),
-    item(
-      NAME = "Region",
-      FILE = "model_gt1_veh_prop.csv",
-      TABLE = "Gt1Prop",
-      GROUP = "Global",
-      TYPE = "character",
-      UNITS = "category",
-      PROHIBIT = "NA",
-      ISELEMENTOF = c("Metro","NonMetro"),
-      SIZE = 8,
-      DESCRIPTION = "Gt1 region type"
-    ),
-    item(
-      NAME = "DrvAgePop",
-      FILE = "model_gt1_veh_prop.csv",
-      TABLE = "Gt1Prop",
-      GROUP = "Global",
-      TYPE = "people",
-      UNITS = "PRSN",
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = "",
-      DESCRIPTION = "Gt1 driver age population"
-    ),
-    item(
-      NAME = "NumVeh",
-      FILE = "model_gt1_veh_prop.csv",
-      TABLE = "Gt1Prop",
-      GROUP = "Global",
-      TYPE = "vehicles",
-      UNITS = "VEH",
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = "",
-      DESCRIPTION = "Gt1 number of vehicles"
-    ),
-    item(
-      NAME = "Prob",
-      FILE = "model_gt1_veh_prop.csv",
-      TABLE = "Gt1Prop",
-      GROUP = "Global",
-      TYPE = "double",
-      UNITS = "multiplier",
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = "",
-      DESCRIPTION = "Distribution of number of vehicles when the number of
-      vehicles in a household is greater than driver population of the household"
-    ),
-    item(
-      NAME = "VehAge",
-      FILE = "model_veh_cumprop_by_vehage.csv",
-      TABLE = "VehAgeCumProp",
-      GROUP = "Global",
-      TYPE = "vehicles",
-      UNITS = "VEH",
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = "",
-      DESCRIPTION = "Age of vehicles"
-    ),
-    item(
-      NAME = items(
-        "AutoCumProp",
-        "LtTruckCumProp"),
-      FILE = "model_veh_cumprop_by_vehage.csv",
-      TABLE = "VehAgeCumProp",
-      GROUP = "Global",
-      TYPE = "double",
-      UNITS = "multiplier",
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = "",
-      DESCRIPTION = items("cumulative probability distribution of Auto by age",
-                          "cumulative probability distribution of LtTruck by age")
-    ),
-    item(
-      NAME = "VehAge",
-      FILE = "model_veh_prop_by_vehage_vehtype_inc.csv",
-      TABLE = "VehAgeTypeProp",
-      GROUP = "Global",
-      TYPE = "vehicles",
-      UNITS = "VEH",
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = "",
-      DESCRIPTION = "Age of vehicles"
-    ),
-    item(
-      NAME = "IncGrp",
-      FILE = "model_veh_prop_by_vehage_vehtype_inc.csv",
-      TABLE = "VehAgeTypeProp",
-      GROUP = "Global",
-      TYPE = "character",
-      UNITS = "category",
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = c("0to20K", "20Kto40K", "40Kto60K", "60Kto80K", "80Kto100K", "100KPlus"),
-      SIZE = 9,
-      DESCRIPTION = "Income Groups"
-    ),
-    item(
-      NAME = "VehType",
-      FILE = "model_veh_prop_by_vehage_vehtype_inc.csv",
-      TABLE = "VehAgeTypeProp",
-      GROUP = "Global",
-      TYPE = "character",
-      UNITS = "category",
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = c("Auto", "LtTruck"),
-      SIZE = 7,
-      DESCRIPTION = "Types of Vehicle"
-    ),
-    item(
-      NAME = "Prop",
-      FILE = "model_veh_prop_by_vehage_vehtype_inc.csv",
-      TABLE = "VehAgeTypeProp",
-      GROUP = "Global",
-      TYPE = "double",
-      UNITS = "multiplier",
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = "",
-      DESCRIPTION = "Distribution of vehicles by age and type of vehicles, and the
-      income group of the household"
-    ),
     item(
       NAME = items(
         "AutoMpg",
@@ -382,51 +710,6 @@ AssignVehicleFeaturesSpecifications <- list(
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
       DESCRIPTION = "Years for which the efficiency of vehicle are measured."
-    ),
-    item(
-      NAME = items(
-        "Veh1Value",
-        "Veh2Value",
-        "Veh3Value",
-        "Veh4Value",
-        "Veh5PlusValue"
-      ),
-      FILE = "model_veh_mpg_dvmt_prop.csv",
-      TABLE = "VehicleMpgProp",
-      GROUP = "Global",
-      TYPE = "double",
-      UNITS = "NA",
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = "",
-      DESCRIPTION = items(
-        "The proportion assignment of mileage for 1 vehicle housholds.",
-        "The proportion assignment of mileage for 2 vehicle housholds.",
-        "The proportion assignment of mileage for 3 vehicle housholds.",
-        "The proportion assignment of mileage for 4 vehicle housholds.",
-        "The proportion assignment of mileage for 5 plus vehicle housholds.")
-    ),
-    item(
-      NAME = items(
-        "Veh1Prob",
-        "Veh2Prob",
-        "Veh3Prob",
-        "Veh4Prob",
-        "Veh5PlusProb"
-      ),
-      FILE = "model_veh_mpg_dvmt_prop.csv",
-      TABLE = "VehicleMpgProp",
-      GROUP = "Global",
-      TYPE = "double",
-      UNITS = "multiplier",
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = "",
-      TOTAL = 1,
-      DESCRIPTION = items(
-        "The probability distribution of mileage assignment for 1 vehicle households.",
-        "The probability distribution of mileage assignment for 2 vehicle households.",
-        "The probability distribution of mileage assignment for 3 vehicle households.",
-        "The probability distribution of mileage assignment for 4 vehicle households.",
-        "The probability distribution of mileage assignment for 5 plus vehicle households.")
     )
   ),
   #---------------------------
@@ -545,145 +828,6 @@ AssignVehicleFeaturesSpecifications <- list(
     ),
     # Global variables
     item(
-      NAME = "Region",
-      TABLE = "Lt1Prop",
-      GROUP = "Global",
-      TYPE = "character",
-      UNITS = "category",
-      PROHIBIT = "NA",
-      ISELEMENTOF = c("Metro","NonMetro"),
-      SIZE = 8
-    ),
-    item(
-      NAME = "DrvAgePop",
-      TABLE = "Lt1Prop",
-      GROUP = "Global",
-      TYPE = "people",
-      UNITS = "PRSN",
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = ""
-    ),
-    item(
-      NAME = "NumVeh",
-      TABLE = "Lt1Prop",
-      GROUP = "Global",
-      TYPE = "vehicles",
-      UNITS = "VEH",
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = ""
-    ),
-    item(
-      NAME = "Prob",
-      TABLE = "Lt1Prop",
-      GROUP = "Global",
-      TYPE = "double",
-      UNITS = "multiplier",
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = ""
-    ),
-    item(
-      NAME = "Region",
-      TABLE = "Gt1Prop",
-      GROUP = "Global",
-      TYPE = "character",
-      UNITS = "category",
-      PROHIBIT = "NA",
-      ISELEMENTOF = c("Metro","NonMetro"),
-      SIZE = 8
-    ),
-    item(
-      NAME = "DrvAgePop",
-      TABLE = "Gt1Prop",
-      GROUP = "Global",
-      TYPE = "people",
-      UNITS = "PRSN",
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = ""
-    ),
-    item(
-      NAME = "NumVeh",
-      TABLE = "Gt1Prop",
-      GROUP = "Global",
-      TYPE = "vehicles",
-      UNITS = "VEH",
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = ""
-    ),
-    item(
-      NAME = "Prob",
-      TABLE = "Gt1Prop",
-      GROUP = "Global",
-      TYPE = "double",
-      UNITS = "multiplier",
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = ""
-    ),
-    item(
-      NAME = "LtTruckProp",
-      TABLE = "Model",
-      GROUP = "Global",
-      TYPE = "double",
-      UNITS = "multiplier",
-      PROHIBIT = c('NA', '< 0'),
-      ISELEMENTOF = ""
-    ),
-    item(
-      NAME = "VehAge",
-      TABLE = "VehAgeCumProp",
-      GROUP = "Global",
-      TYPE = "vehicles",
-      UNITS = "VEH",
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = ""
-    ),
-    item(
-      NAME = items(
-        "AutoCumProp",
-        "LtTruckCumProp"),
-      TABLE = "VehAgeCumProp",
-      GROUP = "Global",
-      TYPE = "double",
-      UNITS = "multiplier",
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = ""
-    ),
-    item(
-      NAME = "VehAge",
-      TABLE = "VehAgeTypeProp",
-      GROUP = "Global",
-      TYPE = "vehicles",
-      UNITS = "VEH",
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = ""
-    ),
-    item(
-      NAME = "IncGrp",
-      TABLE = "VehAgeTypeProp",
-      GROUP = "Global",
-      TYPE = "character",
-      UNITS = "category",
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = c("0to20K", "20Kto40K", "40Kto60K", "60Kto80K", "80Kto100K", "100KPlus")
-    ),
-    item(
-      NAME = "VehType",
-      TABLE = "VehAgeTypeProp",
-      GROUP = "Global",
-      TYPE = "character",
-      UNITS = "category",
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = c("Auto", "LtTruck")
-    ),
-    item(
-      NAME = "Prop",
-      TABLE = "VehAgeTypeProp",
-      GROUP = "Global",
-      TYPE = "double",
-      UNITS = "multiplier",
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = ""
-    ),
-    item(
       NAME = items(
         "AutoMpg",
         "LtTruckMpg",
@@ -708,35 +852,14 @@ AssignVehicleFeaturesSpecifications <- list(
       ISELEMENTOF = ""
     ),
     item(
-      NAME = items(
-        "Veh1Value",
-        "Veh2Value",
-        "Veh3Value",
-        "Veh4Value",
-        "Veh5PlusValue"
-      ),
-      TABLE = "VehicleMpgProp",
-      GROUP = "Global",
-      TYPE = "double",
-      UNITS = "NA",
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = ""
-    ),
-    item(
-      NAME = items(
-        "Veh1Prob",
-        "Veh2Prob",
-        "Veh3Prob",
-        "Veh4Prob",
-        "Veh5PlusProb"
-      ),
-      TABLE = "VehicleMpgProp",
+      NAME = "LtTruckProp",
+      TABLE = "Model",
       GROUP = "Global",
       TYPE = "double",
       UNITS = "multiplier",
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = "",
-      TOTAL = 1)
+      PROHIBIT = c('NA', '< 0'),
+      ISELEMENTOF = ""
+    )
   ),
   #---------------------------
   #Specify data to saved in the data store
@@ -852,7 +975,7 @@ AssignVehicleFeaturesSpecifications <- list(
 #' }
 #' @source AssignVehicleFeatures.R script.
 "AssignVehicleFeaturesSpecifications"
-devtools::use_data(AssignVehicleFeaturesSpecifications, overwrite = TRUE)
+usethis::use_data(AssignVehicleFeaturesSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -877,6 +1000,7 @@ devtools::use_data(AssignVehicleFeaturesSpecifications, overwrite = TRUE)
 #' of vehicles by driving age population for each region type.
 #' @param Type A string indicating the region type ("Metro": Default, or "NonMetro")
 #' @return A list containing number of vehicles and ownership ratio for each household
+#' @name predictVehicleOwnership
 #' @export
 #'
 predictVehicleOwnership <- function( Hh_df, ModelType=VehOwnModels_ls, VehProp = NA, Type="Metro" ) {
@@ -1010,6 +1134,7 @@ predictVehicleOwnership <- function( Hh_df, ModelType=VehOwnModels_ls, VehProp =
 #' @param  TruckProp A numeric indicating the target proportion for light truck
 #' ownership.
 #' @return A list containing vehicle types for each household.
+#' @name predictLtTruckOwn
 #' @export
 #'
 predictLtTruckOwn <- function( Hh_df, ModelType=LtTruckModels_ls, TruckProp=NA) {
@@ -1093,6 +1218,7 @@ predictLtTruckOwn <- function( Hh_df, ModelType=LtTruckModels_ls, TruckProp=NA) 
 #' @param Hh_df A household data frame consisting of household characteristics.
 #' @return A data frame containing the distribution of vehicle types by income
 #' groups.
+#' @name calcVehPropByIncome
 #' @import reshape2
 #' @export
 #'
@@ -1121,6 +1247,7 @@ calcVehPropByIncome <- function( Hh_df ) {
 #' be an ordered sequence from 0 to 32.
 #' @param AdjRatio A number that is the target ratio value.
 #' @return A numeric vector of adjusted distribution.
+#' @name adjAgeDistribution
 #' @import stats
 #' @export
 #'
@@ -1208,6 +1335,7 @@ adjAgeDistribution <- function( CumDist, AdjRatio ) {
 #' @param MaxIter A numeric indicating maximum number of iterations. (Default: 100)
 #' @param Closure A numeric indicating the tolerance level for conversion. (Default: 1e-3)
 #' @return A numeric vector of joint probabilities of vehicle by age and income group.
+#' @name calcVehAgePropByInc
 #' @export
 #'
 calcVehAgePropByInc <- function(VehAgIgProp, AgeGrp, AgeMargin, IncGrp, IncMargin, MaxIter=100, Closure=0.001){
@@ -1258,6 +1386,7 @@ calcVehAgePropByInc <- function(VehAgIgProp, AgeGrp, AgeMargin, IncGrp, IncMargi
 #' the household.
 #' @param AdjRatio A number that is the target ratio value.
 #' @return A list containing the vehicle types and ages for each household.
+#' @name calcVehicleAges
 #' @import reshape2
 #' @export
 #'
@@ -1345,6 +1474,7 @@ calcVehicleAges <- function(Hh_df, VProp=NULL, AdjRatio = c(Auto = 1, LtTruck = 
 #' @param VehMpgYr A data frame of mileage of vehicles by type and year.
 #' @param CurrentYear A integer indicating the current year.
 #' @return A numeric vector that indicates the mileage of vehicles.
+#' @name assignFuelEconomy
 #' @export
 #'
 assignFuelEconomy <- function( Hh_df, VehMpgYr=NULL, CurrentYear ) {
@@ -1392,6 +1522,7 @@ assignFuelEconomy <- function( Hh_df, VehMpgYr=NULL, CurrentYear ) {
 #' @param DvmtProp A data frame of distribution of VMT proportion by number of
 #' vehicles in a household.
 #' @return A list containing number of vehicles and ownership ratio for each household
+#' @name apportionDvmt
 #' @export
 #'
 apportionDvmt <- function( Hh_df, DvmtProp=NULL ) {
@@ -1512,6 +1643,7 @@ apportionDvmt <- function( Hh_df, DvmtProp=NULL ) {
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
 #' @import visioneval
+#' @name AssignVehicleFeatures
 #' @import stats
 #' @export
 AssignVehicleFeatures <- function(L) {
@@ -1554,8 +1686,8 @@ AssignVehicleFeatures <- function(L) {
   TranRevMiPC_Bz <- L$Year$Marea$TranRevMiPC[match(L$Year$Bzone$Marea, L$Year$Marea$Marea)]
   Hh_df$TranRevMiPC <- TranRevMiPC_Bz[match(L$Year$Household$HhPlaceTypes, L$Year$Bzone$Bzone)]
 
-  Lt1VehProp <- data.frame(L$Global$Lt1Prop)
-  Gt1VehProp <- data.frame(L$Global$Gt1Prop)
+  Lt1VehProp <- data.frame(VehOwnModels_ls$Lt1Prop)
+  Gt1VehProp <- data.frame(VehOwnModels_ls$Gt1Prop)
 
   # Gather vehicle proportions for Lt1 and Gt1
   VehProp <- list(
@@ -1570,13 +1702,13 @@ AssignVehicleFeatures <- function(L) {
 
   # Gather vehicle proportions for vehicle types, income groups, etc..
   VehPropByGroups <- list()
-  VehPropByGroups$VehCumPropByAge <- data.frame(list(VehAge = L$Global$VehAgeCumProp$VehAge,
-                                                     Auto = L$Global$VehAgeCumProp$AutoCumProp,
-                                                     LtTruck = L$Global$VehAgeCumProp$LtTruckCumProp))
-  VehPropByGroups$VehPropByAgeIncGrpType <- data.frame(list(VehAge = L$Global$VehAgeTypeProp$VehAge,
-                                                            IncGrp = L$Global$VehAgeTypeProp$IncGrp,
-                                                            VehType = L$Global$VehAgeTypeProp$VehType,
-                                                            Prop = L$Global$VehAgeTypeProp$Prop))
+  VehPropByGroups$VehCumPropByAge <- data.frame(list(VehAge = VehOwnModels_ls$VehAgeCumProp$VehAge,
+                                                     Auto = VehOwnModels_ls$VehAgeCumProp$AutoCumProp,
+                                                     LtTruck = VehOwnModels_ls$VehAgeCumProp$LtTruckCumProp))
+  VehPropByGroups$VehPropByAgeIncGrpType <- data.frame(list(VehAge = VehOwnModels_ls$VehAgeTypeProp$VehAge,
+                                                            IncGrp = VehOwnModels_ls$VehAgeTypeProp$IncGrp,
+                                                            VehType = VehOwnModels_ls$VehAgeTypeProp$VehType,
+                                                            Prop = VehOwnModels_ls$VehAgeTypeProp$Prop))
   # Relevel the income groups
   VehPropByGroups$VehPropByAgeIncGrpType$IncGrp <- reorder(VehPropByGroups$VehPropByAgeIncGrpType$IncGrp,IncBreaks_[as.character(VehPropByGroups$VehPropByAgeIncGrpType$IncGrp)],FUN = max)
 
@@ -1662,16 +1794,16 @@ AssignVehicleFeatures <- function(L) {
   # Assign vehicle mileage proportions to household vehicles
   Hh_df$DvmtProp <- NA
   ModelVar_ <- c("Hhvehcnt", "HhId")
-  DvmtProp_ <- data.frame(Veh1Value = L$Global$VehicleMpgProp$Veh1Value,
-                         Veh1Prob = L$Global$VehicleMpgProp$Veh1Prob,
-                         Veh2Value = L$Global$VehicleMpgProp$Veh2Value,
-                         Veh2Prob = L$Global$VehicleMpgProp$Veh2Prob,
-                         Veh3Value = L$Global$VehicleMpgProp$Veh3Value,
-                         Veh3Prob = L$Global$VehicleMpgProp$Veh3Prob,
-                         Veh4Value = L$Global$VehicleMpgProp$Veh4Value,
-                         Veh4Prob = L$Global$VehicleMpgProp$Veh4Prob,
-                         Veh5PlusValue = L$Global$VehicleMpgProp$Veh5PlusValue,
-                         Veh5PlusProb = L$Global$VehicleMpgProp$Veh5PlusProb)
+  DvmtProp_ <- data.frame(Veh1Value = VehOwnModels_ls$VehicleMpgProp$Veh1Value,
+                         Veh1Prob = VehOwnModels_ls$VehicleMpgProp$Veh1Prob,
+                         Veh2Value = VehOwnModels_ls$VehicleMpgProp$Veh2Value,
+                         Veh2Prob = VehOwnModels_ls$VehicleMpgProp$Veh2Prob,
+                         Veh3Value = VehOwnModels_ls$VehicleMpgProp$Veh3Value,
+                         Veh3Prob = VehOwnModels_ls$VehicleMpgProp$Veh3Prob,
+                         Veh4Value = VehOwnModels_ls$VehicleMpgProp$Veh4Value,
+                         Veh4Prob = VehOwnModels_ls$VehicleMpgProp$Veh4Prob,
+                         Veh5PlusValue = VehOwnModels_ls$VehicleMpgProp$Veh5PlusValue,
+                         Veh5PlusProb = VehOwnModels_ls$VehicleMpgProp$Veh5PlusProb)
   #fix seed as allocation involves sampling
   set.seed(L$G$Seed)
   Hh_df$DvmtProp[ HhHasVeh ] <- apportionDvmt( Hh_df[ HhHasVeh, ModelVar_],
@@ -1738,12 +1870,13 @@ AssignVehicleFeatures <- function(L) {
 #Test code to check specifications, loading inputs, and whether datastore
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions
-#-------------------------------------------------------------------------------
+# #-------------------------------------------------------------------------------
 # TestDat_ <- testModule(
 #   ModuleName = "AssignVehicleFeatures",
 #   LoadDatastore = TRUE,
 #   SaveDatastore = TRUE,
-#   DoRun = FALSE
+#   DoRun = FALSE,
+#   RunFor = "NotBaseYear"
 # )
 # L <- TestDat_$L
 
@@ -1754,5 +1887,6 @@ AssignVehicleFeatures <- function(L) {
 #   ModuleName = "AssignVehicleOwnership",
 #   LoadDatastore = TRUE,
 #   SaveDatastore = TRUE,
-#   DoRun = TRUE
+#   DoRun = TRUE,
+#   RunFor = "NotBaseYear"
 # )

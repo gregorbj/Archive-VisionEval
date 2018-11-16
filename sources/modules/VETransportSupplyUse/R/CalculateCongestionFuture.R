@@ -26,7 +26,7 @@ load("inst/extdata/CongModel_ls.RData")
 #' parameters that are used in the evaluation of aforementioned models.
 #' @source GreenSTEP version ?.? model.
 "CongModel_ls"
-devtools::use_data(CongModel_ls, overwrite = TRUE)
+usethis::use_data(CongModel_ls, overwrite = TRUE)
 
 
 #================================================
@@ -43,6 +43,7 @@ CalculateCongestionFutureSpecifications <- list(
   #Specify input data
   #Specify data to be loaded from data store
   Get = items(
+    # Azone variables
     item(
       NAME = "ITS",
       TABLE = "Azone",
@@ -54,6 +55,7 @@ CalculateCongestionFutureSpecifications <- list(
       PROHIBIT = c("NA", "< 0", "> 1"),
       ISELEMENTOF = ""
     ),
+    # Global variables
     item(
       NAME = "Type",
       TABLE = "Vmt",
@@ -107,6 +109,27 @@ CalculateCongestionFutureSpecifications <- list(
       ISELEMENTOF = ""
     ),
     item(
+      NAME = "TranRevMiAdjFactor",
+      TABLE = "Model",
+      GROUP = "Global",
+      TYPE = "double",
+      UNITS = "multiplier",
+      PROHIBIT = c('NA', '< 0'),
+      SIZE = 0,
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "LtVehDvmtFactor",
+      TABLE = "Model",
+      GROUP = "Global",
+      TYPE = "double",
+      UNITS = "multiplier",
+      PROHIBIT = c('NA', '< 0'),
+      SIZE = 0,
+      ISELEMENTOF = ""
+    ),
+    # Bzone variables
+    item(
       NAME = "Bzone",
       TABLE = "Bzone",
       GROUP = "Year",
@@ -158,6 +181,7 @@ CalculateCongestionFutureSpecifications <- list(
       SIZE = 0,
       ISELEMENTOF = ""
     ),
+    # Marea variables
     item(
       NAME = "Marea",
       TABLE = "Marea",
@@ -202,30 +226,11 @@ CalculateCongestionFutureSpecifications <- list(
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = ""
-    ),
-    item(
-      NAME = "TranRevMiAdjFactor",
-      TABLE = "Model",
-      GROUP = "Global",
-      TYPE = "double",
-      UNITS = "multiplier",
-      PROHIBIT = c('NA', '< 0'),
-      SIZE = 0,
-      ISELEMENTOF = ""
-    ),
-    item(
-      NAME = "LtVehDvmtFactor",
-      TABLE = "Model",
-      GROUP = "Global",
-      TYPE = "double",
-      UNITS = "multiplier",
-      PROHIBIT = c('NA', '< 0'),
-      SIZE = 0,
-      ISELEMENTOF = ""
     )
   ),
   #Specify data to saved in the data store
   Set = items(
+    # Marea variables
     item(
       NAME = items(
         "LtVehDvmtFuture",
@@ -257,9 +262,30 @@ CalculateCongestionFutureSpecifications <- list(
       SIZE = 0,
       ISELEMENTOF = "",
       DESCRIPTION = items(
-        "Fuel efficiency adjustment for light vehicles",
-        "Fuel efficiency adjustment for buses",
-        "Fuel efficiency adjustment for heavy trucks"
+        "Fuel efficiency adjustment for light vehicles with internal combustion engine",
+        "Fuel efficiency adjustment for buses with internal combustion engine",
+        "Fuel efficiency adjustment for heavy trucks with internal combustion engine"
+      )
+    ),
+    item(
+      NAME = items(
+        "MpKwhAdjLtVehHevFuture",
+        "MpKwhAdjLtVehEvFuture",
+        "MpKwhAdjBusFuture",
+        "MpKwhAdjTruckFuture"
+      ),
+      TABLE = "Marea",
+      GROUP = "Year",
+      TYPE = "double",
+      UNITS = "multiplier",
+      PROHIBIT = c("NA", "< 0"),
+      SIZE = 0,
+      ISELEMENTOF = "",
+      DESCRIPTION = items(
+        "Power efficiency adjustment for light plugin/hybrid electric vehicles",
+        "Power efficiency adjustment for light electric vehicles",
+        "Power efficiency adjustment for buses with electric power train",
+        "Power efficiency adjustment for heavy trucks with electric power train"
       )
     ),
     item(
@@ -348,6 +374,28 @@ CalculateCongestionFutureSpecifications <- list(
       SIZE = 0,
       ISELEMENTOF = "",
       DESCRIPTION = "Fuel efficiency adjustment for households"
+    ),
+    item(
+      NAME = "MpKwhAdjHevHhFuture",
+      TABLE = "Marea",
+      GROUP = "Year",
+      TYPE = "double",
+      UNITS = "multiplier",
+      PROHIBIT = c('NA', '< 0'),
+      SIZE = 0,
+      ISELEMENTOF = "",
+      DESCRIPTION = "Power efficiency adjustment for households with HEV"
+    ),
+    item(
+      NAME = "MpKwhAdjEvHhFuture",
+      TABLE = "Marea",
+      GROUP = "Year",
+      TYPE = "double",
+      UNITS = "multiplier",
+      PROHIBIT = c('NA', '< 0'),
+      SIZE = 0,
+      ISELEMENTOF = "",
+      DESCRIPTION = "Power efficiency adjustment for households households with EV"
     )
   )
   )
@@ -368,7 +416,7 @@ CalculateCongestionFutureSpecifications <- list(
 #' }
 #' @source CalculateCongestionFuture.R script.
 "CalculateCongestionFutureSpecifications"
-devtools::use_data(CalculateCongestionFutureSpecifications, overwrite = TRUE)
+usethis::use_data(CalculateCongestionFutureSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -401,6 +449,7 @@ devtools::use_data(CalculateCongestionFutureSpecifications, overwrite = TRUE)
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name CalculateCongestionFuture
 #' @import visioneval
 #' @export
 CalculateCongestionFuture <- function(L) {
@@ -481,7 +530,8 @@ CalculateCongestionFuture <- function(L) {
 #   ModuleName = "CalculateCongestionFuture",
 #   LoadDatastore = TRUE,
 #   SaveDatastore = TRUE,
-#   DoRun = FALSE
+#   DoRun = FALSE,
+#   RunFor = "NotBaseYear"
 # )
 # L <- TestDat_$L
 
@@ -492,5 +542,6 @@ CalculateCongestionFuture <- function(L) {
 #   ModuleName = "CalculateCongestionFuture",
 #   LoadDatastore = TRUE,
 #   SaveDatastore = TRUE,
-#   DoRun = TRUE
+#   DoRun = TRUE,
+#   RunFor = "NotBaseYear"
 # )

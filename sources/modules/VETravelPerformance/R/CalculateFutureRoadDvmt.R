@@ -295,7 +295,7 @@ CalculateFutureRoadDvmtSpecifications <- list(
 #' }
 #' @source CalculateFutureRoadDvmt.R script.
 "CalculateFutureRoadDvmtSpecifications"
-devtools::use_data(CalculateFutureRoadDvmtSpecifications, overwrite = TRUE)
+usethis::use_data(CalculateFutureRoadDvmtSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -348,6 +348,7 @@ devtools::use_data(CalculateFutureRoadDvmtSpecifications, overwrite = TRUE)
 #' @param L A list containing data defined by the module specification.
 #' @return A list containing data produced by the function consistent with the
 #' module specifications.
+#' @name CalculateFutureRoadDvmt
 #' @import visioneval
 #' @export
 CalculateFutureRoadDvmt <- function(L) {
@@ -385,26 +386,38 @@ CalculateFutureRoadDvmt <- function(L) {
 
   #Calculate ComSvc DVMT
   #---------------------
-  ComSvcDvmtGrowthBasis <- L$Global$Marea$ComSvcDvmtGrowthBasis
-  if (ComSvcDvmtGrowthBasis == "HhDvmt") {
-    ComSvcUrbanDvmt_Ma <-
-      L$Year$Marea$UrbanHhDvmt * L$Global$Marea$ComSvcDvmtHhDvmtFactor
-    ComSvcRuralDvmt_Ma <-
-      L$Year$Marea$RuralHhDvmt * L$Global$Marea$ComSvcDvmtHhDvmtFactor
+  Ma <- L$Year$Marea$Marea
+  ComSvcDvmtGrowthBasis_Ma <- L$Global$Marea$ComSvcDvmtGrowthBasis
+  ComSvcUrbanDvmt_Ma <- numeric(length(Ma))
+  ComSvcRuralDvmt_Ma <- numeric(length(Ma))
+  IsDvmtBasis_Ma <- ComSvcDvmtGrowthBasis_Ma == "HhDvmt"
+  IsPopBasis_Ma <- ComSvcDvmtGrowthBasis_Ma == "Population"
+  IsIncBasis_Ma <- ComSvcDvmtGrowthBasis_Ma == "Income"
+  if (any(IsDvmtBasis_Ma)) {
+    ComSvcUrbanDvmt_Ma[IsDvmtBasis_Ma] <-
+      L$Year$Marea$UrbanHhDvmt[IsDvmtBasis_Ma] *
+      L$Global$Marea$ComSvcDvmtHhDvmtFactor[IsDvmtBasis_Ma]
+    ComSvcRuralDvmt_Ma[IsDvmtBasis_Ma] <-
+      L$Year$Marea$RuralHhDvmt[IsDvmtBasis_Ma] *
+      L$Global$Marea$ComSvcDvmtHhDvmtFactor[IsDvmtBasis_Ma]
   }
-  if (ComSvcDvmtGrowthBasis == "Population") {
-    ComSvcUrbanDvmt_Ma <-
-      L$Year$Marea$UrbanPop * L$Global$Marea$ComSvcDvmtPopulationFactor
+  if (any(IsPopBasis_Ma)) {
+    ComSvcUrbanDvmt_Ma[IsPopBasis_Ma] <-
+      L$Year$Marea$UrbanPop[IsPopBasis_Ma] *
+      L$Global$Marea$ComSvcDvmtPopulationFactor[IsPopBasis_Ma]
     ComSvcRuralDvmt_Ma <-
-      L$Year$Marea$RuralPop * L$Global$Marea$ComSvcDvmtPopulationFactor
+      L$Year$Marea$RuralPop[IsPopBasis_Ma] *
+      L$Global$Marea$ComSvcDvmtPopulationFactor[IsPopBasis_Ma]
   }
-  if (ComSvcDvmtGrowthBasis == "Income") {
-    ComSvcUrbanDvmt_Ma <-
-      L$Year$Marea$UrbanIncome * L$Global$Marea$ComSvcDvmtIncomeFactor
-    ComSvcRuralDvmt_Ma <-
-      L$Year$Marea$RuralIncome * L$Global$Marea$ComSvcDvmtIncomeFactor
+  if (any(IsIncBasis_Ma)) {
+    ComSvcUrbanDvmt_Ma[IsIncBasis_Ma] <-
+      L$Year$Marea$UrbanIncome[IsIncBasis_Ma] *
+      L$Global$Marea$ComSvcDvmtIncomeFactor[IsIncBasis_Ma]
+    ComSvcRuralDvmt_Ma[IsIncBasis_Ma] <-
+      L$Year$Marea$RuralIncome[IsIncBasis_Ma] *
+      L$Global$Marea$ComSvcDvmtIncomeFactor[IsIncBasis_Ma]
   }
-  rm(ComSvcDvmtGrowthBasis)
+  rm(ComSvcDvmtGrowthBasis_Ma, IsDvmtBasis_Ma, IsPopBasis_Ma, IsIncBasis_Ma)
   Out_ls$Year$Marea$ComSvcUrbanDvmt <- unname(ComSvcUrbanDvmt_Ma)
   Out_ls$Year$Marea$ComSvcRuralDvmt <- unname(ComSvcRuralDvmt_Ma)
 
@@ -421,15 +434,19 @@ CalculateFutureRoadDvmt <- function(L) {
   #Calculate Marea heavy truck DVMT
   #--------------------------------
   #Calculate quantities without region controls
-  HvyTrkDvmtGrowthBasis <- L$Global$Marea$HvyTrkDvmtGrowthBasis
-  if (HvyTrkDvmtGrowthBasis == "Population") {
+  HvyTrkDvmtGrowthBasis_Ma <- L$Global$Marea$HvyTrkDvmtGrowthBasis
+  HvyTrkUrbanDvmt_Ma <- numeric(length(Ma))
+  IsPopBasis_Ma <- HvyTrkDvmtGrowthBasis_Ma == "Population"
+  IsIncBasis_Ma <- HvyTrkDvmtGrowthBasis_Ma == "Income"
+  if (any(IsPopBasis_Ma)) {
     HvyTrkUrbanDvmt_Ma <-
       L$Year$Marea$UrbanPop * L$Global$Marea$HvyTrkDvmtPopulationFactor
   }
-  if (HvyTrkDvmtGrowthBasis == "Income") {
+  if (any(IsIncBasis_Ma)) {
     HvyTrkUrbanDvmt_Ma <-
       L$Year$Marea$UrbanIncome * L$Global$Marea$HvyTrkDvmtIncomeFactor
   }
+  rm(HvyTrkDvmtGrowthBasis_Ma, IsPopBasis_Ma, IsIncBasis_Ma)
   #Adjust quantities if there are regional controls
   if (HasRegionHvyTrk) {
     HvyTrkUrbanDvmt_Ma <-

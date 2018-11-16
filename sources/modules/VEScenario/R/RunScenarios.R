@@ -99,7 +99,7 @@ RunScenariosSpecifications <- list(
 #' }
 #' @source RunScenarios.R script.
 "RunScenariosSpecifications"
-devtools::use_data(RunScenariosSpecifications, overwrite = TRUE)
+usethis::use_data(RunScenariosSpecifications, overwrite = TRUE)
 
 
 
@@ -403,6 +403,7 @@ processRunningTasks <- function(asyncTasksRunning = vector(mode = "list"),
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name RunScenarios
 #' @import future
 #' @export
 RunScenarios <- function(L){

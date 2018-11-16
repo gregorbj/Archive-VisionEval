@@ -114,7 +114,7 @@ ViewResultsSpecifications <- list(
 #' }
 #' @source ViewResults.R script.
 "ViewResultsSpecifications"
-devtools::use_data(ViewResultsSpecifications, overwrite = TRUE)
+usethis::use_data(ViewResultsSpecifications, overwrite = TRUE)
 
 #Main module function run scenarios
 #------------------------------------------------------------------
@@ -128,6 +128,7 @@ devtools::use_data(ViewResultsSpecifications, overwrite = TRUE)
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name ViewResults
 #' @export
 ViewResults <- function(L){
   # Setup

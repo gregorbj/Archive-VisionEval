@@ -133,7 +133,7 @@ ScenarioResultsSpecifications <- list(
 #' }
 #' @source ScenarioResults.R script.
 "ScenarioResultsSpecifications"
-devtools::use_data(ScenarioResultsSpecifications, overwrite = TRUE)
+usethis::use_data(ScenarioResultsSpecifications, overwrite = TRUE)
 
 
 # TableNames <- c("Azone", "Bzone", "Marea", "IncomeGroup", "FuelType")
@@ -256,6 +256,7 @@ getScenarioResults <- function(ScenarioPath, ...){
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name ScenarioResults
 #' @import jsonlite future data.table
 #' @export
 ScenarioResults <- function(L){

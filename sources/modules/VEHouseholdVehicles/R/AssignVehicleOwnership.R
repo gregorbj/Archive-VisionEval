@@ -168,7 +168,7 @@ rm(Hh_df, EstData_df)
 #' }
 #' @source AssignVehicleOwnership.R script.
 "AutoOwnModels_ls"
-devtools::use_data(AutoOwnModels_ls, overwrite = TRUE)
+usethis::use_data(AutoOwnModels_ls, overwrite = TRUE)
 
 
 #================================================
@@ -343,7 +343,7 @@ AssignVehicleOwnershipSpecifications <- list(
 #' }
 #' @source AssignVehicleOwnership.R script.
 "AssignVehicleOwnershipSpecifications"
-devtools::use_data(AssignVehicleOwnershipSpecifications, overwrite = TRUE)
+usethis::use_data(AssignVehicleOwnershipSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -365,8 +365,8 @@ devtools::use_data(AssignVehicleOwnershipSpecifications, overwrite = TRUE)
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
-#' @import visioneval
-#' @import ordinal
+#' @name AssignVehicleOwnership
+#' @import visioneval ordinal
 #' @export
 AssignVehicleOwnership <- function(L) {
   #Set up

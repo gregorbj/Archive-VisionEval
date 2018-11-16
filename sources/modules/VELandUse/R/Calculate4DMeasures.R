@@ -288,7 +288,7 @@ Calculate4DMeasuresSpecifications <- list(
 #' }
 #' @source Calculate4DMeasures.R script.
 "Calculate4DMeasuresSpecifications"
-devtools::use_data(Calculate4DMeasuresSpecifications, overwrite = TRUE)
+usethis::use_data(Calculate4DMeasuresSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -377,6 +377,7 @@ sumValsInDist <- function(DistCutoff, DataToSum_, Lat_, Lng_){
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name Calculate4DMeasures
 #' @import visioneval
 #' @export
 Calculate4DMeasures <- function(L) {

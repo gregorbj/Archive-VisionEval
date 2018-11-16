@@ -1,9 +1,37 @@
 #==================
 #CreateHouseholds.R
 #==================
-#This module creates simulated households for a model using inputs of population
-#by age group for each Azone and year.
 
+#<doc>
+## CreateHouseholds Module
+#### September 6, 2018
+#
+#This module creates a *Household* table in the datastore and populates the table with datasets characterizing simulated households. Each entry represents a simulated household. Household datasets are created for the numbers of persons in each of 6 age categories (0-14, 15-19, 20-29, 30-54, 55-64, and 65+) and the total number of persons in the household. Two types of households are created: *regular* households (i.e. not persons in group quarters) and *group quarters* households (i.e. persons in group quarters such as college dormatories). Households are created from Azone level demographic forecasts of the number of persons in each of the 6 age groups for *regular* households and for the group quarters population. In addition, users may optionally specify an average household size and/or the proportion of households that are single person households. The module creates households that matches the age forecast and the optional household size and single person inputs (close but not exact). The module tabulates the number of households created in each Azone.
+#
+### Model Parameter Estimation
+#
+#This model has just one parameter object, a matrix of the probability that a person in each age group is in one of several hundred *regular* household types. The matrix is created by selecting from the PUMS data the records for the most frequently observed household types. The default is to select the household types which account for 99% of all households. Each household type is denoted by the number of persons in each age group in the household. For example, a household that has 2 persons of age 0-14 and 2 persons of age 20-29 would be designated as type *2-0-2-0-0-0*. The numbers represent the number of persons in each of the age groups in the order listed above with the hyphens separating the age groups. These household types comprise the rows of the probability matrix. The columns of the matrix correspond to the 6 age groups. Each column of the matrix sums to 1.
+#
+#This probability matrix is created from Census public use microsample (PUMS) data that is compiled into a R dataset (HhData_df) when the VESimHouseholds package is built. The data that is supplied with the VESimHouseholds package downloaded from the official VisionEval repository may be used, but it is preferrable to use data for the region being modeled. How this is done is explained in the documentation for the *CreateEstimationDatasets.R* script. The matrix is created by summing the number of persons each each age group and each of the household types using the household weights in the PUMS data. The probability that a person in each age group would be in each of the household type is the number of persons in the household type divided by the total number of persons in the age group.
+#
+#No model parameters are used to create *group quarters* households because those households are just composed of single persons.
+#
+### How the Module Works
+#
+#For *regular* households, the module uses the matrix of probabilities that a person in each age group is present in the most frequently observed household types along with a forecast of number of persons in each age group to synthesize a likely set of *regular* households. The module starts by assigning the forecast population by age group to household types using the probability matrix that has been estimated. It then carries out the following interative process to create a set of households that is internally consistent and that matches (approximately) the optional inputs for household size and proportion of single-person households:
+#
+#1) For each household type, the number of households of the type is calculated from the number of persons of each age group assigned to the type. For example if 420 persons age 0-14 and 480 persons age 20-29 are assigned to household type *2-0-2-0-0-0*, that implies either 210 or 240 households of that type. Where the number of households of the type implied by the persons assigned is not consistent as in this example, the mean of the implied number of households is used. In the example, this would be 225 households. This is the *resolved* number of households. For all household types, the resolved number of households is compared to the maximum number of implied households (in this case 225 is compared to 240) if ratio of these values differs from 1 in absolute terms by less than 0.001 for all household types, the iterative process ends.
+#
+#2) If a household size target has been specified, the average household size for the resolved households is computed. The ratio of the target household size and the average household size for the resolved households is computed. The number of resolved households in household types having sizes greater than the target household size is multiplied by this ratio. For example, if target household size is 2.5 and average household size for the resolved households is 3, th number of household for household types having more than 2.5 persons (i.e. 3 or more persons) would be multiplied by *2.5 / 3*.
+#
+#3) If a target for the proportion of households that are 1-person households is set, the difference between the number of 1-person households that there should be and the number that have been assigned is calculated. That difference is added across all 1-person household types (e.g. if the difference is 100, since there are 5 1-person household types, 20 is added to each of those types). The difference is substracted across all other household types.
+#
+#4) Using the resolved number of households of each type (as adjusted to match household size and 1-person household targets), the number of persons in each age group in each household type is computed. Continuing with the example, 225 households in household type *2-0-2-0-0-0* means that there must be 550 persons of age 0-14 and 550 persons of age 20-29 in that household type. This is called the *resolved* population. An updated probability matrix is computed using the resolved population by housing type.
+#
+#5) The difference between the total number of persons by age group in the resolved population and the forecast number of persons by age group is calculated and that difference is allocated to household types using the updated probability matrix. Then calculation returns to the first iteration step.
+#
+#After the iterations have been completed, the numbers of households by type are rounded to create whole number amounts. Then individual household records are created for each.
+#</doc>
 
 #=================================
 #Packages used in code development
@@ -77,7 +105,7 @@ HtProb_HtAp <- calcHhAgeTypes(Hh_df)
 #' @format A matrix having 950 rows (for Oregon data) and 6 colums:
 #' @source CreateHouseholds.R script.
 "HtProb_HtAp"
-devtools::use_data(HtProb_HtAp, overwrite = TRUE)
+usethis::use_data(HtProb_HtAp, overwrite = TRUE)
 rm(calcHhAgeTypes, Hh_df)
 
 
@@ -354,7 +382,7 @@ CreateHouseholdsSpecifications <- list(
 #' }
 #' @source CreateHouseholds.R script.
 "CreateHouseholdsSpecifications"
-devtools::use_data(CreateHouseholdsSpecifications, overwrite = TRUE)
+usethis::use_data(CreateHouseholdsSpecifications, overwrite = TRUE)
 rm(CreateHouseholdsSpecifications)
 
 
@@ -409,6 +437,7 @@ rm(CreateHouseholdsSpecifications)
 #' Age 55to64 - number of persons age 55 to 64 in the household
 #' Age65Plus - number of persons 65 or older in the household
 #' HhSize - total number of persons in the household
+#' @name createHhByAge
 #' @export
 createHhByAge <-
   function(Prsn_Ap,
@@ -555,6 +584,7 @@ createHhByAge <-
 #' Age 55to64 - number of persons age 55 to 64 in the household
 #' Age65Plus - number of persons 65 or older in the household
 #' HhSize - total number of persons in the household
+#' @name createGrpHhByAge
 #' @export
 createGrpHhByAge <-
   function(GrpPrsn_Ag) {
@@ -623,6 +653,7 @@ createGrpHhByAge <-
 #' identifies the size of the longest HhId.
 #' @import visioneval stats
 #' @include CreateEstimationDatasets.R
+#' @name CreateHouseholds
 #' @export
 CreateHouseholds <- function(L) {
   #Define dimension name vectors
@@ -725,9 +756,13 @@ CreateHouseholds <- function(L) {
 }
 
 
-#================================
-#Code to aid development and test
-#================================
+#===============================================================
+#SECTION 4: MODULE DOCUMENTATION AND AUXILLIARY DEVELOPMENT CODE
+#===============================================================
+#Run module automatic documentation
+#----------------------------------
+documentModule("CreateHouseholds")
+
 #Test code to check specifications, loading inputs, and whether datastore
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions

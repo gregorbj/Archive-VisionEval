@@ -201,7 +201,7 @@ rm(Hh_df, Veh_df)
 #' }
 #' @source AssignVehicleType.R script.
 "VehicleTypeModel_ls"
-devtools::use_data(VehicleTypeModel_ls, overwrite = TRUE)
+usethis::use_data(VehicleTypeModel_ls, overwrite = TRUE)
 
 #================================================
 #SECTION 2: DEFINE THE MODULE DATA SPECIFICATIONS
@@ -381,7 +381,7 @@ AssignVehicleTypeSpecifications <- list(
 #' }
 #' @source AssignVehicleType.R script.
 "AssignVehicleTypeSpecifications"
-devtools::use_data(AssignVehicleTypeSpecifications, overwrite = TRUE)
+usethis::use_data(AssignVehicleTypeSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -404,10 +404,9 @@ devtools::use_data(AssignVehicleTypeSpecifications, overwrite = TRUE)
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name AssignVehicleType
 #' @import visioneval
 #' @export
-#'
-
 AssignVehicleType <- function(L) {
   #Set up
   #------

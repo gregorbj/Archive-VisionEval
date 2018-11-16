@@ -401,7 +401,7 @@ RoadDvmtModel_ls$ComSvcDvmtFactor <- local({
 #' vehicle DVMT from household DVMT.
 #' @source CalculateRoadDVMT.R
 "RoadDvmtModel_ls"
-devtools::use_data(RoadDvmtModel_ls, overwrite = TRUE)
+usethis::use_data(RoadDvmtModel_ls, overwrite = TRUE)
 
 rm("HvyTrkDvmt_St", "RuralVmt_StRc", "RuralVmt_StVtRc", "RuralVtProps_StVtRc",
    "UrbanRcProps_StVtRc", "UrbanVmt_StRc", "UrbanVmt_StVtRc",

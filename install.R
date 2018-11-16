@@ -67,7 +67,7 @@ devtools::install_local(normalizePath(file.path(destdir, "sources", "framework",
 #Download and install the required VE modules for VERPAT and VERSPM
 for(module in VE_modules){
 	cat(paste("\nInstalling Module:", module,"\n"))
-	devtools::install_local(normalizePath(file.path(destdir, "sources", "modules", module)))
+	devtools::install_local(normalizePath(file.path(destdir, "sources", "modules", module)), force=TRUE)
 	if(!module %in% rownames(installed.packages())){
 		stop(paste0(module, " cannot be installed."))
 	}

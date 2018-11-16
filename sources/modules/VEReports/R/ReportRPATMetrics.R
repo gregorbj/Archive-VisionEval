@@ -42,7 +42,7 @@ load("inst/extdata/TruckBusAgeDist_.RData")
 #' }
 #' @source CalculateTravelDemand.R script.
 "TruckBusAgeDist_mx"
-devtools::use_data(TruckBusAgeDist_mx, overwrite = TRUE)
+usethis::use_data(TruckBusAgeDist_mx, overwrite = TRUE)
 #================================================
 #SECTION 2: DEFINE THE MODULE DATA SPECIFICATIONS
 #================================================
@@ -189,13 +189,31 @@ ReportRPATMetricsSpecifications <- list(
         "MpgAdjHhPolicy",
         "MpgAdjLtVehPolicy",
         "MpgAdjTruckPolicy",
-        "MpgAdjBusPolicy"),
+        "MpgAdjBusPolicy"
+        ),
       TABLE = "Marea",
       GROUP = "Year",
       TYPE = "double",
       UNITS = "multiplier",
       SIZE = 9,
       PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = items(
+        "MpKwhAdjLtVehHevPolicy",
+        "MpKwhAdjLtVehEvPolicy",
+        "MpKwhAdjBusPolicy",
+        "MpKwhAdjTruckPolicy",
+        "MpKwhAdjHevHhPolicy",
+        "MpKwhAdjEvHhPolicy"
+      ),
+      TABLE = "Marea",
+      GROUP = "Year",
+      TYPE = "double",
+      UNITS = "multiplier",
+      PROHIBIT = c("NA", "< 0"),
+      SIZE = 0,
       ISELEMENTOF = ""
     ),
     item(
@@ -330,8 +348,8 @@ ReportRPATMetricsSpecifications <- list(
       TYPE = "character",
       UNITS = "category",
       PROHIBIT = "NA",
-      SIZE = 10,
-      ISELEMENTOF = c("ULSD", "Biodiesel", "RFG", "CARBOB", "Ethanol", "Cng")
+      SIZE = 11,
+      ISELEMENTOF = c("ULSD", "Biodiesel", "RFG", "CARBOB", "Ethanol", "Cng", "Electricity")
     ),
     item(
       NAME = "Intensity",
@@ -515,7 +533,31 @@ ReportRPATMetricsSpecifications <- list(
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
       SIZE = 0,
-      DESCRIPTION = "Average daily Co2 equivalent greenhouse gass emissions"
+      DESCRIPTION = "Average daily Co2 equivalent greenhouse gass emissions by combustion"
+    ),
+    item(
+      NAME = "ElecKwhFuture",
+      TABLE = "Household",
+      GROUP = "Year",
+      TYPE = "compound",
+      UNITS = "KWH/DAY",
+      NAVALUE = -1,
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      SIZE = 0,
+      DESCRIPTION = "Average daily power consumption in kilo-watt-hours"
+    ),
+    item(
+      NAME = "ElecCo2eFuture",
+      TABLE = "Household",
+      GROUP = "Year",
+      TYPE = "mass",
+      UNITS = "GM",
+      NAVALUE = -1,
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      SIZE = 0,
+      DESCRIPTION = "Average daily Co2 equivalent greenhouse gass emissions by electricity"
     ),
     item(
       NAME = "DailyParkingCostPolicy",
@@ -558,6 +600,25 @@ ReportRPATMetricsSpecifications <- list(
       ISELEMENTOF = ""
     ),
     item(
+      NAME = "MpKwhFuture",
+      TABLE = "Vehicle",
+      GROUP = "Year",
+      TYPE = "compound",
+      UNITS = "MI/KWH",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "PowertrainFuture",
+      TABLE = "Vehicle",
+      GROUP = "Year",
+      TYPE = "character",
+      UNITS = "category",
+      SIZE = 4,
+      PROHIBIT = "NA",
+      ISELEMENTOF = c("Ice", "Hev", "Phev", "Ev")
+    ),
+    item(
       NAME = "TypeFuture",
       TABLE = "Vehicle",
       GROUP = "Year",
@@ -568,7 +629,11 @@ ReportRPATMetricsSpecifications <- list(
       ISELEMENTOF = c("Auto", "LtTrk")
     ),
     item(
-      NAME = "DvmtPolicy",
+      NAME = item(
+        "DvmtPolicy",
+        "EvDvmtPolicy",
+        "HcDvmtPolicy"
+        ),
       TABLE = "Vehicle",
       GROUP = "Year",
       TYPE = "compound",
@@ -582,7 +647,10 @@ ReportRPATMetricsSpecifications <- list(
   Set = items(
     # Save Bzone variables
     item(
-      NAME = "EmissionsMetric",
+      NAME = item(
+        "FuelEmissionsMetric",
+        "PowerEmissionsMetric"
+        ),
       TABLE = "Bzone",
       GROUP = "Year",
       TYPE = "compound",
@@ -590,7 +658,10 @@ ReportRPATMetricsSpecifications <- list(
       PROHIBIT = c("NA", "< 0"),
       SIZE = 0,
       ISELEMENTOF = "",
-      DESCRIPTION = "The amount of greenhouse gas emissions per day by place-types"
+      DESCRIPTION = item(
+        "The amount of greenhouse gas emissions per day by place-types by fuel consumption",
+        "The amount of greenhouse gas emissions per day by place-types by power consumption"
+        )
     ),
     item(
       NAME = "FuelMetric",
@@ -602,6 +673,17 @@ ReportRPATMetricsSpecifications <- list(
       SIZE = 0,
       ISELEMENTOF = "",
       DESCRIPTION = "The amount of fuel consumed per day by place-types"
+    ),
+    item(
+      NAME = "PowerMetric",
+      TABLE = "Bzone",
+      GROUP = "Year",
+      TYPE = "compound",
+      UNITS = "KWH/DAY",
+      PROHIBIT = c("NA", "< 0"),
+      SIZE = 0,
+      ISELEMENTOF = "",
+      DESCRIPTION = "The amount of power consumed per day by place-types"
     ),
     item(
       NAME = "CostsMetric",
@@ -625,10 +707,25 @@ ReportRPATMetricsSpecifications <- list(
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
       SIZE = 0,
-      DESCRIPTION = "Average daily fuel consumption in gallons after policy"
+      DESCRIPTION = "Average daily fuel consumption in gallons after applying policy"
     ),
     item(
-      NAME = "FuelCo2eMetric",
+      NAME = "ElecKwhMetric",
+      TABLE = "Household",
+      GROUP = "Year",
+      TYPE = "compound",
+      UNITS = "KWH/DAY",
+      NAVALUE = -1,
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      SIZE = 0,
+      DESCRIPTION = "Average daily power consumption in KWH after applying policy"
+    ),
+    item(
+      NAME = item(
+        "FuelCo2eMetric",
+        "ElecCo2eMetric"
+        ),
       TABLE = "Household",
       GROUP = "Year",
       TYPE = "mass",
@@ -637,7 +734,10 @@ ReportRPATMetricsSpecifications <- list(
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
       SIZE = 0,
-      DESCRIPTION = "Average daily Co2 equivalent greenhouse gass emissions after policy"
+      DESCRIPTION = item(
+        "Average daily Co2 equivalent greenhouse gass emissions by fuel consumption after policy",
+        "Average daily Co2 equivalent greenhouse gass emissions by power consumption after policy"
+        )
     ),
     item(
       NAME = "FutureCostPerMileMetric",
@@ -806,7 +906,7 @@ ReportRPATMetricsSpecifications <- list(
 #' }
 #' @source ReportRPATMetrics.R script.
 "ReportRPATMetricsSpecifications"
-devtools::use_data(ReportRPATMetricsSpecifications, overwrite = TRUE)
+usethis::use_data(ReportRPATMetricsSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -829,6 +929,7 @@ devtools::use_data(ReportRPATMetricsSpecifications, overwrite = TRUE)
 #' be an ordered sequence from 0 to 32.
 #' @param AdjRatio A number that is the target ratio value.
 #' @return A numeric vector of adjusted distribution.
+#' @name adjustHvyVehAgeDistribution
 #' @import stats
 #' @export
 adjustHvyVehAgeDistribution <- function( CumDist_, AdjRatio ) {
@@ -881,6 +982,7 @@ adjustHvyVehAgeDistribution <- function( CumDist_, AdjRatio ) {
 #' @param Type A string identifying the type of vehicle ("Truck" or "Bus").
 #' @param CurrentYear A integer indicating the current year.
 #' @return A numeric vector that indicates the mileage of vehicles.
+#' @name assignHvyVehFuelEconomy
 #' @export
 #'
 assignHvyVehFuelEconomy <- function( AgeDist_Ag, Mpg__Yr=TrkBusMpg__Yr, Type, CurrYear ) {
@@ -920,6 +1022,7 @@ assignHvyVehFuelEconomy <- function( AgeDist_Ag, Mpg__Yr=TrkBusMpg__Yr, Type, Cu
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name ReportRPATMetrics
 #' @import visioneval VEHouseholdTravel
 #' @export
 ReportRPATMetrics <- function(L) {
@@ -975,7 +1078,7 @@ ReportRPATMetrics <- function(L) {
   }
 
   # Modify the input data set
-  L <- RemoveSuffix(L)
+  L <- RemoveSuffix(L, suffix = "Future")
   L <- RemoveSuffix(L, suffix = "Policy")
 
   #
@@ -990,8 +1093,17 @@ ReportRPATMetrics <- function(L) {
   names(Pop_Pt) <- L$Year$Bzone$Bzone
   # Load results from previous model steps
   HhMpgAdj_Ma <- L$Year$Marea$MpgAdjHh
-  MpgAdj_MaTy <- cbind(LtVeh=L$Year$Marea$MpgAdjLtVeh, Truck=L$Year$Marea$MpgAdjTruck, Bus=L$Year$Marea$MpgAdjBus)
+  HhMpKwhAdjHev_Ma <- L$Year$Marea$MpKwhAdjHevHh
+  HhMpKwhAdjEv_Ma <- L$Year$Marea$MpKwhAdjEvHh
+  MpgAdj_MaTy <- cbind(LtVeh=L$Year$Marea$MpgAdjLtVeh,
+                       Truck=L$Year$Marea$MpgAdjTruck,
+                       Bus=L$Year$Marea$MpgAdjBus)
+  MpKwhAdj_MaTy <- cbind(LtVehEv=L$Year$Marea$MpKwhAdjLtVehEv,
+                         LtVehHev=L$Year$Marea$MpKwhAdjLtVehHev,
+                         Truck=L$Year$Marea$MpKwhAdjTruck,
+                         Bus=L$Year$Marea$MpKwhAdjBus)
   rownames(MpgAdj_MaTy) <- "Metro"
+  rownames(MpKwhAdj_MaTy) <- "Metro"
   Dvmt_MaTy <- cbind(LtVeh=L$Year$Marea$LtVehDvmt, Truck=L$Year$Marea$TruckDvmt, Bus=L$Year$Marea$BusDvmt)
   rownames(Dvmt_MaTy) <- "Metro"
   Costs_ <- L$Global$Model$Costs
@@ -1012,6 +1124,12 @@ ReportRPATMetrics <- function(L) {
   if( any( IsMetro_ ) ) {
     MpgAdj <- HhMpgAdj_Ma
     Vehicle_df$Mileage <- Vehicle_df$Mileage * MpgAdj
+    MpKwhHev <- HhMpKwhAdjHev_Ma
+    Vehicle_df$MpKwh[Vehicle_df$Powertrain %in% c("Hev","Phev")] <-
+      Vehicle_df$MpKwh[Vehicle_df$Powertrain %in% c("Hev","Phev")] * MpKwhHev
+    MpKwhEv <- HhMpKwhAdjEv_Ma
+    Vehicle_df$MpKwh[Vehicle_df$Powertrain %in% c("Ev")] <-
+      Vehicle_df$MpKwh[Vehicle_df$Powertrain %in% c("Ev")] * MpKwhEv
   }
 
   # Calculate average fuel CO2e per gallon
@@ -1019,17 +1137,33 @@ ReportRPATMetrics <- function(L) {
   FuelProp <- data.frame(L$Global$FuelProp)
   FuelComp <- data.frame(L$Global$FuelComp)
   FuelCo2Ft <- data.frame(L$Global$Fuel)
-  AveFuelCo2e_ <- VEHouseholdTravel::calculateAveFuelCo2e( L$G$Year, FuelProp=FuelProp, FuelComp=FuelComp,
-                                        FuelCo2Ft=FuelCo2Ft,
-                                        MJPerGallon=121, OutputType="MetricTons" )
+  AveFuelCo2e_ <- VEHouseholdTravel::calculateAveFuelCo2e( L$G$Year,
+                                                           FuelProp=FuelProp,
+                                                           FuelComp=FuelComp,
+                                                           FuelCo2Ft=FuelCo2Ft,
+                                                           MJPerGallon=121,
+                                                           OutputType="MetricTons" )
+  AveElectricCo2e_ <- VEHouseholdTravel::calculateAveElectricityCo2e(L$G$Year,
+                                                                     PowerCo2Ft=FuelCo2Ft,
+                                                                     OutputType="MetricTons" )
 
   # Calculate consumption and production at a household level
   #----------------------------------------------------------
-  ModelVar_ <- c("HhId" ,"Mileage", "Type", "Dvmt")
-  FuelCo2e_ <- VEHouseholdTravel::calculateVehFuelCo2(Hh_df[, c("ZeroVeh","HhId", "Dvmt")], Vehicle_df[ , ModelVar_ ], AveFuelCo2e=AveFuelCo2e_ )
-  Hh_df$FuelGallons <- FuelCo2e_$FuelGallons
-  Hh_df$FuelCo2e <- FuelCo2e_$FuelCo2e
-  rm( AveFuelCo2e_, FuelCo2e_ )
+  Vehicle_df$Mpkwh <- Vehicle_df$MpKwh
+  ModelVar_ <- c("HhId" ,"Mileage", "Mpkwh", "Type", "EvDvmt", "HcDvmt")
+  FuelElecCo2e_ <- VEHouseholdTravel::calculateVehFuelElectricCo2(
+    Hh_df[, c("ZeroVeh","HhId", "Dvmt")],
+    Vehicle_df[ , ModelVar_ ],
+    AveFuelCo2e=AveFuelCo2e_,
+    AveElectricCo2e = AveElectricCo2e_
+    )
+  Vehicle_df$Mpkwh <- NULL
+
+  Hh_df$FuelGallons <- FuelElecCo2e_$FuelGallons
+  Hh_df$FuelCo2e <- FuelElecCo2e_$FuelCo2e
+  Hh_df$ElecKwh <- FuelElecCo2e_$ElecKwh
+  Hh_df$ElecCo2e <- FuelElecCo2e_$ElecCo2e
+  rm( AveFuelCo2e_, AveElectricCo2e_, FuelElecCo2e_ )
   rm( ModelVar_ )
   gc()
 
@@ -1037,22 +1171,32 @@ ReportRPATMetrics <- function(L) {
   #Performance Metrics	Fuel.Pt.Rdata	Fuel Consumption	Environment and Energy Impacts
 
   Pt <- as.character(L$Year$Bzone$Bzone)
-  #Tabulate Co2e
-  Emissions_Pt <- Pop_Pt * 0
-  Emissions_Pt[Pt] <- tapply( Hh_df$FuelCo2e, Hh_df$HhPlaceTypes, sum )[Pt]
-  Emissions_Pt[is.na(Emissions_Pt)] <- 0
+  #Tabulate Fuel Co2e
+  FuelEmissions_Pt <- Pop_Pt * 0
+  FuelEmissions_Pt[Pt] <- tapply( Hh_df$FuelCo2e, Hh_df$HhPlaceTypes, sum )[Pt]
+  FuelEmissions_Pt[is.na(FuelEmissions_Pt)] <- 0
 
   #Tabulate Fuel
   Fuel_Pt <- Pop_Pt * 0
   Fuel_Pt[Pt] <- tapply( Hh_df$FuelGallons, Hh_df$HhPlaceTypes, sum )[Pt]
   Fuel_Pt[is.na(Fuel_Pt)] <- 0
 
+  #Tabulate Power Co2e
+  PowerEmissions_Pt <- Pop_Pt * 0
+  PowerEmissions_Pt[Pt] <- tapply( Hh_df$ElecCo2e, Hh_df$HhPlaceTypes, sum )[Pt]
+  PowerEmissions_Pt[is.na(PowerEmissions_Pt)] <- 0
+
+  #Tabulate Power
+  Power_Pt <- Pop_Pt * 0
+  Power_Pt[Pt] <- tapply( Hh_df$ElecKwh, Hh_df$HhPlaceTypes, sum )[Pt]
+  Power_Pt[is.na(Power_Pt)] <- 0
+
 
   # Calculate household travel costs
   #---------------------------------
   Hh_df$DailyPkgCost <- Hh_df$DailyParkingCost
   Hh_df$DailyParkingCost <- NULL
-  ModelVar_ <- c( "FuelGallons", "FuelCo2e", "Dvmt", "DailyPkgCost", "Vehicles" )
+  ModelVar_ <- c("HhId", "FuelGallons", "FuelCo2e", "ElecKwh", "ElecCo2e", "Dvmt", "DailyPkgCost", "Vehicles" )
   Costs_ <- VEHouseholdTravel::calculateCosts( Hh_df[ , ModelVar_ ], Costs_)
   Hh_df$FutureCostPerMile <- Costs_$FutrCostPerMi
   Hh_df$TotalCost <- Costs_$TotCost
@@ -1066,7 +1210,7 @@ ReportRPATMetrics <- function(L) {
   Costs_Pt[is.na(Costs_Pt)] <- 0
 
   #Clean up
-  rm ( HhMpgAdj_Ma )
+  rm ( HhMpgAdj_Ma, HhMpKwhAdjEv_Ma, HhMpKwhAdjHev_Ma)
 
   #CALCULATE METROPOLITAN AREA HEAVY VEHICLE CONSUMPTION AND EMISSIONS
   #===================================================================
@@ -1262,13 +1406,17 @@ ReportRPATMetrics <- function(L) {
   #Return the outputs list
   Out_ls$Year <- list(
     Bzone = list(
-      Emissions = Emissions_Pt,
+      FuelEmissions = FuelEmissions_Pt,
       Fuel = Fuel_Pt,
+      PowerEmissions = PowerEmissions_Pt,
+      Power = Power_Pt,
       Costs = Costs_Pt
     ),
     Household = list(
       FuelGallons = Hh_df$FuelGallons,
       FuelCo2e = Hh_df$FuelCo2e,
+      ElecKwh = Hh_df$ElecKwh,
+      ElecCo2e = Hh_df$ElecCo2e,
       FutureCostPerMile = Hh_df$FutureCostPerMile,
       TotalCost = Hh_df$TotalCost
     ),

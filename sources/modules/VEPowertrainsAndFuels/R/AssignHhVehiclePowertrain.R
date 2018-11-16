@@ -184,7 +184,7 @@ rm(Vm, Rg, smoothLookup, calcElectricProp)
 #' }
 #' @source CalculateHhEnergyAndEmissions.R script.
 "PhevElecProp_ls"
-devtools::use_data(PhevElecProp_ls, overwrite = TRUE)
+usethis::use_data(PhevElecProp_ls, overwrite = TRUE)
 
 
 #================================================
@@ -554,7 +554,7 @@ AssignHhVehiclePowertrainSpecifications <- list(
 #' }
 #' @source AssignHhVehiclePowertrain.R script.
 "AssignHhVehiclePowertrainSpecifications"
-devtools::use_data(AssignHhVehiclePowertrainSpecifications, overwrite = TRUE)
+usethis::use_data(AssignHhVehiclePowertrainSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -592,9 +592,8 @@ devtools::use_data(AssignHhVehiclePowertrainSpecifications, overwrite = TRUE)
 #' @param M A list the module functions of modules called by this module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
-#' @import visioneval
-#' @import VEHouseholdTravel
-#' @import stats
+#' @name AssignHhVehiclePowertrain
+#' @import visioneval VEHouseholdTravel stats
 #' @export
 #'
 AssignHhVehiclePowertrain <- function(L, M) {

@@ -4,8 +4,9 @@
 \alias{processRunningTasks}
 \title{Function that processes the tasks running currently}
 \usage{
-processRunningTasks(asyncTasksRunning = vector(mode = "list"), wait = FALSE,
-  catchErrors = TRUE, debug = FALSE, maximumTasksToResolve = NULL)
+processRunningTasks(asyncTasksRunning = vector(mode = "list"),
+  wait = FALSE, catchErrors = TRUE, debug = FALSE,
+  maximumTasksToResolve = NULL)
 }
 \arguments{
 \item{asyncTasksRunning}{A list of asynchronous tasks running currently.}

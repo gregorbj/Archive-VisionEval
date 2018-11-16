@@ -192,7 +192,7 @@ DriverModel_ls <- list(
 #' }
 #' @source AssignDrivers.R script.
 "DriverModel_ls"
-devtools::use_data(DriverModel_ls, overwrite = TRUE)
+usethis::use_data(DriverModel_ls, overwrite = TRUE)
 
 
 #================================================
@@ -461,7 +461,7 @@ AssignDriversSpecifications <- list(
 #' }
 #' @source AssignDrivers.R script.
 "AssignDriversSpecifications"
-devtools::use_data(AssignDriversSpecifications, overwrite = TRUE)
+usethis::use_data(AssignDriversSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -489,6 +489,7 @@ devtools::use_data(AssignDriversSpecifications, overwrite = TRUE)
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name AssignDrivers
 #' @import visioneval stats
 #' @export
 AssignDrivers <- function(L) {

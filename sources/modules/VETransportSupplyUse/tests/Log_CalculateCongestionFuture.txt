@@ -1,100 +1,30 @@
-RPAT Pilot
+RPAT Base Scenario
 Pilot RPAT module in VisionEval
-2018-02-27_21:11:35
+2018-05-30_09:57:51
 
-2018-02-27 21:11:36 : Testing CalculateCongestionFuture. 
+2018-05-30 09:57:51 : Testing CalculateCongestionFuture. 
 
-2018-02-27 21:11:38 : Attempting to load datastore. 
+2018-05-30 09:57:51 : Attempting to load datastore. 
 
-2018-02-27 21:11:41 : Datastore loaded. 
+2018-05-30 09:57:51 : Datastore loaded. 
 
-2018-02-27 21:11:42 : Attempting to load and check specifications. 
+2018-05-30 09:57:51 : Attempting to load and check specifications. 
 
-2018-02-27 21:11:45 : Module specifications successfully loaded and checked. 
+2018-05-30 09:57:52 : Module specifications successfully loaded and checked for errors. 
 
-2018-02-27 21:11:46 : Attempting to process, check and load module inputs. 
+2018-05-30 09:57:52 : No inputs to process. 
 
-2018-02-27 21:11:50 : No inputs to process. 
+2018-05-30 09:57:52 : Checking whether datastore contains all datasets in Get specifications. 
 
-2018-02-27 21:11:50 : Checking whether datastore contains all datasets in Get specifications. 
+2018-05-30 09:57:52 : Datastore contains all datasets identified in module Get specifications. 
 
-RPAT Pilot
-Pilot RPAT module in VisionEval
-2018-02-27_21:14:53
+2018-05-30 09:57:52 : Running module and checking whether outputs meet Set specifications. 
 
-2018-02-27 21:14:54 : Testing CalculateCongestionFuture. 
+2018-05-30 09:57:52 : Also saving module outputs to datastore. 
 
-2018-02-27 21:14:59 : Attempting to load datastore. 
+2018-05-30 09:58:01 : Module run successfully and outputs meet Set specifications. 
 
-2018-02-27 21:15:02 : Datastore loaded. 
+2018-05-30 09:58:01 : Module outputs saved to datastore. 
 
-2018-02-27 21:15:04 : Attempting to load and check specifications. 
-
-2018-02-27 21:15:09 : Module specifications successfully loaded and checked. 
-
-2018-02-27 21:15:09 : Attempting to process, check and load module inputs. 
-
-2018-02-27 21:15:11 : No inputs to process. 
-
-2018-02-27 21:15:12 : Checking whether datastore contains all datasets in Get specifications. 
-
-RPAT Pilot
-Pilot RPAT module in VisionEval
-2018-02-27_21:17:57
-
-2018-02-27 21:17:57 : Testing CalculateCongestionFuture. 
-
-2018-02-27 21:18:22 : Attempting to load datastore. 
-
-RPAT Pilot
-Pilot RPAT module in VisionEval
-2018-02-27_21:55:07
-
-2018-02-27 21:55:07 : Testing CalculateCongestionFuture. 
-
-2018-02-27 21:55:09 : Attempting to load datastore. 
-
-2018-02-27 21:55:11 : Datastore loaded. 
-
-2018-02-27 21:55:11 : Attempting to load and check specifications. 
-
-2018-02-27 21:55:13 : Module specifications successfully loaded and checked. 
-
-2018-02-27 21:55:13 : Attempting to process, check and load module inputs. 
-
-2018-02-27 21:55:15 : No inputs to process. 
-
-2018-02-27 21:55:15 : Checking whether datastore contains all datasets in Get specifications. 
-
-RPAT Pilot
-Pilot RPAT module in VisionEval
-2018-02-27_22:10:44
-
-2018-02-27 22:10:44 : Testing CalculateCongestionFuture. 
-
-2018-02-27 22:10:45 : Attempting to load datastore. 
-
-2018-02-27 22:10:46 : Datastore loaded. 
-
-2018-02-27 22:10:46 : Attempting to load and check specifications. 
-
-2018-02-27 22:10:47 : Module specifications successfully loaded and checked. 
-
-2018-02-27 22:10:47 : Attempting to process, check and load module inputs. 
-
-2018-02-27 22:10:48 : No inputs to process. 
-
-2018-02-27 22:10:48 : Checking whether datastore contains all datasets in Get specifications. 
-
-2018-02-27 22:11:03 : Datastore contains all datasets identified in module Get specifications. 
-
-2018-02-27 22:11:03 : Running module and checking whether outputs meet Set specifications. 
-
-2018-02-27 22:11:03 : Also saving module outputs to datastore. 
-
-2018-02-27 22:11:19 : Module run successfully and outputs meet Set specifications. 
-
-2018-02-27 22:11:19 : Module outputs saved to datastore. 
-
-2018-02-27 22:11:19 : Congratulations. Module CalculateCongestionFuture passed all tests. 
+2018-05-30 09:58:01 : Congratulations. Module CalculateCongestionFuture passed all tests. 
 

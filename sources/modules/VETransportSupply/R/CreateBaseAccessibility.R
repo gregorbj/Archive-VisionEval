@@ -205,7 +205,7 @@ CreateBaseAccessibilitySpecifications <- list(
 #' }
 #' @source CreateBaseAccessibility.R script.
 "CreateBaseAccessibilitySpecifications"
-devtools::use_data(CreateBaseAccessibilitySpecifications, overwrite = TRUE)
+usethis::use_data(CreateBaseAccessibilitySpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -232,6 +232,7 @@ devtools::use_data(CreateBaseAccessibilitySpecifications, overwrite = TRUE)
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name CreateBaseAccessibility
 #' @import visioneval
 #' @export
 CreateBaseAccessibility <- function(L) {

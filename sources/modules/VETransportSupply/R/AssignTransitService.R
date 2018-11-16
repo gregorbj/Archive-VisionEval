@@ -97,6 +97,7 @@ ServiceInp_ls <- items(
 #' UZABusEqRevMile_df: data on bus equivalent revenue miles by urbanized area,
 #' VehMiFactors_df: factors to convert revenue miles by mode into vehicle miles
 #' by mode.
+#' @name estimateTransitModel
 #' @import stats
 #' @export
 estimateTransitModel <- function() {
@@ -266,7 +267,7 @@ rm(ServiceInp_ls)
 #' }
 #' @source AssignTransitService.R script.
 "BusEquivalents_df"
-devtools::use_data(BusEquivalents_df, overwrite = TRUE)
+usethis::use_data(BusEquivalents_df, overwrite = TRUE)
 
 #Save the vehicle mile factors
 #-----------------------------
@@ -297,7 +298,7 @@ devtools::use_data(BusEquivalents_df, overwrite = TRUE)
 #' }
 #' @source AssignTransitService.R script.
 "VehMiFactors_df"
-devtools::use_data(VehMiFactors_df, overwrite = TRUE)
+usethis::use_data(VehMiFactors_df, overwrite = TRUE)
 
 #Save the urbanized area bus equivalency data
 #--------------------------------------------
@@ -318,7 +319,7 @@ devtools::use_data(VehMiFactors_df, overwrite = TRUE)
 #' }
 #' @source AssignTransitService.R script.
 "UZABusEqRevMile_df"
-devtools::use_data(UZABusEqRevMile_df, overwrite = TRUE)
+usethis::use_data(UZABusEqRevMile_df, overwrite = TRUE)
 
 #Clean up
 rm(TransitParam_ls)
@@ -489,7 +490,7 @@ AssignTransitServiceSpecifications <- list(
 #' }
 #' @source AssignTransitService.R script.
 "AssignTransitServiceSpecifications"
-devtools::use_data(AssignTransitServiceSpecifications, overwrite = TRUE)
+usethis::use_data(AssignTransitServiceSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -512,6 +513,7 @@ devtools::use_data(AssignTransitServiceSpecifications, overwrite = TRUE)
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name AssignTransitService
 #' @import visioneval
 #' @export
 AssignTransitService <- function(L) {

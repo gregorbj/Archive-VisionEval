@@ -17,10 +17,11 @@ Depends: R (>= 3.1.0)
 Imports:
     visioneval,
     devtools,
+    usethis,
     VE2001NHTS,
     data.table,
     pscl
 Suggests:
     knitr
 VignetteBuilder: knitr
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0.9000
