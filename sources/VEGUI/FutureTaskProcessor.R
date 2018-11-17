@@ -170,7 +170,6 @@ processRunningTasks <-
                 )
               )
               print(sys.calls())
-              backtrace(asyncFutureObject)
             }
           )#end withCallingHandlers
         } #end if catch errors

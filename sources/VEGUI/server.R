@@ -143,13 +143,15 @@ server <- function(input, output, session) {
     #From now on we will get the current ModelState by reading the object stored on disk
     #store the current ModelState in the global options
     #so that the process will use the same log file as the one we have already started tracking...
+
+    debugConsole('getScriptOutput entered')
+    setwd(dirname(datapath))
+    debugConsole(paste('Working directory is', getwd()))
+
     debugConsole('Calling readModelState')
     ModelState_ls <- readModelState()
     options("visioneval.preExistingModelState" = ModelState_ls)
-    debugConsole("getScriptOutput entered")
     debugConsole(paste("Model output is captured in", captureFile))
-    setwd(dirname(datapath))
-    debugConsole(paste('Working directory is', getwd()))
     debugConsole(paste('Calling source on', datapath))
     capture.output(source(datapath), file = captureFile)
     debugConsole(paste('Captured source from', datapath))
