@@ -334,7 +334,6 @@ rm(MaxRatio)
 
 #Define a function to estimate the SOV proportion
 #------------------------------------------------
-Data_df <- Hh_df
 estimateSovPropModel <- function(Data_df, StartTerms_) {
   #Define function to prepare inputs for estimating model
   prepIndepVar <- function(In_df) {
@@ -366,7 +365,7 @@ estimateSovPropModel <- function(Data_df, StartTerms_) {
     EndTerms_ <- EndTerms_[-grep("(Intercept)", EndTerms_)]
   }
   SovModel_LM <- lm(makeFormula(EndTerms_), data = EstData_df)
-  #Define function to transform model outputs and establish income groups
+  #Define function to transform model outputs
   transformResult <- function(Result_) {
     Odds_ <- exp(Result_)
     Odds_ / (1 + Odds_)
