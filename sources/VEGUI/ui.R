@@ -186,7 +186,7 @@ ui <- fluidPage(
       h3("Output files"),
       selectInput(OUTPUT_FILE, label="", choices=""),
       verbatimTextOutput(OUTPUT_FILE_PATH, placeholder=TRUE),
-      downloadButton(outputId="btn_outputId", label="Download data",
+      downloadButton(outputId=OUTPUT_FILE_SAVE_BUTTON, label="Download data",
                      class="btn-primary"),
       br(),
       rhandsontable::rHandsontableOutput(OUTPUT_FILE_RHT)
