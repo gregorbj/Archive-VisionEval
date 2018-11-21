@@ -51,7 +51,7 @@ replaceVolumeroots <- function(mystr, modelname){
 file.rename("global.R","global.R.tmp")
 
 # Read in the script to modify
-myapp <- readLines("global.R")
+myapp <- readLines("global.R.tmp")
 
 #============================================
 #SECTION 3: RUN THE TESTS

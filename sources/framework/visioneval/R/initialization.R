@@ -167,8 +167,8 @@ readModelState <- function(Names_ = "All", FileName = "ModelState.Rda") {
         i <- i + 1
       }
     }
+    if ( i > 5 ) stop('Could not load ', FileName)
   }
-  if ( i > 5 ) stop('Could not load ', FileName)
 
   # Commented out the following because it looks only in the local environment
   #if ("ModelState_ls" %in% ls()) State_ls <- get("ModelState_ls")
