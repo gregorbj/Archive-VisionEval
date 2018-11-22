@@ -75,7 +75,7 @@ DvmtLmModels_ls$NonMetro <- list(
 #' }
 #' @source CalculateTravelDemand.R script.
 "DvmtLmModels_ls"
-devtools::use_data(DvmtLmModels_ls, overwrite = TRUE)
+usethis::use_data(DvmtLmModels_ls, overwrite = TRUE)
 
 
 #================================================
@@ -663,7 +663,7 @@ CalculateTravelDemandSpecifications <- list(
 #' }
 #' @source CalculateTravelDemand.R script.
 "CalculateTravelDemandSpecifications"
-devtools::use_data(CalculateTravelDemandSpecifications, overwrite = TRUE)
+usethis::use_data(CalculateTravelDemandSpecifications, overwrite = TRUE)
 
 
 #=======================================================
