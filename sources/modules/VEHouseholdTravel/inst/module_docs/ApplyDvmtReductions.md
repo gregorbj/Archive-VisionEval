@@ -1,8 +1,8 @@
 
 # ApplyDvmtReductions Module
-### November 12, 2018
+### November 21, 2018
 
-This module applies the computed proportional reductions in household DVMT due to the application of travel demand management programs and the diversion of single-occupant vehicle travel to bicycles, electric bicycles, or other light-weight vehicles.
+This module applies the computed proportional reductions in household DVMT due to the application of travel demand management programs and the diversion of single-occupant vehicle travel to bicycles, electric bicycles, or other light-weight vehicles. It also computes added bike trips due to the diversion.
 
 ## Model Parameter Estimation
 
@@ -10,7 +10,7 @@ This module has no estimated model parameters.
 
 ## How the Module Works
 
-The module loads from the datastore the proportional reductions in household DVMT calculated by the AssignDemandManagement module and DivertSovTravel module. It converts the proportional reductions to proportions of DVMT (i.e. 1 - proportional reduction), multiplies them, and multiplies by household DVMT to arrive at a revised household DVMT which is saved to the datastore.
+The module loads from the datastore the proportional reductions in household DVMT calculated by the AssignDemandManagement module and DivertSovTravel module. It converts the proportional reductions to proportions of DVMT (i.e. 1 - proportional reduction), multiplies them, and multiplies by household DVMT to arrive at a revised household DVMT which is saved to the datastore. It computes the added 'bike' trips that would occur due to the diversion by calculating the diverted SOV travel and dividing by the average SOV trip length.
 
 
 ## User Inputs
@@ -37,6 +37,7 @@ ISELEMENTOF - Categorical values that are permitted. Values in the datastore are
 |:--------------------|:---------|:-----|:--------|:----------|:------------|:-----------|
 |Dvmt                 |Household |Year  |compound |MI/DAY     |NA, < 0      |            |
 |PropDvmtDiverted     |Household |Year  |double   |proportion |NA, < 0, > 1 |            |
+|AveTrpLenDiverted    |Household |Year  |distance |MI         |NA, < 0      |            |
 |PropTdmDvmtReduction |Household |Year  |double   |proportion |NA, < 0, > 1 |            |
 
 ## Datasets Produced by the Module
