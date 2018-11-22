@@ -5,9 +5,9 @@
 #<doc>
 #
 ## ApplyDvmtReductions Module
-#### November 12, 2018
+#### November 21, 2018
 #
-#This module applies the computed proportional reductions in household DVMT due to the application of travel demand management programs and the diversion of single-occupant vehicle travel to bicycles, electric bicycles, or other light-weight vehicles.
+#This module applies the computed proportional reductions in household DVMT due to the application of travel demand management programs and the diversion of single-occupant vehicle travel to bicycles, electric bicycles, or other light-weight vehicles. It also computes added bike trips due to the diversion.
 #
 ### Model Parameter Estimation
 #
@@ -15,7 +15,7 @@
 #
 ### How the Module Works
 #
-#The module loads from the datastore the proportional reductions in household DVMT calculated by the AssignDemandManagement module and DivertSovTravel module. It converts the proportional reductions to proportions of DVMT (i.e. 1 - proportional reduction), multiplies them, and multiplies by household DVMT to arrive at a revised household DVMT which is saved to the datastore.
+#The module loads from the datastore the proportional reductions in household DVMT calculated by the AssignDemandManagement module and DivertSovTravel module. It converts the proportional reductions to proportions of DVMT (i.e. 1 - proportional reduction), multiplies them, and multiplies by household DVMT to arrive at a revised household DVMT which is saved to the datastore. It computes the added 'bike' trips that would occur due to the diversion by calculating the diverted SOV travel and dividing by the average SOV trip length.
 #
 #</doc>
 
@@ -63,6 +63,15 @@ ApplyDvmtReductionsSpecifications <- list(
       TYPE = "double",
       UNITS = "proportion",
       PROHIBIT = c("NA", "< 0", "> 1"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "AveTrpLenDiverted",
+      TABLE = "Household",
+      GROUP = "Year",
+      TYPE = "distance",
+      UNITS = "MI",
+      PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = ""
     ),
     item(
@@ -162,7 +171,7 @@ ApplyDvmtReductions <- function(L) {
   #Daily miles diverted
   SovMilesDivert_Hh <- L$Year$Household$PropDvmtDiverted * L$Year$Household$Dvmt
   #Yearly trips diverted
-  SovToBikeTrip_Hh <- SovModel_ls$TripsPerMile * SovMilesDivert_Hh * 365
+  SovToBikeTrip_Hh <- 365 * SovMilesDivert_Hh / L$Year$Household$AveTrpLenDiverted
 
   #Return the results
   #------------------
