@@ -39,35 +39,10 @@
 #SECTION 1: ESTIMATE AND SAVE MODEL PARAMETERS
 #=============================================
 #
+#' @importFrom utils capture.output
+#
 #Define a function to estimate driver choice model
 #-------------------------------------------------
-#' Estimate housing choice model
-#'
-#' \code{estimateDriverModel} estimates a binomial logit model for choosing
-#' between driver and non-driver
-#'
-#' This function estimates a binomial logit model for predicting whether a
-#' person is a driver or a non-driver
-#'
-#' @param Data_df A data frame containing estimation data.
-#' @param StartTerms_ A character vector of the terms of the model to be
-#' tested in the model.
-#' @param ValidationProp A numeric value between 0 and 0.5 which specified
-#' the proportion of Data_df that will be the validation dataset. The remainder
-#' will be the training dataset.
-#' @return A list which has the following components:
-#' Type: a string identifying the type of model ("binomial"),
-#' Formula: a string representation of the model equation,
-#' PrepFun: a function that prepares inputs to be applied in the binomial model,
-#' OutFun: a function that transforms the result of applying the binomial model.
-#' Summary: the summary of the binomial model estimation results.
-#' Anova: the results of analysis of variance of the model.
-#' PropCorrectlyPredicted: the proportion of validation set observed values that
-#' are correctly predicted by the estimated. The model is estimated using 80% of
-#' the data and validated using the remaining 20%. The proportion of correct
-#' predictions for the validation data set is calculated.
-#' @import visioneval stats
-#Define function to estimate the income model
 estimateDriverModel <- function(Data_df, StartTerms_, ValidationProp) {
   #Define function to prepare inputs for estimating model
   prepIndepVar <-
