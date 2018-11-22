@@ -207,15 +207,6 @@ SovTour_dt <- HhTours_dt[Distance <= 20 & Persons == 1,]
 #Calculate median trip length in SOV tours 20 miles or less
 SovTripLength_ <- SovTour_dt$Distance / SovTour_dt$Trips
 SovTripLength <- round(median(SovTripLength_), 2)
-#SovModel_ls$TripsPerMile <- 1 / SovTripLength
-png("data/sov_trip_length_dist.png", width = 480, height = 480)
-plot(density(SovTripLength_, width = 2),
-     xlab = "Trip Length (miles)", ylab = "Probability Density",
-     main = "Trip Length Distribution of SOV Tours <= 20 Miles")
-abline(v = SovTripLength, lty = 2)
-text(SovTripLength, 0.2, pos = 4,
-     labels = paste("Median =", round(SovTripLength, 1), "miles"))
-dev.off()
 #Sum up SOV tour distances within 20 miles by household
 SovTourByHh_dt <- SovTour_dt[, sum(Distance), by = Houseid]
 Hh_df$Sov20MiDvmt <-
