@@ -104,30 +104,9 @@ Hh_df$NonDriverAdult <- Hh_df$Adult - Hh_df$DriverAdult
 Hh_df$NonDriverElder <- Hh_df$Elder - Hh_df$DriverElder
 Hh_df$HhSize <- Hh_df$Hhsize
 
-#Define function to estimate alternative mode trip model for a mode
-#------------------------------------------------------------------
-#' Estimate a hurdle for alternative mode trips
-#'
-#' \code{estimateAltModeTripModel} estimates a hurdle model for calculating
-#' alternative mode trips.
-#'
-#' The function estimates a Hurdle regression model for calculating trips
-#' for an alternative mode (walk, bike, or public transit). The function
-#' estimates the model and outputs the model in the form of text strings, one
-#' for the zero trip model and one for the count model. It returns a list having
-#' three components: 'Count' which contains a string representation of the count
-#' model component, 'Zero' which contains a string representation of the zero
-#' model component, and 'Summary' which contains summary information about the
-#' model.
-#' @param Data_df a data frame containing the model estimation data
-#' @param DepVar a string that is the dependent variable name
-#' @param IndepVars_ a string vector of the names of the independent variables
-#' @return a list having three components: 'Count' which contains a string
-#' representation of the count model component, 'Zero' which contains a
-#' string representation of the zero model component, 'Summary' which contains
-#' the model summary.
+#Define function to estimate hurdle model for alternative mode trips
+#-------------------------------------------------------------------
 #' @import pscl
-#' @export
 estimateAltModeTripModel <- function(Data_df, DepVar, IndepVars_) {
 
   #Estimate hurdle model
