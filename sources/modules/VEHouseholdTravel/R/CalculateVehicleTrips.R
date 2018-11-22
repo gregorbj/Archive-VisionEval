@@ -168,7 +168,7 @@ simAveVehTrpLen <- function(Data_df, DepVar, IndepVars_, Pow) {
     binarySearch(testSd, SearchRange_ = sort(c(ObsSd, EstSd)))
   }
   #Calculate dispersion factor
-  TrpLenSd <- calcDispersonFactor(Data_df$PowVehTrpLen, PredVehTrpLen_)
+  TrpLenSd <- calcDispersonFactor(Data_df[,DepVar], PredVehTrpLen_)
   #Define function to simulate trip length for random day
   simulateTrpLen <- function(PowTrpLen_, SD, Pow) {
     N <- length(PowTrpLen_)
