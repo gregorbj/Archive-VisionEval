@@ -411,7 +411,7 @@ CalculateInducedDemandSpecifications <- list(
 #' }
 #' @source CalculateInducedDemand.R script.
 "CalculateInducedDemandSpecifications"
-devtools::use_data(CalculateInducedDemandSpecifications, overwrite = TRUE)
+usethis::use_data(CalculateInducedDemandSpecifications, overwrite = TRUE)
 
 
 #=======================================================
