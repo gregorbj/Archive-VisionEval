@@ -55,6 +55,7 @@
 #based on the supply of housing of each type and the demographic and
 #income characteristics of the household.
 
+
 #Define a function to estimate housing choice model
 #--------------------------------------------------
 #' Estimate housing choice model
@@ -76,6 +77,7 @@
 #' OutFun: a function that transforms the result of applying the binomial model.
 #' Summary: the summary of the binomial model estimation results.
 #' @import visioneval stats
+#' @importFrom utils capture.output
 #Define function to estimate the income model
 estimateHousingModel <- function(Data_df, StartTerms_) {
   #Define function to prepare inputs for estimating model
