@@ -208,6 +208,7 @@ CalculateUrbanMixMeasureSpecifications <- list(
       NAME =
         items(
           "UrbanPop",
+          "TownPop",
           "RuralPop"),
       TABLE = "Bzone",
       GROUP = "Year",
@@ -220,6 +221,7 @@ CalculateUrbanMixMeasureSpecifications <- list(
       NAME =
         items(
           "UrbanArea",
+          "TownArea",
           "RuralArea"),
       TABLE = "Bzone",
       GROUP = "Year",
@@ -243,6 +245,16 @@ CalculateUrbanMixMeasureSpecifications <- list(
       GROUP = "Year",
       TYPE = "character",
       UNITS = "ID",
+      PROHIBIT = "",
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "HhId",
+      TABLE = "Household",
+      GROUP = "Year",
+      TYPE = "character",
+      UNITS = "ID",
+      NAVALUE = "NA",
       PROHIBIT = "",
       ISELEMENTOF = ""
     ),
@@ -331,33 +343,81 @@ CalculateUrbanMixMeasure <- function(L) {
   Hh_df <- data.frame(L$Year$Household)
   Hh_df$IsSF <- with(Hh_df, as.numeric(HouseType == "SF"))
 
-  #Calculate urban mix-use probability
-  #-----------------------------------
+  #Set up data to calculate urban mix-use probability
+  #--------------------------------------------------
   #Population density
   Bz_df$LocalPopDensity <-
-    with(Bz_df, (UrbanPop + RuralPop) / (UrbanArea + RuralArea))
+    with(Bz_df, (UrbanPop + TownPop + RuralPop) / (UrbanArea + TownArea + RuralArea))
   Bz_df$LocalPopDensity[is.na(Bz_df$LocalPopDensity)] <- 0
   Hh_df$LocalPopDensity <-
     Bz_df$LocalPopDensity[match(Hh_df$Bzone, Bz_df$Bzone)]
-  Hh_df$MixUseProp <-
-    Bz_df$MixUseProp[match(Hh_df$Bzone, Bz_df$Bzone)]
-  Data_df <- split(Hh_df[, c("LocalPopDensity", "IsSF", "MixUseProp")], Hh_df$Bzone)
-  #Predict urban mixed use measure
+  #Add target urban mixed-use proportion to household records
+  Hh_df$MixUseProp <- Bz_df$MixUseProp[match(Hh_df$Bzone, Bz_df$Bzone)]
+  #Split household data frame by Bzone
+  Data_df <-
+    split(Hh_df[, c("HhId", "LocalPopDensity", "IsSF", "MixUseProp")],
+          Hh_df$Bzone)
+
+  #Define a function to apply the model to match mix target if there is one
+  #------------------------------------------------------------------------
+  matchMixTarget <- function(D_df, MixTarget) {
+    D_df$Intercept <- 1
+    Odds_ <- exp(eval(parse(text = UrbanMixModel_ls$Formula), envir = D_df))
+    Prob_ <- Odds_ / (1 + Odds_)
+    Rand_ <- runif(nrow(D_df))
+    #Find out whether prediction is matching, under, or over
+    NPred <- sum(Rand_ <= Prob_)
+    #Return the prediction if NPred equals MixTarget
+    if (NPred == MixTarget) {
+      return(Rand_ <= Prob_)
+    } else {
+      #Define an adjustment function depending on whether need to go up or down
+      if (NPred < MixTarget) {
+        adjProb <- function(Adj) {
+          Adj + Prob_ * (1 - Adj)
+        }
+      } else {
+        adjProb <- function(Adj) {
+          Prob_ * (1 - Adj)
+        }
+      }
+      #Define function to feed binary search to find adjustment
+      checkMixTargetMatch <- function(Adj) {
+        ProbAdj_ <- adjProb(Adj)
+        sum(Rand_ <= ProbAdj_)
+      }
+      #Call binary search to find Adj to match
+      TargetAdj <- binarySearch(checkMixTargetMatch, c(0,1), Target = MixTarget)
+      #Determine the values
+      Rand_ <= adjProb(TargetAdj)
+    }
+  }
+
+  #Apply urban mixed-use model to households by Bzone
+  #--------------------------------------------------
+  #Iterate over Bzones and apply model
   UrbanMix_ls <-
     lapply(Data_df, function(x) {
       if (any(is.na(x$MixUseProp))) {
         applyBinomialModel(UrbanMixModel_ls, x)
       } else {
-        applyBinomialModel(UrbanMixModel_ls, x, TargetProp = x$MixUseProp[1])
+        N <- nrow(x)
+        NumToMatch <- round(x$MixUseProp[1] * N)
+        matchMixTarget(x, NumToMatch)
       }
     })
+  #Convert results into vector properly ordered by household
+  UrbanMix_Hh <- unlist(UrbanMix_ls, use.names = FALSE)
+  names(UrbanMix_Hh) <-
+    unlist(lapply(Data_df, function(x) x$HhId), use.names = FALSE)
+  UrbanMix_Hh <- UrbanMix_Hh[L$Year$Household$HhId]
 
   #Produce output list of results
   #------------------------------
   Out_ls <- initDataList()
   Out_ls$Year$Household <-
     list(
-      IsUrbanMixNbrhd = as.integer(do.call(c, UrbanMix_ls))
+      IsUrbanMixNbrhd = as.integer(UrbanMix_Hh[L$Year$Household$HhId])
     )
   Out_ls
 }
