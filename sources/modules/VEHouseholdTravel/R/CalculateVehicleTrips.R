@@ -5,7 +5,7 @@
 #<doc>
 #
 ## CalculateVehicleTrips Module
-#### November 20, 2018
+#### November 23, 2018
 #
 #This module calculates average daily vehicle trips for households consistent with the household DVMT. An average trip length model is applied to estimate average length of household trips reflecting the characteristics of the household and the place where they live. The average trip length is divided into the average household DVMT to get an estimate of average number of daily vehicle trips.
 #
@@ -479,13 +479,13 @@ CalculateVehicleTripsSpecifications <- list(
       ISELEMENTOF = ""
     ),
     item(
-      NAME = "DevType",
+      NAME = "LocType",
       TABLE = "Household",
       GROUP = "Year",
       TYPE = "character",
       UNITS = "category",
       PROHIBIT = "NA",
-      ISELEMENTOF = c("Urban", "Rural")
+      ISELEMENTOF = c("Urban", "Town", "Rural")
     ),
     item(
       NAME = "Income",
@@ -628,7 +628,7 @@ CalculateVehicleTrips <- function(L) {
     L$Year$Bzone$D1B[match(L$Year$Household$Bzone, L$Year$Bzone$Bzone)]
   Hh_df$NonDrivers <- Hh_df$HhSize - Hh_df$Drivers
   Hh_df$VehLtDvr <- with(Hh_df, as.numeric(Vehicles < Drivers))
-  IsMetro <- Hh_df$DevType == "Urban"
+  IsMetro <- Hh_df$LocType == "Urban"
 
   #Apply the average trip length model
   #-----------------------------------
