@@ -1,6 +1,6 @@
 
 # CalculateVehicleTrips Module
-### November 20, 2018
+### November 23, 2018
 
 This module calculates average daily vehicle trips for households consistent with the household DVMT. An average trip length model is applied to estimate average length of household trips reflecting the characteristics of the household and the place where they live. The average trip length is divided into the average household DVMT to get an estimate of average number of daily vehicle trips.
 
@@ -88,27 +88,27 @@ lm(formula = makeFormula(EndTerms_), data = EstData_df)
 
 Residuals:
        Min         1Q     Median         3Q        Max 
--0.0154184 -0.0024817  0.0000008  0.0025352  0.0138067 
+-0.0132761 -0.0022757  0.0000081  0.0022509  0.0137005 
 
 Coefficients:
                              Estimate Std. Error t value Pr(>|t|)    
-(Intercept)                 9.914e-01  1.023e-03  969.00   <2e-16 ***
-Drivers                     9.135e-02  5.364e-04  170.30   <2e-16 ***
-NonDrivers                  3.803e-02  3.732e-04  101.90   <2e-16 ***
-LogIncome                   3.299e-02  9.323e-05  353.86   <2e-16 ***
-LogDensity                 -1.421e-02  2.428e-05 -585.14   <2e-16 ***
-IsUrbanMixNbrhd            -1.680e-01  7.962e-04 -211.00   <2e-16 ***
-FwyLaneMiPC                 1.275e+01  1.620e-01   78.69   <2e-16 ***
-VehLtDvr                   -1.801e-02  9.972e-05 -180.65   <2e-16 ***
-Drivers:LogIncome          -7.392e-03  4.868e-05 -151.85   <2e-16 ***
-NonDrivers:LogIncome       -3.749e-03  3.425e-05 -109.45   <2e-16 ***
-LogDensity:IsUrbanMixNbrhd  1.796e-02  8.598e-05  208.85   <2e-16 ***
+(Intercept)                 9.936e-01  9.172e-04 1083.31   <2e-16 ***
+Drivers                     8.157e-02  4.809e-04  169.65   <2e-16 ***
+NonDrivers                  3.423e-02  3.346e-04  102.31   <2e-16 ***
+LogIncome                   2.972e-02  8.358e-05  355.61   <2e-16 ***
+LogDensity                 -1.274e-02  2.177e-05 -585.35   <2e-16 ***
+IsUrbanMixNbrhd            -1.511e-01  7.138e-04 -211.65   <2e-16 ***
+FwyLaneMiPC                 1.159e+01  1.452e-01   79.82   <2e-16 ***
+VehLtDvr                   -1.614e-02  8.940e-05 -180.49   <2e-16 ***
+Drivers:LogIncome          -6.604e-03  4.364e-05 -151.34   <2e-16 ***
+NonDrivers:LogIncome       -3.372e-03  3.071e-05 -109.80   <2e-16 ***
+LogDensity:IsUrbanMixNbrhd  1.614e-02  7.708e-05  209.32   <2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Residual standard error: 0.003764 on 16299 degrees of freedom
-Multiple R-squared:  0.9858,	Adjusted R-squared:  0.9858 
-F-statistic: 1.129e+05 on 10 and 16299 DF,  p-value: < 2.2e-16
+Residual standard error: 0.003374 on 16299 degrees of freedom
+Multiple R-squared:  0.9859,	Adjusted R-squared:  0.9858 
+F-statistic: 1.136e+05 on 10 and 16299 DF,  p-value: < 2.2e-16
 
 ```
 
@@ -125,24 +125,24 @@ lm(formula = makeFormula(EndTerms_), data = EstData_df)
 
 Residuals:
       Min        1Q    Median        3Q       Max 
--0.184015 -0.034049 -0.001289  0.032529  0.244858 
+-0.185044 -0.033865 -0.001535  0.032080  0.292926 
 
 Coefficients:
                        Estimate Std. Error  t value Pr(>|t|)    
-(Intercept)           0.9274327  0.0099115    93.57   <2e-16 ***
-Drivers               0.8710513  0.0052013   167.47   <2e-16 ***
-NonDrivers            0.3707222  0.0037898    97.82   <2e-16 ***
-LogIncome             0.2787945  0.0009439   295.36   <2e-16 ***
-LogDensity           -0.1794625  0.0001590 -1128.56   <2e-16 ***
-VehLtDvr             -0.1742474  0.0010198  -170.87   <2e-16 ***
-Drivers:LogIncome    -0.0688491  0.0004853  -141.87   <2e-16 ***
-NonDrivers:LogIncome -0.0348399  0.0003547   -98.23   <2e-16 ***
+(Intercept)           0.9128236  0.0098488    92.68   <2e-16 ***
+Drivers               0.8740902  0.0051684   169.12   <2e-16 ***
+NonDrivers            0.3707174  0.0037658    98.44   <2e-16 ***
+LogIncome             0.2801689  0.0009379   298.70   <2e-16 ***
+LogDensity           -0.1794153  0.0001580 -1135.44   <2e-16 ***
+VehLtDvr             -0.1730487  0.0010133  -170.77   <2e-16 ***
+Drivers:LogIncome    -0.0691771  0.0004822  -143.46   <2e-16 ***
+NonDrivers:LogIncome -0.0348271  0.0003524   -98.81   <2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Residual standard error: 0.05029 on 31205 degrees of freedom
-Multiple R-squared:  0.9833,	Adjusted R-squared:  0.9833 
-F-statistic: 2.63e+05 on 7 and 31205 DF,  p-value: < 2.2e-16
+Residual standard error: 0.04998 on 31205 degrees of freedom
+Multiple R-squared:  0.9835,	Adjusted R-squared:  0.9835 
+F-statistic: 2.664e+05 on 7 and 31205 DF,  p-value: < 2.2e-16
 
 ```
 
@@ -183,22 +183,22 @@ PROHIBIT - Values that are prohibited. Values in the datastore do not meet any o
 
 ISELEMENTOF - Categorical values that are permitted. Values in the datastore are one or more of the listed values.
 
-|NAME            |TABLE     |GROUP |TYPE      |UNITS     |PROHIBIT |ISELEMENTOF  |
-|:---------------|:---------|:-----|:---------|:---------|:--------|:------------|
-|Marea           |Marea     |Year  |character |ID        |         |             |
-|FwyLaneMiPC     |Marea     |Year  |compound  |MI/PRSN   |NA, < 0  |             |
-|Marea           |Bzone     |Year  |character |ID        |         |             |
-|Bzone           |Bzone     |Year  |character |ID        |         |             |
-|D1B             |Bzone     |Year  |compound  |PRSN/SQMI |NA, < 0  |             |
-|Marea           |Household |Year  |character |ID        |         |             |
-|Bzone           |Household |Year  |character |ID        |         |             |
-|DevType         |Household |Year  |character |category  |NA       |Urban, Rural |
-|Income          |Household |Year  |currency  |USD.2001  |NA, < 0  |             |
-|Drivers         |Household |Year  |people    |PRSN      |NA, < 0  |             |
-|Vehicles        |Household |Year  |vehicles  |VEH       |NA, < 0  |             |
-|HhSize          |Household |Year  |people    |PRSN      |NA, < 0  |             |
-|IsUrbanMixNbrhd |Household |Year  |integer   |binary    |NA       |0, 1         |
-|Dvmt            |Household |Year  |compound  |MI/DAY    |NA, < 0  |             |
+|NAME            |TABLE     |GROUP |TYPE      |UNITS     |PROHIBIT |ISELEMENTOF        |
+|:---------------|:---------|:-----|:---------|:---------|:--------|:------------------|
+|Marea           |Marea     |Year  |character |ID        |         |                   |
+|FwyLaneMiPC     |Marea     |Year  |compound  |MI/PRSN   |NA, < 0  |                   |
+|Marea           |Bzone     |Year  |character |ID        |         |                   |
+|Bzone           |Bzone     |Year  |character |ID        |         |                   |
+|D1B             |Bzone     |Year  |compound  |PRSN/SQMI |NA, < 0  |                   |
+|Marea           |Household |Year  |character |ID        |         |                   |
+|Bzone           |Household |Year  |character |ID        |         |                   |
+|LocType         |Household |Year  |character |category  |NA       |Urban, Town, Rural |
+|Income          |Household |Year  |currency  |USD.2001  |NA, < 0  |                   |
+|Drivers         |Household |Year  |people    |PRSN      |NA, < 0  |                   |
+|Vehicles        |Household |Year  |vehicles  |VEH       |NA, < 0  |                   |
+|HhSize          |Household |Year  |people    |PRSN      |NA, < 0  |                   |
+|IsUrbanMixNbrhd |Household |Year  |integer   |binary    |NA       |0, 1               |
+|Dvmt            |Household |Year  |compound  |MI/DAY    |NA, < 0  |                   |
 
 ## Datasets Produced by the Module
 The following table documents each dataset that is retrieved from the datastore and used by the module. Each row in the table describes a dataset. All the datasets must be present in the datastore. One or more of these datasets may be entered into the datastore from the user input files. The table names and their meanings are as follows:

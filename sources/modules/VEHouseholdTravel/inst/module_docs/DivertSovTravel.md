@@ -56,24 +56,24 @@ lm(formula = PowSovDvmt ~ LogDensity + LogIncome + Drivers +
     NumChild + NumVehLtNumDvr + LogDvmt, data = TestHh_df)
 
 Residuals:
-     Min       1Q   Median       3Q      Max 
--2.26143 -0.50863  0.04234  0.51568  2.62243 
+    Min      1Q  Median      3Q     Max 
+-2.2614 -0.5085  0.0422  0.5157  2.6226 
 
 Coefficients:
                 Estimate Std. Error t value Pr(>|t|)    
-(Intercept)     1.109045   0.067721  16.377  < 2e-16 ***
-LogDensity     -0.006893   0.002863  -2.408 0.016051 *  
-LogIncome       0.031350   0.008082   3.879 0.000105 ***
-Drivers         0.155239   0.011832  13.120  < 2e-16 ***
-NumChild       -0.080278   0.005144 -15.606  < 2e-16 ***
-NumVehLtNumDvr -0.235967   0.016174 -14.589  < 2e-16 ***
-LogDvmt         0.173326   0.022662   7.648  2.1e-14 ***
+(Intercept)     1.108037   0.067759  16.353  < 2e-16 ***
+LogDensity     -0.006808   0.002868  -2.374 0.017593 *  
+LogIncome       0.031290   0.008084   3.871 0.000109 ***
+Drivers         0.155119   0.011837  13.105  < 2e-16 ***
+NumChild       -0.080309   0.005145 -15.610  < 2e-16 ***
+NumVehLtNumDvr -0.236038   0.016169 -14.598  < 2e-16 ***
+LogDvmt         0.173626   0.022678   7.656 1.98e-14 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Residual standard error: 0.7176 on 28842 degrees of freedom
 Multiple R-squared:  0.07139,	Adjusted R-squared:  0.0712 
-F-statistic: 369.5 on 6 and 28842 DF,  p-value: < 2.2e-16
+F-statistic: 369.6 on 6 and 28842 DF,  p-value: < 2.2e-16
 
 ```
 
@@ -88,25 +88,25 @@ lm(formula = makeFormula(EndTerms_), data = EstData_df)
 
 Residuals:
      Min       1Q   Median       3Q      Max 
--1.37921 -0.03868  0.00406  0.04411  0.34630 
+-1.34875 -0.03826  0.00383  0.04366  0.31916 
 
 Coefficients:
                      Estimate Std. Error t value Pr(>|t|)    
-(Intercept)        -0.6972968  0.0107401  -64.92   <2e-16 ***
-LogDensity          0.1911784  0.0013060  146.38   <2e-16 ***
-IsSF                0.0606621  0.0007994   75.88   <2e-16 ***
-LogIncome           0.0376032  0.0005804   64.79   <2e-16 ***
-Drivers             0.4200026  0.0008939  469.83   <2e-16 ***
-NumChild           -0.1619660  0.0003718 -435.61   <2e-16 ***
-NumVehLtNumDvr     -0.5122768  0.0011442 -447.71   <2e-16 ***
-LogDvmt            -0.7132380  0.0033011 -216.06   <2e-16 ***
-LogDensity:LogDvmt -0.0286535  0.0003220  -88.98   <2e-16 ***
+(Intercept)        -0.6762972  0.0107417  -62.96   <2e-16 ***
+LogDensity          0.1880949  0.0013059  144.04   <2e-16 ***
+IsSF                0.0605064  0.0007986   75.76   <2e-16 ***
+LogIncome           0.0376989  0.0005801   64.98   <2e-16 ***
+Drivers             0.4202335  0.0008938  470.15   <2e-16 ***
+NumChild           -0.1617095  0.0003716 -435.12   <2e-16 ***
+NumVehLtNumDvr     -0.5100785  0.0011427 -446.39   <2e-16 ***
+LogDvmt            -0.7197006  0.0033030 -217.89   <2e-16 ***
+LogDensity:LogDvmt -0.0278202  0.0003218  -86.45   <2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Residual standard error: 0.06774 on 51915 degrees of freedom
-Multiple R-squared:  0.9789,	Adjusted R-squared:  0.9789 
-F-statistic: 3.017e+05 on 8 and 51915 DF,  p-value: < 2.2e-16
+Residual standard error: 0.06767 on 51915 degrees of freedom
+Multiple R-squared:  0.979,	Adjusted R-squared:  0.979 
+F-statistic: 3.024e+05 on 8 and 51915 DF,  p-value: < 2.2e-16
 
 ```
 
@@ -171,21 +171,21 @@ lm(formula = ModelFormula, data = Data_df)
 
 Residuals:
     Min      1Q  Median      3Q     Max 
--3.3061 -1.1918 -0.2371  0.9336 10.4183 
+-3.2382 -1.1593 -0.2256  0.9117 10.0060 
 
 Coefficients:
                 Estimate Std. Error t value Pr(>|t|)    
-(Intercept)     1.800230   0.178713  10.073   <2e-16 ***
-Drivers         0.165569   0.018305   9.045   <2e-16 ***
-LogIncome       0.153622   0.017370   8.844   <2e-16 ***
-LogDensity     -0.146129   0.006742 -21.675   <2e-16 ***
-NumVehLtNumDvr -0.382890   0.042679  -8.971   <2e-16 ***
+(Intercept)     1.771937   0.173592  10.207   <2e-16 ***
+Drivers         0.161285   0.017780   9.071   <2e-16 ***
+LogIncome       0.149921   0.016872   8.886   <2e-16 ***
+LogDensity     -0.141624   0.006549 -21.626   <2e-16 ***
+NumVehLtNumDvr -0.373266   0.041456  -9.004   <2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Residual standard error: 1.616 on 19021 degrees of freedom
-Multiple R-squared:  0.04437,	Adjusted R-squared:  0.04417 
-F-statistic: 220.8 on 4 and 19021 DF,  p-value: < 2.2e-16
+Residual standard error: 1.57 on 19021 degrees of freedom
+Multiple R-squared:  0.04439,	Adjusted R-squared:  0.04418 
+F-statistic: 220.9 on 4 and 19021 DF,  p-value: < 2.2e-16
 
 ```
 
@@ -199,25 +199,25 @@ Call:
 lm(formula = makeFormula(EndTerms_), data = EstData_df)
 
 Residuals:
-     Min       1Q   Median       3Q      Max 
--0.18029 -0.03447  0.00074  0.03413  0.20548 
+      Min        1Q    Median        3Q       Max 
+-0.214649 -0.033459  0.000424  0.032921  0.256070 
 
 Coefficients:
                   Estimate Std. Error t value Pr(>|t|)    
-(Intercept)      2.488e+00  8.632e-03  288.18   <2e-16 ***
-Drivers          2.022e-01  7.875e-04  256.73   <2e-16 ***
-NonDrivers      -4.615e-02  4.961e-04  -93.01   <2e-16 ***
-LogIncome        7.404e-02  7.384e-04  100.28   <2e-16 ***
-LogDensity      -1.246e-01  4.221e-04 -295.25   <2e-16 ***
-IsUrbanMixNbrhd -1.234e-01  1.420e-03  -86.92   <2e-16 ***
-FwyLaneMiPC      3.813e+02  2.819e+00  135.26   <2e-16 ***
-VehLtDvr        -4.070e-01  1.779e-03 -228.75   <2e-16 ***
+(Intercept)      2.460e+00  8.386e-03  293.36   <2e-16 ***
+Drivers          1.965e-01  7.651e-04  256.78   <2e-16 ***
+NonDrivers      -4.443e-02  4.820e-04  -92.18   <2e-16 ***
+LogIncome        7.126e-02  7.174e-04   99.34   <2e-16 ***
+LogDensity      -1.211e-01  4.101e-04 -295.27   <2e-16 ***
+IsUrbanMixNbrhd -1.179e-01  1.379e-03  -85.45   <2e-16 ***
+FwyLaneMiPC      3.792e+02  2.739e+00  138.44   <2e-16 ***
+VehLtDvr        -3.924e-01  1.729e-03 -226.96   <2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Residual standard error: 0.05066 on 9815 degrees of freedom
-Multiple R-squared:  0.9782,	Adjusted R-squared:  0.9782 
-F-statistic: 6.299e+04 on 7 and 9815 DF,  p-value: < 2.2e-16
+Residual standard error: 0.04922 on 9815 degrees of freedom
+Multiple R-squared:  0.9782,	Adjusted R-squared:  0.9781 
+F-statistic: 6.281e+04 on 7 and 9815 DF,  p-value: < 2.2e-16
 
 ```
 
@@ -227,23 +227,22 @@ Call:
 lm(formula = makeFormula(EndTerms_), data = EstData_df)
 
 Residuals:
-       Min         1Q     Median         3Q        Max 
--2.948e-03 -4.641e-04  8.650e-06  4.749e-04  2.624e-03 
+      Min        1Q    Median        3Q       Max 
+-0.127881 -0.024353  0.000179  0.024323  0.143838 
 
 Coefficients:
-              Estimate Std. Error   t value Pr(>|t|)    
-(Intercept)  1.036e+00  7.834e-05 13221.165   <2e-16 ***
-Drivers      2.050e-03  8.053e-06   254.535   <2e-16 ***
-NonDrivers   1.141e-05  5.238e-06     2.178   0.0294 *  
-LogIncome    1.981e-03  7.617e-06   260.128   <2e-16 ***
-LogDensity  -1.833e-03  2.963e-06  -618.651   <2e-16 ***
-VehLtDvr    -4.936e-03  1.869e-05  -264.017   <2e-16 ***
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  2.0325331  0.0039887   509.6   <2e-16 ***
+Drivers      0.1099513  0.0004084   269.2   <2e-16 ***
+LogIncome    0.1027802  0.0003876   265.2   <2e-16 ***
+LogDensity  -0.0974167  0.0001510  -645.4   <2e-16 ***
+VehLtDvr    -0.2539384  0.0009523  -266.7   <2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Residual standard error: 0.0007078 on 19020 degrees of freedom
-Multiple R-squared:  0.9746,	Adjusted R-squared:  0.9746 
-F-statistic: 1.458e+05 on 5 and 19020 DF,  p-value: < 2.2e-16
+Residual standard error: 0.03606 on 19021 degrees of freedom
+Multiple R-squared:  0.9763,	Adjusted R-squared:  0.9763 
+F-statistic: 1.961e+05 on 4 and 19021 DF,  p-value: < 2.2e-16
 
 ```
 
@@ -321,27 +320,27 @@ PROHIBIT - Values that are prohibited. Values in the datastore do not meet any o
 
 ISELEMENTOF - Categorical values that are permitted. Values in the datastore are one or more of the listed values.
 
-|NAME                |TABLE     |GROUP |TYPE      |UNITS      |PROHIBIT     |ISELEMENTOF  |
-|:-------------------|:---------|:-----|:---------|:----------|:------------|:------------|
-|Marea               |Marea     |Year  |character |ID         |             |             |
-|FwyLaneMiPC         |Marea     |Year  |compound  |MI/PRSN    |NA, < 0      |             |
-|Azone               |Azone     |Year  |character |ID         |             |             |
-|PropSovDvmtDiverted |Azone     |Year  |double    |Proportion |NA, < 0, > 1 |             |
-|Bzone               |Bzone     |Year  |character |ID         |             |             |
-|D1B                 |Bzone     |Year  |compound  |PRSN/SQMI  |NA, < 0      |             |
-|Marea               |Household |Year  |character |ID         |             |             |
-|Azone               |Household |Year  |character |ID         |             |             |
-|Bzone               |Household |Year  |character |ID         |             |             |
-|Dvmt                |Household |Year  |compound  |MI/DAY     |NA, < 0      |             |
-|Vehicles            |Household |Year  |vehicles  |VEH        |NA, < 0      |             |
-|HhSize              |Household |Year  |people    |PRSN       |NA, < 0      |             |
-|Age0to14            |Household |Year  |people    |PRSN       |NA, < 0      |             |
-|Age15to19           |Household |Year  |people    |PRSN       |NA, < 0      |             |
-|Drivers             |Household |Year  |people    |PRSN       |NA, < 0      |             |
-|Income              |Household |Year  |currency  |USD.2001   |NA, < 0      |             |
-|DevType             |Household |Year  |character |category   |NA           |Urban, Rural |
-|IsUrbanMixNbrhd     |Household |Year  |integer   |binary     |NA           |0, 1         |
-|HouseType           |Household |Year  |character |category   |             |SF, MF, GQ   |
+|NAME                |TABLE     |GROUP |TYPE      |UNITS      |PROHIBIT     |ISELEMENTOF        |
+|:-------------------|:---------|:-----|:---------|:----------|:------------|:------------------|
+|Marea               |Marea     |Year  |character |ID         |             |                   |
+|FwyLaneMiPC         |Marea     |Year  |compound  |MI/PRSN    |NA, < 0      |                   |
+|Azone               |Azone     |Year  |character |ID         |             |                   |
+|PropSovDvmtDiverted |Azone     |Year  |double    |Proportion |NA, < 0, > 1 |                   |
+|Bzone               |Bzone     |Year  |character |ID         |             |                   |
+|D1B                 |Bzone     |Year  |compound  |PRSN/SQMI  |NA, < 0      |                   |
+|Marea               |Household |Year  |character |ID         |             |                   |
+|Azone               |Household |Year  |character |ID         |             |                   |
+|Bzone               |Household |Year  |character |ID         |             |                   |
+|Dvmt                |Household |Year  |compound  |MI/DAY     |NA, < 0      |                   |
+|Vehicles            |Household |Year  |vehicles  |VEH        |NA, < 0      |                   |
+|HhSize              |Household |Year  |people    |PRSN       |NA, < 0      |                   |
+|Age0to14            |Household |Year  |people    |PRSN       |NA, < 0      |                   |
+|Age15to19           |Household |Year  |people    |PRSN       |NA, < 0      |                   |
+|Drivers             |Household |Year  |people    |PRSN       |NA, < 0      |                   |
+|Income              |Household |Year  |currency  |USD.2001   |NA, < 0      |                   |
+|LocType             |Household |Year  |character |category   |NA           |Urban, Town, Rural |
+|IsUrbanMixNbrhd     |Household |Year  |integer   |binary     |NA           |0, 1               |
+|HouseType           |Household |Year  |character |category   |             |SF, MF, GQ         |
 
 ## Datasets Produced by the Module
 The following table documents each dataset that is retrieved from the datastore and used by the module. Each row in the table describes a dataset. All the datasets must be present in the datastore. One or more of these datasets may be entered into the datastore from the user input files. The table names and their meanings are as follows:
