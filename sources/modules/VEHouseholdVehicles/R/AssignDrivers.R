@@ -381,13 +381,13 @@ AssignDriversSpecifications <- list(
       ISELEMENTOF = c(0, 1)
     ),
     item(
-      NAME = "DevType",
+      NAME = "LocType",
       TABLE = "Household",
       GROUP = "Year",
       TYPE = "character",
       UNITS = "category",
       PROHIBIT = "NA",
-      ISELEMENTOF = c("Urban", "Rural")
+      ISELEMENTOF = c("Urban", "Town", "Rural")
     )
   ),
   #Specify data to saved in the data store
@@ -534,7 +534,7 @@ AssignDrivers <- function(L) {
       L$Year$Household[[AttrName]][match(Per_df$HhId, L$Year$Household$HhId)]
     }
     AttrNames_ <-
-      c("HhSize", "Income", "HouseType", "IsUrbanMixNbrhd", "DevType", "Bzone", "Marea")
+      c("HhSize", "Income", "HouseType", "IsUrbanMixNbrhd", "LocType", "Bzone", "Marea")
     for (AttrName in AttrNames_) {
       Per_df[[AttrName]] <- getHhAttribute(AttrName)
     }
@@ -561,7 +561,7 @@ AssignDrivers <- function(L) {
       DrvAdjProp <- 1
     }
     # Run metropolitan model
-    MetroPer_df <- Per_df[Per_df$DevType == "Urban",]
+    MetroPer_df <- Per_df[Per_df$LocType == "Urban",]
     Driver_ <- applyBinomialModel(
       DriverModel_ls$Metro,
       MetroPer_df
@@ -579,7 +579,7 @@ AssignDrivers <- function(L) {
     Out_ls$Year$Household[[BinName]][HhIdx] <- unname(NumDrivers_Hh)
     rm(MetroPer_df, Driver_, NumDrivers_Hh, HhIdx)
     # Run nonmetropolitan model
-    NonMetroPer_df <- Per_df[Per_df$DevType != "Urban",]
+    NonMetroPer_df <- Per_df[Per_df$LocType != "Urban",]
     Driver_ <- applyBinomialModel(
       DriverModel_ls$NonMetro,
       NonMetroPer_df
