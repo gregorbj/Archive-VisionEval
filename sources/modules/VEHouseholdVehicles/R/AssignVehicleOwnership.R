@@ -5,7 +5,7 @@
 #<doc>
 #
 ## AssignVehicleOwnership Module
-#### September 8, 2018
+#### November 23, 2018
 #
 #This module determines the number of vehicles owned or leased by each household as a function of household characteristics, land use characteristics, and transportation system characteristics.
 #
@@ -334,13 +334,13 @@ AssignVehicleOwnershipSpecifications <- list(
       ISELEMENTOF = c(0, 1)
     ),
     item(
-      NAME = "DevType",
+      NAME = "LocType",
       TABLE = "Household",
       GROUP = "Year",
       TYPE = "character",
       UNITS = "category",
       PROHIBIT = "NA",
-      ISELEMENTOF = c("Urban", "Rural")
+      ISELEMENTOF = c("Urban", "Town", "Rural")
     )
   ),
   #Specify data to saved in the data store
@@ -426,23 +426,23 @@ AssignVehicleOwnership <- function(L) {
   #-------------
   #Probability no vehicles
   NoVehicleProb_ <- numeric(NumHh)
-  NoVehicleProb_[Hh_df$DevType == "Urban"] <-
+  NoVehicleProb_[Hh_df$LocType == "Urban"] <-
     predict(AutoOwnModels_ls$Metro$Zero,
-            newdata = Hh_df[Hh_df$DevType == "Urban",],
+            newdata = Hh_df[Hh_df$LocType == "Urban",],
             type = "response")
-  NoVehicleProb_[Hh_df$DevType == "Rural"] <-
+  NoVehicleProb_[Hh_df$LocType %in% c("Town", "Rural")] <-
     predict(AutoOwnModels_ls$NonMetro$Zero,
-            newdata = Hh_df[Hh_df$DevType == "Rural",],
+            newdata = Hh_df[Hh_df$LocType %in% c("Town", "Rural"),],
             type = "response")
   #Vehicle counts
   Vehicles_ <- integer(NumHh)
-  Vehicles_[Hh_df$DevType == "Urban"] <-
+  Vehicles_[Hh_df$LocType == "Urban"] <-
     as.integer(predict(AutoOwnModels_ls$Metro$Count,
-            newdata = Hh_df[Hh_df$DevType == "Urban",],
+            newdata = Hh_df[Hh_df$LocType == "Urban",],
             type = "class")$fit)
-  Vehicles_[Hh_df$DevType == "Rural"] <-
+  Vehicles_[Hh_df$LocType %in% c("Town", "Rural")] <-
     as.integer(predict(AutoOwnModels_ls$NonMetro$Count,
-            newdata = Hh_df[Hh_df$DevType == "Rural",],
+            newdata = Hh_df[Hh_df$LocType %in% c("Town", "Rural"),],
             type = "class")$fit)
   #Set count to zero for households modeled as having no vehicles
   Vehicles_[NoVehicleProb_ >= runif(NumHh)] <- 0
@@ -477,6 +477,7 @@ documentModule("AssignVehicleOwnership")
 #   DoRun = FALSE
 # )
 # L <- TestDat_$L
+# R <- AssignVehicleOwnership(L)
 
 #Test code to check everything including running the module and checking whether
 #the outputs are consistent with the 'Set' specifications
