@@ -72,13 +72,14 @@ DESCRIPTION - A description of the data.
 |Geo       |     |      |         |Bzones      |         |Must contain a record for each Bzone and model run year.              |
 |Year      |     |      |         |            |         |Must contain a record for each Bzone and model run year.              |
 |UrbanArea |area |ACRE  |NA, < 0  |            |         |Area that is Urban and unprotected (i.e. developable) within the zone |
+|TownArea  |area |ACRE  |NA, < 0  |            |         |Area that is Town and unprotected (i.e. developable) within the zone  |
 |RuralArea |area |ACRE  |NA, < 0  |            |         |Area that is Rural and unprotected (i.e. developable) within the zone |
 ### bzone_network_design.csv
 |   |NAME   |TYPE   |UNITS                                             |PROHIBIT |ISELEMENTOF |UNLIKELY |DESCRIPTION                                                                                                                                         |
 |:--|:------|:------|:-------------------------------------------------|:--------|:-----------|:--------|:---------------------------------------------------------------------------------------------------------------------------------------------------|
 |1  |Geo    |       |                                                  |         |Bzones      |         |Must contain a record for each Bzone and model run year.                                                                                            |
 |11 |Year   |       |                                                  |         |            |         |Must contain a record for each Bzone and model run year.                                                                                            |
-|3  |D3bpo4 |double |pedestrian-oriented intersections per square mile |NA       |            |         |Intersection density in terms of pedestrian-oriented intersections having four or more legs per square mile (Ref: EPA 2010 Smart Location Database) |
+|4  |D3bpo4 |double |pedestrian-oriented intersections per square mile |NA       |            |         |Intersection density in terms of pedestrian-oriented intersections having four or more legs per square mile (Ref: EPA 2010 Smart Location Database) |
 
 ## Datasets Used by the Module
 The following table documents each dataset that is retrieved from the datastore and used by the module. Each row in the table describes a dataset. All the datasets must be present in the datastore. One or more of these datasets may be entered into the datastore from the user input files. The table names and their meanings are as follows:
@@ -107,6 +108,7 @@ ISELEMENTOF - Categorical values that are permitted. Values in the datastore are
 |NumHh     |Bzone |Year  |households |HH    |NA, < 0  |            |
 |NumWkr    |Bzone |Year  |people     |PRSN  |NA, < 0  |            |
 |UrbanArea |Bzone |Year  |area       |ACRE  |NA, < 0  |            |
+|TownArea  |Bzone |Year  |area       |ACRE  |NA, < 0  |            |
 |RuralArea |Bzone |Year  |area       |ACRE  |NA, < 0  |            |
 |Latitude  |Bzone |Year  |double     |NA    |NA       |            |
 |Longitude |Bzone |Year  |double     |NA    |NA       |            |

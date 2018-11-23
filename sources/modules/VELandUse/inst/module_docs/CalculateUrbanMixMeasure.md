@@ -25,7 +25,7 @@ Coefficients:
 LocalPopDensity  2.522e-04  2.753e-06  91.618  < 2e-16 ***
 IsSF            -1.929e-01  4.074e-02  -4.734  2.2e-06 ***
 ---
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 (Dispersion parameter for binomial family taken to be 1)
 
@@ -90,11 +90,14 @@ ISELEMENTOF - Categorical values that are permitted. Values in the datastore are
 |Bzone      |Bzone     |Year  |character  |ID         |         |            |
 |NumHh      |Bzone     |Year  |households |HH         |NA, < 0  |            |
 |UrbanPop   |Bzone     |Year  |people     |PRSN       |NA, <= 0 |            |
+|TownPop    |Bzone     |Year  |people     |PRSN       |NA, <= 0 |            |
 |RuralPop   |Bzone     |Year  |people     |PRSN       |NA, <= 0 |            |
 |UrbanArea  |Bzone     |Year  |area       |SQMI       |NA, < 0  |            |
+|TownArea   |Bzone     |Year  |area       |SQMI       |NA, < 0  |            |
 |RuralArea  |Bzone     |Year  |area       |SQMI       |NA, < 0  |            |
 |MixUseProp |Bzone     |Year  |double     |proportion |< 0, > 1 |            |
 |Bzone      |Household |Year  |character  |ID         |         |            |
+|HhId       |Household |Year  |character  |ID         |         |            |
 |HouseType  |Household |Year  |character  |category   |         |SF, MF, GQ  |
 
 ## Datasets Produced by the Module
