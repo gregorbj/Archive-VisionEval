@@ -87,6 +87,7 @@ Calculate4DMeasuresSpecifications <- list(
       NAME =
         items(
           "UrbanArea",
+          "TownArea",
           "RuralArea"),
       FILE = "bzone_unprotected_area.csv",
       TABLE = "Bzone",
@@ -102,6 +103,7 @@ Calculate4DMeasuresSpecifications <- list(
       DESCRIPTION =
         items(
           "Area that is Urban and unprotected (i.e. developable) within the zone",
+          "Area that is Town and unprotected (i.e. developable) within the zone",
           "Area that is Rural and unprotected (i.e. developable) within the zone"
         )
     ),
@@ -178,6 +180,7 @@ Calculate4DMeasuresSpecifications <- list(
       NAME =
         items(
           "UrbanArea",
+          "TownArea",
           "RuralArea"),
       TABLE = "Bzone",
       GROUP = "Year",
@@ -407,7 +410,7 @@ Calculate4DMeasures <- function(L) {
   Bz <- L$Year$Bzone$Bzone
   #Create data frame of Bzone data
   D_df <- data.frame(L$Year$Bzone)
-  D_df$Area <- D_df$UrbanArea + D_df$RuralArea
+  D_df$Area <- D_df$UrbanArea + D_df$TownArea + D_df$RuralArea
 
   #Calculate density measures
   #--------------------------
