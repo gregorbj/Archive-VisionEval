@@ -293,25 +293,25 @@ lm(formula = makeFormula("PowDvmt", IndepVars_), data = TestHh_df)
 
 Residuals:
       Min        1Q    Median        3Q       Max 
--0.187490 -0.012227  0.000394  0.012629  0.218495 
+-0.175522 -0.012052  0.000358  0.012561  0.203393 
 
 Coefficients:
               Estimate Std. Error t value Pr(>|t|)    
-(Intercept)  1.212e+00  1.953e-03   620.6   <2e-16 ***
-Drivers      9.821e-02  2.566e-04   382.8   <2e-16 ***
-LogIncome    6.426e-02  1.818e-04   353.5   <2e-16 ***
-Hbppopdn    -1.376e-05  3.074e-08  -447.6   <2e-16 ***
-NumVeh       2.992e-02  1.974e-04   151.6   <2e-16 ***
-ZeroVeh     -3.215e-01  8.397e-04  -382.8   <2e-16 ***
-OneVeh      -6.231e-02  4.050e-04  -153.9   <2e-16 ***
-Workers      6.994e-02  1.802e-04   388.1   <2e-16 ***
-Age0to14     6.059e-02  1.406e-04   430.9   <2e-16 ***
+(Intercept)  1.215e+00  1.944e-03   625.2   <2e-16 ***
+Drivers      9.815e-02  2.554e-04   384.3   <2e-16 ***
+LogIncome    6.396e-02  1.809e-04   353.5   <2e-16 ***
+Hbppopdn    -1.380e-05  3.060e-08  -451.0   <2e-16 ***
+NumVeh       3.002e-02  1.965e-04   152.8   <2e-16 ***
+ZeroVeh     -3.209e-01  8.358e-04  -383.9   <2e-16 ***
+OneVeh      -6.246e-02  4.031e-04  -154.9   <2e-16 ***
+Workers      6.996e-02  1.794e-04   390.1   <2e-16 ***
+Age0to14     6.055e-02  1.400e-04   432.6   <2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Residual standard error: 0.02295 on 35494 degrees of freedom
+Residual standard error: 0.02284 on 35494 degrees of freedom
 Multiple R-squared:  0.9922,	Adjusted R-squared:  0.9922 
-F-statistic: 5.619e+05 on 8 and 35494 DF,  p-value: < 2.2e-16
+F-statistic: 5.668e+05 on 8 and 35494 DF,  p-value: < 2.2e-16
 
 ```
 
@@ -321,8 +321,8 @@ The mean values of the survey DVMT, simulated average DVMT, and predicted averag
 |                       |    Miles|
 |:----------------------|--------:|
 |Survey Day DVMT        | 55.44947|
-|Simulated Average DVMT | 55.46771|
-|Predicted Average DVMT | 55.52984|
+|Simulated Average DVMT | 55.46890|
+|Predicted Average DVMT | 55.53123|
 
 The metropolitan linear model of household power-transformed simulated average DVMT includes the following terms in addition to the terms included in the non-metropolitan household model:
 
@@ -341,28 +341,28 @@ lm(formula = makeFormula("PowDvmt", IndepVars_), data = TestHh_df)
 
 Residuals:
      Min       1Q   Median       3Q      Max 
--0.22078 -0.01769  0.00002  0.01773  0.34204 
+-0.24084 -0.01847  0.00014  0.01814  0.33373 
 
 Coefficients:
                Estimate Std. Error t value Pr(>|t|)    
-(Intercept)   1.097e+00  4.341e-03  252.67   <2e-16 ***
-Drivers       1.203e-01  5.483e-04  219.47   <2e-16 ***
-LogIncome     1.005e-01  3.765e-04  267.00   <2e-16 ***
-Hbppopdn     -1.159e-05  4.459e-08 -259.85   <2e-16 ***
-NumVeh        3.016e-02  4.960e-04   60.81   <2e-16 ***
-ZeroVeh      -5.882e-01  1.595e-03 -368.72   <2e-16 ***
-OneVeh       -8.649e-02  9.167e-04  -94.35   <2e-16 ***
-Workers       1.265e-01  3.908e-04  323.60   <2e-16 ***
-UrbanDev     -6.331e-02  8.069e-04  -78.45   <2e-16 ***
-Age0to14      7.745e-02  2.965e-04  261.24   <2e-16 ***
-BusEqRevMiPC -3.364e-04  1.038e-05  -32.41   <2e-16 ***
-FwyLaneMiPC   6.756e+01  1.718e+00   39.33   <2e-16 ***
+(Intercept)   1.109e+00  4.382e-03  253.01   <2e-16 ***
+Drivers       1.194e-01  5.534e-04  215.69   <2e-16 ***
+LogIncome     1.001e-01  3.801e-04  263.26   <2e-16 ***
+Hbppopdn     -1.159e-05  4.501e-08 -257.48   <2e-16 ***
+NumVeh        2.974e-02  5.007e-04   59.40   <2e-16 ***
+ZeroVeh      -5.906e-01  1.610e-03 -366.78   <2e-16 ***
+OneVeh       -8.817e-02  9.253e-04  -95.29   <2e-16 ***
+Workers       1.269e-01  3.945e-04  321.69   <2e-16 ***
+UrbanDev     -6.315e-02  8.145e-04  -77.53   <2e-16 ***
+Age0to14      7.763e-02  2.992e-04  259.44   <2e-16 ***
+BusEqRevMiPC -3.545e-04  1.048e-05  -33.84   <2e-16 ***
+FwyLaneMiPC   6.464e+01  1.734e+00   37.28   <2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Residual standard error: 0.0366 on 19619 degrees of freedom
-Multiple R-squared:  0.9941,	Adjusted R-squared:  0.9941 
-F-statistic: 3.015e+05 on 11 and 19619 DF,  p-value: < 2.2e-16
+Residual standard error: 0.03694 on 19619 degrees of freedom
+Multiple R-squared:  0.994,	Adjusted R-squared:  0.994 
+F-statistic: 2.956e+05 on 11 and 19619 DF,  p-value: < 2.2e-16
 
 ```
 
@@ -372,8 +372,8 @@ The mean values of the survey DVMT, simulated average DVMT, and predicted averag
 |                       |    Miles|
 |:----------------------|--------:|
 |Survey Day DVMT        | 53.45152|
-|Simulated Average DVMT | 53.37595|
-|Predicted Average DVMT | 53.49994|
+|Simulated Average DVMT | 53.51008|
+|Predicted Average DVMT | 53.63296|
 
 The following charts compare the distributions of the household average DVMT for survey households predicted by the linear model with the distributions simulated for the survey households by stochastically applying the binomial and linear models of survey day DVMT. This shows that the linear model of average household DVMT can be substituted for the stochastic simulation. This enables the module to run much faster than would be the case if average DVMT had to be simulated.
 
@@ -390,20 +390,20 @@ lm(formula = PctlDvmt ~ Dvmt + DvmtSq + DvmtCu, data = TestHh_df)
 
 Residuals:
     Min      1Q  Median      3Q     Max 
--39.335  -4.204  -0.115   4.203 112.481 
+-40.233  -4.181  -0.109   4.118 120.769 
 
 Coefficients:
               Estimate Std. Error t value Pr(>|t|)    
-(Intercept)  2.370e+01  1.183e-01  200.27   <2e-16 ***
-Dvmt         2.688e+00  3.661e-03  734.33   <2e-16 ***
-DvmtSq      -2.166e-03  2.854e-05  -75.91   <2e-16 ***
-DvmtCu       1.520e-06  2.772e-08   54.84   <2e-16 ***
+(Intercept)  2.309e+01  1.181e-01  195.44   <2e-16 ***
+Dvmt         2.715e+00  3.660e-03  741.83   <2e-16 ***
+DvmtSq      -2.395e-03  2.854e-05  -83.90   <2e-16 ***
+DvmtCu       1.699e-06  2.771e-08   61.32   <2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Residual standard error: 6.819 on 35499 degrees of freedom
+Residual standard error: 6.798 on 35499 degrees of freedom
 Multiple R-squared:  0.9907,	Adjusted R-squared:  0.9907 
-F-statistic: 1.261e+06 on 3 and 35499 DF,  p-value: < 2.2e-16
+F-statistic: 1.267e+06 on 3 and 35499 DF,  p-value: < 2.2e-16
 
 ```
 
@@ -416,20 +416,20 @@ lm(formula = PctlDvmt ~ Dvmt + DvmtSq + DvmtCu, data = TestHh_df)
 
 Residuals:
     Min      1Q  Median      3Q     Max 
--69.888  -3.886   0.023   3.790  46.129 
+-53.473  -4.046   0.105   3.872  33.480 
 
 Coefficients:
               Estimate Std. Error t value Pr(>|t|)    
-(Intercept)  1.542e+01  1.493e-01  103.28   <2e-16 ***
-Dvmt         2.996e+00  7.186e-03  416.92   <2e-16 ***
-DvmtSq      -8.177e-03  9.623e-05  -84.98   <2e-16 ***
-DvmtCu       2.041e-05  3.545e-07   57.58   <2e-16 ***
+(Intercept)  1.551e+01  1.512e-01  102.58   <2e-16 ***
+Dvmt         3.002e+00  7.260e-03  413.46   <2e-16 ***
+DvmtSq      -8.045e-03  9.722e-05  -82.75   <2e-16 ***
+DvmtCu       1.934e-05  3.593e-07   53.82   <2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Residual standard error: 6.431 on 19627 degrees of freedom
-Multiple R-squared:  0.9923,	Adjusted R-squared:  0.9923 
-F-statistic: 8.402e+05 on 3 and 19627 DF,  p-value: < 2.2e-16
+Residual standard error: 6.511 on 19627 degrees of freedom
+Multiple R-squared:  0.9921,	Adjusted R-squared:  0.9921 
+F-statistic: 8.254e+05 on 3 and 19627 DF,  p-value: < 2.2e-16
 
 ```
 
@@ -464,24 +464,24 @@ PROHIBIT - Values that are prohibited. Values in the datastore do not meet any o
 
 ISELEMENTOF - Categorical values that are permitted. Values in the datastore are one or more of the listed values.
 
-|NAME            |TABLE     |GROUP |TYPE      |UNITS      |PROHIBIT |ISELEMENTOF  |
-|:---------------|:---------|:-----|:---------|:----------|:--------|:------------|
-|Marea           |Marea     |Year  |character |ID         |         |             |
-|TranRevMiPC     |Marea     |Year  |compound  |MI/PRSN/YR |NA, < 0  |             |
-|FwyLaneMiPC     |Marea     |Year  |compound  |MI/PRSN    |NA, < 0  |             |
-|Marea           |Bzone     |Year  |character |ID         |         |             |
-|Bzone           |Bzone     |Year  |character |ID         |         |             |
-|D1B             |Bzone     |Year  |compound  |PRSN/SQMI  |NA, < 0  |             |
-|Bzone           |Household |Year  |character |ID         |         |             |
-|Marea           |Household |Year  |character |ID         |         |             |
-|Age0to14        |Household |Year  |people    |PRSN       |NA, < 0  |             |
-|Workers         |Household |Year  |people    |PRSN       |NA, < 0  |             |
-|Drivers         |Household |Year  |people    |PRSN       |NA, < 0  |             |
-|DevType         |Household |Year  |character |category   |NA       |Urban, Rural |
-|HhSize          |Household |Year  |people    |PRSN       |NA, <= 0 |             |
-|Income          |Household |Year  |currency  |USD.2001   |NA, < 0  |             |
-|Vehicles        |Household |Year  |vehicles  |VEH        |NA, < 0  |             |
-|IsUrbanMixNbrhd |Household |Year  |integer   |binary     |NA       |0, 1         |
+|NAME            |TABLE     |GROUP |TYPE      |UNITS      |PROHIBIT |ISELEMENTOF        |
+|:---------------|:---------|:-----|:---------|:----------|:--------|:------------------|
+|Marea           |Marea     |Year  |character |ID         |         |                   |
+|TranRevMiPC     |Marea     |Year  |compound  |MI/PRSN/YR |NA, < 0  |                   |
+|FwyLaneMiPC     |Marea     |Year  |compound  |MI/PRSN    |NA, < 0  |                   |
+|Marea           |Bzone     |Year  |character |ID         |         |                   |
+|Bzone           |Bzone     |Year  |character |ID         |         |                   |
+|D1B             |Bzone     |Year  |compound  |PRSN/SQMI  |NA, < 0  |                   |
+|Bzone           |Household |Year  |character |ID         |         |                   |
+|Marea           |Household |Year  |character |ID         |         |                   |
+|Age0to14        |Household |Year  |people    |PRSN       |NA, < 0  |                   |
+|Workers         |Household |Year  |people    |PRSN       |NA, < 0  |                   |
+|Drivers         |Household |Year  |people    |PRSN       |NA, < 0  |                   |
+|LocType         |Household |Year  |character |category   |NA       |Urban, Town, Rural |
+|HhSize          |Household |Year  |people    |PRSN       |NA, <= 0 |                   |
+|Income          |Household |Year  |currency  |USD.2001   |NA, < 0  |                   |
+|Vehicles        |Household |Year  |vehicles  |VEH        |NA, < 0  |                   |
+|IsUrbanMixNbrhd |Household |Year  |integer   |binary     |NA       |0, 1               |
 
 ## Datasets Produced by the Module
 The following table documents each dataset that is retrieved from the datastore and used by the module. Each row in the table describes a dataset. All the datasets must be present in the datastore. One or more of these datasets may be entered into the datastore from the user input files. The table names and their meanings are as follows:
@@ -502,8 +502,9 @@ ISELEMENTOF - Categorical values that are permitted. Values in the datastore are
 
 DESCRIPTION - A description of the data.
 
-|NAME        |TABLE     |GROUP |TYPE     |UNITS  |PROHIBIT |ISELEMENTOF |DESCRIPTION                                                                                                                    |
-|:-----------|:---------|:-----|:--------|:------|:--------|:-----------|:------------------------------------------------------------------------------------------------------------------------------|
-|Dvmt        |Household |Year  |compound |MI/DAY |NA, < 0  |            |Average daily vehicle miles traveled by the household in autos or light trucks                                                 |
-|UrbanHhDvmt |Marea     |Year  |compound |MI/DAY |NA, < 0  |            |Average daily vehicle miles traveled in autos or light trucks by households residing in the urbanized portion of the Marea     |
-|RuralHhDvmt |Marea     |Year  |compound |MI/DAY |NA, < 0  |            |Average daily vehicle miles traveled in autos or light trucks by households residing in the non-urbanized portion of the Marea |
+|NAME        |TABLE     |GROUP |TYPE     |UNITS  |PROHIBIT |ISELEMENTOF |DESCRIPTION                                                                                                                                 |
+|:-----------|:---------|:-----|:--------|:------|:--------|:-----------|:-------------------------------------------------------------------------------------------------------------------------------------------|
+|Dvmt        |Household |Year  |compound |MI/DAY |NA, < 0  |            |Average daily vehicle miles traveled by the household in autos or light trucks                                                              |
+|UrbanHhDvmt |Marea     |Year  |compound |MI/DAY |NA, < 0  |            |Average daily vehicle miles traveled in autos or light trucks by households residing in the urbanized portion of the Marea                  |
+|TownHhDvmt  |Marea     |Year  |compound |MI/DAY |NA, < 0  |            |Average daily vehicle miles traveled in autos or light trucks by households residing in town (urban but not urbanized) portion of the Marea |
+|RuralHhDvmt |Marea     |Year  |compound |MI/DAY |NA, < 0  |            |Average daily vehicle miles traveled in autos or light trucks by households residing in the rural (non-urban) portion of the Marea          |

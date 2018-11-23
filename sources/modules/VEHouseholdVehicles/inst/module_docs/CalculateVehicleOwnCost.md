@@ -1,6 +1,6 @@
 
 # AssignVehicleType Module
-### September 9, 2018
+### November 23, 2018
 
 This module calculates average vehicle ownership cost for each vehicle based on the vehicle type and age using data from the American Automobile Association (AAA). To this are added the cost of parking at the vehicle residence if free parking is not available for all household vehicles. The ownership cost is converted into an average ownership cost per mile by predicting the household DVMT given the number of owned vehicles and splitting the miles equally among the vehicles. Vehicle ownership costs are used by the AdjustVehicleOwnership module to determine whether it would be more cost-effective for a household to substitute the use of car services for one or more of vehicles that they otherwise would own.
 
@@ -153,7 +153,7 @@ ISELEMENTOF - Categorical values that are permitted. Values in the datastore are
 |Drv55to64          |Household |Year  |people    |PRSN           |NA, < 0      |                           |
 |Drv65Plus          |Household |Year  |people    |PRSN           |NA, < 0      |                           |
 |Income             |Household |Year  |currency  |USD.2005       |NA, < 0      |                           |
-|DevType            |Household |Year  |character |category       |NA           |Urban, Rural               |
+|LocType            |Household |Year  |character |category       |NA           |Urban, Town, Rural         |
 |NumLtTrk           |Household |Year  |vehicles  |VEH            |NA, < 0      |                           |
 |NumAuto            |Household |Year  |vehicles  |VEH            |NA, < 0      |                           |
 

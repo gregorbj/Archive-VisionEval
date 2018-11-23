@@ -16,33 +16,33 @@ glm(formula = makeFormula(StartTerms_), family = binomial, data = EstData_df[Tra
 
 Deviance Residuals: 
     Min       1Q   Median       3Q      Max  
--3.3088   0.1301   0.2099   0.4028   3.0747  
+-3.2981   0.1289   0.2044   0.3949   2.7416  
 
 Coefficients:
                   Estimate Std. Error z value Pr(>|z|)    
-(Intercept)     -1.803e+01  1.062e+02  -0.170    0.865    
-Age15to19        1.719e+01  1.062e+02   0.162    0.871    
-Age20to29        1.957e+01  1.062e+02   0.184    0.854    
-Age30to54        1.986e+01  1.062e+02   0.187    0.852    
-Age55to64        1.970e+01  1.062e+02   0.186    0.853    
-Age65Plus        1.914e+01  1.062e+02   0.180    0.857    
-Worker           1.294e+00  5.107e-02  25.340   <2e-16 ***
-HhSize          -2.721e-01  1.656e-02 -16.429   <2e-16 ***
-Income           4.490e-05  1.987e-06  22.601   <2e-16 ***
-IncomeSq        -1.860e-10  1.185e-11 -15.696   <2e-16 ***
-IsSF             4.230e-01  5.101e-02   8.294   <2e-16 ***
-PopDensity      -4.134e-05  3.172e-06 -13.031   <2e-16 ***
-IsUrbanMixNbrhd -6.106e-01  5.939e-02 -10.282   <2e-16 ***
-TranRevMiPC     -8.070e-03  7.505e-04 -10.753   <2e-16 ***
+(Intercept)     -1.801e+01  1.056e+02  -0.171    0.865    
+Age15to19        1.713e+01  1.056e+02   0.162    0.871    
+Age20to29        1.956e+01  1.056e+02   0.185    0.853    
+Age30to54        1.988e+01  1.056e+02   0.188    0.851    
+Age55to64        1.974e+01  1.056e+02   0.187    0.852    
+Age65Plus        1.911e+01  1.056e+02   0.181    0.856    
+Worker           1.291e+00  5.132e-02  25.147   <2e-16 ***
+HhSize          -2.793e-01  1.665e-02 -16.777   <2e-16 ***
+Income           4.581e-05  1.992e-06  22.995   <2e-16 ***
+IncomeSq        -1.952e-10  1.187e-11 -16.440   <2e-16 ***
+IsSF             4.461e-01  5.128e-02   8.698   <2e-16 ***
+PopDensity      -4.129e-05  3.188e-06 -12.951   <2e-16 ***
+IsUrbanMixNbrhd -6.268e-01  5.999e-02 -10.449   <2e-16 ***
+TranRevMiPC     -7.594e-03  7.558e-04 -10.048   <2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 (Dispersion parameter for binomial family taken to be 1)
 
-    Null deviance: 26639  on 31324  degrees of freedom
-Residual deviance: 14990  on 31311  degrees of freedom
-  (10237 observations deleted due to missingness)
-AIC: 15018
+    Null deviance: 26664  on 31369  degrees of freedom
+Residual deviance: 14814  on 31356  degrees of freedom
+  (10192 observations deleted due to missingness)
+AIC: 14842
 
 Number of Fisher Scoring iterations: 16
 
@@ -58,31 +58,31 @@ glm(formula = makeFormula(StartTerms_), family = binomial, data = EstData_df[Tra
 
 Deviance Residuals: 
     Min       1Q   Median       3Q      Max  
--3.2883   0.1226   0.1787   0.3509   2.5884  
+-3.2878   0.1233   0.1784   0.3469   2.5976  
 
 Coefficients:
               Estimate Std. Error z value Pr(>|z|)    
-(Intercept) -1.944e+01  1.155e+02  -0.168    0.866    
-Age15to19    1.855e+01  1.155e+02   0.161    0.872    
-Age20to29    2.083e+01  1.155e+02   0.180    0.857    
-Age30to54    2.102e+01  1.155e+02   0.182    0.856    
-Age55to64    2.105e+01  1.155e+02   0.182    0.855    
-Age65Plus    2.034e+01  1.155e+02   0.176    0.860    
-Worker       1.606e+00  4.583e-02  35.035   <2e-16 ***
-HhSize      -2.308e-01  1.455e-02 -15.863   <2e-16 ***
-Income       4.299e-05  1.796e-06  23.942   <2e-16 ***
-IncomeSq    -1.951e-10  1.129e-11 -17.280   <2e-16 ***
-IsSF         4.556e-01  4.292e-02  10.617   <2e-16 ***
-PopDensity  -6.348e-05  3.674e-06 -17.278   <2e-16 ***
+(Intercept) -1.944e+01  1.152e+02  -0.169    0.866    
+Age15to19    1.857e+01  1.152e+02   0.161    0.872    
+Age20to29    2.088e+01  1.152e+02   0.181    0.856    
+Age30to54    2.106e+01  1.152e+02   0.183    0.855    
+Age55to64    2.108e+01  1.152e+02   0.183    0.855    
+Age65Plus    2.036e+01  1.152e+02   0.177    0.860    
+Worker       1.554e+00  4.597e-02  33.814   <2e-16 ***
+HhSize      -2.311e-01  1.467e-02 -15.748   <2e-16 ***
+Income       4.495e-05  1.804e-06  24.915   <2e-16 ***
+IncomeSq    -2.066e-10  1.136e-11 -18.185   <2e-16 ***
+IsSF         3.919e-01  4.336e-02   9.038   <2e-16 ***
+PopDensity  -6.377e-05  3.651e-06 -17.469   <2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 (Dispersion parameter for binomial family taken to be 1)
 
-    Null deviance: 43372  on 57700  degrees of freedom
-Residual deviance: 21962  on 57689  degrees of freedom
-  (16645 observations deleted due to missingness)
-AIC: 21986
+    Null deviance: 43175  on 57813  degrees of freedom
+Residual deviance: 21808  on 57802  degrees of freedom
+  (16532 observations deleted due to missingness)
+AIC: 21832
 
 Number of Fisher Scoring iterations: 17
 
@@ -141,35 +141,35 @@ PROHIBIT - Values that are prohibited. Values in the datastore do not meet any o
 
 ISELEMENTOF - Categorical values that are permitted. Values in the datastore are one or more of the listed values.
 
-|NAME             |TABLE     |GROUP |TYPE      |UNITS      |PROHIBIT |ISELEMENTOF  |
-|:----------------|:---------|:-----|:---------|:----------|:--------|:------------|
-|Drv15to19AdjProp |Region    |Year  |double    |proportion |NA, < 0  |             |
-|Drv20to29AdjProp |Region    |Year  |double    |proportion |NA, < 0  |             |
-|Drv30to54AdjProp |Region    |Year  |double    |proportion |NA, < 0  |             |
-|Drv55to64AdjProp |Region    |Year  |double    |proportion |NA, < 0  |             |
-|Drv65PlusAdjProp |Region    |Year  |double    |proportion |NA, < 0  |             |
-|Marea            |Marea     |Year  |character |ID         |         |             |
-|TranRevMiPC      |Marea     |Year  |compound  |MI/PRSN/YR |NA, < 0  |             |
-|Bzone            |Bzone     |Year  |character |ID         |         |             |
-|D1B              |Bzone     |Year  |compound  |PRSN/SQMI  |NA, < 0  |             |
-|Marea            |Household |Year  |character |ID         |         |             |
-|Bzone            |Household |Year  |character |ID         |         |             |
-|HhId             |Household |Year  |character |ID         |         |             |
-|Age15to19        |Household |Year  |people    |PRSN       |NA, < 0  |             |
-|Age20to29        |Household |Year  |people    |PRSN       |NA, < 0  |             |
-|Age30to54        |Household |Year  |people    |PRSN       |NA, < 0  |             |
-|Age55to64        |Household |Year  |people    |PRSN       |NA, < 0  |             |
-|Age65Plus        |Household |Year  |people    |PRSN       |NA, < 0  |             |
-|Wkr15to19        |Household |Year  |people    |PRSN       |NA, < 0  |             |
-|Wkr20to29        |Household |Year  |people    |PRSN       |NA, < 0  |             |
-|Wkr30to54        |Household |Year  |people    |PRSN       |NA, < 0  |             |
-|Wkr55to64        |Household |Year  |people    |PRSN       |NA, < 0  |             |
-|Wkr65Plus        |Household |Year  |people    |PRSN       |NA, < 0  |             |
-|Income           |Household |Year  |currency  |USD.2001   |NA, < 0  |             |
-|HhSize           |Household |Year  |people    |PRSN       |NA, <= 0 |             |
-|HouseType        |Household |Year  |character |category   |         |SF, MF, GQ   |
-|IsUrbanMixNbrhd  |Household |Year  |integer   |binary     |NA       |0, 1         |
-|DevType          |Household |Year  |character |category   |NA       |Urban, Rural |
+|NAME             |TABLE     |GROUP |TYPE      |UNITS      |PROHIBIT |ISELEMENTOF        |
+|:----------------|:---------|:-----|:---------|:----------|:--------|:------------------|
+|Drv15to19AdjProp |Region    |Year  |double    |proportion |NA, < 0  |                   |
+|Drv20to29AdjProp |Region    |Year  |double    |proportion |NA, < 0  |                   |
+|Drv30to54AdjProp |Region    |Year  |double    |proportion |NA, < 0  |                   |
+|Drv55to64AdjProp |Region    |Year  |double    |proportion |NA, < 0  |                   |
+|Drv65PlusAdjProp |Region    |Year  |double    |proportion |NA, < 0  |                   |
+|Marea            |Marea     |Year  |character |ID         |         |                   |
+|TranRevMiPC      |Marea     |Year  |compound  |MI/PRSN/YR |NA, < 0  |                   |
+|Bzone            |Bzone     |Year  |character |ID         |         |                   |
+|D1B              |Bzone     |Year  |compound  |PRSN/SQMI  |NA, < 0  |                   |
+|Marea            |Household |Year  |character |ID         |         |                   |
+|Bzone            |Household |Year  |character |ID         |         |                   |
+|HhId             |Household |Year  |character |ID         |         |                   |
+|Age15to19        |Household |Year  |people    |PRSN       |NA, < 0  |                   |
+|Age20to29        |Household |Year  |people    |PRSN       |NA, < 0  |                   |
+|Age30to54        |Household |Year  |people    |PRSN       |NA, < 0  |                   |
+|Age55to64        |Household |Year  |people    |PRSN       |NA, < 0  |                   |
+|Age65Plus        |Household |Year  |people    |PRSN       |NA, < 0  |                   |
+|Wkr15to19        |Household |Year  |people    |PRSN       |NA, < 0  |                   |
+|Wkr20to29        |Household |Year  |people    |PRSN       |NA, < 0  |                   |
+|Wkr30to54        |Household |Year  |people    |PRSN       |NA, < 0  |                   |
+|Wkr55to64        |Household |Year  |people    |PRSN       |NA, < 0  |                   |
+|Wkr65Plus        |Household |Year  |people    |PRSN       |NA, < 0  |                   |
+|Income           |Household |Year  |currency  |USD.2001   |NA, < 0  |                   |
+|HhSize           |Household |Year  |people    |PRSN       |NA, <= 0 |                   |
+|HouseType        |Household |Year  |character |category   |         |SF, MF, GQ         |
+|IsUrbanMixNbrhd  |Household |Year  |integer   |binary     |NA       |0, 1               |
+|LocType          |Household |Year  |character |category   |NA       |Urban, Town, Rural |
 
 ## Datasets Produced by the Module
 The following table documents each dataset that is retrieved from the datastore and used by the module. Each row in the table describes a dataset. All the datasets must be present in the datastore. One or more of these datasets may be entered into the datastore from the user input files. The table names and their meanings are as follows:

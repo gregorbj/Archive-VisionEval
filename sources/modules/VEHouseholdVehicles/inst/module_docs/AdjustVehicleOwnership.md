@@ -1,6 +1,6 @@
 
 # AdjustVehicleOwnership Module
-### September 7, 2018
+### November 23, 2018
 
 This module adjusts household vehicle ownership based on a comparison of the cost of owning a vehicle per mile of travel compared to the cost per mile of using a car service where the level of service is high. The determination of whether car services are substituted for ownership also depends on input assumptions regarding the average likelihood that an owner would substitute car services for a household vehicle.
 

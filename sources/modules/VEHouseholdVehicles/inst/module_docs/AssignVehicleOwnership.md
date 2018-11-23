@@ -1,6 +1,6 @@
 
 # AssignVehicleOwnership Module
-### September 8, 2018
+### November 23, 2018
 
 This module determines the number of vehicles owned or leased by each household as a function of household characteristics, land use characteristics, and transportation system characteristics.
 
@@ -162,22 +162,22 @@ PROHIBIT - Values that are prohibited. Values in the datastore do not meet any o
 
 ISELEMENTOF - Categorical values that are permitted. Values in the datastore are one or more of the listed values.
 
-|NAME            |TABLE     |GROUP |TYPE      |UNITS      |PROHIBIT |ISELEMENTOF  |
-|:---------------|:---------|:-----|:---------|:----------|:--------|:------------|
-|Marea           |Marea     |Year  |character |ID         |         |             |
-|TranRevMiPC     |Marea     |Year  |compound  |MI/PRSN/YR |NA, < 0  |             |
-|Marea           |Bzone     |Year  |character |ID         |         |             |
-|Bzone           |Bzone     |Year  |character |ID         |         |             |
-|D1B             |Bzone     |Year  |compound  |PRSN/SQMI  |NA, < 0  |             |
-|Bzone           |Household |Year  |character |ID         |         |             |
-|Workers         |Household |Year  |people    |PRSN       |NA, < 0  |             |
-|Drivers         |Household |Year  |people    |PRSN       |NA, < 0  |             |
-|Income          |Household |Year  |currency  |USD.2001   |NA, < 0  |             |
-|HouseType       |Household |Year  |character |category   |         |SF, MF, GQ   |
-|HhSize          |Household |Year  |people    |PRSN       |NA, <= 0 |             |
-|Age65Plus       |Household |Year  |people    |PRSN       |NA, < 0  |             |
-|IsUrbanMixNbrhd |Household |Year  |integer   |binary     |NA       |0, 1         |
-|DevType         |Household |Year  |character |category   |NA       |Urban, Rural |
+|NAME            |TABLE     |GROUP |TYPE      |UNITS      |PROHIBIT |ISELEMENTOF        |
+|:---------------|:---------|:-----|:---------|:----------|:--------|:------------------|
+|Marea           |Marea     |Year  |character |ID         |         |                   |
+|TranRevMiPC     |Marea     |Year  |compound  |MI/PRSN/YR |NA, < 0  |                   |
+|Marea           |Bzone     |Year  |character |ID         |         |                   |
+|Bzone           |Bzone     |Year  |character |ID         |         |                   |
+|D1B             |Bzone     |Year  |compound  |PRSN/SQMI  |NA, < 0  |                   |
+|Bzone           |Household |Year  |character |ID         |         |                   |
+|Workers         |Household |Year  |people    |PRSN       |NA, < 0  |                   |
+|Drivers         |Household |Year  |people    |PRSN       |NA, < 0  |                   |
+|Income          |Household |Year  |currency  |USD.2001   |NA, < 0  |                   |
+|HouseType       |Household |Year  |character |category   |         |SF, MF, GQ         |
+|HhSize          |Household |Year  |people    |PRSN       |NA, <= 0 |                   |
+|Age65Plus       |Household |Year  |people    |PRSN       |NA, < 0  |                   |
+|IsUrbanMixNbrhd |Household |Year  |integer   |binary     |NA       |0, 1               |
+|LocType         |Household |Year  |character |category   |NA       |Urban, Town, Rural |
 
 ## Datasets Produced by the Module
 The following table documents each dataset that is retrieved from the datastore and used by the module. Each row in the table describes a dataset. All the datasets must be present in the datastore. One or more of these datasets may be entered into the datastore from the user input files. The table names and their meanings are as follows:

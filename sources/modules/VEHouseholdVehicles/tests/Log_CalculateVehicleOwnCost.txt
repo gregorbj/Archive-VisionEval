@@ -1,32 +1,32 @@
 Test
 Test of VESimHouseholds package modules
-2018-11-11_14:52:15
+2018-11-23_11:05:26
 
-2018-11-11 14:52:15 : Testing CalculateVehicleOwnCost. 
+2018-11-23 11:05:26 : Testing CalculateVehicleOwnCost. 
 
-2018-11-11 14:52:15 : Attempting to load datastore. 
+2018-11-23 11:05:27 : Attempting to load datastore. 
 
-2018-11-11 14:52:15 : Datastore loaded. 
+2018-11-23 11:05:27 : Datastore loaded. 
 
-2018-11-11 14:52:15 : Attempting to load and check specifications. 
+2018-11-23 11:05:27 : Attempting to load and check specifications. 
 
-2018-11-11 14:52:15 : Module specifications successfully loaded and checked for errors. 
+2018-11-23 11:05:27 : Module specifications successfully loaded and checked for errors. 
 
-2018-11-11 14:52:15 : Attempting to process, check and load module inputs. 
+2018-11-23 11:05:27 : Attempting to process, check and load module inputs. 
 
-2018-11-11 14:52:15 : Module inputs successfully checked and loaded into datastore. 
+2018-11-23 11:05:31 : Module inputs successfully checked and loaded into datastore. 
 
-2018-11-11 14:52:15 : Checking whether datastore contains all datasets in Get specifications. 
+2018-11-23 11:05:32 : Checking whether datastore contains all datasets in Get specifications. 
 
-2018-11-11 14:52:15 : Datastore contains all datasets identified in module Get specifications. 
+2018-11-23 11:05:32 : Datastore contains all datasets identified in module Get specifications. 
 
-2018-11-11 14:52:15 : Running module and checking whether outputs meet Set specifications. 
+2018-11-23 11:05:32 : Running module and checking whether outputs meet Set specifications. 
 
-2018-11-11 14:52:15 : Also saving module outputs to datastore. 
+2018-11-23 11:05:32 : Also saving module outputs to datastore. 
 
-2018-11-11 14:52:20 : Module run successfully and outputs meet Set specifications. 
+2018-11-23 11:05:41 : Module run successfully and outputs meet Set specifications. 
 
-2018-11-11 14:52:20 : Module outputs saved to datastore. 
+2018-11-23 11:05:41 : Module outputs saved to datastore. 
 
-2018-11-11 14:52:20 : Congratulations. Module CalculateVehicleOwnCost passed all tests. 
+2018-11-23 11:05:41 : Congratulations. Module CalculateVehicleOwnCost passed all tests. 
 
