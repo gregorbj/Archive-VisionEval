@@ -1,32 +1,72 @@
 Test
 Test of VESimHouseholds package modules
-2018-04-18_16:02:33
+2018-11-22_19:43:51
 
-2018-04-18 16:02:33 : Testing Calculate4DMeasures. 
+2018-11-22 19:43:51 : Testing Calculate4DMeasures. 
 
-2018-04-18 16:02:33 : Attempting to load datastore. 
+2018-11-22 19:43:51 : Attempting to load datastore. 
 
-2018-04-18 16:02:33 : Datastore loaded. 
+2018-11-22 19:43:51 : Datastore loaded. 
 
-2018-04-18 16:02:33 : Attempting to load and check specifications. 
+2018-11-22 19:43:51 : Attempting to load and check specifications. 
 
-2018-04-18 16:02:33 : Module specifications successfully loaded and checked for errors. 
+2018-11-22 19:43:52 : Module specifications successfully loaded and checked for errors. 
 
-2018-04-18 16:02:33 : Attempting to process, check and load module inputs. 
+2018-11-22 19:43:52 : Attempting to process, check and load module inputs. 
 
-2018-04-18 16:02:33 : Module inputs successfully checked and loaded into datastore. 
+2018-11-22 19:43:52 : Module inputs successfully checked and loaded into datastore. 
 
-2018-04-18 16:02:33 : Checking whether datastore contains all datasets in Get specifications. 
+2018-11-22 19:43:52 : Checking whether datastore contains all datasets in Get specifications. 
 
-2018-04-18 16:02:33 : Datastore contains all datasets identified in module Get specifications. 
+2018-11-22 19:43:52 : Datastore contains all datasets identified in module Get specifications. 
 
-2018-04-18 16:02:33 : Running module and checking whether outputs meet Set specifications. 
+2018-11-22 19:43:52 : Running module and checking whether outputs meet Set specifications. 
 
-2018-04-18 16:02:33 : Also saving module outputs to datastore. 
+2018-11-22 19:43:52 : Also saving module outputs to datastore. 
 
-2018-04-18 16:02:36 : Module run successfully and outputs meet Set specifications. 
+2018-11-22 19:43:53 : Module run successfully and outputs meet Set specifications. 
 
-2018-04-18 16:02:36 : Module outputs saved to datastore. 
+2018-11-22 19:43:53 : Module outputs saved to datastore. 
 
-2018-04-18 16:02:36 : Congratulations. Module Calculate4DMeasures passed all tests. 
+2018-11-22 19:43:53 : Congratulations. Module Calculate4DMeasures passed all tests. 
+
+Test
+Test of VESimHouseholds package modules
+2018-11-22_19:43:53
+
+2018-11-22 19:43:53 : Testing Calculate4DMeasures. 
+
+2018-11-22 19:43:53 : Attempting to load datastore. 
+
+2018-11-22 19:43:53 : Datastore loaded. 
+
+2018-11-22 19:43:53 : Attempting to load and check specifications. 
+
+2018-11-22 19:43:53 : Module specifications successfully loaded and checked for errors. 
+
+2018-11-22 19:43:53 : Attempting to process, check and load module inputs. 
+
+2018-11-22 19:43:54 : Module inputs successfully checked and loaded into datastore. 
+
+2018-11-22 19:43:54 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-11-22 19:43:54 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-11-22 19:43:54 : Running module and checking whether outputs meet Set specifications. 
+
+2018-11-22 19:43:54 : Also saving module outputs to datastore. 
+
+2018-11-22 19:43:56 : Module run successfully and outputs meet Set specifications. 
+
+2018-11-22 19:43:56 : Module outputs saved to datastore. 
+
+2018-11-22 19:43:56 : Congratulations. Module Calculate4DMeasures passed all tests. 
+
+Test
+Test of VESimHouseholds package modules
+2018-11-22_19:47:11
+
+2018-11-22 19:47:11 : Testing Calculate4DMeasures. 
+
+2018-11-22 19:47:11 : Attempting to load datastore. 
 

@@ -1,0 +1,72 @@
+Test
+Test of VESimHouseholds package modules
+2018-11-22_19:43:22
+
+2018-11-22 19:43:23 : Testing AssignLocTypes. 
+
+2018-11-22 19:43:23 : Attempting to load datastore. 
+
+2018-11-22 19:43:23 : Datastore loaded. 
+
+2018-11-22 19:43:23 : Attempting to load and check specifications. 
+
+2018-11-22 19:43:23 : Module specifications successfully loaded and checked for errors. 
+
+2018-11-22 19:43:23 : Attempting to process, check and load module inputs. 
+
+2018-11-22 19:43:29 : Module inputs successfully checked and loaded into datastore. 
+
+2018-11-22 19:43:29 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-11-22 19:43:29 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-11-22 19:43:29 : Running module and checking whether outputs meet Set specifications. 
+
+2018-11-22 19:43:29 : Also saving module outputs to datastore. 
+
+2018-11-22 19:43:38 : Module run successfully and outputs meet Set specifications. 
+
+2018-11-22 19:43:38 : Module outputs saved to datastore. 
+
+2018-11-22 19:43:38 : Congratulations. Module AssignLocTypes passed all tests. 
+
+Test
+Test of VESimHouseholds package modules
+2018-11-22_19:43:38
+
+2018-11-22 19:43:39 : Testing AssignLocTypes. 
+
+2018-11-22 19:43:39 : Attempting to load datastore. 
+
+2018-11-22 19:43:39 : Datastore loaded. 
+
+2018-11-22 19:43:39 : Attempting to load and check specifications. 
+
+2018-11-22 19:43:39 : Module specifications successfully loaded and checked for errors. 
+
+2018-11-22 19:43:39 : Attempting to process, check and load module inputs. 
+
+2018-11-22 19:43:42 : Module inputs successfully checked and loaded into datastore. 
+
+2018-11-22 19:43:42 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-11-22 19:43:42 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-11-22 19:43:42 : Running module and checking whether outputs meet Set specifications. 
+
+2018-11-22 19:43:42 : Also saving module outputs to datastore. 
+
+2018-11-22 19:43:51 : Module run successfully and outputs meet Set specifications. 
+
+2018-11-22 19:43:51 : Module outputs saved to datastore. 
+
+2018-11-22 19:43:51 : Congratulations. Module AssignLocTypes passed all tests. 
+
+Test
+Test of VESimHouseholds package modules
+2018-11-22_19:46:04
+
+2018-11-22 19:46:04 : Testing AssignLocTypes. 
+
+2018-11-22 19:46:04 : Attempting to load datastore. 
+
