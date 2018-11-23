@@ -797,13 +797,13 @@ DivertSovTravelSpecifications <- list(
       ISELEMENTOF = ""
     ),
     item(
-      NAME = "DevType",
+      NAME = "LocType",
       TABLE = "Household",
       GROUP = "Year",
       TYPE = "character",
       UNITS = "category",
       PROHIBIT = "NA",
-      ISELEMENTOF = c("Urban", "Rural")
+      ISELEMENTOF = c("Urban", "Town", "Rural")
     ),
     item(
       NAME = "IsUrbanMixNbrhd",
@@ -905,7 +905,7 @@ DivertSovTravel <- function(L) {
     L$Year$Bzone$D1B[match(Hh_df$Bzone, L$Year$Bzone$Bzone)]
   Hh_df$FwyLaneMiPC <-
     L$Year$Marea$FwyLaneMiPC[match(Hh_df$Marea, L$Year$Marea$Marea)]
-  IsMetro <- Hh_df$DevType == "Urban"
+  IsMetro <- Hh_df$LocType == "Urban"
 
   #Calculate proportions of household DVMT in SOV tours
   #------------------------------------------
