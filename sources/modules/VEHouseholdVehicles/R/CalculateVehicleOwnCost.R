@@ -5,7 +5,7 @@
 #<doc>
 #
 ## AssignVehicleType Module
-#### September 9, 2018
+#### November 23, 2018
 #
 #This module calculates average vehicle ownership cost for each vehicle based on the vehicle type and age using data from the American Automobile Association (AAA). To this are added the cost of parking at the vehicle residence if free parking is not available for all household vehicles. The ownership cost is converted into an average ownership cost per mile by predicting the household DVMT given the number of owned vehicles and splitting the miles equally among the vehicles. Vehicle ownership costs are used by the AdjustVehicleOwnership module to determine whether it would be more cost-effective for a household to substitute the use of car services for one or more of vehicles that they otherwise would own.
 #
@@ -604,13 +604,13 @@ CalculateVehicleOwnCostSpecifications <- list(
       ISELEMENTOF = ""
     ),
     item(
-      NAME = "DevType",
+      NAME = "LocType",
       TABLE = "Household",
       GROUP = "Year",
       TYPE = "character",
       UNITS = "category",
       PROHIBIT = "NA",
-      ISELEMENTOF = c("Urban", "Rural")
+      ISELEMENTOF = c("Urban", "Town", "Rural")
     ),
     item(
       NAME = items(
@@ -846,7 +846,7 @@ idPaydHh <- function(L) {
     })
     #Add weight for households that are located within a metropolitan area
     Weight_Hh <- local({
-      InMetroArea <- L$Y$Household$DevType == "Urban"
+      InMetroArea <- L$Y$Household$LocType == "Urban"
       Weight_Hh + PaydWts_["InMetroArea"]
     })
     #Use weights to identify PAYD households
