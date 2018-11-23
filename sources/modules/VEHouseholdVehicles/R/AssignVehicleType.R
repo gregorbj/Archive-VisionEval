@@ -5,7 +5,7 @@
 #<doc>
 #
 ## AssignVehicleType Module
-#### September 9, 2018
+#### November 23, 2018
 #
 #This module identifies how many household vehicles are light trucks and how many are automobiles. Light trucks include pickup trucks, sport utility vehicles, vans, and any other vehicle not classified as a passenger car. Automobiles are vehicles classified as passenger cars. The crossover vehicle category [blurs the line between light trucks and passenger vehicles](https://www.eia.gov/todayinenergy/detail.php?id=31352). Their classification as light trucks or automobiles depends on the agency doing the classification and purpose of the classification. These vehicles were not a significant portion of the market when the model estimation data were collected and so are not explictly considered. How they are classified is up to the model user who is responsible for specifying the light truck proportion of the vehicle fleet.
 #
