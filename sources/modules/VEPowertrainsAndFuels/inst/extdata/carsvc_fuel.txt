@@ -1,0 +1,21 @@
+=================================
+Documentation for carsvc_fuel.csv
+=================================
+
+This file contains values for the proportions of fuel type (gasoline, diesel, compressed natural gas) by vehicle type (auto, light truck) used by car services (e.g. taxi, TNC). The proportions represent the proportions of daily vehicle miles traveled (DVMT) rather than the proportions of vehicles. The proportions by vehicle type must add up to 1. Note that the proportions only address vehicles powered by hydrocarbon fuels. The split of DVMT between hydrocarbon fuel use vs. electricity is addressed in the "carsvc_powertrain_prop.csv" file. Also not that the fuel types include blends (e.g. gasoline with ethanol, diesel with biodiesel). The fuel blending proportions are established by values in the "ldv_biofuel_mix.csv" file. 
+
+File Structure
+--------------
+Each row is a decade year from 1990 to 2050. The range of years needs to be sufficient to encompass all model run years that are anticipated.
+Column names as follows:
+Year: The year to which the data apply
+AutoPropGasoline: The proportion of car service automobile DVMT powered by gasoline and gasoline blends
+AutoPropDiesel: The proportion of car service automobile DVMT powered by diesel and diesel blends
+AutoPropCng: The proportion of car service automobile DVMT powered by compressed natural gas and compressed natural gas blends
+LtTrkPropGasoline: The proportion of car service light truck DVMT powered by gasoline and gasoline blends
+LtTrkPropDiesel: The proportion of car service light truck DVMT powered by diesel and diesel blends
+LtTrkPropCng: The proportion of car service light truck DVMT powered by compressed natural gas and compressed natural gas blends
+
+Source:
+-------
+These are demonstration data developed for the purpose of creating and testing modules. Data comes from various sources used to develop values for Oregon and other sources.
