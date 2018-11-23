@@ -5,7 +5,7 @@
 #<doc>
 #
 ## CalculateAltModeTrips Module
-#### November 12, 2018
+#### November 23, 2018
 #
 #This module calculates household transit trips, walk trips, and bike trips. The models are sensitive to household DVMT so they are run after all household DVMT adjustments (e.g. to account for cost on household DVMT) are made.
 #
@@ -318,13 +318,13 @@ CalculateAltModeTripsSpecifications <- list(
       ISELEMENTOF = ""
     ),
     item(
-      NAME = "DevType",
+      NAME = "LocType",
       TABLE = "Household",
       GROUP = "Year",
       TYPE = "character",
       UNITS = "category",
       PROHIBIT = "NA",
-      ISELEMENTOF = c("Urban", "Rural")
+      ISELEMENTOF = c("Urban", "Town", "Rural")
     ),
     item(
       NAME = "HhSize",
@@ -480,7 +480,7 @@ CalculateAltModeTrips <- function(L) {
   #----------------------------------
   calcTrips <- function(Mode) {
     Trips_ <- nrow(Hh_df)
-    IsMetro_ <- Hh_df$DevType == "Urban"
+    IsMetro_ <- Hh_df$LocType == "Urban"
     Trips_[IsMetro_] <-
       applyHurdleTripModel(Hh_df[IsMetro_,], AltModeModels_ls$Metro[[Mode]])
     Trips_[!IsMetro_] <-
