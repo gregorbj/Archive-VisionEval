@@ -19,43 +19,6 @@
 
 PowertrainFuelDefaults_ls <- list()
 
-#---------------------
-#Congestion efficiency
-#---------------------
-#Specify input file attributes
-Inp_ls <- items(
-  item(
-    NAME = "Year",
-    TYPE = "integer",
-    PROHIBIT = c("NA", "< 0"),
-    ISELEMENTOF = "",
-    UNLIKELY = "",
-    TOTAL = ""
-  ),
-  item(
-    NAME =
-      items("LdIce",
-            "LdHev",
-            "LdEv",
-            "LdFcv",
-            "HdIce"),
-    TYPE = "double",
-    PROHIBIT = c("NA", "< 0"),
-    ISELEMENTOF = "",
-    UNLIKELY = "",
-    TOTAL = ""
-  )
-)
-#Load and process data
-CongestionEfficiency_df <-
-  processEstimationInputs(
-    Inp_ls,
-    "congestion_efficiency.csv",
-    "LoadDefaultValues.R")
-#Add to PowertrainFuelDefaults_ls and clean up
-PowertrainFuelDefaults_ls$CongestionEfficiency_df <- CongestionEfficiency_df
-rm(Inp_ls, CongestionEfficiency_df)
-
 #----------------
 #Carbon intensity
 #----------------
