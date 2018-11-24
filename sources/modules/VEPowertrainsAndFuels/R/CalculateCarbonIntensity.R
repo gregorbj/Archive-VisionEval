@@ -1,11 +1,33 @@
 #==========================
 #CalculateCarbonIntensity.R
 #==========================
-#This module calculates the average carbon intensity of fuels (grams CO2e per
-#megajoule) by transportation mode. It also calculates the carbon intensity of
-#electricity. It checks for optional input data from users. If those data are
-#available, it uses them to calculate carbon intensities. Where not available,
-#it calculates carbon intensities from package data.
+#
+#<doc>
+#
+## CalculateCarbonIntensity Module
+#### November 24, 2018
+#
+#This module calculates the average carbon intensity of fuels (grams CO2e per megajoule) by transportation mode and vehicle type. The transportation modes and vehicle types are:
+#
+#|Mode               |Vehicle Types           |
+#|-------------------|------------------------|
+#|Household          |automobile, light truck |
+#|Car Service        |automobile, light truck |
+#|Commercial Service |automobile, light truck |
+#|Heavy Truck        |heavy truck             |
+#|Public Transit     |van, bus, rail          |
+#
+#Average fuel carbon intensities for public transit vehicles are calculated by Marea. The average fuel carbon intensities for the other mode vehicles are calculated for the entire model region. The module also calculates the average carbon intensity of electricity at the Azone level.
+#
+### Model Parameter Estimation
+#
+#This module has no estimated parameters.
+#
+### How the Module Works
+#
+#If carbon intensities are provided as user inputs, those carbon intensities are used. If carbon intensity values are not provided, the module calculates the values using fuels information including the fuel type proportions, the biofuel mix proportions, and the fuel carbon intensity values. The fuel mix proportions are multiplied by the biofuel mix proportions to arrive a the proportions of fuel by all categories. These proportions are used as weights to calculate that average carbon intensity from the fuel carbon intensity values.
+#
+#</doc>
 
 
 #=================================
@@ -218,7 +240,7 @@ CalculateCarbonIntensitySpecifications <- list(
 #' }
 #' @source CalculateCarbonIntensity.R script.
 "CalculateCarbonIntensitySpecifications"
-devtools::use_data(CalculateCarbonIntensitySpecifications, overwrite = TRUE)
+usethis::use_data(CalculateCarbonIntensitySpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -678,9 +700,13 @@ CalculateCarbonIntensity <- function(L) {
 }
 
 
-#================================
-#Code to aid development and test
-#================================
+#===============================================================
+#SECTION 4: MODULE DOCUMENTATION AND AUXILLIARY DEVELOPMENT CODE
+#===============================================================
+#Run module automatic documentation
+#----------------------------------
+documentModule("CalculateCarbonIntensity")
+
 #Test code to check specifications, loading inputs, and whether datastore
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions
