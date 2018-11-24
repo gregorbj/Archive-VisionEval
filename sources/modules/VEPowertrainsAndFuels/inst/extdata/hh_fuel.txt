@@ -1,8 +1,8 @@
-=================================
-Documentation for carsvc_fuel.csv
-=================================
+=============================
+Documentation for hh_fuel.csv
+=============================
 
-This file contains values for the proportions of hydrocarbon fuels used to power car service vehicles by fuel type (gasoline, diesel, compressed natural gas) and vehicle type (auto, light truck). Note that these include fuel blends (e.g. gasoline blended with ethanol). Blending proportions are specified in the "ldv_biofuel_mix.csv" file. The data in these files as well as in the "carbon_intensity.csv" file are used to calculate the average carbon intensity of hydrocarbon fuels used by car service vehicles. Note that the proportions in this file do not represent volumetric proportions (e.g. gallons), they represent energy proportions (e.g. gasoline gallon equivalents) or DVMT proportions.
+This file contains values for the proportions of hydrocarbon fuels used to power household vehicles by fuel type (gasoline, diesel, compressed natural gas) and vehicle type (auto, light truck). Note that these include fuel blends (e.g. gasoline blended with ethanol). Blending proportions are specified in the "ldv_biofuel_mix.csv" file. The data in these files as well as in the "carbon_intensity.csv" file are used to calculate the average carbon intensity of hydrocarbon fuels used by household vehicles. Note that the proportions in this file do not represent volumetric proportions (e.g. gallons), they represent energy proportions (e.g. gasoline gallon equivalents) or DVMT proportions.
 
 File Structure
 --------------

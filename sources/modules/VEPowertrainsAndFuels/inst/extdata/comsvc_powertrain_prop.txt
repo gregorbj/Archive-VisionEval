@@ -11,10 +11,10 @@ Column names as follows:
 Year: The year to which the data apply
 AutoPropIcev: The proportion of commercial service automobile DVMT occurring with internal combustion engine vehicles (ICEV)
 AutoPropHev: The proportion of commercial service automobile DVMT occurring with hybrid electric vehicles (HEV)
-AutoPropBev: The proportion of commercial service automobile DVMT occurring with battery electric vehicle (BEV)
+AutoPropBev: The proportion of commercial service automobile DVMT occurring with battery electric vehicles (BEV)
 LtTrkPropIcev: The proportion of commercial service light truck DVMT occurring with internal combustion engine vehicles (ICEV)
 LtTrkPropHev: The proportion of commercial service light truck DVMT occurring with hybrid electric vehicles (HEV)
-LtTrkPropBev: The proportion of commercial service light truck DVMT occurring with battery electric vehicle (BEV)
+LtTrkPropBev: The proportion of commercial service light truck DVMT occurring with battery electric vehicles (BEV)
 
 Source:
 -------
