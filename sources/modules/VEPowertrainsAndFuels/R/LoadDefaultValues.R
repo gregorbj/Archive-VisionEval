@@ -1226,5 +1226,5 @@ rm(Inp_ls, Names_, Cols_, Years_, Msg_, ty, pt, TransitPowertrain_df)
 #' }
 #' @source LoadDefaultValues.R script.
 "PowertrainFuelDefaults_ls"
-devtools::use_data(PowertrainFuelDefaults_ls, overwrite = TRUE)
+usethis::use_data(PowertrainFuelDefaults_ls, overwrite = TRUE)
 rm(PowertrainFuelDefaults_ls)
