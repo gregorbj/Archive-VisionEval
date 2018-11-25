@@ -1,7 +1,7 @@
 ======================================
 Documentation for ums_2009.csv
 ======================================
-Data in this file is used in the CalculateRoadPerformance.R script to calculate .
+Data in this file is used in the CalculateRoadPerformance.R script to create models which calculate congestion and speeds on urbanized area roadways and to distribute light-duty vehicle traffic between freeways and arterials.
 
 File Structure
 --------------
