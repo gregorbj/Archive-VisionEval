@@ -1,21 +1,96 @@
 #==========================
 #CalculateRoadPerformance.R
 #==========================
-#This module splits light-duty vehicle (LDV) daily vehicle miles of travel
-#DVHT between freeways and arterials as a function of relative speeds and
-#congestion prices. Speeds and prices are combined to calculate an average
-#'effective' speed for freeways and for arterials. The ratio of freeway and
-#arterial 'effective' speeds and a split factor calculated for the metropolitan
-#area are used to split the LDV DVMT. Iteration is used to find an equilibrium
-#split value. In addition to the LDV freeway DVMT and arterial DVMT, the
-#following performance measures are saved to the datastore:
-#- Average freeway speed by congestion level;
-#- Average arterial speed by congestion level;
-#- Average freeway delay by congestion level;
-#- Average arterial delay by congestion level;
-#- Freeway DVMT proportions by congestion level;
-#- Arterial DVMT proportions by congestion level; and,
-#- Average amount paid per mile in congestion pricing fees.
+
+#<doc>
+#
+## CalculateRoadPerformance Module
+#### November 24, 2018
+#
+#This module splits light-duty vehicle (LDV) daily vehicle miles of travel DVHT between freeways and arterials as a function of relative speeds and congestion prices. Speeds and prices are combined to calculate an average 'effective' speed for freeways and for arterials. The ratio of freeway and arterial 'effective' speeds and a split factor calculated for the metropolitan area are used to split the LDV DVMT. Iteration is used to find an equilibrium split value. In addition to the LDV freeway DVMT and arterial DVMT, the following performance measures are saved to the datastore:
+#
+#* Average freeway speed by congestion level;
+#
+#* Average arterial speed by congestion level;
+#
+#* Average freeway delay by congestion level;
+#
+#* Average arterial delay by congestion level;
+#
+#* Freeway DVMT proportions by congestion level;
+#
+#* Arterial DVMT proportions by congestion level;
+#
+#* Average amount paid per mile in congestion pricing fees; and,
+#
+#* Vehicle hours of delay by vehicle type.
+#
+### Model Parameter Estimation
+#
+#Several models are estimated
+#
+#### Estimate Congestion Lookup Table
+#
+# Lookup tables are created that are used by the module to calculate the proportions of freeway and arterial daily vehicle miles of travel (DVMT) and daily vehicle hours of travel (DVHT) in each of 5 congestion levels (none, moderate, heavy, severe, extreme) as a function of freeway average daily traffic (ADT) per lane and arterial ADT per lane respectively. The lookup tables are created using the following Urban Mobility Study (UMS) data for 90 urbanized areas that are used in the calculations:
+#
+#* Average daily freeway vehicle miles traveled in thousands;
+#
+#* Average daily arterial vehicle miles traveled in thousands;
+#
+#* Freeway lane miles
+#
+#* Arterial lane miles
+#
+#* Percentages of freeway DVMT occurring in 5 congestion levels
+#
+#* Percentages of arterial DVMT occurring in 5 congestion levels
+#
+#* Average freeway speeds for travel at each of the 5 congestion levels
+#
+#* Average arterial speeds for travel at each of the 5 congestion levels
+#
+#The steps for creating the lookup tables are as follows:
+#
+#1. Freeway demand levels and arterial demand levels are calculated for each urbanized area by dividing the respective value of DVMT by the respective number of lane miles. The result is the average daily traffic volume per lane-mile.
+#
+#2. A lookup table relating the proportions of freeway DVMT by congestion level to freeway demand level is created through the calculation of weighted moving averages. Values are calculated for for freeway demand levels ranging from 6000 vehicles per lane to 24,000 vehicles per lane in 100 vehicle increments. For each demand level, the data for the 10 urbanized areas whose demand level is nearest the target demand level (5 below and 5 above are chosen). If there are less than 5 below the target then the sample includes all that are below and 5 above. Similarly if there are less then 5 above the sample target. The DVMT proportions for each congestion level are computed as a weighted average of the proportions in the sample where the weights measure how close the demand level of each sample urbanized area is to the target demand level. After weighted averages have been calculated for all freeway demand levels, smoothing splines (5 degrees of freedom) are used to smooth out the values for each congestion level over the range of demand levels.
+#
+#3. A lookup table relating the proportions of arterial DVMT by congestion level to arterial demand level is created by the same method used to create the freeway table.
+#
+#4. The proportions of freeway DVHT (daily vehicle hours of travel) by congestion level is computed for each urbanized area by dividing the freeway DVMT by congestion by the average speed by congestion level. The proportions of arterial DVHT by congestion level are computed in the same way.
+#
+#5. Freeway and arterial lookup tables for of the proportions of DVHT by congestion level by demand level are calculated in the same manner at the DVMT lookup tables.
+#
+#The following figures illustrate the 4 lookup tables:
+#
+#<fig:fwy_dvmt_cong_prop.png>
+#
+#<fig:art_dvmt_cong_prop.png>
+#
+#<fig:fwy_dvht_cong_prop.png>
+#
+#<fig:art_dvht_cong_prop.png>
+#
+#### Urbanized Area Base Speeds and Operational Adjustments
+#
+#Based on research by Bigazzi and Clifton. The speeds modeled above include the
+#effects of ITS/operations strategies that are in place in urban areas. In order
+#to calculate the effects of operations at various levels, base speed estimates
+#which are not influenced by operations improvements need to be used as the
+#starting point. Bigazzi and Clifton made the calculations and these are
+#included in the data directory. Speeds are reduced based on assumed deployment
+#levels relative to average levels, estimated maximum reductions possible by
+#congestion category, facility type, congestion type (recurring vs. incident),
+#and assumed deployment relative to the average for a metropolitan area of the
+#size.
+
+#
+#
+### How the Module Works
+#
+#
+#</doc>
+
 
 
 #=================================
@@ -283,7 +358,41 @@ estimateCongestionModel <- function() {
 
 #Estimate the congestion model (lookup tables)
 #---------------------------------------------
+#Create proportions table
 CongestedProportions_ls <- estimateCongestionModel()
+#Document the DVMT proportions by congestion level for freeways
+png("data/fwy_dvmt_cong_prop.png", height = 360, width = 480)
+Props_mx <- CongestedProportions_ls$DVMT$Fwy
+matplot(as.numeric(rownames(Props_mx)), Props_mx, type = "l",
+        xlab = "Average Daily Traffic Per Lane", ylab = "Proportion of DVMT",
+        main = "Freeway DVMT Split by Congestion Level")
+legend("topright", lty = 1:5, col = 1:5, legend = colnames(Props_mx), bty = "n")
+dev.off()
+#Document the DVMT proportions by congestion level for arterials
+png("data/art_dvmt_cong_prop.png", height = 360, width = 480)
+Props_mx <- CongestedProportions_ls$DVMT$Art
+matplot(as.numeric(rownames(Props_mx)), Props_mx, type = "l",
+        xlab = "Average Daily Traffic Per Lane", ylab = "Proportion of DVMT",
+        main = "Arterial DVMT Split by Congestion Level")
+legend("topright", lty = 1:5, col = 1:5, legend = colnames(Props_mx), bty = "n")
+dev.off()
+#Document the DVHT proportions by congestion level for freeways
+png("data/fwy_dvht_cong_prop.png", height = 360, width = 480)
+Props_mx <- CongestedProportions_ls$DVHT$Fwy
+matplot(as.numeric(rownames(Props_mx)), Props_mx, type = "l",
+        xlab = "Average Daily Traffic Per Lane", ylab = "Proportion of DVHT",
+        main = "Freeway DVHT Split by Congestion Level")
+legend("topright", lty = 1:5, col = 1:5, legend = colnames(Props_mx), bty = "n")
+dev.off()
+#Document the DVHT proportions by congestion level for arterials
+png("data/art_dvht_cong_prop.png", height = 360, width = 480)
+Props_mx <- CongestedProportions_ls$DVHT$Art
+matplot(as.numeric(rownames(Props_mx)), Props_mx, type = "l",
+        xlab = "Average Daily Traffic Per Lane", ylab = "Proportion of DVHT",
+        main = "Arterial DVHT Split by Congestion Level")
+legend("topright", lty = 1:5, col = 1:5, legend = colnames(Props_mx), bty = "n")
+dev.off()
+
 rm(estimateCongestionModel)
 
 #Save the congestion lookup tables
