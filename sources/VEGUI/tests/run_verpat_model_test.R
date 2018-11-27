@@ -39,6 +39,10 @@ if(!exists("createExpectedResults")){
 
 name <- "run_verpat_model_test"
 
+# Start the app
+app <- ShinyDriver$new(".", debug = 'all',
+                       loadTimeout = 10000, phantomTimeout = 10000)
+
 if ( !exists(tests_dir) ){
   tests_dir <- file.path(app$getAppDir(),"tests")
   tests_dir <- normalizePath(tests_dir)
@@ -59,30 +63,36 @@ if(!dir.exists(save_dir)){
 #SECTION 2: CREATE RESULTS
 #===========================
 
-# Start the app
-suppressWarnings(
-  app <- ShinyDriver$new(".", debug = 'all')
-)
-
 # Set the model and run parameters to nothing to ensure consistency in the tests.
 #app$setInputs(MODEL_PARAMETERS_FILE = "[\"\"]")
 #app$setInputs(RUN_PARAMETERS_FILE = "[\"\"]")
 
 # Find and press select button
+cat('Pressing the select button\n')
 select_button <- app$findElement(xpath = "//*[@id='SELECT_RUN_SCRIPT_BUTTON']")
 select_button$click()
+Sys.sleep(10)
+#app$takeScreenshot()
 
 # Select run_model.R
+cat('Finding the run_model.R script\n')
 dir_file <- app$findElements(xpath = "//*//div[contains(@class,'sF-file')]//*//div[contains(string(),'run_model.R')]")
+cat('Length of dir_file:', length(dir_file), '\n')
+
 foldernames <- sapply(dir_file,getname)
 index <- match("run_model.R",foldernames)
+cat('Index = ', index, '\n')
+cat('Clicking the run model file\n')
 run_model_file <- dir_file[[index]]
 run_model_file$click()
+
+cat('Clicking the select button\n')
 select_button <- app$findElement(xpath = "//*[@id='sF-selectButton']")
 select_button$click()
+app$expectUpdate(output = "SCRIPT_NAME", timeout = 10e3) # Monitor that the run_model.R is loaded completely
 
 # Get results of selecting run_model.R
-app$expectUpdate(output = "SCRIPT_NAME", timeout = 10e3) # Monitor that the run_model.R is loaded completely
+cat('Taking screenshots and saving output\n')
 Sys.sleep(10)
 app$takeScreenshot(file = file.path(save_dir,"001.png"))
 
@@ -92,26 +102,31 @@ output$output$SCRIPT_NAME <- NULL
 jsonlite::write_json(output, path = file.path(save_dir,"001.json"),pretty=TRUE)
 
 # Move to the run model tab
+cat('Moving to the run model tab\n')
 run_tab <- app$findElement(xpath = "//*//a[@data-value='TAB_RUN']")
 run_tab$click()
-app$expectUpdate(output = "CAPTURED_SOURCE", timeout = 10e3)
 Sys.sleep(1)
 
 # Clean the results displayed in the browser (remove the identifiers)
+cat('Saving output\n')
 output <- app$getAllValues()
 output$output$SCRIPT_NAME <- NULL
 app$takeScreenshot(file = file.path(save_dir,"002.png"))
 jsonlite::write_json(output, path = file.path(save_dir,"002.json"),pretty=TRUE)
 
 # Run the model
+cat('Running model\n')
 run_model_script_button <- app$findElement(xpath = "//*[@id='RUN_MODEL_BUTTON']")
 run_model_script_button$click()
+#app$expectUpdate(output = "MODULE_PROGRESS")
+#app$expectUpdate(output = "CAPTURED_SOURCE")
 
 # FIXME: if the script stops, the run_model_script_button will still not be enabled
 while(!run_model_script_button$isEnabled()) {
   Sys.sleep(30)
   print(paste0("Running Model: ",!run_model_script_button$isEnabled()))
   print(paste0("Time: ", Sys.time()))
+  #app$takeScreenshot()
 }
 Sys.sleep(1)
 
@@ -119,15 +134,16 @@ Sys.sleep(1)
 # app$takeScreenshot(file = file.path(save_dir,"003.png"))
 
 # Clean the results displayed in the browser (remove the identifiers)
+cat('Getting output\n')
 output <- app$getAllValues()
 output$output <- lapply(output$output,removeDates)
 output$output$SCRIPT_NAME <- NULL
 jsonlite::write_json(output, path = file.path(save_dir,"003.json"),pretty=TRUE)
 
 # Move to the output tab
+cat('Moving to the Output tab\n')
 outputs_button <- app$findElement(xpath = "//*//a[@data-value='TAB_OUTPUTS']")
 outputs_button$click()
-app$expectUpdate(output = "MODEL_STATE_FILE", timeout = 10e3)
 Sys.sleep(1)
 # Screenshot not take as the displayed value contains timestamp and other identifiers
 # app$takeScreenshot(file = file.path(save_dir,"004.png"))
@@ -149,6 +165,8 @@ if(!createExpectedResults){
 #=============================
 #SECTION 4: STOP THE APP
 #=============================
+cat('Finished!  Stopping the app\n')
 app$stop()
 rm(app)
 gc()
+cat('run_verpat_model_test.R complete!\n')

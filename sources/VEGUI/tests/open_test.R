@@ -16,9 +16,7 @@ if(!exists("createExpectedResults")){
 }
 
 # Start the browser
-suppressWarnings(
-  app <- ShinyDriver$new(".")
-)
+app <- ShinyDriver$new(".", loadTimeout = 10000, phantomTimeout = 10000)
 
 name <- "open_test"
 

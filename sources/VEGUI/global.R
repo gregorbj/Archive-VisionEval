@@ -2,20 +2,22 @@
 # LOAD LIBRARIES
 #=============================================
 
-library(visioneval)
-library(shiny)
-library(shinyjs)
-library(shinyFiles)
-library(data.table)
-library(shinyBS)
-library(future)
-library(testit)
-library(jsonlite)
-library(DT)
-library(rhandsontable)
-library(envDocument)
-library(rhdf5)
-library(namedCapture)
+suppressPackageStartupMessages({
+  library(visioneval)
+  library(shiny)
+  library(shinyjs)
+  library(shinyFiles)
+  library(data.table)
+  library(shinyBS)
+  library(future)
+  library(testit)
+  library(jsonlite)
+  library(DT)
+  library(rhandsontable)
+  library(envDocument)
+  library(rhdf5)
+  library(namedCapture)
+})
 
 #==========================================================
 # DEFINE CONSTANTS AND DEFINITIONS OF FUNCTIONS
