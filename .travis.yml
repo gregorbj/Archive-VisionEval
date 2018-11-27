@@ -35,7 +35,7 @@ install:
 # setup a different environment variable for each Travis build environment (in the matrix) to run in parallel
 env:
    - FOLDER=sources/framework/visioneval            SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=
-   - FOLDER=sources/modules/VE2001NHTS              SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=visioneval
+   - FOLDER=sources/modules/VE2001NHTS              SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=
    - FOLDER=sources/modules/VEHouseholdTravel       SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=VE2001NHTS
    - FOLDER=sources/modules/VEHouseholdVehicles     SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=VE2001NHTS,VEHouseholdTravel
    - FOLDER=sources/modules/VELandUse               SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=VE2001NHTS,VESimHouseholds
