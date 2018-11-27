@@ -770,7 +770,7 @@ loadModelParameters <- function(ModelParamFile = "model_parameters.json") {
 #' identify the 'ModuleName', the 'PackageName', and the 'RunFor' value.
 #' @export
 parseModelScript <-
-  function(FilePath = "run_model.R",
+  function(FilePath = "Run_Model.R",
            TestMode = FALSE) {
     if (!TestMode) {
       writeLog("Parsing model script")
