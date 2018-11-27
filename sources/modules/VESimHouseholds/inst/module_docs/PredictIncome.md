@@ -88,7 +88,7 @@ An additional step must be carried out in order to predict household income. Bec
 |          | Dollars|
 |:---------|-------:|
 |Observed  |   51924|
-|Estimated |   52160|
+|Estimated |   51822|
 
 The following figure compares the distributions of the observed and predicted incomes of *regular* households.
 
@@ -100,7 +100,7 @@ Following is the comparison of mean values for the observed *group quarters* hou
 |          | Dollars|
 |:---------|-------:|
 |Observed  |    7504|
-|Estimated |    7584|
+|Estimated |    7630|
 
 The following figure compares the distributions of the observed and predicted incomes of *groups quarters* households.
 
@@ -156,8 +156,8 @@ ISELEMENTOF - Categorical values that are permitted. Values in the datastore are
 |NAME       |TABLE     |GROUP |TYPE      |UNITS    |PROHIBIT |ISELEMENTOF |
 |:----------|:---------|:-----|:---------|:--------|:--------|:-----------|
 |Azone      |Azone     |Year  |character |ID       |         |            |
-|HHIncomePC |Azone     |Year  |currency  |USD      |NA, < 0  |            |
-|GQIncomePC |Azone     |Year  |currency  |USD      |NA, < 0  |            |
+|HHIncomePC |Azone     |Year  |currency  |USD.1999 |NA, < 0  |            |
+|GQIncomePC |Azone     |Year  |currency  |USD.1999 |NA, < 0  |            |
 |Azone      |Household |Year  |character |ID       |         |            |
 |HhSize     |Household |Year  |people    |PRSN     |NA, <= 0 |            |
 |HhType     |Household |Year  |character |category |         |            |
@@ -186,6 +186,6 @@ ISELEMENTOF - Categorical values that are permitted. Values in the datastore are
 
 DESCRIPTION - A description of the data.
 
-|NAME   |TABLE     |GROUP |TYPE     |UNITS |PROHIBIT |ISELEMENTOF |DESCRIPTION                                                |
-|:------|:---------|:-----|:--------|:-----|:--------|:-----------|:----------------------------------------------------------|
-|Income |Household |Year  |currency |USD   |NA, < 0  |            |Total annual household (non-qroup & group quarters) income |
+|NAME   |TABLE     |GROUP |TYPE     |UNITS    |PROHIBIT |ISELEMENTOF |DESCRIPTION                                                |
+|:------|:---------|:-----|:--------|:--------|:--------|:-----------|:----------------------------------------------------------|
+|Income |Household |Year  |currency |USD.1999 |NA, < 0  |            |Total annual household (non-qroup & group quarters) income |
