@@ -186,9 +186,9 @@ Dt_df[Dt_df < 0] <- NA
 
 #Describe specifications for road supply data file
 #-------------------------------------------------
-RoadInp_ls <- items(
-  item(
-    NAME = items(
+RoadInp_ls <- visioneval::items(
+  visioneval::item(
+    NAME = visioneval::items(
       "MsaCode",
       "UrbanizedArea"),
     TYPE = "character",
@@ -197,8 +197,8 @@ RoadInp_ls <- items(
     UNLIKELY = "",
     TOTAL = ""
   ),
-  item(
-    NAME = items(
+  visioneval::item(
+    NAME = visioneval::items(
       "RoadMiles",
       "TotalDvmt",
       "Population",
@@ -226,9 +226,9 @@ rm(RoadInp_ls)
 
 #Describe specifications for transit supply data file
 #----------------------------------------------------
-TransitInp_ls <- items(
-  item(
-    NAME = items(
+TransitInp_ls <- visioneval::items(
+  visioneval::item(
+    NAME = visioneval::items(
       "UZAName",
       "MSACode"),
     TYPE = "character",
@@ -237,8 +237,8 @@ TransitInp_ls <- items(
     UNLIKELY = "",
     TOTAL = ""
   ),
-  item(
-    NAME = items(
+  visioneval::item(
+    NAME = visioneval::items(
       "BusEqRevMi",
       "UZAPop",
       "BusEqRevMiPC"),
