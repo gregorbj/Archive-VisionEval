@@ -100,7 +100,7 @@
 #' PrepFun: a function that prepares inputs to be applied in the linear model,
 #' OutFun: a function that transforms the result of applying the linear model.
 #' Summary: the summary of the linear model estimation results.
-#' @import visioneval
+#' @import visioneval utils
 #' @include CreateEstimationDatasets.R CreateHouseholds.R PredictWorkers.R
 #' @export
 estimateIncomeModel <- function(Data_df, StartTerms_) {
