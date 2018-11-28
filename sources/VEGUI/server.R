@@ -504,7 +504,6 @@ server <- function(input, output, session) {
                                  ignoreNULL = TRUE,
                                  ignoreInit=TRUE, valueExpr={
       debugConsole("getScriptInfo entered")
-      debugConsole(paste('SELECT_RUN_SCRIPT_BUTTON:', input[[SELECT_RUN_SCRIPT_BUTTON]]))
 
       scriptInfo_ls <- list()
 
@@ -515,13 +514,16 @@ server <- function(input, output, session) {
         scriptInfo_ls$fileDirectory <- dirname(scriptInfo_ls$datapath)
         scriptInfo_ls$fileBase <- basename(scriptInfo_ls$datapath)
 
-        debugConsole(paste("getScriptInfo:", scriptInfo_ls$datapath))
+        debugConsole(paste("getScriptInfo: got script info for",
+                           scriptInfo_ls$datapath))
 
         #call the first few methods so can find out log file value and get the ModelState_ls global
         setwd(scriptInfo_ls$fileDirectory)
+        debugConsole("getScriptInfo: calling visioneval::initModelStateFile() and visioneval::initLog()")
+
         visioneval::initModelStateFile()
         visioneval::initLog()
-        visioneval::writeLog("VE_GUI called visioneval::initModelStateFile() and visioneval::initLog()")
+        visioneval::writeLog("VEGUI called visioneval::initModelStateFile() and visioneval::initLog()")
 
         #From now on we will get the current ModelState by reading the object stored on disk
         reactiveFilePaths_rv[[MODEL_STATE_FILE]] <- file.path(scriptInfo_ls$fileDirectory, "ModelState.Rda")
@@ -538,7 +540,7 @@ server <- function(input, output, session) {
         reactiveFilePaths_rv[[GEO_CSV_FILE]] <- file.path(defsDirectory, "geo.csv")
 
         reactiveFilePaths_rv[[OUTPUT_DIR]] <- file.path(scriptInfo_ls$fileDirectory, 'outputs')
-
+        debugConsole(paste('reactiveFilePaths_rv[[OUTPUT_DIR]]', reactiveFilePaths_rv[[OUTPUT_DIR]]))
         #move to the settings tab
         #updateNavlistPanel(session, "navlist", selected = TAB_SETTINGS)
       }
@@ -598,12 +600,15 @@ server <- function(input, output, session) {
       getInputsTree()
       fileItems <- extractFromTree("FILE")
     }
+    debugConsole(paste('getInputFiles exiting with', length(fileItems), 'file items'))
     return(fileItems)
   })
 
   getOutputFiles <- reactive({
     debugConsole('getOutputFiles entered')
     files <- Sys.glob(file.path(reactiveFilePaths_rv[[OUTPUT_DIR]], '*.csv'))
+    debugConsole(paste('getOutputFiles exiting with', length(files), 'files from',
+                       reactiveFilePaths_rv[[OUTPUT_DIR]]))
     return(files)
   })
 
@@ -626,6 +631,10 @@ server <- function(input, output, session) {
       #select all items where data-value starts with 'TAB_'. The ^= similar to ^ in grep 'starts with'
       selector = "#navlist li a[data-value^=TAB_]"
     )
+  })
+
+  observeEvent(input[[SELECT_RUN_SCRIPT_BUTTON]], handlerExpr = {
+    debugConsole(paste('SELECT_RUN_SCRIPT_BUTTON value:', input[[SELECT_RUN_SCRIPT_BUTTON]]))
   })
 
   shinyFiles::shinyFileChoose(
@@ -711,14 +720,16 @@ server <- function(input, output, session) {
   })
 
   observe({
-    fileName <- input[[INPUT_FILES]]
-    if ( fileName != "" ){
-      filePath <- file.path(getScriptInfo()$fileDirectory, "inputs", fileName)
-
-      fileDataTable <- SafeReadCSV(filePath)
-      debugConsole(paste("nrow(fileDataTable):", nrow(fileDataTable)))
-      otherReactiveValues_rv[[EDITOR_INPUT_FILE_IDENTIFIER]] <- fileName
-      otherReactiveValues_rv[[EDITOR_INPUT_FILE_DT]] <- fileDataTable
+    fileDirectory <- getScriptInfo()$fileDirectory
+    if ( length(fileDirectory) > 0 && dir.exists(fileDirectory)){
+      fileName <- input[[INPUT_FILES]]
+      filePath <- file.path(fileDirectory, "inputs", fileName)
+      if ( fileName != "" && file.exists(filePath) ){
+        fileDataTable <- SafeReadCSV(filePath)
+        debugConsole(paste("nrow(fileDataTable):", nrow(fileDataTable)))
+        otherReactiveValues_rv[[EDITOR_INPUT_FILE_IDENTIFIER]] <- fileName
+        otherReactiveValues_rv[[EDITOR_INPUT_FILE_DT]] <- fileDataTable
+      }
     }
   })
 
@@ -861,11 +872,23 @@ server <- function(input, output, session) {
   ### OUTPUTS TAB (TAB_OUTPUTS)------------------------------------------
 
   observe({
-    if ( length(getOutputFiles()) > 0){
+    shinyjs::toggle(
+      id = NULL,
+      condition = length(getOutputFiles()) > 0,
+      anim = TRUE,
+      animType = "Slide",
+      time = 0.25,
+      #select all items where data-value starts with 'TAB_'. The ^= similar to ^ in grep 'starts with'
+      selector = "#navlist li a[data-value^=TAB_OUTPUTS]"
+    )
+  })
+
+  observe({
+    #if ( length(getOutputFiles()) > 0){
       debugConsole("Getting output files")
       choices <- sort(basename(getOutputFiles()))
       updateSelectInput(session, OUTPUT_FILE, choices=choices)
-    }
+    #}
   })
 
   output[[OUTPUT_FILE_PATH]] <- renderText({
@@ -879,11 +902,13 @@ server <- function(input, output, session) {
   output_rht <- eventReactive(input[[OUTPUT_FILE]],{
     dataTable <- data.frame()
     fileName <- input[[OUTPUT_FILE]]
-    if ( fileName != "" ){
-      filePath <- file.path(reactiveFilePaths_rv[[OUTPUT_DIR]], fileName)
+    filePath <- file.path(reactiveFilePaths_rv[[OUTPUT_DIR]], fileName)
+
+    if ( fileName != "" && file.exists(filePath)){
       dataTable <- SafeReadCSV(filePath)
       debugConsole(paste0('Loaded ', filePath))
-      }
+    }
+
     rhandsontable::hot_context_menu(
       rhandsontable::rhandsontable(dataTable, readOnly=TRUE),
       allowRowEdit=FALSE,
