@@ -1,7 +1,7 @@
 [
   {
     "NAME": "ModelFolder",
-    "VALUE": "VERPAT_model",
+    "VALUE": "VERPAT_base_model",
     "TYPE": "character",
     "UNITS": "NA",
     "PROHIBIT": "NA",

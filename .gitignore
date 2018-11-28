@@ -3,3 +3,4 @@
 .RData
 .Ruserdata
 *.bak
+.DS_Store

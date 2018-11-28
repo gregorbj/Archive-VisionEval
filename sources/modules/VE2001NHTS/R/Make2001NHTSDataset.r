@@ -14,7 +14,7 @@
 #dataset to be used in model estimation. Data on freeway lane miles and
 #bus equivalent transit revenue miles are added. A household dataframe (Hh_df)
 #containing travel and other relevant data for each survey household.
-library(visioneval)
+# library(visioneval)
 
 
 #==================
@@ -186,9 +186,9 @@ Dt_df[Dt_df < 0] <- NA
 
 #Describe specifications for road supply data file
 #-------------------------------------------------
-RoadInp_ls <- items(
-  item(
-    NAME = items(
+RoadInp_ls <- visioneval::items(
+  visioneval::item(
+    NAME = visioneval::items(
       "MsaCode",
       "UrbanizedArea"),
     TYPE = "character",
@@ -197,8 +197,8 @@ RoadInp_ls <- items(
     UNLIKELY = "",
     TOTAL = ""
   ),
-  item(
-    NAME = items(
+  visioneval::item(
+    NAME = visioneval::items(
       "RoadMiles",
       "TotalDvmt",
       "Population",
@@ -218,7 +218,7 @@ RoadInp_ls <- items(
 #Read in road supply data
 #------------------------
 Hwy2001_df <-
-  processEstimationInputs(
+  visioneval::processEstimationInputs(
     RoadInp_ls,
     "highway_statistics.csv",
     "Make2001NHTSDataset")
@@ -226,9 +226,9 @@ rm(RoadInp_ls)
 
 #Describe specifications for transit supply data file
 #----------------------------------------------------
-TransitInp_ls <- items(
-  item(
-    NAME = items(
+TransitInp_ls <- visioneval::items(
+  visioneval::item(
+    NAME = visioneval::items(
       "UZAName",
       "MSACode"),
     TYPE = "character",
@@ -237,8 +237,8 @@ TransitInp_ls <- items(
     UNLIKELY = "",
     TOTAL = ""
   ),
-  item(
-    NAME = items(
+  visioneval::item(
+    NAME = visioneval::items(
       "BusEqRevMi",
       "UZAPop",
       "BusEqRevMiPC"),
@@ -253,7 +253,7 @@ TransitInp_ls <- items(
 #Read in transit supply data
 #---------------------------
 Transit2001_df <-
-  processEstimationInputs(
+  visioneval::processEstimationInputs(
     TransitInp_ls,
     "uza_bus_eq_rev_mi.csv",
     "Make2001NHTSDataset")

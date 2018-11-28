@@ -46,11 +46,10 @@ initModelStateFile <-
     Message <- paste("Missing", ParamFilePath, "file.")
     stop(Message)
   } else {
-    ModelState_ls <- fromJSON(ParamFilePath)
+    ModelState_ls <- jsonlite::fromJSON(ParamFilePath)
     ModelState_ls$LastChanged <- Sys.time()
     ModelState_ls$Deflators <- read.csv(DeflatorFilePath, as.is = TRUE)
     ModelState_ls$Units <- read.csv(UnitsFilePath, as.is = TRUE)
-    #cat('initModelStateFile: Writing ModelState.Rda\n')
     save(ModelState_ls, file = "ModelState.Rda")
     ModelState_ls <<- ModelState_ls
   }
@@ -168,8 +167,8 @@ readModelState <- function(Names_ = "All", FileName = "ModelState.Rda") {
         i <- i + 1
       }
     }
+    if ( i > 5 ) stop('Could not load ', FileName)
   }
-  if ( i > 5 ) stop('Could not load ', FileName)
 
   # Commented out the following because it looks only in the local environment
   #if ("ModelState_ls" %in% ls()) State_ls <- get("ModelState_ls")
