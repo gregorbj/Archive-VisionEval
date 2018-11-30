@@ -414,7 +414,7 @@ rm(estimateCongestionModel)
 #'
 #' @source CalculateCongestion.R script.
 "CongestedProportions_ls"
-devtools::use_data(CongestedProportions_ls, overwrite = TRUE)
+usethis::use_data(CongestedProportions_ls, overwrite = TRUE)
 
 
 #---------------------------------------------------------
@@ -445,6 +445,7 @@ devtools::use_data(CongestedProportions_ls, overwrite = TRUE)
 #' MeasureType is 'DVHT'.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name calculateCongestion
 #' @import visioneval
 #' @export
 calculateCongestion <-
@@ -542,7 +543,7 @@ rm(BaseSpeedInp_ls)
 #'   }
 #' @source CalculateSpeeds.R script.
 "BaseSpeeds_df"
-devtools::use_data(BaseSpeeds_df, overwrite = TRUE)
+usethis::use_data(BaseSpeeds_df, overwrite = TRUE)
 
 
 #----------------------------------------------------
@@ -576,7 +577,7 @@ rm(BaseTravelRate_mx, Delay_mx)
 #'   }
 #' @source CalculateSpeeds.R script.
 "Delay_df"
-devtools::use_data(Delay_df, overwrite = TRUE)
+usethis::use_data(Delay_df, overwrite = TRUE)
 
 
 #-------------------------------------------
@@ -631,7 +632,7 @@ rm(RampMeteringInp_ls)
 #'   }
 #' @source CalculateSpeeds.R script.
 "Ramp_df"
-devtools::use_data(Ramp_df, overwrite = TRUE)
+usethis::use_data(Ramp_df, overwrite = TRUE)
 
 
 #-------------------------------------------------
@@ -686,7 +687,7 @@ rm(IncidentManagementInp_ls)
 #'   }
 #' @source CalculateSpeeds.R script.
 "Incident_df"
-devtools::use_data(Incident_df, overwrite = TRUE)
+usethis::use_data(Incident_df, overwrite = TRUE)
 
 
 #------------------------------------------------
@@ -741,7 +742,7 @@ rm(SignalCoordinationInp_ls)
 #'   }
 #' @source CalculateSpeeds.R script.
 "Signal_df"
-devtools::use_data(Signal_df, overwrite = TRUE)
+usethis::use_data(Signal_df, overwrite = TRUE)
 
 
 #--------------------------------------
@@ -796,7 +797,7 @@ rm(AccessManagementInp_ls)
 #'   }
 #' @source CalculateSpeeds.R script.
 "Access_df"
-devtools::use_data(Access_df, overwrite = TRUE)
+usethis::use_data(Access_df, overwrite = TRUE)
 
 
 #-----------------------------------
@@ -821,6 +822,7 @@ devtools::use_data(Access_df, overwrite = TRUE)
 #' @return A list containing two matrices. The first is a matrix of average
 #' speed (miles per hour) by congestion level and road class. The second is a
 #' matrix of delay hours per vehicle mile by congestion level and road class.
+#' @name calculateSpeeds
 #' @import visioneval
 #' @import stats
 #' @export
@@ -1007,7 +1009,7 @@ rm(Lambda_df, Ums_df)
 #' }
 #' @source CalculateRoadPerformance.R script.
 "DvmtSplit_LM"
-devtools::use_data(DvmtSplit_LM, overwrite = TRUE)
+usethis::use_data(DvmtSplit_LM, overwrite = TRUE)
 
 
 #================================================
@@ -1295,7 +1297,7 @@ CalculateRoadPerformanceSpecifications <- list(
 #' }
 #' @source CalculateRoadPerformance.R script.
 "CalculateRoadPerformanceSpecifications"
-devtools::use_data(CalculateRoadPerformanceSpecifications, overwrite = TRUE)
+usethis::use_data(CalculateRoadPerformanceSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -1328,6 +1330,7 @@ devtools::use_data(CalculateRoadPerformanceSpecifications, overwrite = TRUE)
 #' @param L A list containing data defined by the module specification.
 #' @return A list containing data produced by the function consistent with the
 #' module specifications.
+#' @name CalculateRoadPerformance
 #' @import visioneval
 #' @export
 CalculateRoadPerformance <- function(L) {

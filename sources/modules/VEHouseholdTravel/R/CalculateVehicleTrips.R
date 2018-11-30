@@ -61,6 +61,7 @@
 #=================================
 #Uncomment following lines during code development. Recomment when done.
 # library(visioneval)
+# library(pscl)
 
 #=============================================
 #SECTION 1: ESTIMATE AND SAVE MODEL PARAMETERS
@@ -609,6 +610,7 @@ usethis::use_data(CalculateVehicleTripsSpecifications, overwrite = TRUE)
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name CalculateVehicleTrips
 #' @import visioneval
 #' @export
 CalculateVehicleTrips <- function(L) {

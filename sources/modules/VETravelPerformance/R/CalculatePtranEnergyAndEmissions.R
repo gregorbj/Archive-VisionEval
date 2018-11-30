@@ -206,7 +206,7 @@ CalculatePtranEnergyAndEmissionsSpecifications <- list(
 #' }
 #' @source CalculatePtranEnergyAndEmissions.R script.
 "CalculatePtranEnergyAndEmissionsSpecifications"
-devtools::use_data(CalculatePtranEnergyAndEmissionsSpecifications, overwrite = TRUE)
+usethis::use_data(CalculatePtranEnergyAndEmissionsSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -241,6 +241,7 @@ devtools::use_data(CalculatePtranEnergyAndEmissionsSpecifications, overwrite = T
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name CalculatePtranEnergyAndEmissions
 #' @import visioneval
 #' @export
 #'

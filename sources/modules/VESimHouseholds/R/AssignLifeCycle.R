@@ -154,6 +154,7 @@ rm(AssignLifeCycleSpecifications)
 #' specifications for the module.
 #' @import visioneval
 #' @include CreateEstimationDatasets.R CreateHouseholds.R PredictWorkers.R PredictIncome.R
+#' @name AssignLifeCycle
 #' @export
 AssignLifeCycle <- function(L) {
   #Convert inputs to data frame

@@ -1,0 +1,152 @@
+[
+  {"NAME": "EmploymentGrowth",
+   "VALUE": "1.5",
+   "TYPE": "double",
+   "UNITS": "multiplier",
+   "PROHIBIT": "",
+   "ISELEMENTOF": ""},
+  {
+    "NAME": "FwyLaneMiGrowth",
+    "VALUE": "1",
+    "TYPE" : "double",
+    "UNITS" : "multiplier",
+    "PROHIBIT" : "c('NA', '< 0')",
+    "ISELEMENTOF" : ""
+  },
+  {
+    "NAME" : "ArtLaneMiGrowth",
+    "VALUE": "1",
+    "TYPE" : "double",
+    "UNITS" : "multiplier",
+    "PROHIBIT" : "c('NA', '< 0')",
+    "ISELEMENTOF" : ""
+  },
+  {
+    "NAME" : "BusRevMiPCGrowth",
+    "VALUE": "1",
+    "TYPE" : "double",
+    "UNITS" : "multiplier",
+    "PROHIBIT" : "c('NA', '< 0')",
+    "ISELEMENTOF" : ""
+  },
+  {
+    "NAME" : "RailRevMiPCGrowth",
+    "VALUE": "1",
+    "TYPE" : "double",
+    "UNITS" : "multiplier",
+    "PROHIBIT" : "c('NA', '< 0')",
+    "ISELEMENTOF" : ""
+  },
+  {
+    "NAME" : "LtTruckProp",
+    "VALUE": "0.45",
+    "TYPE" : "double",
+    "UNITS" : "multiplier",
+    "PROHIBIT" : "c('NA', '< 0')",
+    "ISELEMENTOF" : ""
+  },
+  {
+    "NAME" : "BaseCostPerMile",
+    "VALUE": "0.04",
+    "TYPE" : "compound",
+    "UNITS" : "USD/MI",
+    "PROHIBIT" : "c('NA', '< 0')",
+    "ISELEMENTOF" : ""
+  },
+  {
+    "NAME" : "DvmtBudgetProp",
+    "VALUE": "0.1",
+    "TYPE" : "double",
+    "UNITS" : "multiplier",
+    "PROHIBIT" : "c('NA', '< 0', '> 1')",
+    "ISELEMENTOF" : ""
+  },
+  {
+    "NAME" : "AnnVmtInflator",
+    "VALUE": "365",
+    "TYPE" : "integer",
+    "UNITS" : "DAYS",
+    "PROHIBIT" : "c('NA', '< 0')",
+    "ISELEMENTOF" : ""
+  },
+  {
+    "NAME" : "FuelCost",
+    "VALUE": "1.82",
+    "TYPE" : "compound",
+    "UNITS" : "USD/GAL",
+    "PROHIBIT" : "c('NA', '< 0')",
+    "ISELEMENTOF" : ""
+  },
+  {
+    "NAME" : "KwhCost",
+    "VALUE": "0.257",
+    "TYPE" : "compound",
+    "UNITS" : "USD/KWH",
+    "PROHIBIT" : "c('NA', '< 0')",
+    "ISELEMENTOF" : ""
+  },
+  {
+    "NAME" : "GasTax",
+    "VALUE": "0.424",
+    "TYPE" : "compound",
+    "UNITS" : "USD/GAL",
+    "PROHIBIT" : "c('NA', '< 0')",
+    "ISELEMENTOF" : ""
+  },
+  {
+    "NAME" : "BaseLtVehDvmt",
+    "VALUE": "27244",
+    "TYPE" : "compound",
+    "UNITS" : "MI/DAY",
+    "PROHIBIT" : "c('NA', '< 0')",
+    "ISELEMENTOF" : ""
+  },
+  {
+    "NAME" : "BaseFwyArtProp",
+    "VALUE": "0.77",
+    "TYPE" : "double",
+    "UNITS" : "proportion",
+    "PROHIBIT" : "c('NA', '< 0', '> 1')",
+    "ISELEMENTOF" : ""
+  },
+  {
+    "NAME" : "TruckVmtGrowthMultiplier",
+    "VALUE": "1",
+    "TYPE" : "double",
+    "UNITS" : "multiplier",
+    "PROHIBIT" : "c('NA', '< 0')",
+    "ISELEMENTOF" : ""
+  },
+  {
+    "NAME" : "TranRevMiAdjFactor",
+    "VALUE": "1.12",
+    "TYPE" : "double",
+    "UNITS" : "multiplier",
+    "PROHIBIT" : "c('NA', '< 0')",
+    "ISELEMENTOF" : ""
+  },
+  {
+    "NAME" : "VmtCharge",
+    "VALUE": "0.05",
+    "TYPE" : "compound",
+    "UNITS" : "USD/MI",
+    "PROHIBIT" : "c('NA', '< 0')",
+    "ISELEMENTOF" : ""
+  },
+  {
+    "NAME" : "WorkVmtProp",
+    "VALUE": "0.25",
+    "TYPE" : "double",
+    "UNITS" : "proportion",
+    "PROHIBIT" : "c('NA', '< 0')",
+    "ISELEMENTOF" : ""
+  },
+  {
+    "NAME" : "AutoCostGrowth",
+    "VALUE": "1.5",
+    "TYPE" : "double",
+    "UNITS" : "multiplier",
+    "PROHIBIT" : "c('NA', '< 0')",
+    "ISELEMENTOF" : ""
+  }
+]

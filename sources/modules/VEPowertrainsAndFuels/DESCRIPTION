@@ -23,10 +23,9 @@ Imports:
 Suggests:
     knitr
 VignetteBuilder: knitr
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0.9000
 Collate: 
     'LoadDefaultValues.R'
     'Initialize.R'
     'CalculateCarbonIntensity.R'
     'AssignHhVehiclePowertrain.R'
-

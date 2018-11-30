@@ -76,7 +76,7 @@
 #Packages used in code development
 #=================================
 #Uncomment following lines during code development. Recomment when done.
-library(visioneval)
+# library(visioneval)
 
 
 #=============================================
@@ -711,6 +711,52 @@ usethis::use_data(CalculateVehicleOwnCostSpecifications, overwrite = TRUE)
 #DVMT given the number of owned vehicles and splitting the miles equally among
 #the vehicles.
 
+#Function to calculate vehicle depreciation
+#------------------------------------------
+#' Calculate vehicle depreciation
+#'
+#' \code{calcVehDepr} calculates vehicle depreciation given vehicle type, age,
+#' and annual mileage
+#'
+#' This function calculates the annual depreciation cost (in 2017 dollars) of
+#' vehicles as a function of the vehicle type (Auto, LtTrk), age, and annual
+#' mileage. A base depreciation value is calculated using the depreciation cost
+#' matrix (VehOwnCost_ls$Depr_AgVt) calculated from AAA data in the module
+#' script. The base depreciation is a function of vehicle type and age. The
+#' base depreciation is adjusted based on the vehicle's annual mileage using the
+#' depreciation adjustment models (VehOwnCost_ls$DeprAdjModel_ls). The models,
+#' one for each vehicle type (Auto, LtTrk) are quadratic polynomials with
+#' minimum values at 10,000 miles so the minimum vehicle VMT is constrained to
+#' 10,000 miles for use in the model.
+#'
+#' @param Type_ A character vector of vehicle types (Auto, LtTrk)
+#' @param Age_ A numeric vector of vehicle ages
+#' @param Vmt_ A numeric vector of the annual vehicle miles traveled for the
+#' vehicles
+#' @return A numeric vector of annual depreciation cost in 2017 dollars
+#' @name calcVehDepr
+#' @export
+calcVehDepr <- function(Type_, Age_, Vmt_) {
+  #Calculate index to the vehicle depreciation model table
+  TypeToIndex <- c(Auto = 1, LtTrk = 2)
+  DeprIdx_mx <- cbind(
+    pmin(as.integer(Age_) + 1, 30),
+    TypeToIndex[Type_]
+  )
+  #Apply the index to calculate base vehicle depreciation
+  BaseDepr_Ve <- with(VehOwnCost_ls, Depr_AgVt[DeprIdx_mx])
+  #Put depreciation adjustment model coefficients into matrix
+  Coeff_mx <-
+    do.call(rbind, VehOwnCost_ls$DeprAdjModel_ls[Type_])
+  #Adjust Vmt_ to fit form of depreciation adjustment model
+  DeprAdjVmt_Ve <- pmax(Vmt_, 10000) / 1000
+  #Create model input matrix
+  Inp_mx <- cbind(rep(1, length(BaseDepr_Ve)), DeprAdjVmt_Ve, DeprAdjVmt_Ve^2)
+  #Apply the depreciation adjustment model to calculate adjustment factors
+  DeprAdj_Ve <- rowSums(Coeff_mx * Inp_mx)
+  #Multiply the base depreciation by mileage adjustment factors for result
+  BaseDepr_Ve * DeprAdj_Ve
+}
 
 #Function to calculate vehicle finance cost
 #------------------------------------------

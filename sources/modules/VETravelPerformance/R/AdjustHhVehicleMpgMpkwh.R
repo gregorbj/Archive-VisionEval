@@ -408,7 +408,7 @@ AdjustHhVehicleMpgMpkwhSpecifications <- list(
 #' }
 #' @source AdjustHhVehicleMpgMpkwh.R script.
 "AdjustHhVehicleMpgMpkwhSpecifications"
-devtools::use_data(AdjustHhVehicleMpgMpkwhSpecifications, overwrite = TRUE)
+usethis::use_data(AdjustHhVehicleMpgMpkwhSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -433,6 +433,7 @@ devtools::use_data(AdjustHhVehicleMpgMpkwhSpecifications, overwrite = TRUE)
 #' @param M A list the module functions of modules called by this module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name AdjustHhVehicleMpgMpkwh
 #' @import visioneval
 #' @export
 #'

@@ -300,6 +300,7 @@ rm(PredictWorkersSpecifications)
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name PredictWorkers
 #' @import visioneval
 #' @include CreateEstimationDatasets.R CreateHouseholds.R
 #' @export

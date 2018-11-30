@@ -153,6 +153,7 @@ usethis::use_data(ApplyDvmtReductionsSpecifications, overwrite = TRUE)
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name ApplyDvmtReductions
 #' @import visioneval
 #' @export
 ApplyDvmtReductions <- function(L) {

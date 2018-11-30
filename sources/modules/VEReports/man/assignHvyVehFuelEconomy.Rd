@@ -4,7 +4,8 @@
 \alias{assignHvyVehFuelEconomy}
 \title{Assignes mileage to heavy vehicles}
 \usage{
-assignHvyVehFuelEconomy(AgeDist_Ag, Mpg__Yr = TrkBusMpg__Yr, Type, CurrYear)
+assignHvyVehFuelEconomy(AgeDist_Ag, Mpg__Yr = TrkBusMpg__Yr, Type,
+  CurrYear)
 }
 \arguments{
 \item{AgeDist_Ag}{Age distribution of vehicle type.}

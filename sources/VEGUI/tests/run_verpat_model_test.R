@@ -233,6 +233,8 @@ if(!createExpectedResults){
 #=============================
 #SECTION 4: STOP THE APP
 #=============================
+cat('Finished!  Stopping the app\n')
 app$stop()
 rm(app)
 gc()
+cat('run_verpat_model_test.R complete!\n')

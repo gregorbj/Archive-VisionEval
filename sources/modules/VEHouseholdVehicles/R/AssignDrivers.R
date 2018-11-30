@@ -486,6 +486,7 @@ usethis::use_data(AssignDriversSpecifications, overwrite = TRUE)
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name AssignDrivers
 #' @import visioneval stats
 #' @export
 AssignDrivers <- function(L) {

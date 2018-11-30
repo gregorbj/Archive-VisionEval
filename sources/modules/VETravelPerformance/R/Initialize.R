@@ -360,7 +360,7 @@ InitializeSpecifications <- list(
 #' }
 #' @source Initialize.R script.
 "InitializeSpecifications"
-devtools::use_data(InitializeSpecifications, overwrite = TRUE)
+usethis::use_data(InitializeSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -388,6 +388,7 @@ devtools::use_data(InitializeSpecifications, overwrite = TRUE)
 #' components: Errors and Data.
 #' @return A list that is the same as the input list with an additional
 #' Warnings component.
+#' @name Initialize
 #' @import visioneval
 #' @export
 Initialize <- function(L) {

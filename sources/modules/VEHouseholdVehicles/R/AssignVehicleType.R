@@ -455,10 +455,9 @@ usethis::use_data(AssignVehicleTypeSpecifications, overwrite = TRUE)
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name AssignVehicleType
 #' @import visioneval
 #' @export
-#'
-
 AssignVehicleType <- function(L) {
   #Set up
   #------

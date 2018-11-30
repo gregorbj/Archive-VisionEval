@@ -364,6 +364,7 @@ usethis::use_data(AssignVehicleAgeSpecifications, overwrite = TRUE)
 #' the values are the proportion of vehicles that age or younger. The names must
 #' be an ordered sequence from 0 to 30.
 #' @return A numeric value that is the mean vehicle age.
+#' @name findMeanAge
 #' @export
 #'
 findMeanAge <- function(AgeCDF_Ag) {
@@ -390,6 +391,7 @@ findMeanAge <- function(AgeCDF_Ag) {
 #' be an ordered sequence from 0 to 30.
 #' @param TargetMean A number that is the target mean value.
 #' @return A numeric value that is the mean vehicle age.
+#' @name adjustAgeDistribution
 #' @export
 #'
 adjustAgeDistribution <- function(AgeCDF_Ag, TargetMean = NULL) {
@@ -465,6 +467,7 @@ adjustAgeDistribution <- function(AgeCDF_Ag, TargetMean = NULL) {
 #' between any margin value and corresponding sum of values of the joint
 #' probability matrix.
 #' @return A numeric value that is the mean vehicle age.
+#' @name calcAgeDistributionByInc
 #' @export
 #'
 calcAgeDistributionByInc <-
@@ -513,6 +516,7 @@ calcAgeDistributionByInc <-
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name AssignVehicleAge
 #' @import visioneval
 #' @export
 #'

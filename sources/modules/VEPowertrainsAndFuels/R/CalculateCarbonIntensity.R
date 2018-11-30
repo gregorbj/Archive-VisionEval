@@ -266,6 +266,7 @@ usethis::use_data(CalculateCarbonIntensitySpecifications, overwrite = TRUE)
 #' @return A logical value that is FALSE if the named component is not present
 #' in the list or if the value of the component is NA. Otherwise the value is
 #' TRUE.
+#' @name DataPresent
 #' @export
 DataPresent <- function(List, ComponentName) {
   if (!is.list(List)) stop("First argument must be a list")
@@ -297,6 +298,7 @@ DataPresent <- function(List, ComponentName) {
 #' of values
 #' @param Year a numeric or string value for the year to calculate for.
 #' @return A numeric value interpolated for the specified year.
+#' @name interpolate
 #' @export
 #' @importFrom stats smooth.spline
 interpolate <- function(Values_, Years_, Year) {
@@ -329,6 +331,7 @@ interpolate <- function(Values_, Years_, Year) {
 #' numeric values, and also includes a field named 'Year'.
 #' @param Year a numeric or string value for the year to calculate for.
 #' @return A vector of numeric values interpolated for the specified year.
+#' @name interpolateDfVals
 #' @export
 interpolateDfVals <- function(Vals_df, Year) {
   sapply(names(Vals_df)[names(Vals_df) != "Year"], function(x) {
@@ -354,6 +357,7 @@ interpolateDfVals <- function(Vals_df, Year) {
 #' filtering has been completed.
 #' @return An object of same class as the input with the only the elements or
 #' columns that contain all the key 'words'
+#' @name filterOnNames
 #' @export
 filterOnNames <- function(Data_misc, Filter_, Remove_ = NULL) {
   if (is.vector(Data_misc) & !is.list(Data_misc)) {
@@ -487,6 +491,7 @@ calcAverageFuelCI <- function(FuelCI_, FuelProp_, BiofuelProp_) {
 #' components: Errors and Data.
 #' @return A list that is the same as the input list with an additional
 #' Warnings component.
+#' @name CalculateCarbonIntensity
 #' @import visioneval
 #' @export
 CalculateCarbonIntensity <- function(L) {
