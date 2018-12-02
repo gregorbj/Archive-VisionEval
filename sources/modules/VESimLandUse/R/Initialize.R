@@ -35,7 +35,7 @@
 #Packages used in code development
 #=================================
 #Uncomment following lines during code development. Recomment when done.
-#library(visioneval)
+# library(visioneval)
 
 
 #=============================================
@@ -400,19 +400,19 @@ documentModule("Initialize")
 #Test code to check everything including running the module and checking whether
 #the code runs completely and produces desired results
 #-------------------------------------------------------------------------------
-source("tests/scripts/test_functions.R")
+# source("tests/scripts/test_functions.R")
 #Set up test data
-setUpTests(list(
-  TestDataRepo = "../Test_Data/VE-State",
-  DatastoreName = "Datastore.tar",
-  LoadDatastore = TRUE,
-  TestDocsDir = "vestate",
-  ClearLogs = TRUE
-))
-TestDat_ <- testModule(
-  ModuleName = "Initialize",
-  LoadDatastore = TRUE,
-  SaveDatastore = TRUE,
-  DoRun = TRUE
-)
+# setUpTests(list(
+#   TestDataRepo = "../Test_Data/VE-State",
+#   DatastoreName = "Datastore.tar",
+#   LoadDatastore = TRUE,
+#   TestDocsDir = "vestate",
+#   ClearLogs = TRUE
+# ))
+# TestDat_ <- testModule(
+#   ModuleName = "Initialize",
+#   LoadDatastore = TRUE,
+#   SaveDatastore = TRUE,
+#   DoRun = TRUE
+# )
 
