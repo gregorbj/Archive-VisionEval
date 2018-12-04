@@ -843,7 +843,7 @@ rm(d2, TotAct_, PropEmp_)
 #' }
 #' @source CreateSimBzones.R script.
 "SimBzone_ls"
-devtools::use_data(SimBzone_ls, overwrite = TRUE)
+usethis::use_data(SimBzone_ls, overwrite = TRUE)
 
 
 #================================================
@@ -961,7 +961,7 @@ CreateSimBzonesSpecifications <- list(
 #' }
 #' @source CreateSimBzones.R script.
 "CreateSimBzonesSpecifications"
-devtools::use_data(CreateSimBzonesSpecifications, overwrite = TRUE)
+usethis::use_data(CreateSimBzonesSpecifications, overwrite = TRUE)
 rm(CreateSimBzonesSpecifications)
 
 
