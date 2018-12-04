@@ -28,3 +28,63 @@ Test of VESimHouseholds package modules
 
 2018-11-23 11:04:27 : Congratulations. Module AssignDrivers passed all tests. 
 
+Test
+Test of VESimHouseholds package modules
+2018-12-04_10:06:49
+
+2018-12-04 10:06:49 : Testing AssignDrivers. 
+
+2018-12-04 10:06:49 : Attempting to load datastore. 
+
+2018-12-04 10:06:49 : Datastore loaded. 
+
+2018-12-04 10:06:49 : Attempting to load and check specifications. 
+
+2018-12-04 10:06:50 : Module specifications successfully loaded and checked for errors. 
+
+2018-12-04 10:06:50 : No inputs to process. 
+
+2018-12-04 10:06:50 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-12-04 10:06:50 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-12-04 10:06:50 : Running module and checking whether outputs meet Set specifications. 
+
+2018-12-04 10:06:50 : Also saving module outputs to datastore. 
+
+2018-12-04 10:07:07 : Module run successfully and outputs meet Set specifications. 
+
+2018-12-04 10:07:07 : Module outputs saved to datastore. 
+
+2018-12-04 10:07:07 : Congratulations. Module AssignDrivers passed all tests. 
+
+Test
+Test of VESimHouseholds package modules
+2018-12-04_11:18:33
+
+2018-12-04 11:18:33 : Testing AssignDrivers. 
+
+2018-12-04 11:18:33 : Attempting to load datastore. 
+
+2018-12-04 11:18:33 : Datastore loaded. 
+
+2018-12-04 11:18:33 : Attempting to load and check specifications. 
+
+2018-12-04 11:18:34 : Module specifications successfully loaded and checked for errors. 
+
+2018-12-04 11:18:34 : No inputs to process. 
+
+2018-12-04 11:18:34 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-12-04 11:18:34 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-12-04 11:18:34 : Running module and checking whether outputs meet Set specifications. 
+
+2018-12-04 11:18:34 : Also saving module outputs to datastore. 
+
+2018-12-04 11:18:41 : Module run successfully and outputs meet Set specifications. 
+
+2018-12-04 11:18:41 : Module outputs saved to datastore. 
+
+2018-12-04 11:18:41 : Congratulations. Module AssignDrivers passed all tests. 
+

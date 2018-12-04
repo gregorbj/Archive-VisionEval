@@ -30,3 +30,67 @@ Test of VESimHouseholds package modules
 
 2018-11-23 11:05:04 : Congratulations. Module AssignVehicleType passed all tests. 
 
+Test
+Test of VESimHouseholds package modules
+2018-12-04_10:07:42
+
+2018-12-04 10:07:42 : Testing AssignVehicleType. 
+
+2018-12-04 10:07:42 : Attempting to load datastore. 
+
+2018-12-04 10:07:42 : Datastore loaded. 
+
+2018-12-04 10:07:42 : Attempting to load and check specifications. 
+
+2018-12-04 10:07:42 : Module specifications successfully loaded and checked for errors. 
+
+2018-12-04 10:07:42 : Attempting to process, check and load module inputs. 
+
+2018-12-04 10:07:42 : Module inputs successfully checked and loaded into datastore. 
+
+2018-12-04 10:07:42 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-12-04 10:07:42 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-12-04 10:07:42 : Running module and checking whether outputs meet Set specifications. 
+
+2018-12-04 10:07:42 : Also saving module outputs to datastore. 
+
+2018-12-04 10:07:58 : Module run successfully and outputs meet Set specifications. 
+
+2018-12-04 10:07:58 : Module outputs saved to datastore. 
+
+2018-12-04 10:07:58 : Congratulations. Module AssignVehicleType passed all tests. 
+
+Test
+Test of VESimHouseholds package modules
+2018-12-04_11:19:15
+
+2018-12-04 11:19:15 : Testing AssignVehicleType. 
+
+2018-12-04 11:19:15 : Attempting to load datastore. 
+
+2018-12-04 11:19:15 : Datastore loaded. 
+
+2018-12-04 11:19:15 : Attempting to load and check specifications. 
+
+2018-12-04 11:19:15 : Module specifications successfully loaded and checked for errors. 
+
+2018-12-04 11:19:15 : Attempting to process, check and load module inputs. 
+
+2018-12-04 11:19:16 : Module inputs successfully checked and loaded into datastore. 
+
+2018-12-04 11:19:16 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-12-04 11:19:16 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-12-04 11:19:16 : Running module and checking whether outputs meet Set specifications. 
+
+2018-12-04 11:19:16 : Also saving module outputs to datastore. 
+
+2018-12-04 11:19:30 : Module run successfully and outputs meet Set specifications. 
+
+2018-12-04 11:19:30 : Module outputs saved to datastore. 
+
+2018-12-04 11:19:30 : Congratulations. Module AssignVehicleType passed all tests. 
+
