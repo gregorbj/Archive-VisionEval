@@ -19,9 +19,8 @@ LazyData: TRUE
 Depends: R (>= 3.1.0)
 Imports:
     visioneval,
-    devtools,
-	usethis,
+    usethis,
     VEHouseholdTravel,
     VEPowertrainsAndFuels
 Encoding: UTF-8
-RoxygenNote: 6.1.0.9000
+RoxygenNote: 6.1.1

@@ -348,7 +348,6 @@ usethis::use_data(CalculateFutureRoadDvmtSpecifications, overwrite = TRUE)
 #' @param L A list containing data defined by the module specification.
 #' @return A list containing data produced by the function consistent with the
 #' module specifications.
-#' @name CalculateFutureRoadDvmt
 #' @import visioneval
 #' @export
 CalculateFutureRoadDvmt <- function(L) {

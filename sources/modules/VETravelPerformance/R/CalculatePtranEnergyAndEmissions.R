@@ -241,7 +241,6 @@ usethis::use_data(CalculatePtranEnergyAndEmissionsSpecifications, overwrite = TR
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
-#' @name CalculatePtranEnergyAndEmissions
 #' @import visioneval
 #' @export
 #'

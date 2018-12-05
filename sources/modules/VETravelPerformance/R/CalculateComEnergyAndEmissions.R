@@ -370,7 +370,6 @@ usethis::use_data(CalculateComEnergyAndEmissionsSpecifications, overwrite = TRUE
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
-#' @name CalculateComEnergyAndEmissions
 #' @import visioneval
 #' @export
 #'
