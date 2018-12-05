@@ -206,7 +206,7 @@ CalculatePtranEnergyAndEmissionsSpecifications <- list(
 #' }
 #' @source CalculatePtranEnergyAndEmissions.R script.
 "CalculatePtranEnergyAndEmissionsSpecifications"
-devtools::use_data(CalculatePtranEnergyAndEmissionsSpecifications, overwrite = TRUE)
+usethis::use_data(CalculatePtranEnergyAndEmissionsSpecifications, overwrite = TRUE)
 
 
 #=======================================================
