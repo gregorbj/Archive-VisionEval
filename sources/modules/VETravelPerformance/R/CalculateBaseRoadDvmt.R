@@ -418,7 +418,7 @@ CalculateBaseRoadDvmtSpecifications <- list(
 #' }
 #' @source CalculateBaseRoadDvmt.R script.
 "CalculateBaseRoadDvmtSpecifications"
-devtools::use_data(CalculateBaseRoadDvmtSpecifications, overwrite = TRUE)
+usethis::use_data(CalculateBaseRoadDvmtSpecifications, overwrite = TRUE)
 
 
 #=======================================================
