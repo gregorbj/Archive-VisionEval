@@ -295,7 +295,7 @@ CalculateFutureRoadDvmtSpecifications <- list(
 #' }
 #' @source CalculateFutureRoadDvmt.R script.
 "CalculateFutureRoadDvmtSpecifications"
-devtools::use_data(CalculateFutureRoadDvmtSpecifications, overwrite = TRUE)
+usethis::use_data(CalculateFutureRoadDvmtSpecifications, overwrite = TRUE)
 
 
 #=======================================================
