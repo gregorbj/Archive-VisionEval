@@ -290,7 +290,7 @@ OpCosts_ls <- list(
 #' }
 #' @source CalculateVehicleOperatingCost.R script.
 "OpCosts_ls"
-devtools::use_data(OpCosts_ls, overwrite = TRUE)
+usethis::use_data(OpCosts_ls, overwrite = TRUE)
 rm(VehCost_AgTy, AAAOpCost_, BLSOpCost_, CO2eCost_, Deflators_Yr, OtherExtCost_)
 
 
@@ -818,7 +818,7 @@ CalculateVehicleOperatingCostSpecifications <- list(
 #' }
 #' @source CalculateVehicleOperatingCost.R script.
 "CalculateVehicleOperatingCostSpecifications"
-devtools::use_data(CalculateVehicleOperatingCostSpecifications, overwrite = TRUE)
+usethis::use_data(CalculateVehicleOperatingCostSpecifications, overwrite = TRUE)
 
 
 #=======================================================
