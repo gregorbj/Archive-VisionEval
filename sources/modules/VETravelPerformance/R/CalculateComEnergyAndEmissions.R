@@ -333,7 +333,7 @@ CalculateComEnergyAndEmissionsSpecifications <- list(
 #' }
 #' @source CalculateComEnergyAndEmissions.R script.
 "CalculateComEnergyAndEmissionsSpecifications"
-devtools::use_data(CalculateComEnergyAndEmissionsSpecifications, overwrite = TRUE)
+usethis::use_data(CalculateComEnergyAndEmissionsSpecifications, overwrite = TRUE)
 
 
 #=======================================================
