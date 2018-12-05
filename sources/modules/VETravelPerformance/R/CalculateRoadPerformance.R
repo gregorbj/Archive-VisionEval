@@ -414,7 +414,7 @@ rm(estimateCongestionModel)
 #'
 #' @source CalculateCongestion.R script.
 "CongestedProportions_ls"
-devtools::use_data(CongestedProportions_ls, overwrite = TRUE)
+usethis::use_data(CongestedProportions_ls, overwrite = TRUE)
 
 
 #---------------------------------------------------------
@@ -542,7 +542,7 @@ rm(BaseSpeedInp_ls)
 #'   }
 #' @source CalculateSpeeds.R script.
 "BaseSpeeds_df"
-devtools::use_data(BaseSpeeds_df, overwrite = TRUE)
+usethis::use_data(BaseSpeeds_df, overwrite = TRUE)
 
 
 #----------------------------------------------------
@@ -576,7 +576,7 @@ rm(BaseTravelRate_mx, Delay_mx)
 #'   }
 #' @source CalculateSpeeds.R script.
 "Delay_df"
-devtools::use_data(Delay_df, overwrite = TRUE)
+usethis::use_data(Delay_df, overwrite = TRUE)
 
 
 #-------------------------------------------
@@ -631,7 +631,7 @@ rm(RampMeteringInp_ls)
 #'   }
 #' @source CalculateSpeeds.R script.
 "Ramp_df"
-devtools::use_data(Ramp_df, overwrite = TRUE)
+usethis::use_data(Ramp_df, overwrite = TRUE)
 
 
 #-------------------------------------------------
@@ -686,7 +686,7 @@ rm(IncidentManagementInp_ls)
 #'   }
 #' @source CalculateSpeeds.R script.
 "Incident_df"
-devtools::use_data(Incident_df, overwrite = TRUE)
+usethis::use_data(Incident_df, overwrite = TRUE)
 
 
 #------------------------------------------------
@@ -741,7 +741,7 @@ rm(SignalCoordinationInp_ls)
 #'   }
 #' @source CalculateSpeeds.R script.
 "Signal_df"
-devtools::use_data(Signal_df, overwrite = TRUE)
+usethis::use_data(Signal_df, overwrite = TRUE)
 
 
 #--------------------------------------
@@ -796,7 +796,7 @@ rm(AccessManagementInp_ls)
 #'   }
 #' @source CalculateSpeeds.R script.
 "Access_df"
-devtools::use_data(Access_df, overwrite = TRUE)
+usethis::use_data(Access_df, overwrite = TRUE)
 
 
 #-----------------------------------
@@ -1007,7 +1007,7 @@ rm(Lambda_df, Ums_df)
 #' }
 #' @source CalculateRoadPerformance.R script.
 "DvmtSplit_LM"
-devtools::use_data(DvmtSplit_LM, overwrite = TRUE)
+usethis::use_data(DvmtSplit_LM, overwrite = TRUE)
 
 
 #================================================
@@ -1295,7 +1295,7 @@ CalculateRoadPerformanceSpecifications <- list(
 #' }
 #' @source CalculateRoadPerformance.R script.
 "CalculateRoadPerformanceSpecifications"
-devtools::use_data(CalculateRoadPerformanceSpecifications, overwrite = TRUE)
+usethis::use_data(CalculateRoadPerformanceSpecifications, overwrite = TRUE)
 
 
 #=======================================================
