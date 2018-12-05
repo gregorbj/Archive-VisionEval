@@ -360,7 +360,7 @@ InitializeSpecifications <- list(
 #' }
 #' @source Initialize.R script.
 "InitializeSpecifications"
-devtools::use_data(InitializeSpecifications, overwrite = TRUE)
+usethis::use_data(InitializeSpecifications, overwrite = TRUE)
 
 
 #=======================================================
