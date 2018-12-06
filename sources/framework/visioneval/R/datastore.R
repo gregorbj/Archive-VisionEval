@@ -298,8 +298,8 @@ readFromTableRD <- function(Name, Table, Group, DstoreLoc = NULL, Index = NULL, 
     if (any(Index > AllowedLength)) {
       Message <-
         paste0(
-          "One or more specified indicies for reading data from ",
-          Table, " exceed ", AllowedLength
+          "One or more specified indices for reading dataset ", Name,
+          " in table ", Table, " in group ", Group, " exceeds ", AllowedLength
         )
       writeLog(Message)
       stop(Message)
