@@ -3,7 +3,7 @@
 #============================
 
 # This script runs a shinytest that does the following steps:
-# 1. Runs app.R (VEGUI)
+# 1. Runs global.R (VEGUI)
 # 2. Selects run_model.R script from VERPAT project folder
 # 3. Runs the model
 # 4. Collects the results from the model run
@@ -51,8 +51,8 @@ getname <- function(divclass){
 } # end getname
 
 # Set the model and run parameters to nothing to ensure consistency in the tests.
-app$setInputs(MODEL_PARAMETERS_FILE = "[\"\"]")
-app$setInputs(RUN_PARAMETERS_FILE = "[\"\"]")
+# app$setInputs(MODEL_PARAMETERS_FILE = "[\"\"]")
+# app$setInputs(RUN_PARAMETERS_FILE = "[\"\"]")
 
 
 #===========================

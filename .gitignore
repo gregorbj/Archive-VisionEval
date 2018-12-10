@@ -4,3 +4,5 @@
 .Ruserdata
 *.bak
 .DS_Store
+ve-lib
+Log_*.txt
