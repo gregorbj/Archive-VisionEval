@@ -1,7 +1,7 @@
 # R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
 
 language: r
-r: 3.4
+r: 3.5
 sudo: true
 dist: trusty
 cache: packages
