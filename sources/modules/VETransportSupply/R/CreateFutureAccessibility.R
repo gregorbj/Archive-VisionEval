@@ -196,7 +196,7 @@ CreateFutureAccessibilitySpecifications <- list(
 #' }
 #' @source CreateFutureAccessibility.R script.
 "CreateFutureAccessibilitySpecifications"
-devtools::use_data(CreateFutureAccessibilitySpecifications, overwrite = TRUE)
+usethis::use_data(CreateFutureAccessibilitySpecifications, overwrite = TRUE)
 
 
 #=======================================================

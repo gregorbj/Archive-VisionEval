@@ -301,7 +301,7 @@ CreateBaseSyntheticFirmsSpecifications <- list(
 #' }
 #' @source CreateBaseSyntheticFirms.R script.
 "CreateBaseSyntheticFirmsSpecifications"
-devtools::use_data(CreateBaseSyntheticFirmsSpecifications, overwrite = TRUE)
+usethis::use_data(CreateBaseSyntheticFirmsSpecifications, overwrite = TRUE)
 
 
 #=======================================================

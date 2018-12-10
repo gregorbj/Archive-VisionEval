@@ -14,6 +14,7 @@ library(visioneval)
 #=============================================
 #Load the alternative mode trip models from GreenSTEP
 load("inst/extdata/CongModel_ls.RData")
+
 #Save the model
 #' Congestion models and required parameters.
 #'
@@ -26,7 +27,7 @@ load("inst/extdata/CongModel_ls.RData")
 #' parameters that are used in the evaluation of aforementioned models.
 #' @source GreenSTEP version ?.? model.
 "CongModel_ls"
-devtools::use_data(CongModel_ls, overwrite = TRUE)
+usethis::use_data(CongModel_ls, overwrite = TRUE)
 
 
 #================================================
@@ -393,7 +394,7 @@ CalculateCongestionBaseSpecifications <- list(
 #' }
 #' @source CalculateCongestionBase.R script.
 "CalculateCongestionBaseSpecifications"
-devtools::use_data(CalculateCongestionBaseSpecifications, overwrite = TRUE)
+usethis::use_data(CalculateCongestionBaseSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -448,16 +449,16 @@ calcCongestion <- function( Model_ls, DvmtByVehType, PerCapFwyLnMi, PerCapArtLnM
   DvmtByFcType[ "LtVeh", "Art" ] <- ArtDvmt
   DvmtByFcType["LtVeh", "Other"] <- DvmtByVehType[ "LtVeh" ] - LtVehFwyArtDvmt
   rm( LtVehFwyArtDvmt, LnMiRatio, Intercept, FwyArtDvmtRatio, FwyDvmt, ArtDvmt )
-  # Split Truck Dvmt
+    # Split Truck Dvmt
   DvmtByFcType[ "Truck", ] <- unlist( DvmtByVehType[ "Truck" ] * TruckVmtSplit_Fc )
-  # Split Bus Dvmt
+    # Split Bus Dvmt
   DvmtByFcType[ "Bus", ] <- unlist( DvmtByVehType[ "Bus" ] * BusVmtSplit_Fc )
 
   # Calculate volumes by functional class in passenger car equivalents
   #-------------------------------------------------------------------
   if( UsePce ) {
     PceDevmtByFc <- colSums( sweep( DvmtByFcType, 1, Model_ls$Pce.Ty, "*" ) )
-  } else {
+    } else {
     PceDevmtByFc <- colSums( DvmtByFcType )
   }
 
@@ -491,19 +492,19 @@ calcCongestion <- function( Model_ls, DvmtByVehType, PerCapFwyLnMi, PerCapArtLnM
   if( ArtDvmtPctByCl[ "Mod" ] < 0 ) ArtDvmtPctByCl[ "Mod" ] <- 0
   if( sum( ArtDvmtPctByCl ) > 100 ) ArtDvmtPctByCl <- 100 * ArtDvmtPctByCl / sum( ArtDvmtPctByCl )
 
-  # Calculate DVMT by vehicle type, functional class and congestion level
-  #----------------------------------------------------------------------
-  # Calculate light vehicle DVMT
+    # Calculate DVMT by vehicle type, functional class and congestion level
+    #----------------------------------------------------------------------
+    # Calculate light vehicle DVMT
   LtVehDvmtByClFc <- array( 0, dim=c(length(Cl),length(Fc)), dimnames=list(Cl,Fc) )
   LtVehDvmtByClFc[ ,"Fwy"] <- DvmtByFcType["LtVeh","Fwy"] * FwyDvmtPctByCl / 100
   LtVehDvmtByClFc[ ,"Art"] <- DvmtByFcType["LtVeh","Art"] * ArtDvmtPctByCl / 100
   LtVehDvmtByClFc["None","Other"] <- DvmtByFcType["LtVeh","Other"]
-  # Calculate truck DVMT
+    # Calculate truck DVMT
   TruckDvmtByClFc <- array( 0, dim=c(length(Cl),length(Fc)), dimnames=list(Cl,Fc) )
   TruckDvmtByClFc[ ,"Fwy"] <- DvmtByFcType["Truck","Fwy"] * FwyDvmtPctByCl / 100
   TruckDvmtByClFc[ ,"Art"] <- DvmtByFcType["Truck","Art"] * ArtDvmtPctByCl / 100
   TruckDvmtByClFc["None","Other"] <- DvmtByFcType["Truck","Other"]
-  # Calculate bus DVMT
+    # Calculate bus DVMT
   BusDvmtByClFc <- array( 0, dim=c(length(Cl),length(Fc)), dimnames=list(Cl,Fc) )
   BusDvmtByClFc[ ,"Fwy"] <- DvmtByFcType["Bus","Fwy"] * FwyDvmtPctByCl / 100
   BusDvmtByClFc[ ,"Art"] <- DvmtByFcType["Bus","Art"] * ArtDvmtPctByCl / 100
@@ -511,8 +512,8 @@ calcCongestion <- function( Model_ls, DvmtByVehType, PerCapFwyLnMi, PerCapArtLnM
 
   # Calculate congested speeds by congestion level and roadway type
   #----------------------------------------------------------------
-  # Calculate incident reduction factors
-  IncdFactors_ <- c( IncdReduc, 1 - IncdReduc )
+    # Calculate incident reduction factors
+    IncdFactors_ <- c( IncdReduc, 1 - IncdReduc )
   # Calculate average freeway speeds by congestion level
   FwySpeedByClCc <- cbind( Model_ls$Speeds$FwyRcr, Model_ls$Speeds$FwyNonRcr )
   FwySpeedByCl <- rowSums( sweep( FwySpeedByClCc, 2, IncdFactors_, "*" ) )
@@ -523,7 +524,7 @@ calcCongestion <- function( Model_ls, DvmtByVehType, PerCapFwyLnMi, PerCapArtLnM
   CongSpeedByClFc <- cbind( FwySpeedByCl, ArtSpeedByCl, Model_ls$FreeFlowSpeed.Fc["Other"] )
   colnames( CongSpeedByClFc ) <- Fc
   # Make separate array of bus congested speeds
-  # Since normal bus operating speeds on arterials and other are lower than freeflow speed
+    # Since normal bus operating speeds on arterials and other are lower than freeflow speed
   BusCongSpeedByClFc <- CongSpeedByClFc
   BusCongSpeedByClFc[ , "Art" ] <- pmin( CongSpeedByClFc[ , "Art" ], Model_ls$BusSpeeds.Fc[ "Art" ] )
   BusCongSpeedByClFc[ , "Other" ] <- pmin( CongSpeedByClFc[ , "Other" ], Model_ls$BusSpeeds.Fc[ "Other" ] )
@@ -764,7 +765,7 @@ CalculateCongestionBase <- function(L) {
   Its_Yr <- L$Year$Azone$ITS
 
   # Calculate the MPG adjustment, travel time and travel delay
-  CongResults_ls <- calcCongestion( Model_ls=CongModel_ls, DvmtByVehType=DvmtByVehType_vc,
+  CongResults_ls <- calcCongestion(Model_ls=CongModel_ls, DvmtByVehType=DvmtByVehType_vc,
                                   PerCapFwyLnMi=PerCapFwyLnMi_vc, PerCapArtLnMi=PerCapArtLnMi_vc,
                                   Population=Population_vc, IncdReduc=Its_Yr,
                                   FwyArtProp=L$Global$Model$BaseFwyArtProp,

@@ -195,7 +195,7 @@ CreateFutureSyntheticFirmsSpecifications <- list(
 #' }
 #' @source CreateFutureSyntheticFirms.R script.
 "CreateFutureSyntheticFirmsSpecifications"
-devtools::use_data(CreateFutureSyntheticFirmsSpecifications, overwrite = TRUE)
+usethis::use_data(CreateFutureSyntheticFirmsSpecifications, overwrite = TRUE)
 
 
 #=======================================================

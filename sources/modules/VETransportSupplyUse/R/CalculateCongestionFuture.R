@@ -26,7 +26,7 @@ load("inst/extdata/CongModel_ls.RData")
 #' parameters that are used in the evaluation of aforementioned models.
 #' @source GreenSTEP version ?.? model.
 "CongModel_ls"
-devtools::use_data(CongModel_ls, overwrite = TRUE)
+usethis::use_data(CongModel_ls, overwrite = TRUE)
 
 
 #================================================
@@ -43,6 +43,7 @@ CalculateCongestionFutureSpecifications <- list(
   #Specify input data
   #Specify data to be loaded from data store
   Get = items(
+    # Azone variables
     item(
       NAME = "ITS",
       TABLE = "Azone",
@@ -54,6 +55,7 @@ CalculateCongestionFutureSpecifications <- list(
       PROHIBIT = c("NA", "< 0", "> 1"),
       ISELEMENTOF = ""
     ),
+    # Global variables
     item(
       NAME = "Type",
       TABLE = "Vmt",
@@ -158,6 +160,7 @@ CalculateCongestionFutureSpecifications <- list(
       SIZE = 0,
       ISELEMENTOF = ""
     ),
+    # Marea variables
     item(
       NAME = "Marea",
       TABLE = "Marea",
@@ -368,7 +371,7 @@ CalculateCongestionFutureSpecifications <- list(
 #' }
 #' @source CalculateCongestionFuture.R script.
 "CalculateCongestionFutureSpecifications"
-devtools::use_data(CalculateCongestionFutureSpecifications, overwrite = TRUE)
+usethis::use_data(CalculateCongestionFutureSpecifications, overwrite = TRUE)
 
 
 #=======================================================

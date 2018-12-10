@@ -6,7 +6,7 @@
 # and other roadways adjusted by policy applied for the selected scenario.
 
 
-library(visioneval)
+# library(visioneval)
 
 #=============================================
 #SECTION 1: ESTIMATE AND SAVE MODEL PARAMETERS
@@ -25,7 +25,7 @@ load("inst/extdata/CongModel_ls.RData")
 #' parameters that are used in the evaluation of aforementioned models.
 #' @source GreenSTEP version ?.? model.
 "CongModel_ls"
-devtools::use_data(CongModel_ls, overwrite = TRUE)
+usethis::use_data(CongModel_ls, overwrite = TRUE)
 
 
 #================================================
@@ -367,7 +367,7 @@ CalculateCongestionPolicySpecifications <- list(
 #' }
 #' @source CalculateCongestionPolicy.R script.
 "CalculateCongestionPolicySpecifications"
-devtools::use_data(CalculateCongestionPolicySpecifications, overwrite = TRUE)
+usethis::use_data(CalculateCongestionPolicySpecifications, overwrite = TRUE)
 
 
 #=======================================================

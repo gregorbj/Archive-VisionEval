@@ -205,7 +205,7 @@ CreateBaseAccessibilitySpecifications <- list(
 #' }
 #' @source CreateBaseAccessibility.R script.
 "CreateBaseAccessibilitySpecifications"
-devtools::use_data(CreateBaseAccessibilitySpecifications, overwrite = TRUE)
+usethis::use_data(CreateBaseAccessibilitySpecifications, overwrite = TRUE)
 
 
 #=======================================================

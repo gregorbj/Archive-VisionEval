@@ -42,7 +42,7 @@ load("inst/extdata/TruckBusAgeDist_.RData")
 #' }
 #' @source CalculateTravelDemand.R script.
 "TruckBusAgeDist_mx"
-devtools::use_data(TruckBusAgeDist_mx, overwrite = TRUE)
+usethis::use_data(TruckBusAgeDist_mx, overwrite = TRUE)
 #================================================
 #SECTION 2: DEFINE THE MODULE DATA SPECIFICATIONS
 #================================================
@@ -806,7 +806,7 @@ ReportRPATMetricsSpecifications <- list(
 #' }
 #' @source ReportRPATMetrics.R script.
 "ReportRPATMetricsSpecifications"
-devtools::use_data(ReportRPATMetricsSpecifications, overwrite = TRUE)
+usethis::use_data(ReportRPATMetricsSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -1020,7 +1020,7 @@ ReportRPATMetrics <- function(L) {
   FuelComp <- data.frame(L$Global$FuelComp)
   FuelCo2Ft <- data.frame(L$Global$Fuel)
   AveFuelCo2e_ <- VEHouseholdTravel::calculateAveFuelCo2e( L$G$Year, FuelProp=FuelProp, FuelComp=FuelComp,
-                                        FuelCo2Ft=FuelCo2Ft,
+                                                           FuelCo2Ft=FuelCo2Ft,
                                         MJPerGallon=121, OutputType="MetricTons" )
 
   # Calculate consumption and production at a household level
