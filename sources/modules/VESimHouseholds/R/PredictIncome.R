@@ -552,7 +552,8 @@ PredictIncome <- function(L) {
     CheckTargetSearchRange = FALSE)
   #Predict income for persons in noninstitutional group quarters
   #-------------------------------------------------------------
-  if(any(IsGroupQuarters_)){
+  #Only run group quarters model if there is a group quarters population
+  if (sum(IsGroupQuarters_) > 0) {
     #Create data frame for group quarters persons
     Data_df <-
       data.frame(L$Year$Household)[IsGroupQuarters_,]

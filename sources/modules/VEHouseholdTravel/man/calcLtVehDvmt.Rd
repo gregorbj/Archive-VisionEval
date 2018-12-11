@@ -17,6 +17,8 @@ calculate DVMT for light vehicles.}
 
 \item{PropSuitable}{A numeric (proportion) indication the proportion of total DVMT
 accounted by light vehicles}
+
+\item{Sharing}{A logical indicating whether to adjust for car sharing.}
 }
 \value{
 A numeric representing the light vehicles DVMT for each household
