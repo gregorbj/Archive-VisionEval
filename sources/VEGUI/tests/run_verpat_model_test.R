@@ -62,15 +62,6 @@ if(!dir.exists(save_dir)){
 #===========================
 #SECTION 2: CREATE RESULTS
 #===========================
-==== BASE ====
-if(dir.exists(file.path(save_dir,paste0(name,expected))) & !createExpectedResults){
-  if(!dir.exists(file.path(save_dir,paste0(name,current)))){
-    dir.create(file.path(save_dir,paste0(name,current)))
-  }
-  # Find and press select button
-  select_button <- app$findElement(xpath = "//*[@id='SELECT_RUN_SCRIPT_BUTTON']")
-  select_button$click()
-  Sys.sleep(4)
 
 # Set the model and run parameters to nothing to ensure consistency in the tests.
 #app$setInputs(MODEL_PARAMETERS_FILE = "[\"\"]")
