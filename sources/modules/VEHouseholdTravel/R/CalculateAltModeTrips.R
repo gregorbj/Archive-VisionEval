@@ -2,6 +2,46 @@
 #CalculateAltModeTrips.R
 #=======================
 #This module calculates transit, walk, and bike trips for households.
+#<doc>
+#
+## CalculateAltModeTrips Module
+#### November 23, 2018
+#
+#This module calculates household transit trips, walk trips, and bike trips. The models are sensitive to household DVMT so they are run after all household DVMT adjustments (e.g. to account for cost on household DVMT) are made.
+#
+### Model Parameter Estimation
+#
+#Hurdle models are estimated for calculating the numbers of household transit, walk, and bike trips using the [pscl](https://cran.r-project.org/web/packages/pscl/vignettes/countreg.pdf) package. Separate models are calculated for metropolitan and non-metropolitan households to account for the additional variables available in metropolitan areas.
+#
+#Following are the estimation statistics for the metropolitan and nonmetropolitan **walk** trip models.
+#
+#**Metropolitan Walk Trip Model**
+#<txt:AltModeModels_ls$Metro$Walk$Summary>
+#
+#**Nonmetropolitan Walk Trip Model**
+#<txt:AltModeModels_ls$NonMetro$Walk$Summary>
+#
+#Following are the estimation statistics for the metropolitan and nonmetropolitan **bike** trip models.
+#
+#**Metropolitan Bike Trip Model**
+#<txt:AltModeModels_ls$Metro$Bike$Summary>
+#
+#**Nonmetropolitan Bike Trip Model**
+#<txt:AltModeModels_ls$NonMetro$Bike$Summary>
+#
+#Following are the estimation statistics for the metropolitan and nonmetropolitan **transit** trip models.
+#
+#**Metropolitan Transit Trip Model**
+#<txt:AltModeModels_ls$Metro$Transit$Summary>
+#
+#**Nonmetropolitan Transit Trip Model**
+#<txt:AltModeModels_ls$NonMetro$Transit$Summary>
+#
+### How the Module Works
+#
+#This module is run after all household DVMT adjustments are made due to cost, travel demand management, and light-weight vehicle (e.g. bike, scooter) diversion, so that alternative mode travel reflects the result of those influences. The alternative mode trip models are run and the results are saved.
+#
+#</doc>
 
 
 #=================================
@@ -31,6 +71,7 @@ Hh_df$OneVeh <- as.numeric(Hh_df$NumVeh == 1)
 Hh_df$DrvAgePop <- Hh_df$Hhsize - Hh_df$Age0to14
 Hh_df$Workers <- Hh_df$Wrkcount
 Hh_df$Drivers <- Hh_df$Drvrcnt
+Hh_df$FwyLaneMiPC <- Hh_df$FwyLnMiPC / 1000
 Hh_df$Intercept <- 1
 #Apply the model
 Hh_df$Dvmt <- NA
@@ -63,28 +104,8 @@ Hh_df$NonDriverAdult <- Hh_df$Adult - Hh_df$DriverAdult
 Hh_df$NonDriverElder <- Hh_df$Elder - Hh_df$DriverElder
 Hh_df$HhSize <- Hh_df$Hhsize
 
-#Define function to estimate alternative mode trip model for a mode
-#------------------------------------------------------------------
-#' Estimate a hurdle for alternative mode trips
-#'
-#' \code{estimateAltModeTripModel} estimates a hurdle model for calculating
-#' alternative mode trips.
-#'
-#' The function estimates a Hurdle regression model for calculating trips
-#' for an alternative mode (walk, bike, or public transit). The function
-#' estimates the model and outputs the model in the form of text strings, one
-#' for the zero trip model and one for the count model. It returns a list having
-#' three components: 'Count' which contains a string representation of the count
-#' model component, 'Zero' which contains a string representation of the zero
-#' model component, and 'Summary' which contains summary information about the
-#' model.
-#' @param Data_df a data frame containing the model estimation data
-#' @param DepVar a string that is the dependent variable name
-#' @param IndepVars_ a string vector of the names of the independent variables
-#' @return a list having three components: 'Count' which contains a string
-#' representation of the count model component, 'Zero' which contains a
-#' string representation of the zero model component, 'Summary' which contains
-#' the model summary.
+#Define function to estimate hurdle model for alternative mode trips
+#-------------------------------------------------------------------
 #' @import pscl
 estimateAltModeTripModel <- function(Data_df, DepVar, IndepVars_) {
 
@@ -114,7 +135,10 @@ estimateAltModeTripModel <- function(Data_df, DepVar, IndepVars_) {
 
   #Return results
   #--------------
-  list(Count = CountFormula, Zero = ZeroFormula, Summary = summary(Model_HM))
+  list(
+    Count = CountFormula,
+    Zero = ZeroFormula,
+    Summary = capture.output(summary(Model_HM)))
 }
 
 #Estimate metropolitan models
@@ -126,22 +150,22 @@ Vars_ <- c("NumWalkTrp", "NumBikeTrp", "NumTransitTrp", "HhSize", "LogIncome",
 MetroHh_df <- Hh_df[IsMetro_, Vars_]
 MetroHh_df <- MetroHh_df[complete.cases(MetroHh_df),]
 #Estimate walk model
-DepVars_ <- c("HhSize", "LogIncome", "LogDensity", "BusEqRevMiPC", "Urban",
+IndepVars_ <- c("HhSize", "LogIncome", "LogDensity", "BusEqRevMiPC", "Urban",
               "LogDvmt", "Age0to14", "Age15to19", "Age20to29", "Age30to54",
               "Age65Plus")
 MetroWalkModel_ls <-
-  estimateAltModeTripModel(MetroHh_df, "NumWalkTrp", DepVars_)
+  estimateAltModeTripModel(MetroHh_df, "NumWalkTrp", IndepVars_)
 #Estimate bike model
-DepVars_ <- c("HhSize", "LogIncome", "BusEqRevMiPC", "LogDvmt", "Age0to14",
+IndepVars_ <- c("HhSize", "LogIncome", "BusEqRevMiPC", "LogDvmt", "Age0to14",
               "Age15to19", "Age20to29", "Age30to54", "Age65Plus")
 MetroBikeModel_ls <-
-  estimateAltModeTripModel(MetroHh_df, "NumBikeTrp", DepVars_)
+  estimateAltModeTripModel(MetroHh_df, "NumBikeTrp", IndepVars_)
 #Estimate transit model
-DepVars_ <- c("HhSize", "LogIncome", "LogDensity", "BusEqRevMiPC", "LogDvmt",
+IndepVars_ <- c("HhSize", "LogIncome", "LogDensity", "BusEqRevMiPC", "LogDvmt",
               "Urban", "Age15to19", "Age20to29", "Age30to54", "Age65Plus")
 MetroTransitModel_ls <-
-  estimateAltModeTripModel(MetroHh_df, "NumTransitTrp", DepVars_)
-rm(DepVars_)
+  estimateAltModeTripModel(MetroHh_df, "NumTransitTrp", IndepVars_)
+rm(IndepVars_)
 
 #Estimate nonmetropolitan models
 #-------------------------------
@@ -152,33 +176,33 @@ Vars_ <- c("NumWalkTrp", "NumBikeTrp", "NumTransitTrp", "HhSize", "LogIncome",
 NonMetroHh_df <- Hh_df[!IsMetro_, Vars_]
 NonMetroHh_df <- NonMetroHh_df[complete.cases(NonMetroHh_df),]
 #Estimate walk model
-DepVars_ <- c("HhSize", "LogIncome", "LogDensity", "LogDvmt", "Age0to14",
+IndepVars_ <- c("HhSize", "LogIncome", "LogDensity", "LogDvmt", "Age0to14",
               "Age15to19", "Age20to29", "Age30to54", "Age65Plus")
 NonMetroWalkModel_ls <-
-  estimateAltModeTripModel(NonMetroHh_df, "NumWalkTrp", DepVars_)
+  estimateAltModeTripModel(NonMetroHh_df, "NumWalkTrp", IndepVars_)
 #Estimate bike model
-DepVars_ <- c("HhSize", "LogIncome", "LogDvmt", "Age0to14", "Age15to19",
+IndepVars_ <- c("HhSize", "LogIncome", "LogDvmt", "Age0to14", "Age15to19",
               "Age20to29", "Age30to54", "Age65Plus")
 NonMetroBikeModel_ls <-
-  estimateAltModeTripModel(NonMetroHh_df, "NumBikeTrp", DepVars_)
+  estimateAltModeTripModel(NonMetroHh_df, "NumBikeTrp", IndepVars_)
 #Estimate transit model
-DepVars_ <- c("HhSize", "LogIncome", "LogDensity", "LogDvmt", "Age0to14",
+IndepVars_ <- c("HhSize", "LogIncome", "LogDensity", "LogDvmt", "Age0to14",
               "Age15to19", "Age20to29", "Age30to54", "Age65Plus")
 NonMetroTransitModel_ls <-
-  estimateAltModeTripModel(NonMetroHh_df, "NumTransitTrp", DepVars_)
+  estimateAltModeTripModel(NonMetroHh_df, "NumTransitTrp", IndepVars_)
 
 #Save alternative mode trip models
 #---------------------------------
 #Put models in a list
 AltModeModels_ls <- list()
 AltModeModels_ls$Metro <-
-  list(Walk = MetroWalkModel_ls[c("Count", "Zero")],
-       Bike = MetroBikeModel_ls[c("Count", "Zero")],
-       Transit = MetroTransitModel_ls[c("Count", "Zero")])
+  list(Walk = MetroWalkModel_ls,
+       Bike = MetroBikeModel_ls,
+       Transit = MetroTransitModel_ls)
 AltModeModels_ls$NonMetro <-
-  list(Walk = NonMetroWalkModel_ls[c("Count", "Zero")],
-       Bike = NonMetroBikeModel_ls[c("Count", "Zero")],
-       Transit = NonMetroTransitModel_ls[c("Count", "Zero")])
+  list(Walk = NonMetroWalkModel_ls,
+       Bike = NonMetroBikeModel_ls,
+       Transit = NonMetroTransitModel_ls)
 #Save the model
 #' Alternative mode trip models
 #'
@@ -197,7 +221,7 @@ usethis::use_data(AltModeModels_ls, overwrite = TRUE)
 
 rm(DvmtModel_ls, Hh_df, MetroBikeModel_ls, MetroHh_df, MetroTransitModel_ls,
    MetroWalkModel_ls, NonMetroBikeModel_ls, NonMetroHh_df,
-   NonMetroTransitModel_ls, NonMetroWalkModel_ls, DepVars_, IsMetro_, Vars_,
+   NonMetroTransitModel_ls, NonMetroWalkModel_ls, IndepVars_, IsMetro_, Vars_,
    estimateAltModeTripModel)
 
 
@@ -294,13 +318,13 @@ CalculateAltModeTripsSpecifications <- list(
       ISELEMENTOF = ""
     ),
     item(
-      NAME = "DevType",
+      NAME = "LocType",
       TABLE = "Household",
       GROUP = "Year",
       TYPE = "character",
       UNITS = "category",
       PROHIBIT = "NA",
-      ISELEMENTOF = c("Urban", "Rural")
+      ISELEMENTOF = c("Urban", "Town", "Rural")
     ),
     item(
       NAME = "HhSize",
@@ -457,7 +481,7 @@ CalculateAltModeTrips <- function(L) {
   #----------------------------------
   calcTrips <- function(Mode) {
     Trips_ <- nrow(Hh_df)
-    IsMetro_ <- Hh_df$DevType == "Urban"
+    IsMetro_ <- Hh_df$LocType == "Urban"
     Trips_[IsMetro_] <-
       applyHurdleTripModel(Hh_df[IsMetro_,], AltModeModels_ls$Metro[[Mode]])
     Trips_[!IsMetro_] <-
@@ -475,9 +499,13 @@ CalculateAltModeTrips <- function(L) {
 }
 
 
-#================================
-#Code to aid development and test
-#================================
+#===============================================================
+#SECTION 4: MODULE DOCUMENTATION AND AUXILLIARY DEVELOPMENT CODE
+#===============================================================
+#Run module automatic documentation
+#----------------------------------
+documentModule("CalculateAltModeTrips")
+
 #Test code to check specifications, loading inputs, and whether datastore
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions

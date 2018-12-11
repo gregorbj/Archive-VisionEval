@@ -1,32 +1,72 @@
 Test
 Test of VESimHouseholds package modules
-2018-04-24_07:52:27
+2018-11-24_13:15:07
 
-2018-04-24 07:52:27 : Testing AssignHhVehiclePowertrain. 
+2018-11-24 13:15:08 : Testing AssignHhVehiclePowertrain. 
 
-2018-04-24 07:52:27 : Attempting to load datastore. 
+2018-11-24 13:15:08 : Attempting to load datastore. 
 
-2018-04-24 07:52:27 : Datastore loaded. 
+2018-11-24 13:15:09 : Datastore loaded. 
 
-2018-04-24 07:52:27 : Attempting to load and check specifications. 
+2018-11-24 13:15:09 : Attempting to load and check specifications. 
 
-2018-04-24 07:52:27 : Module specifications successfully loaded and checked for errors. 
+2018-11-24 13:15:09 : Module specifications successfully loaded and checked for errors. 
 
-2018-04-24 07:52:27 : Attempting to process, check and load module inputs. 
+2018-11-24 13:15:09 : Attempting to process, check and load module inputs. 
 
-2018-04-24 07:52:27 : Module inputs successfully checked and loaded into datastore. 
+2018-11-24 13:15:12 : Module inputs successfully checked and loaded into datastore. 
 
-2018-04-24 07:52:27 : Checking whether datastore contains all datasets in Get specifications. 
+2018-11-24 13:15:12 : Checking whether datastore contains all datasets in Get specifications. 
 
-2018-04-24 07:52:27 : Datastore contains all datasets identified in module Get specifications. 
+2018-11-24 13:15:12 : Datastore contains all datasets identified in module Get specifications. 
 
-2018-04-24 07:52:27 : Running module and checking whether outputs meet Set specifications. 
+2018-11-24 13:15:12 : Running module and checking whether outputs meet Set specifications. 
 
-2018-04-24 07:52:27 : Also saving module outputs to datastore. 
+2018-11-24 13:15:12 : Also saving module outputs to datastore. 
 
-2018-04-24 07:52:38 : Module run successfully and outputs meet Set specifications. 
+2018-11-24 13:15:23 : Module run successfully and outputs meet Set specifications. 
 
-2018-04-24 07:52:38 : Module outputs saved to datastore. 
+2018-11-24 13:15:23 : Module outputs saved to datastore. 
 
-2018-04-24 07:52:38 : Congratulations. Module AssignHhVehiclePowertrain passed all tests. 
+2018-11-24 13:15:23 : Congratulations. Module AssignHhVehiclePowertrain passed all tests. 
+
+Test
+Test of VESimHouseholds package modules
+2018-11-24_13:15:24
+
+2018-11-24 13:15:24 : Testing AssignHhVehiclePowertrain. 
+
+2018-11-24 13:15:24 : Attempting to load datastore. 
+
+2018-11-24 13:15:24 : Datastore loaded. 
+
+2018-11-24 13:15:24 : Attempting to load and check specifications. 
+
+2018-11-24 13:15:24 : Module specifications successfully loaded and checked for errors. 
+
+2018-11-24 13:15:24 : Attempting to process, check and load module inputs. 
+
+2018-11-24 13:15:26 : Module inputs successfully checked and loaded into datastore. 
+
+2018-11-24 13:15:26 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-11-24 13:15:26 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-11-24 13:15:26 : Running module and checking whether outputs meet Set specifications. 
+
+2018-11-24 13:15:26 : Also saving module outputs to datastore. 
+
+2018-11-24 13:15:37 : Module run successfully and outputs meet Set specifications. 
+
+2018-11-24 13:15:37 : Module outputs saved to datastore. 
+
+2018-11-24 13:15:37 : Congratulations. Module AssignHhVehiclePowertrain passed all tests. 
+
+Test
+Test of VESimHouseholds package modules
+2018-11-24_13:20:58
+
+2018-11-24 13:20:58 : Testing AssignHhVehiclePowertrain. 
+
+2018-11-24 13:20:58 : Attempting to load datastore. 
 

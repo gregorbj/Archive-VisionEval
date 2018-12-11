@@ -1,10 +1,23 @@
 #=================
 #AssignRoadMiles.R
 #=================
-#This module assigns freeway and arterial lane-miles to metropolitan areas
-#(Marea) and calculate freeway lane-miles per capita.
 
-
+#<doc>
+#
+## AssignRoadMiles Module
+#### November 5, 2018
+#
+#This module assigns freeway and arterial lane-miles to metropolitan areas (Marea) and calculates freeway lane-miles per capita.
+#
+### Model Parameter Estimation
+#
+#This module has no estimated parameters.
+#
+### How the Module Works
+#
+#Users provide inputs on the numbers of freeway lane-miles and arterial lane-miles by Marea and year. In addition to saving these inputs, the module loads the urbanized area population of each Marea and year from the datastore and computes the value of freeway lane-miles per capita. This relative roadway supply measure is used by several other modules.
+#
+#</doc>
 
 
 #=================================
@@ -184,9 +197,14 @@ AssignRoadMiles <- function(L) {
 }
 
 
-#================================
-#Code to aid development and test
-#================================
+
+#===============================================================
+#SECTION 4: MODULE DOCUMENTATION AND AUXILLIARY DEVELOPMENT CODE
+#===============================================================
+#Run module automatic documentation
+#----------------------------------
+documentModule("AssignRoadMiles")
+
 #Test code to check specifications, loading inputs, and whether datastore
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions

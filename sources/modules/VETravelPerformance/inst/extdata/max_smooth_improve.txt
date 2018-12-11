@@ -1,0 +1,19 @@
+========================================
+Documentation for max_smooth_improve.csv
+========================================
+Data in this file is used in the CalculateRoadPerformance.R script to calculate the effect on fuel consumption of operations programs such as active traffic management (https://en.wikipedia.org/wiki/Active_traffic_management) which reduce speed variation on freeways (speed smoothing). 
+
+File Structure
+--------------
+Rows contain data by speed level
+Column names as follows:
+Speed: Average speed
+LdIce: Speed smoothing factors for light-duty internal combustion engine vehicles
+HdIce: Speed smoothing factors for heavy-duty internal combustion engine vehicles
+
+Source:
+-------
+Alex Bigazzi and Kelly Clifton, Refining GreenSTEP: Impacts of Vehicle Technologies and ITS/Operational Improvements on Travel Speed and Fuel Consumption Curves, Report on Task 2: Incorporation of Operations and ITS Improvements, Portland State University, November 2011.
+Bigazzi_GreenSTEP_estimate_ops_impacts.xls
+
+

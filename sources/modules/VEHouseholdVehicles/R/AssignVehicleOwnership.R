@@ -1,8 +1,39 @@
 #========================
 #AssignVehicleOwnership.R
 #========================
-#This module assigns household vehicle ownership based on household, land use,
-#and transportation system characteristics.
+#
+#<doc>
+#
+## AssignVehicleOwnership Module
+#### November 23, 2018
+#
+#This module determines the number of vehicles owned or leased by each household as a function of household characteristics, land use characteristics, and transportation system characteristics.
+#
+### Model Parameter Estimation
+#
+#The vehicle ownership model is segmented for metropolitan and non-metropolitan households because additional information about transit supply and the presence of urban mixed-use neighborhoods is available for metropolitan households that is not available for non-metropolitan households. There are two models for each segment. A binary logit model is used to predict which households own no vehicles. An ordered logit model is used to predict how many vehicles a household owns if they own any vehicles. The number of vehicles a household may be assigned is 6.
+#
+#The metropolitan model for determining whether a household owns no vehicles is documented below. As expected, the probability that a household is carless is greater for low income households (less than $20,000), households living in higher density and/or mixed-use neighborhoods, and households living in metropolitan areas having higher levels of transit service. The probability decreases as the number of drivers in the household increases, household income increases, and if the household lives in a single-family dwelling. The number of drivers has the greatest influence on car ownership. The number of workers increases the probability of no vehicle ownership, but since the model includes drivers, this coefficient probably reflects the effect of non-driving workers on vehicle ownership.
+#
+#<txt:AutoOwnModels_ls$Stats$MetroZeroSummary>
+#
+#The non-metropolitan model for zero car ownership is shown below. The model terms are the same as for the metropolitan model with the exception of the urban mixed-use and transit supply variables. The signs of the variables are the same as for the metropolitan model and the values are of similar magnitude.
+#
+#<txt:AutoOwnModels_ls$Stats$NonMetroZeroSummary>
+#
+#The ordered logit model for the number of vehicles owned by metropolitan households that own at least one vehicle is shown below. Households are likely to own more vehicles if they live in a single-family dwelling, have higher incomes, have more workers, and have more drivers. Households are likely to own fewer vehicles if all household members are elderly, they live in a higher density and/or urban mixed-use neighborhood, they live in a metropolitan area with a higher level of transit service, and if more persons are in the household. The latter result is at surprising at first glance, but since the model also includes the number of drivers and number of workers, the household size coefficient is probably showing the effect of non-drivers non-workers in the household.
+#
+#<txt:AutoOwnModels_ls$Stats$MetroCountSummary>
+#
+#The ordered logit model for non-metropolitan household vehicle ownership is described below. The variables are the same as for the metropolitan model with the exception of the urban mixed-use neighborhood and transit variables. The signs of the coefficients are the same and the magnitudes are similar.
+#
+#<txt:AutoOwnModels_ls$Stats$NonMetroCountSummary>
+#
+### How the Module Works
+#
+#For each household, the metropolitan or non-metropolitan binary logit model is run to predict the probability that the household owns no vehicles. A random number is drawn from a uniform distribution in the interval from 0 to 1 and if the result is less than the probability of zero-vehicle ownership, the household is assigned no vehicles. Households that have no drivers are also assigned 0 vehicles. The metropolitan or non-metropolitan ordered logit model is run to predict the number of vehicles owned by the household if they own any.
+#
+#</doc>
 
 
 #=================================
@@ -75,9 +106,9 @@ AutoOwnModels_ls$Metro$Zero <-
     family = binomial
   )
 AutoOwnModels_ls$Stats$MetroZeroSummary <-
-  print(summary(AutoOwnModels_ls$Metro$Zero))
+  capture.output(summary(AutoOwnModels_ls$Metro$Zero))
 AutoOwnModels_ls$Stats$MetroZeroAnova <-
-  print(anova(AutoOwnModels_ls$Metro$Zero, test = "Chisq"))
+  capture.output(anova(AutoOwnModels_ls$Metro$Zero, test = "Chisq"))
 #Trim down model
 AutoOwnModels_ls$Metro$Zero[c("residuals", "fitted.values",
                               "linear.predictors", "weights",
@@ -96,7 +127,7 @@ AutoOwnModels_ls$Metro$Count <-
     threshold = "equidistant"
   )
 AutoOwnModels_ls$Stats$MetroCountSummary <-
-  print(summary(AutoOwnModels_ls$Metro$Count))
+  capture.output(summary(AutoOwnModels_ls$Metro$Count))
 #Trim down model
 AutoOwnModels_ls$Metro$Count[c("fitted.values", "model", "y")] <- NULL
 
@@ -121,9 +152,9 @@ AutoOwnModels_ls$NonMetro$Zero <-
     family = binomial
   )
 AutoOwnModels_ls$Stats$NonMetroZeroSummary <-
-  print(summary(AutoOwnModels_ls$NonMetro$Zero))
+  capture.output(summary(AutoOwnModels_ls$NonMetro$Zero))
 AutoOwnModels_ls$Stats$NonMetroZeroAnova <-
-  print(anova(AutoOwnModels_ls$NonMetro$Zero, test = "Chisq"))
+  capture.output(anova(AutoOwnModels_ls$NonMetro$Zero, test = "Chisq"))
 #Trim down model
 AutoOwnModels_ls$NonMetro$Zero[c("residuals", "fitted.values",
                               "linear.predictors", "weights",
@@ -142,7 +173,7 @@ AutoOwnModels_ls$NonMetro$Count <-
     threshold = "equidistant"
   )
 AutoOwnModels_ls$Stats$NonMetroCountSummary <-
-  print(summary(AutoOwnModels_ls$NonMetro$Count))
+  capture.output(summary(AutoOwnModels_ls$NonMetro$Count))
 #Trim down model
 AutoOwnModels_ls$NonMetro$Count[c("fitted.values", "model", "y")] <- NULL
 #Clean up
@@ -303,13 +334,13 @@ AssignVehicleOwnershipSpecifications <- list(
       ISELEMENTOF = c(0, 1)
     ),
     item(
-      NAME = "DevType",
+      NAME = "LocType",
       TABLE = "Household",
       GROUP = "Year",
       TYPE = "character",
       UNITS = "category",
-      PROHIBITED = "NA",
-      ISELEMENTOF = c("Urban", "Rural")
+      PROHIBIT = "NA",
+      ISELEMENTOF = c("Urban", "Town", "Rural")
     )
   ),
   #Specify data to saved in the data store
@@ -395,23 +426,23 @@ AssignVehicleOwnership <- function(L) {
   #-------------
   #Probability no vehicles
   NoVehicleProb_ <- numeric(NumHh)
-  NoVehicleProb_[Hh_df$DevType == "Urban"] <-
+  NoVehicleProb_[Hh_df$LocType == "Urban"] <-
     predict(AutoOwnModels_ls$Metro$Zero,
-            newdata = Hh_df[Hh_df$DevType == "Urban",],
+            newdata = Hh_df[Hh_df$LocType == "Urban",],
             type = "response")
-  NoVehicleProb_[Hh_df$DevType == "Rural"] <-
+  NoVehicleProb_[Hh_df$LocType %in% c("Town", "Rural")] <-
     predict(AutoOwnModels_ls$NonMetro$Zero,
-            newdata = Hh_df[Hh_df$DevType == "Rural",],
+            newdata = Hh_df[Hh_df$LocType %in% c("Town", "Rural"),],
             type = "response")
   #Vehicle counts
   Vehicles_ <- integer(NumHh)
-  Vehicles_[Hh_df$DevType == "Urban"] <-
+  Vehicles_[Hh_df$LocType == "Urban"] <-
     as.integer(predict(AutoOwnModels_ls$Metro$Count,
-            newdata = Hh_df[Hh_df$DevType == "Urban",],
+            newdata = Hh_df[Hh_df$LocType == "Urban",],
             type = "class")$fit)
-  Vehicles_[Hh_df$DevType == "Rural"] <-
+  Vehicles_[Hh_df$LocType %in% c("Town", "Rural")] <-
     as.integer(predict(AutoOwnModels_ls$NonMetro$Count,
-            newdata = Hh_df[Hh_df$DevType == "Rural",],
+            newdata = Hh_df[Hh_df$LocType %in% c("Town", "Rural"),],
             type = "class")$fit)
   #Set count to zero for households modeled as having no vehicles
   Vehicles_[NoVehicleProb_ >= runif(NumHh)] <- 0
@@ -428,9 +459,13 @@ AssignVehicleOwnership <- function(L) {
   Out_ls
 }
 
-#================================
-#Code to aid development and test
-#================================
+#===============================================================
+#SECTION 4: MODULE DOCUMENTATION AND AUXILLIARY DEVELOPMENT CODE
+#===============================================================
+#Run module automatic documentation
+#----------------------------------
+documentModule("AssignVehicleOwnership")
+
 #Test code to check specifications, loading inputs, and whether datastore
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions
@@ -442,6 +477,7 @@ AssignVehicleOwnership <- function(L) {
 #   DoRun = FALSE
 # )
 # L <- TestDat_$L
+# R <- AssignVehicleOwnership(L)
 
 #Test code to check everything including running the module and checking whether
 #the outputs are consistent with the 'Set' specifications

@@ -1,0 +1,20 @@
+===========================================
+Documentation for congestion_efficiency.csv
+===========================================
+
+This file contains values for the relative 'fuel efficiency' of different vehicle powertrains in congestion. The impact of congestion on vehicle fuel economy was modeled for 145 vehicle configurations using the Environmental Protection Agency's PERE model (Alex Bigazzi and Kelly Clifton. Refining GreenSTEP: Impacts of Vehicle Technologies and ITS/Operational Improvements on Travel Speed and Fuel Consumption Curves. Final Report on Task 1: Advanced Vehicle Fuel-Speed Curves, November 2011, Portland State University). The vehicle configurations that perform 'best' and 'worst' in congestion were identified for 4 light-duty vehicle powertrains and one heavy duty vehicle powertrain. The congestion efficiency values in this file identify assumptions about the average congestion performance of each powertrain relative to the 'best' and 'worst' values. The values can range from 0 to 1 where 0 means that it is the 'worst' performance, 1 means that it is the 'best' performance, and 0.5 is midway between.
+
+File Structure
+--------------
+Each row is a decade year from 1990 to 2050. The range of years needs to be sufficient to encompass all model run years that are anticipated.
+Column names as follows:
+Year: The year to which the data apply
+LdIce: Relative performance of light-duty internal combustion engine vehicles
+LdHev: Relative performance of light-duty hybrid electric vehicles
+LdEv: Relative performance of light-duty electric vehicles
+LdFcv: Relative performance of light-duty fuel cell vehicles
+HdIce: Relative performance of heavy-duty internal combustion engine vehicles
+
+Source:
+-------
+These are demonstration data developed for the purpose of creating and testing modules. Data values are set at 0.5 because more study is needed to analyze the existing fleet and develop how values may change over time.

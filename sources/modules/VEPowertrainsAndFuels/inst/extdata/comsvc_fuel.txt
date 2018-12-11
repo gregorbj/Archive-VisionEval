@@ -1,0 +1,21 @@
+=================================
+Documentation for comsvc_fuel.csv
+=================================
+
+This file contains values for the proportions of hydrocarbon fuels used to power commercial service vehicles by fuel type (gasoline, diesel, compressed natural gas) and vehicle type (auto, light truck). Note that these include fuel blends (e.g. gasoline blended with ethanol). Blending proportions are specified in the "ldv_biofuel_mix.csv" file. The data in these files as well as in the "carbon_intensity.csv" file are used to calculate the average carbon intensity of hydrocarbon fuels used by commercial service vehicles. Note that the proportions in this file do not represent volumetric proportions (e.g. gallons), they represent energy proportions (e.g. gasoline gallon equivalents) or DVMT proportions. 
+
+File Structure
+--------------
+Each row is a decade year from 1990 to 2050. The range of years needs to be sufficient to encompass all model run years that are anticipated.
+Column names as follows:
+Year: The year to which the data apply
+AutoPropGasoline: The proportion of commercial service automobile DVMT powered by gasoline and gasoline blends
+AutoPropDiesel: The proportion of commercial service automobile DVMT powered by diesel and diesel blends
+AutoPropCng: The proportion of commercial service automobile DVMT powered by compressed natural gas and compressed natural gas blends
+LtTrkPropGasoline: The proportion of commercial service light truck DVMT powered by gasoline and gasoline blends
+LtTrkPropDiesel: The proportion of commercial service light truck DVMT powered by diesel and diesel blends
+LtTrkPropCng: The proportion of commercial service light truck DVMT powered by compressed natural gas and compressed natural gas blends
+
+Source:
+-------
+These are demonstration data developed for the purpose of creating and testing modules. Data comes from various sources used to develop values for Oregon and other sources.

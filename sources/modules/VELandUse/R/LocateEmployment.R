@@ -1,15 +1,35 @@
 #==================
 #LocateEmployment.R
 #==================
-#This module places employment in Bzones based on input assumptions of
-#employment by type and Bzone. The model adjusts the employment numbers to
-#balance with the number of workers in the region. The module assigns workers
-#to jobs as a function of the number of jobs in each Bzone and the inverse of
-#distance between residence and employment Bzones. An iterative proportional
-#fitting process is used to allocate the number of workers between each pair of
-#Bzones. A worker table is created and workers are assigned randomly to
-#employment Bzones based on the balanced matrix of number of workers by
-#residence and employment Bzones.
+
+#<doc>
+#
+## LocateEmployment Module
+#### November 6, 2018
+#
+#This module places employment in Bzones based on input assumptions of employment by type and Bzone. The model adjusts the employment numbers to balance with the number of workers in the region. The module creates a worker table and assigns workers to Bzone employment locations as a function of the number of jobs in each Bzone and the inverse of distance between residence and employment Bzones.
+#
+### Model Parameter Estimation
+#
+#This module has no parameters. Regional employment is allocated to Bzones based on user inputs and is scaled to match the number of workers in the region. Workers are assigned a Bzone work location as a function of the number of jobs in each Bzone and the inverse of distance between residence and employment Bzones.
+#
+### How the Module Works
+#
+#The module creates a worker table in the datastore where each entry is a worker identified by a worker ID, the ID of the household it belongs to, and the Bzone where the worker's job is located, along with a few other attributes identified below. The following computations are carried out in order to identify the Bzone identified as the worker's job site:
+#
+#1) The number of workers by residence Bzone is tabulated.
+#
+#2) The number of jobs by Bzone and category (retail, service, total) is a user input. Those input values are scaled if necessary so that the total number of jobs equals the total number of workers.
+#
+#3) A matrix of distances between Bzones are calculated from the latitude and longitude positions of the Bzone centroids that are input by the user.
+#
+#4) An iterative proportional fitting (IPF) process is used to create a balanced matrix of the number of workers in each residence zone and employment zone pair. The IPF margins are the tabulations of workers by Bzone (step #1) and jobs by Bzone (step #2). The IPF seed matrix is the inverse of the values of the distance matrix (step #3).
+#
+#5) Create a dataset of workers identifying their residence locations and assign them a work location by randomly assigning them to Bzones as constrained by the allocation of workers to jobs (step #4).
+#
+#6) Identify the Azone and Marea of the worker job location and the distance from home to work.
+#
+#</doc>
 
 
 #=================================
@@ -435,9 +455,13 @@ LocateEmployment <- function(L) {
 }
 
 
-#================================
-#Code to aid development and test
-#================================
+#===============================================================
+#SECTION 4: MODULE DOCUMENTATION AND AUXILLIARY DEVELOPMENT CODE
+#===============================================================
+#Run module automatic documentation
+#----------------------------------
+documentModule("LocateEmployment")
+
 #Test code to check specifications, loading inputs, and whether datastore
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions

@@ -1,0 +1,23 @@
+========================================
+Documentation for hh_powertrain_prop.csv
+========================================
+
+This file contains values for household vehicle powertrain (ICEV, HEV, PHEV, BEV) proportions by vehicle type (auto, light truck), and vehicle model year. Note that the powertrain use proportions need add to 1 for each vehicle type.
+
+File Structure
+--------------
+Each row is a vehicle model year from 1975 to 2050.
+Column names as follows:
+Year: The model year to which the data apply
+AutoPropIcev: The proportion of model year automobiles that are internal combustion engine vehicles (ICEV)
+AutoPropHev: The proportion of model year automobiles that are hybrid electric vehicles (HEV)
+AutoPropPhev: The proportion of model year automobiles that are plug-in hybrid electric vehicles (PHEV)
+AutoPropBev: The proportion of model year automobiles that are battery electric vehicle (BEV)
+LtTrkPropIcev: The proportion of model year light trucks that are internal combustion engine vehicles (ICEV)
+LtTrkPropHev: The proportion of model year light trucks that are hybrid electric vehicles (HEV)
+LtTrkPropPhev: The proportion of model year light trucks that are plug-in hybrid electric vehicles (PHEV)
+LtTrkPropBev: The proportion of model year light trucks that are battery electric vehicle (BEV)
+
+Source:
+-------
+These are demonstration data developed for the purpose of creating and testing modules. Data comes from various sources used to develop values for Oregon and other sources.

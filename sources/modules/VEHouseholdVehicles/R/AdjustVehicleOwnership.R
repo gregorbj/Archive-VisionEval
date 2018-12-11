@@ -1,19 +1,23 @@
 #========================
 #AdjustVehicleOwnership.R
 #========================
-#This module adjusts household vehicle ownership based on a comparison of the
-#cost of owning a vehicle per mile of travel compared to the cost per mile of
-#using a car service where the level of service is high. The determination of
-#whether car services are substituted for ownership also depends on input
-#assumptions regarding the average likelihood that an owner would substitute
-#car services for a household vehicle. The user inputs the likelihood by vehicle
-#type. For example, if the user believes that a quarter of light truck owners
-#would not substitute car services for owning a light truck because of how they
-#use their light truck (e.g. pulling a recreational trailer, rough road travel,
-#etc.), then the substitition probability would be 0.75. When it is determined
-#that car services will substitute for a household vehicle, then the vehicle
-#status is changed from 'Own' to 'HighCarSvc' and the ownership and insurance
-#costs are changed as well. The household's vehicle totals are changed as well.
+#
+#<doc>
+#
+## AdjustVehicleOwnership Module
+#### November 23, 2018
+#
+#This module adjusts household vehicle ownership based on a comparison of the cost of owning a vehicle per mile of travel compared to the cost per mile of using a car service where the level of service is high. The determination of whether car services are substituted for ownership also depends on input assumptions regarding the average likelihood that an owner would substitute car services for a household vehicle.
+#
+### Model Parameter Estimation
+#
+#This module has no estimated parameters.
+#
+### How the Module Works
+#
+#The module loads car service cost and substitution probability datasets that are inputs to the CreateVehicleTable module, car service service levels that are inputs from the AssignCarSvcAvailability module, and household vehicle ownership cost data that are outputs of the CalculateVehicleOwnCost module. The module compares the vehicle ownership cost per mile of travel for all vehicles of households living in zones where there is a high level of car service with the cost per mile of using a car service. The module flags all all vehicles where car service is high and the car service use cost is lower than the ownership cost. For those flagged vehicles, the module randomly changes their status from ownership to car service where the probability of change is the substitution probability. For example, if the user believes that only a quarter of light truck owners would substitute car services for owning a light truck (because car services wouldn't enable them to use their light truck as they intend, such as towing a trailer), then the substitution probability would be 0.25. For vehicles where it is determined that car services will substitute for a household vehicle, then the vehicle status is changed from 'Own' to 'HighCarSvc' and the ownership and insurance costs are changed as well. The household's vehicle totals are changed as well.
+#
+#</doc>
 
 
 #=================================
@@ -423,9 +427,13 @@ AdjustVehicleOwnership <- function(L) {
 }
 
 
-#================================
-#Code to aid development and test
-#================================
+#===============================================================
+#SECTION 4: MODULE DOCUMENTATION AND AUXILLIARY DEVELOPMENT CODE
+#===============================================================
+#Run module automatic documentation
+#----------------------------------
+documentModule("AdjustVehicleOwnership")
+
 #Test code to check specifications, loading inputs, and whether datastore
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions

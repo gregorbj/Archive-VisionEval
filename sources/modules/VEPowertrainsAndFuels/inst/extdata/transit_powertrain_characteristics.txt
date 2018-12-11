@@ -1,0 +1,24 @@
+========================================================
+Documentation for transit_powertrain_characteristics.csv
+========================================================
+
+This file contains values for key powertrain characteristics for the public transit fleet vehicles that are used in calculating amounts of fuel and electric power consumed.
+
+File Structure
+--------------
+Each row is a decade year from 1990 to 2050. The range of years needs to be sufficient to encompass all model run years that are anticipated.
+Column names as follows:
+Year: The year to which the data apply
+VanIcevMpg: The average fuel economy (miles per gasoline gallon equivalent) of vans with internal combustion engine powertrains
+VanHevMpg: The average fuel economy (miles per gasoline gallon equivalent) of vans with hybrid electric powertrains
+VanBevMpkwh: The average efficiency (miles per kilowatt-hour) of vans with battery electric powertrains
+BusIcevMpg: The average fuel economy (miles per gasoline gallon equivalent) of buses with internal combustion engine powertrains
+BusHevMpg: The average fuel economy (miles per gasoline gallon equivalent) of buses with hybrid electric powertrains
+BusBevMpkwh: The average efficiency (miles per kilowatt-hour) of buses with battery electric powertrains
+RailIcevMpg: The average fuel economy (miles per gasoline gallon equivalent) of rail vehicles with internal combustion engine powertrains
+RailHevMpg: The average fuel economy (miles per gasoline gallon equivalent) of rail vehicles with hybrid electric powertrains
+RailBevMpkwh: The average efficiency (miles per kilowatt-hour) of rail vehicles with electric powertrains
+
+Source:
+-------
+These are demonstration data developed for the purpose of creating and testing modules. Data comes from various sources used to develop values for Oregon and other sources.
