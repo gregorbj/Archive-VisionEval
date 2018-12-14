@@ -76,10 +76,10 @@ script:
     done
     
     # run module or model tests
-  # - |
-    # cd $FOLDER
-    # if ( [ $TYPE == "module" ] ); then  Rscript -e 'devtools::install_deps(".")'; fi  
-  # - if ( [ $TYPE == "module" ] ); then  Rscript -e 'devtools::check(".")'; fi
-  # - if ( [ $TYPE == "module" ] ); then  Rscript -e "tryCatch( source( '$SCRIPT' ) )"; fi
-  # - if ( [ $TYPE == "module" ] ); then  R CMD INSTALL .; fi
-  # - if ( [ $TYPE == "model" ] ); then  Rscript -e "tryCatch( source( '$SCRIPT' ) )"; fi
+  - |
+    cd $FOLDER
+    if ( [ $TYPE == "module" ] ); then  Rscript -e 'devtools::install_deps(".")'; fi  
+  - if ( [ $TYPE == "module" ] ); then  Rscript -e 'devtools::check(".")'; fi
+  - if ( [ $TYPE == "module" ] ); then  Rscript -e "tryCatch( source( '$SCRIPT' ) )"; fi
+  - if ( [ $TYPE == "module" ] ); then  R CMD INSTALL .; fi
+  - if ( [ $TYPE == "model" ] ); then  Rscript -e "tryCatch( source( '$SCRIPT' ) )"; fi
