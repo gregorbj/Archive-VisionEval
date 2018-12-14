@@ -5,6 +5,8 @@ r: 3.5
 sudo: true
 dist: trusty
 cache: packages
+git:
+  depth: 10
   
 # Be strict when checking our package
 warnings_are_errors: false
