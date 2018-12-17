@@ -8,7 +8,7 @@ library(ordinal)
 ##################################################
 
 #Load datastore from VETransportSupply package
-file.copy("../VETransportSupply/tests/Datastore.tar", "tests/Datastore.tar")
+file.copy("../VETransportSupply/tests/Datastore.tar", "tests/Datastore.tar", overwrite = TRUE)
 setwd("tests")
 untar("Datastore.tar")
 file.remove("Datastore.tar")

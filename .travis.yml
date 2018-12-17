@@ -5,6 +5,8 @@ r: 3.4
 sudo: true
 dist: trusty
 cache: packages
+git:
+  depth: 10
   
 # Be strict when checking our package
 warnings_are_errors: false
@@ -75,7 +77,7 @@ script:
       fi
     done
     
-    #run module or model tests
+    # run module or model tests
   - |
     cd $FOLDER
     if ( [ $TYPE == "module" ] ); then  Rscript -e 'devtools::install_deps(".")'; fi  

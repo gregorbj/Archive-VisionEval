@@ -31,7 +31,7 @@ for(Year in getYears()) {
   runModule("PredictIncome",                   "VESimHouseholds",       RunFor = "AllYears",    RunYear = Year)
   runModule("PredictHousing",                  "VELandUse",             RunFor = "AllYears",    RunYear = Year)
   runModule("LocateEmployment",                "VELandUse",             RunFor = "AllYears",    RunYear = Year)
-  runModule("AssignDevTypes",                  "VELandUse",             RunFor = "AllYears",    RunYear = Year)
+  runModule("AssignLocTypes",                  "VELandUse",             RunFor = "AllYears",    RunYear = Year)
   runModule("Calculate4DMeasures",             "VELandUse",             RunFor = "AllYears",    RunYear = Year)
   runModule("CalculateUrbanMixMeasure",        "VELandUse",             RunFor = "AllYears",    RunYear = Year)
   runModule("AssignParkingRestrictions",       "VELandUse",             RunFor = "AllYears",    RunYear = Year)

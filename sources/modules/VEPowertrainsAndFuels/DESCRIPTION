@@ -23,6 +23,7 @@ Imports:
     data.table
 Suggests:
     knitr
+Encoding: UTF-8
 VignetteBuilder: knitr
 RoxygenNote: 6.1.0.9000
 Collate: 

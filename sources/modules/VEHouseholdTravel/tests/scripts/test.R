@@ -9,7 +9,7 @@ library(pscl)
 ##################################################
 
 #Load datastore from VEHouseholdVehicles package
-file.copy("../VEHouseholdVehicles/tests/Datastore.tar", "tests/Datastore.tar")
+file.copy("../VEHouseholdVehicles/tests/Datastore.tar", "tests/Datastore.tar", overwrite = TRUE)
 setwd("tests")
 untar("Datastore.tar")
 file.remove("Datastore.tar")

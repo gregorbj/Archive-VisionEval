@@ -3,7 +3,7 @@ library(data.table)
 library(filesstrings)
 
 #Load datastore from VERoadPerformance package
-file.copy("../VEHouseholdTravel/tests/Datastore.tar", "tests/Datastore.tar")
+file.copy("../VEHouseholdTravel/tests/Datastore.tar", "tests/Datastore.tar", overwrite = TRUE)
 setwd("tests")
 untar("Datastore.tar")
 file.remove("Datastore.tar")
