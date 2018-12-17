@@ -1,32 +1,32 @@
 Test
 Test of VESimHouseholds package modules
-2018-04-23_07:44:37
+2018-11-23_12:09:15
 
-2018-04-23 07:44:37 : Testing DivertSovTravel. 
+2018-11-23 12:09:16 : Testing DivertSovTravel. 
 
-2018-04-23 07:44:37 : Attempting to load datastore. 
+2018-11-23 12:09:16 : Attempting to load datastore. 
 
-2018-04-23 07:44:37 : Datastore loaded. 
+2018-11-23 12:09:16 : Datastore loaded. 
 
-2018-04-23 07:44:37 : Attempting to load and check specifications. 
+2018-11-23 12:09:16 : Attempting to load and check specifications. 
 
-2018-04-23 07:44:37 : Module specifications successfully loaded and checked for errors. 
+2018-11-23 12:09:16 : Module specifications successfully loaded and checked for errors. 
 
-2018-04-23 07:44:37 : Attempting to process, check and load module inputs. 
+2018-11-23 12:09:16 : Attempting to process, check and load module inputs. 
 
-2018-04-23 07:44:37 : Module inputs successfully checked and loaded into datastore. 
+2018-11-23 12:09:16 : Module inputs successfully checked and loaded into datastore. 
 
-2018-04-23 07:44:37 : Checking whether datastore contains all datasets in Get specifications. 
+2018-11-23 12:09:17 : Checking whether datastore contains all datasets in Get specifications. 
 
-2018-04-23 07:44:37 : Datastore contains all datasets identified in module Get specifications. 
+2018-11-23 12:09:17 : Datastore contains all datasets identified in module Get specifications. 
 
-2018-04-23 07:44:37 : Running module and checking whether outputs meet Set specifications. 
+2018-11-23 12:09:17 : Running module and checking whether outputs meet Set specifications. 
 
-2018-04-23 07:44:37 : Also saving module outputs to datastore. 
+2018-11-23 12:09:17 : Also saving module outputs to datastore. 
 
-2018-04-23 07:44:41 : Module run successfully and outputs meet Set specifications. 
+2018-11-23 12:09:20 : Module run successfully and outputs meet Set specifications. 
 
-2018-04-23 07:44:41 : Module outputs saved to datastore. 
+2018-11-23 12:09:20 : Module outputs saved to datastore. 
 
-2018-04-23 07:44:41 : Congratulations. Module DivertSovTravel passed all tests. 
+2018-11-23 12:09:20 : Congratulations. Module DivertSovTravel passed all tests. 
 

@@ -100,8 +100,7 @@
 #' PrepFun: a function that prepares inputs to be applied in the linear model,
 #' OutFun: a function that transforms the result of applying the linear model.
 #' Summary: the summary of the linear model estimation results.
-#' @name estimateIncomeModel
-#' @import visioneval
+#' @import visioneval utils
 #' @include CreateEstimationDatasets.R CreateHouseholds.R PredictWorkers.R
 #' @export
 estimateIncomeModel <- function(Data_df, StartTerms_) {
@@ -552,7 +551,8 @@ PredictIncome <- function(L) {
     CheckTargetSearchRange = FALSE)
   #Predict income for persons in noninstitutional group quarters
   #-------------------------------------------------------------
-  if(any(IsGroupQuarters_)){
+  #Only run group quarters model if there is a group quarters population
+  if (sum(IsGroupQuarters_) > 0) {
     #Create data frame for group quarters persons
     Data_df <-
       data.frame(L$Year$Household)[IsGroupQuarters_,]

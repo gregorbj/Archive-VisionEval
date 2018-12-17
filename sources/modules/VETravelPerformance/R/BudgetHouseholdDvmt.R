@@ -216,13 +216,13 @@ BudgetHouseholdDvmtSpecifications <- list(
       ISELEMENTOF = ""
     ),
     item(
-      NAME = "DevType",
+      NAME = "LocType",
       TABLE = "Household",
       GROUP = "Year",
       TYPE = "character",
       UNITS = "category",
       PROHIBIT = "NA",
-      ISELEMENTOF = c("Urban", "Rural")
+      ISELEMENTOF = c("Urban", "Town", "Rural")
     ),
     item(
       NAME = "AveVehCostPM",
@@ -546,7 +546,7 @@ BudgetHouseholdDvmt <- function(L, M) {
     MinDvmt <- quantile(AdjDvmt_Hh, 0.01)
     AdjDvmt_Hh[AdjDvmt_Hh < MinDvmt] <- MinDvmt
     #Calculate adjusted urban and rural DVMT for the Marea
-    IsUbz_Hh <- L$Year$Household$DevType == "Urban"
+    IsUbz_Hh <- L$Year$Household$LocType == "Urban"
     UrbanDvmt <- sum(AdjDvmt_Hh[IsUbz_Hh])
     RuralDvmt <- sum(AdjDvmt_Hh[!IsUbz_Hh])
     #Return list of results

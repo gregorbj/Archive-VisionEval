@@ -31,16 +31,16 @@ household income group.
 }
 \details{
 This function calculates vehicle age distributions by household income group.
-It takes marginal distributions of vehicles by age and households by income
-group along with a seed matrix of the joint probability distribution of
-vehicles by age and income group, and then uses iterative proportional
+It takes marginal distributions of vehicles by age and vehicles by household
+income group along with a seed matrix of the joint probability distribution
+of vehicles by age and income group, and then uses iterative proportional
 fitting to adjust the joint probabilities to match the margins. The
 probabilities by income group are calculated from the fitted joint
 probability matrix. The seed matrix is the joint age and income distribution
 for autos or light trucks in the VehicleAgeModel_ls (AgeIncJointProp_AgIg).
 The age margin is the proportional distribution of vehicles by age calculated
-by adjusting the cumulative age distribution for autos or light trucks in
-the VehicleAgeModel_ls (AgeCDF_AgTy) to match a target mean age. The income
+by adjusting the cumulative age distribution for autos or light trucks in the
+VehicleAgeModel_ls (AgeCDF_AgTy) to match a target mean age. The income
 margin is the proportional distribution of vehicles by household income group
 ($0-20K, $20K-40K, $40K-60K, $60K-80K, $80K-100K, $100K or more) calculated
 from the modeled household values.

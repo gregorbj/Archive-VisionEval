@@ -342,13 +342,14 @@ PredictWorkers <- function(L) {
     NumPrsn_ <- L$Year$Household[[Ag[i]]]
     Probs_ <- PropHhWkr_HtAg[L$Year$Household$HhType, Ag[i]]
     if (!is.null(L$Year$Azone[[Re[i]]])) {
-      RelEmp <- L$Year$Azone[[Re[i]]]
+      RelEmp <-
+        L$Year$Azone[[Re[i]]][match(L$Year$Household$Azone, L$Year$Azone$Azone)]
     } else {
-      RelEmp <- 1
+      RelEmp <- rep(1, length(L$Year$Household$Azone))
     }
     DoPredict_ <- NumPrsn_ > 0 & Probs_ > 0
     Out_ls$Year$Household[[Wk[i]]][DoPredict_] <-
-      mapply(getNumWkr, NumPrsn_[DoPredict_], Probs_[DoPredict_] * RelEmp)
+      mapply(getNumWkr, NumPrsn_[DoPredict_], Probs_[DoPredict_] * RelEmp[DoPredict_])
     rm(NumPrsn_, Probs_, DoPredict_)
   }
   rm(i)

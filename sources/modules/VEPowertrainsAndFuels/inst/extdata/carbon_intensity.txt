@@ -1,0 +1,23 @@
+======================================
+Documentation for carbon_intensity.csv
+======================================
+
+This file includes values for the carbon intensity of motor vehicle fuels and electricity by fuel type. Note that the carbon intensity values may be well-to-wheels or tank-to-wheels estimates/forecasts. Well-to-wheels values include the carbon emissions to produce and transport the fuels as well as the emissions that result from using the fuels. Tank-to-wheels values only include the carbon emissions resulting from using the fuels. If the estimates are tank-to-wheels, the 'Electricity' values would be zero. RSPM models are almost always run with well-to-wheels values as this provides a more complete assessment of the effects of transportation decisions and provides a fairer assessment of the effects of electric vehicles which depends on the source of electric power. Well-to-wheels estimates are included in this table. If tank-to-wheels estimates are used instead, it is important that all other carbon intensity inputs be consistent. All carbon intensity values are measured in the units of grams of carbon dioxide equivalents per megajoule of energy content.
+
+File Structure
+--------------
+Each row is a decade year from 1990 to 2050. The range of years needs to be sufficient to encompass all model run years that are anticipated. 
+Column names as follows:
+Year: The year to which the data apply
+Gasoline: The carbon intensity of gasoline
+Diesel: The carbon intensity of diesel
+Cng: The carbon intensity of compressed natural gas
+Lng: The carbon intensity of liquified natural gas
+Ethanol: The carbon intensity of ethanol
+Biodiesel: The carbon intensity of biodiesel
+Rng: The carbon intensity of renewable natural gas (i.e. gas captured from land fills)
+Electricity: The carbon intensity of electricity generation and transportation to charging locations
+
+Source:
+-------
+These are demonstration data developed for the purpose of creating and testing modules. Data comes from various sources used to develop values for Oregon and other sources.

@@ -1,9 +1,23 @@
 #==================
 #AssignDevTypes.R
 #==================
-#This module assigns development types - Urban and Rural - to households based
-#on input values on the proportions of housing units that are within the
-#urban area by Bzone and housing type.
+#
+#<doc>
+#
+## AssignDevTypes Module
+#### November 6, 2018
+#
+#This module assigns households to development types: Urban (located within an urbanized area boundary) and Rural (located outside of an urbanized area boundary).
+#
+### Model Parameter Estimation
+#
+#This module has no parameters. Households are assigned to development types based on input assumptions on the proportions of housing units that are urban by Bzone and housing type.
+#
+### How the Module Works
+#
+#The user specifies the proportion of housing units that are *Urban* (located within an urbanized area boundary) by housing type (SF, MF, GQ) and Bzone. Each household is randomly assigned as *Urban* or *Rural* based on its housing type and Bzone and the urban/rural proportions of housing units of that housing type in that Bzone.
+#
+#</doc>
 
 
 #=================================
@@ -376,9 +390,13 @@ AssignDevTypes <- function(L) {
   Out_ls
 }
 
-#================================
-#Code to aid development and test
-#================================
+#===============================================================
+#SECTION 4: MODULE DOCUMENTATION AND AUXILLIARY DEVELOPMENT CODE
+#===============================================================
+#Run module automatic documentation
+#----------------------------------
+documentModule("AssignDevTypes")
+
 #Test code to check specifications, loading inputs, and whether datastore
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions

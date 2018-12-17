@@ -2,7 +2,7 @@ Package: VESimHouseholds
 Type: Package
 Title: Create Simulated Households with Attributes for VE
 Version: 0.9
-Date: 10/22/17
+Date: 11/05/17
 Author: Brian Gregor [aut, cre],
 Maintainer: Brian Gregor <gregorb@or-analytics.com>
 Copyright: AASHTO
@@ -18,7 +18,7 @@ Depends: R (>= 3.1.0)
 Imports:
     visioneval,
     devtools,
-	usethis
+    usethis
 Suggests:
     knitr,
     rmarkdown

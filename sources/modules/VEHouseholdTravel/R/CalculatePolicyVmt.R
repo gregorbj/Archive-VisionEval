@@ -4,7 +4,7 @@
 #This module models adjusts the VMT for the policies entered for the scenario.
 #The outputs form this module contains 'Policy' as the suffix in their names.
 
-library(visioneval)
+# library(visioneval)
 
 #=============================================
 #SECTION 1: ESTIMATE AND SAVE MODEL PARAMETERS
@@ -1327,6 +1327,8 @@ usethis::use_data(CalculatePolicyVmtSpecifications, overwrite = TRUE)
 #' calculate light vehicle ownership.
 #' @param LtVehOwnModels_ A list of light vehicle ownership models.
 #' @param Type A string indicating the region type. ("Metro": Default, or "NonMetro")
+#' @param TargetProp A numeric indicating the target light vehicle ownership rate (
+#' average ratio of light vehicles to driver age population)
 #' @return An array of integers representing the number of light vehicles for each
 #' household.
 predictLightVehicles <- function( Data_, LtVehOwnModels_, Type, TargetProp=NA ) {
@@ -1506,6 +1508,7 @@ calcAveSovProp <- function( Data__, AveSovPropModels_, Threshold ) {
 #' @param Threshold A numeric (miles) for which SOV model should be used
 #' @param PropSuitable A numeric (proportion) indication the proportion of total DVMT
 #' accounted by light vehicles
+#' @param Sharing A logical indicating whether to adjust for car sharing.
 #' @return A numeric representing the light vehicles DVMT for each household
 calcLtVehDvmt <- function( Data_, AveSovPropModels_, Threshold, PropSuitable, Sharing=FALSE ) {
 

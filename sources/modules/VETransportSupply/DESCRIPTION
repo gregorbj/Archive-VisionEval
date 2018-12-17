@@ -1,8 +1,8 @@
 Package: VETransportSupply
 Type: Package
 Title: Create Transportation System Attributes for VE
-Version: 0.7
-Date: 4/08/2018
+Version: 0.75
+Date: 11/05/2018
 Author: Brian Gregor [aut, cre], Aditya Gore <aditya.gore@rsginc.com> [cre]
 Maintainer: Brian Gregor <gregorb@or-analytics.com>, Aditya Gore <aditya.gore@rsginc.com>
 Copyright: AASHTO
@@ -18,7 +18,7 @@ Depends: R (>= 3.1.0)
 Imports:
     visioneval,
     devtools,
-	usethis
+    usethis
 Suggests:
     knitr
 VignetteBuilder: knitr

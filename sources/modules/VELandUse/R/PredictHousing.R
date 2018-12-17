@@ -1,12 +1,43 @@
 #================
 #PredictHousing.R
 #================
-#This module assigns a housing type, either single family (SF) or multifamily
-#(MF) to regular households and group quarters (GQ) to non-institutional
-#group quarters persons. In addition, it assigns each household to a Bzone
-#based on the household's housing type and income quartile as well as the
-#supply of housing by type and Bzone (an input) and the distribution of
-#households by income quartile for each Bzone (an input).
+
+#<doc>
+#
+## PredictHousing Module
+#### November 6, 2018
+#
+#This module assigns a housing type, either single-family (SF) or multifamily (MF) to *regular* households based on the respective supplies of SF and MF dwelling units in the housing market to which the household is assigned (i.e. the Azone the household is assigned to) and on household characteristics. It then assigns each household to a Bzone based on the household's housing type and income quartile as well as the supply of housing by type and Bzone (an input) and the distribution of households by income quartile for each Bzone (an input). The module assigns non-institutional group quarters *households* to Bzones based on the supply of group quarters units by Bzone.
+#
+### Model Parameter Estimation
+#
+#A binomial logit model is used to assign housing types to households. The model is estimated using a Census Public Use Microsample (PUMS) dataset (Hh_df) that is prepared by the *CreateEstimationDatasets.R* script in the *VESimHouseholds* package. For more information on the preparation of the *Hh_df* dataset and how to substitute regional data for the default package data, refer to the documentation in the *CreateEstimationDatasets.R* script. The binomial logit model predicts the likelihood that a household will reside in a single-family dwelling as a function of the age group of the head of the household, the ratio of the natural log of the household income to the natural log of the mean household income (log income ratio), the household size, and the interaction of the log income ratio and household size. The age group of the head of household is the oldest age group in the household. The summary statistics for this model are as follows:
+#
+#<txt:HouseTypeModel_ls$Summary>
+#
+#The results of applying the binomial logit model are constrained to match the housing *choice* proportions with the dwelling unit proportions by successively adjusting the intercept of the model using a binary search algorithm.
+#
+### How the Module Works
+#
+#The module carries out the following series of calculations to assign a housing type (SF or MF) to each *regular* household and to assign each household to a Bzone location.
+#
+#1) The proportions of SF and MF dwelling units in the Azone are calculated.
+#
+#2) The binomial logit is applied to each household in the Azone to determine the household's housing type. The model is applied multiple times using a binary search algorithm to successively adjust the model intercept until the housing type *choice* proportions equal the housing unit proportions in the Azone.
+#
+#3) The income quartile of each household in the Azone is calculated and a tabulation of households by income quartile and housing type is made.
+#
+#4) A matrix of the number of housing units by Bzone and housing type is created from the user inputs (e.g. resulting from a land use model or other allocation process). Because the number of housing units may not equal the number of households, the number of units by type and Bzone are adjusted so that the total number by type equals the number of households by housing type.
+#
+#5) A matrix of the proportions of households by income quartile and Bzone is created from the user inputs (e.g. resulting from Census tabulation with adjustments as deemed appropriate) and the tabulation of housing units by Bzone.
+#
+#6) An iterative proportional fitting (IPF) process is used to balance the number of housing units over 3 dimensions: Bzone, unit type, and income quartile. Two matrixes are used as margin control totals for the balancing process. The first is the matrix of demand by housing type and income quartile (step #3). The second is a matrix of units by Bzone and housing type (step #4). The seed matrix for the IPF uses the matrix of household proportions by Bzone and income quartile. The IPF is constrained to produce whole numbers.
+#
+#7) After the number of housing units is allocated to each Bzone, housing type, and income quartile, households are allocated to Bzones to fill those units. This is done by iterating through each housing type and income quartile combination and doing the following: Extracting a vector of units by Bzone for the type and quartile combination;  Using the vector as replication weights to replicate the Bzone names; Randomizing the Bzone name vector; Assigning the randomized Bzone name vector to households matching the type and quartile combination.
+
+#Non-institutionalized group-quarters *households* are assigned randomly to Bzones based on the number of group-quarters *housing units* in each Bzone.
+#
+#</doc>
 
 
 
@@ -23,6 +54,7 @@
 #This model predicts housing (single family or multifamily) for households
 #based on the supply of housing of each type and the demographic and
 #income characteristics of the household.
+
 
 #Define a function to estimate housing choice model
 #--------------------------------------------------
@@ -45,6 +77,7 @@
 #' OutFun: a function that transforms the result of applying the binomial model.
 #' Summary: the summary of the binomial model estimation results.
 #' @import visioneval stats
+#' @importFrom utils capture.output
 #Define function to estimate the income model
 estimateHousingModel <- function(Data_df, StartTerms_) {
   #Define function to prepare inputs for estimating model
@@ -103,7 +136,7 @@ estimateHousingModel <- function(Data_df, StartTerms_) {
     Formula = makeModelFormulaString(HouseTypeModel),
     Choices = c("SF", "MF"),
     PrepFun = prepIndepVar,
-    Summary = summary(HouseTypeModel)
+    Summary = capture.output(summary(HouseTypeModel))
   )
 }
 
@@ -878,9 +911,13 @@ PredictHousing <- function(L) {
 }
 
 
-#================================
-#Code to aid development and test
-#================================
+#===============================================================
+#SECTION 4: MODULE DOCUMENTATION AND AUXILLIARY DEVELOPMENT CODE
+#===============================================================
+#Run module automatic documentation
+#----------------------------------
+documentModule("PredictHousing")
+
 #Test code to check specifications, loading inputs, and whether datastore
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions

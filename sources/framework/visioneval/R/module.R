@@ -1649,6 +1649,19 @@ documentModule <- function(ModuleName){
   #-------------------------------------------------------------------
   #Define function to process specifications
   processModuleSpecs <- function(Spec_ls) {
+    #Define a function to expand a specification having multiple NAMEs
+    expandSpec <- function(SpecToExpand_ls, ComponentName) {
+      Names_ <- unlist(SpecToExpand_ls$NAME)
+      Descriptions_ <- unlist(SpecToExpand_ls$DESCRIPTION)
+      Expanded_ls <- list()
+      for (i in 1:length(Names_)) {
+        Temp_ls <- SpecToExpand_ls
+        Temp_ls$NAME <- Names_[i]
+        Temp_ls$DESCRIPTION <- Descriptions_[i]
+        Expanded_ls <- c(Expanded_ls, list(Temp_ls))
+      }
+      Expanded_ls
+    }
     #Define a function to process a component of a specifications list
     processComponent <- function(Component_ls, ComponentName) {
       Result_ls <- list()
@@ -1685,8 +1698,12 @@ documentModule <- function(ModuleName){
   loadSpecs <- function(ModuleName) {
     ModuleSpecs <- paste0(ModuleName, "Specifications")
     ModuleSpecsFile <- paste0("data/", ModuleSpecs, ".rda")
-    load(ModuleSpecsFile)
-    eval(parse(text = ModuleSpecs))
+    if (file.exists(ModuleSpecsFile)) {
+      load(ModuleSpecsFile)
+      eval(parse(text = ModuleSpecs))
+    } else {
+      list()
+    }
   }
   #Define function to creates a data frame from specifications Inp, Get, or Set
   makeSpecsTable <- function(ModuleName, Component, SpecNames_) {
@@ -1834,11 +1851,16 @@ documentModule <- function(ModuleName){
           UNLIKELY = "",
           DESCRIPTION = GeoYearDescription
         )
+        InpMarkdown_ <- c(
+          InpMarkdown_,
+          kable(rbind(Geo_df, SpecsTable_df))
+        )
+      } else {
+        InpMarkdown_ <- c(
+          InpMarkdown_,
+          kable(SpecsTable_df)
+        )
       }
-      InpMarkdown_ <- c(
-        InpMarkdown_,
-        kable(rbind(Geo_df, SpecsTable_df))
-      )
     }
   } else {
     InpMarkdown_ <- c(

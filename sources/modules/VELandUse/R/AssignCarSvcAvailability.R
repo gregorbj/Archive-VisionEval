@@ -1,22 +1,23 @@
 #==========================
 #AssignCarSvcAvailability.R
 #==========================
-#This module reads in and assigns car service availability in Bzones. Car
-#services include taxis (with human drivers or under automated control) and car
-#sharing services (e.g. Car-To-Go, Zipcar), and future automated taxi services.
-#A user input file identifies which Bzones have high or low levels of service. A
-#high car service level is one that has access times that are competitive with
-#private car use. This means that the time it takes for a taxi service to pick
-#up a passenger or that time it takes to get to a car share car is not much
-#longer than the time to get to and from a vehicle owned by a household,
-#especially when considering that a car service may be able to drop off the
-#passengers at the destination, or may have preferential parking, thus avoiding
-#time to park a private vehicle and walk to the destination. High level of car
-#service is considered to increase household car availability and affects the
-#amount of household DVMT. Low level car service does not have competitive
-#access time and is not considered as increasing household car availability. Low
-#level car service characteristics determine what a household living in an area
-#with low level service will pay for their vehicle travel.
+#
+#<doc>
+#
+## AssignCarSvcAvailability Module
+#### November 6, 2018
+#
+#This module reads in and assigns car service availability in Bzones. Car services include taxis, car sharing services (e.g. Car-To-Go, Zipcar), and future automated taxi services. A user input file identifies which Bzones have high or low levels of service. A high car service level is one that has access times that are competitive with private car use. This means that the time it takes for a taxi service to pick up a passenger or that time it takes to get to a car share car is not much longer than the time to get to and from a vehicle owned by a household, especially when considering that a car service may be able to drop off the passengers at the destination, or may have preferential parking, thus avoiding time to park a private vehicle and walk to the destination. High level of car service is considered to increase household car availability similar to owning a car. Low level car service does not have competitive access time and is not considered as increasing household car availability.
+#
+### Model Parameter Estimation
+#
+#This module has no model parameters.
+#
+### How the Module Works
+#
+#The user specifies the level of car service availability (Low or High) by Bzone. The module assigns that level to each household based on the Bzone the household resides in.
+#
+#</doc>
 
 
 #=================================
@@ -168,9 +169,13 @@ AssignCarSvcAvailability <- function(L) {
   Out_ls
 }
 
-#================================
-#Code to aid development and test
-#================================
+#===============================================================
+#SECTION 4: MODULE DOCUMENTATION AND AUXILLIARY DEVELOPMENT CODE
+#===============================================================
+#Run module automatic documentation
+#----------------------------------
+documentModule("AssignCarSvcAvailability")
+
 #Test code to check specifications, loading inputs, and whether datastore
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions

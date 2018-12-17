@@ -1,9 +1,31 @@
 #===============
 #AssignDrivers.R
 #===============
-# This module assigns drivers by age group to each household as a function of
-# the numbers of persons and workers by age group, the household income, land
-# use characteristics, and public transit availability.
+#
+#<doc>
+#
+## AssignDrivers Module
+#### September 6, 2018
+#
+#This module assigns drivers by age group to each household as a function of the numbers of persons and workers by age group, the household income, land use characteristics, and public transit availability. Users may specify the relative driver licensing rate relative to the model estimation data year in order to account for observed or projected changes in licensing rates.
+#
+### Model Parameter Estimation
+#
+#Binary logit models are estimated to predict the probability that a person has a drivers license. Two versions of the model are estimated, one for persons in a metropolitan (i.e. urbanized) area, and another for persons located in non-metropolitan areas. There are different versions because the estimation data have more information about transportation system and land use characteristics for households located in urbanized areas. In both versions, the probability that a person has a drivers license is a function of the age group of the person, whether the person is a worker, the number of persons in the household, the income and squared income of the household, whether the household lives in a single-family dwelling, and the population density of the Bzone where the person lives. In the metropolitan area model, the bus-equivalent transit revenue miles and whether the household resides in an urban mixed-use neighborhood are significant factors. Following are the summary statistics for the metropolitan model:
+#
+#<txt:DriverModel_ls$Metro$Summary>
+#
+#Following are the summary statistics for the non-metropolitan model:
+#
+#<txt:DriverModel_ls$NonMetro$Summary>
+#
+#The models are estimated using the *Hh_df* (household) and *Per_df* (person) datasets in the VE2001NHTS package. Information about these datasets and how they were developed from the 2001 National Household Travel Survey public use dataset is included in that package.
+#
+### How the Module Works
+#
+#The module iterates through each age group excluding the 0-14 year age group and creates a temporary set of person records for households in the region. For each household there are as many person records as there are persons in the age group in the household. A worker status attribute is added to each record based on the number of workers in the age group in the household. For example, if a household has 2 persons and 1 worker in the 20-29 year age group, one of the records would have its worker status attribute equal to 1 and the other would have its worker status attribute equal to 0. The person records are also populated with the household characteristics used in the model. The binomial logit model is applied to the person records to determine the probability that each person is a driver. The driver status of each person is determined by random draws with the modeled probability determining the likelihood that the person is determined to be a driver. The resulting number of drivers in the age group is then tabulated by household.
+#
+#</doc>
 
 
 #=================================
@@ -17,35 +39,10 @@
 #SECTION 1: ESTIMATE AND SAVE MODEL PARAMETERS
 #=============================================
 #
+#' @importFrom utils capture.output
+#
 #Define a function to estimate driver choice model
 #-------------------------------------------------
-#' Estimate housing choice model
-#'
-#' \code{estimateDriverModel} estimates a binomial logit model for choosing
-#' between driver and non-driver
-#'
-#' This function estimates a binomial logit model for predicting whether a
-#' person is a driver or a non-driver
-#'
-#' @param Data_df A data frame containing estimation data.
-#' @param StartTerms_ A character vector of the terms of the model to be
-#' tested in the model.
-#' @param ValidationProp A numeric value between 0 and 0.5 which specified
-#' the proportion of Data_df that will be the validation dataset. The remainder
-#' will be the training dataset.
-#' @return A list which has the following components:
-#' Type: a string identifying the type of model ("binomial"),
-#' Formula: a string representation of the model equation,
-#' PrepFun: a function that prepares inputs to be applied in the binomial model,
-#' OutFun: a function that transforms the result of applying the binomial model.
-#' Summary: the summary of the binomial model estimation results.
-#' Anova: the results of analysis of variance of the model.
-#' PropCorrectlyPredicted: the proportion of validation set observed values that
-#' are correctly predicted by the estimated. The model is estimated using 80% of
-#' the data and validated using the remaining 20%. The proportion of correct
-#' predictions for the validation data set is calculated.
-#' @import visioneval stats
-#Define function to estimate the income model
 estimateDriverModel <- function(Data_df, StartTerms_, ValidationProp) {
   #Define function to prepare inputs for estimating model
   prepIndepVar <-
@@ -91,7 +88,7 @@ estimateDriverModel <- function(Data_df, StartTerms_, ValidationProp) {
     Formula = makeModelFormulaString(DriverModel),
     Choices = c(1, 0),
     PrepFun = prepIndepVar,
-    Summary = summary(DriverModel),
+    Summary = capture.output(summary(DriverModel)),
     Anova = anova(DriverModel, test = "Chisq"),
     PropCorrectlyPredicted = sum(diag(Compare_tbl)) / sum(Compare_tbl)
   )
@@ -384,13 +381,13 @@ AssignDriversSpecifications <- list(
       ISELEMENTOF = c(0, 1)
     ),
     item(
-      NAME = "DevType",
+      NAME = "LocType",
       TABLE = "Household",
       GROUP = "Year",
       TYPE = "character",
       UNITS = "category",
-      PROHIBITED = "NA",
-      ISELEMENTOF = c("Urban", "Rural")
+      PROHIBIT = "NA",
+      ISELEMENTOF = c("Urban", "Town", "Rural")
     )
   ),
   #Specify data to saved in the data store
@@ -538,7 +535,7 @@ AssignDrivers <- function(L) {
       L$Year$Household[[AttrName]][match(Per_df$HhId, L$Year$Household$HhId)]
     }
     AttrNames_ <-
-      c("HhSize", "Income", "HouseType", "IsUrbanMixNbrhd", "DevType", "Bzone", "Marea")
+      c("HhSize", "Income", "HouseType", "IsUrbanMixNbrhd", "LocType", "Bzone", "Marea")
     for (AttrName in AttrNames_) {
       Per_df[[AttrName]] <- getHhAttribute(AttrName)
     }
@@ -565,7 +562,7 @@ AssignDrivers <- function(L) {
       DrvAdjProp <- 1
     }
     # Run metropolitan model
-    MetroPer_df <- Per_df[Per_df$DevType == "Urban",]
+    MetroPer_df <- Per_df[Per_df$LocType == "Urban",]
     Driver_ <- applyBinomialModel(
       DriverModel_ls$Metro,
       MetroPer_df
@@ -583,7 +580,7 @@ AssignDrivers <- function(L) {
     Out_ls$Year$Household[[BinName]][HhIdx] <- unname(NumDrivers_Hh)
     rm(MetroPer_df, Driver_, NumDrivers_Hh, HhIdx)
     # Run nonmetropolitan model
-    NonMetroPer_df <- Per_df[Per_df$DevType != "Urban",]
+    NonMetroPer_df <- Per_df[Per_df$LocType != "Urban",]
     Driver_ <- applyBinomialModel(
       DriverModel_ls$NonMetro,
       NonMetroPer_df
@@ -618,9 +615,13 @@ AssignDrivers <- function(L) {
 }
 
 
-#================================
-#Code to aid development and test
-#================================
+#===============================================================
+#SECTION 4: MODULE DOCUMENTATION AND AUXILLIARY DEVELOPMENT CODE
+#===============================================================
+#Run module automatic documentation
+#----------------------------------
+documentModule("AssignDrivers")
+
 #Test code to check specifications, loading inputs, and whether datastore
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions

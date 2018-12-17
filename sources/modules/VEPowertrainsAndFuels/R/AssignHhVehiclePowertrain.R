@@ -1,64 +1,102 @@
-#=========================
-#AssignVehiclePowertrain.R
-#=========================
-#This module assigns powertrain types to household vehicles. The powertrain
-#types are internal combustion engine vehicle (ICEV), hybrid electric vehicle
-#(HEV), plug-in hybrid electric vehicle (PHEV), and battery electric vehicles
-#(BEV). Assignment of powertrains is done by vehicle type (Auto, LtTrk) and
-#model year. For each type and model year, vehicles of that type and model
-#year are assigned powertrains in the order of BEV, PHEV, HEV, and ICEV. The
-#assignment of BEV is conditional on the whether the 95th percentile DVMT for
-#the vehicle is within the battery range of the vehicle and whether charging the
-#vehicle is possible at the residence. Charging possibilities are determined by
-#household based on the housing type and charging availability by housing type
-#by azone in the azone_charging_availability.csv input file. Charging
-#availability is specified as a proportion of housing units that have chargers
-#or could have chargers installed. It is assumed that if charging is available
-#for a household, then all vehicles in the household have charging available. If
-#there are not enough qualifying vehicles to match the charging and battery
-#range assumptions, then the number of BEVs that can't be assigned are
-#designated as PHEVs. The range criterion is not used in assigning PHEVs, but
-#the charging criterion is. The PHEV designation is only assigned to vehicles
-#where residential charging is available. If there are not enough qualifying
-#vehicles, then the number of PHEVs that can't be assigned to a vehicle are
-#designated as HEVs. There are no qualifications for HEVs and ICEVs and their
-#numbers are assigned randomly to vehicles that have no assignment. Vehicle DVMT
-#is a consideration for determining qualification for BEVs and for determining
-#the proportion of the travel of PHEVs that is powered by electricity, however
-#DVMT has not yet been assigned to vehicles at the time when this module is run
-#because the assignment of DVMT depends on the availability of unit costs (i.e.
-#cost per mile) and that depends on the fuel economy, power efficiency, and
-#GHG emissions of each vehicle. What is done to get vehicle DVMT in this module
-#is to take total household DVMT and divide it equally among all vehicles owned
-#by the household. Given the powertrain designations, vehicle DVMT, and several
-#other inputs, the module computes the MPG and MPKWH of each vehicle and adjusts
-#it for ecodriving, speed smoothing, and congestion effects. It also computes
-#GHG emissions per mile. The module also computes these quantities for car
-#service vehicles assigned to each household.
+#===========================
+#AssignHhVehiclePowertrain.R
+#===========================
+#
+#<doc>
+#
+## AssignHhVehiclePowertrain Module
+#### November 24, 2018
+#
+#This module assigns a powertrain type to each household vehicle. The powertrain types are internal combustion engine vehicle (ICEV), hybrid electric vehicle (HEV), plug-in hybrid electric vehicle (PHEV), and battery electric vehicles (BEV). The module also assigns related characteristics to household vehicles including:
+#
+#* Battery range (for PHEV and BEV)
+#
+#* Miles per gallon (MPG) and gallons per mile (GPM)
+#
+#* Miles per kilowatt-hour (MPKWH) and kilowatt-hours per mile (KWHPM)
+#
+#* Miles per gasoline gallon equivalent (MPGe)
+#
+#* The proportion of DVMT powered by electricity
+#
+#* Carbon dioxide equivalent emissions per mile powered by hydrocarbon fuel
+#
+#* Carbon dioxide equivalent emissions per mile powered by electricity
+#
+### Model Parameter Estimation
+#
+#Most of the module calculations require no estimated models. The procedures for these calculations are described in the next section. However, models are estimated to calculate the proportions of PHEV vehicle travel powered by electricity vs. fuel. Those proportions will vary depending on the day-to-day travel patterns of households. A household which travels short distances on most days may power most of their travel by their battery which is charged up overnight.
+#
+#The model to calculate the proportion of PHEV travel powered by electricity assumes that a PHEV will be fully charged once per day and that the vehicle will be powered by electricity up to the specified battery range. Travel exceeding the battery range will be powered by fuel. It is also assumed that travel will vary from day to day so that the proportion of travel powered by electricity will not be the ratio of the battery range and average daily vehicle miles of travel (DVMT). For example, if a household has a PHEV whose battery range is greater than the average DVMT for the vehicle, not all of the vehicle travel will be powered by electricity because there will be some days when the vehicle is driven beyond the vehicle's battery range.
+#
+#To estimate the proportion of a PHEV travel powered by electricity, it is assumed that the variation in the vehicle's DVMT is the same as the variation in household DVMT as simulated by the CalculateHouseholdDvmt module in the VEHouseholdTravel package. That module includes polynomial regression models for calculating DVMT percentiles (from 5% to 95% at 5% intervals) as a function of the average household DVMT. There are separate models for metropolitan and non-metropolitan households.
+#
+#The estimated models take the form of lookup tables which calculate the proportion of travel powered by electricity for combinations of average DVMT and battery range. The average DVMT values range from 5 to 200 miles in 5 mile increments. The battery range values range from 5 to 150 miles in 5 mile increments. Two such lookup tables are created, one for metropolitan households (those residing in an urbanized area) and non-metropolitan households (those residing outside of an urbanized area). For each location type (metropolitan vs. non-metropolitan) and each combination of DVMT and battery range, the DVMT percentile models for the location type are run. These are the percentile models estimated and included in the CalculateHouseholdDvmt module. Running the DVMT percentile models produces the DVMT at different percentiles from the 5th percentile to the 95th percentile in 5% increments and the 99th percentile. A smooth spline curve is fitted to these values to cover all percentiles from 0 to 100. The percentile corresponding to the battery range is predicted using the smooth spline curve relationship. Then the DVMT traveled below the battery range and DVMT traveled above the battery range is calculated from integrating the smooth spline curve using the battery range percentile threshold. The DVMT powered by electricity is then calculated as follows:
+#
+#  ElecDvmt = DvmtBelow + Range * (100 - RangePctl)
+#
+#  Where:
+#
+#  * ElecDvmt is the DVMT powered by electricity
+#
+#  * DvmtBelow is the sum of DVMT below the range percentile described above
+#
+#  * Range is the battery range
+#
+#  * RangePctl is the battery range percentile described above
+#
+#Once the DVMT powered by electricity is calculated, the proportion of DVMT powered by electricity is calculated as follows:
+#
+#  ElecProp = ElecDvmt / (DvmtBelow + DvmtAbove)
+#
+#  Where:
+#
+#  * ElecDvmt is as described above
+#
+#  * DvmtBelow + DvmtAbove is the sum of all DVMT below and above the battery range percentile
+#
+#These calculations are done for every combination of DVMT and battery range for metropolitan and non-metropolitan households to produce a metropolitan lookup table and a non-metropolitan lookup table. The values in the tables are smoothed using smooth splines; first by smoothing the values in the columns (battery range) and then smoothing the values in rows (average DVMT). The following figures illustrate the relationships of electrically-powered DVMT, average DVMT, and battery range for metropolitan and non-metropolitan household vehicles.
+#
+#<fig:metro_phev_elec_prop.png>
+#
+#<fig:non-metro_phev_elec_prop.png>
+#
+### How the Module Works
+#
+#Assignment of powertrains is done by vehicle type (Auto, LtTrk) and model year. For each type and model year, vehicles of that type and model year are assigned powertrains in the order of BEV, PHEV, HEV, and ICEV.
+#
+#The assignment of BEVs is conditional on the whether the 95th percentile DVMT for the vehicle is within the battery range of the vehicle and whether charging the vehicle is possible at the residence. The battery range of the vehicle is determined by the age and type of vehicle. Battery range is a BEV powertrain characteristic as described in the documentation for `PowertrainFuelDefaults_ls`. Charging possibilities are determined by household based on the housing type and charging availability by housing type by azone in the `azone_charging_availability.csv` input file. Charging availability is specified as a proportion of housing units that have chargers or could have chargers installed. Households are randomly selected based on the input proportions. It is assumed that if charging is available for a household, then all vehicles in the household have charging available. If there are not enough qualifying vehicles to match the charging and battery range assumptions, then the number of BEVs that can't be assigned are designated as PHEVs. The range criterion is not used in assigning PHEVs, but the charging criterion is. The PHEV designation is only assigned to vehicles where residential charging is available. If there are not enough qualifying vehicles, then the number of PHEVs that can't be assigned to a vehicle are designated as HEVs. There are no qualifications for HEVs and ICEVs and their numbers are assigned randomly to vehicles that have no assignment.
+#
+#The vehicle MPG (GPM) and MPKWH (KWHPM) characteristics are determined by the vehicle powertrain, vehicle age, and vehicle type by looking up the corresponding values in the household powertrain table.
+#
+#The proportion of DVMT powered by electricity is either 1 for BEVs or 0 for ICEVs and HEVs. To calculate the proportion for PHEVs, it is assumed that household DVMT is split equally among household vehicles. Then the proportion is determined from the estimated lookup table using the vehicle DVMT and battery range.
+#
+#Carbon dioxide equivalent emissions per mile from fuel are calculated by converting the gallons per mile (GPM) which are in gasoline gallon equivalents to megajoules per mile and multiplying by the average carbon intensity for the vehicle type. Carbon dioxide equivalent emissions per mile from electricity are calculated similarly by converting kilowatts to megajoules.
+#
+#</doc>
 
 
 #=================================
 #Packages used in code development
 #=================================
 #Uncomment following lines during code development. Recomment when done.
-library(visioneval)
+# library(visioneval)
 
 
 #=============================================
 #SECTION 1: ESTIMATE AND SAVE MODEL PARAMETERS
 #=============================================
-#The MPG and MPkWh of household vehicles by looking up values from tables in
-#the PowertrainFuelDefaults_ls created by the LoadDefaultValues module, and
-#adjusting those values for the effects of travel speed. Carbon emissions rates
-#are calculated based on the MPG or MPkWh of the vehicle and the average carbon
-#intensity of fuel or electricity. The situation is more complicated for PHEVs
-#because they comsume both fuel and electricity and the proportion of travel
-#powered by each will differ depending on how much travel is powered by fuel
-#vs electricity. A model is estimated to calculate those proportions.
+#The MPG (GPM) and MPKWH (KWHPM) of household vehicles by looking up values from
+#tables in the PowertrainFuelDefaults_ls created by the LoadDefaultValues module
+#. Carbon emissions rates are calculated based on the MPG or MPkWh of the
+#vehicle and the average carbon intensity of fuel or electricity. The situation
+#is more complicated for PHEVs because they comsume both fuel and electricity
+#and the proportion of travel powered by each will differ depending on
+#day-to-day household travel patterns. A model is estimated to calculate those
+#proportions.
 
 #Load PowertrainFuelDefaults_ls to make it available as a global variable
 load("./data/PowertrainFuelDefaults_ls.rda")
-
 
 #-------------------------------------------------------
 #Model proportions of PHEV travel powered by electricity
@@ -127,6 +165,7 @@ Rg <- seq(5, 150, 5)
 smoothLookup <- function(ElecProp_VmRg) {
   for (i in 1:length(Rg)) {
     Props_Vm <- ElecProp_VmRg[,i]
+    if (any(Props_Vm == 1)) Props_Vm[1] <- 1
     SS <- smooth.spline(Vm, Props_Vm, df = 4)
     ElecProp_VmRg[,i] <- predict(SS, Vm)$y
   }
@@ -157,6 +196,32 @@ ElecProp_VmRg <- sapply(Rg, function(x) {
 })
 PhevElecProp_ls$NonMetro_VmRg <- smoothLookup(ElecProp_VmRg)
 rm(ElecProp_VmRg)
+#Plot metropolitan lookup for documentation
+png("data/metro_phev_elec_prop.png", width = 500, height = 500)
+Col_ <- rainbow(40)[1:30]
+matplot(PhevElecProp_ls$Metro_VmRg, type = "l", lty = 1, col = Col_,
+        axes = FALSE, ylab = "Proportion of DVMT Powered by Electricity",
+        xlab = "Average Daily Vehicle Miles Traveled",
+        main = "Metropolitan Electrically Powered DVMT Proportion")
+box()
+axis(2, at = seq(0, 1, 0.1))
+axis(1, at = seq(0, 40, 10), labels = 5 * seq(0, 40, 10))
+legend("topright", legend = c("5-mile range", "150-mile range"), lty = 1,
+       col = Col_[c(1,30)], bty = "n")
+dev.off()
+#Plot non-metropolitan lookup for documentation
+png("data/non-metro_phev_elec_prop.png", width = 500, height = 500)
+Col_ <- rainbow(40)[1:30]
+matplot(PhevElecProp_ls$NonMetro_VmRg, type = "l", lty = 1, col = Col_,
+        axes = FALSE, ylab = "Proportion of DVMT Powered by Electricity",
+        xlab = "Average Daily Vehicle Miles Traveled",
+        main = "Non-metropolitan Electrically Powered DVMT Proportion")
+box()
+axis(2, at = seq(0, 1, 0.1))
+axis(1, at = seq(0, 40, 10), labels = 5 * seq(0, 40, 10))
+legend("topright", legend = c("5-mile range", "150-mile range"), lty = 1,
+       col = Col_[c(1,30)], bty = "n")
+dev.off()
 #Define function to look up an electric proportion from DVMT and range values
 PhevElecProp_ls$getElecProp <-
   function(Dvmt, Range, MareaType, Prop_ls = PhevElecProp_ls) {
@@ -314,13 +379,13 @@ AssignHhVehiclePowertrainSpecifications <- list(
       ISELEMENTOF = ""
     ),
     item(
-      NAME = "DevType",
+      NAME = "LocType",
       TABLE = "Household",
       GROUP = "Year",
       TYPE = "character",
       UNITS = "category",
       PROHIBIT = "NA",
-      ISELEMENTOF = c("Urban", "Rural")
+      ISELEMENTOF = c("Urban", "Town", "Rural")
     ),
     item(
       NAME = items(
@@ -769,7 +834,7 @@ AssignHhVehiclePowertrain <- function(L, M) {
   #-------------------------------------------------
   ElecDvmtProp_Ve <- local({
     IsPhev_Ve <- Powertrain_Ve == "PHEV"
-    IsMetro_Ve <- L$Year$Household$DevType[HhToVehIdx_Ve] == "Urban"
+    IsMetro_Ve <- L$Year$Household$LocType[HhToVehIdx_Ve] == "Urban"
     ElecDvmtProp_Ve <- numeric(NumVeh)
     if (sum((IsPhev_Ve & IsMetro_Ve) >= 1)) {
       ElecDvmtProp_Ve[IsPhev_Ve & IsMetro_Ve] <-
@@ -914,9 +979,13 @@ AssignHhVehiclePowertrain <- function(L, M) {
 }
 
 
-#================================
-#Code to aid development and test
-#================================
+#===============================================================
+#SECTION 4: MODULE DOCUMENTATION AND AUXILLIARY DEVELOPMENT CODE
+#===============================================================
+#Run module automatic documentation
+#----------------------------------
+documentModule("AssignHhVehiclePowertrain")
+
 #Test code to check specifications, loading inputs, and whether datastore
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions
@@ -941,8 +1010,5 @@ AssignHhVehiclePowertrain <- function(L, M) {
 #   SaveDatastore = TRUE,
 #   DoRun = TRUE
 # )
-#
-# setwd("tests")
-# untar("Datastore.tar")
-# setwd("..")
+
 
