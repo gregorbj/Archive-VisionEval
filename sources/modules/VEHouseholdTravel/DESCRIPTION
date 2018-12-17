@@ -22,5 +22,6 @@ Imports:
     pscl
 Suggests:
     knitr
+Encoding: UTF-8
 VignetteBuilder: knitr
 RoxygenNote: 6.0.1
