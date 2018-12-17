@@ -36,7 +36,7 @@ for(Year in getYears()) {
     RunYear = Year
   )
   runModule(
-    ModuleName = "ScenarioResults",
+    ModuleName = "VERPATResults",
     PackageName = "VEScenario",
     RunFor = "AllYears",
     RunYear = Year

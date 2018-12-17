@@ -2,7 +2,8 @@
 
 export(BuildScenarios)
 export(RunScenarios)
-export(ScenarioResults)
+export(VERPATResults)
+export(VERSPMResults)
 export(ViewResults)
 import(data.table)
 import(future)

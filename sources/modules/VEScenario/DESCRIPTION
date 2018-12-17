@@ -27,5 +27,6 @@ RoxygenNote: 6.1.0.9000
 Collate:
         'BuildScenarios.R'
         'RunScenarios.R'
-        'ScenarioResults.R'
+        'VERPATResults.R'
+        'VERSPMResults.R'
         'ViewResults.R'

@@ -1,5 +1,5 @@
 #=================
-#ScenarioResults.R
+#VERSPMResults.R
 #=================
 # This module gathers the output of scenario runs in data.table and returns
 # it as a list.
@@ -21,19 +21,109 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-library(visioneval)
-library(data.table)
+# library(visioneval)
+# library(data.table)
 
 #=================================================
 #SECTION 1: ESTIMATE AND SAVE Scenario PARAMETERS
 #=================================================
+
+# Save VERSPM OUTPUT config file
+
+verspm_output_config_txt <-
+'[
+  {
+    "NAME": "GHG Target Reduction",
+    "LABEL": "GHG Target Reduction",
+    "DESCRIPTION": "Placeholder - 2005-2038 percentage reduction in light-duty vehicle GHG emissions (beyond what is anticipated to occur due to baseline assumptions regarding improvements to vehiles and fuels). RVMPO has a 2005 - 2035 state-set GHG reduction target of 19%",
+    "INSTRUCTIONS": "Placeholder - 2005-2038 percentage reduction in light-duty vehicle GHG emissions (beyond what is anticipated to occur due to baseline assumptions regarding improvements to vehiles and fuels). RVMPO has a 2005 - 2035 state-set GHG reduction target of 19%",
+    "METRIC": "Average",
+    "UNIT": "%"
+  },
+{
+    "NAME": "DVMT Per Capita",
+  "LABEL": "Daily Vehicle Miles Traveled",
+  "DESCRIPTION": "daily vehicle miles of travel of residents divided by population.",
+  "INSTRUCTIONS": "daily vehicle miles of travel of residents divided by population.",
+  "METRIC": "Average",
+  "UNIT": "daily miles"
+},
+{
+  "NAME": "Walk Trips Per Capita",
+  "LABEL": "Walk Travel Per Capita",
+  "DESCRIPTION": "annual residents walk trips (not including recreation or walk to transit) divided by population",
+  "INSTRUCTIONS": "annual residents walk trips (not including recreation or walk to transit) divided by population",
+  "METRIC": "Average",
+  "UNIT": "annual trips"
+  },
+{
+    "NAME": "Air Pollution Emissions",
+  "LABEL": "Air Pollution Emissions",
+  "DESCRIPTION": "daily metric tons of pollutants emitted from all light-duty vehicle travel (including hydrocarbons, carbon monoxide, nitrogen dioxide, and particulates).",
+  "INSTRUCTIONS": "daily metric tons of pollutants emitted from all light-duty vehicle travel (including hydrocarbons, carbon monoxide, nitrogen dioxide, and particulates).",
+  "METRIC": "Average",
+  "UNIT": "daily metric tons"
+},
+{
+    "NAME": "Annual Fuel Use",
+  "LABEL": "Annual Fuel Use",
+  "DESCRIPTION": "annual million gallons of gasoline and other fuels consumed by all light-duty vehicle travel.",
+  "INSTRUCTIONS": "annual million gallons of gasoline and other fuels consumed by all light-duty vehicle travel.",
+  "METRIC": "Average",
+  "UNIT": "million gallons"
+},
+{
+    "NAME": "Truck Delay",
+  "LABEL": "Truck Delay",
+  "DESCRIPTION": "daily vehicle-hours of delay for heavy truck travel on area roads.",
+  "INSTRUCTIONS": "daily vehicle-hours of delay for heavy truck travel on area roads.",
+  "METRIC": "Average",
+  "UNIT": "daily vehicle hr."
+},
+{
+    "NAME": "Household Vehicle Cost as Percentage of Income",
+  "LABEL": "Vehicle Cost % (All Income)",
+  "DESCRIPTION": "average percentage of income spent by all households on owning and operating light-duty vehicles.",
+  "INSTRUCTIONS": "average percentage of income spent by all households on owning and operating light-duty vehicles.",
+  "METRIC": "Average",
+  "UNIT": "%"
+},
+{
+    "NAME": "Low Income Household Vehicle Cost as Percentage of Income",
+  "LABEL": "Vehicle Cost % (Low Income)",
+  "DESCRIPTION": "average percentage of income spent by low-income (< $20,000 USD2005) households on owning and operating light-duty vehicles.",
+  "INSTRUCTIONS": "average percentage of income spent by low-income (< $20,000 USD2005) households on owning and operating light-duty vehicles.",
+  "METRIC": "Average",
+  "UNIT": "%"
+  }
+]'
+
+  VERSPMOutputConfig <- list(
+    VERSPM = verspm_output_config_txt
+  )
+  #Save the config specifications list
+  #---------------------------------
+  #' Scenario output configurations for VERSPM model
+  #'
+  #' A list containing output configurations for VERSPM model.
+  #'
+  #' @format A list containing configuration for models in json format:
+  #' \describe{
+  #'  \item{VERSPM}{Scenario output configuration for VERSPM model}
+  #' }
+  #' @source VERSPMResults.R script.
+  "VERSPMOutputConfig"
+  usethis::use_data(VERSPMOutputConfig, overwrite = TRUE)
+
+
+
 
 
 #================================================
 #SECTION 2: DEFINE THE MODULE DATA SPECIFICATIONS
 #================================================
 
-ScenarioResultsSpecifications <- list(
+VERSPMResultsSpecifications <- list(
   # Level of geography module is applied at
   RunBy = "Region",
   # Specify new tables to be created by Inp if any
@@ -101,6 +191,15 @@ ScenarioResultsSpecifications <- list(
       SIZE = 20,
       PROHIBIT = "NA",
       ISELMENTOF = ""
+    ),
+    item(
+      NAME = "InputLabels",
+      TABLE = "Model",
+      GROUP = "Global",
+      TYPE = "character",
+      UNITS = "NA",
+      PROHIBIT = "NA",
+      ISELEMENTOF = ""
     )
   ),
   Set = items(
@@ -119,9 +218,9 @@ ScenarioResultsSpecifications <- list(
 
 #Save the data specifications list
 #---------------------------------
-#' Specifications list for ScenarioResults module
+#' Specifications list for VERSPMResults module
 #'
-#' A list containing specifications for the ScenarioResults module.
+#' A list containing specifications for the VERSPMResults module.
 #'
 #' @format A list containing 4 components:
 #' \describe{
@@ -131,9 +230,9 @@ ScenarioResultsSpecifications <- list(
 #'  \item{Get}{module inputs to be read from the datastore}
 #'  \item{Set}{module outputs to be written to the datastore}
 #' }
-#' @source ScenarioResults.R script.
-"ScenarioResultsSpecifications"
-usethis::use_data(ScenarioResultsSpecifications, overwrite = TRUE)
+#' @source VERSPMResults.R script.
+"VERSPMResultsSpecifications"
+usethis::use_data(VERSPMResultsSpecifications, overwrite = TRUE)
 
 
 # TableNames <- c("Azone", "Bzone", "Marea", "IncomeGroup", "FuelType")
@@ -204,20 +303,12 @@ readTables <- function(Year = NULL, Scenario = "Base", Output = "All", Table=TRU
   FilterDatastore_ar <- DataStore_dt[[ColumnToSearch]] %in% Output
   DataStore_dt <- DataStore_dt[FilterDatastore_ar]
   DataStore_dt[,Value:=.(list(readFromTable(Name,Table,Group))),.(Group,Table,Name,Units)]
-  Outputs_dt <- DataStore_dt[,.(Output=lapply(.SD,function(x){
-    maxLength <- max(unlist(lapply(x, length)))
-    x <- lapply(x, function(y) y[1:maxLength])
-    as.data.table(x, stringsAsFactors=FALSE)
-  })),.(Table), .SDcols=c("Value")]
-  OutputNames_dt <- DataStore_dt[Outputs_dt,.(Names=list(Name)),on=.(Table),by=.EACHI]
-  OutputUnits_dt <- DataStore_dt[Outputs_dt, .(Units=list(Units)), on=.(Table), by=.EACHI]
-  Outputs_dt[OutputNames_dt,Names:=i.Names,on=.(Table)]
-  Outputs_dt[OutputUnits_dt,Units:=i.Units,on=.(Table)]
-  Results_dt <- Outputs_dt[,.(Result={Output <- Output[[1]]
-  setnames(Output, colnames(Output), unlist(Names))
-  .((Output), unlist(Units, recursive = FALSE))}), by=.(Table)]
-  Results_dt[,Type:=rep(c("Data","Units"),times=.N/2)]
-  Results_dt <- dcast.data.table(Results_dt, Table~Type, value.var = "Result")
+  Results_dt <- DataStore_dt[,{
+    Outputs_dt <- data.table(data.frame(Value))
+    setnames(Outputs_dt,colnames(Outputs_dt),Name)
+    Units_ls <- list(Units)
+    .(Data=list(Outputs_dt),Units=Units_ls)
+  },.(Table)]
   Results_dt[,Scenario:=Scenario]
   return(Results_dt[,.(Scenario, Table, Data, Units)])
 }
@@ -248,7 +339,7 @@ getScenarioResults <- function(ScenarioPath, ...){
 #------------------------------------------------------------------
 #' Function to gather scenario results.
 #'
-#' \code{ScenarioResults} gather scenario results.
+#' \code{VERSPMResults} gather scenario results.
 #'
 #' This function gather results from scenarios asynchronously.
 #'
@@ -256,10 +347,10 @@ getScenarioResults <- function(ScenarioPath, ...){
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
-#' @name ScenarioResults
+#' @name VERSPMResults
 #' @import jsonlite future data.table
 #' @export
-ScenarioResults <- function(L){
+VERSPMResults <- function(L){
   # Setup
   # -------------
   # Set input directory
@@ -273,6 +364,8 @@ ScenarioResults <- function(L){
                                       L$Global$Model$ScenarioOutputFolder,
                                       "ScenarioProgressReport.csv"),
                             stringsAsFactors = FALSE)
+
+  InputLabels_ar <- L$Global$Model$InputLabels
 
   # Set future processors
   NWorkers <- L$Global$Model$NWorkers
@@ -289,7 +382,7 @@ ScenarioResults <- function(L){
       ScenarioPath = sc_path,
       Output = L$Global$Tables$Name,
       Year = L$G$Year,
-      Table = TRUE
+      Table = FALSE
     )
     Scenarios_df$Results[which(Scenarios_df$Name==basename(sc_path))] <<- "Completed"
     ScResults},
@@ -310,66 +403,64 @@ ScenarioResults <- function(L){
   LevelNames_ar <- strsplit(ScenNames_ar[1],"\\d")[[1]]
   setnames(Levels_dt,colnames(Levels_dt),LevelNames_ar)
   ScenTab_dt <- cbind(ScenTab_dt,Levels_dt)
-  ScenTab_dt <- ScenTab_dt[FinalResults_dt,on=.(Scenario)][order(B,C,D,L,P,T)]
-  ScenTab_dt <- ScenTab_dt[,{Bzone <- Data[Table=="Bzone"][[1]]
-  Marea <- Data[Table=="Marea"][[1]]
-  Azone <- Data[Table=="Azone"][[1]]
-  BzoneUnits <- Units[Table=="Bzone"][[1]]
-  MareaUnits <- Units[Table=="Marea"][[1]]
-  AzoneUnits <- Units[Table=="Azone"][[1]]
-  #Get the population to compute per capita values
-  Pop <- sum(Bzone$UrbanPop)
-  #Calculate fatalities and injuries per 1000 persons by scenario
-  FatalityInjury <- sum(Marea[,.(FatalIncidentMetric, InjuryIncidentMetric)])
-  FatalityInjuryRate <- 1000 * FatalityInjury / Pop
-  #Calculate average cost per person
-  Cost <- sum(Bzone$CostsMetric)
-  AveCost <- Cost / Pop
-  #Calculate average DVMT per person
-  Dvmt <- sum(Bzone$DvmtPolicy)
-  AveDvmt <- Dvmt / Pop
-  AveDvmt <- convertUnits(AveDvmt, "compound",
-                          BzoneUnits[which(colnames(Bzone)=="DvmtPolicy")],
-                          "MI/DAY")$Value
-  #Calculate average emissions per person
-  # Withouth EV
-  # Emissions <- sum(Bzone$EmissionsMetric)
-  # AveEmissions <- 365 * Emissions / Pop
-  # AveEmissions <- convertUnits(AveEmissions, "compound",
-  #                              BzoneUnits[which(colnames(Bzone)=="EmissionsMetric")],
-  #                              "MT/YR")$Value
-  FuelEmissions <- sum(Bzone$FuelEmissionsMetric)
-  PowerEmissions <- sum(Bzone$PowerEmissionsMetric)
-  AveFuelEmissions <- 365 * FuelEmissions / Pop
-  AvePowerEmissions <- 365 * PowerEmissions / Pop
-  AveEmissions <- convertUnits(AveFuelEmissions, "compound",
-                               BzoneUnits[which(colnames(Bzone)=="FuelEmissionsMetric")],
-                               "MT/DAY")$Value +
-    convertUnits(AvePowerEmissions, "compound",
-                 BzoneUnits[which(colnames(Bzone)=="PowerEmissionsMetric")],
-                 "MT/YR")$Value
-  #Calculate average fuel consumed per person
-  Fuel <- sum(Bzone$FuelMetric)
-  AveFuel <- 365 * Fuel / Pop
-  AveFuel <- convertUnits(AveFuel, "compound",
-                          BzoneUnits[which(colnames(Bzone)=="FuelMetric")],
-                          "GAL/DAY")$Value
-  #Calculate average vehicle hours per person
-  VehHr <- Marea$VehHrLtVehPolicy
-  AveVehHr <- VehHr / Pop
-  AveVehHr <- convertUnits(AveVehHr, "time",
-                           BzoneUnits[which(colnames(Bzone)=="VehHrLtVehPolicy")],
-                           "HR")$Value
-  .(FatalityInjuryRate=FatalityInjuryRate, AveCost=AveCost,
-    AveDvmt=AveDvmt, AveEmissions=AveEmissions,
-    AveFuel=AveFuel, AveVehHr=AveVehHr)
-  },.(Scenario,Bike=B,
-      VmtChrg=C,DemandMgt=D,LandUse=L,Parking=P,
-      Transit=T)]
+  ScenTab_dt <- ScenTab_dt[FinalResults_dt,on=.(Scenario)][order(Scenario)]
+  BaseYear <- L$G$BaseYear
+  ModelState_ls <<- readModelState()
+  ScenTab_dt <- ScenTab_dt[,{
+                            Bzone <- Data[Table=="Bzone"][[1]]
+                            Marea <- Data[Table=="Marea"][[1]]
+                            Household <- Data[Table=="Household"][[1]]
+                            Vehicle <- Data[Table=="Vehicle"][[1]]
+                            BzoneUnits <- Units[Table=="Bzone"][[1]]
+                            MareaUnits <- Units[Table=="Marea"][[1]]
+                            HouseholdUnits <- Units[Table=="Household"][[1]]
+                            VehicleUnits <- Units[Table=="Vehicle"][[1]]
+
+                            #GHG Reduction Placeholder
+                            GHGReduction <- 0
+
+                            #Get the DVMT per capita
+                            DVMTPerCapita <- sum(Household$Dvmt)/sum(Bzone$Pop)
+                            #Walk travel per capita
+                            WalkTraverPerCapita <- sum(Household$WalkTrips)/sum(Bzone$Pop)
+                            #Air pollution emiisions placeholder
+                            AirPollutionEm <- sum(Household$DailyCO2e) #incorrect calculations
+                            #Annual fuel use
+                            FuelUse <- (sum(Household$DailyGGE) +
+                                          sum(Marea$ComSvcUrbanGGE) +
+                                          sum(Marea$ComSvcRuralGGE)
+                            ) * 365
+
+                            #Truck Delay Placeholder
+                            TruckDelay <- 0
+                            #Vehicle ownership cost as percentage of income
+                            OperationCost <- Household$AveVehCostPM  * Household$Dvmt
+                            OwnCost <- Household$OwnCost
+                            TotalCost <- OwnCost+OperationCost
+                            VehilceCost <- sum(TotalCost)/sum(Household$Income) * 100
+
+                            #Vehicle ownership cost as percentage of income for low income people
+                            #“low income” assumption is defined as  <$20K (2005$).
+                            Income2005 <- deflateCurrency(Household$Income,BaseYear,"2005")
+                            IsLowIncome <- Income2005 < 20000
+                            VehilceCostLow <- sum(TotalCost[IsLowIncome])/sum(Household$Income[IsLowIncome]) * 100
+
+                            .(GHGReduction=GHGReduction,DVMTPerCapita=DVMTPerCapita,
+                              WalkTraverPerCapita=WalkTraverPerCapita, TruckDelay=TruckDelay,
+                              AirPollutionEm=AirPollutionEm, FuelUse=FuelUse,
+                              VehilceCost=VehilceCost, VehilceCostLow=VehilceCostLow)
+                          },by=c("Scenario", InputLabels_ar)]
+
   # Write the output to JSON file
   JSON <- toJSON(ScenTab_dt)
   JSON <- paste("var data = ", JSON, ";", sep="")
-  File <- file(file.path(ModelPath, L$Global$Model$ScenarioOutputFolder, "verpat.js"), "w")
+  File <- file(file.path(ModelPath, L$Global$Model$ScenarioOutputFolder, "verspm.js"), "w")
+  writeLines(JSON, con=File)
+  close(File)
+
+  # Write the output configuration file
+  JSON <- paste("var outputcfg = ", VERSPMOutputConfig$VERSPM, ";", sep="")
+  File <- file(file.path(ModelPath, L$Global$Model$ScenarioOutputFolder, "output-cfg.js"), "w")
   writeLines(JSON, con=File)
   close(File)
 

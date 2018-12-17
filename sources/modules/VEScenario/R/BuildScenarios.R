@@ -83,6 +83,16 @@ BuildScenariosSpecifications <- list(
       PROHIBIT = "NA",
       ISELEMENTOF = "",
       DESCRIPTION = "Returns 1 if completes build"
+    ),
+    item(
+      NAME = "InputLabels",
+      TABLE = "Model",
+      GROUP = "Global",
+      TYPE = "character",
+      UNITS = "NA",
+      PROHIBIT = "NA",
+      ISELEMENTOF = "",
+      DESCRIPTION = "Category labels for inputs"
     )
   )
 )
@@ -128,6 +138,7 @@ usethis::use_data(BuildScenariosSpecifications, overwrite = TRUE)
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
 #' @name BuildScenarios
+#' @import jsonlite
 #' @export
 BuildScenarios <- function(L){
   # Setup
@@ -137,20 +148,82 @@ BuildScenarios <- function(L){
   ModelPath <- file.path(RunDir, L$Global$Model$ModelFolder)
   ScenarioInputPath <- file.path(RunDir, L$Global$Model$ScenarioInputFolder)
   # Gather Scenario file structure and names
-  ScenarioFiles_ar <- list.files(path = ScenarioInputPath, recursive = TRUE)
+  InputLabels_ar <- list.dirs(path = ScenarioInputPath, recursive = FALSE,
+                              full.names = FALSE)
+  ScenarioFiles_ar <- grep(list.files(path = ScenarioInputPath, recursive = TRUE),
+                           pattern = "config", value = TRUE, invert = TRUE)
+
   LevelDef_ar <- dirname(ScenarioFiles_ar)
-  if(any(duplicated(LevelDef_ar))){
-    stop("More than one file exists in the scenario inputs.")
+  # if(any(duplicated(LevelDef_ar))){
+  #   stop("More than one file exists in the scenario inputs.")
+  # }
+  LevelDef_ar <- unique(LevelDef_ar)
+
+  # Gather scenario and category config files
+  if(file.exists(file.path(ScenarioInputPath,"scenario_config.json"))){
+    file.copy(file.path(ScenarioInputPath, "scenario_config.json"),
+              file.path(RunDir, L$Global$Model$ScenarioOutputFolder))
+    ScenarioConfig_ls <- fromJSON(file.path(ScenarioInputPath, "scenario_config.json"))
   }
 
-  # Create scenario combinations
-  LevelDef_ls <- split(LevelDef_ar, dirname(LevelDef_ar), drop = TRUE)
-  ScenarioDef_df <- expand.grid(LevelDef_ls, stringsAsFactors = FALSE)
+  if(file.exists(file.path(ScenarioInputPath,"category_config.json"))){
+    file.copy(file.path(ScenarioInputPath, "category_config.json"),
+              file.path(RunDir, L$Global$Model$ScenarioOutputFolder))
+    CategoryConfig_ls <- fromJSON(file.path(ScenarioInputPath, "category_config.json"))
+    # Filter to only scenarios mentioned in categories config file
+    # Structure of Category files
+    # DF of Category Names and LEVELS
+    # LEVELS is a list of DF of LEVEL NAMES and INPUTS
+    # INPUTS is a list of DF of Scenario NAMES and LEVEL
+    CategoryLevels_df <- do.call(rbind,
+                                 lapply(CategoryConfig_ls$LEVELS, function(x) {
+                                   y <- lapply(seq_along(x$NAME),
+                                               function(z) {
+                                                 inputtable <- x$INPUTS[[z]]
+                                                 inputtable$CATLEVEL <- x$NAME[[z]]
+                                                 return(inputtable)
+                                               })
+                                   do.call(rbind, y)
+                                 }
+                                 )
+    )
+    CategoryLevels_df$PATH <- paste0(CategoryLevels_df$NAME,
+                                     "/",
+                                     CategoryLevels_df$LEVEL)
+
+    # Check if all the scenario level inputs exists
+    InputsExists_ar <- sapply(CategoryLevels_df$PATH,
+                             function(path) dir.exists(file.path(ScenarioInputPath, path)))
+    if(!all(InputsExists_ar)){
+      simpleWarning("Scenario level inputs are missing")
+      simpleMessage(paste0("Missing Inputs: ",paste0(names(InputsExists_ar[!InputsExists_ar]),
+                                     collapse = ", ")))
+    }
+
+    Categories_ls <- lapply(CategoryConfig_ls$LEVELS, function(categories){
+      lapply(categories$INPUTS, function(inputlevel){
+        sort(apply(inputlevel,1,paste0,collapse="/"))
+        }
+      )
+    })
+    # Create scenario combinations from categories
+    Scenarios_df <- expand.grid(Categories_ls)
+    Scenarios_mx <- t(do.call(rbind,list(apply(Scenarios_df,1,unlist))))
+    colnames(Scenarios_mx) <- gsub("\\d|\\W","",Scenarios_mx[1,])
+    Scenarios_mx <- Scenarios_mx[,sort(colnames(Scenarios_mx))]
+    ScenarioDef_df <- data.frame(Scenarios_mx, stringsAsFactors = FALSE)
+  } else {
+    # Create scenario combinations
+    LevelDef_ls <- split(LevelDef_ar, dirname(LevelDef_ar), drop = TRUE)
+    ScenarioDef_df <- expand.grid(LevelDef_ls, stringsAsFactors = FALSE)
+  }
+
   ScenarioNames_ar <- apply(ScenarioDef_df, 1, function(x) {
     Name <- paste(x, collapse = "/")
     gsub("/", "", Name)
   })
   rownames(ScenarioDef_df) <- ScenarioNames_ar
+
 
 
   # Iterate through scenarios and build inputs
@@ -166,6 +239,28 @@ BuildScenarios <- function(L){
   warning = function(w) print(w),
   error = function(e) print(e))
   dir.create(file.path(RunDir, L$Global$Model$ScenarioOutputFolder))
+  if(file.exists(file.path(ScenarioInputPath,"scenario_config.json"))){
+    # file.copy(file.path(ScenarioInputPath, "scenario_config.json"),
+    #           file.path(RunDir, L$Global$Model$ScenarioOutputFolder))
+    scenconfig_ls <- fromJSON(file.path(ScenarioInputPath,"scenario_config.json"),
+                              simplifyDataFrame = FALSE)
+    scenconfig_ch <- paste0("var scenconfig = ",
+                            toJSON(scenconfig_ls, pretty = TRUE), ";")
+    write(scenconfig_ch, file = file.path(RunDir,
+                                          L$Global$Model$ScenarioOutputFolder,
+                                          "scenario-cfg.js"))
+  }
+  if(file.exists(file.path(ScenarioInputPath,"category_config.json"))){
+    # file.copy(file.path(ScenarioInputPath, "category_config.json"),
+    #           file.path(RunDir, L$Global$Model$ScenarioOutputFolder))
+    catconfig_ls <- fromJSON(file.path(ScenarioInputPath,"category_config.json"),
+                              simplifyDataFrame = FALSE)
+    catconfig_ch <- paste0("var catconfig = ",
+                            toJSON(catconfig_ls, pretty = TRUE), ";")
+    write(catconfig_ch, file = file.path(RunDir,
+                                         L$Global$Model$ScenarioOutputFolder,
+                                         "category-cfg.js"))
+  }
   commonfiles_ar <- file.path(ModelPath, c("defs", "inputs", "run_model.R"))
 
   # Create/Save a file to store the results of scenario builds, runs,
@@ -196,13 +291,13 @@ BuildScenarios <- function(L){
         File <- list.files(Path, full.names = TRUE)
         # If a csv file then copy and overwrite existing file
         # If a json file then replace the existing values with new values
-        if(grepl("\\.csv$", File)){
-          if(!file.exists(file.path(ScenarioPath, "inputs", basename(File)))){
+        if(any(grepl("\\.csv$", File))){
+          if(!any(file.exists(file.path(ScenarioPath, "inputs", basename(File))))){
             stop(paste0("Scenario input file not recognized: ", basename(File)))
           }
-          file.copy(File, file.path(ScenarioPath, "inputs"), overwrite = TRUE)
-        } else if (grepl("\\.json$", File)){
-          if(!file.exists(file.path(ScenarioPath, "defs", basename(File)))){
+          file.copy(File[grepl("\\.csv$", File)], file.path(ScenarioPath, "inputs"), overwrite = TRUE)
+        } else if (any(grepl("\\.json$", File))){
+          if(!any(file.exists(file.path(ScenarioPath, "defs", basename(File))))){
             stop(paste0("Scenario defs file not recognized: ", basename(File)))
           }
           NewModelParameterContent <- fromJSON(File)
@@ -243,6 +338,7 @@ BuildScenarios <- function(L){
             row.names = FALSE)
   #Initialize output list
   Out_ls <- initDataList()
-  Out_ls$Global$Model <- list(CompleteBuild = 1L)
+  Out_ls$Global$Model <- list(CompleteBuild = 1L,
+                              InputLabels = InputLabels_ar)
   return(Out_ls)
 }
