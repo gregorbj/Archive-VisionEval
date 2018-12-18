@@ -34,9 +34,11 @@ VE_modules <- c(
   "VEHouseholdVehicles",
   "VEPowertrainsAndFuels",
   "VETravelPerformance",
+  # "VESimLandUse",
+  # "VESimLandUseData",
+  "VEScenario",
   "VEReports"
 )
-
 
 VE_src_dirs <- c(file.path(ve_root, 'sources', 'framework', VE_framework),
                  file.path(ve_root, 'sources', 'modules', VE_modules))
@@ -89,7 +91,8 @@ for(src_dir in VE_src_dirs){
   module <- basename(src_dir)
 	cat(paste("\nInstalling:", module,"\n"))
 	if ( !module %in% rownames(installed.packages(lib.loc=ve_lib)) ){
-	  devtools::install_local(normalizePath(src_dir), force=TRUE, lib = ve_lib)
+	  devtools::install_local(normalizePath(src_dir), force=TRUE, lib = ve_lib,
+	                          upgrade = "never")
 	}
 	if(!module %in% rownames(installed.packages(lib.loc=ve_lib))){
 		stop(paste0(module, " cannot be installed."))

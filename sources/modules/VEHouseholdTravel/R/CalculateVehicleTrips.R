@@ -398,8 +398,8 @@ rm(capMaxVals, MetroHh_df, NonMetroHh_df, Hh_df, findPower, MetroAveTrpLen_ls,
 #' length, daily vehicle trips, and daily vehicle trips per driver;
 #' contains a string representing a hurdle model for computing household trips.
 #' @source CalculateVehicleTrips.R script.
-"VehTripModels_ls"
-usethis::use_data(VehTripModels_ls, overwrite = TRUE)
+"VehTrpLenModel_ls"
+usethis::use_data(VehTrpLenModel_ls, overwrite = TRUE)
 
 
 #================================================
@@ -615,7 +615,7 @@ usethis::use_data(CalculateVehicleTripsSpecifications, overwrite = TRUE)
 #' @export
 CalculateVehicleTrips <- function(L) {
 
-  #Assign VehTripModels_ls within function so it is in scope for module call
+  #Assign VehTrpLenModel_ls within function so it is in scope for module call
   if(!exists("VehTrpLenModel_ls")){
     VehTrpLenModel_ls <- VEHouseholdTravel::VehTrpLenModel_ls
   }
