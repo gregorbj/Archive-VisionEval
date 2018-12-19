@@ -1,9 +1,23 @@
 #=======================
 #CalculateBaseRoadDvmt.R
 #=======================
-#This module calculates base year roadway DVMT by vehicle type (light-duty,
-#heavy truck, bus) and the distribution of roadway DVMT by vehicle type to
-#roadway classes (freeway, arterial, other).
+
+#<doc>
+#
+## CalculateBaseRoadDvmt Module
+#### September 10, 2018
+#
+#This module calculates base year roadway DVMT by vehicle type (light-duty, heavy truck, bus) and the distribution of roadway DVMT by vehicle type to roadway classes (freeway, arterial, other).
+#
+### Model Parameter Estimation
+#
+#This module has no estimated parameters.
+#
+### How the Module Works
+#
+
+#
+#</doc>
 
 
 #=================================
