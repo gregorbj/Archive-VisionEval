@@ -16,33 +16,33 @@ glm(formula = makeFormula(StartTerms_), family = binomial, data = EstData_df[Tra
 
 Deviance Residuals: 
     Min       1Q   Median       3Q      Max  
--3.2981   0.1289   0.2044   0.3949   2.7416  
+-3.2836   0.1306   0.2074   0.3986   3.0759  
 
 Coefficients:
                   Estimate Std. Error z value Pr(>|z|)    
-(Intercept)     -1.801e+01  1.056e+02  -0.171    0.865    
-Age15to19        1.713e+01  1.056e+02   0.162    0.871    
-Age20to29        1.956e+01  1.056e+02   0.185    0.853    
-Age30to54        1.988e+01  1.056e+02   0.188    0.851    
-Age55to64        1.974e+01  1.056e+02   0.187    0.852    
-Age65Plus        1.911e+01  1.056e+02   0.181    0.856    
-Worker           1.291e+00  5.132e-02  25.147   <2e-16 ***
-HhSize          -2.793e-01  1.665e-02 -16.777   <2e-16 ***
-Income           4.581e-05  1.992e-06  22.995   <2e-16 ***
-IncomeSq        -1.952e-10  1.187e-11 -16.440   <2e-16 ***
-IsSF             4.461e-01  5.128e-02   8.698   <2e-16 ***
-PopDensity      -4.129e-05  3.188e-06 -12.951   <2e-16 ***
-IsUrbanMixNbrhd -6.268e-01  5.999e-02 -10.449   <2e-16 ***
-TranRevMiPC     -7.594e-03  7.558e-04 -10.048   <2e-16 ***
+(Intercept)     -1.809e+01  1.058e+02  -0.171    0.864    
+Age15to19        1.715e+01  1.058e+02   0.162    0.871    
+Age20to29        1.956e+01  1.058e+02   0.185    0.853    
+Age30to54        1.987e+01  1.058e+02   0.188    0.851    
+Age55to64        1.977e+01  1.058e+02   0.187    0.852    
+Age65Plus        1.915e+01  1.058e+02   0.181    0.856    
+Worker           1.302e+00  5.127e-02  25.395   <2e-16 ***
+HhSize          -2.669e-01  1.653e-02 -16.146   <2e-16 ***
+Income           4.517e-05  1.998e-06  22.615   <2e-16 ***
+IncomeSq        -1.918e-10  1.189e-11 -16.128   <2e-16 ***
+IsSF             4.632e-01  5.091e-02   9.098   <2e-16 ***
+PopDensity      -4.211e-05  3.169e-06 -13.286   <2e-16 ***
+IsUrbanMixNbrhd -6.010e-01  5.949e-02 -10.104   <2e-16 ***
+TranRevMiPC     -7.213e-03  7.520e-04  -9.592   <2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 (Dispersion parameter for binomial family taken to be 1)
 
-    Null deviance: 26664  on 31369  degrees of freedom
-Residual deviance: 14814  on 31356  degrees of freedom
-  (10192 observations deleted due to missingness)
-AIC: 14842
+    Null deviance: 26662  on 31371  degrees of freedom
+Residual deviance: 14918  on 31358  degrees of freedom
+  (10190 observations deleted due to missingness)
+AIC: 14946
 
 Number of Fisher Scoring iterations: 16
 
@@ -58,31 +58,31 @@ glm(formula = makeFormula(StartTerms_), family = binomial, data = EstData_df[Tra
 
 Deviance Residuals: 
     Min       1Q   Median       3Q      Max  
--3.2878   0.1233   0.1784   0.3469   2.5976  
+-3.2938   0.1225   0.1783   0.3444   2.5917  
 
 Coefficients:
               Estimate Std. Error z value Pr(>|z|)    
-(Intercept) -1.944e+01  1.152e+02  -0.169    0.866    
-Age15to19    1.857e+01  1.152e+02   0.161    0.872    
-Age20to29    2.088e+01  1.152e+02   0.181    0.856    
-Age30to54    2.106e+01  1.152e+02   0.183    0.855    
-Age55to64    2.108e+01  1.152e+02   0.183    0.855    
-Age65Plus    2.036e+01  1.152e+02   0.177    0.860    
-Worker       1.554e+00  4.597e-02  33.814   <2e-16 ***
-HhSize      -2.311e-01  1.467e-02 -15.748   <2e-16 ***
-Income       4.495e-05  1.804e-06  24.915   <2e-16 ***
-IncomeSq    -2.066e-10  1.136e-11 -18.185   <2e-16 ***
-IsSF         3.919e-01  4.336e-02   9.038   <2e-16 ***
-PopDensity  -6.377e-05  3.651e-06 -17.469   <2e-16 ***
+(Intercept) -1.943e+01  1.149e+02  -0.169    0.866    
+Age15to19    1.854e+01  1.149e+02   0.161    0.872    
+Age20to29    2.089e+01  1.149e+02   0.182    0.856    
+Age30to54    2.106e+01  1.149e+02   0.183    0.855    
+Age55to64    2.110e+01  1.149e+02   0.184    0.854    
+Age65Plus    2.035e+01  1.149e+02   0.177    0.859    
+Worker       1.575e+00  4.594e-02  34.274   <2e-16 ***
+HhSize      -2.278e-01  1.467e-02 -15.534   <2e-16 ***
+Income       4.269e-05  1.800e-06  23.718   <2e-16 ***
+IncomeSq    -1.927e-10  1.136e-11 -16.960   <2e-16 ***
+IsSF         4.475e-01  4.320e-02  10.359   <2e-16 ***
+PopDensity  -6.501e-05  3.656e-06 -17.781   <2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 (Dispersion parameter for binomial family taken to be 1)
 
-    Null deviance: 43175  on 57813  degrees of freedom
-Residual deviance: 21808  on 57802  degrees of freedom
-  (16532 observations deleted due to missingness)
-AIC: 21832
+    Null deviance: 43353  on 57832  degrees of freedom
+Residual deviance: 21774  on 57821  degrees of freedom
+  (16513 observations deleted due to missingness)
+AIC: 21798
 
 Number of Fisher Scoring iterations: 17
 

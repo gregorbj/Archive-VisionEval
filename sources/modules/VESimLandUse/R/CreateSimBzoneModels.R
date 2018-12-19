@@ -4,7 +4,7 @@
 
 #<doc>
 ## CreateSimBzoneModels Module
-#### December 1, 2018
+#### December 16, 2018
 #
 #This module estimates all the models for synthesizing Bzones and their land use attributes as a function of Azone characteristics as well as data derived from the US Environmental Protection Agency's Smart Location Database (SLD) augmented with US Census housing and household income data, and data from the National Transit Database. Details on these data are included in the VESimLandUseData package. The combined dataset contains a number of land use attributes at the US Census block group level. The goal of Bzone synthesis to generate a set of SimBzones in each Azone that reasonably represent block group land use characteristics given the characteristics of the Azone, the Marea that the Azone is a part of, and scenario inputs provided by the user.
 #
@@ -80,7 +80,7 @@
 #
 #Differences among urbanized areas are accounted for by developing individual area profiles. As with activity density, these profiles are simplified by discretizing the D2A_JPHH variable into the following 5 activity mix levels:
 #
-#* **primarily-hh**: from 0 to 4 households per job
+#* **primarily-hh**: greater than 4 households per job
 #
 #* **largely-hh**: less than 4 households to 2 households per job
 #
@@ -104,7 +104,7 @@
 #
 #### Split SimBzone Activity Between Jobs and Households
 #
-#The process of splitting the activity of each SimBzone between jobs and households is done in 2 steps. In the first step an initial value for the jobs proportion of activity is selected by sampling from distributions associated with each activity mix level. In the second step, a balancing process is use to so that the distribution of jobs and households among SimBzones in an area is consistent with the control totals of jobs and households by Azone and location type.
+#The process of splitting the activity of each SimBzone between jobs and households is done in 2 steps. In the first step an initial value for the jobs proportion of activity is selected by sampling from distributions associated with each activity mix level. In the second step, a balancing process is used so that the distribution of jobs and households among SimBzones in an area is consistent with the control totals of jobs and households by Azone and location type.
 #
 #The 1st step uses tabulations from the SLD of the numbers of block groups by employment proportion for each activity mix level. Those tabulations are converted into proportions of block groups that are then used as sampling distributions from which to choose an initial employment proportion based on the activity mix level of the SimBzone. The following figure shows the probability distributions of jobs proportions by activity mix levels. These are the sample distributions used to determine the initial jobs proportion for SimBzones located in urbanized areas. Similar sampling distributions are tabulated from the SLD for town locations and for rural locations.
 #
@@ -116,7 +116,7 @@
 #
 #Destination accessibility is a measure of the amount of activity present in the vicinity of each SimBzone. The measure used is the harmonic mean of the population within 5 miles and employment within 2 miles of the SimBzone. This measure was computed for each block group in the SLD using straight line distances between block group centroids. This measure is used instead of destination accessibility measures in the SLD which are auto oriented (for example, jobs within 45 minute travel time) and not very useful for measuring destination accessibility within smaller urbanized areas. The harmonic mean of population and employment was found to be useful for distinguishing *area types*, one of the dimensions in the *place type* system that will be implemented in the Bzone synthesis process.
 #
-#Destination accessibility at the block group level, like the distribution of activity density, is approximately lognormally distributed. However, unlike the activity density distribution, the distribution of the jobs to housing ratio has no apparent relationship with the overall activity density of the area. Is can be seen in the following figure which compares distributions for 9 urbanized areas. As with activity density, the distribution of destination accessibility is related to overall urbanized area density; shifting to the right as overall density increases.
+#Destination accessibility at the block group level, like the distribution of activity density, is approximately lognormally distributed. As with activity density, the distribution of destination accessibility is related to overall urbanized area density; shifting to the right as overall density increases.
 #
 #<fig:example-uza_d5_distributions.png>
 #
@@ -174,8 +174,6 @@
 #* High (H): Greater than 10 households and jobs per acre
 #
 #Following are the destination accessiblity level definitions:
-#
-#c(0, 2e3, 1e4, 5e4, max(Values_Bz))
 #
 #* Very Low (VL): 0 to 2,000 units
 #
