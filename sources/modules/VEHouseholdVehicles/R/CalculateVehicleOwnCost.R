@@ -76,7 +76,7 @@
 #Packages used in code development
 #=================================
 #Uncomment following lines during code development. Recomment when done.
-library(visioneval)
+# library(visioneval)
 
 
 #=============================================
@@ -727,8 +727,8 @@ usethis::use_data(CalculateVehicleOwnCostSpecifications, overwrite = TRUE)
 #' @param Age_ A numeric vector of vehicle ages
 #' vehicles
 #' @return A numeric vector of annual finance cost in 2017 dollars
+#' @name calcVehFin
 #' @export
-#'
 calcVehFin <- function(Type_, Age_) {
   #Calculate index to the vehicle finance model table
   TypeToIndex <- c(Auto = 1, LtTrk = 2)
@@ -758,8 +758,8 @@ calcVehFin <- function(Type_, Age_) {
 #' @param TaxRate A numeric value that is the annual Ad valorem tax rate in
 #' dollars of tax per dollar of vehicle value
 #' @return A numeric vector of annual Ad valorem tax cost in 2017 dollars
+#' @name calcAdValoremTax
 #' @export
-#'
 calcAdValoremTax <- function(Type_, Age_, TaxRate) {
   #Calculate index to the vehicle value model table
   TypeToIndex <- c(Auto = 1, LtTrk = 2)
@@ -878,9 +878,9 @@ idPaydHh <- function(L) {
 #' @param M A list the module functions of modules called by this module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name CalculateVehicleOwnCost
 #' @import visioneval
 #' @export
-#'
 CalculateVehicleOwnCost <- function(L,M) {
   #Estimate the household DVMT
   Dvmt_ls <- M$CalcDvmt(L$CalcDvmt)

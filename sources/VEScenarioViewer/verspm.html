@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+
+    <meta charset='utf-8'>
+
+    <title>Scenario Viewer</title>
+
+    <!--
+    LOAD REQUIRED JAVASCRIPT LIBRARIES
+    -->
+    <script src='js/d3.min.js'></script>
+    <script src='js/crossfilter.min.js'></script>
+    <script src='js/dc.min.js'></script>
+    <script src='js/jquery-1.10.2.js'></script>
+    <script src='js/bootstrap.min.js'></script>
+    <script src='js/colorbrewer.js'></script>
+
+    <!--
+    SET STYLES
+    <link href='css/bootstrap.css' rel='stylesheet' type='text/css' >
+    -->
+    <link href='css/bootstrap.min.css' rel='stylesheet' type='text/css'>
+    <link href='css/dc.css' rel='stylesheet' type='text/css'>
+    <link href='css/colorbrewer.css' rel='stylesheet' type='text/css'>
+    <style>
+        h5 span {
+            font-size: 14px;
+            }
+        .pietitle {
+            font-weight: bold;
+            }
+        .bartitle {
+            font-weight: bold;
+            }
+        .subtitle {
+            font: 11px;
+            color: grey;
+            }
+        .stat {
+            font: 11 px;
+            font-weight: bold;
+            color: grey;
+            }
+        .info {
+            cursor: url(img/info.png), auto;
+            }
+        .readme {
+            float:right;
+            }
+        .pie-slice text {
+            font-size: 11px;
+            fill: black;
+            }
+        .pop-crsr {
+            cursor: help
+            }
+        .sm-margin {
+            margin: .1em;
+            }
+        .glyphicon {
+            color: darkgray;
+            }
+        .policy {
+            background-color: white;
+            }
+        .context {
+            background-color: lightgray;
+            }
+      }
+    </style>
+
+    <!--
+    INITIALIZE POPOVERS THAT DISPLAY INFORMATION WHEN HOVERING ON PIE CHART AND BAR CHART TITLES
+    -->
+    <script>
+        $(function ()
+          { $("#community-popover").popover({
+              trigger: "hover",
+              html: true,
+              placement: "bottom",
+              content: function() {
+                  return $('#community-popover-content').html();
+              }
+            });
+          });
+        $(function ()
+          { $("#marketing-popover").popover({
+              trigger: "hover",
+              html: true,
+              placement: "bottom",
+              content: function() {
+                  return $('#marketing-popover-content').html();
+              }
+            });
+          });
+        $(function ()
+          { $("#pricing-popover").popover({
+              trigger: "hover",
+              html: true,
+              placement: "bottom",
+              content: function() {
+                  return $('#pricing-popover-content').html();
+              }
+            });
+          });
+        $(function ()
+          { $("#fleet-popover").popover({
+              trigger: "hover",
+              html: true,
+              placement: "bottom",
+              content: function() {
+                  return $('#fleet-popover-content').html();
+              }
+            });
+          });
+        $(function ()
+          { $("#gas-popover").popover({
+              trigger: "hover",
+              html: true,
+              placement: "bottom",
+              content: function() {
+                  return $('#gas-popover-content').html();
+              }
+            });
+          });
+        $(function ()
+          { $("#income-popover").popover({
+              trigger: "hover",
+              html: true,
+              placement: "bottom",
+              content: function() {
+                  return $('#income-popover-content').html();
+              }
+            });
+          });
+        $(function ()
+          { $("#growth-popover").popover({
+              trigger: "hover",
+              html: true,
+              placement: "bottom",
+              content: function() {
+                  return $('#growth-popover-content').html();
+              }
+            });
+          });
+        $(function ()
+          { $("#co2e-popover").popover({
+              trigger: "hover",
+              html: true,
+              placement: "top",
+              content: function() {
+                  return $('#co2e-popover-content').html();
+              }
+            });
+          });
+        $(function ()
+          { $("#dvmt-popover").popover({
+              trigger: "hover",
+              html: true,
+              placement: "top",
+              content: function() {
+                  return $('#dvmt-popover-content').html();
+              }
+            });
+          });
+        $(function ()
+          { $("#bike-popover").popover({
+              trigger: "hover",
+              html: true,
+              placement: "top",
+              content: function() {
+                  return $('#bike-popover-content').html();
+              }
+            });
+          });
+        $(function ()
+          { $("#walk-popover").popover({
+              trigger: "hover",
+              html: true,
+              placement: "top",
+              content: function() {
+                  return $('#walk-popover-content').html();
+              }
+            });
+          });
+        $(function ()
+          { $("#pollution-popover").popover({
+              trigger: "hover",
+              html: true,
+              placement: "top",
+              content: function() {
+                  return $('#pollution-popover-content').html();
+              }
+            });
+          });
+        $(function ()
+          { $("#fuel-popover").popover({
+              trigger: "hover",
+              html: true,
+              placement: "top",
+              content: function() {
+                  return $('#fuel-popover-content').html();
+              }
+            });
+          });
+        $(function ()
+          { $("#cost-popover").popover({
+              trigger: "hover",
+              html: true,
+              placement: "top",
+              content: function() {
+                  return $('#cost-popover-content').html();
+              }
+            });
+          });
+        $(function ()
+          { $("#truck-popover").popover({
+              trigger: "hover",
+              html: true,
+              placement: "top",
+              content: function() {
+                  return $('#truck-popover-content').html();
+              }
+            });
+          });
+        $(function ()
+          { $("#emission-rate-popover").popover({
+              trigger: "hover",
+              html: true,
+              placement: "top",
+              content: function() {
+                  return $('#emission-rate-popover-content').html();
+              }
+            });
+          });
+        $(function ()
+          { $("#cost-pct-popover").popover({
+              trigger: "hover",
+              html: true,
+              placement: "top",
+              content: function() {
+                  return $('#cost-pct-popover-content').html();
+              }
+            });
+          });
+        $(function ()
+          { $("#low-pct-popover").popover({
+              trigger: "hover",
+              html: true,
+              placement: "top",
+              content: function() {
+                  return $('#low-pct-popover-content').html();
+              }
+            });
+          });
+    </script>
+
+</head>
+
+<body>
+
+    <!--
+    SET UP HEADING AND BUTTONS TO SHOW QUICK START AND DETAILED EXPLANATION BOOTSTRAP MODALS
+    -->
+    <div style="text-align:center">
+        <h2>VERSPM Scenario Viewer</h2>
+    </div>
+    <div style="text-align:center">
+        <button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#about-modal">
+        About
+        </button>
+        <button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#quick-start-modal">
+        Quick Start
+        </button>
+        <button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#detail-modal">
+        Detailed Instructions
+        </button>
+    </div>
+
+    <!--
+    ABOUT THIS EFFORT BOOTSTRAP MODAL
+    -->
+    <div class="modal fade" id="about-modal" tabindex="-1" role="dialog" aria-labelledby="about-label" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h3 class="modal-title" id="about-label">About This Effort</h3>
+            </div>
+            <div class="modal-body">
+                <h3>About the Scenario Viewer</h3>
+                <p>
+                This web page enables you to explore the results of multiple VERPSM model runs for sensitivity testing purposes. With it, you can select different combinations of input factors and find out how various future outcomes are affected by your selection. You can also select desired outcomes and find out what factors cause those outcomes to occur. By experimenting with the selections and observing the results, you will get a better understanding of the relationships between policy choices and context factors and future outcomes.
+                </p>
+                <h3>Copyright, Attribution and Acknowledgements</h3>
+                <p>
+                Copyright 2016 Oregon Department of Transportation, 2018 AASHTO
+                </p>
+                <p>
+                Licensed under the <a href="http://www.apache.org/licenses/LICENSE-2.0" target="_blank">Apache License, Version 2.0</a> (the "License"); you may not use this file except in compliance with the License.
+                <p>Author(s): Brian Gregor (gregor@or-analytics.com), Ben Stabler (ben.stabler@rsginc.com), Aditya Gore (aditya.gore@rsginc.com).</p>
+                <p>Many thanks go to the authors of the d3.js, dc.js, crossfilter.js, bootstrap.js, jquery.js, and colorbrewer.js libraries without which this data visualization would have been much more challenging to develop.</p>
+             </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!--
+    QUICK START BOOTSTRAP MODAL
+    -->
+    <div class="modal fade" id="quick-start-modal" tabindex="-1" role="dialog" aria-labelledby="quick-start-label" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h3 class="modal-title" id="quick-start-label">Scenario Viewer Quick Start Guide</h3>
+            </div>
+            <div class="modal-body">
+              <div>
+                Select different combinations of factors and find out how various future outcomes are affected by your selection. You can also select desired outcomes and find out what factors cause those outcomes to occur. By experimenting with the selections and observing the results, you will get a better understanding of the relationships between policy choices, context factors and future outcomes.
+              </div>
+                <div>
+                  <ol>
+                    <li><h4>Select Scenarios</h4></li>
+                      <ul>
+                        <li><strong>Pie Charts</strong> - choose level of ambition for policies and context factors. Click on a pie slice to toggle between selection and deselection (gray color). More than one level can be selected. Level 1 always reflects the region’s adopted plans for the future.</li>
+                          <ul>
+                            <li><strong>Level 1</strong>: reference case reflecting funded adopted plans</li>
+                            <li><strong>Level 0</strong>: a retreat from current plans/forecasts </li>
+                            <li><strong>Levels 2-3</strong>: more ambitious policies </li>
+                          </ul>
+                        <li><strong>Bar Charts</strong> - click and drag mouse to select desired range of outcome measure. Change a selected range by clicking in the middle and dragging to move the entire selection or by clicking and dragging handles at either end of the range.</li>
+                      </ul>
+                        <li><h4>View Results</h4></li>
+                          <ul>
+                            <li>Pie (factors) and Bar Charts (outcomes) represent the values of the selected scenarios</li>
+                            <li>Table shows attributes (factor levels and outcomes) of the selected scenarios</li>
+                          </ul>
+                    </ol>
+                    <ul>
+                        <li><h4>Other</h4></li>
+                        <ul>
+                            <li>"Clear All Selections" restores original selections</li>
+                            <li>Mouse over pie chart and bar chart titles for short descriptions</li>
+                            <li>"Detailed Instructions" button gives further information</li>
+                        </ul>
+                    </ul>
+                  </div>
+             </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!--
+    DETAILED EXPLANATION BOOTSTRAP MODAL
+    -->
+    <div class="modal fade" id="detail-modal" tabindex="-1" role="dialog" aria-labelledby="detail-label" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h3 class="modal-title" id="detail-label">Detailed Instructions</h3>
+            </div>
+            <div class="modal-body">
+                <h3>Categories</h3>
+                <p>Many factors such as land use and fuel price affect light duty vehicle travel. Because the number of factors considered is large, they were grouped into 6 categories as follows:</p>
+                <h4>Policy Factors: These categories represent factors within local and state control.</h4>
+                <ul>
+                    <li><strong>Community Design</strong> Policies that seek to enable shorter trips and alternate modes such as promotion of mixed use land use, transit service, bicycling, and <a href="http://www.arb.ca.gov/planning/tsaq/cashout/cashout.htm" target="_blank">parking management</a>.</li>
+                    <li><strong>Marketing & Incentives</strong> Policies that improve driving efficiency such as<a href="http://www.ecodrive.org/" target="_blank"> ecodriving,</a>and <a href="http://www.oregon.gov/ODOT/hwy/its/Pages/its_devices.aspx" target="_blank">Intelligent Transportation System</a> efforts, as well as programs that reduce auto demand such as <a href="http://oregonstate.edu/sustainability/carshare" target="_blank"> carsharing,</a> and home or work-based <a href="http://drivelesssavemore.com/" target="_blank">transportation demand management</a>.</li>
+                    <li><strong>Pricing</strong> Policies that move towards true cost pricing such as <a href="http://www.oregon.gov/ODOT/HWY/RUFPP/Pages/ruc_overview.aspx" target="_blank">road user fees</a> to pay for the cost of operating, maintaining and improving roads, <a href="http://en.wikipedia.org/wiki/Usage-based_insurance" target="_blank"> pay-as-you-drive (PAYD) insurance,</a> and environmental impact fees such as a <a href="http://www.fin.gov.bc.ca/tbs/tp/climate/A1.htm" target="_blank">carbon tax</a>.</li>
+                    <li><strong>Vehicles & Fuels</strong> Factors representing the anticipated changes to future vehicles and fuels, in addition to those resulting from existing federal and state laws, including market changes such as the shift to electric vehicles or more fuel efficient vehicles, reduced <a href="http://www.deq.state.or.us/aq/cleanFuel/qa.htm" target="_blank">carbon intensity</a> of fuels, pace of vehicle turnover, and the light truck share of vehicles. Since these shifts would primarily result from additional federal and state policies promoting market changes, these scenarios assume supportive local actions that advocate for more amitious policies along with local efforts, such as installing charging stations and using landfill captured gases (renewable natural gas) to fuel buses.</li>
+                </ul>
+                <h4>Context Factors: These categories represent factors outside our control, but help evaluate the robustness of policies in the face of uncertain future conditions.</h4>
+                <ul>
+                <li><strong>Fuel Price</strong> The assumed market price of gasoline and other fuels (exclusive of fuel taxes).</li>
+                <li><strong>Income Growth</strong> The assumed growth of average per capita income, representing the health of the economy.</li>
+                </ul>
+                <h3>Levels</h3>
+                <p>Several levels were defined for each of the categories. These levels are numbered to indicate the amount of change from a <em>reference case</em> which represents the continuation of adopted local plans, policies and trends.</p>
+                <ul>
+                    <li><strong>Level 1:</strong> Corresponds to the <em>reference case</em>.</li>
+                    <li><strong>Level 0:</strong> Represents a retreat from current plans (such as lower parking fees or less bicycling than anticipated), or lower context forecasts (lower fuel price or lower income).</li>
+                    <li><strong>Levels 2-3:</strong> Representing more ambitious policies or higher context forecasts (higher fuel price or higher income).</li>
+                </ul>
+                <p>The levels are displayed in pie charts, one for each category, as shown in the following illustration.  The pie charts for the policy-related categories are highlighted with a light gray background.  The pie charts for the context factors are highlighted with a darker gray background.</p>
+                <img src="img/verspm-piechart.png" width="95%">
+                <p>Each pie chart has a legend showing the color associated with each level.  The sizes of the pie slices show the proportions of the selected scenarios in each level.  The number of selected scenarios in each level is shown in the corresponding pie slices.  You can select (or deselect) the scenarios in a level by either clicking on the pie slice or the corresponding legend entry.  The picture shows what it will look like when level 1 is selected for fuel price, income, and growth.  The selected level is colored and the non-selected levels are <em>grayed-out</em>.  (This is the starting condition when you open this web page.)  In this instance the numbers in the selected pie slices mean that there are 69 scenarios that have reference case values for fuel price and income.</p>
+                <h3>Outcomes</h3>
+                <p>Given the chosen category inputs, the web page also shows future year outcomes for the following performance measures:</p>
+                <ul>
+                    <li><strong>GHG Target Reduction:</strong> 2005-2038 percentage reduction in light-duty vehicle GHG emissions (beyond what is anticipated to occur due to baseline assumptions regarding improvements to vehiles and fuels). RVMPO has a 2005 - 2035 state-set GHG reduction target of 19%</li>
+                    <li><strong>DVMT Per Capita:</strong> daily vehicle miles of travel of residents divided by population.</li>
+                    <li><strong>Bike Travel Per Capita:</strong> annual miles of resident bike travel (not including recreational travel) divided by population.</li>
+                    <li><strong>Walk Travel Per Capita:</strong> annual residents' walk trips (not including recreation or walk to transit) divided by population.</li>
+                    <li><strong>Air Pollution Emissions:</strong> daily metric tons of pollutants emitted from all light-duty vehicle travel (including hydrocarbons, carbon monoxide, nitrogen dioxide, and particulates).</li>
+                    <li><strong>Annual Fuel Use:</strong> annual million gallons of gasoline and other fuels consumed by all light-duty vehicle travel.</li>
+                    <li><strong>Annual Household Vehicle Cost:</strong> average annual household cost (thousand dollars) for owning and operating light-duty vehicles (including gas, taxes, parking, registration, depreciation, maintenance, and financing).</li>
+                    <li><strong>Truck Delay:</strong> daily vehicle-hours of delay for heavy truck travel on area roads.</li>
+                </ul>
+                <p>Each outcome is illustrated in a bar chart showing the range of outcome values for the selected scenarios.  The bar height indicates the number of selected scenarios with that outcome value. The value for the 2038 adopted plans scenario is shown above the bar chart.  The following illustrations shows what the <em>CO2e Target Reduction</em>, <em>DVMT Per Capita</em>, <em>Bike Travel per Capita</em>, and <em>Walk Travel Per Capita</em> bar charts look like when all scenarios are selected.</p>
+                <img src="img/verspm-barchart1.png" width="95%">
+                <p>The bar charts can also be used to make a selection of scenarios.  This can be done by hovering the mouse cursor over the bar at one end of the desired selection range.  When the cursor is in the shape of a crosshairs, click and drag the mouse cursor to the other end of the desired range.  The bar chart will change to show the selected range.  In addition, handles will appear at the ends of the selected range.  You can click one of these handles and drag it to alter the selection.  You can also click on the middle of the selection (when the shape of the cursor is a crossed arrow) to drag the whole selection to a different location on the bar chart.  As you make a selection in one bar chart, all the other bar charts will change to show outcomes for just the selected scenarios.  The pie charts will also change accordingly to show the numbers and proportions of the selected scenarios in each level.  The following illustration shows a selection made on the <em>GHG Target Reduction</em> bar chart and the corresponding values for the other bar charts in the row.  You can see in the picture the crossed-arrow cursor shape which means that the whole selection can be dragged to a new position.</p>
+                <img src="img/verspm-barchart2.png" width="95%">
+                <p>Selections can be made simultaneously on multiple pie charts and bar charts.  As more selections are made, all of the charts will be updated to show the selections that meet all of the selection conditions.  To clear all of the selections and return to the starting conditions, just click on one of the <em>Clear All Selections</em> links on the web page.</p>
+                <h3>Selected Scenario Table</h3>
+                <p>Finally, at the bottom of the web page is a table which shows the data for the selected scenarios, including both the input factor levels and the outcome measures.  The values in this table can be copied and saved in a spreadsheet.  To select the data to copy, double-click in the top left-hand cell, press the <em>Shift</em> key, and then click in the bottom right-hand cell.  Once the data has been selected, copy it by pressing the <em>Ctrl c</em> keys for a Windows computer or the <em>Command c</em> keys for an Apple Macintosh computer.  Paste as unicode text into the spreadsheet of your choice.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!--
+    SET UP PIE CHART DISPLAYS OF CATEGORIES
+    -->
+    <hr>
+    <div class='container'>
+        <!-- HEADING AND RESET LINK -->
+        <div class='row'>
+            <h3>
+                <span>Scenario Input Levels</span>
+                <span><a href="javascript:history.go(0)"> | Clear All Selections</a></span> <!-- RESET BY RELOADING PAGE -->
+            </h3>
+        </div>
+        <!-- INPUT CATEGORY PIE CHARTS -->
+        <div class='row'>
+            <div class='span3 pietitle policy' id='Community'>
+                <div>
+                <h5 class='text-center'><span class="pietitle">Community Design</span><span class="glyphicon glyphicon-info-sign pop-crsr" id='community-popover'></span></h5>
+                </div>
+                <div id='community-popover-content' style='display: none'>
+                    <p><strong>Community Design:</strong> Local policies to enable shorter trips and travel by alternate modes.</p>
+                    <p><strong>Level of Ambition:</p>
+                    <p><strong>L1 (Adopted Plans):</strong> No change from 2010.</p>
+                    <p><strong>L2:</strong> Activity center growth, 2 x transit service, 10% bike diversion.</p>
+                    <p><strong>L3:</strong> Activity center growth, 4 x transit service, 10% bike diversion, increase paid parking in activity centers & Ashland with cashout.</p>
+                    <p><strong>L4:</strong> Activity center growth, 4 x transit service, 55% diversion through large adoption of e-bikes, increase paid parking in activity centers & Ashland.</p>
+                </div>
+            </div>
+              <div class='span3 pietitle policy' id='Marketing'>
+                <div>
+                  <h5 class='text-center'><span class='pietitle'>Marketing/Incentives</span><span class="glyphicon glyphicon-info-sign pop-crsr" id='marketing-popover'></span></h5>
+                </div>
+                <div id='marketing-popover-content' style='display: none'>
+                    <p><strong>Marketing/Incentives:</strong> Local programs to improve driving efficiency & reduce auto demand.</p>
+                    <p><strong>Level of Ambition:</p>
+                    <p><strong>L1 (Adopted Plans):</strong> No change from 2010.</p>
+                    <p><strong>L2:</strong> Fully implement travel demand management, eco-driving, and ITS programs.</p>
+                </div>
+            </div>
+            <div class='span3 pietitle policy' id='Pricing'>
+                <div>
+                  <h5 class='text-center'><span class='pietitle'>Pricing</span><span class="glyphicon glyphicon-info-sign pop-crsr" id='pricing-popover'></span></h5>
+                </div>
+                <div id='pricing-popover-content' style='display: none'>
+                    <p><strong>Pricing:</strong> State-led policies that move towards true cost pricing.</p>
+                    <p><strong>Level of Ambition:</p>
+                    <p><strong>L1 (Adopted Plans):</strong> 2010 taxes and fees.</p>
+                    <p><strong>L2:</strong> Pay-as-you-drive (PAYD) insurance, higher electricity costs (due to more renewables).</p>
+                    <p><strong>L3:</strong> Pay-as-you-drive (PAYD) insurance, higher electricity costs (due to more renewables), 69% social cost recovery.</p>
+                </div>
+            </div>
+            <div class='span3 pietitle policy' id='Fleet'>
+                <div>
+                  <h5 class='text-center'><span class='pietitle'>Vehicles/Fuels</span><span class="glyphicon glyphicon-info-sign pop-crsr" id='fleet-popover'></span></h5>
+                </div>
+                <div id='fleet-popover-content' style='display: none'>
+                    <p><strong>Vehicles/Fuels:</strong> Factors representing changes to future vehicles and fuels.</p>
+                    <p><strong>Level of Ambition:</p>
+                    <p><strong>L0:</strong> Baseline vehicle technology mix (8% electric vehicles) and carbon intensity of fuels, but light-trucks remain 45% of the fleet, and the average vehicle age remains 10.5 years.</p>
+                    <p><strong>L1 (Reference):</strong> Baseline vehicle technology mix and carbon intensity of fuels, light truck share reduced to 35% of fleet, and average vehicle age declines (8 years).</p>
+                    <p><strong>L2:</strong> Vehicle technology mix includes a higher percentage of electric vehicles (14%), average carbon intensity of fuels reduced by commercial vehicles switching to renewable natural gas, light truck share reduced to 35% of fleet, and average vehicle age declines (8 years).</p>
+                </div>
+            </div>
+            <div class='span3 pietitle context' id='Gas'>
+                <div>
+                  <h5 class='text-center'><span class='pietitle'>Fuel Price (context)</span><span class="glyphicon glyphicon-info-sign pop-crsr" id='gas-popover'></span></h5>
+                </div>
+                <div id='gas-popover-content' style='display: none'>
+                    <p><strong>Level of Ambition:</p>
+                    <p><strong>Fuel Price:</strong> Context factor on the assumed market price of gasoline (exclusive of fuel taxes.)</p>
+                    <p><strong>L0:</strong> Real fuel price (i.e. exclusive of inflation) stays at 2010 purchasing power.</p>
+                    <p><strong>L1 (Reference):</strong> Real fuel price doubles relative to 2010.</p>
+                    <p><strong>L2:</strong> Real fuel price is four times the 2010 price.</p>
+                </div>
+            </div>
+            <div class='span3 pietitle context' id='Income'>
+                <div>
+                <h5 class='text-center'><span class='pietitle'>Income (context)</span><span class="glyphicon glyphicon-info-sign pop-crsr" id='income-popover'></span></h5>
+                </div>
+                <div id='income-popover-content' style='display: none'>
+                    <p><strong>Income Growth:</strong> Context factor on the assumed growth of statewide average per capita income.</p>
+                    <p><strong>Level of Ambition:</p>
+                    <p><strong>L0:</strong> Real income (i.e. exclusive of inflation) remains at 2010 level.</p>
+                    <p><strong>L1 (Reference):</strong> Real income grows at historic 80-year compound average growth rate of 0.7% per year.</p>
+                    <p><strong>L2:</strong> Real income grows at 50% greater rate than reference.</p>
+                </div>
+            </div>
+            <div class='span3 pietitle context' id='Growth'>
+                <div>
+                <h5 class='text-center'><span class='pietitle'>Growth (context)</span><span class="glyphicon glyphicon-info-sign pop-crsr" id='growth-popover'></span></h5>
+                </div>
+                <div id='growth-popover-content' style='display: none'>
+                    <p><strong>Population Growth:</strong> Context factor on the assumed growth of metropolitan area.</p>
+                    <p><strong>Level of Ambition:</p>
+                    <p><strong>L0:</strong> Population growth is lower than in assumed plans (0.9% per year).</p>
+                    <p><strong>L1 (Reference):</strong> Population growth occurs as assumed in plans (1.4% per year).</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--
+    SET UP BAR CHART DISPLAYS OF OUTPUTS
+    -->
+    <hr>
+    <div class='container'>
+        <!-- HEADING AND RESET LINK -->
+        <div class='row'>
+            <h3>
+                <span>Model Outputs:</span>
+                <span class="num-selected-scenarios">
+                    <span class="filter-count" id="filter"></span>
+                    scenarios selected out of
+                    <span class="total-count" id="total"></span>
+                    scenarios |
+                    <a href="javascript:history.go(0)">Clear All Selections</a>
+                </span>
+             </h3>
+        </div>
+        <!-- 1ST ROW OF OUTPUT MEASURE BAR CHARTS -->
+        <div class='row'>
+            <div class='span4' id='CO2e-Reduction'>
+                <div>
+                <h5 class='text-center'><span class='bartitle'>GHG Target Reduction (-19%)</span><span class="glyphicon glyphicon-info-sign pop-crsr" id='co2e-popover'></span></h5>
+                <h5 class='text-center sm-margin'><span class='subtitle'>2038 Plans = <span id='Ref-CO2e-Reduction' class='stat'></span>%</span></h5>
+                <h5 class='text-center sm-margin'><span class='subtitle'>Average = <span id='Ave-CO2e-Reduction' class='stat'></span>%</span></h5>
+                </div>
+                <div id='co2e-popover-content' style='display: none'>
+                    <p><strong>GHG Target Reduction:</strong> 2005-2038 percentage reduction in light-duty vehicle GHG emissions (beyond what is anticipated to occur due to baseline assumptions regarding improvements to vehiles and fuels). RVMPO has a 2005 - 2035 state-set GHG reduction target of 19%.</p>
+                </div>
+            </div>
+            <div class='span4' id='Dvmt'>
+                <div>
+                <h5 class='text-center'><span class='bartitle'>DVMT Per Capita</span><span class="glyphicon glyphicon-info-sign pop-crsr" id='dvmt-popover'></span></h5>
+                <h5 class='text-center sm-margin'><span class='subtitle'>2038 Plans = <span id='Ref-Dvmt' class='stat'></span> daily miles</span></h5>
+                <h5 class='text-center sm-margin'><span class='subtitle'>Average = <span id='Ave-Dvmt' class='stat'></span> daily miles</span></h5>
+                </div>
+                <div id='dvmt-popover-content' style='display: none'>
+                    <p><strong>DVMT Per Capita:</strong> daily vehicle miles of travel of residents divided by population.</p>
+                </div>
+            </div>
+            <div class='span4' id='Walk'>
+                <div>
+                <h5 class='text-center'><span class='bartitle'>Walk Travel Per Capita</span><span class="glyphicon glyphicon-info-sign pop-crsr" id='walk-popover'></span></h5>
+                <h5 class='text-center sm-margin'><span class='subtitle'>2038 Plans = <span id='Ref-Walk' class='stat'></span> annual trips</span></h5>
+                <h5 class='text-center sm-margin'><span class='subtitle'>Average = <span id='Ave-Walk' class='stat'></span> annual trips</span></h5>
+                </div>
+                <div id='walk-popover-content' style='display: none'>
+                    <p><strong>Walk Trips Per Capita:</strong> annual residents' walk trips (not including recreation or walk to transit) divided by population.</p>
+                </div>
+            </div>
+             <div class='span4' id='Air-Pollution'>
+                <div>
+                <h5 class='text-center'><span class='bartitle'>Air Pollution Emissions</span><span class="glyphicon glyphicon-info-sign pop-crsr" id='pollution-popover'></span></h5>
+                <h5 class='text-center sm-margin'><span class='subtitle'>2038 Plans = <span id='Ref-Air-Pollution' class='stat'></span> daily metric tons</span></h5>
+                <h5 class='text-center sm-margin'><span class='subtitle'>Average = <span id='Ave-Air-Pollution' class='stat'></span> daily metric tons</span></h5>
+                </div>
+                <div id='pollution-popover-content' style='display: none'>
+                    <p><strong>Air Pollution Emissions:</strong> daily metric tons of pollutants emitted from all light-duty vehicle travel (including hydrocarbons, carbon monoxide, nitrogen dioxide, and particulates).</p>
+                </div>
+            </div>
+         </div>
+
+      <!-- 2ND ROW OF OUTPUT MEASURE BAR CHARTS -->
+        <div class='row'>
+            <div class='span4' id='Fuel'>
+                <div>
+                <h5 class='text-center'><span class='bartitle'>Annual Fuel Use</span><span class="glyphicon glyphicon-info-sign pop-crsr" id='fuel-popover'></span></h5>
+                <h5 class='text-center sm-margin'><span class='subtitle'>2038 Plans = <span id='Ref-Fuel' class='stat'></span> million gallons</span></h5>
+                <h5 class='text-center sm-margin'><span class='subtitle'>Average = <span id='Ave-Fuel' class='stat'></span> million gallons</span></h5>
+                </div>
+                <div id='fuel-popover-content' style='display: none'>
+                    <p><strong>Annual Fuel Use:</strong> annual million gallons of gasoline and other fuels consumed by all light-duty vehicle travel.</p>
+                </div>
+            </div>
+            <div class='span4' id='Truck-Delay'>
+                <div>
+                <h5 class='text-center'><span class='bartitle'>Truck Delay</span><span class="glyphicon glyphicon-info-sign pop-crsr" id='truck-popover'></span></h5>
+                <h5 class='text-center sm-margin'><span class='subtitle'>2038 Plans = <span id='Ref-Truck-Delay' class='stat'></span> daily vehicle hr.</span></h5>
+                <h5 class='text-center sm-margin'><span class='subtitle'>Average = <span id='Ave-Truck-Delay' class='stat'></span> daily vehicle hr.</span></h5>
+                </div>
+                <div id='truck-popover-content' style='display: none'>
+                    <p><strong>Truck Delay:</strong> daily vehicle-hours of delay for heavy truck travel on area roads.</p>
+                </div>
+            </div>
+            <div class='span4' id='Cost-Pct'>
+                <div>
+                <h5 class='text-center'><span class='bartitle'>Vehicle Cost % (All Income)</span><span class="glyphicon glyphicon-info-sign pop-crsr" id='cost-pct-popover'></span></h5>
+                <h5 class='text-center sm-margin'><span class='subtitle'>2038 Plans = <span id='Ref-Cost-Pct' class='stat'></span>%</span></h5>
+                <h5 class='text-center sm-margin'><span class='subtitle'>Average = <span id='Ave-Cost-Pct' class='stat'></span>%</span></h5>
+                </div>
+                <div id='cost-pct-popover-content' style='display: none'>
+                    <p><strong>Household Vehicle Cost as Percentage of Income:</strong> average percentage of income spent by all households on owning and operating light-duty vehicles.</p>
+                </div>
+            </div>
+            <div class='span4' id='Low-Pct'>
+                <div>
+                <h5 class='text-center'><span class='bartitle'>Vehicle Cost % (Low Income)</span><span class="glyphicon glyphicon-info-sign pop-crsr" id='low-pct-popover'></span></h5>
+                <h5 class='text-center sm-margin'><span class='subtitle'>2038 Plans = <span id='Ref-Low-Pct' class='stat'></span>%</span></h5>
+                <h5 class='text-center sm-margin'><span class='subtitle'>Average = <span id='Ave-Low-Pct' class='stat'></span>%</span></h5>
+                </div>
+                <div id='low-pct-popover-content' style='display: none'>
+                    <p><strong>Low Income Household Vehicle Cost as Percentage of Income:</strong> average percentage of income spent by low-income households on owning and operating light-duty vehicles.</p>
+                </div>
+            </div>
+       </div>
+
+    <!--
+    SET UP OUTPUT TABLE
+    -->
+    <hr>
+    <div class='container' style='font: 12px sans-serif;'>
+        <div class='row'>
+            <h3>Scenario Data Table</h3>
+        </div>
+        <div class='row'>
+            <div class='span12'>
+                <table class='table table-hover' id='Scenario-Results'>
+                    <thead>
+                        <tr class='header'>
+                            <th>Community</th>
+                            <th>Marketing</th>
+                            <th>Pricing</th>
+                            <th>Fleet</th>
+                            <th>Gas Price</th>
+                            <th>Income</th>
+                            <th>Growth</th>
+                            <th>CO2e Reduction</th>
+                            <th>DVMT</th>
+                            <th>Bike Travel</th>
+                            <th>Walk Trips</th>
+                            <th>Air Pollution</th>
+                            <th>Fuel Use</th>
+                            <th>Emission Rate</th>
+                            <th>Truck Delay</th>
+                            <th>Vehicle Cost</th>
+                            <th>Ave. Cost Pct.</th>
+                            <th>Low Inc. Cost Pct.</th>
+                        </tr>
+                   </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!--
+    LOAD SCENARIO DATA AND REF MEASURES DATA
+    -->
+    <script src='data/verspm.js' type='text/javascript'></script>
+    <script src='data/verspm-ref.js' type="text/javascript"></script>
+    
+    <!--
+    JAVASCRIPT TO IMPLEMENT VISUALIZATION
+    -->
+    <script>
+
+        // Identify the reference scenario values
+        //---------------------------------------
+        var refValues = ref[0];
+
+        // Establish the crossfilter
+        //--------------------------
+        var facts = crossfilter(data);
+
+        // Set up all of the dc.js chart objects
+        //--------------------------------------
+        // Set up the pie chart objects to display scenario input levels
+        var
+            communityPieChart = dc.pieChart("#Community"),
+            marketingPieChart = dc.pieChart("#Marketing"),
+            pricingPieChart = dc.pieChart("#Pricing"),
+            fleetPieChart = dc.pieChart("#Fleet"),
+            gasPieChart = dc.pieChart("#Gas"),
+            incomePieChart = dc.pieChart("#Income"),
+            growthPieChart = dc.pieChart("#Growth")
+        ;
+        // Set up the bar chart objects to display scenario output levels
+        var
+            targetBarChart = dc.barChart("#CO2e-Reduction"),
+            dvmtBarChart = dc.barChart("#Dvmt"),
+            walkBarChart = dc.barChart("#Walk"),
+            pollutionBarChart = dc.barChart("#Air-Pollution"),
+            fuelBarChart = dc.barChart("#Fuel"),
+            truckDelayBarChart = dc.barChart("#Truck-Delay"),
+            costPctBarChart = dc.barChart("#Cost-Pct"),
+            lowPctBarChart = dc.barChart("#Low-Pct")
+        ;
+        // Set up the number objects to display output averages
+        var
+            targetAveNum = dc.numberDisplay("#Ave-CO2e-Reduction")
+            dvmtAveNum = dc.numberDisplay("#Ave-Dvmt"),
+            walkAveNum = dc.numberDisplay("#Ave-Walk"),
+            pollutionAveNum = dc.numberDisplay("#Ave-Air-Pollution"),
+            fuelAveNum = dc.numberDisplay("#Ave-Fuel"),
+            truckDelayAveNum = dc.numberDisplay("#Ave-Truck-Delay"),
+            costPctAveNum = dc.numberDisplay("#Ave-Cost-Pct"),
+            lowPctAveNum = dc.numberDisplay("#Ave-Low-Pct")
+        ;
+        // Set up the number objects to display output reference values
+        var
+            targetRefNum = dc.numberDisplay("#Ref-CO2e-Reduction")
+            dvmtRefNum = dc.numberDisplay("#Ref-Dvmt"),
+            walkRefNum = dc.numberDisplay("#Ref-Walk"),
+            pollutionRefNum = dc.numberDisplay("#Ref-Air-Pollution"),
+            fuelRefNum = dc.numberDisplay("#Ref-Fuel"),
+            truckDelayRefNum = dc.numberDisplay("#Ref-Truck-Delay"),
+            costPctRefNum = dc.numberDisplay("#Ref-Cost-Pct"),
+            lowPctRefNum = dc.numberDisplay("#Ref-Low-Pct")
+        ;
+        // Set up table to display values for selected scenarios
+        var scenarioTable = dc.dataTable("#Scenario-Results");
+        // Set up display of total selected scenarios
+        var all = facts.groupAll();
+        dc.dataCount(".num-selected-scenarios")
+            .dimension(facts)
+            .group(all);
+
+
+        // Establish a crossfilter dimensions for the scenario data
+        //---------------------------------------------------------
+        // Establish the scenario input dimensions to be displayed and filtered
+        var
+            communityDim = facts.dimension( function(d) {return d.Community;} ),
+            marketingDim = facts.dimension( function(d) {return d.Marketing;} ),
+            pricingDim = facts.dimension( function(d) {return d.Pricing;} ),
+            fleetDim = facts.dimension( function(d) {return d.Fleet;} ),
+            gasPriceDim = facts.dimension( function(d) {return d.FuelPrice;} ),
+            incomeDim = facts.dimension( function(d) {return d.Income;} ),
+            growthDim = facts.dimension( function(d) {return d.Growth;} )
+        ;
+        // Establish the scenario output dimensions to be displayed and filtered
+        var
+            co2eReduceDim = facts.dimension( function(d) {return d.CO2eTargetChange;} ),
+            dvmtDim = facts.dimension( function(d) {return d.DvmtCap;} ),
+            walkDim = facts.dimension( function(d) {return d.WalkTripsCap;} ),
+            pollutionDim = facts.dimension( function(d) {return d.TotalPollution;} ),
+            fuelDim = facts.dimension( function(d) {return d.FuelTotal;} ),
+            truckDelayDim = facts.dimension( function(d) {return d.TruckDelay;} ),
+            costPctDim = facts.dimension( function(d) {return d.HouseholdCostPct;} ),
+            lowPctDim = facts.dimension( function(d) {return d.LowIncHouseholdCostPct;} )
+        ;
+
+        // Establish the group statistics to display
+        //------------------------------------------
+        // Establish the scenario input group statistics (counts) to be displayed as pie wedges
+        var
+            communityGroup = communityDim.group(),
+            marketingGroup = marketingDim.group(),
+            pricingGroup = pricingDim.group(),
+            fleetGroup = fleetDim.group(),
+            gasPriceGroup = gasPriceDim.group(),
+            incomeGroup = incomeDim.group(),
+            growthGroup = growthDim.group()
+        ;
+        // Establish the bin dimensions for bar charts (to be used in grouping)
+        var measures = [ "CO2eTargetChange", "DvmtCap", "WalkTripsCap",
+                         "TotalPollution", "FuelTotal", "TruckDelay",
+                         "HouseholdCostPct", "LowIncHouseholdCostPct"]
+        var bins = {};
+        var calcBinning = function(data, measure, nBins) {
+            var xExtent = d3.extent(data, function(d) {return d[measure];});
+            var xWidth = (xExtent[1] - xExtent[0]) / nBins;
+            return { xExtent: xExtent, xWidth: xWidth };
+        };
+        for( var i=0; i<measures.length; i++ ) {
+            bins[measures[i]] = calcBinning( data, measures[i], 15 );
+        };
+        // Establish the output group statistics (counts) to be displayed in bar charts
+        var
+            co2eReduceGroup = co2eReduceDim.group(function(d) {return Math.floor(d / bins.CO2eTargetChange.xWidth) * bins.CO2eTargetChange.xWidth;}),
+            dvmtGroup = dvmtDim.group(function(d){return Math.floor(d / bins.DvmtCap.xWidth) * bins.DvmtCap.xWidth;}),
+            walkGroup = walkDim.group(function(d){return Math.floor(d / bins.WalkTripsCap.xWidth) * bins.WalkTripsCap.xWidth;}),
+            pollutionGroup = pollutionDim.group(function(d){return Math.floor(d / bins.TotalPollution.xWidth) * bins.TotalPollution.xWidth;}),
+            fuelGroup = fuelDim.group(function(d){return Math.floor(d / bins.FuelTotal.xWidth) * bins.FuelTotal.xWidth;}),
+            truckDelayGroup = truckDelayDim.group(function(d){return Math.floor(d / bins.TruckDelay.xWidth) * bins.TruckDelay.xWidth;}),
+            costPctGroup = costPctDim.group(function(d){return Math.floor(d / bins.HouseholdCostPct.xWidth) * bins.HouseholdCostPct.xWidth;}),
+            lowPctGroup = lowPctDim.group(function(d){return Math.floor(d / bins.LowIncHouseholdCostPct.xWidth) * bins.LowIncHouseholdCostPct.xWidth;})
+        ;
+        // Define reduce functions to calculate output measure averages for filtered selections
+        function addAvg(attr) {
+            return function(p,v) {
+                ++p.count
+                p.sum += v[attr];
+                p.avg = p.sum/p.count;
+                p.ref = refValues[attr];
+                return p;
+            };
+        }
+        function remAvg(attr) {
+            return function(p,v) {
+                --p.count
+                p.sum -= v[attr];
+                p.avg = p.sum/p.count;
+                p.ref = refValues[attr];
+                return p;
+            };
+        }
+        function iniAvg() {
+            return {count:0, sum:0, avg:0, ref:0};
+        }
+      
+        // Establish the output group output measure averages
+        var
+            //allDim = facts.dimension( function(d) {return Math.round(d.CO2eTargetChange / d.CO2eTargetChange);} ),
+            allDim = facts.dimension( function(d) {return d;} ),
+            co2eReduceAveGroup = allDim.group().reduce(addAvg("CO2eTargetChange"), remAvg("CO2eTargetChange"), iniAvg),
+            dvmtAveGroup = allDim.group().reduce(addAvg("DvmtCap"), remAvg("DvmtCap"), iniAvg),
+            walkAveGroup = allDim.group().reduce(addAvg("WalkTripsCap"), remAvg("WalkTripsCap"), iniAvg),
+            pollutionAveGroup = allDim.group().reduce(addAvg("TotalPollution"), remAvg("TotalPollution"), iniAvg),
+            fuelAveGroup = allDim.group().reduce(addAvg("FuelTotal"), remAvg("FuelTotal"), iniAvg),
+            truckDelayAveGroup = allDim.group().reduce(addAvg("TruckDelay"), remAvg("TruckDelay"), iniAvg),
+            costPctAveGroup = allDim.group().reduce(addAvg("HouseholdCostPct"), remAvg("HouseholdCostPct"), iniAvg),
+            lowPctAveGroup = allDim.group().reduce(addAvg("LowIncHouseholdCostPct"), remAvg("LowIncHouseholdCostPct"), iniAvg)
+        ;
+
+        // Plot the input pie charts
+        //--------------------------
+        // Define layout variables that are common to all the pie charts
+        var
+            pieWidth = 160,
+            pieHeight = 160,
+            pieRadius = 60,
+            pieInnerRadius = 20,
+            pieMargins = {top: 10, right: 10, bottom: 10, left: 10}
+        ;
+        // Community category input levels
+        communityPieInfo = {
+          1: "L1 (Adopted Plans): No change from 2010.",
+          2: "L2: Activity center growth,\n2 x transit service, 10% bike diversion.",
+          3: "L3: Activity center growth,\n4 x transit service, 10% bike diversion,\nincrease paid parking in activity centers & Ashland with cashout.",
+          4: "L4: Activity center growth,\n4 x transit service, 55% diversion through large adoption of e-bikes,\nincrease paid parking in activity centers & Ashland."
+        }
+        communityPieChart.width(pieWidth)
+            .height(pieHeight)
+            .radius(pieRadius)
+            .innerRadius(pieInnerRadius)
+            .slicesCap(4)
+            .dimension(communityDim)
+            .group(communityGroup)
+            .title(function(d){return communityPieInfo[d.key]})
+            .label(function (d){return "L" + d.key;});
+            communityPieChart.ordinalColors(["#a1d99b","#74c476","#31a354","#006d2c"]);
+        // Marketing category input levels
+        marketingPieInfo = {
+          1: "L1 (Adopted Plans): No change from 2010.",       
+          2: "L2: Fully implement travel demand management,\neco-driving, and ITS programs."
+        }
+        marketingPieChart.width(pieWidth)
+            .height(pieHeight)
+            .radius(pieRadius)
+            .innerRadius(pieInnerRadius)
+            .slicesCap(3)
+            .dimension(marketingDim)
+            .group(marketingGroup)
+            .title(function(d){return marketingPieInfo[d.key]})
+            .label(function (d){return "L" + d.key;});
+            marketingPieChart.ordinalColors(["#9e9ac8","#6a51a3"]);
+        // Pricing category input levels
+        pricingPieInfo = {
+          1: "L1 (Adopted Plans): 2010 taxes and fees.",
+          2: "L2: Pay-as-you-drive (PAYD) insurance,\nhigher electricity costs (due to more renewables).",
+          3: "L3: Pay-as-you-drive (PAYD) insurance,\nhigher electricity costs (due to more renewables),\n69% social cost recovery."
+        }
+        pricingPieChart.width(pieWidth)
+            .height(pieHeight)
+            .radius(pieRadius)
+            .innerRadius(pieInnerRadius)
+            .slicesCap(3)
+            .dimension(pricingDim)
+            .group(pricingGroup)
+            .title(function(d){return pricingPieInfo[d.key]})
+            .label(function (d){return "L" + d.key;});
+            pricingPieChart.ordinalColors(["#fdbe85","#fd8d3c","#d94701"]);
+        // Fleet category input levels
+        fleetPieInfo = {
+          0: "L0: Baseline vehicle technology mix (8% electric vehicles)\nand carbon intensity of fuels,\nbut light-trucks remain 45% of the fleet,\nand the average vehicle age remains 10.5 years.",
+          1: "L1 (Reference): Baseline vehicle technology mix\nand carbon intensity of fuels,\nlight truck share reduced to 35% of fleet,\nand average vehicle age declines (8 years).",
+          2: "L2: Vehicle technology mix includes a higher percentage of electric vehicles (14%),\naverage carbon intensity of fuels reduced by\ncommercial vehicles switching to renewable natural gas,\nlight truck share reduced to 35% of fleet,\nand average vehicle age declines (8 years)."
+        }
+        fleetPieChart.width(pieWidth)
+            .height(pieHeight)
+            .radius(pieRadius)
+            .innerRadius(pieInnerRadius)
+            .slicesCap(3)
+            .dimension(fleetDim)
+            .group(fleetGroup)
+            .title(function(d){return fleetPieInfo[d.key]})
+            .label(function (d){return "L" + d.key;});
+            fleetPieChart.ordinalColors(["#6baed6","#3182bd","#08519c"]);
+        // Gas price category input levels
+        gasPieInfo = {
+          0: "L0: Real fuel price (i.e. exclusive of inflation)\nstays at 2010 purchasing power.",
+          1: "L1 (Reference): Real fuel price doubles relative to 2010.",
+          2: "L2: Real fuel price is four times the 2010 price."
+        }
+        gasPieChart.width(pieWidth)
+            .height(pieHeight)
+            .radius(pieRadius)
+            .innerRadius(pieInnerRadius)
+            .slicesCap(3)
+            .dimension(gasPriceDim)
+            .group(gasPriceGroup)
+            .title(function(d){return gasPieInfo[d.key]})
+            .label(function (d){return "L" + d.key;})
+            .filter(1);
+            gasPieChart.ordinalColors(["#fcae91","#fb6a4a","#cb181d"]);
+        // Income category input levels
+        incomePieInfo = {
+          0: "L0: Real income (i.e. exclusive of inflation) remains at 2010 level.",
+          1: "L1 (Reference): Real income grows at historic 80-year\ncompound average growth rate of 0.7% per year.",
+          2: "L2: Real income grows at 50% greater rate than reference."
+        }
+        incomePieChart.width(pieWidth)
+            .height(pieHeight)
+            .radius(pieRadius)
+            .innerRadius(pieInnerRadius)
+            .slicesCap(3)
+            .dimension(incomeDim)
+            .group(incomeGroup)
+            .title(function(d){return incomePieInfo[d.key]})
+            .label(function (d){return "L" + d.key;})
+            .filter(1);
+            incomePieChart.ordinalColors(["#fe9929","#d95f0e","#993404"]);
+        // Growth category input levels
+        growthPieInfo = {
+          0: "L0: Population growth is lower than in assumed plans (0.9% per year).",
+          1: "L1 (Reference): Population growth occurs as assumed in plans (1.4% per year)."
+        }
+        growthPieChart.width(pieWidth)
+            .height(pieHeight)
+            .radius(pieRadius)
+            .innerRadius(pieInnerRadius)
+            .slicesCap(3)
+            .dimension(growthDim)
+            .group(growthGroup)
+            .title(function(d){return growthPieInfo[d.key]})
+            .label(function (d){return "L" + d.key;})
+            .filter(1);
+            growthPieChart.ordinalColors(["#74a9cf","#0570b0"]);
+
+        // Plot the output bar charts
+        //---------------------------
+        // Define layout variables that are common to all the bar charts
+        var
+            barWidth = 250,
+            barHeight = 120,
+            barMargins = {top: 10, right: 10, bottom: 20, left: 15}
+            barGap = 35
+            barX = 5
+        ;
+        // CO2e reduction relative to target baseline
+        targetBarChart.width(barWidth)
+            .height(barHeight)
+            .margins(barMargins)
+            .dimension(co2eReduceDim)
+            .group(co2eReduceGroup)
+            .transitionDuration(200)
+            .centerBar(true)
+            .gap(barGap)
+            .x(d3.scale.linear().domain(bins.CO2eTargetChange.xExtent))
+            .yAxisLabel("# Scenarios")
+            .elasticY(true)
+            .xAxis().tickFormat();
+        targetBarChart.xAxis().ticks(5);
+        targetBarChart.yAxis().ticks(5);
+        targetBarChart.xUnits(function(){return barX;});
+        // Average per capita DVMT of households
+        dvmtBarChart.width(barWidth)
+            .height(barHeight)
+            .margins(barMargins)
+            .dimension(dvmtDim)
+            .group(dvmtGroup)
+            .transitionDuration(200)
+            .centerBar(true)
+            .gap(barGap)
+            .x(d3.scale.linear().domain(bins.DvmtCap.xExtent))
+            .elasticY(true)
+            .xAxis().tickFormat();
+        dvmtBarChart.xAxis().ticks(5);
+        dvmtBarChart.yAxis().ticks(5);
+        dvmtBarChart.xUnits(function(){return barX;});
+        // Average walk trips of households
+        walkBarChart.width(barWidth)
+            .height(barHeight)
+            .margins(barMargins)
+            .dimension(walkDim)
+            .group(walkGroup)
+            .transitionDuration(200)
+            .centerBar(true)
+            .gap(barGap)
+            .x(d3.scale.linear().domain(bins.WalkTripsCap.xExtent))
+            .elasticY(true)
+            .xAxis().tickFormat();
+        walkBarChart.xAxis().ticks(5);
+        walkBarChart.yAxis().ticks(5);
+        walkBarChart.xUnits(function(){return barX;});
+        // Air pollution quantities
+        pollutionBarChart.width(barWidth)
+            .height(barHeight)
+            .margins(barMargins)
+            .dimension(pollutionDim)
+            .group(pollutionGroup)
+            .transitionDuration(200)
+            .centerBar(true)
+            .gap(barGap)
+            .x(d3.scale.linear().domain(bins.TotalPollution.xExtent))
+            .elasticY(true)
+            .xAxis().tickFormat();
+        pollutionBarChart.xAxis().ticks(5);
+        pollutionBarChart.yAxis().ticks(5);
+        pollutionBarChart.xUnits(function(){return barX;});
+        // Fuel consumption quantities
+        fuelBarChart.width(barWidth)
+            .height(barHeight)
+            .margins(barMargins)
+            .dimension(fuelDim)
+            .group(fuelGroup)
+            .transitionDuration(200)
+            .centerBar(true)
+            .gap(barGap)
+            .x(d3.scale.linear().domain(bins.FuelTotal.xExtent))
+            .yAxisLabel("# Scenarios")
+            .elasticY(true)
+            .xAxis().tickFormat();
+        fuelBarChart.xAxis().ticks(5);
+        fuelBarChart.yAxis().ticks(5);
+        fuelBarChart.xUnits(function(){return barX;});
+        // Total hours of truck delay
+        truckDelayBarChart.width(barWidth)
+            .height(barHeight)
+            .margins(barMargins)
+            .dimension(truckDelayDim)
+            .group(truckDelayGroup)
+            .transitionDuration(200)
+            .centerBar(true)
+            .gap(barGap)
+            .x(d3.scale.linear().domain(bins.TruckDelay.xExtent))
+            .elasticY(true)
+            .xAxis().tickFormat();
+        truckDelayBarChart.xAxis().ticks(5);
+        truckDelayBarChart.yAxis().ticks(5);
+        truckDelayBarChart.xUnits(function(){return barX;});
+        // Average percentage of household income spent on vehicle travel
+        costPctBarChart.width(barWidth)
+            .height(barHeight)
+            .margins(barMargins)
+            .dimension(costPctDim)
+            .group(costPctGroup)
+            .transitionDuration(200)
+            .centerBar(true)
+            .gap(barGap)
+            .x(d3.scale.linear().domain(bins.HouseholdCostPct.xExtent))
+            .elasticY(true)
+            .xAxis().tickFormat();
+        costPctBarChart.xAxis().ticks(5);
+        costPctBarChart.yAxis().ticks(5);
+        costPctBarChart.xUnits(function(){return barX;});
+        // Average low income household percentage of income spent on vehicle travel
+        lowPctBarChart.width(barWidth)
+            .height(barHeight)
+            .margins(barMargins)
+            .dimension(lowPctDim)
+            .group(lowPctGroup)
+            .transitionDuration(200)
+            .centerBar(true)
+            .gap(barGap)
+            .x(d3.scale.linear().domain(bins.LowIncHouseholdCostPct.xExtent))
+            .elasticY(true)
+            .xAxis().tickFormat();
+        lowPctBarChart.xAxis().ticks(5);
+        lowPctBarChart.yAxis().ticks(5);
+        lowPctBarChart.xUnits(function(){return barX;});
+
+        // Display the reference values and average values for outputs
+        //------------------------------------------------------------
+        targetRefNum.group(co2eReduceAveGroup)
+          .valueAccessor(function(p) {return p.value.ref;})
+          .formatNumber(d3.format(".1g"));
+        dvmtRefNum.group(dvmtAveGroup)
+          .valueAccessor(function(p) {return p.value.ref;});
+        walkRefNum.group(walkAveGroup)
+          .valueAccessor(function(p) {return p.value.ref;});
+        pollutionRefNum.group(pollutionAveGroup)
+          .valueAccessor(function(p) {return p.value.ref;});
+        fuelRefNum.group(fuelAveGroup)
+          .valueAccessor(function(p) {return p.value.ref;});
+        truckDelayRefNum.group(truckDelayAveGroup)
+          .valueAccessor(function(p) {return p.value.ref;});
+        costPctRefNum.group(costPctAveGroup)
+          .valueAccessor(function(p) {return p.value.ref;});
+        lowPctRefNum.group(lowPctAveGroup)
+          .valueAccessor(function(p) {return p.value.ref;});
+
+        targetAveNum.group(co2eReduceAveGroup).valueAccessor(function(p) {return p.value.avg;});
+        dvmtAveNum.group(dvmtAveGroup).valueAccessor(function(p) {return p.value.avg;});
+        walkAveNum.group(walkAveGroup).valueAccessor(function(p) {return p.value.avg;});
+        pollutionAveNum.group(pollutionAveGroup).valueAccessor(function(p) {return p.value.avg;});
+        fuelAveNum.group(fuelAveGroup).valueAccessor(function(p) {return p.value.avg;});
+        truckDelayAveNum.group(truckDelayAveGroup).valueAccessor(function(p) {return p.value.avg;});
+        costPctAveNum.group(costPctAveGroup).valueAccessor(function(p) {return p.value.avg;});
+        lowPctAveNum.group(lowPctAveGroup).valueAccessor(function(p) {return p.value.avg;});
+
+        // Display the scenario data table for the top 10 scenarios
+        //---------------------------------------------------------
+        scenarioTable.width(960).height(800)
+            .dimension(co2eReduceDim)
+            .group(function(d) {return "";})
+            .columns([
+                function(d) {return d.Community;},
+                function(d) {return d.Marketing;},
+                function(d) {return d.Pricing;},
+                function(d) {return d.Fleet;},
+                function(d) {return d.FuelPrice;},
+                function(d) {return d.Income;},
+                function(d) {return d.Growth;},
+                function(d) {return d.CO2eTargetChange;},
+                function(d) {return d.DvmtCap;},
+                function(d) {return d.BikeDvmtCap;},
+                function(d) {return d.WalkTripsCap;},
+                function(d) {return d.TotalPollution;},
+                function(d) {return d.FuelTotal;},
+                function(d) {return d.CO2eMile;},
+                function(d) {return d.TruckDelay;},
+                function(d) {return d.VehCostHousehold;},
+                function(d) {return d.HouseholdCostPct;},
+                function(d) {return d.LowIncHouseholdCostPct;}
+            ])
+            .sortBy(function(d) {return d.CO2eTargetChange;})
+            .order(d3.ascending)
+            .size(500);
+        // Render all of the graphic elements
+        //-----------------------------------
+        dc.renderAll();
+
+    </script>
+
+</body>

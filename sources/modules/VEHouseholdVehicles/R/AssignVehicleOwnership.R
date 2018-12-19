@@ -40,8 +40,8 @@
 #Packages used in code development
 #=================================
 #Uncomment following lines during code development. Recomment when done.
-library(visioneval)
-library(ordinal)
+# library(visioneval)
+# library(ordinal)
 
 
 #=============================================
@@ -396,8 +396,8 @@ usethis::use_data(AssignVehicleOwnershipSpecifications, overwrite = TRUE)
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
-#' @import visioneval
-#' @import ordinal
+#' @name AssignVehicleOwnership
+#' @import visioneval ordinal
 #' @export
 AssignVehicleOwnership <- function(L) {
   #Set up

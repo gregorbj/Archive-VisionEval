@@ -127,6 +127,7 @@ ServiceInp_ls <- items(
 #' UZABusEqRevMile_df: data on bus equivalent revenue miles by urbanized area,
 #' VehMiFactors_df: factors to convert revenue miles by mode into vehicle miles
 #' by mode.
+#' @name estimateTransitModel
 #' @import stats
 #' @export
 estimateTransitModel <- function() {
@@ -542,6 +543,7 @@ usethis::use_data(AssignTransitServiceSpecifications, overwrite = TRUE)
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name AssignTransitService
 #' @import visioneval
 #' @export
 AssignTransitService <- function(L) {

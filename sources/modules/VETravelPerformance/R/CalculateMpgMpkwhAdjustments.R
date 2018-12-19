@@ -359,6 +359,7 @@ usethis::use_data(CalculateMpgMpkwhAdjustmentsSpecifications, overwrite = TRUE)
 #'
 #' @param L A list containing data requested by the module from the datastore.
 #' @return A list containing data identified in the module Set specifications.
+#' @name CalculateMpgMpkwhAdjustments
 #' @import visioneval stats
 #' @export
 CalculateMpgMpkwhAdjustments <- function(L) {

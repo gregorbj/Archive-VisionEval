@@ -1,0 +1,32 @@
+Package: VEScenario
+Type: Package
+Title: Builds and run VERPAT scenarios
+Version: 0.1
+Date: 07/02/2018
+Author: Aditya Gore <aditya.gore@rsginc.com> [cre], Ben Stabler <ben.stabler@rsginc.com> [cre],  Brian Gregor <gregor@or-analytics.com> [auth]
+Maintainer: Aditya Gore <aditya.gore@rsginc.com>, Ben Stabler <ben.stabler@rsginc.com>
+Copyright: AASHTO
+URL: https://github.com/gregorbj/VisionEval/sources/modules/VEScenario
+Description: This package contains modules that builds and runs
+             scenarios for VERPAT model using visioneval framework.
+License: file LICENSE
+LazyData: TRUE
+Depends: R (>= 3.4)
+Imports:
+    visioneval,
+    devtools,
+	usethis,
+    future,
+    jsonlite,
+    data.table
+Suggests:
+    knitr
+VignetteBuilder: knitr
+Encoding: UTF-8
+RoxygenNote: 6.1.1
+Collate:
+        'BuildScenarios.R'
+        'RunScenarios.R'
+        'VERPATResults.R'
+        'VERSPMResults.R'
+        'ViewResults.R'

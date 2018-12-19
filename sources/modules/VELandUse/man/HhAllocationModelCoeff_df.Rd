@@ -4,7 +4,6 @@
 \docType{data}
 \name{HhAllocationModelCoeff_df}
 \alias{HhAllocationModelCoeff_df}
-\alias{HhAllocationModelCoeff_df}
 \title{Household Allocation Model}
 \format{A data.frame having the following components
 \describe{

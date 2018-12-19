@@ -563,6 +563,7 @@ usethis::use_data(PredictHousingSpecifications, overwrite = TRUE)
 #' @param MaxIter A scalar numeric value specifying the maximum number of
 #' iterations for balancing the array over the specified dimensions.
 #' @return An array containing values that meet the margin controls.
+#' @name ipf
 #' @import visioneval
 #' @export
 ipf <-
@@ -630,6 +631,7 @@ ipf <-
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name PredictHousing
 #' @import visioneval stats
 #' @export
 PredictHousing <- function(L) {

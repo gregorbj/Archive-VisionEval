@@ -877,6 +877,7 @@ usethis::use_data(CalculateHouseholdDvmtSpecifications, overwrite = TRUE)
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name CalculateHouseholdDvmt
 #' @import visioneval
 #' @export
 CalculateHouseholdDvmt <- function(L) {

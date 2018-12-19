@@ -1,5 +1,5 @@
 #update_name_registry.r
-library(visioneval)
+# library(visioneval)
 writeVENameRegistry("CreateBaseSyntheticFirms", "VESyntheticFirms")
 writeVENameRegistry("CreateFutureSyntheticFirms", "VESyntheticFirms")
 writeVENameRegistry("CreateHouseholds", "VESimHouseholds")

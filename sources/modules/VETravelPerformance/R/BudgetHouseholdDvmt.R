@@ -491,6 +491,7 @@ usethis::use_data(BudgetHouseholdDvmtSpecifications, overwrite = TRUE)
 #' @param M A list the module functions of modules called by this module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name BudgetHouseholdDvmt
 #' @import visioneval
 #' @export
 BudgetHouseholdDvmt <- function(L, M) {

@@ -2,7 +2,7 @@
 #CreateFutureSyntheticFirms.R
 #============================
 
-library(visioneval)
+# library(visioneval)
 
 
 #================================================
@@ -216,6 +216,7 @@ usethis::use_data(CreateFutureSyntheticFirmsSpecifications, overwrite = TRUE)
 #'
 #' @param L A list
 #' @return A list
+#' @name CreateFutureSyntheticFirms
 #' @import visioneval stats
 #' @export
 CreateFutureSyntheticFirms <- function(L) {

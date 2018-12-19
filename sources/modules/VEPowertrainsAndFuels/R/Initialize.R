@@ -44,7 +44,7 @@
 #Packages used in code development
 #=================================
 #Uncomment following lines during code development. Recomment when done.
-library(visioneval)
+# library(visioneval)
 
 
 #=============================================
@@ -392,6 +392,7 @@ usethis::use_data(InitializeSpecifications, overwrite = TRUE)
 #' components: Errors and Data.
 #' @return A list that is the same as the input list with an additional
 #' Warnings component.
+#' @name Initialize
 #' @import visioneval
 #' @export
 Initialize <- function(L) {

@@ -80,7 +80,7 @@
 #Packages used in code development
 #=================================
 #Uncomment following lines during code development. Recomment when done.
-library(visioneval)
+# library(visioneval)
 
 
 #=============================================
@@ -657,9 +657,8 @@ usethis::use_data(AssignHhVehiclePowertrainSpecifications, overwrite = TRUE)
 #' @param M A list the module functions of modules called by this module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
-#' @import visioneval
-#' @import VEHouseholdTravel
-#' @import stats
+#' @name AssignHhVehiclePowertrain
+#' @import visioneval VEHouseholdTravel stats
 #' @export
 #'
 AssignHhVehiclePowertrain <- function(L, M) {

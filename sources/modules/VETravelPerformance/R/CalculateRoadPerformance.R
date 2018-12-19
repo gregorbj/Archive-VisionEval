@@ -445,6 +445,7 @@ usethis::use_data(CongestedProportions_ls, overwrite = TRUE)
 #' MeasureType is 'DVHT'.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name calculateCongestion
 #' @import visioneval
 #' @export
 calculateCongestion <-
@@ -821,6 +822,7 @@ usethis::use_data(Access_df, overwrite = TRUE)
 #' @return A list containing two matrices. The first is a matrix of average
 #' speed (miles per hour) by congestion level and road class. The second is a
 #' matrix of delay hours per vehicle mile by congestion level and road class.
+#' @name calculateSpeeds
 #' @import visioneval
 #' @import stats
 #' @export
@@ -1328,6 +1330,7 @@ usethis::use_data(CalculateRoadPerformanceSpecifications, overwrite = TRUE)
 #' @param L A list containing data defined by the module specification.
 #' @return A list containing data produced by the function consistent with the
 #' module specifications.
+#' @name CalculateRoadPerformance
 #' @import visioneval
 #' @export
 CalculateRoadPerformance <- function(L) {

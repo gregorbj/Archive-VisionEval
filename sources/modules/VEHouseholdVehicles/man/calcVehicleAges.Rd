@@ -4,7 +4,8 @@
 \alias{calcVehicleAges}
 \title{Calculate vehicle type and age for each household.}
 \usage{
-calcVehicleAges(Hh_df, VProp = NULL, AdjRatio = c(Auto = 1, LtTruck = 1))
+calcVehicleAges(Hh_df, VProp = NULL, AdjRatio = c(Auto = 1, LtTruck =
+  1))
 }
 \arguments{
 \item{Hh_df}{A household data frame consisting of household characteristics.}

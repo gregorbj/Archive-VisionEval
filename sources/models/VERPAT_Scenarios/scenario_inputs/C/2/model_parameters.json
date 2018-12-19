@@ -1,0 +1,10 @@
+[
+  {
+    "NAME" : "VmtCharge",
+    "VALUE": "0.05",
+    "TYPE" : "compound",
+    "UNITS" : "USD/MI",
+    "PROHIBIT" : "c('NA', '< 0')",
+    "ISELEMENTOF" : ""
+  }
+]

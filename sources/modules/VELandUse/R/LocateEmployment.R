@@ -309,6 +309,7 @@ usethis::use_data(LocateEmploymentSpecifications, overwrite = TRUE)
 #' @return A integer vector of the number of jobs by Bzone which sums to the
 #' total. The positions correspond to the positions of the input vector of jobs
 #' by Bzone.
+#' @name adjustEmployment
 #' @export
 adjustEmployment <- function(EmpTarget, Emp_, Names = NULL) {
   EmpProbs_ <- Emp_ / sum(Emp_)
@@ -339,6 +340,7 @@ adjustEmployment <- function(EmpTarget, Emp_, Names = NULL) {
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name LocateEmployment
 #' @import visioneval fields
 #' @export
 LocateEmployment <- function(L) {

@@ -449,6 +449,7 @@ rm(CreateHouseholdsSpecifications)
 #' Age 55to64 - number of persons age 55 to 64 in the household
 #' Age65Plus - number of persons 65 or older in the household
 #' HhSize - total number of persons in the household
+#' @name createHhByAge
 #' @export
 createHhByAge <-
   function(Prsn_Ap,
@@ -595,6 +596,7 @@ createHhByAge <-
 #' Age 55to64 - number of persons age 55 to 64 in the household
 #' Age65Plus - number of persons 65 or older in the household
 #' HhSize - total number of persons in the household
+#' @name createGrpHhByAge
 #' @export
 createGrpHhByAge <-
   function(GrpPrsn_Ag) {
@@ -663,6 +665,7 @@ createGrpHhByAge <-
 #' identifies the size of the longest HhId.
 #' @import visioneval stats
 #' @include CreateEstimationDatasets.R
+#' @name CreateHouseholds
 #' @export
 CreateHouseholds <- function(L) {
   #Define dimension name vectors
