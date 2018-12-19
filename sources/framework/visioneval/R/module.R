@@ -1795,8 +1795,7 @@ documentModule <- function(ModuleName){
       if (IsOptional) {
         InpMarkdown_ <- c(
           InpMarkdown_,
-          paste("This input file is OPTIONAL.",
-                "It is only needed if the user wants to modify the relative employment rates."),
+          "This input file is OPTIONAL.",
           ""
         )
       }
