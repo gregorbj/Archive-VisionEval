@@ -1,0 +1,11 @@
+{
+  "Model": ["RPAT"],
+  "Scenario": ["RPAT Pilot"],
+  "Description": ["Pilot RPAT module in VisionEval"],
+  "Region": ["Multnomah County Oregon"],
+  "BaseYear": ["2035"],
+  "Years": ["2035"],
+  "DatastoreName": ["Datastore"],
+  "DatastoreType": ["RD"],
+  "Seed": [1]
+}

@@ -8,7 +8,7 @@
 
 
 
-library(visioneval)
+# library(visioneval)
 
 #=============================================
 #SECTION 1: ESTIMATE AND SAVE MODEL PARAMETERS
@@ -223,6 +223,7 @@ usethis::use_data(CreateFutureAccessibilitySpecifications, overwrite = TRUE)
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name CreateFutureAccessibility
 #' @import visioneval
 #' @export
 CreateFutureAccessibility <- function(L) {

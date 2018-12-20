@@ -1,0 +1,10 @@
+TDMProgram,DataItem,DataValue
+Ridesharing,RidesharingParticipation,0.05
+TransitSubsidy,TransitSubsidyParticipation,0.1
+TransitSubsidy,TransitSubsidyLevel,1.25
+WorkSchedule,Schedule980Participation,0.01
+WorkSchedule,Schedule440Participation,0.01
+WorkSchedule,Telecommute1.5DaysParticipation,0.01
+Vanpooling,LowLevelParticipation,0.04
+Vanpooling,MediumLevelParticipation,0.01
+Vanpooling,HighLevelParticipation,0.01

@@ -1,0 +1,11 @@
+{
+  "Model": ["VERSPM"],
+  "Scenario": ["Test"],
+  "Description": ["Test of VERSPM"],
+  "Region": ["RVMPO"],
+  "BaseYear": ["2038"],
+  "Years": ["2038"],
+  "DatastoreName": ["Datastore"],
+  "DatastoreType": ["RD"],
+  "Seed": [1]
+}

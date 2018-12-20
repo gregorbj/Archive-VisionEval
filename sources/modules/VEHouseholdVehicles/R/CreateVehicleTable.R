@@ -248,9 +248,9 @@ usethis::use_data(CreateVehicleTableSpecifications, overwrite = TRUE)
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name CreateVehicleTable
 #' @import visioneval
 #' @export
-#'
 CreateVehicleTable <- function(L) {
   #Initialize the output list
   Out_ls <- initDataList()

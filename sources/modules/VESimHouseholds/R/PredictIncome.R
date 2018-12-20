@@ -512,6 +512,7 @@ usethis::use_data(PredictIncomeSpecifications, overwrite = TRUE)
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name PredictIncome
 #' @import visioneval
 #' @export
 PredictIncome <- function(L) {

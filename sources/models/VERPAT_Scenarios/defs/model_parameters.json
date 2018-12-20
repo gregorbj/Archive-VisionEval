@@ -1,0 +1,37 @@
+[
+  {
+    "NAME": "ModelFolder",
+    "VALUE": "VERPAT_base_model",
+    "TYPE": "character",
+    "UNITS": "NA",
+    "PROHIBIT": "NA",
+    "SIZE": 20,
+    "ISELEMENTOF": ""
+  },
+  {
+    "NAME": "ScenarioInputFolder",
+    "VALUE": "scenario_inputs",
+    "TYPE": "character",
+    "UNITS": "NA",
+    "PROHIBIT": "NA",
+    "SIZE": 20,
+    "ISELEMENTOF": ""
+  },
+  {
+    "NAME" : "ScenarioOutputFolder",
+    "VALUE": "scenarios",
+   "TYPE": "character",
+   "UNITS": "NA",
+   "PROHIBIT": "NA",
+   "SIZE": 20,
+   "ISELEMENTOF": ""
+  },
+  {
+    "NAME" : "NWorkers",
+    "VALUE": "4",
+    "TYPE" : "integer",
+    "UNITS" : "NA",
+    "PROHIBIT" : "c('NA', '< 0')",
+    "ISELEMENTOF" : ""
+  }
+]

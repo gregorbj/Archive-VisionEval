@@ -1,7 +1,7 @@
 # R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
 
 language: r
-r: 3.5
+r: 3.4
 sudo: true
 dist: trusty
 cache: packages
@@ -28,8 +28,8 @@ before_install:
   - "phantomjs --version"
 
 install:
-  - Rscript -e 'install.packages(c("BiocManager", "curl","devtools", "roxygen2", "stringr", "knitr", "data.table", "ordinal", "geosphere", "fields", "car", "pbkrtest", "quantreg", "reshape"))'
-  - Rscript -e 'BiocManager::install(c("rhdf5", "zlibbioc"))'
+  - Rscript -e 'install.packages(c("curl","devtools", "roxygen2", "stringr", "knitr", "data.table", "ordinal", "geosphere", "fields", "car", "pbkrtest", "quantreg", "reshape"))'
+  - Rscript -e 'devtools::install_bioc(c("3.6/BiocInstaller", "3.6/rhdf5"))'
   # Packages required for VEGUI  
   - Rscript -e 'install.packages(c("shiny", "shinyjs", "shinyFiles", "DT", "shinyBS", "future", "testit", "jsonlite", "shinyAce", "envDocument", "rhandsontable", "shinyTree",
                                    "shinytest", "webdriver"))'
@@ -49,6 +49,8 @@ env:
    - FOLDER=sources/modules/VETravelPerformance     SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=VE2001NHTS,VEHouseholdTravel,VEPowertrainsAndFuels
    - FOLDER=sources/modules/VEPowertrainsAndFuels   SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=VE2001NHTS,VEHouseholdTravel
    - FOLDER=sources/modules/VEReports               SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=VE2001NHTS,VEHouseholdTravel
+   # - FOLDER=sources/modules/VEScenario              SCRIPT=tests/scripts/test.R    TYPE=module      DEPENDS=
+   - FOLDER=sources/models/BaseYearVERPAT           SCRIPT=run_model.R             TYPE=model       DEPENDS=VE2001NHTS,VESimHouseholds,VESyntheticFirms,VELandUse,VETransportSupply,VEHouseholdTravel,VEHouseholdVehicles,VETransportSupplyUse,VEReports
    - FOLDER=sources/models/VERPAT                   SCRIPT=run_model.R             TYPE=model       DEPENDS=VE2001NHTS,VESimHouseholds,VESyntheticFirms,VELandUse,VETransportSupply,VEHouseholdTravel,VEHouseholdVehicles,VETransportSupplyUse,VEReports
    - FOLDER=sources/models/VERSPM/Test1             SCRIPT=run_model.R             TYPE=model       DEPENDS=VE2001NHTS,VESimHouseholds,VELandUse,VETransportSupply,VEHouseholdTravel,VEHouseholdVehicles,VEPowertrainsAndFuels,VETravelPerformance
    - FOLDER=sources/VEGUI                           SCRIPT=run_vegui_test.R        TYPE=model       DEPENDS=VE2001NHTS,VESimHouseholds,VESyntheticFirms,VELandUse,VETransportSupply,VEHouseholdTravel,VEHouseholdVehicles,VETransportSupplyUse,VEReports

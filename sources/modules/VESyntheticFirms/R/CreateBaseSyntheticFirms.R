@@ -2,7 +2,7 @@
 #CreateBaseSyntheticFirms.R
 #==========================
 
-library(visioneval)
+# library(visioneval)
 
 
 #================================================
@@ -324,6 +324,7 @@ usethis::use_data(CreateBaseSyntheticFirmsSpecifications, overwrite = TRUE)
 #'
 #' @param Biz_IsEs A list of business by industry and employee size
 #' @return A list
+#' @name createBiz
 #' @import reshape
 #' @export
 createBiz <- function(Biz_IsEs) {
@@ -344,6 +345,7 @@ createBiz <- function(Biz_IsEs) {
 #'
 #' @param L A list
 #' @return A list
+#' @name CreateBaseSyntheticFirms
 #' @import visioneval stats
 #' @export
 CreateBaseSyntheticFirms <- function(L) {

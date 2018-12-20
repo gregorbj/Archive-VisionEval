@@ -120,3 +120,57 @@ Pilot RPAT module in VisionEval
 
 2018-02-27 22:06:38 : Congratulations. Module CalculateTravelDemandFuture passed all tests. 
 
+RPAT Base Scenario
+Pilot RPAT module in VisionEval
+2018-05-25_13:32:11
+
+2018-05-25 13:32:11 : Testing CalculateTravelDemandFuture. 
+
+2018-05-25 13:32:11 : Attempting to load datastore. 
+
+2018-05-25 13:32:11 : Datastore loaded. 
+
+2018-05-25 13:32:11 : Attempting to load and check specifications. 
+
+2018-05-25 13:32:11 : Module specifications successfully loaded and checked for errors. 
+
+2018-05-25 13:32:11 : No inputs to process. 
+
+2018-05-25 13:32:11 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-05-25 13:32:11 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-05-25 13:32:11 : Running module and checking whether outputs meet Set specifications. 
+
+2018-05-25 13:32:11 : Also saving module outputs to datastore. 
+
+RPAT Base Scenario
+Pilot RPAT module in VisionEval
+2018-05-25_13:32:22
+
+2018-05-25 13:32:22 : Testing CalculateTravelDemandFuture. 
+
+2018-05-25 13:32:22 : Attempting to load datastore. 
+
+2018-05-25 13:32:22 : Datastore loaded. 
+
+2018-05-25 13:32:22 : Attempting to load and check specifications. 
+
+2018-05-25 13:32:22 : Module specifications successfully loaded and checked for errors. 
+
+2018-05-25 13:32:22 : No inputs to process. 
+
+2018-05-25 13:32:22 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-05-25 13:32:22 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-05-25 13:32:22 : Running module and checking whether outputs meet Set specifications. 
+
+2018-05-25 13:32:22 : Also saving module outputs to datastore. 
+
+2018-05-25 13:33:49 : Module run successfully and outputs meet Set specifications. 
+
+2018-05-25 13:33:49 : Module outputs saved to datastore. 
+
+2018-05-25 13:33:49 : Congratulations. Module CalculateTravelDemandFuture passed all tests. 
+

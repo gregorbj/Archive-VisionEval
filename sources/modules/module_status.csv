@@ -52,3 +52,7 @@ VETravelPerformance,BudgetHouseholdDvmt,Adjust household DVMT when necessary to 
 VETravelPerformance,CalculateComEnergyAndEmissions,Calculate energy consumption and emissions of light-duty commercial service vehicles and heavy trucks,,,
 VETravelPerformance,CalculatePtranEnergyAndEmissions,Calculate energy consumption and emissions from public transit vehicles,,,
 VEReports,ReportRPATMetrics,Calculates performance metrics for RPAT,IT,,X
+VEScenario,BuildScenarios,Builds scenarios from all possible combinations of level of scenario inputs,I,X,X
+VEScenario,RunScenarios,Runs all scenarios built by BuildScenarios module in parallel,I,X,X
+VEScenario,ScenarioResults,Gathers and combine the outputs from scenario runs,I,X,X
+VEScenario,ViewResults,Displays the results in an html page,I,X,X

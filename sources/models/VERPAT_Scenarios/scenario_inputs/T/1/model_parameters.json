@@ -1,0 +1,34 @@
+[
+  {
+    "NAME": "FwyLaneMiGrowth",
+    "VALUE": "1",
+    "TYPE" : "double",
+    "UNITS" : "multiplier",
+    "PROHIBIT" : "c('NA', '< 0')",
+    "ISELEMENTOF" : ""
+  },
+  {
+    "NAME" : "ArtLaneMiGrowth",
+    "VALUE": "1",
+    "TYPE" : "double",
+    "UNITS" : "multiplier",
+    "PROHIBIT" : "c('NA', '< 0')",
+    "ISELEMENTOF" : ""
+  },
+  {
+    "NAME" : "BusRevMiPCGrowth",
+    "VALUE": "1",
+    "TYPE" : "double",
+    "UNITS" : "multiplier",
+    "PROHIBIT" : "c('NA', '< 0')",
+    "ISELEMENTOF" : ""
+  },
+  {
+    "NAME" : "RailRevMiPCGrowth",
+    "VALUE": "1",
+    "TYPE" : "double",
+    "UNITS" : "multiplier",
+    "PROHIBIT" : "c('NA', '< 0')",
+    "ISELEMENTOF" : ""
+  }
+]

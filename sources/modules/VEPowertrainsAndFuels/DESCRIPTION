@@ -16,7 +16,8 @@ LazyData: TRUE
 Depends: R (>= 3.1.0)
 Imports:
     visioneval,
-    usethis,
+    devtools,
+	usethis,
     VE2001NHTS,
     VEHouseholdTravel,
     data.table
@@ -24,10 +25,9 @@ Suggests:
     knitr
 Encoding: UTF-8
 VignetteBuilder: knitr
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0.9000
 Collate: 
     'LoadDefaultValues.R'
     'Initialize.R'
     'CalculateCarbonIntensity.R'
     'AssignHhVehiclePowertrain.R'
-

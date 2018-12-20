@@ -4,8 +4,6 @@
 \docType{data}
 \name{CongModel_ls}
 \alias{CongModel_ls}
-\alias{CongModel_ls}
-\alias{CongModel_ls}
 \title{Congestion models and required parameters.}
 \format{A list having 'Fwy' and 'Art' components. Each component has a
 logistic model to indicate the level of congestion which are categorized
