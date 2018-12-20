@@ -69,116 +69,7 @@
     <!-- 
     INITIALIZE POPOVERS THAT DISPLAY INFORMATION WHEN HOVERING ON PIE CHART AND BAR CHART TITLES 
     -->
-    <script>
-        $(function ()
-          { $("#scen0-popover").popover({ 
-              trigger: "hover",
-              html: true,
-              content: function() {
-                  return $('#scen0-popover-content').html();
-              }
-            });
-          });
-        $(function ()
-          { $("#scen5-popover").popover({ 
-              trigger: "hover",
-              html: true,
-              content: function() {
-                  return $('#scen5-popover-content').html();
-              }
-            });
-          });
-        $(function ()
-          { $("#scen1-popover").popover({ 
-              trigger: "hover",
-              html: true,
-              content: function() {
-                  return $('#scen1-popover-content').html();
-              }
-            });
-          });
-        $(function ()
-          { $("#scen2-popover").popover({ 
-              trigger: "hover",
-              html: true,
-              content: function() {
-                  return $('#scen2-popover-content').html();
-              }
-            });
-          });
-        $(function ()
-          { $("#scen3-popover").popover({ 
-              trigger: "hover",
-              html: true,
-              content: function() {
-                  return $('#scen3-popover-content').html();
-              }
-            });
-          });
-        $(function ()
-          { $("#scen4-popover").popover({ 
-              trigger: "hover",
-              html: true,
-              content: function() {
-                  return $('#scen4-popover-content').html();
-              }
-            });
-          });
-        $(function ()
-          { $("#crashes-popover").popover({ 
-              trigger: "hover",
-              html: true,
-              content: function() {
-                  return $('#crashes-popover-content').html();
-              }
-            });
-          });
-        $(function ()
-          { $("#cost-popover").popover({ 
-              trigger: "hover",
-              html: true,
-              content: function() {
-                  return $('#cost-popover-content').html();
-              }
-            });
-          });
-        $(function ()
-          { $("#dvmt-popover").popover({ 
-              trigger: "hover",
-              html: true,
-              content: function() {
-                  return $('#dvmt-popover-content').html();
-              }
-            });
-          });
-        $(function ()
-          { $("#emissions-popover").popover({ 
-              trigger: "hover",
-              html: true,
-              content: function() {
-                  return $('#emissions-popover-content').html();
-              }
-            });
-          });
-        $(function ()
-          { $("#fuel-popover").popover({ 
-              trigger: "hover",
-              html: true,
-              content: function() {
-                  return $('#fuel-popover-content').html();
-              }
-            });
-          });
-        $(function ()
-          { $("#time-popover").popover({ 
-              trigger: "hover",
-              html: true,
-              content: function() {
-                  return $('#time-popover-content').html();
-              }
-            });
-          });
-    </script>
+
     
 </head>
 
@@ -283,14 +174,8 @@
             <div class="modal-body">
                 <h3>Categories</h3>
                 <p>Many factors such as parking pricing and transit supply affect light duty vehicle travel. Because the number of factors considered is large, they were grouped into 6 categories as follows:</p>
-                <ul>
-                    <li><strong>Bicycles</strong> The diversion of single-occupant vehicle travel to bicycles, electric bicycles and other light-weight vehicles.</li>
-                    <li><strong>Demand Management</strong> Programs and incentives which encourage people to drive less including ridesharing, van pooling, telecommuting, and transit subsidies.</li>
-                    <li><strong>Land Use</strong> The form in which development occurs (density, regional accessibility, mixed use, etc.) represented by the distribution of population and employment by place type.</li>
-                <li><strong>Parking</strong> The extent of paid parking and its price.</li>
-                <li><strong>Transit</strong> The extent and frequency of transit service.</li>
-                <li><strong>Vehicle Travel Cost</strong> The combination of fuel prices and vehicle travel charges to pay for roadways and to pay for externalities such as carbon pricing.</li>
-                </ul>        
+                <ul id='scenarioinstlist'>
+                 </ul>        
                 <h3>Levels</h3>
                 <p>Several levels were defined for each of the categories. These levels are numbered to indicate the amount of change from a <em>reference case</em> which represents the continuation of adopted local plans, policies and trends.</p>
                 <ul>
@@ -302,14 +187,8 @@
                 <p>The sizes of the bars show the proportions of the selected scenarios in each each level.  The number of selected scenarios in each level is shown in the corresponding bar.  You can select (or deselect) the scenarios in a level by either clicking on the bar.  The selected level is colored and the non-selected levels are <em>grayed-out</em>. The total count of unfiltered scenarios is shown in light gray.</p>
                 <h3>Outcomes</h3>
                 <p>Given the chosen category inputs, the web page also shows future year outcomes for the following performance measures:</p>
-                <ul>
-                    <li><strong>Fatalities & Injuries:</strong> annual traffic fatalities and injuries per 1000 persons.</li>
-                    <li><strong>Vehicle Cost Per Capita:</strong> average annual cost for owning & operating vehicles per person.</li>
-                    <li><strong>DVMT Per Capita:</strong> average daily vehicle miles traveled per person.</li>
-                    <li><strong>GHG Emissions Per Capita:</strong> average annual metric tons of greenhouse gas emissions per person.</li>
-                    <li><strong>Fuel Consumption:</strong> average annual gallons of gasoline and other fuels consumed per person.</li>
-                    <li><strong>DVHT Per Capita:</strong> average daily vehicle hours of travel per person.</li>
-                </ul>        
+                <ul id='outputinstlist'>
+                 </ul>        
                 <p>Each outcome is illustrated in a bar chart showing the range of outcome values for the selected scenarios.  The bar height indicates the number of selected scenarios with that outcome value. The average value for all of the selected scenarios is shown above the bar chart.  The following illustrations shows what the <em>Fatalities & Injuries</em>, <em>Vehicle Cost Per Capita</em>, and <em>DVMT Per Capita</em> bar charts look like when all scenarios are selected.</p>
                 <img src="img/verpat-barchart1.png" width="95%">
                 <p>The bar charts can also be used to make a selection of scenarios.  This can be done by hovering the mouse cursor over the bar at one end of the desired selection range.  When the cursor is in the shape of a crosshairs, click and drag the mouse cursor to the other end of the desired range.  The bar chart will change to show the selected range.  In addition, handles will appear at the ends of the selected range.  You can click one these and drag it to alter the selection.  You can also click on the middle of the selection (when the shape of the cursor is a crossed arrow) to drag the whole selection to a different location on the bar chart.  As you make a selection in one bar chart, all the other bar charts will change to show just the selected scenarios.  The scenario bar charts will also change accordingly.  The following illustration shows a selection made on the <em>Fatalities & Injuries</em> bar chart and the corresponding values for the other bar charts in the row.  You can see in the picture the crossed-arrow cursor shape which means that the whole selection can be dragged to a new position.</p>
@@ -337,50 +216,7 @@
             </h3>
         </div>
         <!-- INPUT CATEGORY PIE CHARTS -->
-        <div class='row'>
-            <div class='span2 pietitle' id='Scenario0' >
-                <div>
-                <h5 class='text-center'><span class='pietitle pop-crsr' id='scen0-popover'></span></h5>
-                </div>
-                <div id='scen0-popover-content' style='display: none'>                                                     
-                                                                         
-                </div>
-            </div>
-            <div class='span2 pietitle' id='Scenario1'>
-                <div>
-                <h5 class='text-center'><span class='pietitle pop-crsr' id='scen1-popover'></span></h5>
-                </div>
-                <div id='scen1-popover-content' style='display: none'>                                                                      
-                </div>
-            </div>
-            <div class='span2 pietitle' id='Scenario2'>
-                <div>
-                <h5 class='text-center'><span class='pietitle pop-crsr' id='scen2-popover'></span></h5>
-                </div>
-                <div id='scen2-popover-content' style='display: none'>                                                        
-                </div>
-            </div>
-            <div class='span2 pietitle' id='Scenario3'>
-                <div>
-                <h5 class='text-center'><span class='pietitle pop-crsr' id='scen3-popover'></span></h5>
-                </div>
-                <div id='scen3-popover-content' style='display: none'>                                                       
-                </div>
-            </div>
-            <div class='span2 pietitle' id='Scenario4'>
-                <div>
-                <h5 class='text-center'><span class='pietitle pop-crsr' id='scen4-popover'></span></h5>
-                </div>
-                <div id='scen4-popover-content' style='display: none'>                                                                        
-                </div>
-            </div>
-            <div class='span2 pietitle' id='Scenario5'>
-                <div>
-                <h5 class='text-center'><span class='pietitle pop-crsr' id='scen5-popover'></span></h5>
-                </div>
-                <div id='scen5-popover-content' style='display: none'>                                                          
-                </div>
-            </div>
+        <div class='row' id='ScenarioInputCharts'>
         </div>
     </div>
 
@@ -401,93 +237,24 @@
                 </span>
              </h3>
         </div>
-        <!-- 1ST ROW OF OUTPUT MEASURE BAR CHARTS -->
-        <div class='flex-container' display="flex" flex-direction="row">
-            <div class='span4' id='Crashes'>
-                <div>
-                <h5 class='text-center'><span class='bartitle pop-crsr' id='crashes-popover'>Fatalities & Injuries<span class="glyphicon glyphicon-info-sign"></span></span></h5>
-                <h5 class='text-center'><span class='subtitle'>Average = <span id='Fatalities-Injuries' class='stat'></span> annual per 1000 pop</span></h5>
-                </div>
-                <div id='crashes-popover-content' style='display: none'>
-                    <p><strong>Fatalities & Injuries:</strong> Annual traffic fatalities and injuries per 1000 pop</p>                                                            
-                </div>
-            </div>
-            <div class='span4' id='Cost'>
-                <div>
-                <h5 class='text-center'><span class='bartitle pop-crsr' id='cost-popover'>Vehicle Cost Per Capita<span class="glyphicon glyphicon-info-sign"></span></span></h5>
-                <h5 class='text-center'><span class='subtitle'>Average = <span id='Ave-Cost' class='stat'></span> annual per capita</span></h5>
-                </div>
-                <div id='cost-popover-content' style='display: none'>
-                    <p><strong>Cost Per Capita:</strong> annual vehicle costs per capita.</p>                                                            
-                </div>
-            </div>
-            <div class='span4' id='Dvmt'>
-                <div>
-                <h5 class='text-center'><span class='bartitle pop-crsr' id='dvmt-popover'>DVMT Per Capita<span class="glyphicon glyphicon-info-sign"></span></span></h5>
-                <h5 class='text-center'><span class='subtitle'>Average = <span id='Ave-Dvmt' class='stat'></span> daily per capita</span></h5>
-                </div>
-                <div id='dvmt-popover-content' style='display: none'>
-                    <p><strong>Daily Vehicle Miles Traveled:</strong> daily miles of vehicle travel per person.</p>                                                            
-                </div>
-            </div>
-         </div>
-        <!-- 2ND ROW OF OUTPUT MEASURE BAR CHARTS -->
-        <div class='row'>
-            <div class='span4' id='Emissions'>
-                <div>
-                <h5 class='text-center'><span class='bartitle pop-crsr' id='emissions-popover'>GHG Emissions Per Capita<span class="glyphicon glyphicon-info-sign"></span></span></h5>
-                <h5 class='text-center'><span class='subtitle'>Average = <span id='Ave-Emissions' class='stat'></span> annual per capita</span></h5>
-                </div>
-                <div id='emissions-popover-content' style='display: none'>
-                    <p><strong>GHG Emissions:</strong> annual metric tons greenhouse gas emissions per capita.</p>                                                            
-                </div>
-            </div>
-             <div class='span4' id='Fuel'>
-                <div>
-                <h5 class='text-center'><span class='bartitle pop-crsr' id='fuel-popover'>Fuel Consumption<span class="glyphicon glyphicon-info-sign"></span></span></h5>
-                <h5 class='text-center'><span class='subtitle'>Average = <span id='Ave-Fuel' class='stat'></span> annual per capita</span></h5>
-                </div>
-                <div id='fuel-popover-content' style='display: none'>
-                    <p><strong>Fuel Consumption:</strong> average annual gallons of fuel consumed per capita.</p>                                                            
-                </div>
-            </div>
-            <div class='span4' id='Time'>
-                <div>
-                <h5 class='text-center'><span class='bartitle pop-crsr' id='time-popover'>DVHT Per Capita<span class="glyphicon glyphicon-info-sign"></span></span></h5>
-                <h5 class='text-center'><span class='subtitle'>Average = <span id='Ave-VHT' class='stat'></span> daily per capita</span></h5>
-                </div>
-                <div id='time-popover-content' style='display: none'>
-                    <p><strong>Vehicle Hours of Travel:</strong> daily vehicle hours of travel per capita.</p>                                                            
-                </div>
-            </div>
-       </div>
-    </div>
+        <!-- OUTPUT MEASURE BAR CHARTS -->
+        <div class='flex-container' display="flex" flex-direction="row" id='OutputInputCharts'>
+         
+           </div>
 
     
     <!-- 
     SET UP OUTPUT TABLE
     -->
-    <div class='container' style='font: 12px sans-serif;'>
+    <div class='container col-sm-12' style='font: 12px sans-serif;'>
         <div class='row'>
             <h3>Scenario Data Table</h3>
         </div>
         <div class='row'>
-            <div class='span12'>
+            <div class='col-sm-12'>
                 <table class='table table-hover' id='Scenario-Results'>
                     <thead>
                         <tr class='header'>
-                            <th>Bicycles</th>
-                            <th>Demand Management</th>
-                            <th>Land Use</th>
-                            <th>Parking</th>
-                            <th>Transit</th>
-                            <th>Vehicle Travel Cost</th>
-                            <th>Fatalities/Injuries</th>
-                            <th>Vehicle Cost</th>
-                            <th>DVMT</th>
-                            <th>GHG Emissions</th>
-                            <th>Fuel</th>
-                            <th>DVHT</th>
                         </tr>
                    </thead>
                 </table>
@@ -499,25 +266,78 @@
     <!--
     SETUP THE UI FROM CONFIG FILE
     -->
-    <script src='data/verpat-cfg.js' type='text/javascript'></script>
+    <script src='data/VERPAT/scenario-cfg.js' type='text/javascript'></script>
     <script>
-        var configdata = config;
+        var configdata = scenconfig;
+        var scenData = [];
         $.each(configdata,function(index,values) {
             var scenarioName = values.NAME;
             var scenarioLabel = values.LABEL;
             var scenarioDescription = values.DESCRIPTION;
             var scenarioInstruct = values.INSTRUCTIONS;
             var scenarioLevels = values.LEVELS;
+            scenData[index] = scenarioName;
+            $('#ScenarioInputCharts').append(
+                "<div class='col-sm-2 pietitle' id='Scenario"+index+"'>"+
+                "<div>"+
+                "<h5 class='text-center'><span class='pietitle pop-crsr' id='scen"+index+"-popover'></span></h5>"+
+                "</div>"+            
+                "<div id='scen"+index+"-popover-content' style='display: none'>"+
+                "</div>"+
+                "</div>");
             $('#scen' + index + '-popover').append(scenarioLabel+"<span class=\"glyphicon glyphicon-info-sign\"></span>");
-
+            $('#scenarioinstlist').append('<li><strong>'+scenarioLabel+'</strong>: '+scenarioInstruct+'</li>');
             $('#scen' + index + '-popover-content').append('<p><strong>' + scenarioLabel + ':</strong> ' + scenarioDescription + '</p>');
+            $('#Scenario-Results thead tr.header').append("<th>"+scenarioLabel+"</th>");
+            $("#scen"+index+"-popover").popover({
+              trigger: "hover",
+              html: true, 
+              placement:"bottom",             
+              content: function() {
+                  return $('#scen'+index+'-popover-content').html();
+              }
+            });
             $.each(scenarioLevels, function (key, value) {
                 $('#scen' + index + '-popover-content').append('<p><strong>Level ' + value.NAME + ':</strong> ' + value.DESCRIPTION + '</p>');
             });
         });
 
     </script>
-
+    <script src='data/VERPAT/output-cfg.js' type='text/javascript'></script>
+    <script>
+        var outputData = outputconfig;
+        var outputCol = [];
+        $.each(outputData, function(index,values){
+            outputCol[index] = values.COLUMN;
+            var outputName = values.NAME;
+            var outputLabel = values.LABEL;
+            var outputDesc = values.DESCRIPTION;
+            var outputInst = values.INSTRUCTIONS;
+            var outputMetric = values.METRIC;
+            var outputUnit = values.UNIT;
+            $('#OutputInputCharts').append("<div class='col-sm-3' id='Output"+index+"'>"+
+                "<div>"+
+                "<h5 class='text-center'><span class='bartitle pop-crsr' id='output"+index+"-popover'>"+"</span></h5>"+
+                "<h5 class='text-center sm-margin'><span id='output"+index+"_subtitle' class='subtitle'><span></h5>"+                
+                "</div>"+
+                "<div id='output"+index+"-popover-content' style='display: none'>"+
+                    "</div>"+
+                    "</div>");
+              $('#output'+index+'-popover').append(outputName+ "<span class=\"glyphicon glyphicon-info-sign\"></span>");
+              $('#output'+index+'_subtitle').append(outputMetric+' = <span id="output'+index+'_stat" class="stat">'+'</span> '+outputUnit);  
+              $('#output'+index+'-popover-content').append('<p><strong>'+outputLabel+ ": </strong>"+outputDesc+'</p>');
+              $('#outputinstlist').append('<li><strong>'+outputName+'</strong>: '+outputInst+'</li>');
+              $('#Scenario-Results thead tr.header').append("<th>"+outputName+"</th>");
+              $("#output"+index+"-popover").popover({
+              trigger: "hover",
+              html: true,
+              placement:"bottom",            
+              content: function() {
+                  return $('#output'+index+'-popover-content').html();
+              }
+            });
+        });
+    </script>
 
 
 
@@ -525,7 +345,7 @@
     <!-- 
     LOAD SCENARIO DATA AND REF MEASURES DATA
     -->
-    <script src='data/verpat.js' type='text/javascript'></script>
+    <script src='data/VERPAT/verpat.js' type='text/javascript'></script>
     <!--
     <script src='data/verpat-ref.js' type="text/javascript"></script>
     --> 
@@ -556,21 +376,21 @@
         ;
         // Set up the bar chart objects to display scenario output levels
         var 
-            crashesBarChart = dc.barChart("#Crashes"),
-            costBarChart = dc.barChart("#Cost"),
-            dvmtBarChart = dc.barChart("#Dvmt"),
-            emissionsBarChart = dc.barChart("#Emissions"),
-            fuelBarChart = dc.barChart("#Fuel"),
-            timeBarChart = dc.barChart("#Time")
+            output0BarChart = dc.barChart("#Output0"),
+            output1BarChart = dc.barChart("#Output1"),
+            output2BarChart = dc.barChart("#Output2"),
+            output3BarChart = dc.barChart("#Output3"),
+            output4BarChart = dc.barChart("#Output4"),
+            output5BarChart = dc.barChart("#Output5")
         ;
         // Set up the number objects to display output averages
         var
-            crashAveNum = dc.numberDisplay("#Fatalities-Injuries")
-            costAveNum = dc.numberDisplay("#Ave-Cost"),
-            dvmtAveNum = dc.numberDisplay("#Ave-Dvmt"),
-            emissionsAveNum = dc.numberDisplay("#Ave-Emissions"),
-            fuelAveNum = dc.numberDisplay("#Ave-Fuel"),
-            timeAveNum = dc.numberDisplay("#Ave-VHT")
+            output0AveNum = dc.numberDisplay("#output0_stat")
+            output1AveNum = dc.numberDisplay("#output1_stat"),
+            output2AveNum = dc.numberDisplay("#output2_stat"),
+            output3AveNum = dc.numberDisplay("#output3_stat"),
+            output4AveNum = dc.numberDisplay("#output4_stat"),
+            output5AveNum = dc.numberDisplay("#output5_stat")
         ;
         // Set up table to display values for selected scenarios
         var scenarioTable = dc.dataTable("#Scenario-Results");
@@ -585,21 +405,21 @@
         //---------------------------------------------------------
         // Establish the scenario input dimensions to be displayed and filtered
         var 
-            scenDim0 = facts.dimension( function(d) {return d.Bike;} ),
-            scenDim5 = facts.dimension( function(d) {return d.VmtChrg;} ),
-            scenDim1 = facts.dimension( function(d) {return d.DemandMgt;} ),
-            scenDim2 = facts.dimension( function(d) {return d.LandUse;} ),
-            scenDim3 = facts.dimension( function(d) {return d.Parking;} ),
-            scenDim4 = facts.dimension( function(d) {return d.Transit;} )
+            scenDim0 = facts.dimension( function(d) {return d[scenData[0]];} ),
+            scenDim5 = facts.dimension( function(d) {return d[scenData[5]];} ),
+            scenDim1 = facts.dimension( function(d) {return d[scenData[1]];} ),
+            scenDim2 = facts.dimension( function(d) {return d[scenData[2]];} ),
+            scenDim3 = facts.dimension( function(d) {return d[scenData[3]];} ),
+            scenDim4 = facts.dimension( function(d) {return d[scenData[4]];} )
         ;
         // Establish the scenario output dimensions to be displayed and filtered
         var 
-            crashDim = facts.dimension( function(d) {return d.FatalityInjuryRate;} ),
-            costDim = facts.dimension( function(d) {return d.AveCost;} ),
-            dvmtDim = facts.dimension( function(d) {return d.AveDvmt;} ),
-            emissionsDim = facts.dimension( function(d) {return d.AveEmissions;} ),
-            fuelDim = facts.dimension( function(d) {return d.AveFuel;} ),
-            timeDim = facts.dimension( function(d) {return d.AveVehHr;} )
+            output0Dim = facts.dimension( function(d) {return d[outputCol[0]];} ),
+            output1Dim = facts.dimension( function(d) {return d[outputCol[1]];} ),
+            output2Dim = facts.dimension( function(d) {return d[outputCol[2]];} ),
+            output3Dim = facts.dimension( function(d) {return d[outputCol[3]];} ),
+            output4Dim = facts.dimension( function(d) {return d[outputCol[4]];} ),
+            output5Dim = facts.dimension( function(d) {return d[outputCol[5]];} )
         ;
         
         // Establish the group statistics to display
@@ -648,8 +468,7 @@
         });                                        
 
         // Establish the bin dimensions for bar charts (to be used in grouping)
-        var measures = [ "FatalityInjuryRate", "AveCost", "AveDvmt", "AveEmissions", 
-                        "AveFuel", "AveVehHr" ]
+        var measures = outputCol;
         var bins = {};
         var calcBinning = function(data, measure, nBins) {
             var xExtent = d3.extent(data, function(d) {return d[measure];});
@@ -661,12 +480,12 @@
         };
         // Establish the output group statistics (counts) to be displayed in bar charts
         var
-            crashGroup = crashDim.group(function(d) {return Math.floor(d / bins.FatalityInjuryRate.xWidth) * bins.FatalityInjuryRate.xWidth;}),
-            costGroup = costDim.group(function(d){return Math.floor(d / bins.AveCost.xWidth) * bins.AveCost.xWidth;}),
-            dvmtGroup = dvmtDim.group(function(d){return Math.floor(d / bins.AveDvmt.xWidth) * bins.AveDvmt.xWidth;}),
-            emissionsGroup = emissionsDim.group(function(d){return Math.floor(d / bins.AveEmissions.xWidth) * bins.AveEmissions.xWidth;}),
-            fuelGroup = fuelDim.group(function(d){return Math.floor(d / bins.AveFuel.xWidth) * bins.AveFuel.xWidth;}),      
-            timeGroup = timeDim.group(function(d){return Math.floor(d / bins.AveVehHr.xWidth) * bins.AveVehHr.xWidth;})
+            output0Group = output0Dim.group(function(d) {return Math.floor(d / bins[outputCol[0]].xWidth) * bins[outputCol[0]].xWidth;}),
+            output1Group = output1Dim.group(function(d){return Math.floor(d / bins[outputCol[1]].xWidth) * bins[outputCol[1]].xWidth;}),
+            output2Group = output2Dim.group(function(d){return Math.floor(d / bins[outputCol[2]].xWidth) * bins[outputCol[2]].xWidth;}),
+            output3Group = output3Dim.group(function(d){return Math.floor(d / bins[outputCol[3]].xWidth) * bins[outputCol[3]].xWidth;}),
+            output4Group = output4Dim.group(function(d){return Math.floor(d / bins[outputCol[4]].xWidth) * bins[outputCol[4]].xWidth;}),      
+            output5Group = output5Dim.group(function(d){return Math.floor(d / bins[outputCol[5]].xWidth) * bins[outputCol[5]].xWidth;})
         ;
         // Define reduce functions to calculate output measure averages for filtered selections
         function addAvg(attr) {
@@ -692,28 +511,24 @@
         }
         // Establish the output group output measure averages
         var
-            allDim = facts.dimension( function(d) {return Math.round(d.FatalityInjuryRate / d.FatalityInjuryRate);} ),
-            crashAveGroup = allDim.group().reduce(addAvg("FatalityInjuryRate"), remAvg("FatalityInjuryRate"), iniAvg),
-            costAveGroup = allDim.group().reduce(addAvg("AveCost"), remAvg("AveCost"), iniAvg),
-            dvmtAveGroup = allDim.group().reduce(addAvg("AveDvmt"), remAvg("AveDvmt"), iniAvg),
-            emissionsAveGroup = allDim.group().reduce(addAvg("AveEmissions"), remAvg("AveEmissions"), iniAvg),
-            fuelAveGroup = allDim.group().reduce(addAvg("AveFuel"), remAvg("AveFuel"), iniAvg),      
-            timeAveGroup = allDim.group().reduce(addAvg("AveVehHr"), remAvg("AveVehHr"), iniAvg)
+            allDim = facts.dimension( function(d) {return Math.round(d[outputCol[0]] / d[outputCol[0]]);} ),
+            output0AveGroup = allDim.group().reduce(addAvg(outputCol[0]), remAvg(outputCol[0]), iniAvg),
+            output1AveGroup = allDim.group().reduce(addAvg(outputCol[1]), remAvg(outputCol[1]), iniAvg),
+            output2AveGroup = allDim.group().reduce(addAvg(outputCol[2]), remAvg(outputCol[2]), iniAvg),
+            output3AveGroup = allDim.group().reduce(addAvg(outputCol[3]), remAvg(outputCol[3]), iniAvg),
+            output4AveGroup = allDim.group().reduce(addAvg(outputCol[4]), remAvg(outputCol[4]), iniAvg),      
+            output5AveGroup = allDim.group().reduce(addAvg(outputCol[5]), remAvg(outputCol[5]), iniAvg)
         ;
 
         // Plot the input pie charts
         //--------------------------
         // Define layout variables that are common to all the pie charts
         var
-            pieWidth = 185,
-            pieHeight = 185,
-            pieRadius = 60,
-            pieInnerRadius = 20,
-            pieMargins = {top: 10, right: 10, bottom: 10, left: 10}
+            scenBarWidth = 185,
+            scenBarHeight = 185                   
         ;
-        // Community category input levels
-
-        scenarioBarChart0.width(pieWidth)
+       
+        scenarioBarChart0.width(scenBarWidth)
             .height(200)      
             .stack(18)
 			.x(d3.scaleBand())
@@ -731,14 +546,12 @@
                 }
                 return "L"+d.key + ": "+ d.value;
                 })
-			.stack(scenGroup0, "Total Items",function(d) { 
-               // if(d.value > 0 ){     //only add the stacked data to filtered bars that have data.
+			.stack(scenGroup0, "Total Items",function(d) {                
                     var id = d.key
-                    return scen0_hash[id] - d.value; //only add the difference between the filter and totals
-              //  }
+                    return scen0_hash[id] - d.value; //only add the difference between the filter and totals              
             });           
        
-            scenarioBarChart1.width(pieWidth)
+            scenarioBarChart1.width(scenBarWidth)
                 .height(200)
                 .stack(18)
 			    .x(d3.scaleBand())
@@ -757,12 +570,10 @@
                 })
                 .label(function (d){return "L" + d.data.key;})
 			    .stack(scenGroup1, "Total Items",function(d) {
-              //  if(d.value > 0 ){     //only add the stacked data to filtered bars that have data.
                     var id = d.key
                     return scen1_hash[id] - d.value; //only add the difference between the filter and totals
-            //    }
                 });
-            scenarioBarChart2.width(pieWidth)
+            scenarioBarChart2.width(scenBarWidth)
                 .height(200)
                 .stack(18)
 			    .x(d3.scaleBand())
@@ -780,13 +591,12 @@
                 }
                 return "L"+d.key + ": "+ d.value;
                 })
-                .stack(scenGroup2, "Total Items",function(d) {
-                    //    if(d.value > 0 ){     //only add the stacked data to filtered bars that have data.
+                .stack(scenGroup2, "Total Items",function(d) {                   
                     var id = d.key
                     return scen2_hash[id] - d.value; //only add the difference between the filter and totals
-                    //   }
+
                 });
-            scenarioBarChart3.width(pieWidth)
+            scenarioBarChart3.width(scenBarWidth)
             .height(200)      
             .stack(18)
 			.x(d3.scaleBand())
@@ -805,12 +615,12 @@
                 return "L"+d.key + ": "+ d.value;
                 })
 			.stack(scenGroup3, "Total Items",function(d) { 
-            //    if(d.value > 0 ){     //only add the stacked data to filtered bars that have data.
+
                     var id = d.key
                     return scen3_hash[id] - d.value; //only add the difference between the filter and totals
-             //   }
+
             });
-            scenarioBarChart4.width(pieWidth)
+            scenarioBarChart4.width(scenBarWidth)
             .height(200)      
             .stack(18)
 			.x(d3.scaleBand())
@@ -829,12 +639,12 @@
                 return "L"+d.key + ": "+ d.value;
                 })
 			.stack(scenGroup4, "Total Items",function(d) { 
-            //    if(d.value > 0 ){     //only add the stacked data to filtered bars that have data.
+            
                     var id = d.key
                     return scen4_hash[id] - d.value; //only add the difference between the filter and totals
-            //    }
+            
             }); 
-            scenarioBarChart5.width(pieWidth)
+            scenarioBarChart5.width(scenBarWidth)
             .height(200)      
             .stack(18)
 			.x(d3.scaleBand())
@@ -853,10 +663,10 @@
                 })
             .label(function (d){return "L" + d.data.key;})
 			.stack(scenGroup5, "Total Items",function(d) { 
-            //    if(d.value > 0 ){     //only add the stacked data to filtered bars that have data.
+            
                     var id = d.key
                     return scen5_hash[id] - d.value; //only add the difference between the filter and totals
-            //    }
+            
             });                                                 
         // Plot the output bar charts
         //---------------------------
@@ -867,128 +677,128 @@
             barMargins = {top: 10, right: 10, bottom: 20, left: 25}
         ;
         // Traffic fatalities and injuries
-        crashesBarChart.width(barWidth)
+        output0BarChart.width(barWidth)
             .height(barHeight)
             .margins(barMargins)
-            .dimension(crashDim)
-            .group(crashGroup)
+            .dimension(output0Dim)
+            .group(output0Group)
             .transitionDuration(200)
             .centerBar(true)
             .gap(40)
             .brushOn(true)
-            .x(d3.scaleLinear().domain(bins.FatalityInjuryRate.xExtent))
+            .x(d3.scaleLinear().domain(bins[outputCol[0]].xExtent))
             .elasticY(true)
             .yAxisLabel("# Scenarios")
             .xAxis().tickFormat();
-        crashesBarChart.xAxis().ticks(5);
-        crashesBarChart.yAxis().ticks(5);
-        crashesBarChart.xUnits(function(){return 4.8;});
-        // Average per capita vehicle cost
-        costBarChart.width(barWidth)
+        output0BarChart.xAxis().ticks(5);
+        output0BarChart.yAxis().ticks(5);
+        output0BarChart.xUnits(function(){return 4.8;});
+       
+        output1BarChart.width(barWidth)
             .height(barHeight)
             .margins(barMargins)
-            .dimension(costDim)
-            .group(costGroup)
+            .dimension(output1Dim)
+            .group(output1Group)
             .transitionDuration(200)
             .centerBar(true)
             .gap(40)
-            .x(d3.scaleLinear().domain(bins.AveCost.xExtent))
+            .x(d3.scaleLinear().domain(bins[outputCol[1]].xExtent))
             .elasticY(true)
             .xAxis().tickFormat();
-        costBarChart.xAxis().ticks(5);        
-        costBarChart.yAxis().ticks(5);
-        costBarChart.xUnits(function(){return 4.8;});
+        output1BarChart.xAxis().ticks(5);        
+        output1BarChart.yAxis().ticks(5);
+        output1BarChart.xUnits(function(){return 4.8;});
         // Average per capita daily vehicle miles of travel
-        dvmtBarChart.width(barWidth)
+        output2BarChart.width(barWidth)
             .height(barHeight)
             .margins(barMargins)
-            .dimension(dvmtDim)
-            .group(dvmtGroup)
+            .dimension(output2Dim)
+            .group(output2Group)
             .transitionDuration(200)
             .centerBar(true)
             .gap(40)
-            .x(d3.scaleLinear().domain(bins.AveDvmt.xExtent))
+            .x(d3.scaleLinear().domain(bins[outputCol[2]].xExtent))
             .elasticY(true)
             .xAxis().tickFormat();
-        dvmtBarChart.xAxis().ticks(5);        
-        dvmtBarChart.yAxis().ticks(5);
-        dvmtBarChart.xUnits(function(){return 4.8;});
-        // Average annual greenhouse gas emissions per capita
-        emissionsBarChart.width(barWidth)
+        output2BarChart.xAxis().ticks(5);        
+        output2BarChart.yAxis().ticks(5);
+        output2BarChart.xUnits(function(){return 4.8;});
+        
+        output3BarChart.width(barWidth)
             .height(barHeight)
             .margins(barMargins)
-            .dimension(emissionsDim)
-            .group(emissionsGroup)
+            .dimension(output3Dim)
+            .group(output3Group)
             .transitionDuration(200)
             .centerBar(true)
             .gap(40)
-            .x(d3.scaleLinear().domain(bins.AveEmissions.xExtent))
+            .x(d3.scaleLinear().domain(bins[outputCol[3]].xExtent))
             .elasticY(true)
             .xAxis().tickFormat();
-        emissionsBarChart.xAxis().ticks(5);        
-        emissionsBarChart.yAxis().ticks(5);
-        emissionsBarChart.xUnits(function(){return 4.8;});
-        // Average gallons of fuel consumed per person    
-        fuelBarChart.width(barWidth)
+        output3BarChart.xAxis().ticks(5);        
+        output3BarChart.yAxis().ticks(5);
+        output3BarChart.xUnits(function(){return 4.8;});
+       
+        output4BarChart.width(barWidth)
             .height(barHeight)
             .margins(barMargins)
-            .dimension(fuelDim)
-            .group(fuelGroup)
+            .dimension(output4Dim)
+            .group(output4Group)
             .transitionDuration(200)
             .centerBar(true)
             .gap(105)
-            .x(d3.scaleLinear().domain(bins.AveFuel.xExtent))
+            .x(d3.scaleLinear().domain(bins[outputCol[4]].xExtent))
             .elasticY(true)
             .yAxisLabel("# Scenarios")
             .xAxis().tickFormat();
-        fuelBarChart.xAxis().ticks(5);        
-        fuelBarChart.yAxis().ticks(5);
-        fuelBarChart.xUnits(function(){return 2.65;});
-        // Average daily vehicle hours of travel per person
-        timeBarChart.width(barWidth)
+        output4BarChart.xAxis().ticks(5);        
+        output4BarChart.yAxis().ticks(5);
+        output4BarChart.xUnits(function(){return 2.65;});
+
+        output5BarChart.width(barWidth)
             .height(barHeight)
             .margins(barMargins)
-            .dimension(timeDim)
-            .group(timeGroup)
+            .dimension(output5Dim)
+            .group(output5Group)
             .transitionDuration(200)
             .centerBar(true)
             .gap(40)
-            .x(d3.scaleLinear().domain(bins.AveVehHr.xExtent))
+            .x(d3.scaleLinear().domain(bins[outputCol[5]].xExtent))
             .elasticY(true)
             .xAxis().tickFormat();
-        timeBarChart.xAxis().ticks(5);        
-        timeBarChart.yAxis().ticks(5);
-        timeBarChart.xUnits(function(){return 4.8;});
+        output5BarChart.xAxis().ticks(5);        
+        output5BarChart.yAxis().ticks(5);
+        output5BarChart.xUnits(function(){return 4.8;});
 
         // Display the average values for outputs
         //---------------------------------------
-        crashAveNum.group(crashAveGroup).valueAccessor(function(p) {return p.value.avg;});
-        costAveNum.group(costAveGroup).valueAccessor(function(p) {return p.value.avg;});
-        dvmtAveNum.group(dvmtAveGroup).valueAccessor(function(p) {return p.value.avg;});
-        emissionsAveNum.group(emissionsAveGroup).valueAccessor(function(p) {return p.value.avg;});
-        fuelAveNum.group(fuelAveGroup).valueAccessor(function(p) {return p.value.avg;});
-        timeAveNum.group(timeAveGroup).valueAccessor(function(p) {return p.value.avg;});
+        output0AveNum.group(output0AveGroup).valueAccessor(function(p) {return p.value.avg;});
+        output1AveNum.group(output1AveGroup).valueAccessor(function(p) {return p.value.avg;});
+        output2AveNum.group(output2AveGroup).valueAccessor(function(p) {return p.value.avg;});
+        output3AveNum.group(output3AveGroup).valueAccessor(function(p) {return p.value.avg;});
+        output4AveNum.group(output4AveGroup).valueAccessor(function(p) {return p.value.avg;});
+        output5AveNum.group(output5AveGroup).valueAccessor(function(p) {return p.value.avg;});
         
         // Display the scenario data table for the top 10 scenarios
         //---------------------------------------------------------
         scenarioTable.width(960).height(800)
-            .dimension(crashDim)
+            .dimension(output0Dim)
             .group(function(d) {return "";})
             .columns([
-                function(d) {return d.Bike;},
-                function(d) {return d.DemandMgt;},
-                function(d) {return d.LandUse;},
-                function(d) {return d.Parking;},
-                function(d) {return d.Transit;},
-                function(d) {return d.VmtChrg;},
-                function(d) {return d.FatalityInjuryRate;},
-                function(d) {return d.AveCost;},
-                function(d) {return d.AveDvmt;},
-                function(d) {return d.AveEmissions;},
-                function(d) {return d.AveFuel;},
-                function(d) {return d.AveVehHr;},
+                function(d) {return d[scenData[0]];},
+                function(d) {return d[scenData[1]];},
+                function(d) {return d[scenData[2]];},
+                function(d) {return d[scenData[3]];},
+                function(d) {return d[scenData[4]];},
+                function(d) {return d[scenData[5]];},
+                function(d) {return d[outputCol[0]];},
+                function(d) {return d[outputCol[1]];},
+                function(d) {return d[outputCol[2]];},
+                function(d) {return d[outputCol[3]];},
+                function(d) {return d[outputCol[4]];},
+                function(d) {return d[outputCol[5]];},
             ])
-            .sortBy(function(d) {return d.AveEmissions;})
+            .sortBy(function(d) {return d[outputCol[3]];})
             .order(d3.ascending)
             .size(500);
 
