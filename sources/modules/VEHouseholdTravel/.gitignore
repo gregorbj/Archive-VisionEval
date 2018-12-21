@@ -1,0 +1,10 @@
+.Rprofile
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+*.bak
+.DS_Store
+ve-lib
+Log_*.txt
+data/*.rda
