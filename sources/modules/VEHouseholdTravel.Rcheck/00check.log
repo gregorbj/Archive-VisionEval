@@ -1,0 +1,80 @@
+* using log directory 'E:/Documents/GitHub/VisionEval/sources/modules/VEHouseholdTravel.Rcheck'
+* using R version 3.5.1 (2018-07-02)
+* using platform: x86_64-w64-mingw32 (64-bit)
+* using session charset: ISO8859-1
+* using options '--no-manual --as-cran'
+* checking for file 'VEHouseholdTravel/DESCRIPTION' ... OK
+* checking extension type ... Package
+* this is package 'VEHouseholdTravel' version '0.8.0'
+* package encoding: UTF-8
+* checking package namespace information ... OK
+* checking package dependencies ... OK
+* checking if this is a source package ... OK
+* checking if there is a namespace ... OK
+* checking for executable files ... OK
+* checking for hidden files and directories ... OK
+* checking for portable file names ... OK
+* checking serialization versions ... OK
+* checking whether package 'VEHouseholdTravel' can be installed ... OK
+* checking installed package size ... NOTE
+  installed size is 33.0Mb
+  sub-directories of 1Mb or more:
+    R        15.7Mb
+    data     15.8Mb
+    extdata   1.2Mb
+* checking package directory ... OK
+* checking DESCRIPTION meta-information ... OK
+* checking top-level files ... NOTE
+File
+  LICENSE
+is not mentioned in the DESCRIPTION file.
+Non-standard file/directory found at top level:
+  'temp.csv'
+* checking for left-over files ... OK
+* checking index information ... OK
+* checking package subdirectories ... OK
+* checking R files for non-ASCII characters ... OK
+* checking R files for syntax errors ... OK
+* checking whether the package can be loaded ... OK
+* checking whether the package can be loaded with stated dependencies ... OK
+* checking whether the package can be unloaded cleanly ... OK
+* checking whether the namespace can be loaded with stated dependencies ... OK
+* checking whether the namespace can be unloaded cleanly ... OK
+* checking loading without being on the library search path ... OK
+* checking dependencies in R code ... OK
+* checking S3 generic/method consistency ... OK
+* checking replacement functions ... OK
+* checking foreign function calls ... OK
+* checking R code for possible problems ... OK
+* checking Rd files ... OK
+* checking Rd metadata ... OK
+* checking Rd line widths ... OK
+* checking Rd cross-references ... OK
+* checking for missing documentation entries ... WARNING
+Undocumented code objects:
+  'DvmtModels_ls' 'EvModelData_ls' 'PhevModelData_ls'
+  'TripLengthModel_ls' 'VehTripModels_ls'
+Undocumented data sets:
+  'DvmtModels_ls' 'EvModelData_ls' 'PhevModelData_ls'
+  'TripLengthModel_ls' 'VehTripModels_ls'
+All user-level objects in a package should have documentation entries.
+See chapter 'Writing R documentation files' in the 'Writing R
+Extensions' manual.
+* checking for code/documentation mismatches ... OK
+* checking Rd \usage sections ... WARNING
+Undocumented arguments in documentation object 'assignEv'
+  'CurrYear'
+
+Functions with \usage entries need to have the appropriate \alias
+entries, and all their arguments documented.
+The \usage entries must correspond to syntactically valid R code.
+See chapter 'Writing R documentation files' in the 'Writing R
+Extensions' manual.
+* checking Rd contents ... OK
+* checking for unstated dependencies in examples ... OK
+* checking contents of 'data' directory ... OK
+* checking data for non-ASCII characters ... OK
+* checking data for ASCII and uncompressed saves ... OK
+* checking examples ... NONE
+* DONE
+Status: 2 WARNINGs, 2 NOTEs
