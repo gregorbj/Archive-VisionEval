@@ -30,3 +30,65 @@ Test of VESimHouseholds package modules
 
 2018-11-23 12:09:20 : Congratulations. Module DivertSovTravel passed all tests. 
 
+Test
+Test of VESimHouseholds package modules
+2018-12-20_18:13:27
+
+2018-12-20 18:13:27 : Testing DivertSovTravel. 
+
+2018-12-20 18:13:27 : Attempting to load datastore. 
+
+Test
+Test of VESimHouseholds package modules
+2018-12-20_18:19:02
+
+2018-12-20 18:19:02 : Testing DivertSovTravel. 
+
+2018-12-20 18:19:02 : Attempting to load datastore. 
+
+2018-12-20 18:19:02 : Datastore loaded. 
+
+2018-12-20 18:19:04 : Attempting to load and check specifications. 
+
+2018-12-20 18:19:04 : Module specifications successfully loaded and checked for errors. 
+
+2018-12-20 18:19:04 : Attempting to process, check and load module inputs. 
+
+2018-12-20 18:19:04 : Module inputs successfully checked and loaded into datastore. 
+
+2018-12-20 18:19:04 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-12-20 18:19:04 : Datastore contains all datasets identified in module Get specifications. 
+
+Test
+Test of VESimHouseholds package modules
+2018-12-20_19:21:09
+
+2018-12-20 19:21:09 : Testing DivertSovTravel. 
+
+2018-12-20 19:21:10 : Attempting to load datastore. 
+
+2018-12-20 19:21:10 : Datastore loaded. 
+
+2018-12-20 19:21:10 : Attempting to load and check specifications. 
+
+2018-12-20 19:21:10 : Module specifications successfully loaded and checked for errors. 
+
+2018-12-20 19:21:10 : Attempting to process, check and load module inputs. 
+
+2018-12-20 19:21:12 : Module inputs successfully checked and loaded into datastore. 
+
+2018-12-20 19:21:13 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-12-20 19:21:13 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-12-20 19:21:13 : Running module and checking whether outputs meet Set specifications. 
+
+2018-12-20 19:21:13 : Also saving module outputs to datastore. 
+
+2018-12-20 19:21:18 : Module run successfully and outputs meet Set specifications. 
+
+2018-12-20 19:21:19 : Module outputs saved to datastore. 
+
+2018-12-20 19:21:19 : Congratulations. Module DivertSovTravel passed all tests. 
+
