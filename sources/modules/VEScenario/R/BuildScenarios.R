@@ -160,6 +160,12 @@ BuildScenarios <- function(L){
   LevelDef_ar <- unique(LevelDef_ar)
 
   # Gather scenario and category config files
+  if(!dir.exists(file.path(RunDir, L$Global$Model$ScenarioOutputFolder))) { 
+    if(file.exists(file.path(RunDir, L$Global$Model$ScenarioOutputFolder))){
+      file.remove(file.path(RunDir, L$Global$Model$ScenarioOutputFolder))
+    }
+    dir.create(file.path(RunDir, L$Global$Model$ScenarioOutputFolder))
+  }
   if(file.exists(file.path(ScenarioInputPath,"scenario_config.json"))){
     file.copy(file.path(ScenarioInputPath, "scenario_config.json"),
               file.path(RunDir, L$Global$Model$ScenarioOutputFolder))
