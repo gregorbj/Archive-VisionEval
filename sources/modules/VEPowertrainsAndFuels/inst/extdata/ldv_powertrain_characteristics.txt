@@ -1,0 +1,29 @@
+====================================================
+Documentation for ldv_powertrain_characteristics.csv
+====================================================
+
+This file contains values for key powertrain characteristics for light-duty vehicles by vehicle model year that are used in calculating amounts of fuel and electric power consumed.
+
+File Structure
+--------------
+Each row is a vehicle model year from 1975 to 2050.
+Column names as follows:
+Year: The year to which the data apply
+AutoIcevMpg: The average fuel economy (miles per gasoline gallon equivalent) of automobiles with internal combustion engine powertrains
+LtTrkIcevMpg: The average fuel economy (miles per gasoline gallon equivalent) of light trucks with internal combustion engine powertrains
+AutoHevMpg: The average fuel economy (miles per gasoline gallon equivalent) of automobiles with hybrid electric powertrains
+LtTrkHevMpg: The average fuel economy (miles per gasoline gallon equivalent) of light trucks with hybrid electric powertrains
+AutoPhevMpg: The average fuel economy (miles per gasoline gallon equivalent) of automobiles with plug-in hybrid electric powertrains
+AutoPhevMpkwh: The average electric efficiency (miles per kilowatt-hour) of automobiles with plug-in hybrid electric powertrains
+AutoPhevRange: The average electric-only travel range on a fully charged battery of automobiles with plug-in hybrid electric powertrains
+LtTrkPhevMpg: The average fuel economy (miles per gasoline gallon equivalent) of light trucks with plug-in hybrid electric powertrains
+LtTrkPhevMpkwh: The average electric efficiency (miles per kilowatt-hour) of light trucks with plug-in hybrid electric powertrains
+LtTrkPhevRange: The average electric-only travel range on a fully charged battery of light trucks with plug-in hybrid electric powertrains
+AutoBevMpkwh: The average electric efficiency (miles per kilowatt-hour) of automobiles with battery electric powertrains
+AutoBevRange: The average travel range on a fully charged battery of automobiles with battery electric powertrains
+LtTrkBevMpkwh: The average electric efficiency (miles per kilowatt-hour) of light trucks with battery electric powertrains
+LtTrkBevRange: The average travel range on a fully charged battery of light trucks with battery electric powertrains
+
+Source:
+-------
+These are demonstration data developed for the purpose of creating and testing modules. Data comes from various sources used to develop values for Oregon and other sources.

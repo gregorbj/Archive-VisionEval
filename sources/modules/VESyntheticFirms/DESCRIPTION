@@ -14,12 +14,13 @@ Depends: R (>= 3.3.2)
 Imports:
     visioneval,
     devtools,
+	usethis,
     stats,
     reshape
 Suggests: knitr
 VignetteBuilder: knitr
 Encoding: UTF-8
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0.9000
 Collate:
     'CreateBaseSyntheticFirms.R'
     'CreateFutureSyntheticFirms.R'

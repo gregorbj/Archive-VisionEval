@@ -9,7 +9,7 @@ library(pscl)
 ##################################################
 
 #Load datastore from VEHouseholdVehicles package
-file.copy("../VEHouseholdVehicles/tests/Datastore.tar", "tests/Datastore.tar")
+file.copy("../VEHouseholdVehicles/tests/Datastore.tar", "tests/Datastore.tar", overwrite = TRUE)
 setwd("tests")
 untar("Datastore.tar")
 file.remove("Datastore.tar")
@@ -85,6 +85,19 @@ untar("defs_CalculateTravelDemand.tar")
 unzip("ModelState_CalculateTravelDemand.zip")
 untar("inputs_CalculateTravelDemand.tar")
 setwd("..")
+
+#Run default data generation for CalculateTravelDemand Module
+source("R/LoadDefaultValues.R")
+
+#Test Initialize module
+source("R/Initialize.R")
+testModule(
+  ModuleName = "Initialize",
+  LoadDatastore = TRUE,
+  SaveDatastore = TRUE,
+  DoRun = TRUE,
+  RunFor = "NotBaseYear"
+)
 
 #Test CalculateTravelDemand module
 source("R/CalculateTravelDemand.R")

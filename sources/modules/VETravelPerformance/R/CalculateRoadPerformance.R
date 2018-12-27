@@ -1,21 +1,96 @@
 #==========================
 #CalculateRoadPerformance.R
 #==========================
-#This module splits light-duty vehicle (LDV) daily vehicle miles of travel
-#DVHT between freeways and arterials as a function of relative speeds and
-#congestion prices. Speeds and prices are combined to calculate an average
-#'effective' speed for freeways and for arterials. The ratio of freeway and
-#arterial 'effective' speeds and a split factor calculated for the metropolitan
-#area are used to split the LDV DVMT. Iteration is used to find an equilibrium
-#split value. In addition to the LDV freeway DVMT and arterial DVMT, the
-#following performance measures are saved to the datastore:
-#- Average freeway speed by congestion level;
-#- Average arterial speed by congestion level;
-#- Average freeway delay by congestion level;
-#- Average arterial delay by congestion level;
-#- Freeway DVMT proportions by congestion level;
-#- Arterial DVMT proportions by congestion level; and,
-#- Average amount paid per mile in congestion pricing fees.
+
+#<doc>
+#
+## CalculateRoadPerformance Module
+#### November 24, 2018
+#
+#This module splits light-duty vehicle (LDV) daily vehicle miles of travel DVHT between freeways and arterials as a function of relative speeds and congestion prices. Speeds and prices are combined to calculate an average 'effective' speed for freeways and for arterials. The ratio of freeway and arterial 'effective' speeds and a split factor calculated for the metropolitan area are used to split the LDV DVMT. Iteration is used to find an equilibrium split value. In addition to the LDV freeway DVMT and arterial DVMT, the following performance measures are saved to the datastore:
+#
+#* Average freeway speed by congestion level;
+#
+#* Average arterial speed by congestion level;
+#
+#* Average freeway delay by congestion level;
+#
+#* Average arterial delay by congestion level;
+#
+#* Freeway DVMT proportions by congestion level;
+#
+#* Arterial DVMT proportions by congestion level;
+#
+#* Average amount paid per mile in congestion pricing fees; and,
+#
+#* Vehicle hours of delay by vehicle type.
+#
+### Model Parameter Estimation
+#
+#Several models are estimated
+#
+#### Estimate Congestion Lookup Table
+#
+# Lookup tables are created that are used by the module to calculate the proportions of freeway and arterial daily vehicle miles of travel (DVMT) and daily vehicle hours of travel (DVHT) in each of 5 congestion levels (none, moderate, heavy, severe, extreme) as a function of freeway average daily traffic (ADT) per lane and arterial ADT per lane respectively. The lookup tables are created using the following Urban Mobility Study (UMS) data for 90 urbanized areas that are used in the calculations:
+#
+#* Average daily freeway vehicle miles traveled in thousands;
+#
+#* Average daily arterial vehicle miles traveled in thousands;
+#
+#* Freeway lane miles
+#
+#* Arterial lane miles
+#
+#* Percentages of freeway DVMT occurring in 5 congestion levels
+#
+#* Percentages of arterial DVMT occurring in 5 congestion levels
+#
+#* Average freeway speeds for travel at each of the 5 congestion levels
+#
+#* Average arterial speeds for travel at each of the 5 congestion levels
+#
+#The steps for creating the lookup tables are as follows:
+#
+#1. Freeway demand levels and arterial demand levels are calculated for each urbanized area by dividing the respective value of DVMT by the respective number of lane miles. The result is the average daily traffic volume per lane-mile.
+#
+#2. A lookup table relating the proportions of freeway DVMT by congestion level to freeway demand level is created through the calculation of weighted moving averages. Values are calculated for for freeway demand levels ranging from 6000 vehicles per lane to 24,000 vehicles per lane in 100 vehicle increments. For each demand level, the data for the 10 urbanized areas whose demand level is nearest the target demand level (5 below and 5 above are chosen). If there are less than 5 below the target then the sample includes all that are below and 5 above. Similarly if there are less then 5 above the sample target. The DVMT proportions for each congestion level are computed as a weighted average of the proportions in the sample where the weights measure how close the demand level of each sample urbanized area is to the target demand level. After weighted averages have been calculated for all freeway demand levels, smoothing splines (5 degrees of freedom) are used to smooth out the values for each congestion level over the range of demand levels.
+#
+#3. A lookup table relating the proportions of arterial DVMT by congestion level to arterial demand level is created by the same method used to create the freeway table.
+#
+#4. The proportions of freeway DVHT (daily vehicle hours of travel) by congestion level is computed for each urbanized area by dividing the freeway DVMT by congestion by the average speed by congestion level. The proportions of arterial DVHT by congestion level are computed in the same way.
+#
+#5. Freeway and arterial lookup tables for of the proportions of DVHT by congestion level by demand level are calculated in the same manner at the DVMT lookup tables.
+#
+#The following figures illustrate the 4 lookup tables:
+#
+#<fig:fwy_dvmt_cong_prop.png>
+#
+#<fig:art_dvmt_cong_prop.png>
+#
+#<fig:fwy_dvht_cong_prop.png>
+#
+#<fig:art_dvht_cong_prop.png>
+#
+#### Urbanized Area Base Speeds and Operational Adjustments
+#
+#Based on research by Bigazzi and Clifton. The speeds modeled above include the
+#effects of ITS/operations strategies that are in place in urban areas. In order
+#to calculate the effects of operations at various levels, base speed estimates
+#which are not influenced by operations improvements need to be used as the
+#starting point. Bigazzi and Clifton made the calculations and these are
+#included in the data directory. Speeds are reduced based on assumed deployment
+#levels relative to average levels, estimated maximum reductions possible by
+#congestion category, facility type, congestion type (recurring vs. incident),
+#and assumed deployment relative to the average for a metropolitan area of the
+#size.
+
+#
+#
+### How the Module Works
+#
+#
+#</doc>
+
 
 
 #=================================
@@ -283,7 +358,41 @@ estimateCongestionModel <- function() {
 
 #Estimate the congestion model (lookup tables)
 #---------------------------------------------
+#Create proportions table
 CongestedProportions_ls <- estimateCongestionModel()
+#Document the DVMT proportions by congestion level for freeways
+png("data/fwy_dvmt_cong_prop.png", height = 360, width = 480)
+Props_mx <- CongestedProportions_ls$DVMT$Fwy
+matplot(as.numeric(rownames(Props_mx)), Props_mx, type = "l",
+        xlab = "Average Daily Traffic Per Lane", ylab = "Proportion of DVMT",
+        main = "Freeway DVMT Split by Congestion Level")
+legend("topright", lty = 1:5, col = 1:5, legend = colnames(Props_mx), bty = "n")
+dev.off()
+#Document the DVMT proportions by congestion level for arterials
+png("data/art_dvmt_cong_prop.png", height = 360, width = 480)
+Props_mx <- CongestedProportions_ls$DVMT$Art
+matplot(as.numeric(rownames(Props_mx)), Props_mx, type = "l",
+        xlab = "Average Daily Traffic Per Lane", ylab = "Proportion of DVMT",
+        main = "Arterial DVMT Split by Congestion Level")
+legend("topright", lty = 1:5, col = 1:5, legend = colnames(Props_mx), bty = "n")
+dev.off()
+#Document the DVHT proportions by congestion level for freeways
+png("data/fwy_dvht_cong_prop.png", height = 360, width = 480)
+Props_mx <- CongestedProportions_ls$DVHT$Fwy
+matplot(as.numeric(rownames(Props_mx)), Props_mx, type = "l",
+        xlab = "Average Daily Traffic Per Lane", ylab = "Proportion of DVHT",
+        main = "Freeway DVHT Split by Congestion Level")
+legend("topright", lty = 1:5, col = 1:5, legend = colnames(Props_mx), bty = "n")
+dev.off()
+#Document the DVHT proportions by congestion level for arterials
+png("data/art_dvht_cong_prop.png", height = 360, width = 480)
+Props_mx <- CongestedProportions_ls$DVHT$Art
+matplot(as.numeric(rownames(Props_mx)), Props_mx, type = "l",
+        xlab = "Average Daily Traffic Per Lane", ylab = "Proportion of DVHT",
+        main = "Arterial DVHT Split by Congestion Level")
+legend("topright", lty = 1:5, col = 1:5, legend = colnames(Props_mx), bty = "n")
+dev.off()
+
 rm(estimateCongestionModel)
 
 #Save the congestion lookup tables
@@ -305,7 +414,7 @@ rm(estimateCongestionModel)
 #'
 #' @source CalculateCongestion.R script.
 "CongestedProportions_ls"
-devtools::use_data(CongestedProportions_ls, overwrite = TRUE)
+usethis::use_data(CongestedProportions_ls, overwrite = TRUE)
 
 
 #---------------------------------------------------------
@@ -336,6 +445,7 @@ devtools::use_data(CongestedProportions_ls, overwrite = TRUE)
 #' MeasureType is 'DVHT'.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name calculateCongestion
 #' @import visioneval
 #' @export
 calculateCongestion <-
@@ -433,7 +543,7 @@ rm(BaseSpeedInp_ls)
 #'   }
 #' @source CalculateSpeeds.R script.
 "BaseSpeeds_df"
-devtools::use_data(BaseSpeeds_df, overwrite = TRUE)
+usethis::use_data(BaseSpeeds_df, overwrite = TRUE)
 
 
 #----------------------------------------------------
@@ -467,7 +577,7 @@ rm(BaseTravelRate_mx, Delay_mx)
 #'   }
 #' @source CalculateSpeeds.R script.
 "Delay_df"
-devtools::use_data(Delay_df, overwrite = TRUE)
+usethis::use_data(Delay_df, overwrite = TRUE)
 
 
 #-------------------------------------------
@@ -522,7 +632,7 @@ rm(RampMeteringInp_ls)
 #'   }
 #' @source CalculateSpeeds.R script.
 "Ramp_df"
-devtools::use_data(Ramp_df, overwrite = TRUE)
+usethis::use_data(Ramp_df, overwrite = TRUE)
 
 
 #-------------------------------------------------
@@ -577,7 +687,7 @@ rm(IncidentManagementInp_ls)
 #'   }
 #' @source CalculateSpeeds.R script.
 "Incident_df"
-devtools::use_data(Incident_df, overwrite = TRUE)
+usethis::use_data(Incident_df, overwrite = TRUE)
 
 
 #------------------------------------------------
@@ -632,7 +742,7 @@ rm(SignalCoordinationInp_ls)
 #'   }
 #' @source CalculateSpeeds.R script.
 "Signal_df"
-devtools::use_data(Signal_df, overwrite = TRUE)
+usethis::use_data(Signal_df, overwrite = TRUE)
 
 
 #--------------------------------------
@@ -687,7 +797,7 @@ rm(AccessManagementInp_ls)
 #'   }
 #' @source CalculateSpeeds.R script.
 "Access_df"
-devtools::use_data(Access_df, overwrite = TRUE)
+usethis::use_data(Access_df, overwrite = TRUE)
 
 
 #-----------------------------------
@@ -712,6 +822,7 @@ devtools::use_data(Access_df, overwrite = TRUE)
 #' @return A list containing two matrices. The first is a matrix of average
 #' speed (miles per hour) by congestion level and road class. The second is a
 #' matrix of delay hours per vehicle mile by congestion level and road class.
+#' @name calculateSpeeds
 #' @import visioneval
 #' @import stats
 #' @export
@@ -859,28 +970,29 @@ rm(DvmtRatio_Ma, SpeedRatio_Ma)
 #A linear model for calculating the computed 'Lambda' values is estimated using
 #independent variables available in the urban mobility study data. Several model
 #specifications were tested. The best performing model (having the highest
-#adjusted R-squared value) is shown below. Highly significant terms are the
-#natural log of urbanized area population, the number of freeway lane miles per
-#capita, the number of arterial lane miles per capita, and the number of
-#freeway lane miles per square mile. Arterial lane miles per square mile and
-#population per square mile were found not to be significant. An intercept is
-#also not in the model because it was found to be statistically insignificant
-#(P = 0.985) and because it should be zero if there are no freeways.
+#adjusted R-squared value) includes as independent variables the natural log of
+#population and the ratio of freeway lane miles to arterial lane miles.
 Lambda_df <- data.frame(
   Lambda = Lambda_Ma,
-  LnMiRatio = with(Ums_df, FwyLnMi / ArtLnMi),
+  Pop = Ums_df$Pop000 * 1000,
+  SqMi = Ums_df$SqMi,
   LogPop = log(Ums_df$Pop000 * 1000),
-  FwyLnMiPC = with(Ums_df, FwyDvmt000 / Pop000),
-  ArtLnMiPC = with(Ums_df, ArtDvmt000 / Pop000),
-  FwyLnMiSqMi = with(Ums_df, 1000 * FwyDvmt000 / SqMi),
-  ArtLnMiSqMi = with(Ums_df, 1000 * FwyDvmt000 / SqMi)
+  LnMiRatio = with(Ums_df, FwyLnMi / ArtLnMi),
+  PopSqMi = with(Ums_df, 1000 * Pop000 / SqMi),
+  FwyLnMi = Ums_df$FwyLnMi,
+  ArtLnMi = Ums_df$ArtLnMi,
+  FwyLnMiPC = with(Ums_df, 1e-3 * FwyLnMi / Pop000),
+  ArtLnMiPC = with(Ums_df, 1e-3 * ArtLnMi / Pop000),
+  FwyLnMiSqMi = with(Ums_df, FwyLnMi / SqMi),
+  ArtLnMiSqMi = with(Ums_df, ArtLnMi / SqMi),
+  LnMiSqMi = with(Ums_df, (FwyLnMi + ArtLnMi) / SqMi)
 )
-DvmtSplit_LM <-
-  lm(Lambda ~ LogPop + FwyLnMiPC + ArtLnMiPC + FwyLnMiSqMi - 1,
-     data = Lambda_df)
+DvmtSplit_LM <-  lm(Lambda ~ LogPop + LnMiRatio, data = Lambda_df)
 #summary(DvmtSplit_LM)
-#plot(Lambda_Ma, fitted(DvmtSplit_LM)
-#cor(Lambda_df[,c("LogPop", "FwyLnMiPC", "ArtLnMiPC", "FwyLnMiSqMi")])
+#plot(DvmtSplit_LM)
+#plot(Lambda_Ma, fitted(DvmtSplit_LM))
+#abline(0, 1, col = "red")
+#cor(Lambda_df[,c("LogPop", "LnMiRatio")])
 rm(Lambda_df, Ums_df)
 
 #Save the model for calculating factor for splitting DVMT based on speeds
@@ -897,7 +1009,7 @@ rm(Lambda_df, Ums_df)
 #' }
 #' @source CalculateRoadPerformance.R script.
 "DvmtSplit_LM"
-devtools::use_data(DvmtSplit_LM, overwrite = TRUE)
+usethis::use_data(DvmtSplit_LM, overwrite = TRUE)
 
 
 #================================================
@@ -1185,7 +1297,7 @@ CalculateRoadPerformanceSpecifications <- list(
 #' }
 #' @source CalculateRoadPerformance.R script.
 "CalculateRoadPerformanceSpecifications"
-devtools::use_data(CalculateRoadPerformanceSpecifications, overwrite = TRUE)
+usethis::use_data(CalculateRoadPerformanceSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -1218,6 +1330,7 @@ devtools::use_data(CalculateRoadPerformanceSpecifications, overwrite = TRUE)
 #' @param L A list containing data defined by the module specification.
 #' @return A list containing data produced by the function consistent with the
 #' module specifications.
+#' @name CalculateRoadPerformance
 #' @import visioneval
 #' @export
 CalculateRoadPerformance <- function(L) {
@@ -1234,9 +1347,7 @@ CalculateRoadPerformance <- function(L) {
   #--------------------------------------------
   DvmtSplitData_df <- data.frame(
     LogPop = log(sum(L$Year$Marea$UrbanPop)),
-    FwyLnMiPC = with(L$Year$Marea, FwyLaneMi / UrbanPop),
-    ArtLnMiPC = with(L$Year$Marea, ArtLaneMi / UrbanPop),
-    FwyLnMiSqMi = L$Year$Marea$FwyLaneMi / sum(L$Year$Bzone$UrbanArea)
+    LnMiRatio = L$Year$Marea$FwyLaneMi / L$Year$Marea$ArtLaneMi
   )
   Lambda_Ma <- unname(predict(DvmtSplit_LM, newdata = DvmtSplitData_df))
   names(Lambda_Ma) <- Ma
@@ -1266,7 +1377,6 @@ CalculateRoadPerformance <- function(L) {
   for (ma in Ma) {
     SpeedAndDelay_ls[[ma]] <-
       calculateSpeeds(OpsDeployment_MaOp[ma,], OtherOpsEffects_mx)
-    rm(OpsDeployNames_, OpsDeployment_MaOp, OtherOpsEffects_mx)
   }
   #Convert to matrices
   FwySpeed_MaCl <- do.call(rbind, lapply(SpeedAndDelay_ls, function(x) {

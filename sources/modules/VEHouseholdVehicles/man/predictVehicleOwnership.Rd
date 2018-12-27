@@ -5,8 +5,8 @@
 \title{Predict vehicle ownership to match the target proportion for a specific
 region type.}
 \usage{
-predictVehicleOwnership(Hh_df, ModelType = VehOwnModels_ls, VehProp = NA,
-  Type = "Metro")
+predictVehicleOwnership(Hh_df, ModelType = VehOwnModels_ls,
+  VehProp = NA, Type = "Metro")
 }
 \arguments{
 \item{Hh_df}{A household data frame consisting of household attributes.}

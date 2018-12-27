@@ -7,7 +7,7 @@ library(fields)
 ##################################################
 
 #Load datastore from VESimHouseholds package
-file.copy("../VESimHouseholds/tests/Datastore.tar", "tests/Datastore.tar")
+file.copy("../VESimHouseholds/tests/Datastore.tar", "tests/Datastore.tar", overwrite = TRUE)
 setwd("tests")
 untar("Datastore.tar")
 file.remove("Datastore.tar")
@@ -31,10 +31,10 @@ testModule(
   DoRun = TRUE
 )
 
-#Test AssignDevTypes module
-source("R/AssignDevTypes.R")
+#Test AssignLocTypes module
+source("R/AssignLocTypes.R")
 testModule(
-  ModuleName = "AssignDevTypes",
+  ModuleName = "AssignLocTypes",
   LoadDatastore = TRUE,
   SaveDatastore = TRUE,
   DoRun = TRUE

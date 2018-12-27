@@ -9,7 +9,7 @@
 
 
 
-library(visioneval)
+# library(visioneval)
 
 #=============================================
 #SECTION 1: ESTIMATE AND SAVE MODEL PARAMETERS
@@ -37,7 +37,7 @@ rm(HhAllocationModelCoeff)
 #' }
 #' @source CalculateBasePlaceTypes.R script.
 "HhAllocationModelCoeff_df"
-devtools::use_data(HhAllocationModelCoeff_df, overwrite = TRUE)
+usethis::use_data(HhAllocationModelCoeff_df, overwrite = TRUE)
 
 #================================================
 #SECTION 2: DEFINE THE MODULE DATA SPECIFICATIONS
@@ -264,7 +264,7 @@ CalculateBasePlaceTypesSpecifications <- list(
 #' }
 #' @source CalculateBasePlaceTypes.R script.
 "CalculateBasePlaceTypesSpecifications"
-devtools::use_data(CalculateBasePlaceTypesSpecifications, overwrite = TRUE)
+usethis::use_data(CalculateBasePlaceTypesSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -293,7 +293,7 @@ devtools::use_data(CalculateBasePlaceTypesSpecifications, overwrite = TRUE)
 #' @param Hhld A data.frame of households containing population by age
 #' group.
 #' @return A data.frame of households with added variables
-#'
+#' @name addHhldStructure
 #' @export
 addHhldStructure <- function(Hhld) {
   # Define the age groups
@@ -347,7 +347,7 @@ addHhldStructure <- function(Hhld) {
 #' @param ModelData A data.frame model data containing all the necessary variables.
 #' @param ModelCoeffs A data.frame of coefficients of the variables required by the model.
 #' @return An array of predictions
-#'
+#' @name predictLogit
 #' @export
 predictLogit <- function(ModelData,ModelCoeffs){
   # Get the total number of choices
@@ -433,7 +433,7 @@ predictLogit <- function(ModelData,ModelCoeffs){
 #' @param MaxIter Maximum number of iteration to run the logit model (Default: 10).
 #' @param QuitCriteria The quitting criteria for the logit model (Default: 4000).
 #' @return An array of predictions
-#'
+#' @name runLogit
 #' @export
 runLogit <- function(HhldPop = NULL, ModelData = NULL, ModelCoeffs = NULL, TargetPop = NULL,
                      TargetGroups = NULL, MaxIter = 10, QuitCriteria = 4000){
@@ -498,6 +498,7 @@ runLogit <- function(HhldPop = NULL, ModelData = NULL, ModelCoeffs = NULL, Targe
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name CalculateBasePlaceTypes
 #' @import visioneval
 #' @export
 CalculateBasePlaceTypes <- function(L) {

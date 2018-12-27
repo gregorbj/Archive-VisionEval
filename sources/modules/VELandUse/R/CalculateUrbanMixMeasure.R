@@ -1,14 +1,29 @@
 #==========================
 #CalculateUrbanMixMeasure.R
 #==========================
-#This module calculates an urban mixed-use measure based on the 2001 National
-#Household Travel Survey measure of the tract level urban/rural indicator. This
-#measure developed by Claritas uses the density of the tract and surrounding
-#tracts to identify the urban/rural context of the tract. The categories include
-#urban, suburban, second city, town and rural. Mapping of example metropolitan
-#areas shows that places shown as urban correspond to central city and inner
-#neighborhoods characterized by mixed use, higher levels of urban accessibility,
-#and higher levels of walk/bike/transit accessibility.
+
+#<doc>
+#
+## CalculateUrbanMixMeasure Module
+#### November 6, 2018
+#
+#This module calculates an urban mixed-use measure based on the 2001 National Household Travel Survey measure of the tract level urban/rural indicator. This measure developed by Claritas uses the density of the tract and surrounding tracts to identify the urban/rural context of the tract. The categories include urban, suburban, second city, town and rural. Mapping of example metropolitan areas shows that places shown as urban correspond to central city and inner neighborhoods characterized by mixed use, higher levels of urban accessibility, and higher levels of walk/bike/transit accessibility.
+#
+### Model Parameter Estimation
+#
+#A binary logit model is used to calculate the probability that a household is located in an urban mixed-use neighborhood as a function of the population density of the Bzone that household resides in and the housing type of the household.
+#
+#This model is estimated using a household dataset prepared from 2001 National Household Travel Survey public use datasets by the VE2001NHTS package. The HhData_df data frame is loaded from that package and used to estimate the model. Following are the summary statistics for the estimated model:
+#
+#<txt:UrbanMixModel_ls$Summary>
+#
+#The results of applying the binomial logit model are optionally constrained to match a target proportion that the user may input for the Bzone. This is done by successively adjusting the intercept of the model using a binary search algorithm.
+#
+### How the Module Works
+#
+#For each household in each Bzone, the binomial logit model predicts the probability that the household resides in an urban mixed-use neighborhood. Random sampling using the probability determines whether the household is identified as residing in an urban mixed-use neighborhood. If a target proportion for the Bzone has been supplied by the user, the model is run repeatedly for households in the Bzone using a binary search algorithm to adjust the model intercept so that the modeled proportion is equal to the target.
+#
+#</doc>
 
 
 #=================================
@@ -67,7 +82,7 @@ estimateUrbanMixModel <- function(EstData_df, StartTerms_) {
     Formula = makeModelFormulaString(UrbanMixModel),
     Choices = c(1, 0),
     PrepFun = prepIndepVar,
-    Summary = summary(UrbanMixModel)
+    Summary = capture.output(summary(UrbanMixModel))
   )
 }
 
@@ -137,7 +152,7 @@ rm(Data_df)
 #' }
 #' @source CalculateUrbanMixMeasure.R script.
 "UrbanMixModel_ls"
-devtools::use_data(UrbanMixModel_ls, overwrite = TRUE)
+usethis::use_data(UrbanMixModel_ls, overwrite = TRUE)
 
 
 #================================================
@@ -193,6 +208,7 @@ CalculateUrbanMixMeasureSpecifications <- list(
       NAME =
         items(
           "UrbanPop",
+          "TownPop",
           "RuralPop"),
       TABLE = "Bzone",
       GROUP = "Year",
@@ -205,6 +221,7 @@ CalculateUrbanMixMeasureSpecifications <- list(
       NAME =
         items(
           "UrbanArea",
+          "TownArea",
           "RuralArea"),
       TABLE = "Bzone",
       GROUP = "Year",
@@ -228,6 +245,16 @@ CalculateUrbanMixMeasureSpecifications <- list(
       GROUP = "Year",
       TYPE = "character",
       UNITS = "ID",
+      PROHIBIT = "",
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "HhId",
+      TABLE = "Household",
+      GROUP = "Year",
+      TYPE = "character",
+      UNITS = "ID",
+      NAVALUE = "NA",
       PROHIBIT = "",
       ISELEMENTOF = ""
     ),
@@ -275,7 +302,7 @@ CalculateUrbanMixMeasureSpecifications <- list(
 #' }
 #' @source CalculateUrbanMixMeasure.R script.
 "CalculateUrbanMixMeasureSpecifications"
-devtools::use_data(CalculateUrbanMixMeasureSpecifications, overwrite = TRUE)
+usethis::use_data(CalculateUrbanMixMeasureSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -301,6 +328,7 @@ devtools::use_data(CalculateUrbanMixMeasureSpecifications, overwrite = TRUE)
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name CalculateUrbanMixMeasure
 #' @import visioneval
 #' @export
 CalculateUrbanMixMeasure <- function(L) {
@@ -316,41 +344,93 @@ CalculateUrbanMixMeasure <- function(L) {
   Hh_df <- data.frame(L$Year$Household)
   Hh_df$IsSF <- with(Hh_df, as.numeric(HouseType == "SF"))
 
-  #Calculate urban mix-use probability
-  #-----------------------------------
+  #Set up data to calculate urban mix-use probability
+  #--------------------------------------------------
   #Population density
   Bz_df$LocalPopDensity <-
-    with(Bz_df, (UrbanPop + RuralPop) / (UrbanArea + RuralArea))
+    with(Bz_df, (UrbanPop + TownPop + RuralPop) / (UrbanArea + TownArea + RuralArea))
   Bz_df$LocalPopDensity[is.na(Bz_df$LocalPopDensity)] <- 0
   Hh_df$LocalPopDensity <-
     Bz_df$LocalPopDensity[match(Hh_df$Bzone, Bz_df$Bzone)]
-  Hh_df$MixUseProp <-
-    Bz_df$MixUseProp[match(Hh_df$Bzone, Bz_df$Bzone)]
-  Data_df <- split(Hh_df[, c("LocalPopDensity", "IsSF", "MixUseProp")], Hh_df$Bzone)
-  #Predict urban mixed use measure
+  #Add target urban mixed-use proportion to household records
+  Hh_df$MixUseProp <- Bz_df$MixUseProp[match(Hh_df$Bzone, Bz_df$Bzone)]
+  #Split household data frame by Bzone
+  Data_df <-
+    split(Hh_df[, c("HhId", "LocalPopDensity", "IsSF", "MixUseProp")],
+          Hh_df$Bzone)
+
+  #Define a function to apply the model to match mix target if there is one
+  #------------------------------------------------------------------------
+  matchMixTarget <- function(D_df, MixTarget) {
+    D_df$Intercept <- 1
+    Odds_ <- exp(eval(parse(text = UrbanMixModel_ls$Formula), envir = D_df))
+    Prob_ <- Odds_ / (1 + Odds_)
+    Rand_ <- runif(nrow(D_df))
+    #Find out whether prediction is matching, under, or over
+    NPred <- sum(Rand_ <= Prob_)
+    #Return the prediction if NPred equals MixTarget
+    if (NPred == MixTarget) {
+      return(Rand_ <= Prob_)
+    } else {
+      #Define an adjustment function depending on whether need to go up or down
+      if (NPred < MixTarget) {
+        adjProb <- function(Adj) {
+          Adj + Prob_ * (1 - Adj)
+        }
+      } else {
+        adjProb <- function(Adj) {
+          Prob_ * (1 - Adj)
+        }
+      }
+      #Define function to feed binary search to find adjustment
+      checkMixTargetMatch <- function(Adj) {
+        ProbAdj_ <- adjProb(Adj)
+        sum(Rand_ <= ProbAdj_)
+      }
+      #Call binary search to find Adj to match
+      TargetAdj <- binarySearch(checkMixTargetMatch, c(0,1), Target = MixTarget)
+      #Determine the values
+      Rand_ <= adjProb(TargetAdj)
+    }
+  }
+
+  #Apply urban mixed-use model to households by Bzone
+  #--------------------------------------------------
+  #Iterate over Bzones and apply model
   UrbanMix_ls <-
     lapply(Data_df, function(x) {
       if (any(is.na(x$MixUseProp))) {
         applyBinomialModel(UrbanMixModel_ls, x)
       } else {
-        applyBinomialModel(UrbanMixModel_ls, x, TargetProp = x$MixUseProp[1])
+        N <- nrow(x)
+        NumToMatch <- round(x$MixUseProp[1] * N)
+        matchMixTarget(x, NumToMatch)
       }
     })
+  #Convert results into vector properly ordered by household
+  UrbanMix_Hh <- unlist(UrbanMix_ls, use.names = FALSE)
+  names(UrbanMix_Hh) <-
+    unlist(lapply(Data_df, function(x) x$HhId), use.names = FALSE)
+  UrbanMix_Hh <- UrbanMix_Hh[L$Year$Household$HhId]
 
   #Produce output list of results
   #------------------------------
   Out_ls <- initDataList()
   Out_ls$Year$Household <-
     list(
-      IsUrbanMixNbrhd = as.integer(do.call(c, UrbanMix_ls))
+      IsUrbanMixNbrhd = as.integer(UrbanMix_Hh[L$Year$Household$HhId])
     )
   Out_ls
 }
 
 
-#================================
-#Code to aid development and test
-#================================
+#===============================================================
+#SECTION 4: MODULE DOCUMENTATION AND AUXILLIARY DEVELOPMENT CODE
+#===============================================================
+#Run module automatic documentation
+#----------------------------------
+documentModule("CalculateUrbanMixMeasure")
+
 #Test code to check specifications, loading inputs, and whether datastore
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions

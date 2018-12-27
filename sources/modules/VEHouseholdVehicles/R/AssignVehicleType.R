@@ -1,9 +1,47 @@
 #===================
 #AssignVehicleType.R
 #===================
-#This module identifies how many household vehicles are light trucks and how
-#many are automobiles. Automobiles are vehicles classified as passenger cars and not as
-#light trucks (pickup trucks, sport utility vehicles, vans)
+#
+#<doc>
+#
+## AssignVehicleType Module
+#### November 23, 2018
+#
+#This module identifies how many household vehicles are light trucks and how many are automobiles. Light trucks include pickup trucks, sport utility vehicles, vans, and any other vehicle not classified as a passenger car. Automobiles are vehicles classified as passenger cars. The crossover vehicle category [blurs the line between light trucks and passenger vehicles](https://www.eia.gov/todayinenergy/detail.php?id=31352). Their classification as light trucks or automobiles depends on the agency doing the classification and purpose of the classification. These vehicles were not a significant portion of the market when the model estimation data were collected and so are not explictly considered. How they are classified is up to the model user who is responsible for specifying the light truck proportion of the vehicle fleet.
+#
+### Model Parameter Estimation
+#
+#A binary logit models are estimated to predict the probability that a household vehicle is a light truck. A summary of the estimated model follows. The probability that a vehicle is a light truck increases if:
+#
+#* The ratio of the number of persons in the household to the number of vehicles in the household increases;
+#
+#* The number of children in the household increases;
+#
+#* The ratio of vehicles to drivers increases, especially if the number of vehicles is greater than the number of drivers; and,
+#
+#* The household lives in a single-family dwelling.
+#
+#The probability decreases if:
+#
+#* The household only owns one vehicle;
+#
+#* The household has low income (less than $20,000 in year 2000 dollars);
+#
+#* The household lives in a higher density neighborhood; and,
+#
+#* The household lives in an urban mixed-use neighborhood.
+#
+#<txt:VehicleTypeModel_ls$Summary>
+#
+#The model and all of its independent variables are significant, but it only explains a modest proportion of the observed variation in light truck ownership. When the model is applied to the estimation dataset, it correctly predicts the number of light trucks for about 46% of the households. Over predictions and under predictions are approximately equal as shown in the following table.
+#
+#<tab:VehicleTypeModel_ls$PredictionTest>
+#
+### How the Module Works
+#
+#The user inputs the light truck proportion of vehicles observed or assumed each each Azone. The module calls the `applyBinomialModel` function (part of the *visioneval* framework package), passing it the estimated binomial logit model and a data frame of values for the independent variables, and the user-supplied light truck proportion. The `applyBinomialModel` function uses a binary search algorithm to adjust the intercept of the model so that the resulting light truck proportion of all household vehicles in the Azone equals the user input.
+#
+#</doc>
 
 
 #=================================
@@ -71,7 +109,7 @@ estimateVehicleTypeModel <- function(EstData_df, Counts_mx, StartTerms_) {
     Formula = makeModelFormulaString(VehicleTypeModel),
     Choices = c("LtTrk", "Auto"),
     PrepFun = prepIndepVar,
-    Summary = summary(VehicleTypeModel),
+    Summary = capture.output(summary(VehicleTypeModel)),
     RepeatVar = "Vehicles"
   )
 }
@@ -79,15 +117,14 @@ estimateVehicleTypeModel <- function(EstData_df, Counts_mx, StartTerms_) {
 #Estimate the binomial logit model
 #---------------------------------
 #Load and select NHTS household data
-Hh_df <- VE2001NHTS::Hh_df
 HhVars_ <-
-  c("Houseid", "Hbppopdn", "Hhsize", "Age0to14", "Income", "Wrkcount",
-    "Hometype", "UrbanDev", "TownDev", "SuburbanDev", "RuralDev", "SecondCityDev",
-    "NumAuto", "NumLightTruck", "NumVeh")
-Hh_df <- Hh_df[,HhVars_]
-Hh_df <- Hh_df[,HhVars_]
+  c("Houseid", "Hbppopdn", "Hhsize", "Age0to14", "Age15to19", "Hhsize",
+    "Income", "Drvrcnt", "Wrkcount", "Hometype", "UrbanDev", "NumAuto",
+    "NumLightTruck", "NumVeh")
+Hh_df <- VE2001NHTS::Hh_df[, HhVars_]
 Hh_df <- Hh_df[complete.cases(Hh_df),]
 Hh_df <- Hh_df[Hh_df$NumVeh != 0,]
+Hh_df <- Hh_df[Hh_df$Drvrcnt >= 1,]
 rm(HhVars_)
 #Create independent variables that will be used in estimation
 Hh_df$Density <- Hh_df$Hbppopdn
@@ -96,57 +133,69 @@ Hh_df$HhSize <- Hh_df$Hhsize
 Hh_df$DrvAgePop <- Hh_df$HhSize - Hh_df$Age0to14
 Hh_df$IsSF <- as.numeric(Hh_df$Hometype %in% c("Single Family", "Mobile Home"))
 Hh_df$LogIncome <- log(Hh_df$Income)
-Hh_df$LogDensity <- log(Hh_df$Hbppopdn)
 Hh_df$Workers <- Hh_df$Wrkcount
 Hh_df$IsUrbanMixNbrhd <- Hh_df$UrbanDev
 Hh_df$Vehicles <- Hh_df$NumVeh
 Hh_df$VehPerDrvAgePop <- Hh_df$Vehicles / Hh_df$DrvAgePop
-
+Hh_df$VehPerDvr <- Hh_df$Vehicles / Hh_df$Drvrcnt
+Hh_df$NumChild <- Hh_df$Age0to14 + Hh_df$Age15to19
+Hh_df$NumAdult <- Hh_df$HhSize - Hh_df$NumChild
+Hh_df$IsLowIncome <- as.numeric(Hh_df$Income <= 20000)
+Hh_df$OnlyOneVeh <- as.numeric(Hh_df$Vehicles == 1)
+Hh_df$NumVehGtNumDvr <- as.numeric(Hh_df$Vehicles > Hh_df$Drvrcnt)
+Hh_df$NumVehEqNumDvr <- as.numeric(Hh_df$Vehicles == Hh_df$Drvrcnt)
+Hh_df$NumVehLtNumDvr <- as.numeric(Hh_df$Vehicles < Hh_df$Drvrcnt)
+Hh_df$PrsnPerVeh <- Hh_df$Hhsize / Hh_df$Vehicles
 #Create dependent variable matrix of choice proportions
-Veh_df <- VE2001NHTS::Veh_df[,c("Houseid", "Type")]
-NumLtTrk_Hh <-
-  tapply(Veh_df$Type == "LightTruck", Veh_df$Houseid, sum)[Hh_df$Houseid]
-NumAuto_Hh <- Hh_df$Vehicles - NumLtTrk_Hh
-DepVar_mx <- cbind(NumLtTrk_Hh, NumAuto_Hh)
+DepVar_mx <- cbind(Hh_df$NumLightTruck, Hh_df$NumAuto)
 colnames(DepVar_mx) <- c("LtTrk", "Auto")
-rm(NumLtTrk_Hh, NumAuto_Hh)
-
 #Select independent variables
 VehicleTypeModelTerms_ <-
   c(
-    "Density",
-    "Age0to14",
-    "DrvAgePop",
+    "PrsnPerVeh",
+    "NumChild",
+    "NumVehGtNumDvr",
+    "NumVehEqNumDvr",
     "IsSF",
-    "LogIncome",
-    "IsUrbanMixNbrhd",
-    "Vehicles",
-    "VehPerDrvAgePop",
-    "Workers"
+    "OnlyOneVeh",
+    "IsLowIncome",
+    "LogDensity",
+    "IsUrbanMixNbrhd"
   )
 #Estimate model
 VehicleTypeModel_ls <- estimateVehicleTypeModel(Hh_df, DepVar_mx, VehicleTypeModelTerms_)
-#Model summary
-VehicleTypeModel_ls$Summary
 
 #Check the model
 #---------------
-#Model will be run using household data applied as many times as there are
-#vehicles in the household
-#Predict values, sum number of predicted and observed light trucks by households
-Pred <- applyBinomialModel(VehicleTypeModel_ls, Hh_df)
-ObsLtTrk_Hh <-
-  tapply(Veh_df$Type == "LightTruck", Veh_df$Houseid, sum)[Hh_df$Houseid]
-PredLtTrk_Hh <-
-  tapply(Pred == "LtTrk", rep(Hh_df$Houseid, Hh_df$Vehicles), sum)[Hh_df$Houseid]
-#Table of predicted vs. observed number of trucks
-Tab <- table(PredLtTrk_Hh, ObsLtTrk_Hh)
-#Compare ratio of correctly predicted households vs. total households
-sum(diag(Tab)) / sum(Tab)
-#Compare ratio of correctly predicted households by number of light trucks
-diag(Tab)[1:7] / rowSums(Tab[1:7,1:7])
+#Apply the model to household data applied as many times as there are vehicles
+#in the household to predict the numbers of light trucks and automobiles.
+#Household light truck predictions to observed numbers of light trucks. Tabulate
+#the proportion of households with the correct number of light truck
+#predictions, the proportion of households for which the number of light trucks
+#is under predicted, and the proportion of households for which the number of
+#light trucks is over predicted
+VehicleTypeModel_ls$PredictionTest <- local({
+  #Predict values, sum number of predicted and observed light trucks by households
+  Pred <- applyBinomialModel(VehicleTypeModel_ls, Hh_df)
+  ObsLtTrk_Hh <- Hh_df$NumLightTruck
+  PredLtTrk_Hh <-
+    tapply(Pred == "LtTrk", rep(Hh_df$Houseid, Hh_df$Vehicles), sum)[Hh_df$Houseid]
+  #Table of predicted vs. observed number of trucks
+  Tab <- table(PredLtTrk_Hh, ObsLtTrk_Hh)
+  #Calculate the proportions of correctly predicted, underpredicted, and
+  #overpredicted number of light trucks in households
+  PredResults_ <- c(
+    sum(upper.tri(Tab) * Tab),
+    sum(diag(Tab)),
+    sum(lower.tri(Tab) * Tab)
+  )
+  data.frame(
+    Prediction = c("Under Predict", "Correctly Predict", "Over Predict"),
+    Proportion = round(PredResults_ / sum(Tab), 3)
+  )
+})
 #Clean up
-rm(VehicleTypeModelTerms_, ObsLtTrk_Hh, PredLtTrk_Hh, Tab, Pred, DepVar_mx)
+rm(VehicleTypeModelTerms_, DepVar_mx)
 
 #Estimate the search range for matching target housing proportions
 #-----------------------------------------------------------------
@@ -157,11 +206,11 @@ rm(VehicleTypeModelTerms_, ObsLtTrk_Hh, PredLtTrk_Hh, Tab, Pred, DepVar_mx)
 #to specify a search range.
 #Check search range of values to use
 VehicleTypeModel_ls$SearchRange <- c(-10, 10)
-applyBinomialModel(
-  VehicleTypeModel_ls,
-  Hh_df,
-  TargetProp = NULL,
-  CheckTargetSearchRange = TRUE)
+# applyBinomialModel(
+#   VehicleTypeModel_ls,
+#   Hh_df,
+#   TargetProp = NULL,
+#   CheckTargetSearchRange = TRUE)
 #Check that low target can be matched with search range
 Target <- 0.01
 LowResult_ <- applyBinomialModel(
@@ -170,7 +219,7 @@ LowResult_ <- applyBinomialModel(
   TargetProp = Target
 )
 Result <- round(table(LowResult_) / length(LowResult_), 2)
-paste("Target =", Target, "&", "Result =", Result[2])
+#paste("Target =", Target, "&", "Result =", Result[2])
 rm(Target, LowResult_, Result)
 #Check that high target can be matched with search range
 Target <- 0.99
@@ -180,9 +229,9 @@ HighResult_ <- applyBinomialModel(
   TargetProp = Target
 )
 Result <- round(table(HighResult_) / length(HighResult_), 2)
-paste("Target =", Target, "&", "Result =", Result[2])
+#paste("Target =", Target, "&", "Result =", Result[2])
 rm(Target, HighResult_, Result)
-rm(Hh_df, Veh_df)
+rm(Hh_df)
 
 #Save the vehicle type choice model
 #----------------------------------
@@ -201,7 +250,7 @@ rm(Hh_df, Veh_df)
 #' }
 #' @source AssignVehicleType.R script.
 "VehicleTypeModel_ls"
-devtools::use_data(VehicleTypeModel_ls, overwrite = TRUE)
+usethis::use_data(VehicleTypeModel_ls, overwrite = TRUE)
 
 #================================================
 #SECTION 2: DEFINE THE MODULE DATA SPECIFICATIONS
@@ -290,7 +339,9 @@ AssignVehicleTypeSpecifications <- list(
       ISELEMENTOF = ""
     ),
     item(
-      NAME = "Age0to14",
+      NAME = items(
+        "Age0to14",
+        "Age15to19"),
       TABLE = "Household",
       GROUP = "Year",
       TYPE = "people",
@@ -326,20 +377,20 @@ AssignVehicleTypeSpecifications <- list(
       ISELEMENTOF = c(0, 1)
     ),
     item(
-      NAME = "Workers",
-      TABLE = "Household",
-      GROUP = "Year",
-      TYPE = "people",
-      UNITS = "PRSN",
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = ""
-    ),
-    item(
       NAME = "Vehicles",
       TABLE = "Household",
       GROUP = "Year",
       TYPE = "vehicles",
       UNITS = "VEH",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "Drivers",
+      TABLE = "Household",
+      GROUP = "Year",
+      TYPE = "people",
+      UNITS = "PRSN",
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = ""
     )
@@ -381,7 +432,7 @@ AssignVehicleTypeSpecifications <- list(
 #' }
 #' @source AssignVehicleType.R script.
 "AssignVehicleTypeSpecifications"
-devtools::use_data(AssignVehicleTypeSpecifications, overwrite = TRUE)
+usethis::use_data(AssignVehicleTypeSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -404,10 +455,9 @@ devtools::use_data(AssignVehicleTypeSpecifications, overwrite = TRUE)
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name AssignVehicleType
 #' @import visioneval
 #' @export
-#'
-
 AssignVehicleType <- function(L) {
   #Set up
   #------
@@ -419,12 +469,16 @@ AssignVehicleType <- function(L) {
   #Set up data frame of household data needed for model
   #----------------------------------------------------
   Data_df <- data.frame(L$Year$Household)
+  Data_df$PrsnPerVeh <- Data_df$HhSize / Data_df$Vehicles
+  Data_df$NumChild <- Data_df$Age0to14 + Data_df$Age15to19
+  Data_df$NumVehGtNumDvr <- as.numeric(Data_df$Vehicles > Data_df$Drivers)
+  Data_df$NumVehEqNumDvr <- as.numeric(Data_df$Vehicles == Data_df$Drivers)
+  Data_df$IsSF <- as.numeric(Data_df$HouseType == "SF")
+  Data_df$OnlyOneVeh <- as.numeric(Data_df$Vehicles == 1)
+  Data_df$IsLowIncome <- as.numeric(Data_df$Income <= 20000)
   Data_df$Density <-
     L$Year$Bzone$D1B[match(L$Year$Household$Bzone, L$Year$Bzone$Bzone)]
-  Data_df$DrvAgePop <- Data_df$HhSize - Data_df$Age0to14
-  Data_df$VehPerDrvAgePop <- Data_df$Vehicles / Data_df$DrvAgePop
-  Data_df$IsSF <- as.numeric(Data_df$HouseType == "SF")
-  Data_df$LogIncome <- log(Data_df$Income)
+  Data_df$LogDensity <- log(Data_df$Density)
   #Identify households that have vehicles
   HasVeh_Hh <- Data_df$Vehicles != 0
 
@@ -459,13 +513,17 @@ AssignVehicleType <- function(L) {
   Out_ls
 }
 
-#================================
-#Code to aid development and test
-#================================
+#===============================================================
+#SECTION 4: MODULE DOCUMENTATION AND AUXILLIARY DEVELOPMENT CODE
+#===============================================================
+#Run module automatic documentation
+#----------------------------------
+documentModule("AssignVehicleType")
+
 #Test code to check specifications, loading inputs, and whether datastore
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions
-#-------------------------------------------------------------------------------
+# #-------------------------------------------------------------------------------
 # TestDat_ <- testModule(
 #   ModuleName = "AssignVehicleType",
 #   LoadDatastore = TRUE,

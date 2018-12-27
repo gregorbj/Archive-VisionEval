@@ -1,0 +1,18 @@
+=========================================
+Documentation for transit_biofuel_mix.csv
+=========================================
+
+This file contains values for the biofuel proportions of hydrocarbon fuels used by public transit vehicles. For example if the gasoline used by thes vehicles is on average is 5% ethanol, the ethanol proportion of gasoline (EthanolPropGasoline) would be 0.05.
+
+File Structure
+--------------
+Each row is a decade year from 1990 to 2050. The range of years needs to be sufficient to encompass all model run years that are anticipated.
+Column names as follows:
+Year: The year to which the data apply
+EthanolPropGasoline: The ethanol proportion of gasoline blend fuels used by transit vehicles
+BiodieselPropDiesel: The biodiesel proportion of diesel blend fuels used by transit vehicles
+RngPropCng: The renewable natural gas proportion of liquified natural gas blend fuels used by transit vehicles
+
+Source:
+-------
+These are demonstration data developed for the purpose of creating and testing modules. Data comes from various sources used to develop values for Oregon and other sources.

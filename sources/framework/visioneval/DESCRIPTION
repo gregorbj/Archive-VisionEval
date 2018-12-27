@@ -1,8 +1,8 @@
 Package: visioneval
 Type: Package
 Title: Software Framework for VisionEval Model System
-Version: 0.8
-Date: 2017-11-03
+Version: 0.85
+Date: 2018-09-05
 Author: Brian Gregor <gregorb@or-analytics.com>["aut", "cre"]
 Maintainer: Brian Gregor <gregorb@or-analytics.com>
 Copyright: AASHTO
@@ -27,5 +27,7 @@ Imports:
     jsonlite,
     stringr,
     filesstrings,
-    rhdf5
+    rhdf5,
+    knitr
 RoxygenNote: 6.0.1
+biocViews: Infrastructure

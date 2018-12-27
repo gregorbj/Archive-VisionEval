@@ -1,0 +1,24 @@
+=============================================
+Documentation for transit_powertrain_prop.csv
+=============================================
+
+This file contains values for the proportions of vehicle powertrain (ICEV, HEV, BEV) use by public transit vehicles. The proportions represent the proportions of daily vehicle miles traveled (DVMT) rather than the proportions of vehicles. Note that the powertrain use proportions must add to 1 for each vehicle type. Also note that there is no category for plug-in hybrid electric vehicles (PHEV). The reason for this is that the model has no built-in mechanism for determining the proportion of PHEV travel which is powered by electricity vs. the proportion of travel powered by fuel. If the user wishes to model PHEVs, they need to estimate the proportions of travel powered by fuel and by electricity and combine the fuel proportion with the PropHev value and the electric proportion with the PropBev value.
+
+File Structure
+--------------
+Each row is a decade year from 1990 to 2050. The range of years needs to be sufficient to encompass all model run years that are anticipated.
+Column names as follows:
+Year: The year to which the data apply
+VanPropIcev: The proportion of transit van DVMT occurring with internal combustion engine vehicles (ICEV)
+VanPropHev: The proportion of transit van DVMT occurring with hybrid electric vehicles (HEV)
+VanPropBev: The proportion of transit van DVMT occurring with battery electric vehicles (BEV)
+BusPropIcev: The proportion of transit bus DVMT occurring with internal combustion engine vehicles (ICEV)
+BusPropHev: The proportion of transit bus DVMT occurring with hybrid electric vehicles (HEV)
+BusPropBev: The proportion of transit bus DVMT occurring with battery electric vehicles (BEV)
+RailPropIcev: The proportion of transit rail DVMT occurring with internal combustion engine vehicles (ICEV)
+RailPropHev: The proportion of transit rail DVMT occurring with hybrid electric vehicles (HEV)
+RailPropEv: The proportion of transit rail DVMT occurring with electric vehicles (EV)
+
+Source:
+-------
+These are demonstration data developed for the purpose of creating and testing modules. Data comes from various sources used to develop values for Oregon and other sources.

@@ -418,7 +418,7 @@ CalculateBaseRoadDvmtSpecifications <- list(
 #' }
 #' @source CalculateBaseRoadDvmt.R script.
 "CalculateBaseRoadDvmtSpecifications"
-devtools::use_data(CalculateBaseRoadDvmtSpecifications, overwrite = TRUE)
+usethis::use_data(CalculateBaseRoadDvmtSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -471,6 +471,7 @@ devtools::use_data(CalculateBaseRoadDvmtSpecifications, overwrite = TRUE)
 #' @param L A list containing data defined by the module specification.
 #' @return A list containing data produced by the function consistent with the
 #' module specifications.
+#' @name CalculateBaseRoadDvmt
 #' @import visioneval
 #' @export
 CalculateBaseRoadDvmt <- function(L) {
@@ -536,7 +537,8 @@ CalculateBaseRoadDvmt <- function(L) {
   RuralComSvcDvmt_Ma <- RuralHhDvmt_Ma * RoadDvmtModel_ls$ComSvcDvmtFactor
   Out_ls$Year$Marea$ComSvcUrbanDvmt <- UrbanComSvcDvmt_Ma
   Out_ls$Year$Marea$ComSvcRuralDvmt <- RuralComSvcDvmt_Ma
-  Out_ls$Global$Marea$ComSvcDvmtHhDvmtFactor <- RoadDvmtModel_ls$ComSvcDvmtFactor
+  Out_ls$Global$Marea$ComSvcDvmtHhDvmtFactor <-
+    rep(RoadDvmtModel_ls$ComSvcDvmtFactor, length(Ma))
   Out_ls$Global$Marea$ComSvcDvmtPopulationFactor <-
     unname((UrbanComSvcDvmt_Ma + RuralComSvcDvmt_Ma) / Pop_Ma)
   Out_ls$Global$Marea$ComSvcDvmtIncomeFactor <-

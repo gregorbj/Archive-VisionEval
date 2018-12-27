@@ -14,7 +14,7 @@
 #dataset to be used in model estimation. Data on freeway lane miles and
 #bus equivalent transit revenue miles are added. A household dataframe (Hh_df)
 #containing travel and other relevant data for each survey household.
-library(visioneval)
+# library(visioneval)
 
 
 #==================
@@ -186,9 +186,9 @@ Dt_df[Dt_df < 0] <- NA
 
 #Describe specifications for road supply data file
 #-------------------------------------------------
-RoadInp_ls <- items(
-  item(
-    NAME = items(
+RoadInp_ls <- visioneval::items(
+  visioneval::item(
+    NAME = visioneval::items(
       "MsaCode",
       "UrbanizedArea"),
     TYPE = "character",
@@ -197,8 +197,8 @@ RoadInp_ls <- items(
     UNLIKELY = "",
     TOTAL = ""
   ),
-  item(
-    NAME = items(
+  visioneval::item(
+    NAME = visioneval::items(
       "RoadMiles",
       "TotalDvmt",
       "Population",
@@ -218,7 +218,7 @@ RoadInp_ls <- items(
 #Read in road supply data
 #------------------------
 Hwy2001_df <-
-  processEstimationInputs(
+  visioneval::processEstimationInputs(
     RoadInp_ls,
     "highway_statistics.csv",
     "Make2001NHTSDataset")
@@ -226,9 +226,9 @@ rm(RoadInp_ls)
 
 #Describe specifications for transit supply data file
 #----------------------------------------------------
-TransitInp_ls <- items(
-  item(
-    NAME = items(
+TransitInp_ls <- visioneval::items(
+  visioneval::item(
+    NAME = visioneval::items(
       "UZAName",
       "MSACode"),
     TYPE = "character",
@@ -237,8 +237,8 @@ TransitInp_ls <- items(
     UNLIKELY = "",
     TOTAL = ""
   ),
-  item(
-    NAME = items(
+  visioneval::item(
+    NAME = visioneval::items(
       "BusEqRevMi",
       "UZAPop",
       "BusEqRevMiPC"),
@@ -253,7 +253,7 @@ TransitInp_ls <- items(
 #Read in transit supply data
 #---------------------------
 Transit2001_df <-
-  processEstimationInputs(
+  visioneval::processEstimationInputs(
     TransitInp_ls,
     "uza_bus_eq_rev_mi.csv",
     "Make2001NHTSDataset")
@@ -706,10 +706,6 @@ rm(Per_ls, Numcommdrvr_Hh, Nbiketrp_Hh, Nwalktrp_Hh, Usepubtr_Hh, Numwrkdrvr_Hh)
 #---------------------------
 #Change Hhc_msa to character variable to link up highway data properly
 Hh_df$Hhc_msa <- as.character(Hh_df$Hhc_msa)
-#Load data file
-# Hwy2001_df <-
-#   read.csv("data-raw/HighwayStatistics2.csv",
-#            colClasses = c(rep("character", 2), rep("numeric", 8)))
 #Sum quantities by Msa Code
 RoadMi_Mc <- toVecFrom1DAry(tapply(Hwy2001_df$RoadMiles, Hwy2001_df$MsaCode, sum))
 Pop_Mc <- toVecFrom1DAry(tapply(Hwy2001_df$Population, Hwy2001_df$MsaCode, sum))
@@ -730,8 +726,6 @@ rm(RoadMi_Mc, Pop_Mc, FwyLnMi_Mc, Area_Mc, RoadMiCap_Mc, FwyLnMiCap_Mc,
 
 #Add the transit supply data
 #---------------------------
-#Load the data file
-# Transit2001_df <- read.csv("data-raw/uza_bus_eq_rev_mi.csv", as.is = TRUE)
 Transit2001_df$MSACode <- as.character(Transit2001_df$MSACode)
 Transit2001_df$MSACode[Transit2001_df$MSACode == "520"] <- "0520"
 Transit2001_df$MSACode[Transit2001_df$MSACode == "640"] <- "0640"
@@ -885,7 +879,7 @@ rm(Dt_df, toProperName, toVecFrom1DAry)
 #' @source 2001 National Household Travel Survey, Highway Statistics (2001),
 #' National Transit Database (2002), and Make2001NHTSDataset.R script.
 "Hh_df"
-devtools::use_data(Hh_df, overwrite = TRUE)
+usethis::use_data(Hh_df, overwrite = TRUE)
 rm(Hh_df)
 
 
@@ -912,7 +906,7 @@ rm(Hh_df)
 #' }
 #' @source 2001 National Household Travel Survey and Make2001NHTSDataset.R script.
 "Veh_df"
-devtools::use_data(Veh_df, overwrite = TRUE)
+usethis::use_data(Veh_df, overwrite = TRUE)
 rm(Veh_df)
 
 
@@ -946,7 +940,7 @@ rm(Veh_df)
 #'  }
 #'  @source 2001 National Household Travel Survey and Make2001NHTSDataset.R script.
 "HhTours_df"
-devtools::use_data(HhTours_df, overwrite = TRUE)
+usethis::use_data(HhTours_df, overwrite = TRUE)
 rm(HhTours_df)
 
 
@@ -978,5 +972,5 @@ rm(HhTours_df)
 #'  }
 #'  @source 2001 National Household Travel Survey and Make2001NHTSDataset.R script.
 "Per_df"
-devtools::use_data(Per_df, overwrite = TRUE)
+usethis::use_data(Per_df, overwrite = TRUE)
 rm(Per_df)

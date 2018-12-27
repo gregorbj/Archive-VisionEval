@@ -23,7 +23,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-library(visioneval)
+# library(visioneval)
 
 #=============================================
 #SECTION 1: ESTIMATE AND SAVE MODEL PARAMETERS
@@ -205,7 +205,7 @@ CreateBaseAccessibilitySpecifications <- list(
 #' }
 #' @source CreateBaseAccessibility.R script.
 "CreateBaseAccessibilitySpecifications"
-devtools::use_data(CreateBaseAccessibilitySpecifications, overwrite = TRUE)
+usethis::use_data(CreateBaseAccessibilitySpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -232,6 +232,7 @@ devtools::use_data(CreateBaseAccessibilitySpecifications, overwrite = TRUE)
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name CreateBaseAccessibility
 #' @import visioneval
 #' @export
 CreateBaseAccessibility <- function(L) {

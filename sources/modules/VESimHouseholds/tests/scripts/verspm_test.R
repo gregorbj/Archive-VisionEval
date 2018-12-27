@@ -1,0 +1,29 @@
+#verspm_test.R
+#-------------
+
+#Load packages and test functions
+library(visioneval)
+library(filesstrings)
+source("tests/scripts/test_functions.R")
+
+#Define test setup parameters
+TestSetup_ls <- list(
+  TestDataRepo = "../Test_Data/VE-RSPM",
+  DatastoreName = "Datastore.tar",
+  LoadDatastore = FALSE,
+  TestDocsDir = "verspm",
+  ClearLogs = TRUE
+)
+
+#Define the module tests
+Tests_ls <- list(
+  CreateHouseholds = c(LoadDatastore = FALSE, SaveDatastore = TRUE, DoRun = TRUE),
+  PredictWorkers = c(LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
+  AssignLifeCycle = c(LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
+  PredictIncome = c(LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE)
+)
+
+#Set up, run tests, and save test results
+setUpTests(TestSetup_ls)
+doTests(Tests_ls, TestSetup_ls)
+saveTestResults(TestSetup_ls)

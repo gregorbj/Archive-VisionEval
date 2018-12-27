@@ -2,7 +2,7 @@
 #CreateFutureSyntheticFirms.R
 #============================
 
-library(visioneval)
+# library(visioneval)
 
 
 #================================================
@@ -195,7 +195,7 @@ CreateFutureSyntheticFirmsSpecifications <- list(
 #' }
 #' @source CreateFutureSyntheticFirms.R script.
 "CreateFutureSyntheticFirmsSpecifications"
-devtools::use_data(CreateFutureSyntheticFirmsSpecifications, overwrite = TRUE)
+usethis::use_data(CreateFutureSyntheticFirmsSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -216,6 +216,7 @@ devtools::use_data(CreateFutureSyntheticFirmsSpecifications, overwrite = TRUE)
 #'
 #' @param L A list
 #' @return A list
+#' @name CreateFutureSyntheticFirms
 #' @import visioneval stats
 #' @export
 CreateFutureSyntheticFirms <- function(L) {

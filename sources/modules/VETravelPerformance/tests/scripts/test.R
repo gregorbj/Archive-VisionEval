@@ -2,7 +2,7 @@ library(visioneval)
 library(filesstrings)
 
 #Load datastore from VEHouseholdTravel package
-file.copy("../VEPowertrainsAndFuels/tests/Datastore.tar", "tests/Datastore.tar")
+file.copy("../VEPowertrainsAndFuels/tests/Datastore.tar", "tests/Datastore.tar", overwrite = TRUE)
 setwd("tests")
 untar("Datastore.tar")
 file.remove("Datastore.tar")

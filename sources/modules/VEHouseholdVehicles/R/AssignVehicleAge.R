@@ -1,10 +1,37 @@
 #==================
 #AssignVehicleAge.R
 #==================
-#This module assigns vehicle ages to each household vehicle. The type and age
-#of each vehicle owned or leased by households is assigned to the Vehicle table.
-#It is assumed that for vehicles whose access type is car service rather than
-#own, the vehicle type is Auto.
+#
+#<doc>
+#
+## AssignVehicleAge Module
+#### September 7, 2018
+#
+#This module assigns vehicle ages to each household vehicle. Vehicle age is assigned as a function of the vehicle type (auto or light truck), household income, and assumed mean vehicle age by vehicle type and Azone. Car service vehicles are assigned an age based on input assumptions with no distinction between vehicle type.
+#
+### Model Parameter Estimation
+#
+#The models are estimated using the *Hh_df* (household) and *Veh_df* (vehicle) datasets in the VE2001NHTS package. Information about these datasets and how they were developed from the 2001 National Household Travel Survey public use dataset is included in that package. For each vehicle type (auto, light truck), tabulations are made of cumulative proportions of vehicles by age (i.e. proportion of vehicles less than or equal to the age) and the joint proportion of vehicles by age and income group. For these tabulations, the maximum vehicle age was set at 30 years. This ignores about 1.5% of the vehicle records.
+#
+#The following figure shows the cumulative proportions of vehicles by vehicle age.
+#
+#<fig:cum_age_props_by_veh-type.png>
+#
+#The following figure compares the age proportions of automobiles by income group. It can be seen that as income decreases, the age distribution shifts towards older vehicles. The 6 income groups are $0 to $20,000, $20,000 to $40,000, $40,000 to $60,000, $60,000 to $80,000, $80,000 to $100,000, $100,000 plus.
+#
+#<fig:auto_age_props_by_inc.png>
+#
+#The following figure compares the age proportions of light trucks by income group. As with automobiles, as increases, the age distributions shifts to older vehicles.
+#
+#<fig:lttrk_age_props_by_inc.png>
+#
+### How the Module Works
+#
+#The module auto and light truck vehicle age distributions which match user inputs for mean auto age and mean light truck age. The module adjusts the cumulative age distribution to match a target mean age. This is done by either expanding the age interval (i.e. a year is 10% longer) if the mean age increases, or compressing the age interval if the mean age decreases. A binary search function is used to determine the amount of expansion or compression of the estimated age distribution is necessary in order to match the input mean age. The age distribution for the vehicles is derived from the adjusted cumulative age distribution.
+#
+#Once the age distribution for a vehicle type has been determined, the module calculates vehicle age distributions by household income group. It takes marginal distributions of vehicles by age and vehicles by household income group along with a seed matrix of the joint probability distribution of vehicles by age and income group, and then uses iterative proportional fitting to adjust the joint probabilities to match the margins. The age probability by income group is calculated from the joint probability matrix. These probabilities are then used as sampling distributions to determine the age of each household vehicle as a function of the vehicle type and the household income.
+#
+#</doc>
 
 
 #=================================
@@ -19,13 +46,12 @@
 #=============================================
 #This model predicts vehicle age as a function of the vehicle type, household
 #income, and census region the household is located in. It uses a tabulation
-#of vehicles from the 2001 NHTS to create probability three probability tables.
-#The first is a table of the cumulative probability of vehicles by age for each
-#vehicle type. This table is used in the model to create vehicle age
-#distributions by type based on input assumptions regarding the mean vehicle
-#age by type. The second and thirds tables are joint probabilities of vehicles
-#by vehicle age and income group. One of these tables applies to automobiles and
-#the other applies to light trucks.
+#of vehicles from the 2001 NHTS to create two probability tables for each
+#vehicle type. The first is a table of the cumulative probability of vehicles by
+#age. This table is used in the model to create vehicle age distributions by
+#type based on input assumptions regarding the mean vehicle age by type. The
+#second tables is the joint probabilities of vehicles by vehicle age and income
+#group.
 
 #Prepare 2001 NHTS data
 #----------------------
@@ -47,10 +73,9 @@ Data_df <- Data_df[complete.cases(Data_df),]
 Data_df$Weight <- Data_df$Expfllhh / 100
 rm(Hh_df, Veh_df, HhVars_, VehVars_)
 
-#Create joint distributions of vehicles by age and income by type and region
-#---------------------------------------------------------------------------
-#Tabulate vehicle weights by vehicle age, household income, vehicle type, and
-#Census region
+#Create joint distributions of vehicles by age and income by type
+#----------------------------------------------------------------
+#Tabulate vehicle weights by vehicle age, household income, vehicle type
 TotWt_AgIgTy <-
   tapply(Data_df$Weight, as.list(Data_df[c("VehAge", "IncGrp", "Type")]), sum)
 #Calculate joint distribution of proportion of vehicles by age and income for
@@ -68,13 +93,43 @@ rownames(AutoAgeIncDF_AgIg) <- 0:30
 AutoAgeCDF_Ag <- cumsum(rowSums(AutoAgeIncDF_AgIg))
 
 #Light Truck Calculations
-#-----------------
+#------------------------
 LtTrkAgeIncDF_AgIg <- AgeIncJointProp_AgIgTy[,,"LtTrk"]
 LtTrkAgeIncDF_AgIg <-
   apply(LtTrkAgeIncDF_AgIg, 2, function(x) {
     smooth.spline(0:MaxAge, x, df=8)$y})
 rownames(LtTrkAgeIncDF_AgIg) <- 0:30
 LtTrkAgeCDF_Ag <- cumsum(rowSums(LtTrkAgeIncDF_AgIg))
+
+#Document vehicle age proportions
+#--------------------------------
+#Cumulate age proportions
+png("data/cum_age_props_by_veh-type.png", height = 480, width = 480)
+plot(0:30, AutoAgeCDF_Ag, type = "l", xlab = "Vehicle Age (years)",
+     ylab = "Proportion of Vehicles",
+     main = "Cumulative Proportion of Vehicles by Age")
+lines(0:30, LtTrkAgeCDF_Ag, lty = 2)
+legend("bottomright", lty = c(1,2), legend = c("Auto", "Light Truck"),
+       bty = "n")
+dev.off()
+#Document auto age proportions by household income group
+png("data/auto_age_props_by_inc.png", height = 480, width = 480)
+Temp_AgIg <- sweep(AutoAgeIncDF_AgIg, 2, colSums(AutoAgeIncDF_AgIg), "/")
+matplot(Temp_AgIg, type = "l", xlab = "Vehicle Age (years)",
+        ylab = "Proportion of Vehicles",
+        main = "Proportions of Automobiles by Age by Household Income")
+legend("topright", lty = 1:6, col = 1:6, legend = colnames(AutoAgeIncDF_AgIg))
+rm(Temp_AgIg)
+dev.off()
+#Document light truck age proportions by household income group
+png("data/lttrk_age_props_by_inc.png", height = 480, width = 480)
+Temp_AgIg <- sweep(LtTrkAgeIncDF_AgIg, 2, colSums(LtTrkAgeIncDF_AgIg), "/")
+matplot(Temp_AgIg, type = "l", xlab = "Vehicle Age (years)",
+        ylab = "Proportion of Vehicles",
+        main = "Proportions of Light Trucks by Age by Household Income")
+legend("topright", lty = 1:6, col = 1:6, legend = colnames(LtTrkAgeIncDF_AgIg))
+rm(Temp_AgIg)
+dev.off()
 
 #Save model parameters in a list
 #-------------------------------
@@ -108,7 +163,7 @@ rm(MaxAge, TotWt_AgIgTy, AgeIncJointProp_AgIgTy, AutoAgeIncDF_AgIg,
 #' }
 #' @source AssignVehicleAge.R script.
 "VehicleAgeModel_ls"
-devtools::use_data(VehicleAgeModel_ls, overwrite = TRUE)
+usethis::use_data(VehicleAgeModel_ls, overwrite = TRUE)
 
 
 #================================================
@@ -288,7 +343,7 @@ AssignVehicleAgeSpecifications <- list(
 #' }
 #' @source AssignVehicleAge.R script.
 "AssignVehicleAgeSpecifications"
-devtools::use_data(AssignVehicleAgeSpecifications, overwrite = TRUE)
+usethis::use_data(AssignVehicleAgeSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -309,6 +364,7 @@ devtools::use_data(AssignVehicleAgeSpecifications, overwrite = TRUE)
 #' the values are the proportion of vehicles that age or younger. The names must
 #' be an ordered sequence from 0 to 30.
 #' @return A numeric value that is the mean vehicle age.
+#' @name findMeanAge
 #' @export
 #'
 findMeanAge <- function(AgeCDF_Ag) {
@@ -335,6 +391,7 @@ findMeanAge <- function(AgeCDF_Ag) {
 #' be an ordered sequence from 0 to 30.
 #' @param TargetMean A number that is the target mean value.
 #' @return A numeric value that is the mean vehicle age.
+#' @name adjustAgeDistribution
 #' @export
 #'
 adjustAgeDistribution <- function(AgeCDF_Ag, TargetMean = NULL) {
@@ -386,16 +443,16 @@ adjustAgeDistribution <- function(AgeCDF_Ag, TargetMean = NULL) {
 #' household income group.
 #'
 #' This function calculates vehicle age distributions by household income group.
-#' It takes marginal distributions of vehicles by age and households by income
-#' group along with a seed matrix of the joint probability distribution of
-#' vehicles by age and income group, and then uses iterative proportional
+#' It takes marginal distributions of vehicles by age and vehicles by household
+#' income group along with a seed matrix of the joint probability distribution
+#' of vehicles by age and income group, and then uses iterative proportional
 #' fitting to adjust the joint probabilities to match the margins. The
 #' probabilities by income group are calculated from the fitted joint
 #' probability matrix. The seed matrix is the joint age and income distribution
 #' for autos or light trucks in the VehicleAgeModel_ls (AgeIncJointProp_AgIg).
 #' The age margin is the proportional distribution of vehicles by age calculated
-#' by adjusting the cumulative age distribution for autos or light trucks in
-#' the VehicleAgeModel_ls (AgeCDF_AgTy) to match a target mean age. The income
+#' by adjusting the cumulative age distribution for autos or light trucks in the
+#' VehicleAgeModel_ls (AgeCDF_AgTy) to match a target mean age. The income
 #' margin is the proportional distribution of vehicles by household income group
 #' ($0-20K, $20K-40K, $40K-60K, $60K-80K, $80K-100K, $100K or more) calculated
 #' from the modeled household values.
@@ -410,6 +467,7 @@ adjustAgeDistribution <- function(AgeCDF_Ag, TargetMean = NULL) {
 #' between any margin value and corresponding sum of values of the joint
 #' probability matrix.
 #' @return A numeric value that is the mean vehicle age.
+#' @name calcAgeDistributionByInc
 #' @export
 #'
 calcAgeDistributionByInc <-
@@ -458,6 +516,7 @@ calcAgeDistributionByInc <-
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name AssignVehicleAge
 #' @import visioneval
 #' @export
 #'
@@ -573,9 +632,13 @@ AssignVehicleAge <- function(L) {
 }
 
 
-#================================
-#Code to aid development and test
-#================================
+#===============================================================
+#SECTION 4: MODULE DOCUMENTATION AND AUXILLIARY DEVELOPMENT CODE
+#===============================================================
+#Run module automatic documentation
+#----------------------------------
+documentModule("AssignVehicleAge")
+
 #Test code to check specifications, loading inputs, and whether datastore
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions

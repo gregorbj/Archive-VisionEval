@@ -5,33 +5,43 @@
 \title{Function that calculates the MPG adjustment, travel time and travel delay}
 \usage{
 calcCongestion(Model_ls, DvmtByVehType, PerCapFwyLnMi, PerCapArtLnMi,
-  Population, IncdReduc = 0, FwyArtProp, BusVmtSplit_Fc, TruckVmtSplit_Fc,
-  UsePce = FALSE)
+  Population, BasePopulation, CongPrice_ClFc, IncdReduc = 0, FwyArtProp,
+  BusVmtSplit_Fc, TruckVmtSplit_Fc, UsePce = FALSE, ValueOfTime = 16,
+  CurrYear)
 }
 \arguments{
-\item{Model_ls}{A list of congestion models}
+\item{Model_ls}{A list of congestion models and parameters required by the models}
 
-\item{DvmtByVehType}{A data.frame of dvmt by vehicle types}
+\item{DvmtByVehType}{A data frame of dvmt by vehicle types}
 
 \item{PerCapFwyLnMi}{A named numeric vector of free way lane miles}
 
 \item{PerCapArtLnMi}{A named numeric vector of arterial lane miles}
 
-\item{Population}{A numeric indicating the population}
+\item{Population}{A numeric indicating the current year population}
+
+\item{BasePopulation}{A numeric indicating the base year population}
+
+\item{CongPrice_ClFc}{A matrix of congestion pricing by congestion level
+and functional class}
 
 \item{IncdReduc}{A numeric indicating proportion of incidence reduced by ITS}
 
 \item{FwyArtProp}{A numeric indicating the proportions of daily VMT for light
 vehicles that takes place on freeways and arterials}
 
-\item{BusVmtSplit_Fc}{A data.frame indicating the bus vmt split by freeways, arterials
+\item{BusVmtSplit_Fc}{A data frame indicating the bus vmt split by freeways, arterials
 and others}
 
-\item{TruckVmtSplit_Fc}{A data.frame indicating the truck vmt split by freeways, arterials
+\item{TruckVmtSplit_Fc}{A data frame indicating the truck vmt split by freeways, arterials
 and others}
 
 \item{UsePce}{A logical suggesting whether to convert heavy truck and bus dvmt to
 passenger car equivalents for congestion calculation. (Default: FALSE)}
+
+\item{ValueOfTime}{A numeric representing weights on time to model congestion price}
+
+\item{CurrYear}{A character indicating current run year}
 }
 \value{
 A list containing mpg adjustments, travel time, and travel delay hours

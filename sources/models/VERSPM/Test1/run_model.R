@@ -3,10 +3,12 @@
 #===========
 
 #This script demonstrates the VisionEval framework for the RSPM model.
-
+cat('run_model.R: script entered\n')
 #Load libraries
 #--------------
 library(visioneval)
+#devtools::load_all('C:/Users/matt.landis/Git/VisionEval/sources/framework/visioneval/')
+cat('run_model.R: library visioneval loaded\n')
 
 #Initialize model
 #----------------
@@ -19,7 +21,7 @@ initializeModel(
   DatastoreName = NULL,
   SaveDatastore = TRUE
   )  
-
+cat('run_model.R: initializeModel completed\n')
 #Run all demo module for all years
 #---------------------------------
 for(Year in getYears()) {
@@ -29,7 +31,7 @@ for(Year in getYears()) {
   runModule("PredictIncome",                   "VESimHouseholds",       RunFor = "AllYears",    RunYear = Year)
   runModule("PredictHousing",                  "VELandUse",             RunFor = "AllYears",    RunYear = Year)
   runModule("LocateEmployment",                "VELandUse",             RunFor = "AllYears",    RunYear = Year)
-  runModule("AssignDevTypes",                  "VELandUse",             RunFor = "AllYears",    RunYear = Year)
+  runModule("AssignLocTypes",                  "VELandUse",             RunFor = "AllYears",    RunYear = Year)
   runModule("Calculate4DMeasures",             "VELandUse",             RunFor = "AllYears",    RunYear = Year)
   runModule("CalculateUrbanMixMeasure",        "VELandUse",             RunFor = "AllYears",    RunYear = Year)
   runModule("AssignParkingRestrictions",       "VELandUse",             RunFor = "AllYears",    RunYear = Year)

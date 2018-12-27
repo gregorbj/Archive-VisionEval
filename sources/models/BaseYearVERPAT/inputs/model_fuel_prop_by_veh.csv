@@ -1,0 +1,5 @@
+VehType,PropDiesel,PropCng,PropGas
+Auto,0.007,0,0.993
+LtTruck,0.04,0,0.96
+Bus,0.995,0.005,0
+Truck,0.945,0.005,0.05
