@@ -1,10 +1,20 @@
 
-#Download and Install VisionEval Resources
+#Download and Install VisionEval Resources including Dependencies
+#Ben Stabler, ben.stabler@rsginc.com, 12/26/18
 
+################################################################################
+ 
+#VisionEval GitHub repository location settings
+host <- "https://api.github.com/repos/" #github
+repo <- "gregorbj/visioneval/"          #repository
+ref  <- "master"                        #branch, such as master or develop
+
+#If working within a proxy server, uncomment the following commands to access GitHub
 #library(httr)
-#If working within a proxy server, run the following commands to enable install from GitHub
 #set_config(use_proxy(url="proxynew.odot.state.or.us", port=8080))
 #set_config( config( ssl_verifypeer = 0L ) )
+
+################################################################################
 
 #Set repository
 local({currentRepo <- getOption("repos")
@@ -18,17 +28,13 @@ install.packages(c("curl","devtools", "roxygen2", "stringr", "knitr", "digest"),
                  dependencies = TRUE, quiet=TRUE)
 install.packages(c("shiny", "shinyjs", "shinyFiles", "data.table", "DT",
                    "shinyBS", "future", "testit", "jsonlite",
-                   "envDocument", "rhandsontable"),
+                   "envDocument", "rhandsontable", "shinyTree"),
                  dependencies = TRUE, quiet=TRUE)
 devtools::install_github("tdhock/namedCapture", quiet=TRUE)
 source("https://bioconductor.org/biocLite.R")
 biocLite(c("rhdf5","zlibbioc"), suppressUpdates=TRUE, quiet=TRUE)
 
 #Download the VE repository
-host <- "https://api.github.com/repos/"
-repo <- "gregorbj/visioneval/"
-ref <- "master"  # "add_scenario" or "develop"
-
 destfile <- tempfile(fileext = paste0(".zip"))
 destdir <- normalizePath(tempdir())
 cat("\nDownloading VE repository to", destdir, "\n")
@@ -71,4 +77,10 @@ for(module in VE_modules){
 	if(!module %in% rownames(installed.packages())){
 		stop(paste0(module, " cannot be installed."))
 	}
+}
+
+#Install complete
+cat("\nInstall complete.  All required VE packages installed at: \n")
+for (folder in .libPaths()) {
+  cat(paste0(folder,"\n"))
 }
