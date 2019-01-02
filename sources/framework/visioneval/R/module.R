@@ -259,6 +259,37 @@ processEstimationInputs <- function(Inp_ls, FileName, ModuleName) {
 }
 
 
+#LOAD A VE PACKAGE DATASET
+#=========================
+#' Load a VisionEval package dataset
+#'
+#' \code{loadPackageDataset} a visioneval framework module developer function
+#' which loads a dataset identified by name from the VisionEval package
+#' containing the dataset.
+#'
+#' This function is used to load a dataset identified by name from the
+#' VisionEval package which contains the dataset. Using this function is the
+#' preferred alternative to hard-wiring the loading using package::dataset
+#' notation because it enables users to switch between module versions contained
+#' in different packages. For example, there may be different versions of the
+#' VEPowertrainsAndFuels package which have different default assumptions about
+#' light-duty vehicle powertrain mix and characteristics by model year. Using
+#' this function, the module developer only needs to identify the dataset name.
+#' The function uses DatasetsByPackage_df data frame in the model state list
+#' to identify the package which contains the dataset. It then retrieves and
+#' returns the dataset
+#'
+#' @param DatasetName A string identifying the name of the dataset.
+#' @return The identified dataset.
+#' @export
+loadPackageDataset <- function(DatasetName) {
+  Dat_df <- getModelState()$DatasetsByPackage_df
+  PkgName <- with(Dat_df, Package[Dataset == DatasetName])
+  FullName <- paste(PkgName, DatasetName, sep = "::")
+  eval(parse(text = FullName))
+}
+
+
 #CHECK MODULE OUTPUTS FOR CONSISTENCY WITH MODULE SPECIFICATIONS
 #===============================================================
 #' Check module outputs for consistency with specifications
