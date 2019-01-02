@@ -315,6 +315,11 @@ initializeModel <-
                 Err <- paste0("Error in runModule call for module ", Call_,
                               ". Is not present in any package identified in ",
                               "the model run script.")
+              } else {
+                Pkg <-
+                  ModulesByPackage_df$Package[ModulesByPackage_df$Module == Call_]
+                Call_ <- c(Pkg, Call_)
+                rm(Pkg)
               }
             }
             if (length(Err) > 0) {
