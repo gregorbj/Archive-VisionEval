@@ -4,8 +4,8 @@
 \alias{calculateAdjAveDvmt}
 \title{Function to calculate and adjust DVMT}
 \usage{
-calculateAdjAveDvmt(Hh_df, Model_ls, Type, BudgetProp,
-  AnnVmtInflator = 365, TrnstnProp)
+calculateAdjAveDvmt(Hh_df, Model_ls, Type, BudgetProp, AnnVmtInflator = 365,
+  TrnstnProp)
 }
 \arguments{
 \item{Hh_df}{A household data frame consisting of household attributes used to

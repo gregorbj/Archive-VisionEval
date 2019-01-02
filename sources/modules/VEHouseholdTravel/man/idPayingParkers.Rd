@@ -4,8 +4,8 @@
 \alias{idPayingParkers}
 \title{Function to identify households that pays for parking}
 \usage{
-idPayingParkers(Data__, PropWrkPkg, PropWrkChrgd, PropCashOut,
-  PropOthChrgd, LabForcePartRate = 0.65, PkgCost, PropWrkTrav = 0.22,
+idPayingParkers(Data__, PropWrkPkg, PropWrkChrgd, PropCashOut, PropOthChrgd,
+  LabForcePartRate = 0.65, PkgCost, PropWrkTrav = 0.22,
   WrkDaysPerYear = 260)
 }
 \arguments{
