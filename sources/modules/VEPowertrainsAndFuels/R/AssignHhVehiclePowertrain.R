@@ -658,7 +658,7 @@ usethis::use_data(AssignHhVehiclePowertrainSpecifications, overwrite = TRUE)
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
 #' @name AssignHhVehiclePowertrain
-#' @import visioneval VEHouseholdTravel stats
+#' @import visioneval stats
 #' @export
 #'
 AssignHhVehiclePowertrain <- function(L, M) {
