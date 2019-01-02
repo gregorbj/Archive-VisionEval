@@ -1302,23 +1302,8 @@ checkModuleSpecs <- function(Specs_ls, ModuleName) {
               "' is incorrect. The value for '", name, "' is not a string."
             )
           Errors_ <- c(Errors_, Msg)
-        } else {
-          Value_ <- unlist(strsplit(Value, "::"))
-          if (length(Value_) != 2) {
-            Msg <-
-              paste0(
-                "'Call' specification for module '", ModuleName,
-                "' is incorrect. The value for '", name,
-                "' is not formatted correctly. ",
-                "It must be formatted like PackageName::ModuleName ",
-                "where 'PackageName' is the name of a package and ",
-                "'ModuleName' is the name of a module."
-              )
-            Errors_ <- c(Errors_, Msg)
-          }
         }
       }
-
     }
   }
 
