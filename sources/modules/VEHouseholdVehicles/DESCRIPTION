@@ -24,10 +24,8 @@ Imports:
     ordinal,
     reshape2,
     stats,
-    devtools,
     usethis,
-    VE2001NHTS,
-    VEHouseholdTravel
+    VE2001NHTS
 Suggests:
     knitr
 Encoding: UTF-8
