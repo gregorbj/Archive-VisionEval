@@ -4,8 +4,7 @@
 \alias{getFromDatastore}
 \title{Retrieve data identified in 'Get' specifications from datastore}
 \usage{
-getFromDatastore(ModuleSpec_ls, RunYear, Geo = NULL,
-  GeoIndex_ls = NULL)
+getFromDatastore(ModuleSpec_ls, RunYear, Geo = NULL, GeoIndex_ls = NULL)
 }
 \arguments{
 \item{ModuleSpec_ls}{a list of module specifications that is consistent with

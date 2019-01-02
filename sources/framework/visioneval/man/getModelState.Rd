@@ -8,8 +8,7 @@ getModelState(Names_ = "All")
 }
 \arguments{
 \item{Names_}{A string vector of the components to extract from the
-ModelState_ls list.
-default value is ModelState.Rda.}
+ModelState_ls list.}
 }
 \value{
 A list containing the specified components from the model state file.
