@@ -16,10 +16,8 @@ LazyData: TRUE
 Depends: R (>= 3.1.0)
 Imports:
     visioneval,
-    devtools,
-	usethis,
+    usethis,
     VE2001NHTS,
-    VEHouseholdTravel,
     data.table
 Suggests:
     knitr
