@@ -390,7 +390,7 @@ AdjustHhVehicleMpgMpkwhSpecifications <- list(
   ),
   #Specify call status of module
   Call = items(
-    CalcDvmt = "VEHouseholdTravel::CalculateHouseholdDvmt"
+    CalcDvmt = "CalculateHouseholdDvmt"
   )
 )
 

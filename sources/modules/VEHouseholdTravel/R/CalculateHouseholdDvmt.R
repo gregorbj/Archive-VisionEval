@@ -892,7 +892,7 @@ CalculateHouseholdDvmt <- function(L) {
   NumHh <- length(L$Year$Household[[1]])
   #Assign the DvmtModel_ls so that it is in scope when module is called
   if(!exists("DvmtModel_ls")){
-    DvmtModel_ls <- VEHouseholdTravel::DvmtModel_ls
+    DvmtModel_ls <- loadPackageDataset("DvmtModel_ls")
   }
 
   #Set up data frame of household data needed for model

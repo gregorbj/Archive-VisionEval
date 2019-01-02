@@ -381,7 +381,7 @@ CalculateComEnergyAndEmissions <- function(L) {
   Ma <- L$Year$Marea$Marea
   Pt <- c("ICEV", "HEV", "BEV")
   Year <- L$G$Year
-  EnergyEmissionsDefaults_ls <- VEPowertrainsAndFuels::PowertrainFuelDefaults_ls
+  EnergyEmissionsDefaults_ls <- loadPackageDataset("PowertrainFuelDefaults_ls")
 
   #Calculate ComSvc DVMT proportions by vehicle type and powertrain
   #----------------------------------------------------------------

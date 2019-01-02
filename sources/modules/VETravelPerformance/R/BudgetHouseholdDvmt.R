@@ -441,10 +441,10 @@ BudgetHouseholdDvmtSpecifications <- list(
   ),
   #Specify call status of module
   Call = items(
-    CalcDvmt = "VEHouseholdTravel::CalculateHouseholdDvmt",
-    ReduceDvmt = "VEHouseholdTravel::ApplyDvmtReductions",
-    CalcVehTrips = "VEHouseholdTravel::CalculateVehicleTrips",
-    CalcAltTrips = "VEHouseholdTravel::CalculateAltModeTrips"
+    CalcDvmt = "CalculateHouseholdDvmt",
+    ReduceDvmt = "ApplyDvmtReductions",
+    CalcVehTrips = "CalculateVehicleTrips",
+    CalcAltTrips = "CalculateAltModeTrips"
   )
 )
 

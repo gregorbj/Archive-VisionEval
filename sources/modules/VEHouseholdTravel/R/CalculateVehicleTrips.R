@@ -617,7 +617,7 @@ CalculateVehicleTrips <- function(L) {
 
   #Assign VehTrpLenModel_ls within function so it is in scope for module call
   if(!exists("VehTrpLenModel_ls")){
-    VehTrpLenModel_ls <- VEHouseholdTravel::VehTrpLenModel_ls
+    VehTrpLenModel_ls <- loadPackageDataset("VehTrpLenModel_ls")
   }
 
   #Set up data frame of household data needed for model

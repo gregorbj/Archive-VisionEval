@@ -506,7 +506,7 @@ CalculateCarbonIntensity <- function(L) {
   #Get carbon intensity of fuels and electricity for the year
   #----------------------------------------------------------
   if(!exists("PowertrainFuelDefaults_ls")){
-    PowertrainFuelDefaults_ls <- VEPowertrainsAndFuels::PowertrainFuelDefaults_ls
+    PowertrainFuelDefaults_ls <- loadPackageDataset("PowertrainFuelDefaults_ls")
   }
   CI_ <- interpolateDfVals(PowertrainFuelDefaults_ls$CarbonIntensity_df, Year)
   ElectricityCI <- CI_["Electricity"]

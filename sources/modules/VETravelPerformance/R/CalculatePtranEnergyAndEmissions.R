@@ -252,7 +252,7 @@ CalculatePtranEnergyAndEmissions <- function(L) {
   Ma <- L$Year$Marea$Marea
   Pt <- c("ICEV", "HEV", "BEV")
   Year <- L$G$Year
-  EnergyEmissionsDefaults_ls <- VEPowertrainsAndFuels::PowertrainFuelDefaults_ls
+  EnergyEmissionsDefaults_ls <- loadPackageDataset("PowertrainFuelDefaults_ls")
 
   #Calculate the transit powertrain characteristics for the year
   #---------------------------------------------------------------

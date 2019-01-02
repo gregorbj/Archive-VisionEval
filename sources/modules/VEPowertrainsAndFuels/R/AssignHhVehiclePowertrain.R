@@ -599,8 +599,8 @@ AssignHhVehiclePowertrainSpecifications <- list(
   ),
   #Specify call status of module
   Call = items(
-    CalcDvmt = "VEHouseholdTravel::CalculateHouseholdDvmt",
-    ReduceDvmt = "VEHouseholdTravel::ApplyDvmtReductions"
+    CalcDvmt = "CalculateHouseholdDvmt",
+    ReduceDvmt = "ApplyDvmtReductions"
   )
 )
 
@@ -668,7 +668,7 @@ AssignHhVehiclePowertrain <- function(L, M) {
   #Fix seed as synthesis involves sampling
   set.seed(L$G$Seed)
   if(!exists("PowertrainFuelDefaults_ls")){
-    PowertrainFuelDefaults_ls <- VEPowertrainsAndFuels::PowertrainFuelDefaults_ls
+    PowertrainFuelDefaults_ls <- loadPackageDataset("PowertrainFuelDefaults_ls")
   }
   #Match index from households to vehicles
   HhToVehIdx_Ve <- match(L$Year$Vehicle$HhId, L$Year$Household$HhId)

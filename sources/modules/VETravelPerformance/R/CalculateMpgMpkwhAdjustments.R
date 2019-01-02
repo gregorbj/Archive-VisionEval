@@ -371,7 +371,7 @@ CalculateMpgMpkwhAdjustments <- function(L) {
   Cl <- c("None", "Mod", "Hvy", "Sev", "Ext")
   Rc <- c("Fwy", "Art", "Oth")
   #Load energy and emissions defaults
-  EnergyEmissionsDefaults_ls <- VEPowertrainsAndFuels::PowertrainFuelDefaults_ls
+  EnergyEmissionsDefaults_ls <- loadPackageDataset("PowertrainFuelDefaults_ls")
 
   #Create arrays of speeds and congested DVMT proportions by Marea, congestion
   #level, and road class, and DVMT proportion by road class by vehicle type
