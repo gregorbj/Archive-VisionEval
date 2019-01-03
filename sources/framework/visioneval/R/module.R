@@ -494,6 +494,41 @@ testModule <-
     #--------------------------------------------------
     assignDatastoreFunctions(readModelState()$DatastoreType)
 
+    #Make correspondence tables of modules and datasets to packages
+    #--------------------------------------------------------------
+    #This supports soft call and dataset references in modules
+    RequiredPkg_ <- getModelState()$RequiredVEPackages
+    #Make sure all required packages are present
+    MissingPkg_ <- RequiredPkg_[!(RequiredPkg_ %in% InstalledPkgs_)]
+    if (length(MissingPkg_ != 0)) {
+      Msg <-
+        paste0("One or more required packages need to be installed in order ",
+               "to run the model. Following are the missing package(s): ",
+               paste(MissingPkg_, collapse = ", "), ".")
+      stop(Msg)
+    }
+    #Identify all modules and datasets in required packages
+    Datasets_df <-
+      data.frame(
+        do.call(
+          rbind,
+          lapply(RequiredPkg_, function(x) {
+            data(package = x)$results[,c("Package", "Item")]
+          })
+        ), stringsAsFactors = FALSE
+      )
+    WhichAreModules_ <- grep("Specifications", Datasets_df$Item)
+    ModulesByPackage_df <- Datasets_df[WhichAreModules_,]
+    ModulesByPackage_df$Module <-
+      gsub("Specifications", "", ModulesByPackage_df$Item)
+    ModulesByPackage_df$Item <- NULL
+    DatasetsByPackage_df <- Datasets_df[-WhichAreModules_,]
+    names(DatasetsByPackage_df) <- c("Package", "Dataset")
+    #Save the modules and datasets lists in the model state
+    setModelState(list(ModulesByPackage_df = ModulesByPackage_df,
+                       DatasetsByPackage_df = DatasetsByPackage_df))
+    rm(Datasets_df, WhichAreModules_)
+
     #Load datastore if specified or initialize new datastore
     #-------------------------------------------------------
     if (LoadDatastore) {
