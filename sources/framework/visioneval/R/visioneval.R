@@ -223,7 +223,7 @@ initializeModel <-
     #Get list of installed packages
     InstalledPkgs_ <- rownames(installed.packages())
     #Check that all module packages are in list of installed packages
-    RequiredPkg_ <- unique(ModuleCalls_df$PackageName)
+    RequiredPkg_ <- getModelState()$RequiredVEPackages
     MissingPkg_ <- RequiredPkg_[!(RequiredPkg_ %in% InstalledPkgs_)]
     if (length(MissingPkg_ != 0)) {
       Msg <-
@@ -233,7 +233,7 @@ initializeModel <-
       stop(Msg)
     }
     #Check for 'Initialize' module in each package if so add to ModuleCalls_df
-    for (Pkg in RequiredPkg_) {
+    for (Pkg in unique(ModuleCalls_df$PackageName)) {
       PkgData <- data(package = Pkg)$results[,"Item"]
       if ("InitializeSpecifications" %in% PkgData) {
         Add_df <-
@@ -246,14 +246,14 @@ initializeModel <-
         ModuleCalls_df <- rbind(ModuleCalls_df, Add_df)
       }
     }
-    #Make a list of all called packages
-    Pkgs_ <- unique(ModuleCalls_df$PackageName)
-    #Identify all modules and datasets in those packages
+    #Identify all modules and datasets in required packages
     Datasets_df <-
       data.frame(
         do.call(
           rbind,
-          lapply(Pkgs_, function(x) data(package = x)$results[,c("Package", "Item")])
+          lapply(RequiredPkg_, function(x) {
+            data(package = x)$results[,c("Package", "Item")]
+            })
         ), stringsAsFactors = FALSE
       )
     WhichAreModules_ <- grep("Specifications", Datasets_df$Item)
@@ -266,7 +266,7 @@ initializeModel <-
     #Save the modules and datasets lists in the model state
     setModelState(list(ModulesByPackage_df = ModulesByPackage_df,
                        DatasetsByPackage_df = DatasetsByPackage_df))
-    rm(Pkgs_, Datasets_df, WhichAreModules_)
+    rm(Datasets_df, WhichAreModules_)
     #Iterate through each module call and check availability and specifications
     #create combined list of all specifications
     Errors_ <- character(0)
