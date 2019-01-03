@@ -49,6 +49,22 @@ CalculateComEnergyAndEmissionsSpecifications <- list(
       TOTAL = "",
       DESCRIPTION =
         "Regional proportion of commercial service vehicles that are light trucks"
+    ),
+    item(
+      NAME = "AveComSvcVehicleAge",
+      FILE = "region_comsvc_ave_veh_age.csv",
+      TABLE = "Region",
+      GROUP = "Year",
+      TYPE = "time",
+      UNITS = "YR",
+      NAVALUE = -1,
+      SIZE = 0,
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      UNLIKELY = "",
+      TOTAL = "",
+      DESCRIPTION =
+        "Average age of commercial service vehicles"
     )
   ),
   #Specify data to be loaded from data store
@@ -191,6 +207,15 @@ CalculateComEnergyAndEmissionsSpecifications <- list(
       TYPE = "double",
       UNITS = "proportion",
       PROHIBIT = c("NA", "< 0", "> 1"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "AveComSvcVehicleAge",
+      TABLE = "Region",
+      GROUP = "Year",
+      TYPE = "time",
+      UNITS = "YR",
+      PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = ""
     )
   ),
@@ -463,7 +488,7 @@ CalculateComEnergyAndEmissions <- function(L) {
       EnergyEmissionsDefaults_ls$LdvPowertrainCharacteristics_df
     EndIdx <-
       with(LdvPtChar_df, which(as.character(ModelYear) == as.character(Year)))
-    StartIdx <- EndIdx - 5
+    StartIdx <- EndIdx - (2 * L$Year$Region$AveComSvcVehicleAge)
     LdvPtChar_ <- colMeans(LdvPtChar_df[StartIdx:EndIdx,], na.rm = TRUE)[-1]
     AutoMpgMpkwh_Pt <- c(
       ICEV = unname(LdvPtChar_["AutoIcevMpg"]),
