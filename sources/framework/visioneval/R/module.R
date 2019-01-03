@@ -499,6 +499,7 @@ testModule <-
     #This supports soft call and dataset references in modules
     RequiredPkg_ <- getModelState()$RequiredVEPackages
     #Make sure all required packages are present
+    InstalledPkgs_ <- rownames(installed.packages())
     MissingPkg_ <- RequiredPkg_[!(RequiredPkg_ %in% InstalledPkgs_)]
     if (length(MissingPkg_ != 0)) {
       Msg <-
