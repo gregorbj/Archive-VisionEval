@@ -748,8 +748,18 @@ testModule <-
           Specs = list()
         )
         for (Alias in names(Specs_ls$Call)) {
+          #Called module function when specified as package::module
           Function <- Specs_ls$Call[[Alias]]
-          Specs <- paste0(Specs_ls$Call[[Alias]], "Specifications")
+          #Called module function when only module is specified
+          if (length(unlist(strsplit(Function, "::"))) == 1) {
+            Pkg_df <- getModelState()$ModulesByPackage_df
+            Function <-
+              paste(Pkg_df$Package[Pkg_df$Module == Function], Function, sep = "::")
+            rm(Pkg_df)
+          }
+          #Called module specifications
+          Specs <- paste0(Function, "Specifications")
+          #Assign called module function and specifications for the alias
           Call$Func[[Alias]] <- eval(parse(text = Function))
           Call$Specs[[Alias]] <- processModuleSpecs(eval(parse(text = Specs)))
           Call$Specs[[Alias]]$RunBy <- Specs_ls$RunBy
