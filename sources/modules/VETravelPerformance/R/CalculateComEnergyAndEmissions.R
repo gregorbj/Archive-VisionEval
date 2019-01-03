@@ -488,7 +488,8 @@ CalculateComEnergyAndEmissions <- function(L) {
       EnergyEmissionsDefaults_ls$LdvPowertrainCharacteristics_df
     EndIdx <-
       with(LdvPtChar_df, which(as.character(ModelYear) == as.character(Year)))
-    StartIdx <- EndIdx - (2 * L$Year$Region$AveComSvcVehicleAge)
+    StartIdx <-
+      as.integer(round(EndIdx - (2 * L$Year$Region$AveComSvcVehicleAge)))
     LdvPtChar_ <- colMeans(LdvPtChar_df[StartIdx:EndIdx,], na.rm = TRUE)[-1]
     AutoMpgMpkwh_Pt <- c(
       ICEV = unname(LdvPtChar_["AutoIcevMpg"]),
@@ -711,8 +712,6 @@ CalculateComEnergyAndEmissions <- function(L) {
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions
 #-------------------------------------------------------------------------------
-# load("data/EnergyEmissionsDefaults_ls.rda")
-# attach(EnergyEmissionsDefaults_ls)
 # TestDat_ <- testModule(
 #   ModuleName = "CalculateComEnergyAndEmissions",
 #   LoadDatastore = TRUE,
@@ -725,8 +724,6 @@ CalculateComEnergyAndEmissions <- function(L) {
 #Test code to check everything including running the module and checking whether
 #the outputs are consistent with the 'Set' specifications
 #-------------------------------------------------------------------------------
-# load("data/EnergyEmissionsDefaults_ls.rda")
-# TestDat_ <- testModule(
 #   ModuleName = "CalculateComEnergyAndEmissions",
 #   LoadDatastore = TRUE,
 #   SaveDatastore = TRUE,
