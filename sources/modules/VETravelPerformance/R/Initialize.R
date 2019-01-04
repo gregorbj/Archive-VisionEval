@@ -253,7 +253,7 @@ InitializeSpecifications <- list(
       UNITS = "proportion",
       NAVALUE = -1,
       SIZE = 0,
-      PROHIBIT = c("< 0", "> 1"),
+      PROHIBIT = c("< 0", "> 1", "NA"),
       ISELEMENTOF = "",
       UNLIKELY = "",
       TOTAL = "",
@@ -292,7 +292,7 @@ InitializeSpecifications <- list(
       TABLE = "OtherOpsEffectiveness",
       GROUP = "Global",
       TYPE = "double",
-      UNITS = "proportion",
+      UNITS = "percentage",
       NAVALUE = "-1",
       SIZE = 0,
       PROHIBIT = c("< 0", "> 100"),
@@ -592,6 +592,35 @@ Initialize <- function(L) {
     Errors_ <- c(Errors_, Msg)
     rm(Msg)
   }
+
+  #Check consistency of other operations deployment
+  #------------------------------------------------
+  NoOthOpsEff <- is.null(L$Global$OtherOpsEffectiveness)
+  OthFwyOps <- L$Year$Marea$OtherFwyOpsDeployProp
+  OthArtOps <- L$Year$Marea$OtherArtOpsDeployProp
+  if (NoOthOpsEff & OthFwyOps != 0) {
+    Msg <- paste0(
+      "The 'other_ops_effectiveness.csv' optional input file is not present ",
+      "but the values for 'OtherFwyOpsDeployProp' in the ",
+      "'marea_operations_deployment.csv' input file are not 0. ",
+      "Either set those values to 0 or provide the ",
+      "'other_ops_effectiveness.csv' input file."
+    )
+    Errors_ <- c(Errors_, Msg)
+    rm(Msg)
+  }
+  if (NoOthOpsEff & OthArtOps != 0) {
+    Msg <- paste0(
+      "The 'other_ops_effectiveness.csv' optional input file is not present ",
+      "but the values for 'OtherArtOpsDeployProp' in the ",
+      "'marea_operations_deployment.csv' input file are not 0. ",
+      "Either set those values to 0 or provide the ",
+      "'other_ops_effectiveness.csv' input file."
+    )
+    Errors_ <- c(Errors_, Msg)
+    rm(Msg)
+  }
+  rm(NoOthOpsEff, OthFwyOps, OthArtOps)
 
   #Add Errors and Warnings to Out_ls and return
   #--------------------------------------------
