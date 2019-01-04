@@ -595,10 +595,10 @@ Initialize <- function(L) {
 
   #Check consistency of other operations deployment
   #------------------------------------------------
-  NoOthOpsEff <- is.null(L$Global$OtherOpsEffectiveness)
-  OthFwyOps <- L$Year$Marea$OtherFwyOpsDeployProp
-  OthArtOps <- L$Year$Marea$OtherArtOpsDeployProp
-  if (NoOthOpsEff & OthFwyOps != 0) {
+  NoOthOpsEff <- is.null(L$Data$Global$OtherOpsEffectiveness)
+  OthFwyOps <- L$Data$Year$Marea$OtherFwyOpsDeployProp
+  OthArtOps <- L$Data$Year$Marea$OtherArtOpsDeployProp
+  if (NoOthOpsEff & any(OthFwyOps != 0)) {
     Msg <- paste0(
       "The 'other_ops_effectiveness.csv' optional input file is not present ",
       "but the values for 'OtherFwyOpsDeployProp' in the ",
@@ -609,7 +609,7 @@ Initialize <- function(L) {
     Errors_ <- c(Errors_, Msg)
     rm(Msg)
   }
-  if (NoOthOpsEff & OthArtOps != 0) {
+  if (NoOthOpsEff & any(OthArtOps != 0)) {
     Msg <- paste0(
       "The 'other_ops_effectiveness.csv' optional input file is not present ",
       "but the values for 'OtherArtOpsDeployProp' in the ",
