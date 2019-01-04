@@ -402,6 +402,22 @@ CalculateVehicleOperatingCostSpecifications <- list(
       DESCRIPTION = items(
         "Proportion of climate change costs paid by users (i.e. ratio of carbon taxes to climate change costs)",
         "Proportion of other social costs paid by users")
+    ),
+    item(
+      NAME = "CO2eCost",
+      FILE = "region_co2e_costs.csv",
+      TABLE = "Region",
+      GROUP = "Year",
+      TYPE = "currency",
+      UNITS = "USD",
+      NAVALUE = -1,
+      SIZE = 0,
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      UNLIKELY = "",
+      TOTAL = "",
+      DESCRIPTION = "Environmental and social cost of CO2e emissions per metric ton",
+      OPTIONAL = TRUE
     )
   ),
   #Specify new tables to be created by Set if any
@@ -415,6 +431,16 @@ CalculateVehicleOperatingCostSpecifications <- list(
       UNITS = "USD.2010",
       PROHIBIT = c("<= 0"),
       ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "CO2eCost",
+      TABLE = "Region",
+      GROUP = "Year",
+      TYPE = "currency",
+      UNITS = "USD",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      OPTIONAL = TRUE
     ),
     item(
       NAME = items(
@@ -900,10 +926,14 @@ CalculateVehicleOperatingCost <- function(L) {
   #Climate impacts cost per mile
   ClimateImpactsRate_Ve <- local({
     #Calculate CO2e cost per metric ton for year
-    CO2eCost_ <- OpCosts_ls$CO2eCost_
-    Years_ <- as.numeric(names(CO2eCost_))
-    CO2eCost_SS <- smooth.spline(Years_, CO2eCost_)
-    CO2eCost <- predict(CO2eCost_SS, as.numeric(L$G$Year))$y
+    if (!is.null(L$Year$Region$CO2eCost)) {
+      CO2eCost <- L$Year$Region$CO2eCost
+    } else {
+      CO2eCost_ <- OpCosts_ls$CO2eCost_
+      Years_ <- as.numeric(names(CO2eCost_))
+      CO2eCost_SS <- smooth.spline(Years_, CO2eCost_)
+      CO2eCost <- predict(CO2eCost_SS, as.numeric(L$G$Year))$y
+    }
     unname(CO2ePM_Ve * CO2eCost / 1e6)
   })
   #Climate costs paid
