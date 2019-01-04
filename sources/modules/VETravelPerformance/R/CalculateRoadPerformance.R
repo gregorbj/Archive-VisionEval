@@ -1356,13 +1356,23 @@ CalculateRoadPerformance <- function(L) {
   #Calculate speed and delay by congestion level and metropolitan area
   #-------------------------------------------------------------------
   #Create matrix of user-defined other operations effects
-  OtherOpsEffects_mx <- cbind(
-    Fwy_Rcr = L$Global$OtherOpsEffectiveness$Fwy_Rcr,
-    Fwy_NonRcr = L$Global$OtherOpsEffectiveness$Fwy_NonRcr,
-    Art_Rcr = L$Global$OtherOpsEffectiveness$Art_Rcr,
-    Art_NonRcr = L$Global$OtherOpsEffectiveness$Art_NonRcr
-  )
-  rownames(OtherOpsEffects_mx) <- L$Global$OtherOpsEffectiveness$Level
+  if (!is.null(L$Global$OtherOpsEffectiveness)) {
+    OtherOpsEffects_mx <- cbind(
+      Fwy_Rcr = L$Global$OtherOpsEffectiveness$Fwy_Rcr,
+      Fwy_NonRcr = L$Global$OtherOpsEffectiveness$Fwy_NonRcr,
+      Art_Rcr = L$Global$OtherOpsEffectiveness$Art_Rcr,
+      Art_NonRcr = L$Global$OtherOpsEffectiveness$Art_NonRcr
+    )
+    rownames(OtherOpsEffects_mx) <- L$Global$OtherOpsEffectiveness$Level
+  } else {
+    OtherOpsEffects_mx <- array(
+      0,
+      dim = c(5, 4),
+      dimnames = list(
+        c("None", "Mod", "Hvy", "Sev", "Ext"),
+        c("Art_Rcr", "Art_NonRcr", "Fwy_Rcr", "Fwy_NonRcr")
+      ))
+  }
   #Calculate speed and delay by Marea and congestion level
   SpeedAndDelay_ls <- list()
   OpsDeployNames_ <- c(
