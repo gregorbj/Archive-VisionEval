@@ -2,8 +2,11 @@
 # FutureTaskProcessor.R
 # https://gist.github.com/PeterVermont/a4a29d2c6b88e4ee012a869dedb5099c#file-futuretaskprocessor-r
 
+# NOTE: "multiprocess" won't work on many enterprise R installations as it requires opening an internal
+# TCP or UDP port that most firewalls will block.  Use "sequential" instead.
 # The file that 'source's this should also call plan(multiprocess, workers=<desired number of workers>)
 # for example: plan(multiprocess, workers=min((myNumTasks+1), MAX_PROCESSES))
+#   plan(sequential)
 # it is not required to specify workers -- if not then it will default to future::availableCores()
 # use myNumTasks+1 because future uses one process for itself.
 
@@ -261,7 +264,8 @@ fakeDataProcessing <- function(name, duration, sys_sleep = FALSE) {
 
 
 testAsync <- function(loops = future::availableCores() - 1) {
-  plan(multiprocess)
+#  plan(multiprocess)
+  plan(sequential)
   print(paste0("future::availableCores(): ", future::availableCores()))
   loops <- 10 #
   baseWait <- 3

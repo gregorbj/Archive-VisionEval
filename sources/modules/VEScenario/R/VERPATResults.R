@@ -267,7 +267,8 @@ VERPATResults <- function(L){
   # Set future processors
   NWorkers <- L$Global$Model$NWorkers
   NWorkers <- min(max(availableCores()-1, 1), NWorkers)
-  plan(multiprocess, workers = NWorkers, gc=TRUE)
+#  plan(multiprocess, workers = NWorkers, gc=TRUE)
+  plan(sequential, workers = NWorkers, gc=TRUE)
 
   Results_env <- new.env()
   for(sc_path in ScenariosPath_ar){

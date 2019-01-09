@@ -421,8 +421,8 @@ RunScenarios <- function(L){
   ScenarioInProcess_ls <- list()
   NWorkers <- L$Global$Model$NWorkers
   NWorkers <- min(max(availableCores()-1, 1), NWorkers)
-  plan(multiprocess, workers = NWorkers, gc=TRUE)
-
+#  plan(multiprocess, workers = NWorkers, gc=TRUE)
+  plan(sequential, workers = NWorkers, gc=TRUE)
   # Update the Scenario Progress Report
   Scenarios_df  <- read.csv(file.path(ModelPath,
                                       L$Global$Model$ScenarioOutputFolder,

@@ -32,7 +32,8 @@ options(DT.options = list(dom = 'tip', rownames = 'f'))
 
 #use of future in shiny
 #http://stackoverflow.com/questions/41610354/calling-a-shiny-javascript-callback-from-within-a-future
-plan(multiprocess) #tell "future" library to use multiprocessing
+# plan(multiprocess) #tell "future" library to use multiprocessing
+plan(sequential) #tell "future" library to use sequential
 
 if (interactive()) {
   options(shiny.reactlog = TRUE)
