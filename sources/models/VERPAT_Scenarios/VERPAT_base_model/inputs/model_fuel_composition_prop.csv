@@ -1,0 +1,5 @@
+VehType,GasPropEth,DieselPropBio
+Auto,0.1,0.05
+LtTruck,0.1,0.05
+Bus,0.1,0.05
+Truck,0.1,0.01

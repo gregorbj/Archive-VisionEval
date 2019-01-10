@@ -1,0 +1,7 @@
+.Rproj.user
+.Rhistory
+.RData
+/*.Rbuildignore
+Log*.txt
+*.h5
+ModelState.Rda

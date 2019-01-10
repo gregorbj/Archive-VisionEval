@@ -3,11 +3,23 @@
 \docType{data}
 \name{SovModel_ls}
 \alias{SovModel_ls}
-\title{Model of proportion of household average DVMT in single-occupant vehicle
-tours having round-trip distances of 20 miles or less.}
-\format{A list having two components:
-Pow: the power transform of the SOV DVMT proportion;
-Prop: a string representation of the model formula;}
+\title{Models of the proportion of household average DVMT in single-occupant vehicle
+tours having round-trip distances of 20 miles or less, and of the average
+trip length in such tours}
+\format{A list having 6 components:
+ZeroSovModel: summary statistics for the model to predict the likelihood that
+a household has no qualifying tours on the survey day;
+SovDvmtModel: summary statistics for the model to predict miles of travel in
+qualifying tours if there is some travel in qualifying tours;
+SovPropModel: a list that describes and documents a linear model for
+predicting the proportion of average DVMT in qualifying tours;
+MetroTrpLenModel: summary statistics for the model to predict average SOV
+trip length for metropolitan households;
+NonMetroTrpLenModel: summary statistics for the model to predict average SOV
+trip length for non-metropolitan households;
+SovTrpLenModel: a list composed of two lists (Metro and NonMetro) which each
+describe a linear model for predicting average SOV trip length for trips in
+qualifying tours.}
 \source{
 DivertSovTravel.R
 }
@@ -15,7 +27,8 @@ DivertSovTravel.R
 SovModel_ls
 }
 \description{
-A list having two components: Pow - the power transform of the SOV DVMT
-proportion, and Prop - a string representation of the model formula.
+A list having components to describe or document the model for predicting the
+proportion of household DVMT in tours having round-trip distances of 20 miles
+or less, and the model of the average length of trips in such tours.
 }
 \keyword{datasets}

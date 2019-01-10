@@ -333,7 +333,7 @@ CalculateComEnergyAndEmissionsSpecifications <- list(
 #' }
 #' @source CalculateComEnergyAndEmissions.R script.
 "CalculateComEnergyAndEmissionsSpecifications"
-devtools::use_data(CalculateComEnergyAndEmissionsSpecifications, overwrite = TRUE)
+usethis::use_data(CalculateComEnergyAndEmissionsSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -370,6 +370,7 @@ devtools::use_data(CalculateComEnergyAndEmissionsSpecifications, overwrite = TRU
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name CalculateComEnergyAndEmissions
 #' @import visioneval
 #' @export
 #'
@@ -619,8 +620,11 @@ CalculateComEnergyAndEmissions <- function(L) {
       HvyTrkDvmt_Pt <- HvyTrkDvmt * HvyTrkProp_Pt
       #Calculate average MPG and MPKWH by Marea and powertrain
       HvyTrkMpgMpkwh_Pt <- MpgMpkwh_VtPt["HvyTrk",]
+      AveHvyTrkEcoDriveFactor <-
+        sum(L$Year$Marea$HvyTrkEcoDriveFactor * L$Year$Marea$HvyTrkUrbanDvmt) /
+        sum(L$Year$Marea$HvyTrkUrbanDvmt)
       HvyTrkMpgMpkwh_Pt["ICEV"] <-
-        HvyTrkMpgMpkwh_Pt["ICEV"] * L$Year$Marea$HvyTrkEcoDriveFactor
+        HvyTrkMpgMpkwh_Pt["ICEV"] * AveHvyTrkEcoDriveFactor
       #Calculate energy in GGE and KWH by Marea and powertrain
       HvyTrkEnergy_Pt <- HvyTrkDvmt_Pt / HvyTrkMpgMpkwh_Pt
       #Calculate energy in GGE and KWH by Marea and energy type

@@ -1,0 +1,32 @@
+Test
+Test of VESimHouseholds package modules
+2018-11-27_12:07:07
+
+2018-11-27 12:07:07 : Testing PredictHousing. 
+
+2018-11-27 12:07:07 : Attempting to load datastore. 
+
+2018-11-27 12:07:07 : Datastore loaded. 
+
+2018-11-27 12:07:07 : Attempting to load and check specifications. 
+
+2018-11-27 12:07:07 : Module specifications successfully loaded and checked for errors. 
+
+2018-11-27 12:07:07 : Attempting to process, check and load module inputs. 
+
+2018-11-27 12:07:09 : Module inputs successfully checked and loaded into datastore. 
+
+2018-11-27 12:07:09 : Checking whether datastore contains all datasets in Get specifications. 
+
+2018-11-27 12:07:09 : Datastore contains all datasets identified in module Get specifications. 
+
+2018-11-27 12:07:09 : Running module and checking whether outputs meet Set specifications. 
+
+2018-11-27 12:07:09 : Also saving module outputs to datastore. 
+
+2018-11-27 12:07:21 : Module run successfully and outputs meet Set specifications. 
+
+2018-11-27 12:07:21 : Module outputs saved to datastore. 
+
+2018-11-27 12:07:21 : Congratulations. Module PredictHousing passed all tests. 
+

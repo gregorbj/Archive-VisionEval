@@ -1,0 +1,21 @@
+============================================
+Documentation for comsvc_powertrain_prop.csv
+============================================
+
+This file contains values for the proportions of vehicle powertrain (ICEV, HEV, BEV) use by vehicle type (auto, light truck) used by commercial service vehicles (e.g. parcel delivery, contractor). The proportions represent the proportions of daily vehicle miles traveled (DVMT) rather than the proportions of vehicles. Note that the powertrain use proportions must add to 1 for each vehicle type. Also note that there is no category for plug-in hybrid electric vehicles (PHEV). The reason for this is that the model has no built-in mechanism for determining the proportion of PHEV travel which is powered by electricity that is stored in the battery by charging the vehicle battery from an electric outlet vs. the proportion of travel powered by fuel. If the user wishes to model PHEVs, they need to estimate the proportions of travel powered by fuel and by electricity and combine the fuel proportion with the AutoPropHev (or LtTrkPropHev) value and the electric proportion with the AutoPropBev (or LtTrkPropBev) value.
+
+File Structure
+--------------
+Each row is a decade year from 1990 to 2050. The range of years needs to be sufficient to encompass all model run years that are anticipated.
+Column names as follows:
+Year: The year to which the data apply
+AutoPropIcev: The proportion of commercial service automobile DVMT occurring with internal combustion engine vehicles (ICEV)
+AutoPropHev: The proportion of commercial service automobile DVMT occurring with hybrid electric vehicles (HEV)
+AutoPropBev: The proportion of commercial service automobile DVMT occurring with battery electric vehicles (BEV)
+LtTrkPropIcev: The proportion of commercial service light truck DVMT occurring with internal combustion engine vehicles (ICEV)
+LtTrkPropHev: The proportion of commercial service light truck DVMT occurring with hybrid electric vehicles (HEV)
+LtTrkPropBev: The proportion of commercial service light truck DVMT occurring with battery electric vehicles (BEV)
+
+Source:
+-------
+These are demonstration data developed for the purpose of creating and testing modules. Data comes from various sources used to develop values for Oregon and other sources.

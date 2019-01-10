@@ -1,30 +1,30 @@
 Test
 Test of VESimHouseholds package modules
-2018-04-23_07:44:21
+2018-11-23_12:08:40
 
-2018-04-23 07:44:21 : Testing CalculateVehicleTrips. 
+2018-11-23 12:08:40 : Testing CalculateVehicleTrips. 
 
-2018-04-23 07:44:21 : Attempting to load datastore. 
+2018-11-23 12:08:40 : Attempting to load datastore. 
 
-2018-04-23 07:44:21 : Datastore loaded. 
+2018-11-23 12:08:40 : Datastore loaded. 
 
-2018-04-23 07:44:21 : Attempting to load and check specifications. 
+2018-11-23 12:08:41 : Attempting to load and check specifications. 
 
-2018-04-23 07:44:21 : Module specifications successfully loaded and checked for errors. 
+2018-11-23 12:08:41 : Module specifications successfully loaded and checked for errors. 
 
-2018-04-23 07:44:21 : No inputs to process. 
+2018-11-23 12:08:41 : No inputs to process. 
 
-2018-04-23 07:44:21 : Checking whether datastore contains all datasets in Get specifications. 
+2018-11-23 12:08:41 : Checking whether datastore contains all datasets in Get specifications. 
 
-2018-04-23 07:44:21 : Datastore contains all datasets identified in module Get specifications. 
+2018-11-23 12:08:41 : Datastore contains all datasets identified in module Get specifications. 
 
-2018-04-23 07:44:21 : Running module and checking whether outputs meet Set specifications. 
+2018-11-23 12:08:41 : Running module and checking whether outputs meet Set specifications. 
 
-2018-04-23 07:44:21 : Also saving module outputs to datastore. 
+2018-11-23 12:08:41 : Also saving module outputs to datastore. 
 
-2018-04-23 07:44:22 : Module run successfully and outputs meet Set specifications. 
+2018-11-23 12:08:42 : Module run successfully and outputs meet Set specifications. 
 
-2018-04-23 07:44:22 : Module outputs saved to datastore. 
+2018-11-23 12:08:42 : Module outputs saved to datastore. 
 
-2018-04-23 07:44:22 : Congratulations. Module CalculateVehicleTrips passed all tests. 
+2018-11-23 12:08:42 : Congratulations. Module CalculateVehicleTrips passed all tests. 
 

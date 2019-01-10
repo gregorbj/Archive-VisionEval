@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+
+    <meta charset='utf-8'>
+
+    <title>Scenario Viewer</title>
+
+    <!--
+    LOAD REQUIRED JAVASCRIPT LIBRARIES
+    -->
+    <script src='js/d3.min.js'></script>
+    <script src='js/crossfilter.min.js'></script>
+    <script src='js/dc.min.js'></script>
+    <script src='js/jquery-1.10.2.js'></script>
+    <script src='js/bootstrap.min.js'></script>
+    <script src='js/colorbrewer.js'></script>
+
+    <!--
+    SET STYLES
+    <link href='css/bootstrap.css' rel='stylesheet' type='text/css' >
+    -->
+    <link href='css/bootstrap.min.css' rel='stylesheet' type='text/css'>
+    <link href='css/dc.css' rel='stylesheet' type='text/css'>
+    <link href='css/colorbrewer.css' rel='stylesheet' type='text/css'>
+
+    <link href='css/style.css' rel='stylesheet' type='text/css'>
+    <style>
+        .stack._1 > .bar {
+fill:darkgray;
+}
+        h5 span {
+            font-size: 14px;
+            }
+        .pietitle {
+            font-weight: bold;
+            }
+        .bartitle {
+            font-weight: bold;
+            }
+        .subtitle {
+            font: 11px;
+            color: grey;
+            }
+        .stat {
+            font: 11 px;
+            font-weight: bold;
+            color: grey;
+            }
+        .info {
+            cursor: url(img/info.png), auto;
+            }
+        .readme {
+            float:right;
+            }
+        .pie-slice text {
+            font-size: 11px;
+            fill: black;
+            }
+        .pop-crsr {
+            cursor: help
+            }
+        .sm-margin {
+            margin: .1em;
+            }
+        .glyphicon {
+            color: darkgray;
+            }
+        .policy {
+            background-color: white;
+            }
+        .context {
+            background-color: lightgray;
+            }
+            .popover.fade{
+                min-width:400px;
+            }
+      
+    </style>
+</head>
+
+<body>
+
+    <!--
+    SET UP HEADING AND BUTTONS TO SHOW QUICK START AND DETAILED EXPLANATION BOOTSTRAP MODALS
+    -->
+    <div style="text-align:center">
+        <h2>VERSPM Scenario Viewer</h2>
+    </div>
+    <div style="text-align:center">
+        <button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#about-modal">
+        About
+        </button>
+        <button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#quick-start-modal">
+        Quick Start
+        </button>
+        <button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#detail-modal">
+        Detailed Instructions
+        </button>
+    </div>
+
+    <!--
+    ABOUT THIS EFFORT BOOTSTRAP MODAL
+    -->
+    <div class="modal fade" id="about-modal" tabindex="-1" role="dialog" aria-labelledby="about-label" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h3 class="modal-title" id="about-label">About This Effort</h3>
+            </div>
+            <div class="modal-body">
+                <h3>About the Scenario Viewer</h3>
+                <p>
+                This web page enables you to explore the results of multiple VERPSM model runs for sensitivity testing purposes. With it, you can select different combinations of input factors and find out how various future outcomes are affected by your selection. You can also select desired outcomes and find out what factors cause those outcomes to occur. By experimenting with the selections and observing the results, you will get a better understanding of the relationships between policy choices and context factors and future outcomes.
+                </p>
+                <h3>Copyright, Attribution and Acknowledgements</h3>
+                <p>
+                Copyright 2016 Oregon Department of Transportation, 2018 AASHTO
+                </p>
+                <p>
+                Licensed under the <a href="http://www.apache.org/licenses/LICENSE-2.0" target="_blank">Apache License, Version 2.0</a> (the "License"); you may not use this file except in compliance with the License.
+                <p>Author(s): Brian Gregor (gregor@or-analytics.com), Ben Stabler (ben.stabler@rsginc.com), Aditya Gore (aditya.gore@rsginc.com).</p>
+                <p>Many thanks go to the authors of the d3.js, dc.js, crossfilter.js, bootstrap.js, jquery.js, and colorbrewer.js libraries without which this data visualization would have been much more challenging to develop.</p>
+             </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!--
+    QUICK START BOOTSTRAP MODAL
+    -->
+    <div class="modal fade" id="quick-start-modal" tabindex="-1" role="dialog" aria-labelledby="quick-start-label" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h3 class="modal-title" id="quick-start-label">Scenario Viewer Quick Start Guide</h3>
+            </div>
+            <div class="modal-body">
+              <div>
+                Select different combinations of factors and find out how various future outcomes are affected by your selection. You can also select desired outcomes and find out what factors cause those outcomes to occur. By experimenting with the selections and observing the results, you will get a better understanding of the relationships between policy choices, context factors and future outcomes.
+              </div>
+                <div>
+                  <ol>
+                    <li><h4>Select Scenarios</h4></li>
+                      <ul>
+                        <li><strong>Scenario Bar Charts</strong> - choose level of ambition for policies and context factors. Click on a bar to toggle between selection and deselection (light gray color). More than one level can be selected. Level 1 always reflects the region’s adopted plans for the future.</li>
+                          <ul>
+                            <li><strong>Level 1</strong>: reference case reflecting funded adopted plans</li>
+                            <li><strong>Level 0</strong>: a retreat from current plans/forecasts </li>
+                            <li><strong>Levels 2-3</strong>: more ambitious policies </li>
+                          </ul>
+                        <li><strong>Bar Charts</strong> - click and drag mouse to select desired range of outcome measure. Change a selected range by clicking in the middle and dragging to move the entire selection or by clicking and dragging handles at either end of the range.</li>
+                      </ul>
+                        <li><h4>View Results</h4></li>
+                          <ul>
+                            <li>Scenario Bar Charts (factors) and Bar Charts (outcomes) represent the values of the selected scenarios</li>
+                            <li>Table shows attributes (factor levels and outcomes) of the selected scenarios</li>
+                          </ul>
+                    </ol>
+                    <ul>
+                        <li><h4>Other</h4></li>
+                        <ul>
+                            <li>"Clear All Selections" restores original selections</li>
+                            <li>Mouse over bar chart titles for short descriptions</li>
+                            <li>"Detailed Instructions" button gives further information</li>
+                        </ul>
+                    </ul>
+                  </div>
+             </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!--
+    DETAILED EXPLANATION BOOTSTRAP MODAL
+    -->
+    <div class="modal fade" id="detail-modal" tabindex="-1" role="dialog" aria-labelledby="detail-label" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h3 class="modal-title" id="detail-label">Detailed Instructions</h3>
+            </div>
+            <div class="modal-body">
+                <h3>Categories</h3>
+                <p>Many factors such as land use and fuel price affect light duty vehicle travel. Because the number of factors considered is large, they were grouped into 6 categories as follows:</p>
+                <h4>Policy Factors: These categories represent factors within local and state control.</h4>
+                <ul>
+                    <li><strong>Community Design</strong> Policies that seek to enable shorter trips and alternate modes such as promotion of mixed use land use, transit service, bicycling, and <a href="http://www.arb.ca.gov/planning/tsaq/cashout/cashout.htm" target="_blank">parking management</a>.</li>
+                    <li><strong>Marketing & Incentives</strong> Policies that improve driving efficiency such as<a href="http://www.ecodrive.org/" target="_blank"> ecodriving,</a>and <a href="http://www.oregon.gov/ODOT/hwy/its/Pages/its_devices.aspx" target="_blank">Intelligent Transportation System</a> efforts, as well as programs that reduce auto demand such as <a href="http://oregonstate.edu/sustainability/carshare" target="_blank"> carsharing,</a> and home or work-based <a href="http://drivelesssavemore.com/" target="_blank">transportation demand management</a>.</li>
+                    <li><strong>Pricing</strong> Policies that move towards true cost pricing such as <a href="http://www.oregon.gov/ODOT/HWY/RUFPP/Pages/ruc_overview.aspx" target="_blank">road user fees</a> to pay for the cost of operating, maintaining and improving roads, <a href="http://en.wikipedia.org/wiki/Usage-based_insurance" target="_blank"> pay-as-you-drive (PAYD) insurance,</a> and environmental impact fees such as a <a href="http://www.fin.gov.bc.ca/tbs/tp/climate/A1.htm" target="_blank">carbon tax</a>.</li>
+                    <li><strong>Vehicles & Fuels</strong> Factors representing the anticipated changes to future vehicles and fuels, in addition to those resulting from existing federal and state laws, including market changes such as the shift to electric vehicles or more fuel efficient vehicles, reduced <a href="http://www.deq.state.or.us/aq/cleanFuel/qa.htm" target="_blank">carbon intensity</a> of fuels, pace of vehicle turnover, and the light truck share of vehicles. Since these shifts would primarily result from additional federal and state policies promoting market changes, these scenarios assume supportive local actions that advocate for more amitious policies along with local efforts, such as installing charging stations and using landfill captured gases (renewable natural gas) to fuel buses.</li>
+                </ul>
+                <h4>Context Factors: These categories represent factors outside our control, but help evaluate the robustness of policies in the face of uncertain future conditions.</h4>
+                <ul>
+                <li><strong>Fuel Price</strong> The assumed market price of gasoline and other fuels (exclusive of fuel taxes).</li>
+                <li><strong>Income Growth</strong> The assumed growth of average per capita income, representing the health of the economy.</li>
+                </ul>
+                <h3>Levels</h3>
+                <p>Several levels were defined for each of the categories. These levels are numbered to indicate the amount of change from a <em>reference case</em> which represents the continuation of adopted local plans, policies and trends.</p>
+                <ul>
+                    <li><strong>Level 1:</strong> Corresponds to the <em>reference case</em>.</li>
+                    <li><strong>Level 0:</strong> Represents a retreat from current plans (such as lower parking fees or less bicycling than anticipated), or lower context forecasts (lower fuel price or lower income).</li>
+                    <li><strong>Levels 2-3:</strong> Representing more ambitious policies or higher context forecasts (higher fuel price or higher income).</li>
+                </ul>
+                <p>The levels are displayed in category bar charts, one for each category, as shown in the following illustration. </p>
+                <img src="img/verspm-barchartscen.png" width="95%">
+                <p>Each bar chart has a legend showing the color associated with each level.  The sizes of the bars show the proportions of the selected scenarios in each level. The number of selected scenarios in each level is shown in the corresponding bar. You can select (or deselect) the scenarios in a level by either clicking on the bar. The selected level is colored and the non-selected levels are grayed-out. The total count of unfiltered scenarios is shown in light gray.</p>
+                <h3>Outcomes</h3>
+                <p>Given the chosen category inputs, the web page also shows future year outcomes for the following performance measures:</p>
+                <ul>
+                    <li><strong>GHG Target Reduction:</strong> 2005-2038 percentage reduction in light-duty vehicle GHG emissions (beyond what is anticipated to occur due to baseline assumptions regarding improvements to vehiles and fuels). RVMPO has a 2005 - 2035 state-set GHG reduction target of 19%</li>
+                    <li><strong>DVMT Per Capita:</strong> daily vehicle miles of travel of residents divided by population.</li>
+                    <li><strong>Bike Travel Per Capita:</strong> annual miles of resident bike travel (not including recreational travel) divided by population.</li>
+                    <li><strong>Walk Travel Per Capita:</strong> annual residents' walk trips (not including recreation or walk to transit) divided by population.</li>
+                    <li><strong>Air Pollution Emissions:</strong> daily metric tons of pollutants emitted from all light-duty vehicle travel (including hydrocarbons, carbon monoxide, nitrogen dioxide, and particulates).</li>
+                    <li><strong>Annual Fuel Use:</strong> annual million gallons of gasoline and other fuels consumed by all light-duty vehicle travel.</li>
+                    <li><strong>Annual Household Vehicle Cost:</strong> average annual household cost (thousand dollars) for owning and operating light-duty vehicles (including gas, taxes, parking, registration, depreciation, maintenance, and financing).</li>
+                    <li><strong>Truck Delay:</strong> daily vehicle-hours of delay for heavy truck travel on area roads.</li>
+                </ul>
+                <p>Each outcome is illustrated in a bar chart showing the range of outcome values for the selected scenarios.  The bar height indicates the number of selected scenarios with that outcome value. The value for the 2038 adopted plans scenario is shown above the bar chart.  The following illustrations shows what the <em>CO2e Target Reduction</em>, <em>DVMT Per Capita</em>, <em>Bike Travel per Capita</em>, and <em>Walk Travel Per Capita</em> bar charts look like when all scenarios are selected.</p>
+                <img src="img/verspm-barchart1.png" width="95%">
+                <p>The bar charts can also be used to make a selection of scenarios.  This can be done by hovering the mouse cursor over the bar at one end of the desired selection range.  When the cursor is in the shape of a crosshairs, click and drag the mouse cursor to the other end of the desired range.  The bar chart will change to show the selected range.  In addition, handles will appear at the ends of the selected range.  You can click one of these handles and drag it to alter the selection.  You can also click on the middle of the selection (when the shape of the cursor is a crossed arrow) to drag the whole selection to a different location on the bar chart.  As you make a selection in one bar chart, all the other bar charts will change to show outcomes for just the selected scenarios.  The category bar charts will also change accordingly to show the numbers and proportions of the selected scenarios in each level.  The following illustration shows a selection made on the <em>GHG Target Reduction</em> bar chart and the corresponding values for the other bar charts in the row.  You can see in the picture the crossed-arrow cursor shape which means that the whole selection can be dragged to a new position.</p>
+                <img src="img/verspm-barchart2.png" width="95%">
+                <p>Selections can be made simultaneously on multiple scenario bar charts and output bar charts.  As more selections are made, all of the charts will be updated to show the selections that meet all of the selection conditions.  To clear all of the selections and return to the starting conditions, just click on one of the <em>Clear All Selections</em> links on the web page.</p>
+                <h3>Selected Scenario Table</h3>
+                <p>Finally, at the bottom of the web page is a table which shows the data for the selected scenarios, including both the input factor levels and the outcome measures.  The values in this table can be copied and saved in a spreadsheet.  To select the data to copy, double-click in the top left-hand cell, press the <em>Shift</em> key, and then click in the bottom right-hand cell.  Once the data has been selected, copy it by pressing the <em>Ctrl c</em> keys for a Windows computer or the <em>Command c</em> keys for an Apple Macintosh computer.  Paste as unicode text into the spreadsheet of your choice.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!--
+    SET UP PIE CHART DISPLAYS OF CATEGORIES
+    -->
+    <hr>
+    <div class='container'>
+        <!-- HEADING AND RESET LINK -->
+        <div class='row'>
+            <h3>
+                <span>Scenario Input Levels</span>
+                <span><a href="javascript:history.go(0)"> | Clear All Selections</a></span> <!-- RESET BY RELOADING PAGE -->
+            </h3>
+        </div>
+        <!-- INPUT CATEGORY PIE CHARTS -->
+        <div class='row' id='ScenarioInputCharts'>         
+
+        </div>
+    </div>
+
+    <!--
+    SET UP BAR CHART DISPLAYS OF OUTPUTS
+    -->
+    <hr>
+    <div class='container'>
+        <!-- HEADING AND RESET LINK -->
+        <div class='row'>
+            <h3>
+                <span>Model Outputs:</span>
+                <span class="num-selected-scenarios">
+                    <span class="filter-count" id="filter"></span>
+                    scenarios selected out of
+                    <span class="total-count" id="total"></span>
+                    scenarios |
+                    <a href="javascript:history.go(0)">Clear All Selections</a>
+                </span>
+             </h3>
+        </div>
+        <!-- OUTPUT MEASURE BAR CHARTS -->
+        <div class='row' id='OutputInputCharts'>            
+        </div>    
+    <hr>
+
+    <div class='container col-sm-12' style='font: 12px sans-serif;'>
+        <div class='row'>
+            <h3>Scenario Data Table</h3>
+        </div>
+        <div class='row'>
+            <div class='col-sm-12'>
+                <table class='table table-hover' id='Scenario-Results'>
+                    <thead>
+                        <tr class='header'>                      
+
+                        </tr>
+                   </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+
+<!--
+    SETUP THE UI FROM CONFIG FILE
+    -->
+    <script src='data/VERSPM/scenario-cfg.js' type='text/javascript'></script>
+    <script src='data/VERSPM/category-cfg.js' type='text/javascript'></script>
+    <script>
+        var configdata = scenconfig;
+        var categdata = catconfig;
+        var scenData = [];
+        var DataObjects = [];
+        $.each(catconfig,function(index,values) {
+            var scenarioName = values.NAME;         
+            var scenarioDescription = values.DESCRIPTION;           
+            var scenarioLevels = values.LEVELS;
+            scenData[index] = scenarioName; 
+            $('#ScenarioInputCharts').append(
+                "<div class='col-sm-2 pietitle policy' id='Scenario"+index+"'>"+
+                "<div>"+
+                "<h5 class='text-center'><span class='pietitle' id='scen"+index+"-popover'></span></h5>"+
+                "</div>"+            
+                "<div id='scen"+index+"-popover-content' style='display: none'>"+
+                "</div>"+
+                "</div>");
+                DataObjects[index] = {
+                 "NAME" : scenarioName,
+                 "DESC": scenarioDescription,
+                 "LEVELS": values.LEVELS                      
+                  };
+                
+            $('#scen' + index + '-popover').append(scenarioName+"<span class=\"glyphicon glyphicon-info-sign\"></span>");            
+            $('#scen' + index + '-popover-content').append('<p><strong>' + scenarioName + ':</strong> ' + scenarioDescription + '</p>');
+            $.each(scenarioLevels, function(i,val){
+                $.each(val.INPUTS,function(k,v){
+                    $.each(configdata, function(idx,value){
+                        if(v.NAME[0] == value.NAME[0]) {
+                            $('#scen' + index + '-popover-content').append('<p><strong>L'+i+': ' + value.LABEL + ':</strong> ' + value.LEVELS[parseInt(v.LEVEL)-1].DESCRIPTION + '</p>');
+                        }
+                        
+                    });
+                    
+                });
+                
+            });
+            
+            $('#Scenario-Results thead tr.header').append("<th>"+scenarioName+"</th>");                            
+            $("#scen"+index+"-popover").popover({
+              trigger: "hover",
+              html: true,
+              placement: "bottom",
+              content: function() {
+                  return $('#scen'+index+'-popover-content').html();
+              }
+            });
+        });
+        
+
+    </script>
+    <script src='data/VERSPM/output-cfg.js' type='text/javascript'></script>
+    <script>
+        var outputData = outputcfg;
+        var outputCol = [];
+        $.each(outputData, function(index,values){
+            outputCol[index] = values.COLUMN;
+            var outputName = values.NAME;
+            var outputLabel = values.LABEL;
+            var outputDesc = values.DESCRIPTION;
+            var outputInst = values.INSTRUCTIONS;
+            var outputMetric = values.METRIC;
+            var outputUnit = values.UNIT;
+            $('#OutputInputCharts').append("<div class='col-sm-3' id='Output"+index+"'>"+
+                "<div>"+
+                "<h5 class='text-center'><span class='bartitle' id='output"+index+"-popover'>"+"</span></h5>"+
+                "<h5 class='text-center sm-margin'><span id='output"+index+"_subtitle' class='subtitle'><span></h5>"+                
+                "</div>"+
+                "<div id='output"+index+"-popover-content' style='display: none'>"+
+                    "</div>"+
+                    "</div>");
+
+
+              $('#output'+index+'-popover').append(outputName+ "<span class=\"glyphicon glyphicon-info-sign\"></span>");
+              $('#output'+index+'_subtitle').append(outputMetric+' = <span id="output'+index+'_stat" class="stat">'+'</span> '+outputUnit);  
+              $('#output'+index+'-popover-content').append('<p><strong>'+outputLabel+ ": </strong>"+outputDesc+'</p>');
+              $('#outputinstlist').append('<li><strong>'+outputName+'</strong>: '+outputInst+'</li>');
+              $('#Scenario-Results thead tr.header').append("<th>"+values.COLUMN+"</th>");
+              $("#output"+index+"-popover").popover({
+              trigger: "hover",
+              html: true,
+              placement: "bottom",
+              content: function() {
+                  return $('#output'+index+'-popover-content').html();
+              }
+            });
+        });
+    </script>
+
+
+    <!--
+    LOAD SCENARIO DATA AND REF MEASURES DATA
+    -->
+    <script src='data/VERSPM/verspm.js' type='text/javascript'></script>
+    <script src='data/VERSPM/verspm-ref.js' type="text/javascript"></script>
+    
+    <!--
+    JAVASCRIPT TO IMPLEMENT VISUALIZATION
+    -->
+    <script>
+        // Identify the reference scenario values
+        //---------------------------------------
+        var refValues = ref[0];
+
+        // Establish the crossfilter
+        //--------------------------
+        var facts = crossfilter(data);
+
+        // Set up all of the dc.js chart objects
+        //--------------------------------------
+        // Set up the pie chart objects to display scenario input levels
+        var
+            scenarioBarChart0 = dc.barChart("#Scenario0"),
+            scenarioBarChart1 = dc.barChart("#Scenario1"),
+            scenarioBarChart2 = dc.barChart("#Scenario2"),
+            scenarioBarChart3 = dc.barChart("#Scenario3"),
+            scenarioBarChart4 = dc.barChart("#Scenario4"),
+            scenarioBarChart5 = dc.barChart("#Scenario5")
+        ;
+        // Set up the bar chart objects to display scenario output levels
+        var
+            output0BarChart = dc.barChart("#Output0"),
+            output1BarChart = dc.barChart("#Output1"),
+            output2BarChart = dc.barChart("#Output2"),
+            output3BarChart = dc.barChart("#Output3"),
+            output4BarChart = dc.barChart("#Output4"),
+            output5BarChart = dc.barChart("#Output5"),
+            output6BarChart = dc.barChart("#Output6"),
+            output7BarChart = dc.barChart("#Output7")
+        ;
+        // Set up the number objects to display output averages
+        var
+            output0AveNum = dc.numberDisplay("#output0_stat"),
+            output1AveNum = dc.numberDisplay("#output1_stat"),
+            output2AveNum = dc.numberDisplay("#output2_stat"),
+            output3AveNum = dc.numberDisplay("#output3_stat"),
+            output4AveNum = dc.numberDisplay("#output4_stat"),
+            output5AveNum = dc.numberDisplay("#output5_stat"),
+            output6AveNum = dc.numberDisplay("#output6_stat"),
+            output7AveNum = dc.numberDisplay("#output7_stat")
+        ;     
+
+        // Set up table to display values for selected scenarios
+        var scenarioTable = dc.dataTable("#Scenario-Results");
+        // Set up display of total selected scenarios
+        var all = facts.groupAll();
+        dc.dataCount(".num-selected-scenarios")
+            .dimension(facts)
+            .group(all);
+
+
+        // Establish a crossfilter dimensions for the scenario data
+        //---------------------------------------------------------
+        // Establish the scenario input dimensions to be displayed and filtered
+        var
+            scenarioDim0 = facts.dimension( function(d) {
+                var myData = DataObjects[0];
+                var thislevel;
+                var thisismylevel = false;
+                var scnCnt = 0;
+                $.each(myData.LEVELS, function(key,value) {
+                    var inputs = value.INPUTS;
+                    scnCnt =0;                   
+                    $.each(inputs,function(idx,i){
+                        if(d[i.NAME]== i.LEVEL){
+                            scnCnt++;                                                       
+                        }
+                    });
+                    if(scnCnt == inputs.length){                        
+                        thislevel = value.NAME;
+                        thisismylevel = true;                       
+                    }
+                });       
+                if(thisismylevel ==true){
+                    return  thislevel;
+                }      
+              
+            } ),
+            scenarioDim1 = facts.dimension( function(d) {
+                var myData = DataObjects[1];
+                var thislevel;
+                var thisismylevel = false;
+                var scnCnt = 0;
+                $.each(myData.LEVELS, function(key,value) {
+                    var inputs = value.INPUTS;
+                    scnCnt =0;                   
+                    $.each(inputs,function(idx,i){
+                        if(d[i.NAME]== i.LEVEL){
+                            scnCnt++;                                                       
+                        }
+                    });
+                    if(scnCnt == inputs.length){                        
+                        thislevel = value.NAME;
+                        thisismylevel = true;
+                       
+                    }
+                });       
+                if(thisismylevel ==true){
+                    return  thislevel;
+                }  
+            } ),
+            scenarioDim2 = facts.dimension( function(d) {
+                var myData = DataObjects[2];
+                var thislevel;
+                var thisismylevel = false;
+                var scnCnt = 0;
+                $.each(myData.LEVELS, function(key,value) {
+                    var inputs = value.INPUTS;
+                    scnCnt =0;                   
+                    $.each(inputs,function(idx,i){
+                        if(d[i.NAME]== i.LEVEL){
+                            scnCnt++;                                                       
+                        }
+                    });
+                    if(scnCnt == inputs.length){                        
+                        thislevel = value.NAME;
+                        thisismylevel = true;
+                       
+                    }
+                });       
+                if(thisismylevel ==true){
+                    return  thislevel;
+                }  
+
+            } ),
+            scenarioDim3 = facts.dimension( function(d) {
+                var myData = DataObjects[3];
+                var thislevel;
+                var thisismylevel = false;
+                var scnCnt = 0;
+                $.each(myData.LEVELS, function(key,value) {
+                    var inputs = value.INPUTS;
+                    scnCnt =0;                   
+                    $.each(inputs,function(idx,i){
+                        if(d[i.NAME]== i.LEVEL){
+                            scnCnt++;                                                       
+                        }
+                    });
+                    if(scnCnt == inputs.length){                        
+                        thislevel = value.NAME;
+                        thisismylevel = true;
+                       
+                    }
+                });       
+                if(thisismylevel ==true){
+                    return  thislevel;
+                }  
+            } ),
+            scenarioDim4 = facts.dimension( function(d) {
+                var myData = DataObjects[4];
+                var thislevel;
+                var thisismylevel = false;
+                var scnCnt = 0;
+                $.each(myData.LEVELS, function(key,value) {
+                    var inputs = value.INPUTS;
+                    scnCnt =0;                   
+                    $.each(inputs,function(idx,i){
+                        if(d[i.NAME]== i.LEVEL){
+                            scnCnt++;                                                       
+                        }
+                    });
+                    if(scnCnt == inputs.length){                        
+                        thislevel = value.NAME;
+                        thisismylevel = true;
+                       
+                    }
+                });       
+                if(thisismylevel ==true){
+                    return  thislevel;
+                }  
+            } ),
+            scenarioDim5 = facts.dimension( function(d) {              
+                var myData = DataObjects[5];
+                var thislevel;
+                var thisismylevel = false;
+                var scnCnt = 0;
+                $.each(myData.LEVELS, function(key,value) {
+                    var inputs = value.INPUTS;
+                    scnCnt =0;                   
+                    $.each(inputs,function(idx,i){
+                        if(d[i.NAME]== i.LEVEL){
+                            scnCnt++;                                                       
+                        }
+                    });
+                    if(scnCnt == inputs.length){                        
+                        thislevel = value.NAME;
+                        thisismylevel = true;
+                       
+                    }
+                });       
+                if(thisismylevel ==true){
+                    return  thislevel;
+                }  } 
+                   );
+        // Establish the scenario output dimensions to be displayed and filtered
+        var
+            output0Dim = facts.dimension( function(d) {return d[outputCol[0]];} ),
+            output1Dim = facts.dimension( function(d) {return d[outputCol[1]];} ),
+            output2Dim = facts.dimension( function(d) {return d[outputCol[2]];} ),
+            output3Dim = facts.dimension( function(d) {return d[outputCol[3]];} ),
+            output4Dim = facts.dimension( function(d) {return d[outputCol[4]];} ),
+            output5Dim = facts.dimension( function(d) {return d[outputCol[5]];} ),
+            output6Dim = facts.dimension( function(d) {return d[outputCol[6]];} ),
+            output7Dim = facts.dimension( function(d) {return d[outputCol[7]];} )
+        ;
+
+        // Establish the group statistics to display
+        //------------------------------------------
+        // Establish the scenario input group statistics (counts) to be displayed as pie wedges
+        var
+            scenarioGroup0 = scenarioDim0.group(),
+            scenarioGroup1 = scenarioDim1.group(),
+            scenarioGroup2 = scenarioDim2.group(),
+            scenarioGroup3 = scenarioDim3.group(),
+            scenarioGroup4 = scenarioDim4.group(),
+            scenarioGroup5 = scenarioDim5.group()        
+        ;
+        scenarioGroup0Whole = scenarioGroup0.top(Infinity);
+        scenarioGroup1Whole = scenarioGroup1.top(Infinity);
+        scenarioGroup2Whole = scenarioGroup2.top(Infinity);
+        scenarioGroup3Whole = scenarioGroup3.top(Infinity);
+        scenarioGroup4Whole = scenarioGroup4.top(Infinity);
+        scenarioGroup5Whole = scenarioGroup5.top(Infinity);      
+
+        var 
+            scen0_hash = {}, 
+            scen1_hash = {}, 
+            scen2_hash = {},        
+            scen3_hash = {},        
+            scen4_hash = {},
+            scen5_hash = {};
+
+        scenarioGroup0Whole.forEach( function(p,i) {
+            scen0_hash[p.key] = p.value
+        });
+        scenarioGroup1Whole.forEach( function(p,i) {
+            scen1_hash[p.key] = p.value
+        });
+        scenarioGroup2Whole.forEach( function(p,i) {
+            scen2_hash[p.key] = p.value
+        });
+        scenarioGroup3Whole.forEach( function(p,i) {
+            scen3_hash[p.key] = p.value
+        });
+        scenarioGroup4Whole.forEach( function(p,i) {
+            scen4_hash[p.key] = p.value
+        });
+        scenarioGroup5Whole.forEach( function(p,i) {
+            scen5_hash[p.key] = p.value
+        });
+     
+        // Establish the bin dimensions for bar charts (to be used in grouping)
+        var measures = outputCol;
+        var bins = {};
+        var calcBinning = function(data, measure, nBins) {
+            var xExtent = d3.extent(data, function(d) {return d[measure];});
+            var xWidth = (xExtent[1] - xExtent[0]) / nBins;
+            return { xExtent: xExtent, xWidth: xWidth };
+        };
+        for( var i=0; i<measures.length; i++ ) {
+            bins[measures[i]] = calcBinning( data, measures[i], 15 );
+        };
+        // Establish the output group statistics (counts) to be displayed in bar charts
+        var
+            output0ReduceGroup = output0Dim.group(function(d) {return Math.floor(d / bins[outputCol[0]].xWidth) * bins[outputCol[0]].xWidth;}),
+            output1ReduceGroup = output1Dim.group(function(d){return Math.floor(d / bins[outputCol[1]].xWidth) * bins[outputCol[1]].xWidth;}),
+            output2ReduceGroup = output2Dim.group(function(d){return Math.floor(d / bins[outputCol[2]].xWidth) * bins[outputCol[2]].xWidth;}),
+            output3ReduceGroup = output3Dim.group(function(d){return Math.floor(d / bins[outputCol[3]].xWidth) * bins[outputCol[3]].xWidth;}),
+            output4ReduceGroup = output4Dim.group(function(d){return Math.floor(d / bins[outputCol[4]].xWidth) * bins[outputCol[4]].xWidth;}),
+            output5ReduceGroup = output5Dim.group(function(d){return Math.floor(d / bins[outputCol[5]].xWidth) * bins[outputCol[5]].xWidth;}),
+            output6ReduceGroup = output6Dim.group(function(d){return Math.floor(d / bins[outputCol[6]].xWidth) * bins[outputCol[6]].xWidth;}),
+            output7ReduceGroup = output7Dim.group(function(d){return Math.floor(d / bins[outputCol[7]].xWidth) * bins[outputCol[7]].xWidth;})
+        ;
+        // Define reduce functions to calculate output measure averages for filtered selections
+        function addAvg(attr) {
+            return function(p,v) {
+                ++p.count
+                p.sum += v[attr];
+                p.avg = p.sum/p.count;
+                p.ref = refValues[attr];
+                return p;
+            };
+        }
+        function remAvg(attr) {
+            return function(p,v) {
+                --p.count
+                p.sum -= v[attr];
+                p.avg = p.sum/p.count;
+                p.ref = refValues[attr];
+                return p;
+            };
+        }
+        function iniAvg() {
+            return {count:0, sum:0, avg:0, ref:0};
+        }
+      
+        // Establish the output group output measure averages
+        var
+            //allDim = facts.dimension( function(d) {return Math.round(d.GHGReduction / d.GHGReduction);} ),
+            allDim = facts.dimension( function(d) {return d;} ),
+            output0ReduceAveGroup = allDim.group().reduce(addAvg(outputCol[0]), remAvg(outputCol[0]), iniAvg),
+            output1ReduceAveGroup = allDim.group().reduce(addAvg(outputCol[1]), remAvg(outputCol[1]), iniAvg),
+            output2ReduceAveGroup = allDim.group().reduce(addAvg(outputCol[2]), remAvg(outputCol[2]), iniAvg),
+            output3ReduceAveGroup = allDim.group().reduce(addAvg(outputCol[3]), remAvg(outputCol[3]), iniAvg),
+            output4ReduceAveGroup = allDim.group().reduce(addAvg(outputCol[4]), remAvg(outputCol[4]), iniAvg),
+            output5ReduceAveGroup = allDim.group().reduce(addAvg(outputCol[5]), remAvg(outputCol[5]), iniAvg),
+            output6ReduceAveGroup = allDim.group().reduce(addAvg(outputCol[6]), remAvg(outputCol[6]), iniAvg),
+            output7ReduceAveGroup = allDim.group().reduce(addAvg(outputCol[7]), remAvg(outputCol[7]), iniAvg)
+        ;
+
+        // Plot the input pie charts
+        //--------------------------
+        // Define layout variables that are common to all the pie charts
+        var
+            pieWidth = 160,
+            pieHeight = 160,
+            pieRadius = 60,
+            pieInnerRadius = 20,
+            pieMargins = {top: 10, right: 10, bottom: 10, left: 10}
+        ;       
+        var   upperBarMargins = {top: 0, right: 10, bottom: 20, left: 15}
+       
+        scenarioBarChart0.width(pieWidth)
+            .height(200)      
+            .stack(18)
+			.x(d3.scaleBand())
+			.xUnits(dc.units.ordinal)
+            .dimension(scenarioDim0)
+            .group(scenarioGroup0)	        
+            .gap(10)
+            .yAxisPadding('10%')
+            .renderLabel(true)          
+            .label(function (d){return "L" + d.data.key;})
+			.stack(scenarioGroup0, "Total Items",function(d) { 
+                   //only add the stacked data to filtered bars that have data.
+                    var id = d.key
+                    return scen0_hash[id] - d.value; //only add the difference between the filter and totals
+                
+            });             
+
+        scenarioBarChart1.width(pieWidth)
+            .height(200)      
+            .stack(18)
+			.x(d3.scaleBand())
+			.xUnits(dc.units.ordinal)
+            .dimension(scenarioDim1)
+            .group(scenarioGroup1)         
+            .yAxisPadding('10%')
+            .gap(10)
+            .stack(scenarioGroup1, "Total Items",function(d) {                   
+                    var id = d.key
+                    return scen1_hash[id] - d.value; //only add the difference between the filter and totals
+                
+            }) 
+            .label(function (d){return "L" + d.data.key;});
+
+        scenarioBarChart2.width(pieWidth)
+            .height(200)      
+            .stack(18)
+			.x(d3.scaleBand())
+			.xUnits(dc.units.ordinal)
+            .dimension(scenarioDim2)
+            .group(scenarioGroup2)
+            .gap(10)
+            .yAxisPadding('10%')
+            .stack(scenarioGroup2, "Total Items",function(d) { 
+              
+                    var id = d.key
+                    return scen2_hash[id] - d.value; //only add the difference between the filter and totals
+                
+            }) 
+            .label(function (d){return "L" + d.data.key;});
+
+
+        scenarioBarChart3.width(pieWidth)
+            .height(200)      
+            .stack(18)
+			.x(d3.scaleBand())
+			.xUnits(dc.units.ordinal)
+            .dimension(scenarioDim3)
+            .group(scenarioGroup3)	
+            .gap(10)          
+            .yAxisPadding('10%')
+            .stack(scenarioGroup3, "Total Items",function(d) { 
+            
+                    var id = d.key
+                    return scen3_hash[id] - d.value; //only add the difference between the filter and totals
+                
+            }) 
+            .label(function (d){return "L" + d.data.key;});
+
+        scenarioBarChart4.width(pieWidth)
+            .height(200)      
+            .stack(18)
+			.x(d3.scaleBand())
+			.xUnits(dc.units.ordinal)
+            .dimension(scenarioDim4)
+            .group(scenarioGroup4)	
+            .gap(10)		           
+            .yAxisPadding('10%')
+            .stack(scenarioGroup4, "Total Items",function(d) { 
+              
+                    var id = d.key
+                    return scen4_hash[id] - d.value; //only add the difference between the filter and totals
+              
+            }) 
+            .label(function (d){return "L" + d.data.key;});
+
+        scenarioBarChart5.width(pieWidth)
+            .height(200)      
+            .stack(18)
+			.x(d3.scaleBand())
+			.xUnits(dc.units.ordinal)
+            .dimension(scenarioDim5)
+            .group(scenarioGroup5)
+            .gap(10)          
+            .yAxisPadding('10%')
+            .stack(scenarioGroup5, "Total Items",function(d) {                 
+                var id = d.key
+                return scen5_hash[id] - d.value; //only add the difference between the filter and totals                
+            }) 
+            .label(function (d){return "L" + d.data.key;});        
+
+        // Plot the output bar charts
+        //---------------------------
+        // Define layout variables that are common to all the bar charts
+        var
+            barWidth = 250,
+            barHeight = 120,
+            barMargins = {top: 10, right: 10, bottom: 20, left: 15}
+            barGap = 35
+            barX = 5
+        ;
+        // CO2e reduction relative to target baseline
+        output0BarChart.width(barWidth)
+            .height(barHeight)
+            .margins(barMargins)
+            .dimension(output0Dim)
+            .group(output0ReduceGroup)
+            .transitionDuration(200)
+            .centerBar(true)
+            .gap(barGap)
+            .x(d3.scaleLinear().domain(bins[outputCol[0]].xExtent))
+            .yAxisLabel("# Scenarios")
+            .elasticY(true)
+            .xAxis().tickFormat();
+        output0BarChart.xAxis().ticks(5);
+        output0BarChart.yAxis().ticks(5);
+        output0BarChart.xUnits(function(){return barX;});
+        // Average per capita DVMT of households
+        output1BarChart.width(barWidth)
+            .height(barHeight)
+            .margins(barMargins)
+            .dimension(output1Dim)
+            .group(output1ReduceGroup)
+            .transitionDuration(200)
+            .centerBar(true)
+            .gap(barGap)
+            .x(d3.scaleLinear().domain(bins[outputCol[1]].xExtent))
+            .elasticY(true)
+            .xAxis().tickFormat();
+        output1BarChart.xAxis().ticks(5);
+        output1BarChart.yAxis().ticks(5);
+        output1BarChart.xUnits(function(){return barX;});
+        // Average walk trips of households
+        output2BarChart.width(barWidth)
+            .height(barHeight)
+            .margins(barMargins)
+            .dimension(output2Dim)
+            .group(output2ReduceGroup)
+            .transitionDuration(200)
+            .centerBar(true)
+            .gap(barGap)
+            .x(d3.scaleLinear().domain(bins[outputCol[2]].xExtent))
+            .elasticY(true)
+            .xAxis().tickFormat();
+        output2BarChart.xAxis().ticks(5);
+        output2BarChart.yAxis().ticks(5);
+        output2BarChart.xUnits(function(){return barX;});
+        // Air pollution quantities
+        output3BarChart.width(barWidth)
+            .height(barHeight)
+            .margins(barMargins)
+            .dimension(output3Dim)
+            .group(output3ReduceGroup)
+            .transitionDuration(200)
+            .centerBar(true)
+            .gap(barGap)
+            .x(d3.scaleLinear().domain(bins[outputCol[3]].xExtent))
+            .elasticY(true)
+            .xAxis().tickFormat();
+        output3BarChart.xAxis().ticks(3);
+        output3BarChart.yAxis().ticks(5);
+        output3BarChart.xUnits(function(){return barX;});
+        // Fuel consumption quantities
+        output4BarChart.width(barWidth)
+            .height(barHeight)
+            .margins(barMargins)
+            .dimension(output4Dim)
+            .group(output4ReduceGroup)
+            .transitionDuration(200)
+            .centerBar(true)
+            .gap(barGap)
+            .x(d3.scaleLinear().domain(bins[outputCol[4]].xExtent))
+            .yAxisLabel("# Scenarios")
+            .elasticY(true)
+            .xAxis().tickFormat();
+        output4BarChart.xAxis().ticks(3);
+        output4BarChart.yAxis().ticks(5);
+        output4BarChart.xUnits(function(){return barX;});
+        // Total hours of truck delay
+        output5BarChart.width(barWidth)
+            .height(barHeight)
+            .margins(barMargins)
+            .dimension(output5Dim)
+            .group(output5ReduceGroup)
+            .transitionDuration(200)
+            .centerBar(true)
+            .gap(barGap)
+            .x(d3.scaleLinear().domain(bins[outputCol[5]].xExtent))
+            .elasticY(true)
+            .xAxis().tickFormat();
+        output5BarChart.xAxis().ticks(5);
+        output5BarChart.yAxis().ticks(5);
+        output5BarChart.xUnits(function(){return barX;});
+        // Average percentage of household income spent on vehicle travel
+        output6BarChart.width(barWidth)
+            .height(barHeight)
+            .margins(barMargins)
+            .dimension(output6Dim)
+            .group(output6ReduceGroup)
+            .transitionDuration(200)
+            .centerBar(true)
+            .gap(barGap)
+            .x(d3.scaleLinear().domain(bins[outputCol[6]].xExtent))
+            .elasticY(true)
+            .xAxis().tickFormat();
+        output6BarChart.xAxis().ticks(5);
+        output6BarChart.yAxis().ticks(5);
+        output6BarChart.xUnits(function(){return barX;});
+        // Average low income household percentage of income spent on vehicle travel
+        output7BarChart.width(barWidth)
+            .height(barHeight)
+            .margins(barMargins)
+            .dimension(output7Dim)
+            .group(output7ReduceGroup)
+            .transitionDuration(200)
+            .centerBar(true)
+            .gap(barGap)
+            .x(d3.scaleLinear().domain(bins[outputCol[7]].xExtent))
+            .elasticY(true)
+            .xAxis().tickFormat();
+        output7BarChart.xAxis().ticks(5);
+        output7BarChart.yAxis().ticks(5);
+        output7BarChart.xUnits(function(){return barX;});
+
+        // Display the reference values and average values for outputs
+        //------------------------------------------------------------
+    /*    targetRefNum.group(output0ReduceAveGroup)
+          .valueAccessor(function(p) {return p.value.ref;});
+       //   .formatNumber(d3.format(".1g"));
+        dvmtRefNum.group(output1ReduceAveGroup)
+          .valueAccessor(function(p) {return p.value.ref;});
+        walkRefNum.group(output2ReduceAveGroup)
+          .valueAccessor(function(p) {return p.value.ref;});
+        pollutionRefNum.group(output3ReduceAveGroup)
+          .valueAccessor(function(p) {return p.value.ref;});
+        fuelRefNum.group(output4ReduceAveGroup)
+          .valueAccessor(function(p) {return p.value.ref;});
+        truckDelayRefNum.group(output5ReduceAveGroup)
+          .valueAccessor(function(p) {return p.value.ref;});
+        costPctRefNum.group(output6ReduceAveGroup)
+          .valueAccessor(function(p) {return p.value.ref;});
+        lowPctRefNum.group(output7ReduceAveGroup)
+          .valueAccessor(function(p) {return p.value.ref;});
+*/
+        output0AveNum.group(output0ReduceAveGroup).valueAccessor(function(p) {return p.value.avg;});
+        output1AveNum.group(output1ReduceAveGroup).valueAccessor(function(p) {return p.value.avg;});
+        output2AveNum.group(output2ReduceAveGroup).valueAccessor(function(p) {return p.value.avg;});
+        output3AveNum.group(output3ReduceAveGroup).valueAccessor(function(p) {return p.value.avg;});
+        output4AveNum.group(output4ReduceAveGroup).valueAccessor(function(p) {return p.value.avg;});
+        output5AveNum.group(output5ReduceAveGroup).valueAccessor(function(p) {return p.value.avg;});
+        output6AveNum.group(output6ReduceAveGroup).valueAccessor(function(p) {return p.value.avg;});
+        output7AveNum.group(output7ReduceAveGroup).valueAccessor(function(p) {return p.value.avg;});
+
+        // Display the scenario data table for the top 10 scenarios
+        //---------------------------------------------------------
+        scenarioTable.width(960).height(800)
+            .dimension(output0Dim)
+            .group(function(d) {return "";})
+            .columns([
+                function(d) {return d.C;},
+                function(d) {return d.B;},
+                function(d) {return d.P;},
+                function(d) {return d.F;},
+                function(d) {return d.V;},
+                function(d) {return d.I;},
+                function(d) {return d.G;},
+                function(d) {return d[outputCol[0]];},
+                function(d) {return d[outputCol[1]];},               
+                function(d) {return d[outputCol[2]];},   
+                function(d) {return d[outputCol[3]];},   
+                function(d) {return d[outputCol[4]];},   
+                function(d) {return d[outputCol[5]];},   
+                function(d) {return d[outputCol[6]];},   
+                function(d) {return d[outputCol[7]];}
+            ])
+            .sortBy(function(d) {return d[outputCol[0]];})
+            .order(d3.ascending)
+            .size(500);
+        // Render all of the graphic elements
+        //-----------------------------------
+        dc.renderAll();
+
+    </script>
+
+</body>

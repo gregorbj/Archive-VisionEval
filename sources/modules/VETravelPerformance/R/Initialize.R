@@ -1,10 +1,30 @@
 #============
 #Initialize.R
 #============
-# This module processes optional roadway DVMT and operations inputs. The
-# optional roadway DVMT inputs allow users to specify base year roadway DVMT
-# by vehicle type and how the DVMT by type splits across road classes. If these
-# data are not provided, the model calculates values based on default data.
+#
+#<doc>
+#
+## Initialize Module
+#### November 24, 2018
+#
+#This module reads and processes roadway DVMT and operations inputs.
+#
+#The following input files are optional. If these data are not provided, the model calculates values based on default data included with the package and processed by the `LoadDefaultRoadDvmtValues.R` script.
+#
+#*
+#The optional roadway DVMT inputs allow users to specify base year roadway DVMT by vehicle type and how the DVMT by type splits across road classes.
+#
+#
+### Model Parameter Estimation
+#
+#This module has no estimated parameters.
+#
+### How the Module Works
+#
+#
+#
+#</doc>
+
 
 
 #=================================
@@ -340,7 +360,7 @@ InitializeSpecifications <- list(
 #' }
 #' @source Initialize.R script.
 "InitializeSpecifications"
-devtools::use_data(InitializeSpecifications, overwrite = TRUE)
+usethis::use_data(InitializeSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -368,6 +388,7 @@ devtools::use_data(InitializeSpecifications, overwrite = TRUE)
 #' components: Errors and Data.
 #' @return A list that is the same as the input list with an additional
 #' Warnings component.
+#' @name Initialize
 #' @import visioneval
 #' @export
 Initialize <- function(L) {

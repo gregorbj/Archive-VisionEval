@@ -1,0 +1,28 @@
+Package: VESimLandUseData
+Type: Package
+Title: Create dataset used for estimating land use simulation models
+Version: 0.9.0
+Date: 10/31/18
+Author: Brian Gregor [aut, cre],
+Maintainer: Brian Gregor <gregorb@or-analytics.com>
+Copyright: Oregon Department of Transportation
+URL: https://github.com/gregorbj/VisionEval/sources/modules/VESimLandUseData
+Description: This package processes data from several sources to produce a
+    dataset that is used to estimate several models for synthesizing Bzones and
+    their likely land use attributes. Datasets from the U.S. Census 2015
+    American Community Survey, EPA Smart Location Database (SLD), and National
+    Transit Database (NTD) are combined to produce this dataset.
+License: Apache License 2.0
+LazyData: TRUE
+Depends: R (>= 3.1.0)
+Imports:
+    visioneval,
+    usethis,
+    tidycensus,
+    stringr
+Suggests:
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
+Encoding: UTF-8
+RoxygenNote: 6.1.1

@@ -4,7 +4,8 @@
 \alias{ipf}
 \title{Iterative proportional fitting function.}
 \usage{
-ipf(Seed_ar, MrgnVals_ls, MrgnDims_ls, RmseTarget = 1e-05, MaxIter = 100)
+ipf(Seed_ar, MrgnVals_ls, MrgnDims_ls, RmseTarget = 1e-05,
+  MaxIter = 100)
 }
 \arguments{
 \item{Seed_ar}{A array of starting numbers for the calculation. The

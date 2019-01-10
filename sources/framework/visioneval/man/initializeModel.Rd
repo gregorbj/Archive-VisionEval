@@ -4,9 +4,10 @@
 \alias{initializeModel}
 \title{Initialize model.}
 \usage{
-initializeModel(ParamDir = "defs", RunParamFile = "run_parameters.json",
-  GeoFile = "geo.csv", ModelParamFile = "model_parameters.json",
-  LoadDatastore = FALSE, DatastoreName = NULL, SaveDatastore = TRUE)
+initializeModel(ParamDir = "defs",
+  RunParamFile = "run_parameters.json", GeoFile = "geo.csv",
+  ModelParamFile = "model_parameters.json", LoadDatastore = FALSE,
+  DatastoreName = NULL, SaveDatastore = TRUE)
 }
 \arguments{
 \item{ParamDir}{A string identifying the relative or absolute path to the

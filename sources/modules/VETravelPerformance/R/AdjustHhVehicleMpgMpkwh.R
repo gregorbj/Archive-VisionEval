@@ -119,13 +119,13 @@ AdjustHhVehicleMpgMpkwhSpecifications <- list(
       OPTIONAL = TRUE
     ),
     item(
-      NAME = "DevType",
+      NAME = "LocType",
       TABLE = "Household",
       GROUP = "Year",
       TYPE = "character",
       UNITS = "category",
       PROHIBIT = "NA",
-      ISELEMENTOF = c("Urban", "Rural")
+      ISELEMENTOF = c("Urban", "Town", "Rural")
     ),
     item(
       NAME = items(
@@ -408,7 +408,7 @@ AdjustHhVehicleMpgMpkwhSpecifications <- list(
 #' }
 #' @source AdjustHhVehicleMpgMpkwh.R script.
 "AdjustHhVehicleMpgMpkwhSpecifications"
-devtools::use_data(AdjustHhVehicleMpgMpkwhSpecifications, overwrite = TRUE)
+usethis::use_data(AdjustHhVehicleMpgMpkwhSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -433,6 +433,7 @@ devtools::use_data(AdjustHhVehicleMpgMpkwhSpecifications, overwrite = TRUE)
 #' @param M A list the module functions of modules called by this module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name AdjustHhVehicleMpgMpkwh
 #' @import visioneval
 #' @export
 #'
@@ -451,7 +452,7 @@ AdjustHhVehicleMpgMpkwh <- function(L, M) {
 
   #Identify congestion factors for household-owned vehicles
   #--------------------------------------------------------
-  IsMetro_Ve <- L$Year$Household$DevType[HhToVehIdx_Ve] == "Urban"
+  IsMetro_Ve <- L$Year$Household$LocType[HhToVehIdx_Ve] == "Urban"
   MpgCongFactor_Ve <- rep(1, NumVeh)
   MpkwhCongFactor_Ve <- rep(1, NumVeh)
   #ICEV congestion factors
@@ -522,7 +523,7 @@ AdjustHhVehicleMpgMpkwh <- function(L, M) {
   EcoDriveFactor_Ve <-
     IsEcoDrive_Hh[HhToVehIdx_Ve] * L$Year$Marea$LdvEcoDriveFactor
   #Create eco-drive/speed-smoothing factors and populate with smoothing factors
-  IsMetro_Ve <- L$Year$Household$DevType[HhToVehIdx_Ve] == "Urban"
+  IsMetro_Ve <- L$Year$Household$LocType[HhToVehIdx_Ve] == "Urban"
   EcoSmooth_Ve <- rep(1, NumVeh)
   EcoSmooth_Ve[IsMetro_Ve] <- L$Year$Marea$LdvSpdSmoothFactor
   #Substitute eco-drive factor where greater

@@ -6,7 +6,7 @@ library(filesstrings)
 ##################################################
 
 #Load datastore from VELandUse package
-file.copy("../VELandUse/tests/Datastore.tar", "tests/Datastore.tar")
+file.copy("../VELandUse/tests/Datastore.tar", "tests/Datastore.tar", overwrite = TRUE)
 setwd("tests")
 untar("Datastore.tar")
 file.remove("Datastore.tar")

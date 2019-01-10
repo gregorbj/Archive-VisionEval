@@ -11,7 +11,10 @@ Ave: the formula for the average DVMT model;
 Pctl85: the formula for the 85th percentile DVMT model;
 Pctl95: the formula for the 95th percentile DVMT model;
 Pctl99: the formula for the 99th percentile DVMT model;
-Pctl100: the formula for the 100th percentile DVMT model.}
+Pctl100: the formula for the 100th percentile DVMT model.
+In addition, the 'EstimationStats' component of the list documents model
+estimation statistics for the final models as well as intermediate models
+used in developing the final models.}
 \source{
 CalculateHouseholdDVMT.R
 }
@@ -19,12 +22,14 @@ CalculateHouseholdDVMT.R
 DvmtModel_ls
 }
 \description{
-A list of components used to predict the average and several pecentiles
-(85th, 95th, 99th, 100th) of daily vehicle miles traveled for households.
-The models are linear regression models. The average DVMT model predicts
-average DVMT as a power transform. The 'Pow' component contains the power
-term for untransforming the model results. The percentile DVMT models
-predict the household DVMT at variou percentiles as a function of the
-household's average DVMT.
+A list of components used to predict the average household DVMT and several
+DVMT quantiles at 5% intervals as well as the 99th pecentile. The models are
+linear regression models. The average DVMT model predicts average DVMT as a
+power transform. The 'Pow' component contains the power term for
+untransforming the model results. The percentile DVMT models predict the
+household DVMT at variou percentiles as a function of the household's average
+DVMT. This list also includes an 'EstimationStats' component which documents
+model estimation statistics for these models as well as the intermediate
+models that were used to create these final models.
 }
 \keyword{datasets}
