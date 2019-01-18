@@ -8,6 +8,10 @@
 #--------------
 library(visioneval)
 
+planType <- 'multiprocess'
+
+ptm <- proc.time()
+
 #Initialize model
 #----------------
 initializeModel(
@@ -48,3 +52,5 @@ for(Year in getYears()) {
     RunYear = Year
   )
 }
+
+proc.time() - ptm
