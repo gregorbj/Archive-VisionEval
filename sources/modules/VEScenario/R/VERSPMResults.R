@@ -376,10 +376,14 @@ VERSPMResults <- function(L){
   InputLabels_ar <- L$Global$Model$InputLabels
 
   # Set future processors
-  NWorkers <- L$Global$Model$NWorkers
-  NWorkers <- min(max(availableCores()-1, 1), NWorkers)
-  plan(multiprocess, workers = NWorkers, gc=TRUE)
-
+  if ( exists('planType') && planType == 'multiprocess'){
+    NWorkers <- L$Global$Model$NWorkers
+    NWorkers <- min(max(availableCores()-1, 1), NWorkers)
+    plan(multiprocess, workers = NWorkers, gc=TRUE)
+  } else {
+    plan(sequential)
+  }
+  
   Results_env <- new.env()
   for(sc_path in ScenariosPath_ar){
     Results_env[[basename(sc_path)]] <- data.table(Scenario=basename(sc_path),
