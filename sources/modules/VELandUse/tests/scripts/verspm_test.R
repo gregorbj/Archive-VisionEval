@@ -7,22 +7,6 @@ library(visioneval)
 library(fields)
 source("tests/scripts/test_functions.R")
 
-#-------------------------------------------------------------------------------
-#Temporary code until VE-RPAT tests moved over to new system
-if (file.exists("tests/defs")) {
-  setwd("tests")
-  tar("defs.tar", "defs")
-  dir.remove("defs")
-  setwd("..")
-}
-if (file.exists("tests/inputs")) {
-  setwd("tests")
-  tar("inputs.tar", "inputs")
-  dir.remove("inputs")
-  setwd("..")
-}
-#-------------------------------------------------------------------------------
-
 #Define test setup parameters
 TestSetup_ls <- list(
   TestDataRepo = "../Test_Data/VE-RSPM",
@@ -48,20 +32,4 @@ Tests_ls <- list(
 setUpTests(TestSetup_ls)
 doTests(Tests_ls, TestSetup_ls)
 saveTestResults(TestSetup_ls)
-
-#-------------------------------------------------------------------------------
-#Temporary code until VE-RPAT tests moved over to new system
-if (file.exists("tests/defs.tar")) {
-  setwd("tests")
-  untar("defs.tar")
-  file.remove("defs.tar")
-  setwd("..")
-}
-if (file.exists("tests/inputs.tar")) {
-  setwd("tests")
-  untar("inputs.tar")
-  file.remove("inputs.tar")
-  setwd("..")
-}
-#-------------------------------------------------------------------------------
 

@@ -41,12 +41,22 @@ doTests <- function(Tests_ls, TestSetup_ls) {
   for (mn in ModuleNames_) {
     source(paste0("R/", mn, ".R"))
     L <- Tests_ls[[mn]]
-    testModule(
-      ModuleName = mn,
-      LoadDatastore = L["LoadDatastore"],
-      SaveDatastore = L["SaveDatastore"],
-      DoRun = L["DoRun"]
-    )
+    if (!("RunFor" %in% names(L))) {
+      testModule(
+        ModuleName = mn,
+        LoadDatastore = L["LoadDatastore"],
+        SaveDatastore = L["SaveDatastore"],
+        DoRun = L["DoRun"]
+      )
+    } else {
+      testModule(
+        ModuleName = mn,
+        LoadDatastore = L["LoadDatastore"],
+        SaveDatastore = L["SaveDatastore"],
+        DoRun = L["DoRun"],
+        RunFor = L["RunFor"]
+      )
+    }
     LogFile <- paste0("Log_", mn, ".txt")
     file.copy(
       file.path("tests", LogFile),
