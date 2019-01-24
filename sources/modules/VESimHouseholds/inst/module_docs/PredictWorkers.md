@@ -33,7 +33,7 @@ UNLIKELY - Values that are unlikely. Values that meet any of the listed conditio
 DESCRIPTION - A description of the data.
 
 ### azone_relative_employment.csv
-This input file is OPTIONAL. It is only needed if the user wants to modify the relative employment rates.
+This input file is OPTIONAL.
 
 |NAME         |TYPE   |UNITS      |PROHIBIT |ISELEMENTOF |UNLIKELY |DESCRIPTION                                                                           |
 |:------------|:------|:----------|:--------|:-----------|:--------|:-------------------------------------------------------------------------------------|
