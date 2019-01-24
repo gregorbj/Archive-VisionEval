@@ -1,42 +1,118 @@
 #=====================
 #BudgetHouseholdDvmt.R
 #=====================
-#This module adjusts average household DVMT to keep the quantity within
-#household operating cost limits. The limit for each household is calculated in
-#several steps. First, the proportion of the household's income that may be
-#spent on vehicle operating costs is calculated using a model that is explained
-#below. This is called the budget proportion. Then an adjusted household income
-#for budget calculation purposes is calculated by adding the annual cost of
-#insurance for households subscribing to payd-as-you-drive (PAYD) insurance,
-#cash-out parking payments for workers who work at an employer that has
-#cash-out-buy-back parking, and any vehicle ownership cost savings for
-#households that substitute high level car service for one or more household
-#vehicles. The adjusted household income is muliplied by the budget proportion
-#and divided by the average vehicle operating cost per mile for the household
-#to determine the maximum household DVMT that fits within the household budget.
-#The household DVMT is then set at the lesser of this budget maximum or the
-#modeled household DVMT.
-#
-#The budget proportion model is estimated using data from the Bureau of Labor's
-#consumer expenditure survey for the years from 2003 to 2015. The data used
-#are the nominal dollar expenditures by household income category and year
-#by transportation category. The values for the operating cost categories
-#(gas and oil, and maintenance and repair) are summed and then divided by the
-#midpoint value for each income category to calculate the budget proportion for
-#each income group and each year. From this the mean value is computed for each
-#income group. The budget proportions for each income group and year are
-#divided by the mean values by income group to normalize values. The standard
-#deviation for the combined normalized values is computed and value of 3
-#deviations above the mean is set as the maximum normalized value. The mean
-#values by income group are multiplied by this normalized maximum to derive a
-#budget proportion maximum by income group. A smoothed splines model of the
-#budget proportion as a function of income is then estimated from the calculated
-#budget proportion maximums. This model is used to calculate the budget
-#proportion for a household based on the household income. The minimum and
-#maximum values of the calculated budget proportion maximums are used as
-#constraints to avoid unreasonable results for very low incomes and very high
-#incomes.
 
+#<doc>
+#
+## BudgetHouseholdDvmt Module
+#### January 23, 2019
+#
+#This module adjusts average household DVMT to keep the quantity within the limit of the household vehicle operating cost budget. A linear regression model is applied to calculate the maximum proportion of income that the household is willing to pay for vehicle operations. This proportion is multiplied by household income (with adjustments explained below) to calculate the maximum amount the household is willing to spend. This is compared to the vehicle operating cost calculated for the household. If the household vehicle operating cost is greater than the maximum amount the household is willing to pay, the household DVMT is reduced to fit within the budget.
+#
+### Model Parameter Estimation
+#
+#This section describes the estimation of a model to calculate the maximum proportion of household income a household is willing to pay to operate vehicles used by the household. The model is estimated from aggregate data on consumer expenditures published by the U.S. Bureau of Labor Statistics (BLS) collected in the (Consumer Expenditure Survey). The CES data used to estimate the model are included in the 'ces_vehicle_op-cost.csv' file. Documentation of that file is included in the 'ces_vehicle_op-cost.txt' file. The 'ces.R' R script file contains the code used to download the raw CES dataset from the BLS website and process it to produce the dataset in the 'ces_vehicle_op-cost.csv' file.
+#
+#The CES data document average household expenditures by expenditure category and demographic category. Transportation expenditure categories are:
+#
+#* New car and truck purchases
+#* Used car and truck purchases
+#* Other vehicle purchases
+#* Gasoline, other fuels, and motor oil
+#* Vehicle finance charges
+#* Maintenance and repairs
+#* Vehicle insurance
+#* Vehicle rental, leases, licenses, and other charges
+#* Public and other transportation
+#
+#Expenditures in the 'gasoline, other fuels, and motor oils', 'matenance and repairs', and 'vehicle rental, leases, licenses, and other charges' categories are used to represent the vehicle operating cost budget. Following are description of costs in these categories:
+#
+#1. Gasoline and motor oil includes gasoline, diesel fuel, and motor oil.
+#
+#2. Maintenance and repairs includes tires, batteries, tubes, lubrication, filters, coolant, additives, brake and transmission fluids, oil change, brake work including adjustment, front-end alignment, wheel balancing, steering repair, shock absorber replacement, clutch and transmission repair, electrical system repair, exhaust system repair, body work and painting, motor repair, repair to cooling system, drive train repair, drive shaft and rear-end repair, tire repair, audio equipment, other maintenance and services, and auto repair policies.
+#
+#3. Vehicle rental, leases, licenses, and other charges includes leased and rented cars, trucks, motorcycles, and aircraft; inspection fees; State and local registration; driver's license fees; parking fees; towing charges; tolls; and automobile service clubs.
+#
+#Annual average expenditures (in nominal dollars) are tabulated by demographic category. Household income categories were used for estimating the budget model. Table 1 shows the income categories, abbreviations used for them, and midpoint values used in model estimation.
+#
+#| Abbreviation | Annual Before Tax Income | Midpoint Value |
+#|---|---|---|
+#| LT5K | Less than $5,000 | $2,499.50 |
+#| GE5K_LT10K | $5,000 - $9,999 | $7,499.50 |
+#| GE10K_LT15K | $10,000 - $14,999 | $12,499.50 |
+#| GE15K_LT20K | $15,000 - $19,999 | $17,499.50 |
+#| GE20K_LT30K | $20,000 - $29,999 | $24,999.50 |
+#| GE30K_LT40K | $30,000 - $39,999 | $34,999.50 |
+#| GE40K_LT50K | $40,000 - $49,999 | $44,999.50 |
+#| GE50K_LT70K | $50,000 - $69,999 | $59,999.50 |
+#| GE70K_LT80K | $70,000 - $79,999 | $74,999.50 |
+#| GE80K_LT100K | $80,000 - $99,999 | $89,999.50 |
+#| GE100K_LT120K | $100,000 - $119,999 | $109,999.50 |
+#| GE120K_LT150K | $120,000 - $149,999 | $134,999.50 |
+#| GE150K | $150,000 or more | $174,999.50 |
+#
+#**Table 1. CES Income Categories and Abbreviations and Midpoint Values Used in Analysis**
+#
+#CES data for the years from 2003 to 2015 are used in model estimation. 2003 is the first year that the BLS included income subcategories for incomes greater than $70,000. 2015 was the last year for which data were complete when the data were accessed.
+#The ratios of average operating cost to average income are calculated by dividing the average operating cost by the income midpoint value for each income group. Since both operating cost and income are in nominal dollars, the result is the proportion of income spent on vehicle operating cost by income group and year. Figure 1 shows the distribution of values by income group over the period from 2003 to 2015.
+#
+#<fig:op_cost_prop_by_income.png>
+#
+#**Figure 1. Proportion of Household Income Spent on Vehicle Operating Cost by Income Group for the Years 2003 - 2015**
+#
+#The values for the lowest income group look unreasonably high and are dropped from further use in developing the model. The values for the highest income group are also dropped because the actual median income for the group is unknown.
+#
+#The operating cost proportions are normalized by the median proportion for each income group to enable the data to be pooled to compute the budget limit. Figure 2 shows the normalized values by income group over the period. It can be seen that the normalized values for all but the GE5K_LT10K income group follow the same trajectories and have similar values distributions. These are used to develop the model.
+#
+#<fig:normalized_op_cost.png>
+#
+#**Figure 2. Normalized Operating Cost Proportion Trends by Income Group**
+#
+#The distribution of the pooled normalized operating cost data are shown in Figure 3. The distribution is calculated using the R 'density' kernal density estimation function assuming a gaussian probability density function and a bandwidth which implements the methods of Sheather & Jones (1991). The maximum normalized operating cost ratio is calculated as the value that is 3 standard deviations above the mean. The maximum operating cost ratio for each income group is then calculated by multiplying the median operating cost ratio by this maximum normalized ratio.
+#
+#<fig:normalized_op_cost_dist.png>
+#
+#**Figure 3. Probability Distribution of Pooled Normalized Operating Cost Ratios**
+#
+#A log-log linear model is estimated to predict the maximum operating cost ratio as a function of household income. Table 2 shows the model summary statistics. Figure 4 compares the model with the calculated maximum operating cost ratios.
+#
+#<txt:OpPropModel_ls$Summary>
+#
+#**Table 2. Summary Statistics for Log-Log Model of Maximum Operating Cost Ratio**
+#
+#<fig:max_op_prop_lm.png>
+#
+#**Figure 4. Comparison of Log-Log Model of Maximum Operating Cost Ratio**
+#
+#Finally, Figure 5 compares the predicted maximum operating cost ratio for each income group (excluding the lowest income group) with the distributions of operating cost ratios for the period from 2003 to 2015 for each income group.
+#
+#<fig:max_op_cost_predict_model.png>
+#
+#**Figure 5. Comparison of Maximum Operating Cost Ratio by Income with Observed Operating Cost Ratios**
+#
+### How the Module Works
+#
+#The module calculates the household operating cost budget and adjusts household travel to fit within the budget in the following steps:
+#
+#* The model for calculating the maximum proportion of household income to be spent on vehicle operating cost is applied.
+#
+#* Household income adjustments are made for the purpose of calculating the maximum operating cost as follows:
+#
+#  * For workers in a parking cash-out program, their annual work parking costs (calculated by the 'AssignParkingRestrictions' module) are added to household income.
+#
+#  * For households assigned to pay-as-you-drive insurance, their annual vehicle insurance cost (calculated by the 'CalculateVehicleOwnCost' module) are added to household income.
+#
+#  * For households that substitute car service vehicle(s) for owned vehicle(s), the annual ownership cost savings (calculated by the 'AdjustVehicleOwnership' module) are added to household income.
+#
+#* The adjusted household income is multiplied by the maximum operating cost proportion to calculate the household operating cost budget.
+#
+#* The CalculateHouseholdDvmt module is run to calculate household DVMT.
+#
+#* The modeled DVMT is compared to the maximum DVMT that the household would travel given the calculated operating cost budget and the average operating cost per vehicle mile calculated by the 'CalculateVehicleOperatingCost' module. If the modeled DVMT is greater than the DVMT that could be traveled within the household budget, the DVMT which fits the budget is substituted for the modeled DVMT. The ApplyDvmtReductions models are run to adjust household DVMT to account for travel demand management programs and user assumptions regarding diversion of single-occupant vehicle travel to bicycles, electric bicycles, scooters, etc.
+#
+#* The 'CalculateVehicleTrips' and 'CalculateAltModeTrips' modules are run to calculate the number of household vehicle trips and alternative mode trips (walk, bike, transit) to be consistent with the adjusted DVMT.
+#
+#</doc>
 
 #=================================
 #Packages used in code development
@@ -54,11 +130,8 @@
 #Specify input file attributes
 Inp_ls <- items(
   item(
-    NAME = items(
-      "SeriesID",
-      "ExpenseCategory",
-      "IncomeGroup"),
-    TYPE = "character",
+    NAME = "Year",
+    TYPE = "integer",
     PROHIBIT = "NA",
     ISELEMENTOF = "",
     UNLIKELY = "",
@@ -66,21 +139,19 @@ Inp_ls <- items(
   ),
   item(
     NAME = items(
-      "BottomIncome",
-      "TopIncome",
-      "Y2003",
-      "Y2004",
-      "Y2005",
-      "Y2006",
-      "Y2007",
-      "Y2008",
-      "Y2009",
-      "Y2010",
-      "Y2011",
-      "Y2012",
-      "Y2013",
-      "Y2014",
-      "Y2015"),
+      "LT5K",
+      "GE5K_LT10K",
+      "GE10K_LT15K",
+      "GE15K_LT20K",
+      "GE20K_LT30K",
+      "GE30K_LT40K",
+      "GE40K_LT50K",
+      "GE50K_LT70K",
+      "GE70K_LT80K",
+      "GE80K_LT100K",
+      "GE100K_LT120K",
+      "GE120K_LT150K",
+      "GE150K"),
     TYPE = "double",
     PROHIBIT = c("NA", "< 0"),
     ISELEMENTOF = "",
@@ -88,91 +159,126 @@ Inp_ls <- items(
     TOTAL = ""
   )
 )
-#Load and process transportation expenditure data
+#Load and process vehicle operations cost data
 Exp_df <-
   processEstimationInputs(
     Inp_ls,
-    "ces-trans-exp-by-category-income-2003to2015.csv",
+    "ces_vehicle_op-cost.csv",
     "BudgetHouseholdDvmt.R")
-rm(Inp_ls)
+Exp_YrIg <- as.matrix(Exp_df[,-1])
+rownames(Exp_YrIg) <- Exp_df$Year
+rm(Exp_df, Inp_ls)
 
 #Evaluate vehicle operating costs as proportion of income
 #--------------------------------------------------------
 #Calculate the midpoint income values for each income group
-MidInc_ <- (Exp_df$BottomIncome + Exp_df$TopIncome) / 2
-#Calculate expenses as proportion of income
-Yr <- paste0("Y", 2003:2015)
-ExpProp_df <- Exp_df
-ExpProp_df[,Yr] <- sweep(Exp_df[,Yr], 1, MidInc_, "/")
-#Split expenditure proportions data frame by expense category
-ExpProp_ls <- split(ExpProp_df[,Yr], ExpProp_df$ExpenseCategory)
-#Convert each component data frame to a matrix
-Ig <- ExpProp_df$IncomeGroup[1:13]
-ExpProp_ls <- lapply(ExpProp_ls, function(x) {
-  x <- as.matrix(x)
-  rownames(x) <- Ig
-  colnames(x) <- 2003:2015
-  x
-})
-#Sum operating cost category matrices to get operating cost by income and year
-#These are gas and oil, and maintenance and repair
-#Note that insurance and financing are considered part of ownership cost in the
-#model
-OpProp_IgYr <- ExpProp_ls[["Gas/Oil"]] + ExpProp_ls[["Maintenance/Repair"]]
+FloorInc_ <- c(0, 5, 10, 15, 20, 30, 40, 50, 70, 80, 100, 120, 150)* 1000
+TopInc_ <- c(FloorInc_[-1] - 1, 199999)
+MidInc_ <- (FloorInc_ + TopInc_) / 2
+rm(FloorInc_, TopInc_)
+#Calculate ratio of expenditures to income
+OpProp_YrIg <- sweep(Exp_YrIg, 2, MidInc_, "/")
+rm(Exp_YrIg)
+#Transpose matrix
+OpProp_IgYr <- t(OpProp_YrIg)
 #Calculate the mean and maximum operating cost proportions for each income group
-MeanOpProp_Ig <- apply(OpProp_IgYr, 1, mean)
-MaxOpProp_Ig <- apply(OpProp_IgYr, 1, max)
+MedianOpProp_Ig <- apply(OpProp_IgYr, 1, median)
 #Plot the values, note that the curves look like an inverse distribution
-#The values for the lowest income group are unreasonably high
-Inc_ <- MidInc_[1:13]
-# Ylim_ <- c(0, max(MaxOpProp_Ig))
-# plot(Inc_, MeanOpProp_Ig, type = "l")
-# lines(Inc_, MaxOpProp_Ig, col = "red")
-#Drop the lowest income group (< $5,000) value
-Inc_ <- Inc_[-1]
-OpProp_IgYr <- OpProp_IgYr[-1,]
-MeanOpProp_Ig <- MeanOpProp_Ig[-1]
-#Normalize operating cost proportions and evaluate distribution of whole
-#normalized set
-NormOpProp_IgYr <- sweep(OpProp_IgYr, 1, MeanOpProp_Ig, "/")
-NormOpProp_ <- as.vector(NormOpProp_IgYr)
-# plot(density(NormOpProp_))
-#Calculate a maximum normalized operating proportion that is 3 sd above the mean
+#The values for the lowest income group are unreasonably high and the highest
+#are unreasonably low
+png("data/op_cost_prop_by_income.png", width = 480, height = 480)
+Opar_ls <- par(las = 3, mar=c(8.1,5.1,3.1,2.1))
+boxplot(OpProp_YrIg,
+        ylab = "Vehicle Operating Cost\nProportion of Income")
+par(Opar_ls)
+rm(Opar_ls)
+dev.off()
+#Normalize operating cost proportions by median for each income group
+#Exclude the lowest and highest income groups
+Exclude <- -c(1,length(MidInc_))
+NormOpProp_IgYr <- sweep(OpProp_IgYr[Exclude,], 1, MedianOpProp_Ig[Exclude], "/")
+#Plot the normalized values by year and income group
+png("data/normalized_op_cost.png", width = 480, height = 480)
+Col_ <- rainbow(12)
+matplot(2003:2015, t(NormOpProp_IgYr), type = "b", pch = 20, lty = 1, col = Col_,
+        xlab = "Year", ylab = "Ratio with Income Group Median", bg = "gray")
+legend("bottomright", pch = 20, col = Col_, bty = "n",
+       legend = rownames(NormOpProp_IgYr), cex = 0.8)
+rm(Col_)
+dev.off()
+#Calculate density distribution of the normalized operations costs
+NormOpProp_ <- as.vector(NormOpProp_IgYr[-1,])
+rm(NormOpProp_IgYr)
+DensityNormOpProp_ls <- density(as.vector(NormOpProp_), bw = "SJ")
+png("data/normalized_op_cost_dist.png", width = 480, height = 480)
+plot(DensityNormOpProp_ls)
+dev.off()
+#Calculate a maximum normalized ratio
+#MaxRatio <- max(DensityNormOpProp_ls$x)
 MaxRatio <- 1 + 3 * sd(NormOpProp_)
+rm(NormOpProp_, DensityNormOpProp_ls)
 #Calculate the maximum operating proportion for each income group
-MaxOpProp_Ig = MeanOpProp_Ig * MaxRatio
-#Estimate a smooth spline model of the maximum operating cost proportion
-MaxOpProp_SS <- smooth.spline(Inc_, MaxOpProp_Ig, df = 10)
-#Plot the maximum operating proportion and the smooth spline model value
-# plot(Inc_, MaxOpProp_Ig, type = "l")
-# lines(Inc_, predict(MaxOpProp_SS)$y, col = "red")
-#Calculate the maximum value for low income households
-MaxValue <- max(predict(MaxOpProp_SS)$y)
-#Calculate the minimum values for high income households
-MinValue <- min(predict(MaxOpProp_SS)$y)
+MaxOpProp_Ig = MedianOpProp_Ig * MaxRatio
+#Estimate a model of the maximum operating proportion
+LogMaxProp <- log(MaxOpProp_Ig)
+LogInc <- log(MidInc_)
+MaxOpProp_LM <- lm(LogMaxProp ~ LogInc)
+png("data/max_op_prop_lm.png", width = 480, height = 480)
+plot(LogInc, LogMaxProp, xlab = "Natural Log of Income",
+     ylab = "Natural Log of Maximum Operating Cost Proportion")
+abline(MaxOpProp_LM, col = "red", lty = 2)
+dev.off()
+rm(MaxOpProp_Ig, LogMaxProp, LogInc)
+#Calculate the maximum operations proportion by income
+MaxPredOpProp_Ig <-
+  exp(predict(MaxOpProp_LM, newdata = data.frame(LogInc = log(MidInc_))))
+#Plot the median operating proportion and the smooth spline model value of maximum
+png("data/max_op_cost_predict_model.png", width = 480, height = 480)
+Opar_ls <- par(las = 3, mar=c(8.1,5.1,3.1,2.1))
+boxplot(OpProp_YrIg[,-1],
+        ylab = "Vehicle Operating Cost\nProportion of Income")
+lines(1:length(MaxPredOpProp_Ig[-1]), MaxPredOpProp_Ig[-1], col = "blue", type = "b", lty = 2)
+legend("topright", col = "blue", lty = 2, bty = "n", legend = "Maximum Proportion", pch = 1, pt.bg = "white")
+par(Opar_ls)
+rm(Opar_ls, OpProp_IgYr, OpProp_YrIg)
+dev.off()
+#Calculate the maximum values for low income households
+MaxValue <- max(MaxPredOpProp_Ig)
+#Document maximum ratio and maximum value
+MaxVals_df <-
+  data.frame(MaxRatio = round(MaxRatio, 2), MaxProp = round(MaxValue, 2))
+
 
 #Save the model of the maximimum operating cost proportion of income
 #-------------------------------------------------------------------
-BudgetModel_ls <- list(
-  MaxOpProp_SS = MaxOpProp_SS,
-  MaxValue = MaxValue,
-  MinValue = MinValue
+#Create a list which implements the operation cost proportions model
+OpPropModel_ls <-   list(
+  Type = "linear",
+  Formula = makeModelFormulaString(MaxOpProp_LM),
+  PrepFun = function(Inc_) data.frame(LogInc = log1p(Inc_), Intercept = 1),
+  OutFun = function(Result_) pmin(exp(Result_), 0.75),
+  Summary = capture.output(summary(MaxOpProp_LM)),
+  MaxVals_df = MaxVals_df
 )
-#' Household vehicle operating cost budget model
+rm(MaxPredOpProp_Ig, MedianOpProp_Ig, MidInc_, MaxRatio, MaxValue)
+rm(MaxOpProp_LM, MaxVals_df)
+#' Household vehicle operating cost proportion of income model
 #'
-#' A smooth spline model to predict the maximum operating cost budget as a function of income and a maximum value to use for very low income households.
+#' A list in the format required by the applyLinearModel function. The list
+#' implements a linear model which predicts the maximum proportion of income
+#' that a household is willing to spend on vehicle operating costs.
 #'
 #' @format A list:
 #' \describe{
-#'   \item{MaxOpProp_SS}{a smooth spline model to predict the maximum operating cost proportion of income}
-#'   \item{MaxValue}{a scalar value that is the maximum proportion}
+#'   \item{Type}{a string identifying the model type}
+#'   \item{Formula}{a string specifying the model formula}
+#'   \item{PrepFun}{a function to transform function input (i.e. income)}
+#'   \item{OutFun}{a function to transform model output (i.e. to produce proportion)}
+#'   \item{Summary}{summary statistics of linear model}
 #' }
 #' @source BudgetHouseholdDvmt.R script.
-"BudgetModel_ls"
-usethis::use_data(BudgetModel_ls, overwrite = TRUE)
-rm(Exp_df, ExpProp_ls, NormOpProp_IgYr, OpProp_IgYr, ExpProp_df, Inc_,
-   Ig, MaxOpProp_Ig, MaxRatio, MeanOpProp_Ig, MidInc_, NormOpProp_, Yr,
-   MaxOpProp_SS, MaxValue, MinValue)
+"OpPropModel_ls"
+usethis::use_data(OpPropModel_ls, overwrite = TRUE)
 
 
 #================================================
@@ -348,7 +454,10 @@ BudgetHouseholdDvmtSpecifications <- list(
       DESCRIPTION = "Average daily vehicle miles traveled by the household in autos or light trucks"
     ),
     item(
-      NAME = "UrbanHhDvmt",
+      NAME = items(
+        "UrbanHhDvmt",
+        "RuralHhDvmt",
+        "TownHhDvmt"),
       TABLE = "Marea",
       GROUP = "Year",
       TYPE = "compound",
@@ -357,19 +466,10 @@ BudgetHouseholdDvmtSpecifications <- list(
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
       SIZE = 0,
-      DESCRIPTION = "Average daily vehicle miles traveled in autos or light trucks by households residing in the urbanized portion of the Marea"
-    ),
-    item(
-      NAME = "RuralHhDvmt",
-      TABLE = "Marea",
-      GROUP = "Year",
-      TYPE = "compound",
-      UNITS = "MI/DAY",
-      NAVALUE = -1,
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = "",
-      SIZE = 0,
-      DESCRIPTION = "Average daily vehicle miles traveled in autos or light trucks by households residing in the non-urbanized portion of the Marea"
+      DESCRIPTION = items(
+        "Average daily vehicle miles traveled in autos or light trucks by households residing in urban locations of the Marea",
+        "Average daily vehicle miles traveled in autos or light trucks by households residing in rural locations of the Marea",
+        "Average daily vehicle miles traveled in autos or light trucks by households residing in town locations of the Marea")
     ),
     item(
       NAME = "DailyGGE",
@@ -498,12 +598,7 @@ BudgetHouseholdDvmt <- function(L, M) {
 
   #Calculate household budget proportion of income
   #-----------------------------------------------
-  BudgetProp_Hh <- with(BudgetModel_ls, {
-    Prop_ <- predict(MaxOpProp_SS, L$Year$Household$Income)$y
-    Prop_[Prop_ > MaxValue] <- MaxValue
-    Prop_[Prop_ < MinValue] <- MinValue
-    Prop_
-  })
+  BudgetProp_Hh <- applyLinearModel(OpPropModel_ls, L$Year$Household$Income)
 
   #Calculate adjusted household income for calculating vehicle operations budget
   #-----------------------------------------------------------------------------
@@ -513,6 +608,7 @@ BudgetHouseholdDvmt <- function(L, M) {
       with(L$Year$Worker, ParkingCost * IsCashOut * PaysForParking)
     CashOutAdj_Hh <-
       tapply(CashOutAdj_Wk, L$Year$Worker$HhId, sum)[L$Year$Household$HhId]
+    CashOutAdj_Hh <- 365 * CashOutAdj_Hh #Convert daily to annual
     CashOutAdj_Hh[is.na(CashOutAdj_Hh)] <- 0
     #Pay as you drive insurance adjustment
     InsCost_Hh <-
@@ -525,13 +621,10 @@ BudgetHouseholdDvmt <- function(L, M) {
       InsCostAdj_Hh
   })
 
-  #Apply the DVMT model and TDM and SOV reductions
+  #Apply the DVMT model
   #-----------------------------------------------
   #Run the household DVMT model
   Dvmt_Hh <- M$CalcDvmt(L$CalcDvmt)$Year$Household$Dvmt
-  #Reduce DVMT to account for TDM and SOV reductions
-  L$ReduceDvmt$Year$Household$Dvmt <- Dvmt_Hh
-  Dvmt_Hh <- M$ReduceDvmt(L$ReduceDvmt)$Year$Household$Dvmt
 
   #Calculate the budget-adjusted household DVMT
   #--------------------------------------------
@@ -545,14 +638,18 @@ BudgetHouseholdDvmt <- function(L, M) {
     #Establish a lower minimum to avoid zero values
     MinDvmt <- quantile(AdjDvmt_Hh, 0.01)
     AdjDvmt_Hh[AdjDvmt_Hh < MinDvmt] <- MinDvmt
+    #Reduce DVMT to account for TDM and SOV reductions
+    L$ReduceDvmt$Year$Household$Dvmt <- AdjDvmt_Hh
+    AdjDvmt_Hh <- M$ReduceDvmt(L$ReduceDvmt)$Year$Household$Dvmt
     #Calculate adjusted urban and rural DVMT for the Marea
-    IsUbz_Hh <- L$Year$Household$LocType == "Urban"
-    UrbanDvmt <- sum(AdjDvmt_Hh[IsUbz_Hh])
-    RuralDvmt <- sum(AdjDvmt_Hh[!IsUbz_Hh])
+    UrbanDvmt <- sum(AdjDvmt_Hh[L$Year$Household$LocType == "Urban"])
+    RuralDvmt <- sum(AdjDvmt_Hh[L$Year$Household$LocType == "Rural"])
+    TownDvmt <- sum(AdjDvmt_Hh[L$Year$Household$LocType == "Town"])
     #Return list of results
     list(
       Dvmt_Hh = AdjDvmt_Hh,
       UrbanDvmt = UrbanDvmt,
+      TownDvmt = TownDvmt,
       RuralDvmt = RuralDvmt
     )
   })
@@ -565,8 +662,6 @@ BudgetHouseholdDvmt <- function(L, M) {
   #Calculate alternative mode trips
   L$CalcAltTrips$Year$Household$Dvmt <- Adj_ls$Dvmt_Hh
   AltTrips_ls <- M$CalcAltTrips(L$CalcAltTrips)$Year$Household
-
-
 
   #Return the results
   #------------------
@@ -583,15 +678,20 @@ BudgetHouseholdDvmt <- function(L, M) {
     TransitTrips = AltTrips_ls$TransitTrips)
   Out_ls$Year$Marea <- list(
     UrbanHhDvmt = Adj_ls$UrbanDvmt,
+    TownHhDvmt = Adj_ls$TownDvmt,
     RuralHhDvmt = Adj_ls$RuralDvmt)
   #Return the outputs list
   Out_ls
 }
 
 
-#================================
-#Code to aid development and test
-#================================
+#===============================================================
+#SECTION 4: MODULE DOCUMENTATION AND AUXILLIARY DEVELOPMENT CODE
+#===============================================================
+#Run module automatic documentation
+#----------------------------------
+documentModule("BudgetHouseholdDvmt")
+
 #Test code to check specifications, loading inputs, and whether datastore
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions
