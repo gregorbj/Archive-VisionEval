@@ -28,7 +28,7 @@ RelLogIncome         0.97456    0.14899   6.541 6.11e-11 ***
 HhSize              -0.41466    0.07295  -5.684 1.31e-08 ***
 RelLogIncome:HhSize  0.85572    0.07320  11.690  < 2e-16 ***
 ---
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 (Dispersion parameter for binomial family taken to be 1)
 
