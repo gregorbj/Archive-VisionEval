@@ -28,3 +28,33 @@ Pilot RPAT module in VisionEval
 
 2018-05-30 09:58:01 : Congratulations. Module CalculateCongestionFuture passed all tests. 
 
+RPAT Base Scenario
+Pilot RPAT module in VisionEval
+2019-01-24_12:00:37
+
+2019-01-24 12:00:38 : Testing CalculateCongestionFuture. 
+
+2019-01-24 12:00:38 : Attempting to load datastore. 
+
+2019-01-24 12:00:38 : Datastore loaded. 
+
+2019-01-24 12:00:38 : Attempting to load and check specifications. 
+
+2019-01-24 12:00:39 : Module specifications successfully loaded and checked for errors. 
+
+2019-01-24 12:00:39 : No inputs to process. 
+
+2019-01-24 12:00:39 : Checking whether datastore contains all datasets in Get specifications. 
+
+2019-01-24 12:00:39 : Datastore contains all datasets identified in module Get specifications. 
+
+2019-01-24 12:00:39 : Running module and checking whether outputs meet Set specifications. 
+
+2019-01-24 12:00:39 : Also saving module outputs to datastore. 
+
+2019-01-24 12:00:49 : Module run successfully and outputs meet Set specifications. 
+
+2019-01-24 12:00:49 : Module outputs saved to datastore. 
+
+2019-01-24 12:00:49 : Congratulations. Module CalculateCongestionFuture passed all tests. 
+
