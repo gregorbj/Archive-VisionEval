@@ -5,9 +5,9 @@
 #<doc>
 #
 ## CalculateRoadPerformance Module
-#### November 24, 2018
+#### January 23, 2019
 #
-#This module splits light-duty vehicle (LDV) daily vehicle miles of travel DVHT between freeways and arterials as a function of relative speeds and congestion prices. Speeds and prices are combined to calculate an average 'effective' speed for freeways and for arterials. The ratio of freeway and arterial 'effective' speeds and a split factor calculated for the metropolitan area are used to split the LDV DVMT. Iteration is used to find an equilibrium split value. In addition to the LDV freeway DVMT and arterial DVMT, the following performance measures are saved to the datastore:
+#This module calculates freeway and arterial congestion level and the amounts of DVMT by congestion level. It also calculates the average speed and delay at each congestion level. In addition, it splits light-duty vehicle (LDV) DVMT between freeways and arterials as a function of relative speeds and congestion prices. The following performance measures are saved to the datastore:
 #
 #* Average freeway speed by congestion level;
 #
@@ -27,11 +27,11 @@
 #
 ### Model Parameter Estimation
 #
-#Several models are estimated
+#The module uses several estimated models to perform all the calculations. Following are brief descriptions of each model.
 #
-#### Estimate Congestion Lookup Table
+#### Model of Congestion as a Function of Daily Demand
 #
-# Lookup tables are created that are used by the module to calculate the proportions of freeway and arterial daily vehicle miles of travel (DVMT) and daily vehicle hours of travel (DVHT) in each of 5 congestion levels (none, moderate, heavy, severe, extreme) as a function of freeway average daily traffic (ADT) per lane and arterial ADT per lane respectively. The lookup tables are created using the following Urban Mobility Study (UMS) data for 90 urbanized areas that are used in the calculations:
+# This module predicts the proportions of freeway DVMT at each of the 5 congestion levels as a function of the ratio of the ratio of total freeway DVMT and total freeway lane-miles. Lookup tables (one for freeways and another for arterials) are created which specify DVMT proportions by congestion level at different aggregate demand-supply ratios. The lookup tables are created using data from the 2009 Urban Mobility Study (UMS) for 90 urbanized areas including the following. These data are included in the inst/extdata directory of the package:
 #
 #* Average daily freeway vehicle miles traveled in thousands;
 #
@@ -41,56 +41,189 @@
 #
 #* Arterial lane miles
 #
-#* Percentages of freeway DVMT occurring in 5 congestion levels
+#* Percentages of freeway DVMT occurring in each of the 5 congestion levels
 #
-#* Percentages of arterial DVMT occurring in 5 congestion levels
-#
-#* Average freeway speeds for travel at each of the 5 congestion levels
-#
-#* Average arterial speeds for travel at each of the 5 congestion levels
+#* Percentages of arterial DVMT occurring in each of the 5 congestion levels
 #
 #The steps for creating the lookup tables are as follows:
 #
-#1. Freeway demand levels and arterial demand levels are calculated for each urbanized area by dividing the respective value of DVMT by the respective number of lane miles. The result is the average daily traffic volume per lane-mile.
+#1. The freeway demand levels and arterial demand levels are calculated for each urbanized area by dividing the respective value of DVMT by the respective number of lane miles. The result is the average daily traffic volume per lane-mile.
 #
-#2. A lookup table relating the proportions of freeway DVMT by congestion level to freeway demand level is created through the calculation of weighted moving averages. Values are calculated for for freeway demand levels ranging from 6000 vehicles per lane to 24,000 vehicles per lane in 100 vehicle increments. For each demand level, the data for the 10 urbanized areas whose demand level is nearest the target demand level (5 below and 5 above are chosen). If there are less than 5 below the target then the sample includes all that are below and 5 above. Similarly if there are less then 5 above the sample target. The DVMT proportions for each congestion level are computed as a weighted average of the proportions in the sample where the weights measure how close the demand level of each sample urbanized area is to the target demand level. After weighted averages have been calculated for all freeway demand levels, smoothing splines (5 degrees of freedom) are used to smooth out the values for each congestion level over the range of demand levels.
+#2. A lookup table relating the proportions of freeway DVMT by congestion level to freeway demand level is created using a weighted moving averages method. Values are calculated for freeway demand-supply ratios ranging from 6000 vehicles per lane to 24,000 vehicles per lane in 100 vehicle increments. For each demand level, the data for the 10 urbanized areas whose demand-supply ratio is nearest the target level -- 5 below and 5 above -- are chosen. If there are less than 5 below the target then the sample includes all that are below and 5 above. Similarly if there are less then 5 above the sample target. The DVMT proportions for each congestion level are computed as a weighted average of the proportions in the sample where the weights measure how close the demand level of each sample urbanized area is to the target demand level. After weighted averages have been calculated for all freeway demand levels, smoothing splines (5 degrees of freedom) are used to smooth out the values for each congestion level over the range of demand levels. The freeway lookup table is created from the result.
 #
-#3. A lookup table relating the proportions of arterial DVMT by congestion level to arterial demand level is created by the same method used to create the freeway table.
+#3. A lookup table relating the proportions of arterial DVMT by congestion level to arterial demand-supply ratio is created by the same method used to create the freeway table.
 #
-#4. The proportions of freeway DVHT (daily vehicle hours of travel) by congestion level is computed for each urbanized area by dividing the freeway DVMT by congestion by the average speed by congestion level. The proportions of arterial DVHT by congestion level are computed in the same way.
-#
-#5. Freeway and arterial lookup tables for of the proportions of DVHT by congestion level by demand level are calculated in the same manner at the DVMT lookup tables.
-#
-#The following figures illustrate the 4 lookup tables:
+#The following figures illustrate the freeway and arterial lookup tables respectively:
 #
 #<fig:fwy_dvmt_cong_prop.png>
 #
+#**Figure 1. Freeway DVMT Proportions by Congestion Level and ADT per Lane Ratio**
+#
 #<fig:art_dvmt_cong_prop.png>
 #
-#<fig:fwy_dvht_cong_prop.png>
+#**Figure 2. Arterial DVMT Proportions by Congestion Level and ADT per Lane Ratio**
 #
-#<fig:art_dvht_cong_prop.png>
+#### Model of Congested Speeds and the Effects of Operations Programs (e.g. ramp metering, signal coordination)
 #
-#### Urbanized Area Base Speeds and Operational Adjustments
+#The module calculates expected average speed and delay at each congestion level for freeways and for arterials considering the effects of deploying 4 standards operations programs (freeway ramp metering, freeway incident management, arterial signal coordination, arterial access control) and optional user-defined operations programs (e.g. freeway active traffic management). Several lookup tables are used to estimate speeds, delays, and delay reductions due to operations programs. These tables are based on research by Bigazzi and Clifton documented in the 'Bigazzi_Task-2_Final_Report.pdf' file in the inst/extdata/sources directory of this package.
 #
-#Based on research by Bigazzi and Clifton. The speeds modeled above include the
-#effects of ITS/operations strategies that are in place in urban areas. In order
-#to calculate the effects of operations at various levels, base speed estimates
-#which are not influenced by operations improvements need to be used as the
-#starting point. Bigazzi and Clifton made the calculations and these are
-#included in the data directory. Speeds are reduced based on assumed deployment
-#levels relative to average levels, estimated maximum reductions possible by
-#congestion category, facility type, congestion type (recurring vs. incident),
-#and assumed deployment relative to the average for a metropolitan area of the
-#size.
-
+#The following table maps base speeds for freeways and for arterials by congestion level. Base speeds are the expected speeds with no operations program deployments. The columns labeled 'Fwy' and 'Art' in the table show expected base speeds considering both recurring and non-recurring congestion effects. The columns labeled 'Fwy_Rcr' and 'Art_Rcr' show base speeds considering only recurring congestion effects. Recurring congestion effects are the effects of increased traffic density on travel speed not considering the effect of crashes or other incidents that may also occur. Non-recurring congestion effects are the effects of crashes or other incidents on travel speed.
 #
+#<tab:BaseSpeeds_df>
+#
+#**Table 1. Base Average Traffic Speed (miles/hour) by Congestion Level**
+#
+#Average vehicle delay is calculated for each congestion level from the base speeds table. Delay is the difference between the travel rate (the inverse of travel speed) when the roadway is congested and the travel rate when there is no congestion. The following table shows travel delay (hours per mile) by congestion level. Note that this table is laid out differently than the speed table. In the delay table the 'Fwy_Rcr' and 'Art_Rcr' columns show estimated freeway and arterial delays due only to recurring congestion effects. The 'Fwy_NonRcr' and 'Art_NonRcr' columns show estimated delays due only to non-recurring congestion effects. The non-recurring congestion delays are calculated by subtracting the recurring congestion delays from total delay calculated from the speeds table.
+#
+#<tab:Delay_df>
+#
+#**Table 2. Base Travel Delay (hours/mile) by Congestion Type and Level**
+#
+#The model calculates the effects of operations programs on congested speeds by adjusting the recurring and non-recurring delays and then translating delay values back into speeds. The effectiveness of the four common operations programs on reducing recurring and non-recurring delay is documented in the report by Bigazzi and Clifton. The following table shows the average percentage reduction in recurring and non-recurring freeway delay with full deployment of freeway ramp metering.
+#
+#<tab:Ramp_df>
+#
+#**Table 3. Percentage Reduction in Delay with Full Deployment of Freeway Ramp Metering**
+#
+#The following table shows the average percentage reduction in non-recurring freeway delay with full deployment of incident management.
+#
+#<tab:Incident_df>
+#
+#**Table 4. Percentage Reduction in Delay with Full Deployment of Freeway Incident Management**
+#
+#The following table shows the average percentage reduction in arterial recurring delay with full deployment of signal coordination.
+#
+#<tab:Signal_df>
+#
+#**Table 5. Percentage Reduction in Delay with Full Deployment of Arterial Signal Coordination**
+#
+#The following table shows the average percentage reduction in arterial recurring and non-recurring delay with full deployment of access management. Note that recurring delay increases due to increased out-of-direction travel caused by barrier medians but non-recurring delay decreases due to the prevention of crashes by those same barrier medians.
+#
+#<tab:Access_df>
+#
+#**Table 6. Percentage Reduction in Delay with Full Deployment of Arterial Access Management**
+#
+#In addition to these four standard operations programs, the user may specify the deployment of other custom operations programs such as freeway and arterial active traffic management using the 'other_ops_effectiveness.csv' file to specify the percentage reduction in recurring and non-recurring delays expected with full deployment.
+#
+#In application, the percentage reductions shown in each of these tables is multiplied by the extent of deployment of the respective operations programs (i.e. the proportion of freeway or arterial DVMT affected) to calculate the percentage reductions at the deployment levels specified in the 'marea_operations_deployment.csv' file. The resulting percentage reductions are converted into proportions of base delay (e.g. 10% reduction means delay is 0.9 times base delay). The total effect of all operations programs is calculated by multiplying their respective delay proportions by congestion type and level. For example, the combined effect of a 5% reduction in extreme non-recurring congestion delay due to ramp metering and a 10% reduction in extreme non-recurring congestion delay due to incident management is not 15%. The delay is `0.95 * 0.9` times the base delay, meaning that the percentage reduction is 14.5%.
+#
+#### Model of the Split of Light-duty Vehicle (LDV) DVMT between Freeways and Arterials
+#
+#Unlike heavy truck DVMT or bus DVMT, LDV DVMT is not split between freeways and arterials using a fixed ratio. Instead, it is split dynamically as a function of the ratio of the respective average travel speeds and an urbanized area specific factor (lambda).
+#
+# `FwyDvmt / ArtDvmt = lambda * FwySpeed / ArtSpeed`
+#
+#A linear model is estimated to calculate the value of lambda that is representative for an urbanized area. The aforementioned Urban Mobility Study data were used to estimate this model. These data include estimates of average freeway speed and average arterial speed by congestion level for each of the 90 urbanized areas as well as freeway and arterial DVMT by congestion level. Overall average freeway speed (and likewise average arterial speed) for each urbanized area is calculated as a weighted average of the speeds by congestion level where the weights are the DVMT by congestion level. From these data, the ratios of freeway and arterial DVMT and freeway and arterial speeds are computed for each of the urbanized areas. The ratios of those ratios is the lambda value for the urbanized area which satisfies the relationship. A model is estimated to predict the likely value of lambda given a few characteristics of the urbanized area. Following is a summary of the estimated model where `LogPop`is the natural log of the urbanized area population and `LnMiRatio` is the ratio of freeway and arterial lane-miles:
+#
+#<txt:DvmtSplit_LM$Summary>
+#
+#**Figure 3. Summary Statistics for LDV DVMT Split Model**
+#
+#As can be seen, both of the independent variables are highly significant. The proportion of DVMT occurring on freeways increases with the urbanized area population and the relative supply of freeway capacity. The following set of plots show the several indicators of model fit.
+#
+#<fig:lambda_model_plots.png>
+#
+#**Figure 4. Diagnostic Plots for LDV DVMT Split Model**
+#
+#The estimated LDV DVMT split model predicts the average lambda relationship given a simple set of predictors. The model accounts for about 70% of the observed variation. As can be seen in Figure 4, there is a substantial amount of residual variation due to relevant attributes unaccounted for in the model (e.g. interchange density) and inaccuracies in the estimation dataset. If the model is applied as is to split freeway and arterial DVMT for an urbanized area, the results will not correspond to observed measurements in almost all cases. This is compensated for by calculating an additive lambda adjustment factor for the urbanized area in the base year so that the modeled LDV DVMT split is the same as the base year split processed by the Initialize module. The process for calculating the lambda adjustment factor is described in the next section. The additive lambda adjustment is equivalent to an additive adjustment to the constant in the model equation to account for other factors not accounted for in the model equation and data inaccuracies.
+#
+#### Model to Calculate Average Non-urban Road Speed from Average Urban Road Speed
+#
+#The speed models presented above only address travel on urbanized area roads, but speeds are needed as well for roads outside of urbanized areas because not all household vehicle travel occurs on urbanized area roads. The portion of household travel on urbanized area roadways is calculated by the 'CalculateRoadDvmt' module. This section describes the model developed to calculate the ratio of roadway speeds in non-urbanized (rural) areas and urbanized (urban) areas.
+#
+#Unfortunately, and surprisingly given the amount of vehicle speed data being collected nowadays, there appears to be no current sources of urban and rural roadway average speeds for the U.S. that can be used to calculate the rural to urban roadway speed ratio. The only source that the author could find to compare average rural and urban speeds is the National Household Travel Survey (NHTS) which provides information on average vehicle trip distances and durations for households living inside and outside of urbanized areas. Table 7 shows the 2017 distance and duration data by census region.
+#
+#<tab:UrbanRuralAveSpeed_ls$NhtsTripDistTime_df>
+#
+#**Table 7. 2017 NHTS Average Urban and Rural Household Vehicle Trip Distances (miles) and Durations (minutes)
+#
+#Average urban and rural household vehicle trip speeds (miles per hour) and the ratio of rural and urban speed averages are calculated from these data. The results are in Table 8. The overall national average ratio is used in the model. Advanced users may customize the module for their region by changing this script to select the ratio for one of the listed regions.
+#
+#<tab:UrbanRuralAveSpeed_ls$NhtsSpeed_df>
+#
+#**Table 8. Average Urban and Rural Household Vehicle Trip Speeds (miles per hour) and Speed Ratio**
+#
+#Unfortunately, the average household vehicle speed ratio is not a clean representation of the rural and urban road speed ratio because rural households travel some on urban roads and urban households travel some on rural roads. However, since the urban road travel proportions of households are calculated by the 'CalculateRoadDvmt' module it is possible to estimate the road speed ratio using the household speed ratio. This is done in the following equations. Equation 1 shows the calculation of rural household speed from the urban travel proportion of rural households, urban road speed, and ratio of rural to urban road speed.
+#
+#![](rural_household_speed_eq_1.png)
+#
+#**Equation 1. Calculation of Rural Household Speed**
+#
+#Where:
+#
+#* *RHS* = rural household speed
+#* *URS* = urban road speed
+#* *RHPU* = rural household proportion urban DVMT
+#* *RSR* = road speed ratio
+#
+#If a similar equation is formulated for calculating urban household average vehicle speed and that equation is divided into Equation 1, we get the equation for calculating the ratio of rural to urban household average vehicle speed as shown in Equation 2.
+#
+#![](household_speed_ratio_eq_2.png)
+#
+#**Equation 2. Calculation of Household Speed Ratio**
+#
+#Where:
+#
+#* *HSR* = household speed ratio
+#* *UHPU* = urban household proportion of urban DVMT
+#
+#Solving for the road speed ratio (RSR) yields Equation 3.
+#
+#![](road_speed_ratio_eq_3.png)
+#
+#**Equation 3. Calculation of Road Speed Ratio**
+#
+#Where:
+#
+#* *RSR* = road speed ratio
+#
+#The module applies this function to calculate the rural to urban road speed ratio from the rural to urban household speed ratio derived from the NHTS and the respective proportions of household DVMT on urban roadways for rural and urban households. The ratio, calculated by marea, is then applied to the average urban LDV speed calculated for the marea to derive the average rural LDV speed. Some guards are applied to assure that the results are sensible because some combinations of rural and urban household DVMT proportions (however unlikely) can produce road speed ratios that result in unlikely average rural road speeds.
 #
 ### How the Module Works
 #
+#This module models traffic congestion in urbanized areas and the effects of congestion on vehicle speeds and delays. In the process, it splits the freeway-arterial light-duty vehicle (LDV) DVMT forecast into freeway and arterial components as a function of the respective speeds and congestion charges on freeways and arterials. Outputs of the module include the following:
+#
+#* Average speed by marea and vehicle type (LDV, heavy truck, bus) for urban areas
+#
+#* Total delay by marea and vehicle type for urban areas
+#
+#* Average congestion charge by marea per vehicle mile
+#
+#Following are the procedures the module caries out:
+#
+#* **Calculate lambda**: The model for determining the value of lambda (described above) is applied for each metropolitan area. In addition, if the model run year is not the base year, the marea lambda adjustment values are also loaded. The procedures for calculating the lambda adjustment values in the base year are described below.
+#
+#* **Calculate speed and delay by congestion level**: The speed and delay models described above are applied to calculate speed and delay by congestion level on urban freeways and arterials in the urban portion of each marea (i.e. the urbanized area) considering the deployment of operations programs.
+#
+#* **Load and structure data on DVMT and prices**: Urban DVMT data by vehicle type (LDV, heavy truck, bus) and marea is loaded from the datastore and structured to facilitate computation. Similarly congestion pricing data is loaded and structured.
+#
+#* **Define function to calculate average equivalent speed**: Since both average speeds and pricing affect the balance of LDV DVMT on freeways and arterials, the two need to be represented in equivalent terms. The function which does this does the following to create a composite value for freeways or arterials when supplied the necessary data:
+#
+# * Daily vehicle hours of travel (DVHT) is calculated by dividing the DVMT by congestion level by the average speed by congestion level and summing the result.
+#
+# * Congestion pricing is converted into a vehicle time equivalent (i.e. DVHT) by multiplying the DVMT by congestion level by the congestion price by congestion level, summing to calculate total paid by vehicles, and dividing by the value-of-time model parameter.
+#
+# * The sum of DVHT and the DVHT equivalent of congestion pricing is divided into the DVMT to arrive at the equivalent average speed.
+#
+#* **Define function to calculate freeway and arterial congestion and split LDV DVMT**: Since relative speeds affect the split of LDV DVMT between freeways and arterials and since those speeds are affected by how the split effects congestion, the calculations are performed iteratively until an equilibrium condition is achieved. That is determined to have happened when the freeway to arterial DVMT ratio changes by less than 0.01% from iteration to iteration. The iterations are started with the assumption that average freeway speeds and average arterial speeds are the respective uncongested speeds (Table 1). The steps in each iteration are as follows:
+#
+# * The LDV DVMT split model is applied to calculate the freeway and arterial components of LDV DVMT.
+#
+# * Heavy truck DVMT by road type and bus DVMT by road type are added to the LDV DVMT by road type to calculate total freeway DVMT and total arterial DVMT.
+#
+# * The freeway-arterial DVMT ratio is calculated and compared with the ratio calculated in the previous iteration. If it differs by less than 0.01% the iterations stop. In the first iteration, the DVMT ratio is compared to 1.
+#
+# * The freeway and arterial congestion models are used to split freeway DVMT by congestion level and split arterial DVMT by congestion level.
+#
+# * The average equivalent freeway speed and the average equivalent arterial speed are calculated using the function described above.
+#
+#* **Calculate lamba adjustment factor if base year**: If the model is being run for the base year, a lambda adjustment factor must be calculated for each marea to calibrate the LDV DVMT split model so that the LDV DVMT split for the base year (see Initialize module) is replicated. A binary search procedure is used to calculate the lambda adjustment factor for each marea. In each iteration of the binary search process, the previously described function to calculate congestion and split LDV DVMT is run and the resulting freeway-arterial ratio of LDV DVMT is compared with the observed base year ratio. The search process continues until the two ratios closely match.
+#
+#* **Calculate freeway and arterial congestion**: The function to calculate freeway and arterial congestion (described above) is run to calculate freeway and arterial DVMT by congestion level and DVMT by vehicle type and road class.
+#
+#* **Calculate performance measures**: The module computes several performance measures for each marea. These include average speed by vehicle type, total vehicle hours of delay by vehicle type, and average congestion charge per vehicle mile. These performance measures are module outputs that are written to the datastore. Additional module outputs are freeway LDV DVMT and arterial LDV DVMT for each marea, and the lambda adjustment factors. In addition, the module outputs proportions of freeway and arterial DVMT by congestion level and freeway and arterials speeds by congestion level. Those data are used by the 'CalculateMpgMpkwhAdjustments' module to calculate the effects of urban area congestion on fuel economy and electric vehicle efficiency.
 #
 #</doc>
-
 
 
 #=================================
@@ -191,8 +324,8 @@ rm(UmsInp_ls)
 #SECTION 1B: ESTIMATE AND SAVE CONGESTION LOOKUP TABLES AND FUNCTION
 #===================================================================
 # Lookup tables are created that are used by the module to calculated the
-# proportions of freeway and arterial daily vehicle miles of travel (DVMT) and
-# daily vehicle hours of travel (DVHT) in each of 5 congestion levels (none,
+# proportions of freeway and arterial daily vehicle miles of travel (DVMT)
+# in each of 5 congestion levels (none,
 # moderate, heavy, severe, extreme) as a function of freeway average daily
 # traffic (ADT) per lane and arterial ADT per lane respectively.
 # The lookup tables are created using the following Urban Mobility Study (UMS)
@@ -203,8 +336,6 @@ rm(UmsInp_ls)
 # 4) Arterial lane miles
 # 5) Percentages of freeway DVMT occurring in 5 congestion levels
 # 6) Percentages of arterial DVMT occurring in 5 congestion levels
-# 7) Average freeway speeds for travel at each of the 5 congestion levels
-# 8) Average arterial speeds for travel at each of the 5 congestion levels
 
 #Define function to estimate congestion model
 #--------------------------------------------
@@ -239,39 +370,6 @@ estimateCongestionModel <- function() {
   ArtCongVmtPct_df <-
     cbind(None = 100 - rowSums(ArtCongVmtPct_df), ArtCongVmtPct_df)
   ArtCongVmtProp_df <- ArtCongVmtPct_df / 100
-
-  # Calculate percentages of freeway and arterial DVHT by congestion level
-  #-----------------------------------------------------------------------
-  # Urbanized area DVHT by congestion level is calculated from the percentages of
-  # DVMT by congestion level, total DVMT, and average speeds by congestion level.
-
-  # Freeway DVMT by congestion level and metropolitan area
-  FwyCongVmt_df <- sweep(FwyCongVmtProp_df, 1, FwyDvmt_, "*")
-  # Average freeway speeds by congestion level and metropolitan area
-  AveFwySpds_df <-
-    Ums_df[, c("FwyAveModSpd", "FwyAveHvySpd", "FwyAveSevSpd", "FwyAveExtSpd")]
-  names(AveFwySpds_df) <- c("Mod", "Hvy", "Sev", "Ext")
-  AveFwySpds_df <- cbind(None = 60, AveFwySpds_df)
-  # Freeway DVHT by congestion level and metropolitan area
-  FwyCongVht_df <- FwyCongVmt_df / AveFwySpds_df
-  # Proportions of freeway DVHT by congestion level for each metropolitan area
-  FwyCongVhtProp_df <-
-    data.frame(t(apply(FwyCongVht_df, 1, function(x) x/sum(x))))
-  # Clean up
-  rm(FwyCongVmt_df, AveFwySpds_df, FwyCongVht_df)
-
-  # Arterial DVMT by congestion level and metropolitan area
-  ArtCongVmt_df <- sweep(ArtCongVmtProp_df, 1, ArtDvmt_, "*")
-  # Average arterial speeds by congestion level and metropolitan area
-  AveArtSpds_df <-
-    Ums_df[, c("ArtAveModSpd", "ArtAveHvySpd", "ArtAveSevSpd", "ArtAveExtSpd")]
-  names(AveArtSpds_df) <- c("Mod", "Hvy", "Sev", "Ext")
-  AveArtSpds_df <- cbind(None=30, AveArtSpds_df)
-  # Arterial DVHT by congestion level and metropolitan area
-  ArtCongVht_df <- ArtCongVmt_df / AveArtSpds_df
-  # Proportions of arterial DVHT by congestion level for each metropolitan area
-  ArtCongVhtProp_df <-
-    data.frame(t(apply(ArtCongVht_df, 1, function(x) x/sum(x))))
 
   # Define function to calculate a lookup table of congestion proportions
   #----------------------------------------------------------------------
@@ -345,14 +443,8 @@ estimateCongestionModel <- function() {
   #Calculate freeway and arterial congested DVMT and DVHT tables
   #-------------------------------------------------------------
   list(
-    DVMT = list(
-      Fwy = createLookupTable(FwyDemandLvl_, FwyCongVmtProp_df, c(6000, 24000)),
-      Art = createLookupTable(ArtDemandLvl_, ArtCongVmtProp_df, c(2000, 9000))
-    ),
-    DVHT = list(
-      Fwy = createLookupTable(FwyDemandLvl_, FwyCongVhtProp_df, c(6000, 24000)),
-      Art = createLookupTable(ArtDemandLvl_, ArtCongVhtProp_df, c(2000, 9000))
-    )
+    Fwy = createLookupTable(FwyDemandLvl_, FwyCongVmtProp_df, c(6000, 24000)),
+    Art = createLookupTable(ArtDemandLvl_, ArtCongVmtProp_df, c(2000, 9000))
   )
 }
 
@@ -362,55 +454,38 @@ estimateCongestionModel <- function() {
 CongestedProportions_ls <- estimateCongestionModel()
 #Document the DVMT proportions by congestion level for freeways
 png("data/fwy_dvmt_cong_prop.png", height = 360, width = 480)
-Props_mx <- CongestedProportions_ls$DVMT$Fwy
+Opar_ls <- par(mar = c(4,4,3,2))
+Props_mx <- CongestedProportions_ls$Fwy
 matplot(as.numeric(rownames(Props_mx)), Props_mx, type = "l",
-        xlab = "Average Daily Traffic Per Lane", ylab = "Proportion of DVMT",
-        main = "Freeway DVMT Split by Congestion Level")
-legend("topright", lty = 1:5, col = 1:5, legend = colnames(Props_mx), bty = "n")
+        xlab = "Average Daily Traffic Per Lane", ylab = "Proportion of DVMT")
+legend("topright", lty = 1:5, col = 1:5, legend = colnames(Props_mx), bty = "n",
+       title = "Congestion Level")
+par(Opar_ls)
 dev.off()
 #Document the DVMT proportions by congestion level for arterials
 png("data/art_dvmt_cong_prop.png", height = 360, width = 480)
-Props_mx <- CongestedProportions_ls$DVMT$Art
+Opar_ls <- par(mar = c(4,4,3,2))
+Props_mx <- CongestedProportions_ls$Art
 matplot(as.numeric(rownames(Props_mx)), Props_mx, type = "l",
-        xlab = "Average Daily Traffic Per Lane", ylab = "Proportion of DVMT",
-        main = "Arterial DVMT Split by Congestion Level")
-legend("topright", lty = 1:5, col = 1:5, legend = colnames(Props_mx), bty = "n")
-dev.off()
-#Document the DVHT proportions by congestion level for freeways
-png("data/fwy_dvht_cong_prop.png", height = 360, width = 480)
-Props_mx <- CongestedProportions_ls$DVHT$Fwy
-matplot(as.numeric(rownames(Props_mx)), Props_mx, type = "l",
-        xlab = "Average Daily Traffic Per Lane", ylab = "Proportion of DVHT",
-        main = "Freeway DVHT Split by Congestion Level")
-legend("topright", lty = 1:5, col = 1:5, legend = colnames(Props_mx), bty = "n")
-dev.off()
-#Document the DVHT proportions by congestion level for arterials
-png("data/art_dvht_cong_prop.png", height = 360, width = 480)
-Props_mx <- CongestedProportions_ls$DVHT$Art
-matplot(as.numeric(rownames(Props_mx)), Props_mx, type = "l",
-        xlab = "Average Daily Traffic Per Lane", ylab = "Proportion of DVHT",
-        main = "Arterial DVHT Split by Congestion Level")
-legend("topright", lty = 1:5, col = 1:5, legend = colnames(Props_mx), bty = "n")
+        xlab = "Average Daily Traffic Per Lane", ylab = "Proportion of DVMT")
+legend("topright", lty = 1:5, col = 1:5, legend = colnames(Props_mx), bty = "n",
+       title = "Congestion Level")
+par(Opar_ls)
 dev.off()
 
 rm(estimateCongestionModel)
 
 #Save the congestion lookup tables
 #---------------------------------
-#' Congestion lookup tables of proportions of VMT and VHT by congestion level
-#' for freeways and arterials by demand level (average ADT per lane)
+#' Congestion lookup tables of proportions of DVMT by congestion level
+#' for freeways and arterials by demand to supply ratio (average DVMT per lane-mile)
 #'
-#' Bus revenue mile equivalency factors to convert revenue miles for various
-#' modes to bus-equivalent revenue miles.
-#'
-#' @format A list of matrices. The list has two components, Vmt and Vht, that
-#' contain lookup tables for VMT and VHT proportions by congestion level,
-#' respectively. Each component has two components, Fwy and Art, that contains
-#' the lookup tables for freeways and arterials respectively. Each table is a
-#' matrix containing 5 columns corresponding the 5 congestion levels (none,
-#' moderate, heavy, severe, extreme). The rows correspond to demand levels with
-#' the rownames specifying the demand levels. The values are proportions by
-#' congestion level. The values in each row sum to 1.
+#' @format A list of matrices. The list has two components, Fwy and Art, that
+#'   are lookup tables for DVMT by congestion level for freeways and arterials
+#'   respectively. Each table is a matrix containing 5 columns corresponding the
+#'   5 congestion levels (None, Mod, Hvy, Sev, Ext). The rows correspond to
+#'   demand to supply ratios with the rownames specifying the ratios. The values
+#'   are proportions by congestion level. The values in each row sum to 1.
 #'
 #' @source CalculateCongestion.R script.
 "CongestedProportions_ls"
@@ -422,41 +497,31 @@ usethis::use_data(CongestedProportions_ls, overwrite = TRUE)
 #---------------------------------------------------------
 #' Calculate DVMT or DVHT by congestion level.
 #'
-#' \code{CalculateCongestion} splits input DVMT or DVHT into the amounts in
-#' each of 5 congestion levels:none, moderate, heavy, severe, and extreme.
+#' \code{CalculateCongestion} splits input DVMT into the amounts in
+#' each of 5 congestion levels:None, Mod, Hvy, Sev, Ext.
 #'
-#' This function splits input DVMT or DVHT into amounts by congestion level
+#' This function splits input DVMT into amounts by congestion level
 #' (none, moderate, heavy, severe, and extreme) as a function of the ratio of
 #' DVMT to lane-miles. The lookup tables in CongestedProportions_ls are used
-#' to lookup proportions by congestion level. The input DVMT or DVHT are
+#' to lookup proportions by congestion level. The input DVMT is
 #' split with these proportions and the split values are returned.
 #'
-#' @param MeasureType a string having the value 'DVMT' or 'DVHT' depending on
-#' whether daily vehicle miles of travel (DVMT) or daily vehicle hours of travel
-#' is to be split into congestion levels.
 #' @param RoadType a string having the value 'Fwy' or 'Art' depending on whether
 #' congestion is to be calculated for freeways (Fwy) or arterial roadways (Art).
 #' @param LaneMi a number identifying the number of lane-miles for the roadway
 #' type.
 #' @param DVMT a number identifying the daily vehicle miles of travel on the
 #' roadway type.
-#' @param DVHT a number identifying the daily vehicle hours of travel on the
-#' roadway type. Note that a value is required for this argument only if the
-#' MeasureType is 'DVHT'.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
 #' @name calculateCongestion
 #' @import visioneval
 #' @export
 calculateCongestion <-
-  function(MeasureType, RoadType, LaneMi, DVMT, DVHT = NULL) {
-    #Check that DVHT value is provided if MeasureType is DVHT
-    if (MeasureType == "DVHT" & is.null(DVHT)) {
-      stop("MeasureType is 'DVHT' but the values of DVHT is NULL.")
-    }
+  function(RoadType, LaneMi, DVMT) {
     #Extract the lookup table
     Lookup_LvCl <-
-      CongestedProportions_ls[[MeasureType]][[RoadType]]
+      CongestedProportions_ls[[RoadType]]
     #Calculate roadway demand
     Demand <- DVMT / LaneMi
     #Constrain the lookup to the table range
@@ -469,12 +534,8 @@ calculateCongestion <-
     })
     #Make sure values add exactly to 1
     CongProps_ <- CongProps_ / sum(CongProps_)
-    #Split DVMT or DVHT into congested components
-    if (MeasureType == "DVMT") {
-      DVMT * CongProps_
-    } else {
-      DVHT * CongProps_
-    }
+    #Split DVMT into congested components
+    DVMT * CongProps_
   }
 
 
@@ -976,7 +1037,7 @@ Lambda_df <- data.frame(
   Lambda = Lambda_Ma,
   Pop = Ums_df$Pop000 * 1000,
   SqMi = Ums_df$SqMi,
-  LogPop = log(Ums_df$Pop000 * 1000),
+  LogPop = log1p(Ums_df$Pop000 * 1000),
   LnMiRatio = with(Ums_df, FwyLnMi / ArtLnMi),
   PopSqMi = with(Ums_df, 1000 * Pop000 / SqMi),
   FwyLnMi = Ums_df$FwyLnMi,
@@ -988,11 +1049,12 @@ Lambda_df <- data.frame(
   LnMiSqMi = with(Ums_df, (FwyLnMi + ArtLnMi) / SqMi)
 )
 DvmtSplit_LM <-  lm(Lambda ~ LogPop + LnMiRatio, data = Lambda_df)
-#summary(DvmtSplit_LM)
-#plot(DvmtSplit_LM)
-#plot(Lambda_Ma, fitted(DvmtSplit_LM))
-#abline(0, 1, col = "red")
-#cor(Lambda_df[,c("LogPop", "LnMiRatio")])
+DvmtSplit_LM$Summary <- capture.output(summary(DvmtSplit_LM))
+png("data/lambda_model_plots.png", width = 600, height = 600)
+Opar_ls <- par(mfrow = c(2,2))
+plot(DvmtSplit_LM)
+par(Opar_ls)
+dev.off()
 rm(Lambda_df, Ums_df)
 
 #Save the model for calculating factor for splitting DVMT based on speeds
@@ -1012,6 +1074,82 @@ rm(Lambda_df, Ums_df)
 usethis::use_data(DvmtSplit_LM, overwrite = TRUE)
 
 
+#=========================================================================
+#SECTION 1E: ESTIMATE FACTORS FOR CALCULATING AVERAGE NON-URBAN ROAD SPEED
+#=========================================================================
+#The road speed model only estimates urban road speeds (i.e. road speeds in the
+#urbanized area) as a function of road supply and vehicle demand. The average
+#non-urban road speed in an marea is estimated by scaling the urban road speed.
+#The speed scaling factor is calculated from 2017 NHTS data for average vehicle
+#trip distances and durations for urban and rural households along with the
+#proportions of urban and non-urban household DVMT on urban roadways.
+
+#Load 2017 NHTS data on urban and rural household trip distances and speeds
+NhtsTripDistTimeInp_ls <- items(
+  item(
+    NAME = "Region",
+    TYPE = "character",
+    PROHIBIT = "",
+    ISELEMENTOF = "",
+    UNLIKELY = "",
+    TOTAL = ""
+  ),
+  item(
+    NAME =
+      items("UrbanTripLength",
+            "RuralTripLength",
+            "UrbanTripDuration",
+            "RuralTripDuration"),
+    TYPE = "double",
+    PROHIBIT = "",
+    ISELEMENTOF = "",
+    UNLIKELY = "",
+    TOTAL = ""
+  )
+)
+NhtsTripDistTime_df <-   processEstimationInputs(
+  NhtsTripDistTimeInp_ls,
+  "urban_rural_trip_length_duration.csv",
+  "CalculateRoadPerformance.R")
+Rg <- NhtsTripDistTime_df$Region
+#Calculate urban and rural speed
+NhtsSpeed_df <- data.frame(
+  UrbanSpeed = setNames(with(NhtsTripDistTime_df, 60 * UrbanTripLength / UrbanTripDuration), Rg),
+  RuralSpeed = setNames(with(NhtsTripDistTime_df, 60 * RuralTripLength / RuralTripDuration), Rg)
+)
+NhtsSpeed_df$SpeedRatio <- with(NhtsSpeed_df, RuralSpeed / UrbanSpeed)
+#Put in list
+UrbanRuralAveSpeed_ls <- list(
+  NhtsTripDistTime_df = NhtsTripDistTime_df,
+  NhtsSpeed_df = NhtsSpeed_df,
+  SpeedRatio = NhtsSpeed_df["All", "SpeedRatio"]
+)
+rm(NhtsTripDistTimeInp_ls, NhtsTripDistTime_df, Rg, NhtsSpeed_df)
+
+#Save urban-rural household average speed ratio
+#----------------------------------------------
+#' Urban-rural average household speed ratio
+#'
+#' The ratio of average speed of vehicle trips by households residing in urban
+#' areas (i.e. in urbanized areas) to average speed of vehicle trips by
+#' households residing in rural areas (i.e. not in urbanized areas)
+#'
+#' @format A list
+#' \describe{
+#'   \item{NhtsTripDistTime_df}{data frame containing urban and rural household
+#'   average vehicle trip distance (miles) and trip time (minutes) by census
+#'   region}
+#'   \item{NhtsSpeed_df}{data frame containing urban and rural household
+#'   average vehicle trip speed (miles/hour) and ratio of rural to urban
+#'   average speed}
+#'   \item{UrbanRuralHouseholdSpeedRatio}{a number that is the average speed
+#'   ratio used in the model to calculate rural speed from urban speed}
+#' }
+#' @source CalculateRoadPerformance.R script.
+"UrbanRuralAveSpeed_ls"
+usethis::use_data(UrbanRuralAveSpeed_ls, overwrite = TRUE)
+
+
 #================================================
 #SECTION 2: DEFINE THE MODULE DATA SPECIFICATIONS
 #================================================
@@ -1025,6 +1163,20 @@ CalculateRoadPerformanceSpecifications <- list(
   #Specify new tables to be created by Set if any
   #Specify input data
   Get = items(
+    item(
+      NAME = "StateAbbrLookup",
+      TABLE = "Region",
+      GROUP = "Global",
+      TYPE = "character",
+      UNITS = "ID",
+      PROHIBIT = "",
+      ISELEMENTOF = c(
+        "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI",
+        "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI",
+        "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC",
+        "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT",
+        "VT", "VA", "WA", "WV", "WI", "WY", "DC", "PR", NA)
+    ),
     item(
       NAME = "Marea",
       TABLE = "Marea",
@@ -1149,6 +1301,39 @@ CalculateRoadPerformanceSpecifications <- list(
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = ""
+    ),
+    item(
+      NAME =
+        items(
+          "LdvFwyDvmtProp",
+          "LdvArtDvmtProp"),
+      TABLE = "Marea",
+      GROUP = "Global",
+      TYPE = "double",
+      UNITS = "proportion",
+      PROHIBIT = c("< 0", "> 1"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "LambdaAdj",
+      TABLE = "Marea",
+      GROUP = "Global",
+      TYPE = "double",
+      UNITS = "constant",
+      PROHIBIT = "",
+      ISELEMENTOF = "",
+      OPTIONAL = TRUE
+    ),
+    item(
+      NAME = items(
+        "UrbanHhPropUrbanDvmt",
+        "NonUrbanHhPropUrbanDvmt"),
+      TABLE = "Marea",
+      GROUP = "Year",
+      TYPE = "double",
+      UNITS = "proportion",
+      PROHIBIT = c("NA", "< 0", "> 1"),
+      ISELEMENTOF = ""
     )
   ),
   Set = items(
@@ -1170,18 +1355,10 @@ CalculateRoadPerformanceSpecifications <- list(
     ),
     item(
       NAME = items(
-        "FwyNoneCongSpeed",
-        "FwyModCongSpeed",
-        "FwyHvyCongSpeed",
-        "FwySevCongSpeed",
-        "FwyExtCongSpeed",
-        "ArtNoneCongSpeed",
-        "ArtModCongSpeed",
-        "ArtHvyCongSpeed",
-        "ArtSevCongSpeed",
-        "ArtExtCongSpeed",
-        "OthSpd",
-        "AveLdvSpd"),
+        "LdvAveSpeed",
+        "HvyTrkAveSpeed",
+        "BusAveSpeed",
+        "NonUrbanAveSpeed"),
       TABLE = "Marea",
       GROUP = "Year",
       TYPE = "compound",
@@ -1191,31 +1368,16 @@ CalculateRoadPerformanceSpecifications <- list(
       ISELEMENTOF = "",
       SIZE = 0,
       DESCRIPTION = items(
-        "Average freeway speed (miles per hour) when there is no congestion",
-        "Average freeway speed (miles per hour) when congestion is moderate",
-        "Average freeway speed (miles per hour) when congestion is heavy",
-        "Average freeway speed (miles per hour) when congestion is severe",
-        "Average freeway speed (miles per hour) when congestion is extreme",
-        "Average arterial speed (miles per hour) when there is no congestion",
-        "Average arterial speed (miles per hour) when congestion is moderate",
-        "Average arterial speed (miles per hour) when congestion is heavy",
-        "Average arterial speed (miles per hour) when congestion is severe",
-        "Average arterial speed (miles per hour) when congestion is extreme",
-        "Average speed (miles per hour) on other roadways",
-        "Average light-duty vehicle speed (miles per hour) on all roadways weighted by the proportions of light-duty vehicle travel")
+        "Average speed (miles per hour) of light-duty vehicle travel on urban area roads",
+        "Average speed (miles per hour) of heavy truck travel on urban area roads",
+        "Average speed (miles per hour) of bus travel on urban area roads",
+        "Average speed (miles per hour) of vehicle travel on non-urban area roads")
     ),
     item(
       NAME = items(
-        "FwyNoneCongDelay",
-        "FwyModCongDelay",
-        "FwyHvyCongDelay",
-        "FwySevCongDelay",
-        "FwyExtCongDelay",
-        "ArtNoneCongDelay",
-        "ArtModCongDelay",
-        "ArtHvyCongDelay",
-        "ArtSevCongDelay",
-        "ArtExtCongDelay"),
+        "LdvTotDelay",
+        "HvyTrkTotDelay",
+        "BusTotDelay"),
       TABLE = "Marea",
       GROUP = "Year",
       TYPE = "compound",
@@ -1225,16 +1387,21 @@ CalculateRoadPerformanceSpecifications <- list(
       ISELEMENTOF = "",
       SIZE = 0,
       DESCRIPTION = items(
-        "Average freeway delay (hours per mile) occurring when there is no congestion",
-        "Average freeway delay (hours per mile) occurring when congestion is moderate",
-        "Average freeway delay (hours per mile) occurring when congestion is heavy",
-        "Average freeway delay (hours per mile) occurring when congestion is severe",
-        "Average freeway delay (hours per mile) occurring when congestion is extreme",
-        "Average arterial delay (hours per mile) occurring when there is no congestion",
-        "Average arterial delay (hours per mile) occurring when congestion is moderate",
-        "Average arterial delay (hours per mile) occurring when congestion is heavy",
-        "Average arterial delay (hours per mile) occurring when congestion is severe",
-        "Average arterial delay (hours per mile) occurring when congestion is extreme")
+        "Total light-duty vehicle delay (hours per mile) on urban area roads",
+        "Total urban light-duty vehicle delay (hours per mile) on urban area roads",
+        "Total urban light-duty vehicle delay (hours per mile) on urban area roads")
+    ),
+    item(
+      NAME = "AveCongPrice",
+      TABLE = "Marea",
+      GROUP = "Year",
+      TYPE = "currency",
+      UNITS = "USD",
+      NAVALUE = -1,
+      PROHIBIT = "< 0",
+      ISELEMENTOF = "",
+      SIZE = 0,
+      DESCRIPTION = "Average price paid (dollars per mile) in congestion fees"
     ),
     item(
       NAME = items(
@@ -1269,16 +1436,51 @@ CalculateRoadPerformanceSpecifications <- list(
         "Proportion of arterial DVMT occurring when congestion is extreme")
     ),
     item(
-      NAME = "AveCongPrice",
+      NAME = items(
+        "FwyNoneCongSpeed",
+        "FwyModCongSpeed",
+        "FwyHvyCongSpeed",
+        "FwySevCongSpeed",
+        "FwyExtCongSpeed",
+        "ArtNoneCongSpeed",
+        "ArtModCongSpeed",
+        "ArtHvyCongSpeed",
+        "ArtSevCongSpeed",
+        "ArtExtCongSpeed",
+        "OthSpd"),
       TABLE = "Marea",
       GROUP = "Year",
-      TYPE = "currency",
-      UNITS = "USD",
+      TYPE = "compound",
+      UNITS = "MI/HR",
       NAVALUE = -1,
       PROHIBIT = "< 0",
       ISELEMENTOF = "",
       SIZE = 0,
-      DESCRIPTION = "Average price paid (dollars per mile) in congestion fees"
+      DESCRIPTION = items(
+        "Average freeway speed (miles per hour) when there is no congestion",
+        "Average freeway speed (miles per hour) when congestion is moderate",
+        "Average freeway speed (miles per hour) when congestion is heavy",
+        "Average freeway speed (miles per hour) when congestion is severe",
+        "Average freeway speed (miles per hour) when congestion is extreme",
+        "Average arterial speed (miles per hour) when there is no congestion",
+        "Average arterial speed (miles per hour) when congestion is moderate",
+        "Average arterial speed (miles per hour) when congestion is heavy",
+        "Average arterial speed (miles per hour) when congestion is severe",
+        "Average arterial speed (miles per hour) when congestion is extreme",
+        "Average speed (miles per hour) on other roadways",
+        "Average light-duty vehicle speed (miles per hour) on all roadways weighted by the proportions of light-duty vehicle travel")
+    ),
+    item(
+      NAME = "LambdaAdj",
+      TABLE = "Marea",
+      GROUP = "Global",
+      TYPE = "double",
+      UNITS = "constant",
+      NAVALUE = -999,
+      PROHIBIT = "",
+      ISELEMENTOF = "",
+      SIZE = 0,
+      DESCRIPTION = "Constant to adjust the modeled lambda parameter to match base year freeway and arterial LDV proportions"
     )
   )
 )
@@ -1340,17 +1542,37 @@ CalculateRoadPerformance <- function(L) {
   #Define naming vectors for Mareas and congestion levels
   Ma <- L$Year$Marea$Marea
   Cl <- c("None", "Mod", "Hvy", "Sev", "Ext")
+  Vt <- c("Ldv", "HvyTrk", "Bus")
+  Rc <- c("Fwy", "Art", "Oth")
   #Define default speed for other roads (not freeway or arterial)
-  OthSpeed <- 25
+  OthSpeed <- 20
+  #Initialize outputs list
+  Out_ls <- initDataList()
+  Out_ls$Global$Marea <- list()
+  Out_ls$Year$Marea <- list()
+  #Function to remove attributes
+  unattr <- function(X_) {
+    attributes(X_) <- NULL
+    X_
+  }
 
-  #Calculate Lambda value for metropolitan area
-  #--------------------------------------------
+  #Calculate Lambda value for metropolitan areas
+  #---------------------------------------------
+  #Calculate Lambda
   DvmtSplitData_df <- data.frame(
-    LogPop = log(sum(L$Year$Marea$UrbanPop)),
+    LogPop = log1p(sum(L$Year$Marea$UrbanPop)),
     LnMiRatio = L$Year$Marea$FwyLaneMi / L$Year$Marea$ArtLaneMi
   )
   Lambda_Ma <- unname(predict(DvmtSplit_LM, newdata = DvmtSplitData_df))
   names(Lambda_Ma) <- Ma
+  Lambda_Ma[Ma == "None"] <- NA
+  #Load Lambda adjustments if they exist
+  if (!is.null(L$Global$Marea$LambdaAdj)) {
+    LambdaAdj_Ma <- L$Global$Marea$LambdaAdj
+    names(LambdaAdj_Ma) <- Ma
+    #Also save to Out_ls so Set specifications are satisfied
+    Out_ls$Global$Marea$LambdaAdj <- L$Global$Marea$LambdaAdj
+  }
   rm(DvmtSplitData_df)
 
   #Calculate speed and delay by congestion level and metropolitan area
@@ -1436,7 +1658,7 @@ CalculateRoadPerformance <- function(L) {
 
   #Define function to calculate average speed including price adjustments
   #----------------------------------------------------------------------
-  calcAveSpeed <- function(Dvmt_Cl, Speed_Cl, Price_Cl, VOT) {
+  calcAveEqSpeed <- function(Dvmt_Cl, Speed_Cl, Price_Cl, VOT) {
     Dvht <- sum(Dvmt_Cl / Speed_Cl)
     DvhtEq <- sum(Dvmt_Cl * Price_Cl / VOT)
     sum(Dvmt_Cl) / (Dvht + DvhtEq)
@@ -1444,11 +1666,13 @@ CalculateRoadPerformance <- function(L) {
 
   #Define function to split freeway & arterial LDV DVMT
   #----------------------------------------------------
-  splitLdvDvmt <- function(LdvDvmt_, AveFwySpd, AveArtSpd, Lambda) {
-    DvmtRatio <- Lambda * AveFwySpd / AveArtSpd
+  splitLdvDvmt <- function(LdvDvmt_, AveFwySpd, AveArtSpd, Lambda, LambdaAdj) {
+    DvmtRatio <- (Lambda + LambdaAdj) * AveFwySpd / AveArtSpd
     FwyDvmt <- unname(LdvDvmt_["FwyArt"] * DvmtRatio / (1 + DvmtRatio))
     ArtDvmt <- unname(LdvDvmt_["FwyArt"] - FwyDvmt)
-    c(Fwy = FwyDvmt, Art = ArtDvmt, Oth = LdvDvmt_["Oth"])
+    SplitLdvDvmt_ <- c(FwyDvmt, ArtDvmt, LdvDvmt_["Oth"])
+    names(SplitLdvDvmt_) <- c("Fwy", "Art", "Oth")
+    SplitLdvDvmt_
   }
 
   #Define function to balance freeway and arterial DVMT
@@ -1460,124 +1684,275 @@ CalculateRoadPerformance <- function(L) {
     ArtAveSpeed <- 30
     #Iterate to find solution
     for (i in 1:100) {
+      #Split LDV DVMT
       LdvDvmt_Rc <-
-        splitLdvDvmt(LdvDvmt_MaRx[ma,], FwyAveSpeed, ArtAveSpeed, Lambda_Ma[ma])
+        splitLdvDvmt(LdvDvmt_MaRx[ma,], FwyAveSpeed, ArtAveSpeed, Lambda_Ma[ma], LambdaAdj_Ma[ma])
+      #Add heavy truck and bus DVMT to calculate total
       Dvmt_Rc <-
         LdvDvmt_Rc + HvyTrkDvmt_MaRc[ma,] + BusDvmt_MaRc[ma,]
-      FwyDvmt_Cl <-
-        calculateCongestion("DVMT", "Fwy", LaneMi_MaRc[ma,"Fwy"], Dvmt_Rc["Fwy"])
-      FwyAveSpeed <-
-        calcAveSpeed(FwyDvmt_Cl, FwySpeed_MaCl[ma,], FwyPrices_MaCl[ma,], VOT)
-      ArtDvmt_Cl <-
-        calculateCongestion("DVMT", "Art", LaneMi_MaRc[ma,"Art"], Dvmt_Rc["Art"])
-      ArtAveSpeed <-
-        calcAveSpeed(ArtDvmt_Cl, ArtSpeed_MaCl[ma,], ArtPrices_MaCl[ma,], VOT)
-      DvmtRatio <- sum(FwyDvmt_Cl) / sum(ArtDvmt_Cl)
+      #Calculate DVMT ratio, compare to last, and terminate if change is very small
+      DvmtRatio <- Dvmt_Rc["Fwy"] / Dvmt_Rc["Art"]
       if(abs(1 - LastDvmtRatio / DvmtRatio) < 0.0001) break()
       LastDvmtRatio <- DvmtRatio
+      #Split DVMT into congestion levels
+      FwyDvmt_Cl <-
+        calculateCongestion("Fwy", LaneMi_MaRc[ma,"Fwy"], Dvmt_Rc["Fwy"])
+      ArtDvmt_Cl <-
+        calculateCongestion("Art", LaneMi_MaRc[ma,"Art"], Dvmt_Rc["Art"])
+      #Calculate equivalent average speed
+      FwyAveSpeed <-
+        calcAveEqSpeed(FwyDvmt_Cl, FwySpeed_MaCl[ma,], FwyPrices_MaCl[ma,], VOT)
+      ArtAveSpeed <-
+        calcAveEqSpeed(ArtDvmt_Cl, ArtSpeed_MaCl[ma,], ArtPrices_MaCl[ma,], VOT)
     }
-    list(LdvDvmt = LdvDvmt_Rc,
-         FwyDvmt = FwyDvmt_Cl,
-         ArtDvmt = ArtDvmt_Cl)
+    Dvmt_VtRc <- rbind(
+      Ldv = LdvDvmt_Rc,
+      HvyTrk = HvyTrkDvmt_MaRc[ma,],
+      Bus = BusDvmt_MaRc[ma,]
+    )
+    rownames(Dvmt_VtRc) <- c("Ldv", "HvyTrk", "Bus")
+    colnames(Dvmt_VtRc) <- c("Fwy", "Art", "Oth")
+    list(Dvmt_VtRc = Dvmt_VtRc,
+         FwyDvmt_Cl = FwyDvmt_Cl,
+         ArtDvmt_Cl = ArtDvmt_Cl)
   }
 
-  #Iterate through metropolitan areas and perform DVMT balancing
-  #-------------------------------------------------------------
+  #If base year calculate LambdaAdj factor to match input ratio of freeway and
+  #arterial DVMT
+  #---------------------------------------------------------------------------
+  if (L$G$Year == L$G$BaseYear) {
+    #Initialize LambdaAdj
+    LambdaAdj_Ma <- numeric(length(Ma))
+    names(LambdaAdj_Ma) <- Ma
+    LambdaAdj_Ma["None"] <- NA
+    #Calculate input ratio of freeway to arterial DVMT
+    FwyArtTargetRatio_Ma <- with(L$Global$Marea, LdvFwyDvmtProp / LdvArtDvmtProp)
+    names(FwyArtTargetRatio_Ma) <- Ma
+    FwyArtTargetRatio_Ma["None"] <- NA
+    #Define function to find LambdaAdj to match target ratio
+    checkMatchLdvSplit <- function(Adj) {
+      LambdaAdj_Ma[ma] <<- Adj
+      FwyArtResults_ <- balanceFwyArtDvmt(ma)$Dvmt_VtRc["Ldv", 1:2]
+      FwyArtRatio <- FwyArtResults_[1] / FwyArtResults_[2]
+      FwyArtTargetRatio <- FwyArtTargetRatio_Ma[ma]
+      FwyArtRatio - FwyArtTargetRatio
+    }
+    #Use binary search to find LambdaAdj factor for each marea
+    for (ma in Ma[Ma != "None"]) {
+      LambdaAdj_Ma[ma] <-
+        binarySearch(checkMatchLdvSplit, c(-1, 1), DoWtAve = TRUE, Tolerance = 0.01)
+    }
+    #Add to outputs list
+    Out_ls$Global$Marea$LambdaAdj <- unattr(LambdaAdj_Ma)
+  }
+
+  #Run model to balance DVMT between freeways and arterials
+  #--------------------------------------------------------
   BalanceResults_ls <- list()
-  for(ma in Ma) {
+  for (ma in Ma[Ma != "None"]) {
+    #Calculate the balanced DVMT
     BalanceResults_ls[[ma]] <- balanceFwyArtDvmt(ma)
   }
-
-  #Calculate daily average light-duty vehicle speed
-  #------------------------------------------------
-  #Calculate average speed by metropolitan area and road class
-  AveLdvSpd_MaRc <-
-    array(0, dim = c(length(Ma), 3), dimnames = list(Ma, c("Fwy", "Art", "Oth")))
-  for (ma in Ma) {
-    FwySpd_Cl <- SpeedAndDelay_ls[[ma]]$Speed[,"Fwy"]
-    FwyDvmt_Cl <- BalanceResults_ls[[ma]]$FwyDvmt
-    AveLdvSpd_MaRc[ma, "Fwy"] <- sum(FwySpd_Cl * FwyDvmt_Cl / sum(FwyDvmt_Cl))
-    rm(FwySpd_Cl, FwyDvmt_Cl)
-    ArtSpd_Cl <- SpeedAndDelay_ls[[ma]]$Speed[,"Art"]
-    ArtDvmt_Cl <- BalanceResults_ls[[ma]]$ArtDvmt
-    AveLdvSpd_MaRc[ma, "Art"] <- sum(ArtSpd_Cl * ArtDvmt_Cl / sum(ArtDvmt_Cl))
-    rm(ArtSpd_Cl, ArtDvmt_Cl)
-    AveLdvSpd_MaRc[ma, "Oth"] <- OthSpeed
+  if (any(Ma == "None")) {
+    Vt <- c("Ldv", "HvyTrk", "Bus")
+    Cl <- c("None", "Mod", "Hvy", "Sev", "Ext")
+    BalanceResults_ls$None <- list(
+      Dvmt_VtRc = array(0, dim = c(length(Vt), length(Cl)), dimnames = list(Vt,Cl)),
+      FwyDvmt_Cl = setNames(numeric(length(Cl)), Cl),
+      ArtDvmt_Cl = setNames(numeric(length(Cl)), Cl)
+    )
   }
-  #Calculate overall average speed by metropolitan area
-  LdvDvmt_MaRc <-
-    do.call(rbind, lapply(BalanceResults_ls, function(x) x$LdvDvmt))
-  LdvDvmtProp_MaRc <- sweep(LdvDvmt_MaRc, 1, rowSums(LdvDvmt_MaRc), "/")
-  AveLdvSpd_Ma <- rowSums(AveLdvSpd_MaRc * LdvDvmtProp_MaRc)
 
-  #Calculate performance measures
-  #------------------------------
-  Out_ls <- initDataList()
-  Out_ls$Year$Marea <- list()
-  #LDV freeway DVMT and arterial DVMT
-  Out_ls$Year$Marea$LdvFwyDvmt <-
-    unname(unlist(lapply(BalanceResults_ls, function(x) x$LdvDvmt["Fwy"])))
-  Out_ls$Year$Marea$LdvArtDvmt <-
-    unname(unlist(lapply(BalanceResults_ls, function(x) x$LdvDvmt["Art"])))
-  #Average freeway speed by congestion level
-  Data_ls <-
-    as.list(data.frame(
-      do.call(rbind, lapply(SpeedAndDelay_ls, function(x) x$Speed[,"Fwy"]))
-    ))
-  names(Data_ls) <- paste0("Fwy", names(Data_ls), "CongSpeed")
-  Out_ls$Year$Marea <- c(Out_ls$Year$Marea, Data_ls); rm(Data_ls)
-  #Average arterial speed by congestion level
-  Data_ls <-
-    as.list(data.frame(
-      do.call(rbind, lapply(SpeedAndDelay_ls, function(x) x$Speed[,"Art"]))
-    ))
-  names(Data_ls) <- paste0("Art", names(Data_ls), "CongSpeed")
-  Out_ls$Year$Marea <- c(Out_ls$Year$Marea, Data_ls); rm(Data_ls)
-  #Average other road speed
-  Out_ls$Year$Marea$OthSpd <- OthSpeed
-  #Average light-duty vehicle speed
-  Out_ls$Year$Marea$AveLdvSpd <- unname(AveLdvSpd_Ma)
-  #Average freeway delay by congestion level
-  Data_ls <-
-    as.list(data.frame(
-      do.call(rbind, lapply(SpeedAndDelay_ls, function(x) x$Delay[,"Fwy"]))
-    ))
-  names(Data_ls) <- paste0("Fwy", names(Data_ls), "CongDelay")
-  Out_ls$Year$Marea <- c(Out_ls$Year$Marea, Data_ls); rm(Data_ls)
-  #Average arterial delay by congestion level
-  Data_ls <-
-    as.list(data.frame(
-      do.call(rbind, lapply(SpeedAndDelay_ls, function(x) x$Delay[,"Art"]))
-    ))
-  names(Data_ls) <- paste0("Art", names(Data_ls), "CongDelay")
-  Out_ls$Year$Marea <- c(Out_ls$Year$Marea, Data_ls); rm(Data_ls)
-  #Proportion of freeway DVMT by congestion level
+  #Calculate average vehicle speed by metropolitan area and road class
+  #-------------------------------------------------------------------
+  #Define function to calculate average speed
+  calcAveSpd <- function(Dvmt_Cl, Spd_Cl) {
+    sum(Dvmt_Cl * Spd_Cl) / sum(Dvmt_Cl)
+  }
+  #Set up matrix to hold average speed
+  AveSpeed_MaRc <-
+    array(0, dim = c(length(Ma), 3), dimnames = list(Ma, c("Fwy", "Art", "Oth")))
+  #Iterate through mareas and calculate averages
+  for (ma in Ma[Ma != "None"]) {
+    AveSpeed_MaRc[ma, "Fwy"] <- calcAveSpd(
+      Dvmt_Cl = BalanceResults_ls[[ma]]$FwyDvmt_Cl,
+      Spd_Cl = SpeedAndDelay_ls[[ma]]$Speed[,"Fwy"]
+      )
+    AveSpeed_MaRc[ma, "Art"] <- calcAveSpd(
+      Dvmt_Cl = BalanceResults_ls[[ma]]$ArtDvmt_Cl,
+      Spd_Cl = SpeedAndDelay_ls[[ma]]$Speed[,"Art"]
+    )
+    AveSpeed_MaRc[ma, "Oth"] <- OthSpeed
+  }
+  if (any(Ma == "None")) {
+    AveSpeed_MaRc["None",] <- NA
+  }
+
+  #Calculate average vehicle delay by metropolitan area and road class
+  #-------------------------------------------------------------------
+  #Define function to calculate average delay per vehicle mile
+  calcAveDly <- function(Dvmt_Cl, Spd_Cl) {
+    Rate_Cl <- 1 / Spd_Cl
+    Delay_Cl <- Rate_Cl - Rate_Cl[1]
+    sum(Dvmt_Cl * Delay_Cl) / sum(Dvmt_Cl)
+  }
+  #Set up matrix to hold average delay
+  AveDelay_MaRc <-
+    array(0, dim = c(length(Ma), 3), dimnames = list(Ma, c("Fwy", "Art", "Oth")))
+  #Iterate through mareas and calculate averages
+  for (ma in Ma[Ma != "None"]) {
+    AveDelay_MaRc[ma, "Fwy"] <- calcAveDly(
+      Dvmt_Cl = BalanceResults_ls[[ma]]$FwyDvmt_Cl,
+      Spd_Cl = SpeedAndDelay_ls[[ma]]$Speed[,"Fwy"]
+    )
+    AveDelay_MaRc[ma, "Art"] <- calcAveDly(
+      Dvmt_Cl = BalanceResults_ls[[ma]]$ArtDvmt_Cl,
+      Spd_Cl = SpeedAndDelay_ls[[ma]]$Speed[,"Art"]
+    )
+    AveDelay_MaRc[ma, "Oth"] <- 0
+  }
+  if (any(Ma == "None")) {
+    AveDelay_MaRc["None",] <- NA
+  }
+
+  #Calculate average speed and total vehicle delay by marea and vehicle type
+  #-------------------------------------------------------------------------
+  #Initialize average speed array
+  AveSpeed_MaVt <- array(
+    0,
+    dim = c(length(Ma), 3),
+    dimnames = list(Ma, c("Ldv", "HvyTrk", "Bus")))
+  #Initialize vehicle delay array
+  VehDelay_MaVt <- array(
+    0,
+    dim = c(length(Ma), 3),
+    dimnames = list(Ma, c("Ldv", "HvyTrk", "Bus")))
+  #Iterate by marea and calculate average speed and total delay
+  for (ma in Ma[Ma != "None"]) {
+    Dvmt_VtRc <- BalanceResults_ls[[ma]]$Dvmt_VtRc
+    AveSpd_Rc <- AveSpeed_MaRc[ma,]
+    AveSpeed_MaVt[ma,] <-
+      rowSums(sweep(Dvmt_VtRc, 2, AveSpd_Rc, "*")) / rowSums(Dvmt_VtRc)
+    AveDelay_Rc <- AveDelay_MaRc[ma,]
+    VehDelay_MaVt[ma,] <-
+      rowSums(sweep(Dvmt_VtRc, 2, AveDelay_Rc, "*"))
+  }
+  if (any(Ma == "None")) {
+    AveSpeed_MaVt["None",] <- NA
+    VehDelay_MaVt["None",] <- NA
+  }
+
+  #Calculate average vehicle speed for non-urban roads
+  #---------------------------------------------------
+  #Define function to calculate the rural to urban average road speed ratio
+  calcUrbRurHhSpeedRatio <- function() {
+    UHPU_ <- L$Year$Marea$UrbanHhPropUrbanDvmt
+    RHPU_ <- L$Year$Marea$NonUrbanHhPropUrbanDvmt
+    HSR <- UrbanRuralAveSpeed_ls$SpeedRatio
+    setNames((HSR * UHPU_ + RHPU_) / ((1 - RHPU_) - HSR * (1 - UHPU_)), Ma)
+  }
+  #Calculate speed ratio
+  RoadSpeedRatio_Ma <- calcUrbRurHhSpeedRatio()
+  #Calculate non-urban road speeds
+  NonUrbanAveSpeed_Ma <- RoadSpeedRatio_Ma * AveSpeed_MaVt[,"Ldv"]
+  #Constrain average non-urban speed to be in reasonable bounds
+  NonUrbanAveSpeed_Ma[NonUrbanAveSpeed_Ma > 60] <- 60
+  #If any marea is named 'None', assign maximum non-urban speed
+  if (any(Ma == "None")) {
+    MaxSpeed <- max(NonUrbanAveSpeed_Ma, na.rm = TRUE)
+    NonUrbanAveSpeed_Ma["None"] <- MaxSpeed
+    rm(MaxSpeed)
+  }
+
+  #Calculate average congestion cost per mile
+  #------------------------------------------
   FwyDvmt_MaCl <-
-    do.call(rbind, lapply(BalanceResults_ls, function(x) x$FwyDvmt))
-  Data_ls <-
-    as.list(data.frame(sweep(FwyDvmt_MaCl, 1, rowSums(FwyDvmt_MaCl), "/")))
-  names(Data_ls) <- paste0("FwyDvmtProp", names(Data_ls), "Cong")
-  Out_ls$Year$Marea <- c(Out_ls$Year$Marea, Data_ls); rm(Data_ls)
-  #Proportion of arterial DVMT by congestion level
+    do.call(rbind, lapply(BalanceResults_ls, function(x) x$FwyDvmt_Cl))
   ArtDvmt_MaCl <-
-    do.call(rbind, lapply(BalanceResults_ls, function(x) x$ArtDvmt))
-  Data_ls <-
-    as.list(data.frame(sweep(ArtDvmt_MaCl, 1, rowSums(ArtDvmt_MaCl), "/")))
-  names(Data_ls) <- paste0("ArtDvmtProp", names(Data_ls), "Cong")
-  Out_ls$Year$Marea <- c(Out_ls$Year$Marea, Data_ls); rm(Data_ls)
-  #Average congestion cost per mile
+    do.call(rbind, lapply(BalanceResults_ls, function(x) x$ArtDvmt_Cl))
   AveCongPrice_Ma <-
     (rowSums(FwyPrices_MaCl * FwyDvmt_MaCl) + rowSums(ArtPrices_MaCl * ArtDvmt_MaCl)) /
     sum(FwyDvmt_MaCl + ArtDvmt_MaCl)
+
+  #Proportions of freeway and arterial DVMT by congestion level
+  #------------------------------------------------------------
+  #Proportion of freeway DVMT by congestion level
+  FwyDvmt_MaCl <-
+    do.call(rbind, lapply(BalanceResults_ls, function(x) x$FwyDvmt_Cl))
+  FwyDvmtPropByLevel_ls <-
+    as.list(data.frame(sweep(FwyDvmt_MaCl, 1, rowSums(FwyDvmt_MaCl), "/")))
+  names(FwyDvmtPropByLevel_ls) <-
+    paste0("FwyDvmtProp", names(FwyDvmtPropByLevel_ls), "Cong")
+  rm(FwyDvmt_MaCl)
+  #Proportion of arterial DVMT by congestion level
+  ArtDvmt_MaCl <-
+    do.call(rbind, lapply(BalanceResults_ls, function(x) x$ArtDvmt_Cl))
+  ArtDvmtPropByLevel_ls <-
+    as.list(data.frame(sweep(ArtDvmt_MaCl, 1, rowSums(ArtDvmt_MaCl), "/")))
+  names(ArtDvmtPropByLevel_ls) <-
+    paste0("ArtDvmtProp", names(ArtDvmtPropByLevel_ls), "Cong")
+  rm(ArtDvmt_MaCl)
+
+  #Freeway and arterial speeds by congestion level
+  #-----------------------------------------------
+  #Average freeway speed by congestion level
+  FwySpdByLevel_ls <-
+    as.list(data.frame(
+      do.call(rbind, lapply(SpeedAndDelay_ls, function(x) x$Speed[,"Fwy"]))
+    ))
+  names(FwySpdByLevel_ls) <- paste0("Fwy", names(FwySpdByLevel_ls), "CongSpeed")
+  #Average arterial speed by congestion level
+  ArtSpdByLevel_ls <-
+    as.list(data.frame(
+      do.call(rbind, lapply(SpeedAndDelay_ls, function(x) x$Speed[,"Art"]))
+    ))
+  names(ArtSpdByLevel_ls) <- paste0("Art", names(ArtSpdByLevel_ls), "CongSpeed")
+
+  #Save performance measures
+  #-------------------------
+  #LDV DVMT by road class
+  Out_ls$Year$Marea$LdvFwyDvmt <-
+    unattr(unlist(lapply(BalanceResults_ls, function(x) x$Dvmt_VtRc["Ldv", "Fwy"])))
+  Out_ls$Year$Marea$LdvArtDvmt <-
+    unname(unlist(lapply(BalanceResults_ls, function(x) x$Dvmt_VtRc["Ldv", "Art"])))
+  #Average speed by vehicle type
+  Out_ls$Year$Marea$LdvAveSpeed <- AveSpeed_MaVt[,"Ldv"]
+  Out_ls$Year$Marea$HvyTrkAveSpeed <- AveSpeed_MaVt[,"HvyTrk"]
+  Out_ls$Year$Marea$BusAveSpeed <- AveSpeed_MaVt[,"Bus"]
+  #Average non-urban speed
+  Out_ls$Year$Marea$NonUrbanAveSpeed <- NonUrbanAveSpeed_Ma
+  #Total freeway delay by vehicle type
+  Out_ls$Year$Marea$LdvTotDelay <- VehDelay_MaVt[,"Ldv"]
+  Out_ls$Year$Marea$HvyTrkTotDelay <- VehDelay_MaVt[,"HvyTrk"]
+  Out_ls$Year$Marea$BusTotDelay <- VehDelay_MaVt[,"Bus"]
+  #Average congestion cost per mile
   Out_ls$Year$Marea$AveCongPrice <- AveCongPrice_Ma
+  #Add list of freeway DVMT proportions by congestion level
+  Out_ls$Year$Marea <-
+    c(Out_ls$Year$Marea, FwyDvmtPropByLevel_ls); rm(FwyDvmtPropByLevel_ls)
+  #Add list of arterial DVMT proportions by congestion level
+  Out_ls$Year$Marea <-
+    c(Out_ls$Year$Marea, ArtDvmtPropByLevel_ls); rm(ArtDvmtPropByLevel_ls)
+  #Add list of speed by freeway congestion level
+  Out_ls$Year$Marea <-
+    c(Out_ls$Year$Marea, FwySpdByLevel_ls); rm(FwySpdByLevel_ls)
+  #Add list of speed by arterial congestion level
+  Out_ls$Year$Marea <-
+    c(Out_ls$Year$Marea, ArtSpdByLevel_ls); rm(ArtSpdByLevel_ls)
+  #Average other road speed
+  Out_ls$Year$Marea$OthSpd <- OthSpeed
   #Return the result
   Out_ls
 }
 
 
-#================================
-#Code to aid development and test
-#================================
+#===============================================================
+#SECTION 4: MODULE DOCUMENTATION AND AUXILLIARY DEVELOPMENT CODE
+#===============================================================
+#Run module automatic documentation
+#----------------------------------
+documentModule("CalculateRoadPerformance")
+
 #Test code to check specifications, loading inputs, and whether datastore
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions
@@ -1602,5 +1977,10 @@ CalculateRoadPerformance <- function(L) {
 #   DoRun = TRUE,
 #   RunFor = "BaseYear"
 # )
-
-
+# TestDat_ <- testModule(
+#   ModuleName = "CalculateRoadPerformance",
+#   LoadDatastore = TRUE,
+#   SaveDatastore = TRUE,
+#   DoRun = TRUE,
+#   RunFor = "NotBaseYear"
+# )
