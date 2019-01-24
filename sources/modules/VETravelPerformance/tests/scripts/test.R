@@ -27,20 +27,20 @@ testModule(
   DoRun = TRUE
 )
 
-#Test CalculateBaseRoadDvmt module
-source("R/CalculateBaseRoadDvmt.R")
+#Test CalculateRoadDvmt module
+source("R/CalculateRoadDvmt.R")
 TestDat_ <- testModule(
-  ModuleName = "CalculateBaseRoadDvmt",
+  ModuleName = "CalculateRoadDvmt",
   LoadDatastore = TRUE,
   SaveDatastore = TRUE,
   DoRun = TRUE,
   RunFor = "BaseYear"
 )
 
-#Test CalculateFutureRoadDvmt module
-source("R/CalculateFutureRoadDvmt.R")
+#Test CalculateRoadDvmt module
+source("R/CalculateRoadDvmt.R")
 TestDat_ <- testModule(
-  ModuleName = "CalculateFutureRoadDvmt",
+  ModuleName = "CalculateRoadDvmt",
   LoadDatastore = TRUE,
   SaveDatastore = TRUE,
   DoRun = TRUE,
@@ -54,7 +54,17 @@ TestDat_ <- testModule(
   LoadDatastore = TRUE,
   SaveDatastore = TRUE,
   DoRun = TRUE,
-  RunFor = "AllYears"
+  RunFor = "BaseYear"
+)
+
+#Test CalculateRoadPerformance module
+source("R/CalculateRoadPerformance.R")
+TestDat_ <- testModule(
+  ModuleName = "CalculateRoadPerformance",
+  LoadDatastore = TRUE,
+  SaveDatastore = TRUE,
+  DoRun = TRUE,
+  RunFor = "NotBaseYear"
 )
 
 #Test CalculateMpgMpkwhAdjustments module
@@ -74,7 +84,17 @@ TestDat_ <- testModule(
   LoadDatastore = TRUE,
   SaveDatastore = TRUE,
   DoRun = TRUE,
-  RunFor = "AllYears"
+  RunFor = "BaseYear"
+)
+
+#Test AdjustHhVehicleMpgMpkwh module
+source("R/AdjustHhVehicleMpgMpkwh.R")
+TestDat_ <- testModule(
+  ModuleName = "AdjustHhVehicleMpgMpkwh",
+  LoadDatastore = TRUE,
+  SaveDatastore = TRUE,
+  DoRun = TRUE,
+  RunFor = "NotBaseYear"
 )
 
 #Test CalculateVehicleOperatingCost module
@@ -90,6 +110,15 @@ testModule(
 source("R/BudgetHouseholdDvmt.R")
 testModule(
   ModuleName = "BudgetHouseholdDvmt",
+  LoadDatastore = TRUE,
+  SaveDatastore = TRUE,
+  DoRun = TRUE
+)
+
+#Test BalanceRoadCostsAndRevenues module
+source("R/BalanceRoadCostsAndRevenues.R")
+testModule(
+  ModuleName = "BalanceRoadCostsAndRevenues",
   LoadDatastore = TRUE,
   SaveDatastore = TRUE,
   DoRun = TRUE
