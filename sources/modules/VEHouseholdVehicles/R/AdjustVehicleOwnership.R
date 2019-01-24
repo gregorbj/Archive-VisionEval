@@ -226,7 +226,7 @@ AdjustVehicleOwnershipSpecifications <- list(
       TABLE = "Vehicle",
       GROUP = "Year",
       TYPE = "currency",
-      UNITS = "USD.2017",
+      UNITS = "USD",
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
@@ -238,7 +238,7 @@ AdjustVehicleOwnershipSpecifications <- list(
       TABLE = "Vehicle",
       GROUP = "Year",
       TYPE = "currency",
-      UNITS = "USD.2017",
+      UNITS = "USD",
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
@@ -400,6 +400,7 @@ AdjustVehicleOwnership <- function(L) {
   Out_ls$Year$Vehicle$VehicleAccess[DoChange] <- "HighCarSvc"
   Out_ls$Year$Vehicle$OwnCost[DoChange] <- 0
   Out_ls$Year$Vehicle$OwnCostPerMile[DoChange] <- 0
+  Out_ls$Year$Vehicle$InsCost[DoChange] <- 0
   Out_ls$Year$Vehicle$SwitchToCarSvc <- as.integer(DoChange)
 
   #Tabulate household values to reflect changes
