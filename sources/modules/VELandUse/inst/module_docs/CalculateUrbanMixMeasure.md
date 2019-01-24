@@ -25,7 +25,7 @@ Coefficients:
 LocalPopDensity  2.522e-04  2.753e-06  91.618  < 2e-16 ***
 IsSF            -1.929e-01  4.074e-02  -4.734  2.2e-06 ***
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
 (Dispersion parameter for binomial family taken to be 1)
 

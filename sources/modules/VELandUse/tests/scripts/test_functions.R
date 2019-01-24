@@ -77,7 +77,8 @@ saveTestResults <- function(TestSetup_ls) {
     #Copy the datastore
     file.copy(
       file.path("tests", DatastoreName),
-      file.path(TestDataRepo, DatastoreName)
+      file.path(TestDataRepo, DatastoreName),
+      overwrite = TRUE
     )
     file.remove(file.path("tests", DatastoreName))
     #Remove the defs directory
@@ -87,7 +88,8 @@ saveTestResults <- function(TestSetup_ls) {
     #Move the model state file to the test documentation directory
     file.copy(
       file.path("tests", "ModelState.Rda"),
-      file.path("tests", TestDocsDir, "ModelState.Rda"))
+      file.path("tests", TestDocsDir, "ModelState.Rda"),
+      overwrite = TRUE)
     file.remove(file.path("tests", "ModelState.Rda"))
   })
 }
