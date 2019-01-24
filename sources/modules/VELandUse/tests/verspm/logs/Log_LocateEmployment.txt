@@ -1,32 +1,32 @@
 Test
 Test of VESimHouseholds package modules
-2019-01-24_09:39:50
+2019-01-24_11:20:46
 
-2019-01-24 09:39:50 : Testing LocateEmployment. 
+2019-01-24 11:20:46 : Testing LocateEmployment. 
 
-2019-01-24 09:39:50 : Attempting to load datastore. 
+2019-01-24 11:20:46 : Attempting to load datastore. 
 
-2019-01-24 09:39:51 : Datastore loaded. 
+2019-01-24 11:20:46 : Datastore loaded. 
 
-2019-01-24 09:39:51 : Attempting to load and check specifications. 
+2019-01-24 11:20:46 : Attempting to load and check specifications. 
 
-2019-01-24 09:39:51 : Module specifications successfully loaded and checked for errors. 
+2019-01-24 11:20:46 : Module specifications successfully loaded and checked for errors. 
 
-2019-01-24 09:39:51 : Attempting to process, check and load module inputs. 
+2019-01-24 11:20:46 : Attempting to process, check and load module inputs. 
 
-2019-01-24 09:39:51 : Module inputs successfully checked and loaded into datastore. 
+2019-01-24 11:20:48 : Module inputs successfully checked and loaded into datastore. 
 
-2019-01-24 09:39:53 : Checking whether datastore contains all datasets in Get specifications. 
+2019-01-24 11:20:48 : Checking whether datastore contains all datasets in Get specifications. 
 
-2019-01-24 09:39:53 : Datastore contains all datasets identified in module Get specifications. 
+2019-01-24 11:20:48 : Datastore contains all datasets identified in module Get specifications. 
 
-2019-01-24 09:39:53 : Running module and checking whether outputs meet Set specifications. 
+2019-01-24 11:20:48 : Running module and checking whether outputs meet Set specifications. 
 
-2019-01-24 09:39:53 : Also saving module outputs to datastore. 
+2019-01-24 11:20:48 : Also saving module outputs to datastore. 
 
-2019-01-24 09:40:00 : Module run successfully and outputs meet Set specifications. 
+2019-01-24 11:20:59 : Module run successfully and outputs meet Set specifications. 
 
-2019-01-24 09:40:00 : Module outputs saved to datastore. 
+2019-01-24 11:21:00 : Module outputs saved to datastore. 
 
-2019-01-24 09:40:00 : Congratulations. Module LocateEmployment passed all tests. 
+2019-01-24 11:21:00 : Congratulations. Module LocateEmployment passed all tests. 
 

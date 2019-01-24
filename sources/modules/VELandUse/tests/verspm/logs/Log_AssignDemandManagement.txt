@@ -1,32 +1,32 @@
 Test
 Test of VESimHouseholds package modules
-2019-01-24_09:40:33
+2019-01-24_11:21:36
 
-2019-01-24 09:40:34 : Testing AssignDemandManagement. 
+2019-01-24 11:21:37 : Testing AssignDemandManagement. 
 
-2019-01-24 09:40:35 : Attempting to load datastore. 
+2019-01-24 11:21:37 : Attempting to load datastore. 
 
-2019-01-24 09:40:35 : Datastore loaded. 
+2019-01-24 11:21:38 : Datastore loaded. 
 
-2019-01-24 09:40:35 : Attempting to load and check specifications. 
+2019-01-24 11:21:38 : Attempting to load and check specifications. 
 
-2019-01-24 09:40:35 : Module specifications successfully loaded and checked for errors. 
+2019-01-24 11:21:38 : Module specifications successfully loaded and checked for errors. 
 
-2019-01-24 09:40:35 : Attempting to process, check and load module inputs. 
+2019-01-24 11:21:38 : Attempting to process, check and load module inputs. 
 
-2019-01-24 09:40:35 : Module inputs successfully checked and loaded into datastore. 
+2019-01-24 11:21:39 : Module inputs successfully checked and loaded into datastore. 
 
-2019-01-24 09:40:35 : Checking whether datastore contains all datasets in Get specifications. 
+2019-01-24 11:21:40 : Checking whether datastore contains all datasets in Get specifications. 
 
-2019-01-24 09:40:35 : Datastore contains all datasets identified in module Get specifications. 
+2019-01-24 11:21:40 : Datastore contains all datasets identified in module Get specifications. 
 
-2019-01-24 09:40:35 : Running module and checking whether outputs meet Set specifications. 
+2019-01-24 11:21:40 : Running module and checking whether outputs meet Set specifications. 
 
-2019-01-24 09:40:35 : Also saving module outputs to datastore. 
+2019-01-24 11:21:40 : Also saving module outputs to datastore. 
 
-2019-01-24 09:40:51 : Module run successfully and outputs meet Set specifications. 
+2019-01-24 11:21:53 : Module run successfully and outputs meet Set specifications. 
 
-2019-01-24 09:40:51 : Module outputs saved to datastore. 
+2019-01-24 11:21:53 : Module outputs saved to datastore. 
 
-2019-01-24 09:40:51 : Congratulations. Module AssignDemandManagement passed all tests. 
+2019-01-24 11:21:53 : Congratulations. Module AssignDemandManagement passed all tests. 
 
