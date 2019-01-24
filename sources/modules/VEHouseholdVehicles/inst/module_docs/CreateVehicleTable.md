@@ -31,15 +31,15 @@ UNLIKELY - Values that are unlikely. Values that meet any of the listed conditio
 DESCRIPTION - A description of the data.
 
 ### azone_carsvc_characteristics.csv
-|NAME                |TYPE     |UNITS      |PROHIBIT     |ISELEMENTOF |UNLIKELY |DESCRIPTION                                                                                                             |
-|:-------------------|:--------|:----------|:------------|:-----------|:--------|:-----------------------------------------------------------------------------------------------------------------------|
-|Geo                 |         |           |             |Azones      |         |Must contain a record for each Azone and model run year.                                                                |
-|Year                |         |           |             |            |         |Must contain a record for each Azone and model run year.                                                                |
-|HighCarSvcCost      |currency |USD        |NA, < 0      |            |         |Average cost in dollars per mile for travel by high service level car service                                           |
-|LowCarSvcCost       |currency |USD        |NA, < 0      |            |         |Average cost in dollars per mile for travel by low service level car service                                            |
-|AveCarSvcVehicleAge |time     |YR         |NA, < 0      |            |         |Average age of car service vehicles in years                                                                            |
-|LtTrkCarSvcSubProp  |double   |proportion |NA, < 0, > 1 |            |         |The proportion of light-truck owners who would substitute a less-costly car service option for owning their light truck |
-|AutoCarSvcSubProp   |double   |proportion |NA, < 0, > 1 |            |         |Th proportion of automobile owners who would substitute a less-costly car service option for owning their automobile    |
+|NAME                |TYPE     |UNITS      |PROHIBIT     |ISELEMENTOF |UNLIKELY |DESCRIPTION                                                                                                                                                                                        |
+|:-------------------|:--------|:----------|:------------|:-----------|:--------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|Geo                 |         |           |             |Azones      |         |Must contain a record for each Azone and model run year.                                                                                                                                           |
+|Year                |         |           |             |            |         |Must contain a record for each Azone and model run year.                                                                                                                                           |
+|HighCarSvcCost      |currency |USD        |NA, < 0      |            |         |Average cost in dollars per mile for travel by high service level car service exclusive of the cost of fuel, road use taxes, and carbon taxes (and any other social costs charged to vehicle use). |
+|LowCarSvcCost       |currency |USD        |NA, < 0      |            |         |Average cost in dollars per mile for travel by low service level car service exclusive of the cost of fuel, road use taxes, and carbon taxes (and any other social costs charged to vehicle use).  |
+|AveCarSvcVehicleAge |time     |YR         |NA, < 0      |            |         |Average age of car service vehicles in years                                                                                                                                                       |
+|LtTrkCarSvcSubProp  |double   |proportion |NA, < 0, > 1 |            |         |The proportion of light-truck owners who would substitute a less-costly car service option for owning their light truck                                                                            |
+|AutoCarSvcSubProp   |double   |proportion |NA, < 0, > 1 |            |         |Th proportion of automobile owners who would substitute a less-costly car service option for owning their automobile                                                                               |
 
 ## Datasets Used by the Module
 The following table documents each dataset that is retrieved from the datastore and used by the module. Each row in the table describes a dataset. All the datasets must be present in the datastore. One or more of these datasets may be entered into the datastore from the user input files. The table names and their meanings are as follows:
