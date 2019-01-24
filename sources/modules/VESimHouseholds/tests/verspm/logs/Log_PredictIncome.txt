@@ -1,32 +1,32 @@
 Test
 Test of VESimHouseholds package modules
-2019-01-23_21:54:13
+2019-01-24_11:07:39
 
-2019-01-23 21:54:14 : Testing PredictIncome. 
+2019-01-24 11:07:40 : Testing PredictIncome. 
 
-2019-01-23 21:54:14 : Attempting to load datastore. 
+2019-01-24 11:07:40 : Attempting to load datastore. 
 
-2019-01-23 21:54:14 : Datastore loaded. 
+2019-01-24 11:07:40 : Datastore loaded. 
 
-2019-01-23 21:54:14 : Attempting to load and check specifications. 
+2019-01-24 11:07:40 : Attempting to load and check specifications. 
 
-2019-01-23 21:54:14 : Module specifications successfully loaded and checked for errors. 
+2019-01-24 11:07:40 : Module specifications successfully loaded and checked for errors. 
 
-2019-01-23 21:54:14 : Attempting to process, check and load module inputs. 
+2019-01-24 11:07:41 : Attempting to process, check and load module inputs. 
 
-2019-01-23 21:54:15 : Module inputs successfully checked and loaded into datastore. 
+2019-01-24 11:07:41 : Module inputs successfully checked and loaded into datastore. 
 
-2019-01-23 21:54:15 : Checking whether datastore contains all datasets in Get specifications. 
+2019-01-24 11:07:42 : Checking whether datastore contains all datasets in Get specifications. 
 
-2019-01-23 21:54:15 : Datastore contains all datasets identified in module Get specifications. 
+2019-01-24 11:07:42 : Datastore contains all datasets identified in module Get specifications. 
 
-2019-01-23 21:54:15 : Running module and checking whether outputs meet Set specifications. 
+2019-01-24 11:07:42 : Running module and checking whether outputs meet Set specifications. 
 
-2019-01-23 21:54:15 : Also saving module outputs to datastore. 
+2019-01-24 11:07:42 : Also saving module outputs to datastore. 
 
-2019-01-23 21:54:26 : Module run successfully and outputs meet Set specifications. 
+2019-01-24 11:07:52 : Module run successfully and outputs meet Set specifications. 
 
-2019-01-23 21:54:26 : Module outputs saved to datastore. 
+2019-01-24 11:07:52 : Module outputs saved to datastore. 
 
-2019-01-23 21:54:26 : Congratulations. Module PredictIncome passed all tests. 
+2019-01-24 11:07:52 : Congratulations. Module PredictIncome passed all tests. 
 
