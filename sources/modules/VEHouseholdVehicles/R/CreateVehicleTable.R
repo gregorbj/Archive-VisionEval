@@ -80,8 +80,8 @@ CreateVehicleTableSpecifications <- list(
       TOTAL = "",
       DESCRIPTION =
         items(
-          "Average cost in dollars per mile for travel by high service level car service",
-          "Average cost in dollars per mile for travel by low service level car service"
+          "Average cost in dollars per mile for travel by high service level car service exclusive of the cost of fuel, road use taxes, and carbon taxes (and any other social costs charged to vehicle use).",
+          "Average cost in dollars per mile for travel by low service level car service exclusive of the cost of fuel, road use taxes, and carbon taxes (and any other social costs charged to vehicle use)."
         )
     ),
     item(
