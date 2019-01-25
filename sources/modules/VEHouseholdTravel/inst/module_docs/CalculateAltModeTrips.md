@@ -14,40 +14,41 @@ Following are the estimation statistics for the metropolitan and nonmetropolitan
 ```
 
 Call:
-hurdle(formula = ModelFormula, data = Data_df, dist = "poisson", zero.dist = "binomial", link = "logit")
+hurdle(formula = ModelFormula, data = Data_df, dist = "poisson", zero.dist = "binomial", 
+    link = "logit")
 
 Pearson residuals:
     Min      1Q  Median      3Q     Max 
--4.7367 -1.3363 -0.5986  0.5860 32.2104 
+-4.7371 -1.3363 -0.5990  0.5861 32.2158 
 
 Count model coefficients (truncated poisson with log link):
                Estimate Std. Error z value Pr(>|z|)    
-(Intercept)   4.585e+00  6.697e-03  684.66   <2e-16 ***
-HhSize        3.170e-01  8.368e-04  378.81   <2e-16 ***
-LogIncome     1.418e-01  6.560e-04  216.12   <2e-16 ***
-LogDensity   -3.869e-03  3.343e-04  -11.57   <2e-16 ***
-BusEqRevMiPC  1.630e-03  1.302e-05  125.24   <2e-16 ***
-Urban         4.587e-02  6.120e-04   74.95   <2e-16 ***
-LogDvmt      -2.185e-01  7.168e-04 -304.81   <2e-16 ***
-Age0to14     -3.255e-01  9.078e-04 -358.59   <2e-16 ***
-Age15to19    -8.739e-02  1.099e-03  -79.54   <2e-16 ***
-Age20to29     4.688e-02  9.317e-04   50.32   <2e-16 ***
-Age30to54     2.090e-02  7.154e-04   29.21   <2e-16 ***
-Age65Plus    -3.497e-02  8.485e-04  -41.22   <2e-16 ***
+(Intercept)   4.588e+00  6.696e-03  685.11   <2e-16 ***
+HhSize        3.171e-01  8.369e-04  378.91   <2e-16 ***
+LogIncome     1.415e-01  6.555e-04  215.92   <2e-16 ***
+LogDensity   -3.833e-03  3.342e-04  -11.47   <2e-16 ***
+BusEqRevMiPC  1.631e-03  1.302e-05  125.26   <2e-16 ***
+Urban         4.590e-02  6.120e-04   75.00   <2e-16 ***
+LogDvmt      -2.185e-01  7.168e-04 -304.83   <2e-16 ***
+Age0to14     -3.257e-01  9.079e-04 -358.72   <2e-16 ***
+Age15to19    -8.747e-02  1.099e-03  -79.61   <2e-16 ***
+Age20to29     4.689e-02  9.317e-04   50.33   <2e-16 ***
+Age30to54     2.092e-02  7.154e-04   29.25   <2e-16 ***
+Age65Plus    -3.505e-02  8.485e-04  -41.31   <2e-16 ***
 Zero hurdle model coefficients (binomial with logit link):
                Estimate Std. Error z value Pr(>|z|)    
-(Intercept)  -2.2808539  0.2614330  -8.724  < 2e-16 ***
-HhSize        0.4591285  0.0385284  11.917  < 2e-16 ***
-LogIncome     0.2793840  0.0260069  10.743  < 2e-16 ***
-LogDensity    0.0234677  0.0137759   1.704 0.088468 .  
-BusEqRevMiPC -0.0038119  0.0005494  -6.939 3.96e-12 ***
-Urban         0.0644799  0.0260829   2.472 0.013432 *  
-LogDvmt      -0.2548614  0.0313175  -8.138 4.02e-16 ***
-Age0to14     -0.3713936  0.0422588  -8.789  < 2e-16 ***
-Age15to19    -0.1960898  0.0555811  -3.528 0.000419 ***
-Age20to29     0.0929566  0.0428979   2.167 0.030241 *  
-Age30to54     0.0648686  0.0309899   2.093 0.036330 *  
-Age65Plus    -0.0371939  0.0344140  -1.081 0.279796    
+(Intercept)  -2.2779413  0.2614086  -8.714  < 2e-16 ***
+HhSize        0.4593084  0.0385357  11.919  < 2e-16 ***
+LogIncome     0.2791104  0.0259858  10.741  < 2e-16 ***
+LogDensity    0.0235111  0.0137732   1.707 0.087819 .  
+BusEqRevMiPC -0.0038115  0.0005494  -6.938 3.97e-12 ***
+Urban         0.0645189  0.0260824   2.474 0.013374 *  
+LogDvmt      -0.2549406  0.0313245  -8.139 4.00e-16 ***
+Age0to14     -0.3716023  0.0422642  -8.792  < 2e-16 ***
+Age15to19    -0.1962102  0.0555833  -3.530 0.000416 ***
+Age20to29     0.0929556  0.0428980   2.167 0.030243 *  
+Age30to54     0.0648959  0.0309900   2.094 0.036252 *  
+Age65Plus    -0.0372965  0.0344150  -1.084 0.278485    
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 
@@ -59,36 +60,37 @@ Log-likelihood: -2.475e+06 on 24 Df
 ```
 
 Call:
-hurdle(formula = ModelFormula, data = Data_df, dist = "poisson", zero.dist = "binomial", link = "logit")
+hurdle(formula = ModelFormula, data = Data_df, dist = "poisson", zero.dist = "binomial", 
+    link = "logit")
 
 Pearson residuals:
     Min      1Q  Median      3Q     Max 
--2.9715 -1.2631 -0.5842  0.5359 34.5806 
+-2.9713 -1.2632 -0.5842  0.5359 34.5830 
 
 Count model coefficients (truncated poisson with log link):
               Estimate Std. Error z value Pr(>|z|)    
-(Intercept)  6.1534979  0.0044802 1373.49   <2e-16 ***
-HhSize       0.3302864  0.0006748  489.43   <2e-16 ***
-LogIncome   -0.0238715  0.0005583  -42.76   <2e-16 ***
-LogDensity  -0.0377021  0.0001842 -204.72   <2e-16 ***
-LogDvmt     -0.0412615  0.0010322  -39.98   <2e-16 ***
-Age0to14    -0.3605440  0.0007033 -512.62   <2e-16 ***
-Age15to19   -0.1465187  0.0008401 -174.40   <2e-16 ***
-Age20to29    0.0241497  0.0006777   35.63   <2e-16 ***
-Age30to54   -0.0190265  0.0005360  -35.49   <2e-16 ***
-Age65Plus   -0.0301556  0.0006138  -49.13   <2e-16 ***
+(Intercept)  6.1532306  0.0044801 1373.45   <2e-16 ***
+HhSize       0.3303627  0.0006746  489.73   <2e-16 ***
+LogIncome   -0.0237249  0.0005589  -42.45   <2e-16 ***
+LogDensity  -0.0377267  0.0001842 -204.84   <2e-16 ***
+LogDvmt     -0.0415813  0.0010322  -40.28   <2e-16 ***
+Age0to14    -0.3605891  0.0007032 -512.75   <2e-16 ***
+Age15to19   -0.1465507  0.0008401 -174.44   <2e-16 ***
+Age20to29    0.0241620  0.0006777   35.66   <2e-16 ***
+Age30to54   -0.0190170  0.0005360  -35.48   <2e-16 ***
+Age65Plus   -0.0301726  0.0006138  -49.16   <2e-16 ***
 Zero hurdle model coefficients (binomial with logit link):
              Estimate Std. Error z value Pr(>|z|)    
-(Intercept) -0.498975   0.159757  -3.123  0.00179 ** 
-HhSize       0.145039   0.029153   4.975 6.52e-07 ***
-LogIncome    0.058052   0.019800   2.932  0.00337 ** 
-LogDensity  -0.034518   0.006875  -5.021 5.15e-07 ***
-LogDvmt      0.117852   0.036078   3.267  0.00109 ** 
-Age0to14    -0.190518   0.030043  -6.341 2.28e-10 ***
-Age15to19    0.021231   0.038480   0.552  0.58113    
-Age20to29    0.092786   0.028744   3.228  0.00125 ** 
-Age30to54    0.064043   0.021310   3.005  0.00265 ** 
-Age65Plus   -0.049879   0.023212  -2.149  0.03165 *  
+(Intercept) -0.498134   0.159756  -3.118  0.00182 ** 
+HhSize       0.145154   0.029143   4.981 6.33e-07 ***
+LogIncome    0.057989   0.019818   2.926  0.00343 ** 
+LogDensity  -0.034523   0.006875  -5.021 5.14e-07 ***
+LogDvmt      0.117713   0.036068   3.264  0.00110 ** 
+Age0to14    -0.190582   0.030040  -6.344 2.23e-10 ***
+Age15to19    0.021192   0.038479   0.551  0.58181    
+Age20to29    0.092809   0.028744   3.229  0.00124 ** 
+Age30to54    0.064060   0.021310   3.006  0.00265 ** 
+Age65Plus   -0.049916   0.023211  -2.151  0.03151 *  
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 
@@ -102,40 +104,41 @@ Following are the estimation statistics for the metropolitan and nonmetropolitan
 ```
 
 Call:
-hurdle(formula = ModelFormula, data = Data_df, dist = "poisson", zero.dist = "binomial", link = "logit")
+hurdle(formula = ModelFormula, data = Data_df, dist = "poisson", zero.dist = "binomial", 
+    link = "logit")
 
 Pearson residuals:
     Min      1Q  Median      3Q     Max 
--1.2354 -0.3524 -0.2790 -0.2282 34.1275 
+-1.2353 -0.3524 -0.2790 -0.2282 34.1261 
 
 Count model coefficients (truncated poisson with log link):
                Estimate Std. Error z value Pr(>|z|)    
-(Intercept)   6.3288634  0.0247435  255.78   <2e-16 ***
-HhSize        0.1105041  0.0042707   25.88   <2e-16 ***
-LogIncome    -0.0673396  0.0029046  -23.18   <2e-16 ***
-BusEqRevMiPC -0.0022409  0.0000602  -37.23   <2e-16 ***
-LogDvmt      -0.1698886  0.0033274  -51.06   <2e-16 ***
-Age0to14     -0.1937229  0.0044800  -43.24   <2e-16 ***
-Age15to19    -0.1356508  0.0052912  -25.64   <2e-16 ***
-Age20to29     0.0788369  0.0044253   17.82   <2e-16 ***
-Age30to54     0.0788564  0.0036175   21.80   <2e-16 ***
-Age65Plus     0.0491844  0.0043173   11.39   <2e-16 ***
+(Intercept)   6.331e+00  2.473e-02  256.02   <2e-16 ***
+HhSize        1.107e-01  4.271e-03   25.91   <2e-16 ***
+LogIncome    -6.748e-02  2.902e-03  -23.25   <2e-16 ***
+BusEqRevMiPC -2.242e-03  6.019e-05  -37.25   <2e-16 ***
+LogDvmt      -1.700e-01  3.328e-03  -51.09   <2e-16 ***
+Age0to14     -1.938e-01  4.480e-03  -43.26   <2e-16 ***
+Age15to19    -1.358e-01  5.291e-03  -25.66   <2e-16 ***
+Age20to29     7.882e-02  4.425e-03   17.81   <2e-16 ***
+Age30to54     7.899e-02  3.618e-03   21.84   <2e-16 ***
+Age65Plus     4.914e-02  4.317e-03   11.38   <2e-16 ***
 Zero hurdle model coefficients (binomial with logit link):
-              Estimate Std. Error z value Pr(>|z|)    
-(Intercept)  -4.771690   0.380279 -12.548  < 2e-16 ***
-HhSize        0.165883   0.058039   2.858 0.004261 ** 
-LogIncome     0.200624   0.043176   4.647 3.37e-06 ***
-BusEqRevMiPC -0.006160   0.000865  -7.121 1.07e-12 ***
-LogDvmt      -0.039985   0.049547  -0.807 0.419668    
-Age0to14      0.045224   0.059949   0.754 0.450626    
-Age15to19     0.207172   0.071721   2.889 0.003870 ** 
-Age20to29     0.230137   0.061426   3.747 0.000179 ***
-Age30to54     0.171295   0.048319   3.545 0.000392 ***
-Age65Plus    -0.075626   0.061371  -1.232 0.217847    
+               Estimate Std. Error z value Pr(>|z|)    
+(Intercept)  -4.7708824  0.3800941 -12.552  < 2e-16 ***
+HhSize        0.1658531  0.0580476   2.857 0.004274 ** 
+LogIncome     0.2005139  0.0431463   4.647 3.36e-06 ***
+BusEqRevMiPC -0.0061589  0.0008649  -7.121 1.07e-12 ***
+LogDvmt      -0.0398563  0.0495602  -0.804 0.421282    
+Age0to14      0.0452307  0.0599560   0.754 0.450610    
+Age15to19     0.2071859  0.0717232   2.889 0.003869 ** 
+Age20to29     0.2301406  0.0614262   3.747 0.000179 ***
+Age30to54     0.1712962  0.0483193   3.545 0.000392 ***
+Age65Plus    -0.0756264  0.0613725  -1.232 0.217855    
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 
-Number of iterations in BFGS optimization: 39 
+Number of iterations in BFGS optimization: 36 
 Log-likelihood: -1.193e+05 on 20 Df
 ```
 
@@ -143,34 +146,35 @@ Log-likelihood: -1.193e+05 on 20 Df
 ```
 
 Call:
-hurdle(formula = ModelFormula, data = Data_df, dist = "poisson", zero.dist = "binomial", link = "logit")
+hurdle(formula = ModelFormula, data = Data_df, dist = "poisson", zero.dist = "binomial", 
+    link = "logit")
 
 Pearson residuals:
     Min      1Q  Median      3Q     Max 
--2.4412 -0.3567 -0.2792 -0.2273 57.2796 
+-2.4413 -0.3567 -0.2792 -0.2273 57.2813 
 
 Count model coefficients (truncated poisson with log link):
              Estimate Std. Error z value Pr(>|z|)    
-(Intercept)  5.892971   0.017446  337.79   <2e-16 ***
-HhSize       0.242485   0.002576   94.14   <2e-16 ***
-LogIncome    0.033144   0.002124   15.60   <2e-16 ***
-LogDvmt     -0.386672   0.003249 -119.00   <2e-16 ***
-Age0to14    -0.289359   0.002742 -105.53   <2e-16 ***
-Age15to19   -0.092253   0.003159  -29.20   <2e-16 ***
-Age20to29    0.095920   0.002578   37.20   <2e-16 ***
-Age30to54    0.024652   0.002280   10.81   <2e-16 ***
-Age65Plus   -0.033779   0.002863  -11.80   <2e-16 ***
+(Intercept)  5.890165   0.017451  337.53   <2e-16 ***
+HhSize       0.242322   0.002575   94.10   <2e-16 ***
+LogIncome    0.033487   0.002126   15.75   <2e-16 ***
+LogDvmt     -0.386664   0.003248 -119.03   <2e-16 ***
+Age0to14    -0.289285   0.002742 -105.50   <2e-16 ***
+Age15to19   -0.092250   0.003160  -29.20   <2e-16 ***
+Age20to29    0.095813   0.002578   37.16   <2e-16 ***
+Age30to54    0.024588   0.002280   10.79   <2e-16 ***
+Age65Plus   -0.033710   0.002863  -11.77   <2e-16 ***
 Zero hurdle model coefficients (binomial with logit link):
             Estimate Std. Error z value Pr(>|z|)    
-(Intercept) -4.62257    0.27756 -16.654  < 2e-16 ***
-HhSize       0.21591    0.04553   4.742 2.11e-06 ***
-LogIncome    0.19361    0.03285   5.893 3.79e-09 ***
-LogDvmt     -0.12169    0.05759  -2.113 0.034613 *  
-Age0to14    -0.05073    0.04528  -1.120 0.262610    
-Age15to19    0.18236    0.05279   3.455 0.000551 ***
-Age20to29    0.25785    0.04318   5.972 2.35e-09 ***
-Age30to54    0.17486    0.03476   5.031 4.88e-07 ***
-Age65Plus   -0.18271    0.04441  -4.114 3.88e-05 ***
+(Intercept) -4.62336    0.27758 -16.656  < 2e-16 ***
+HhSize       0.21584    0.04551   4.742 2.11e-06 ***
+LogIncome    0.19371    0.03288   5.891 3.83e-09 ***
+LogDvmt     -0.12168    0.05759  -2.113 0.034607 *  
+Age0to14    -0.05069    0.04528  -1.120 0.262891    
+Age15to19    0.18237    0.05279   3.455 0.000551 ***
+Age20to29    0.25782    0.04318   5.971 2.36e-09 ***
+Age30to54    0.17485    0.03476   5.031 4.89e-07 ***
+Age65Plus   -0.18269    0.04441  -4.114 3.89e-05 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 
@@ -184,38 +188,39 @@ Following are the estimation statistics for the metropolitan and nonmetropolitan
 ```
 
 Call:
-hurdle(formula = ModelFormula, data = Data_df, dist = "poisson", zero.dist = "binomial", link = "logit")
+hurdle(formula = ModelFormula, data = Data_df, dist = "poisson", zero.dist = "binomial", 
+    link = "logit")
 
 Pearson residuals:
     Min      1Q  Median      3Q     Max 
--3.8971 -0.3421 -0.2261 -0.1478 34.7556 
+-3.8989 -0.3420 -0.2262 -0.1478 34.7455 
 
 Count model coefficients (truncated poisson with log link):
                Estimate Std. Error z value Pr(>|z|)    
-(Intercept)   6.028e+00  1.044e-02 577.557  < 2e-16 ***
-HhSize        1.345e-02  6.684e-04  20.129  < 2e-16 ***
-LogIncome     5.803e-02  1.001e-03  57.978  < 2e-16 ***
-LogDensity    4.498e-02  5.878e-04  76.515  < 2e-16 ***
-BusEqRevMiPC  1.886e-03  2.542e-05  74.200  < 2e-16 ***
-LogDvmt      -9.579e-02  1.004e-03 -95.392  < 2e-16 ***
-Urban         3.456e-02  1.076e-03  32.131  < 2e-16 ***
-Age15to19    -1.237e-03  1.207e-03  -1.025    0.305    
-Age20to29     6.574e-02  1.333e-03  49.331  < 2e-16 ***
-Age30to54     4.873e-02  1.262e-03  38.626  < 2e-16 ***
-Age65Plus     8.661e-03  1.662e-03   5.210 1.89e-07 ***
+(Intercept)   6.029e+00  1.043e-02 577.849  < 2e-16 ***
+HhSize        1.345e-02  6.683e-04  20.130  < 2e-16 ***
+LogIncome     5.791e-02  9.999e-04  57.920  < 2e-16 ***
+LogDensity    4.498e-02  5.877e-04  76.534  < 2e-16 ***
+BusEqRevMiPC  1.887e-03  2.542e-05  74.218  < 2e-16 ***
+LogDvmt      -9.582e-02  1.004e-03 -95.428  < 2e-16 ***
+Urban         3.458e-02  1.076e-03  32.144  < 2e-16 ***
+Age15to19    -1.210e-03  1.207e-03  -1.003    0.316    
+Age20to29     6.578e-02  1.333e-03  49.361  < 2e-16 ***
+Age30to54     4.877e-02  1.262e-03  38.657  < 2e-16 ***
+Age65Plus     8.681e-03  1.662e-03   5.222 1.77e-07 ***
 Zero hurdle model coefficients (binomial with logit link):
                Estimate Std. Error z value Pr(>|z|)    
-(Intercept)  -4.1866640  0.4118804 -10.165  < 2e-16 ***
-HhSize        0.5180477  0.0245821  21.074  < 2e-16 ***
-LogIncome     0.3449002  0.0403718   8.543  < 2e-16 ***
-LogDensity   -0.0393092  0.0214121  -1.836 0.066382 .  
-BusEqRevMiPC  0.0097519  0.0008816  11.062  < 2e-16 ***
-LogDvmt      -1.0649706  0.0416183 -25.589  < 2e-16 ***
-Urban         0.0716819  0.0400025   1.792 0.073143 .  
-Age15to19     0.3068884  0.0470226   6.526 6.74e-11 ***
-Age20to29     0.1936787  0.0521172   3.716 0.000202 ***
-Age30to54     0.3872058  0.0466704   8.297  < 2e-16 ***
-Age65Plus    -0.5823649  0.0644639  -9.034  < 2e-16 ***
+(Intercept)  -4.1730270  0.4117692 -10.134  < 2e-16 ***
+HhSize        0.5180025  0.0245814  21.073  < 2e-16 ***
+LogIncome     0.3436888  0.0403362   8.521  < 2e-16 ***
+LogDensity   -0.0391585  0.0214096  -1.829 0.067398 .  
+BusEqRevMiPC  0.0097541  0.0008816  11.065  < 2e-16 ***
+LogDvmt      -1.0652368  0.0416216 -25.593  < 2e-16 ***
+Urban         0.0718330  0.0400027   1.796 0.072542 .  
+Age15to19     0.3071700  0.0470240   6.532 6.48e-11 ***
+Age20to29     0.1942151  0.0521237   3.726 0.000195 ***
+Age30to54     0.3876949  0.0466783   8.306  < 2e-16 ***
+Age65Plus    -0.5822575  0.0644635  -9.032  < 2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 
@@ -227,36 +232,37 @@ Log-likelihood: -3.381e+05 on 22 Df
 ```
 
 Call:
-hurdle(formula = ModelFormula, data = Data_df, dist = "poisson", zero.dist = "binomial", link = "logit")
+hurdle(formula = ModelFormula, data = Data_df, dist = "poisson", zero.dist = "binomial", 
+    link = "logit")
 
 Pearson residuals:
     Min      1Q  Median      3Q     Max 
--6.3355 -0.2401 -0.1567 -0.1048 45.2078 
+-6.3339 -0.2401 -0.1567 -0.1049 45.2210 
 
 Count model coefficients (truncated poisson with log link):
               Estimate Std. Error z value Pr(>|z|)    
-(Intercept)  6.7699751  0.0105607 641.055  < 2e-16 ***
-HhSize       0.0532340  0.0018396  28.939  < 2e-16 ***
-LogIncome    0.0587398  0.0012717  46.189  < 2e-16 ***
-LogDensity  -0.0124049  0.0004655 -26.647  < 2e-16 ***
-LogDvmt     -0.1351744  0.0019872 -68.022  < 2e-16 ***
-Age0to14    -0.0083741  0.0018217  -4.597 4.29e-06 ***
-Age15to19    0.0236098  0.0020681  11.416  < 2e-16 ***
-Age20to29   -0.0322737  0.0021758 -14.833  < 2e-16 ***
-Age30to54   -0.0274336  0.0017203 -15.947  < 2e-16 ***
-Age65Plus   -0.0709467  0.0027658 -25.651  < 2e-16 ***
+(Intercept)  6.7688818  0.0105622 640.861  < 2e-16 ***
+HhSize       0.0532170  0.0018393  28.933  < 2e-16 ***
+LogIncome    0.0588901  0.0012727  46.273  < 2e-16 ***
+LogDensity  -0.0124200  0.0004655 -26.679  < 2e-16 ***
+LogDvmt     -0.1352264  0.0019862 -68.083  < 2e-16 ***
+Age0to14    -0.0083843  0.0018217  -4.602 4.18e-06 ***
+Age15to19    0.0236046  0.0020681  11.414  < 2e-16 ***
+Age20to29   -0.0323188  0.0021757 -14.855  < 2e-16 ***
+Age30to54   -0.0274480  0.0017202 -15.956  < 2e-16 ***
+Age65Plus   -0.0709727  0.0027659 -25.660  < 2e-16 ***
 Zero hurdle model coefficients (binomial with logit link):
             Estimate Std. Error z value Pr(>|z|)    
-(Intercept) -1.43896    0.35057  -4.105 4.05e-05 ***
-HhSize       0.49040    0.06451   7.602 2.92e-14 ***
-LogIncome    0.23153    0.04342   5.332 9.73e-08 ***
-LogDensity  -0.17525    0.01442 -12.157  < 2e-16 ***
-LogDvmt     -1.27394    0.06930 -18.382  < 2e-16 ***
-Age0to14     0.25502    0.06337   4.025 5.71e-05 ***
-Age15to19    0.38523    0.07126   5.406 6.45e-08 ***
-Age20to29    0.07019    0.07214   0.973    0.331    
-Age30to54    0.53281    0.05692   9.360  < 2e-16 ***
-Age65Plus   -0.60605    0.08593  -7.053 1.75e-12 ***
+(Intercept) -1.44804    0.35062  -4.130 3.63e-05 ***
+HhSize       0.48988    0.06451   7.594 3.09e-14 ***
+LogIncome    0.23262    0.04346   5.353 8.67e-08 ***
+LogDensity  -0.17531    0.01442 -12.160  < 2e-16 ***
+LogDvmt     -1.27374    0.06927 -18.389  < 2e-16 ***
+Age0to14     0.25519    0.06337   4.027 5.65e-05 ***
+Age15to19    0.38527    0.07127   5.406 6.44e-08 ***
+Age20to29    0.06981    0.07214   0.968    0.333    
+Age30to54    0.53262    0.05692   9.357  < 2e-16 ***
+Age65Plus   -0.60593    0.08593  -7.052 1.77e-12 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 
