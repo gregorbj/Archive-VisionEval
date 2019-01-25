@@ -1,32 +1,32 @@
 Test
 Test of VESimHouseholds package modules
-2019-01-24_11:21:54
+2019-01-25_13:30:39
 
-2019-01-24 11:21:54 : Testing AssignCarSvcAvailability. 
+2019-01-25 13:30:39 : Testing AssignCarSvcAvailability. 
 
-2019-01-24 11:21:54 : Attempting to load datastore. 
+2019-01-25 13:30:39 : Attempting to load datastore. 
 
-2019-01-24 11:21:54 : Datastore loaded. 
+2019-01-25 13:30:39 : Datastore loaded. 
 
-2019-01-24 11:21:54 : Attempting to load and check specifications. 
+2019-01-25 13:30:40 : Attempting to load and check specifications. 
 
-2019-01-24 11:21:54 : Module specifications successfully loaded and checked for errors. 
+2019-01-25 13:30:40 : Module specifications successfully loaded and checked for errors. 
 
-2019-01-24 11:21:54 : Attempting to process, check and load module inputs. 
+2019-01-25 13:30:40 : Attempting to process, check and load module inputs. 
 
-2019-01-24 11:21:55 : Module inputs successfully checked and loaded into datastore. 
+2019-01-25 13:30:40 : Module inputs successfully checked and loaded into datastore. 
 
-2019-01-24 11:21:55 : Checking whether datastore contains all datasets in Get specifications. 
+2019-01-25 13:30:40 : Checking whether datastore contains all datasets in Get specifications. 
 
-2019-01-24 11:21:55 : Datastore contains all datasets identified in module Get specifications. 
+2019-01-25 13:30:40 : Datastore contains all datasets identified in module Get specifications. 
 
-2019-01-24 11:21:55 : Running module and checking whether outputs meet Set specifications. 
+2019-01-25 13:30:40 : Running module and checking whether outputs meet Set specifications. 
 
-2019-01-24 11:21:55 : Also saving module outputs to datastore. 
+2019-01-25 13:30:40 : Also saving module outputs to datastore. 
 
-2019-01-24 11:21:56 : Module run successfully and outputs meet Set specifications. 
+2019-01-25 13:30:41 : Module run successfully and outputs meet Set specifications. 
 
-2019-01-24 11:21:56 : Module outputs saved to datastore. 
+2019-01-25 13:30:41 : Module outputs saved to datastore. 
 
-2019-01-24 11:21:56 : Congratulations. Module AssignCarSvcAvailability passed all tests. 
+2019-01-25 13:30:41 : Congratulations. Module AssignCarSvcAvailability passed all tests. 
 

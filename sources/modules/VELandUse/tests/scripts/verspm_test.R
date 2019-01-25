@@ -13,19 +13,21 @@ TestSetup_ls <- list(
   DatastoreName = "Datastore.tar",
   LoadDatastore = TRUE,
   TestDocsDir = "verspm",
-  ClearLogs = TRUE
+  ClearLogs = TRUE,
+  # SaveDatastore = TRUE
+  SaveDatastore = FALSE
 )
 
 #Define the module tests
 Tests_ls <- list(
-  PredictHousing = c(LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
-  LocateEmployment = c(LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
-  AssignLocTypes = c(LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
-  Calculate4DMeasures = c(LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
-  CalculateUrbanMixMeasure = c(LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
-  AssignParkingRestrictions = c(LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
-  AssignDemandManagement = c(LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
-  AssignCarSvcAvailability = c(LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE)
+  list(ModuleName = "PredictHousing", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
+  list(ModuleName = "LocateEmployment", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
+  list(ModuleName = "AssignLocTypes", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
+  list(ModuleName = "Calculate4DMeasures", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
+  list(ModuleName = "CalculateUrbanMixMeasure", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
+  list(ModuleName = "AssignParkingRestrictions", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
+  list(ModuleName = "AssignDemandManagement", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
+  list(ModuleName = "AssignCarSvcAvailability", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE)
 )
 
 #Set up, run tests, and save test results
