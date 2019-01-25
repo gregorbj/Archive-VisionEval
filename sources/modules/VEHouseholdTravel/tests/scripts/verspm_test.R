@@ -13,16 +13,18 @@ TestSetup_ls <- list(
   DatastoreName = "Datastore.tar",
   LoadDatastore = TRUE,
   TestDocsDir = "verspm",
-  ClearLogs = TRUE
+  ClearLogs = TRUE,
+  # SaveDatastore = TRUE
+  SaveDatastore = FALSE
 )
 
 #Define the module tests
 Tests_ls <- list(
-  CalculateHouseholdDvmt = c(LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
-  CalculateAltModeTrips = c(LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
-  CalculateVehicleTrips = c(LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
-  DivertSovTravel = c(LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
-  ApplyDvmtReductions = c(LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE)
+  list(ModuleName = "CalculateHouseholdDvmt", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
+  list(ModuleName = "CalculateAltModeTrips", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
+  list(ModuleName = "CalculateVehicleTrips", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
+  list(ModuleName = "DivertSovTravel", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
+  list(ModuleName = "ApplyDvmtReductions", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE)
 )
 
 #Set up, run tests, and save test results
