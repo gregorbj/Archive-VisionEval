@@ -233,6 +233,7 @@ initializeModel <-
       stop(Msg)
     }
     #Check for 'Initialize' module in each package if so add to ModuleCalls_df
+    Add_ls <- list()
     for (Pkg in unique(ModuleCalls_df$PackageName)) {
       PkgData <- data(package = Pkg)$results[,"Item"]
       if ("InitializeSpecifications" %in% PkgData) {
@@ -243,9 +244,22 @@ initializeModel <-
             RunFor = "AllYears",
             Year = "Year"
           )
-        ModuleCalls_df <- rbind(ModuleCalls_df, Add_df)
+        Add_ls[[Pkg]] <- Add_df
       }
     }
+    #Insert Initialize module entries into ModuleCalls_df
+    Pkg_ <- names(Add_ls)
+    for (Pkg in Pkg_) {
+      Idx <- head(grep(Pkg, ModuleCalls_df$PackageName), 1)
+      End <- nrow(ModuleCalls_df)
+      ModuleCalls_df <- rbind(
+        ModuleCalls_df[1:(Idx - 1),],
+        Add_ls[[Pkg]],
+        ModuleCalls_df[Idx:End,]
+      )
+      rm(Idx, End)
+    }
+    rm(Pkg, Pkg_, Add_ls)
     #Identify all modules and datasets in required packages
     Datasets_df <-
       data.frame(
