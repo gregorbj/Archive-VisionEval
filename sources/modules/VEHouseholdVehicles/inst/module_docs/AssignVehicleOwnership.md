@@ -33,7 +33,7 @@ IsUrbanMixNbrhd  0.839238   0.093167   9.008  < 2e-16 ***
 LogDensity       0.239777   0.039492   6.072 1.27e-09 ***
 TranRevMiPC      0.014992   0.001327  11.299  < 2e-16 ***
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
 (Dispersion parameter for binomial family taken to be 1)
 
@@ -67,7 +67,7 @@ IsSF        -0.77947    0.08803  -8.854  < 2e-16 ***
 Drivers     -4.11347    0.09972 -41.248  < 2e-16 ***
 LogDensity   0.13658    0.02565   5.324 1.01e-07 ***
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
 (Dispersion parameter for binomial family taken to be 1)
 
@@ -82,8 +82,7 @@ Number of Fisher Scoring iterations: 9
 The ordered logit model for the number of vehicles owned by metropolitan households that own at least one vehicle is shown below. Households are likely to own more vehicles if they live in a single-family dwelling, have higher incomes, have more workers, and have more drivers. Households are likely to own fewer vehicles if all household members are elderly, they live in a higher density and/or urban mixed-use neighborhood, they live in a metropolitan area with a higher level of transit service, and if more persons are in the household. The latter result is at surprising at first glance, but since the model also includes the number of drivers and number of workers, the household size coefficient is probably showing the effect of non-drivers non-workers in the household.
 
 ```
-formula: 
-VehOrd ~ Workers + LogIncome + Drivers + HhSize + OnlyElderly + IsSF + IsUrbanMixNbrhd + LogDensity + TranRevMiPC
+formula: VehOrd ~ Workers + LogIncome + Drivers + HhSize + OnlyElderly + IsSF + IsUrbanMixNbrhd + LogDensity + TranRevMiPC
 data:    EstData_df
 
  link  threshold   nobs  logLik    AIC      niter max.grad cond.H 
@@ -101,7 +100,7 @@ IsUrbanMixNbrhd -0.2344384  0.0482043  -4.863 1.15e-06 ***
 LogDensity      -0.2022960  0.0127091 -15.917  < 2e-16 ***
 TranRevMiPC     -0.0031226  0.0005294  -5.899 3.66e-09 ***
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
 Threshold coefficients:
             Estimate Std. Error z value
@@ -112,8 +111,7 @@ spacing      2.99870    0.02662  112.65
 The ordered logit model for non-metropolitan household vehicle ownership is described below. The variables are the same as for the metropolitan model with the exception of the urban mixed-use neighborhood and transit variables. The signs of the coefficients are the same and the magnitudes are similar.
 
 ```
-formula: 
-VehOrd ~ Workers + LogIncome + Drivers + HhSize + OnlyElderly + IsSF + LogDensity
+formula: VehOrd ~ Workers + LogIncome + Drivers + HhSize + OnlyElderly + IsSF + LogDensity
 data:    EstData_df
 
  link  threshold   nobs  logLik    AIC      niter max.grad cond.H 
@@ -129,7 +127,7 @@ OnlyElderly -0.352559   0.037467  -9.410  < 2e-16 ***
 IsSF         0.710680   0.035003  20.303  < 2e-16 ***
 LogDensity  -0.167458   0.006486 -25.818  < 2e-16 ***
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
 Threshold coefficients:
             Estimate Std. Error z value

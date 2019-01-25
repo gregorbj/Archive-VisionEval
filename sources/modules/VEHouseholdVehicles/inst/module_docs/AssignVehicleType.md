@@ -48,7 +48,7 @@ IsLowIncome     -0.269053   0.024296 -11.074  < 2e-16 ***
 LogDensity      -0.130321   0.003887 -33.532  < 2e-16 ***
 IsUrbanMixNbrhd -0.156379   0.030344  -5.154 2.56e-07 ***
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
 (Dispersion parameter for binomial family taken to be 1)
 
@@ -65,9 +65,9 @@ The model and all of its independent variables are significant, but it only expl
 
 |Prediction        | Proportion|
 |:-----------------|----------:|
-|Under Predict     |      0.272|
-|Correctly Predict |      0.458|
-|Over Predict      |      0.270|
+|Under Predict     |      0.271|
+|Correctly Predict |      0.461|
+|Over Predict      |      0.268|
 
 ## How the Module Works
 

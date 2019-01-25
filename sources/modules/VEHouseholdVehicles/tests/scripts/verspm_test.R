@@ -13,18 +13,20 @@ TestSetup_ls <- list(
   DatastoreName = "Datastore.tar",
   LoadDatastore = TRUE,
   TestDocsDir = "verspm",
-  ClearLogs = TRUE
+  ClearLogs = TRUE,
+  # SaveDatastore = TRUE
+  SaveDatastore = FALSE
 )
 
 #Define the module tests
 Tests_ls <- list(
-  AssignDrivers = c(LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
-  AssignVehicleOwnership = c(LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
-  AssignVehicleType = c(LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
-  CreateVehicleTable = c(LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
-  AssignVehicleAge = c(LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
-  CalculateVehicleOwnCost = c(LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
-  AdjustVehicleOwnership = c(LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE)
+  list(ModuleName = "AssignDrivers", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
+  list(ModuleName = "AssignVehicleOwnership", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
+  list(ModuleName = "AssignVehicleType", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
+  list(ModuleName = "CreateVehicleTable", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
+  list(ModuleName = "AssignVehicleAge", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
+  list(ModuleName = "CalculateVehicleOwnCost", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
+  list(ModuleName = "AdjustVehicleOwnership", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE)
 )
 
 #Set up, run tests, and save test results
