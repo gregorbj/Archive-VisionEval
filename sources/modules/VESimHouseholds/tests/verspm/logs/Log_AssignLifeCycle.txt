@@ -1,30 +1,30 @@
 Test
 Test of VESimHouseholds package modules
-2019-01-24_11:13:27
+2019-01-25_13:43:19
 
-2019-01-24 11:13:27 : Testing AssignLifeCycle. 
+2019-01-25 13:43:19 : Testing AssignLifeCycle. 
 
-2019-01-24 11:13:27 : Attempting to load datastore. 
+2019-01-25 13:43:19 : Attempting to load datastore. 
 
-2019-01-24 11:13:27 : Datastore loaded. 
+2019-01-25 13:43:19 : Datastore loaded. 
 
-2019-01-24 11:13:27 : Attempting to load and check specifications. 
+2019-01-25 13:43:19 : Attempting to load and check specifications. 
 
-2019-01-24 11:13:27 : Module specifications successfully loaded and checked for errors. 
+2019-01-25 13:43:19 : Module specifications successfully loaded and checked for errors. 
 
-2019-01-24 11:13:28 : No inputs to process. 
+2019-01-25 13:43:19 : No inputs to process. 
 
-2019-01-24 11:13:28 : Checking whether datastore contains all datasets in Get specifications. 
+2019-01-25 13:43:19 : Checking whether datastore contains all datasets in Get specifications. 
 
-2019-01-24 11:13:28 : Datastore contains all datasets identified in module Get specifications. 
+2019-01-25 13:43:19 : Datastore contains all datasets identified in module Get specifications. 
 
-2019-01-24 11:13:28 : Running module and checking whether outputs meet Set specifications. 
+2019-01-25 13:43:19 : Running module and checking whether outputs meet Set specifications. 
 
-2019-01-24 11:13:28 : Also saving module outputs to datastore. 
+2019-01-25 13:43:19 : Also saving module outputs to datastore. 
 
-2019-01-24 11:13:30 : Module run successfully and outputs meet Set specifications. 
+2019-01-25 13:43:23 : Module run successfully and outputs meet Set specifications. 
 
-2019-01-24 11:13:30 : Module outputs saved to datastore. 
+2019-01-25 13:43:23 : Module outputs saved to datastore. 
 
-2019-01-24 11:13:30 : Congratulations. Module AssignLifeCycle passed all tests. 
+2019-01-25 13:43:23 : Congratulations. Module AssignLifeCycle passed all tests. 
 
