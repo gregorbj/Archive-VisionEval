@@ -381,8 +381,8 @@ DESCRIPTION - A description of the data.
 
 |NAME                |TABLE |GROUP  |TYPE     |UNITS      |PROHIBIT |ISELEMENTOF |DESCRIPTION                                                                                                   |
 |:-------------------|:-----|:------|:--------|:----------|:--------|:-----------|:-------------------------------------------------------------------------------------------------------------|
-|LdvFwyDvmt          |Marea |Year   |distance |MI         |< 0      |            |Light-duty daily vehicle miles of travel in the urbanized portion of the Marea occurring on freeways          |
-|LdvArtDvmt          |Marea |Year   |distance |MI         |< 0      |            |Light-duty daily vehicle miles of travel in the urbanized portion of the Marea occurring on arterial roadways |
+|LdvFwyDvmt          |Marea |Year   |compound |MI/DAY     |< 0      |            |Light-duty daily vehicle miles of travel in the urbanized portion of the Marea occurring on freeways          |
+|LdvArtDvmt          |Marea |Year   |compound |MI/DAY     |< 0      |            |Light-duty daily vehicle miles of travel in the urbanized portion of the Marea occurring on arterial roadways |
 |LdvAveSpeed         |Marea |Year   |compound |MI/HR      |< 0      |            |Average speed (miles per hour) of light-duty vehicle travel on urban area roads                               |
 |HvyTrkAveSpeed      |Marea |Year   |compound |MI/HR      |< 0      |            |Average speed (miles per hour) of heavy truck travel on urban area roads                                      |
 |BusAveSpeed         |Marea |Year   |compound |MI/HR      |< 0      |            |Average speed (miles per hour) of bus travel on urban area roads                                              |
