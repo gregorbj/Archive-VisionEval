@@ -43,7 +43,7 @@ PowPerCapInc:Wkr30to54  0.41380    0.02512  16.475  < 2e-16 ***
 PowPerCapInc:Wkr55to64  0.41132    0.04653   8.840  < 2e-16 ***
 PowPerCapInc:Age65Plus  0.13778    0.00200  68.893  < 2e-16 ***
 ---
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Residual standard error: 5.41 on 66677 degrees of freedom
 Multiple R-squared:  0.3133,	Adjusted R-squared:  0.3132 
@@ -74,7 +74,7 @@ Age65Plus               20.7776     6.4541   3.219 0.001305 **
 PowPerCapInc:Wkr30to54  -0.3980     0.2266  -1.756 0.079172 .  
 PowPerCapInc:Age65Plus  -0.4800     0.2817  -1.704 0.088525 .  
 ---
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Residual standard error: 5.541 on 2055 degrees of freedom
 Multiple R-squared:  0.312,	Adjusted R-squared:  0.3094 
@@ -88,7 +88,7 @@ An additional step must be carried out in order to predict household income. Bec
 |          | Dollars|
 |:---------|-------:|
 |Observed  |   51924|
-|Estimated |   52072|
+|Estimated |   51899|
 
 The following figure compares the distributions of the observed and predicted incomes of *regular* households.
 
@@ -100,7 +100,7 @@ Following is the comparison of mean values for the observed *group quarters* hou
 |          | Dollars|
 |:---------|-------:|
 |Observed  |    7504|
-|Estimated |    7286|
+|Estimated |    7436|
 
 The following figure compares the distributions of the observed and predicted incomes of *groups quarters* households.
 
