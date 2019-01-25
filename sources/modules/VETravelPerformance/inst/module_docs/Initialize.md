@@ -85,7 +85,7 @@ If a value other than NA is provided in the `UzaNameLookup` field of the `marea_
 |Boise City/ID                           |Coeur d'Alene/ID                       |Idaho Falls/ID                                 |
 |Lewiston/ID                             |Nampa/ID                               |Pocatello/ID                                   |
 |Bloomington--Normal/IL                  |Champaign/IL                           |Chicago/IL                                     |
-|Danville/IL                             |DeKalb/IL                              |Decatur/IL                                     |
+|Danville/IL                             |Decatur/IL                             |DeKalb/IL                                      |
 |Kankakee/IL                             |Peoria/IL                              |Rockford/IL                                    |
 |Round Lake Beach--McHenry--Grayslake/IL |Springfield/IL                         |Anderson/IN                                    |
 |Bloomington/IN                          |Columbus/IN                            |Elkhart/IN                                     |

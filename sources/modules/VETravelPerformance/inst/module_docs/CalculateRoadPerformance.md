@@ -167,7 +167,7 @@ Coefficients:
 LogPop        0.1156     0.0154   7.511 4.83e-11 ***
 LnMiRatio     1.3207     0.1138  11.602  < 2e-16 ***
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
 Residual standard error: 0.1367 on 87 degrees of freedom
 Multiple R-squared:  0.7048,	Adjusted R-squared:  0.698 

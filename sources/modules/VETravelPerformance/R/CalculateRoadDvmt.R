@@ -823,7 +823,7 @@ documentModule("CalculateRoadDvmt")
 #   LoadDatastore = TRUE,
 #   SaveDatastore = TRUE,
 #   DoRun = FALSE,
-#   RunFor = "BaseYear"
+#   RunFor = "AllYears"
 # )
 # L <- TestDat_$L
 # R <- CalculateRoadDvmt(L)
@@ -837,5 +837,5 @@ documentModule("CalculateRoadDvmt")
 #   LoadDatastore = TRUE,
 #   SaveDatastore = TRUE,
 #   DoRun = TRUE,
-#   RunFor = "BaseYear"
+#   RunFor = "AllYears"
 # )
