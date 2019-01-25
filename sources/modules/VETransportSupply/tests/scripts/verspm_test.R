@@ -13,13 +13,15 @@ TestSetup_ls <- list(
   DatastoreName = "Datastore.tar",
   LoadDatastore = TRUE,
   TestDocsDir = "verspm",
-  ClearLogs = TRUE
+  ClearLogs = TRUE,
+  # SaveDatastore = TRUE
+  SaveDatastore = FALSE
 )
 
 #Define the module tests
 Tests_ls <- list(
-  AssignTransitService = c(LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
-  AssignRoadMiles = c(LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE)
+  list(ModuleName = "AssignTransitService", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
+  list(ModuleName = "AssignRoadMiles", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE)
 )
 
 #Set up, run tests, and save test results
