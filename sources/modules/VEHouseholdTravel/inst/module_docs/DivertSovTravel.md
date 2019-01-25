@@ -57,23 +57,23 @@ lm(formula = PowSovDvmt ~ LogDensity + LogIncome + Drivers +
 
 Residuals:
      Min       1Q   Median       3Q      Max 
--2.26148 -0.50856  0.04233  0.51572  2.62236 
+-2.26135 -0.50850  0.04214  0.51576  2.62261 
 
 Coefficients:
                 Estimate Std. Error t value Pr(>|t|)    
-(Intercept)     1.109170   0.067716  16.380  < 2e-16 ***
-LogDensity     -0.006831   0.002867  -2.383  0.01719 *  
-LogIncome       0.031287   0.008088   3.868  0.00011 ***
-Drivers         0.155281   0.011828  13.128  < 2e-16 ***
-NumChild       -0.080273   0.005144 -15.606  < 2e-16 ***
-NumVehLtNumDvr -0.235947   0.016175 -14.587  < 2e-16 ***
-LogDvmt         0.173316   0.022662   7.648 2.11e-14 ***
+(Intercept)     1.108828   0.067718  16.374  < 2e-16 ***
+LogDensity     -0.006796   0.002868  -2.369 0.017819 *  
+LogIncome       0.031234   0.008087   3.862 0.000113 ***
+Drivers         0.155156   0.011829  13.116  < 2e-16 ***
+NumChild       -0.080291   0.005143 -15.613  < 2e-16 ***
+NumVehLtNumDvr -0.235979   0.016171 -14.593  < 2e-16 ***
+LogDvmt         0.173579   0.022662   7.660 1.92e-14 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Residual standard error: 0.7176 on 28842 degrees of freedom
 Multiple R-squared:  0.07139,	Adjusted R-squared:  0.0712 
-F-statistic: 369.5 on 6 and 28842 DF,  p-value: < 2.2e-16
+F-statistic: 369.6 on 6 and 28842 DF,  p-value: < 2.2e-16
 
 ```
 
@@ -88,25 +88,25 @@ lm(formula = makeFormula(EndTerms_), data = EstData_df)
 
 Residuals:
      Min       1Q   Median       3Q      Max 
--1.36254 -0.03875  0.00405  0.04370  0.36380 
+-1.35396 -0.03853  0.00378  0.04374  0.34265 
 
 Coefficients:
                      Estimate Std. Error t value Pr(>|t|)    
-(Intercept)        -0.6672304  0.0106970  -62.38   <2e-16 ***
-LogDensity          0.1879023  0.0013008  144.45   <2e-16 ***
-IsSF                0.0616017  0.0007961   77.38   <2e-16 ***
-LogIncome           0.0367627  0.0005785   63.54   <2e-16 ***
-Drivers             0.4191183  0.0008902  470.83   <2e-16 ***
-NumChild           -0.1618351  0.0003703 -437.01   <2e-16 ***
-NumVehLtNumDvr     -0.5091713  0.0011396 -446.80   <2e-16 ***
-LogDvmt            -0.7190060  0.0032890 -218.61   <2e-16 ***
-LogDensity:LogDvmt -0.0277662  0.0003206  -86.60   <2e-16 ***
+(Intercept)        -0.6889675  0.0107074  -64.34   <2e-16 ***
+LogDensity          0.1916512  0.0013020  147.20   <2e-16 ***
+IsSF                0.0608508  0.0007966   76.39   <2e-16 ***
+LogIncome           0.0369918  0.0005790   63.89   <2e-16 ***
+Drivers             0.4214917  0.0008911  473.01   <2e-16 ***
+NumChild           -0.1613297  0.0003705 -435.39   <2e-16 ***
+NumVehLtNumDvr     -0.5109015  0.0011400 -448.15   <2e-16 ***
+LogDvmt            -0.7146331  0.0032937 -216.97   <2e-16 ***
+LogDensity:LogDvmt -0.0287852  0.0003209  -89.69   <2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Residual standard error: 0.06746 on 51915 degrees of freedom
+Residual standard error: 0.0675 on 51915 degrees of freedom
 Multiple R-squared:  0.9791,	Adjusted R-squared:  0.9791 
-F-statistic: 3.045e+05 on 8 and 51915 DF,  p-value: < 2.2e-16
+F-statistic: 3.046e+05 on 8 and 51915 DF,  p-value: < 2.2e-16
 
 ```
 
@@ -171,21 +171,21 @@ lm(formula = ModelFormula, data = Data_df)
 
 Residuals:
     Min      1Q  Median      3Q     Max 
--3.1498 -1.1137 -0.2099  0.8843  9.4809 
+-3.7315 -1.4121 -0.3194  1.0647 13.1495 
 
 Coefficients:
                 Estimate Std. Error t value Pr(>|t|)    
-(Intercept)     1.735494   0.166983  10.393   <2e-16 ***
-Drivers         0.155726   0.017103   9.105   <2e-16 ***
-LogIncome       0.145110   0.016230   8.941   <2e-16 ***
-LogDensity     -0.135813   0.006299 -21.560   <2e-16 ***
-NumVehLtNumDvr -0.360771   0.039878  -9.047   <2e-16 ***
+(Intercept)     1.981140   0.211318   9.375   <2e-16 ***
+Drivers         0.192409   0.021644   8.890   <2e-16 ***
+LogIncome       0.176700   0.020539   8.603   <2e-16 ***
+LogDensity     -0.174835   0.007972 -21.932   <2e-16 ***
+NumVehLtNumDvr -0.443088   0.050466  -8.780   <2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Residual standard error: 1.51 on 19021 degrees of freedom
-Multiple R-squared:  0.04441,	Adjusted R-squared:  0.04421 
-F-statistic:   221 on 4 and 19021 DF,  p-value: < 2.2e-16
+Residual standard error: 1.911 on 19021 degrees of freedom
+Multiple R-squared:  0.0442,	Adjusted R-squared:  0.044 
+F-statistic: 219.9 on 4 and 19021 DF,  p-value: < 2.2e-16
 
 ```
 
@@ -200,24 +200,24 @@ lm(formula = makeFormula(EndTerms_), data = EstData_df)
 
 Residuals:
       Min        1Q    Median        3Q       Max 
--0.193756 -0.031019 -0.000389  0.032020  0.167450 
+-0.255923 -0.040990 -0.000214  0.040182  0.218282 
 
 Coefficients:
                   Estimate Std. Error t value Pr(>|t|)    
-(Intercept)      2.409e+00  8.012e-03  300.67   <2e-16 ***
-Drivers          1.880e-01  7.309e-04  257.28   <2e-16 ***
-NonDrivers      -4.338e-02  4.605e-04  -94.21   <2e-16 ***
-LogIncome        6.912e-02  6.853e-04  100.86   <2e-16 ***
-LogDensity      -1.159e-01  3.918e-04 -295.74   <2e-16 ***
-IsUrbanMixNbrhd -1.175e-01  1.318e-03  -89.20   <2e-16 ***
-FwyLaneMiPC      3.606e+02  2.617e+00  137.82   <2e-16 ***
-VehLtDvr        -3.804e-01  1.651e-03 -230.32   <2e-16 ***
+(Intercept)      2.682e+00  1.014e-02  264.44   <2e-16 ***
+Drivers          2.377e-01  9.254e-04  256.85   <2e-16 ***
+NonDrivers      -5.250e-02  5.830e-04  -90.05   <2e-16 ***
+LogIncome        8.611e-02  8.677e-04   99.23   <2e-16 ***
+LogDensity      -1.464e-01  4.961e-04 -295.12   <2e-16 ***
+IsUrbanMixNbrhd -1.424e-01  1.668e-03  -85.33   <2e-16 ***
+FwyLaneMiPC      4.559e+02  3.313e+00  137.60   <2e-16 ***
+VehLtDvr        -4.734e-01  2.091e-03 -226.39   <2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Residual standard error: 0.04702 on 9815 degrees of freedom
-Multiple R-squared:  0.9785,	Adjusted R-squared:  0.9785 
-F-statistic: 6.378e+04 on 7 and 9815 DF,  p-value: < 2.2e-16
+Residual standard error: 0.05953 on 9815 degrees of freedom
+Multiple R-squared:  0.9781,	Adjusted R-squared:  0.9781 
+F-statistic: 6.264e+04 on 7 and 9815 DF,  p-value: < 2.2e-16
 
 ```
 
@@ -227,22 +227,22 @@ Call:
 lm(formula = makeFormula(EndTerms_), data = EstData_df)
 
 Residuals:
-       Min         1Q     Median         3Q        Max 
--0.0103308 -0.0013642  0.0000231  0.0014248  0.0076730 
+     Min       1Q   Median       3Q      Max 
+-0.15891 -0.02847 -0.00026  0.02852  0.17735 
 
 Coefficients:
               Estimate Std. Error t value Pr(>|t|)    
-(Intercept)  1.097e+00  2.307e-04  4755.8   <2e-16 ***
-Drivers      6.144e-03  2.362e-05   260.1   <2e-16 ***
-LogIncome    5.938e-03  2.241e-05   264.9   <2e-16 ***
-LogDensity  -5.426e-03  8.730e-06  -621.5   <2e-16 ***
-VehLtDvr    -1.473e-02  5.507e-05  -267.4   <2e-16 ***
+(Intercept)  2.3134610  0.0047225   489.9   <2e-16 ***
+Drivers      0.1278968  0.0004835   264.5   <2e-16 ***
+LogIncome    0.1166334  0.0004589   254.2   <2e-16 ***
+LogDensity  -0.1166901  0.0001787  -652.9   <2e-16 ***
+VehLtDvr    -0.2941853  0.0011274  -260.9   <2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Residual standard error: 0.002085 on 19021 degrees of freedom
-Multiple R-squared:  0.975,	Adjusted R-squared:  0.975 
-F-statistic: 1.856e+05 on 4 and 19021 DF,  p-value: < 2.2e-16
+Residual standard error: 0.04269 on 19021 degrees of freedom
+Multiple R-squared:  0.9761,	Adjusted R-squared:  0.9761 
+F-statistic: 1.944e+05 on 4 and 19021 DF,  p-value: < 2.2e-16
 
 ```
 
