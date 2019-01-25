@@ -1,5 +1,7 @@
 #test_functions.R
-#
+
+#Define function to set up environment for module tests
+#------------------------------------------------------
 setUpTests <- function(TestSetup_ls) {
   with(TestSetup_ls, {
     #Copy datastore if required
@@ -35,29 +37,31 @@ setUpTests <- function(TestSetup_ls) {
   })
 }
 
+#Define function to run a list of tests
+#--------------------------------------
 doTests <- function(Tests_ls, TestSetup_ls) {
-  ModuleNames_ <- names(Tests_ls)
   TestDocsDir <- TestSetup_ls$TestDocsDir
-  for (mn in ModuleNames_) {
-    source(paste0("R/", mn, ".R"))
-    L <- Tests_ls[[mn]]
+  for (i in 1:length(Tests_ls)) {
+    ModuleName <- Tests_ls[[i]]$ModuleName
+    source(paste0("R/", ModuleName, ".R"))
+    L <- Tests_ls[[i]]
     if (!("RunFor" %in% names(L))) {
       testModule(
-        ModuleName = mn,
-        LoadDatastore = L["LoadDatastore"],
-        SaveDatastore = L["SaveDatastore"],
-        DoRun = L["DoRun"]
+        ModuleName = L$ModuleName,
+        LoadDatastore = L$LoadDatastore,
+        SaveDatastore = L$SaveDatastore,
+        DoRun = L$DoRun
       )
     } else {
       testModule(
-        ModuleName = mn,
-        LoadDatastore = L["LoadDatastore"],
-        SaveDatastore = L["SaveDatastore"],
-        DoRun = L["DoRun"],
-        RunFor = L["RunFor"]
+        ModuleName = L$ModuleName,
+        LoadDatastore = L$LoadDatastore,
+        SaveDatastore = L$SaveDatastore,
+        DoRun = L$DoRun,
+        RunFor = L$RunFor
       )
     }
-    LogFile <- paste0("Log_", mn, ".txt")
+    LogFile <- paste0("Log_", ModuleName, ".txt")
     file.copy(
       file.path("tests", LogFile),
       file.path("tests", TestDocsDir, "logs", LogFile))
@@ -65,6 +69,8 @@ doTests <- function(Tests_ls, TestSetup_ls) {
   }
 }
 
+#Define function to save test results and clean up test environment
+#------------------------------------------------------------------
 saveTestResults <- function(TestSetup_ls) {
   with(TestSetup_ls, {
     #Tar the datastore directory if DatastoreName is Datastore.tar
