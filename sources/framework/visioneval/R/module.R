@@ -628,36 +628,6 @@ testModule <-
         writeLog("Module inputs successfully checked and loaded into datastore.",
                  Print = TRUE)
       } else {
-        if (!is.null(Specs_ls$Get)) {
-          #Get the data for all model run years
-          GetData_ls <- list()
-          for (Year in getYears()) {
-            GetData_ls[[Year]] <-
-              getFromDatastore(Specs_ls, RunYear = Year, Geo = NULL)[c("Global", "Year")]
-          }
-          #Format get data and add to processed inputs
-          ProcessedInputs_ls$Get <- list()
-          if (length(GetData_ls[[1]]$Global) != 0) {
-            ProcessedInputs_ls$Get$Global <- GetData_ls[[1]]$Global
-          }
-          if (length(GetData_ls[[1]]$Year) != 0) {
-            YearData_ls <- GetData_ls[[1]]$Year
-            for (i in 2:length(getYears())) {
-              for (GeoType in names(YearData_ls)) {
-                Geo_ls <- YearData_ls[[GeoType]]
-                for (DataName in names(Geo_ls)) {
-                  YearData_ls[[GeoType]][[DataName]] <-
-                    unname(c(
-                      YearData_ls[[GeoType]][[DataName]],
-                      GetData_ls[[i]]$Year[[GeoType]][[DataName]]
-                    ))
-                }
-                YearData_ls[[GeoType]]$Year <- unname(getYears())
-              }
-            }
-            ProcessedInputs_ls$Get$Year <- YearData_ls
-          }
-        }
         if (DoRun) {
           # If module IS Initialize, apply the Initialize function
           initFunc <- get("Initialize")
