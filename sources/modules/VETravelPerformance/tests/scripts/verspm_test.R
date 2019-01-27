@@ -13,8 +13,8 @@ TestSetup_ls <- list(
   LoadDatastore = TRUE,
   TestDocsDir = "verspm",
   ClearLogs = TRUE,
-  # SaveDatastore = TRUE
-  SaveDatastore = FALSE
+  SaveDatastore = TRUE
+  # SaveDatastore = FALSE
 )
 
 #Define the module tests

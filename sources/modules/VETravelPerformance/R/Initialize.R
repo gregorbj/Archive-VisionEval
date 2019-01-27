@@ -5,7 +5,7 @@
 #<doc>
 #
 ## Initialize Module
-#### January 23, 2019
+#### January 27, 2019
 #
 #This module reads and processes roadway DVMT and operations inputs to check for inconsistent values which standard VisionEval data checks will not pick up.
 #
@@ -29,7 +29,7 @@
 #
 #* marea_congestion_charges.csv
 #
-#The `region_base_year_hvytrk_dvmt.csv` and `marea_base_year_dvmt.csv` files are checked to assure that there is enough information to compute base year urban heavy truck DVMT and base year urban light-duty vehicle DVMT. These values are used in the calculation of vehicle travel on urban area roads which is are used in road performance calculations. The values in the 2 files are also checked for consistency. These inputs enable users to either declare explict values for regional heavy truck DVMT, marea urban heavy truck DVMT, and marea urban light-duty vehicle DVMT, or to specify locations (state and/or urbanized area) which are used for calculating DVMT from per capita rates tabulated for the areas from Highway Statistics data by the LoadDefaultRoadDvmtValues.R script. When DVMT input values are not specified, they are calculated from the rates for the state and/or metropolitan areas and the calculated values are used to update the input values. The procedures also check whether the sum of urban heavy truck DVMT for all mareas does not exceed the regional heavy truck DVMT. In addition, a check is made on if the model is likely to be a metropolitan model, not a state model, but a state is specified and state per capita heavy truck DVMT rates are used to calculate regional heavy truck DVMT. The value for StateAbbrLookup in the 'region_base_year_hvytrk_dvmt.csv' file should be NA in metropolitan models rather than a specific state if the regional heavy truck DVMT is not provided because the state rates may not be representative of the metropolitan rates. A warning is issued if this is the case.
+#The `region_base_year_hvytrk_dvmt.csv` and `marea_base_year_dvmt.csv` files are checked to assure that there is enough information to compute base year urban heavy truck DVMT and base year urban light-duty vehicle DVMT. These values are used in the calculation of vehicle travel on urban area roads which is are used in road performance calculations. The values in the 2 files are also checked for consistency. These inputs enable users to either declare explict values for regional heavy truck DVMT, marea urban heavy truck DVMT, and marea urban light-duty vehicle DVMT, or to specify locations (state and/or urbanized area) which are used for calculating DVMT from per capita rates tabulated for the areas from Highway Statistics data by the LoadDefaultRoadDvmtValues.R script. In addition, a check is made on if the model is likely to be a metropolitan model, not a state model, but a state is specified and state per capita heavy truck DVMT rates are used to calculate regional heavy truck DVMT. The value for StateAbbrLookup in the 'region_base_year_hvytrk_dvmt.csv' file should be NA in metropolitan models rather than a specific state if the regional heavy truck DVMT is not provided because the state rates may not be representative of the metropolitan rates. A warning is issued if this is the case.
 #
 #If a value, rather than NA, is provided in the `StateAbbrLookup` field of the `region_base_year_hvytrk_dvmt.csv` file, the value must be a standard 2-character postal code for the state.
 #
@@ -44,14 +44,6 @@
 #The `marea_congestion_charges.csv` is checked to determine whether congestion charges increase with congestion level (if they are not 0). If higher charges are found at lower levels than at higher levels, warnings are written to the log identifying the issue.
 #
 #</doc>
-
-
-
-#=================================
-#Packages used in code development
-#=================================
-#Uncomment following lines during code development. Recomment when done.
-#library(visioneval)
 
 
 #=============================================
@@ -365,29 +357,6 @@ InitializeSpecifications <- list(
         "Charge per mile (U.S. dollars) of vehicle travel on arterials during periods of extreme congestion"
       )
     )
-  ),
-  Get = items(
-    item(
-      NAME = items(
-        "RuralPop",
-        "TownPop",
-        "UrbanPop"),
-      TABLE = "Marea",
-      GROUP = "Year",
-      TYPE = "people",
-      UNITS = "PRSN",
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = ""
-    ),
-    item(
-      NAME = "Marea",
-      TABLE = "Marea",
-      GROUP = "Year",
-      TYPE = "character",
-      UNITS = "ID",
-      PROHIBIT = "",
-      ISELEMENTOF = ""
-    )
   )
 )
 
@@ -438,6 +407,7 @@ usethis::use_data(InitializeSpecifications, overwrite = TRUE)
 #' @export
 Initialize <- function(L) {
 
+  #------
   #Set up
   #------
   #Initialize error and warnings message vectors
@@ -446,6 +416,7 @@ Initialize <- function(L) {
   #Initialize output list with input values
   Out_ls <- L[c("Errors", "Warnings", "Data")]
 
+  #--------------------------------------
   #Define function to check for NA values
   #--------------------------------------
   checkNA <- function(Names_, Geo) {
@@ -457,6 +428,7 @@ Initialize <- function(L) {
     list(None = NoNA, SomeNotAll = SomeNotAllNA)
   }
 
+  #-----------------------------------------------
   #Define function to check and adjust proportions
   #-----------------------------------------------
   checkProps <- function(FieldNames_, UzaNames_, Ua, TypeName) {
@@ -523,6 +495,7 @@ Initialize <- function(L) {
     )
   }
 
+  #-----------------------------------------------------------
   #Check and adjust roadway DVMT proportions for vehicle types
   #-----------------------------------------------------------
   #Extract the urbanized area names and the allowed names
@@ -581,6 +554,7 @@ Initialize <- function(L) {
     rm(Msg)
   }
 
+  #---------------------------------------------------------------------
   #Check region and marea base year heavy truck DVMT and light-duty DVMT
   #---------------------------------------------------------------------
   #Identify which year values correspond to base year in Get data
@@ -589,8 +563,6 @@ Initialize <- function(L) {
   Marea_df <- data.frame(
     Name = L$Data$Global$Marea$Geo,
     LookupName = L$Data$Global$Marea$UzaNameLookup,
-    UrbanPop = L$Get$Year$Marea$UrbanPop[IsBaseYear],
-    TotalPop = with(L$Get$Year$Marea, (UrbanPop + TownPop + RuralPop)[IsBaseYear]),
     UrbanHvyTrkDvmt = L$Data$Global$Marea$UrbanHvyTrkDvmt,
     UrbanLdvDvmt = L$Data$Global$Marea$UrbanLdvDvmt
   )
@@ -673,66 +645,22 @@ Initialize <- function(L) {
     Errors_ <- c(Errors_, Msg)
     rm(Msg)
   }
-  #If heavy truck is fully specified, calculate DVMT rates and values
-  if (all(FullySpecdHvyTrk)) {
-    Marea_df$UrbanHvyTrkDvmtPC <- Marea_df$UrbanHvyTrkDvmt / Marea_df$UrbanPop
-    Marea_df$UrbanHvyTrkDvmtPC[!HasHvyTrkDvmt] <-
-      RoadDvmtModel_ls$UzaHvyTrkDvmtPC_Ua[Marea_df$LookupName[!HasHvyTrkDvmt]]
-    Marea_df$UrbanHvyTrkDvmt <- with(Marea_df, UrbanHvyTrkDvmtPC * UrbanPop)
-  }
-  #If light-duty is fully specified, calculate DVMT rates and values
-  if (all(FullySpecdLdv)) {
-    Marea_df$UrbanLdvDvmtPC <- Marea_df$UrbanLdvDvmt / Marea_df$UrbanPop
-    Marea_df$UrbanLdvDvmtPC[!HasLdvDvmt] <-
-      RoadDvmtModel_ls$UzaLDVDvmtPC_Ua[Marea_df$LookupName[!HasLdvDvmt]]
-    Marea_df$UrbanLdvDvmt <- with(Marea_df, UrbanLdvDvmtPC * UrbanPop)
-  }
   #Check whether region heavy truck data are complete
   RegionHvyTrkDvmt <- L$Data$Global$Region$HvyTrkDvmt
-  if (is.na(RegionHvyTrkDvmt)) {
-    State <- L$Data$Global$Region$StateAbbrLookup
-    if (!is.na(State)) {
-      RegionPop <-
-        with(L$Get$Year$Marea, (RuralPop + TownPop + UrbanPop)[IsBaseYear])
-      RegionHvyTrkDvmt <- RoadDvmtModel_ls$HvyTrkDvmtPC_St[State] * RegionPop
-    } else {
-      if (all(FullySpecdHvyTrk)) {
-        RegionHvyTrkDvmt <- with(Marea_df, sum(UrbanHvyTrkDvmtPC * TotalPop))
-      } else {
-        Msg <- paste0(
-          "Region heavy truck DVMT can't be calculated from data in the ",
-          "'region_base_year_hvytrk_dvmt.csv' file and the 'marea_base_year_dvmt.csv ",
-          "files because the 'marea_base_year_dvmt.csv' file is incomplete. ",
-          "Consult error messages in the log for additional details."
-        )
-        Errors_ <- c(Errors_, Msg)
-        rm(Msg)
-      }
-    }
-  }
-  #Flag an error if the urban heavy truck DVMT is greater than the regional
-  if (all(FullySpecdHvyTrk)) {
-    if (sum(Marea_df$UrbanHvyTrkDvmt) > RegionHvyTrkDvmt) {
-      Msg <- paste0(
-        "Error in the 'marea_base_year_dvmt.csv' input file and/or ",
-        "the 'region_base_year_hvytrk_dvmt.csv' input file. ",
-        "The sum of urban heavy truck DVMT is greater than the regional heavy ",
-        "truck DVMT. Revise the inputs so that the urban value does not exceed ",
-        "the regional value. Note that if this is not a state model but a ",
-        "state abbreviation is identified in the StateAbbrLookup field and a ",
-        "value for HvyTrkDvmt is not identified in the ",
-        "'region_base_year_hvytrk_dvmt.csv' input file, the model will ",
-        "calculate the region value based on the state per capita ",
-        "rate and the regional population. This can be a source of errors. ",
-        "because the state per capita rate for heavy truck DVMT may not be ",
-        "representative of the region being modeled. Instead, enter NA in the ",
-        "StateAbbrLookup field and the model will compute the regional heavy ",
-        "value from the Marea urban heavy truck rates and the total Marea ",
-        "populations."
-      )
-      Errors_ <- c(Errors_, Msg)
-      rm(Msg)
-    }
+  State <- L$Data$Global$Region$StateAbbrLookup
+  if (is.na(RegionHvyTrkDvmt) & is.na(State) & !all(FullySpecdHvyTrk)) {
+    Msg <- paste0(
+      "Region heavy truck DVMT can't be calculated from data in the ",
+      "'region_base_year_hvytrk_dvmt.csv' file and the 'marea_base_year_dvmt.csv ",
+      "files. Either a value needs to be provided in the 'HvyTrkDvmt' field of ",
+      "'region_base_year_dvmt.csv' file or the state abbreviation must be ",
+      "provided in the 'StateAbbrLookup' field of that file, or ",
+      "complete information needs to be provided in the ",
+      "'marea_base_year_dvmt.csv' file. ",
+      "Consult error messages in the log for additional details."
+    )
+    Errors_ <- c(Errors_, Msg)
+    rm(Msg)
   }
   #Flag a warning if not a state model but state abbreviation provided
   State <- L$Data$Global$Region$StateAbbrLookup
@@ -757,11 +685,8 @@ Initialize <- function(L) {
     Warnings_ <- c(Warnings_, Msg)
     rm(Msg)
   }
-  #Update the values for HvyTrk and LDV DVMT
-  Out_ls$Data$Global$Region$HvyTrkDvmt <- RegionHvyTrkDvmt
-  Out_ls$Data$Global$Marea$UrbanHvyTrkDvmt <- Marea_df$UrbanHvyTrkDvmt
-  Out_ls$Data$Global$Marea$UrbanLdvDvmt <- Marea_df$UrbanLdvDvmt
 
+  #--------------------------------------------------------------
   #Check that operations programs are not applied in marea "None"
   #--------------------------------------------------------------
   #Deployment proportion must be 0 for marea "None"
@@ -787,6 +712,7 @@ Initialize <- function(L) {
   }
   rm(OpsNames_, Ma)
 
+  #------------------------------------------------
   #Check consistency of other operations deployment
   #------------------------------------------------
   HasOthOpsEff <- !is.null(L$Data$Global$OtherOpsEffectiveness)
@@ -832,6 +758,7 @@ Initialize <- function(L) {
   }
   rm(HasOthOpsEff, HasNoArtOthOpsEff, HasNoFwyOthOpsEff, OthFwyOps, OthArtOps)
 
+  #---------------------------------------------------------------
   #Check that congestion charges increase with congestion severity
   #---------------------------------------------------------------
   #Make data frames of congestion charges ordered by congestion level
@@ -860,6 +787,7 @@ Initialize <- function(L) {
   }
   rm(CongLvlNames_, ArtCongChgNames_, FwyCongChgNames_, ArtCongChg_df, FwyCongChg_df)
 
+  #--------------------------------------------
   #Add Errors and Warnings to Out_ls and return
   #--------------------------------------------
   Out_ls$Errors <- Errors_
@@ -878,7 +806,23 @@ documentModule("Initialize")
 #Test code to check specifications, loading inputs, and whether datastore
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions
-# #-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+# #Load libraries and test functions
+# library(visioneval)
+# library(filesstrings)
+# source("tests/scripts/test_functions.R")
+# #Set up test environment
+# TestSetup_ls <- list(
+#   TestDataRepo = "../Test_Data/VE-RSPM",
+#   DatastoreName = "Datastore.tar",
+#   LoadDatastore = TRUE,
+#   TestDocsDir = "verspm",
+#   ClearLogs = TRUE,
+#   # SaveDatastore = TRUE
+#   SaveDatastore = FALSE
+# )
+# setUpTests(TestSetup_ls)
+# #Run test module
 # TestDat_ <- testModule(
 #   ModuleName = "Initialize",
 #   LoadDatastore = TRUE,
@@ -887,14 +831,3 @@ documentModule("Initialize")
 # )
 # L <- TestDat_
 # R <- Initialize(TestDat_)
-
-#Test code to check everything including running the module and checking whether
-#the outputs are consistent with the 'Set' specifications
-#-------------------------------------------------------------------------------
-# TestDat_ <- testModule(
-#   ModuleName = "Initialize",
-#   LoadDatastore = TRUE,
-#   SaveDatastore = TRUE,
-#   DoRun = FALSE
-# )
-

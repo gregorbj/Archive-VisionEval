@@ -1,6 +1,6 @@
 
 # Initialize Module
-### January 23, 2019
+### January 27, 2019
 
 This module reads and processes roadway DVMT and operations inputs to check for inconsistent values which standard VisionEval data checks will not pick up.
 
@@ -24,7 +24,7 @@ This module checks the values in the following input files for missing values an
 
 * marea_congestion_charges.csv
 
-The `region_base_year_hvytrk_dvmt.csv` and `marea_base_year_dvmt.csv` files are checked to assure that there is enough information to compute base year urban heavy truck DVMT and base year urban light-duty vehicle DVMT. These values are used in the calculation of vehicle travel on urban area roads which is are used in road performance calculations. The values in the 2 files are also checked for consistency. These inputs enable users to either declare explict values for regional heavy truck DVMT, marea urban heavy truck DVMT, and marea urban light-duty vehicle DVMT, or to specify locations (state and/or urbanized area) which are used for calculating DVMT from per capita rates tabulated for the areas from Highway Statistics data by the LoadDefaultRoadDvmtValues.R script. When DVMT input values are not specified, they are calculated from the rates for the state and/or metropolitan areas and the calculated values are used to update the input values. The procedures also check whether the sum of urban heavy truck DVMT for all mareas does not exceed the regional heavy truck DVMT. In addition, a check is made on if the model is likely to be a metropolitan model, not a state model, but a state is specified and state per capita heavy truck DVMT rates are used to calculate regional heavy truck DVMT. The value for StateAbbrLookup in the 'region_base_year_hvytrk_dvmt.csv' file should be NA in metropolitan models rather than a specific state if the regional heavy truck DVMT is not provided because the state rates may not be representative of the metropolitan rates. A warning is issued if this is the case.
+The `region_base_year_hvytrk_dvmt.csv` and `marea_base_year_dvmt.csv` files are checked to assure that there is enough information to compute base year urban heavy truck DVMT and base year urban light-duty vehicle DVMT. These values are used in the calculation of vehicle travel on urban area roads which is are used in road performance calculations. The values in the 2 files are also checked for consistency. These inputs enable users to either declare explict values for regional heavy truck DVMT, marea urban heavy truck DVMT, and marea urban light-duty vehicle DVMT, or to specify locations (state and/or urbanized area) which are used for calculating DVMT from per capita rates tabulated for the areas from Highway Statistics data by the LoadDefaultRoadDvmtValues.R script. In addition, a check is made on if the model is likely to be a metropolitan model, not a state model, but a state is specified and state per capita heavy truck DVMT rates are used to calculate regional heavy truck DVMT. The value for StateAbbrLookup in the 'region_base_year_hvytrk_dvmt.csv' file should be NA in metropolitan models rather than a specific state if the regional heavy truck DVMT is not provided because the state rates may not be representative of the metropolitan rates. A warning is issued if this is the case.
 
 If a value, rather than NA, is provided in the `StateAbbrLookup` field of the `region_base_year_hvytrk_dvmt.csv` file, the value must be a standard 2-character postal code for the state.
 
@@ -276,28 +276,7 @@ This input file is OPTIONAL.
 |37 |ArtExtCongChg  |currency |USD   |< 0      |            |         |Charge per mile (U.S. dollars) of vehicle travel on arterials during periods of extreme congestion  |
 
 ## Datasets Used by the Module
-The following table documents each dataset that is retrieved from the datastore and used by the module. Each row in the table describes a dataset. All the datasets must be present in the datastore. One or more of these datasets may be entered into the datastore from the user input files. The table names and their meanings are as follows:
-
-NAME - The dataset name.
-
-TABLE - The table in the datastore that the data is retrieved from.
-
-GROUP - The group in the datastore where the table is located. Note that the datastore has a group named 'Global' and groups for every model run year. For example, if the model run years are 2010 and 2050, then the datastore will have a group named '2010' and a group named '2050'. If the value for 'GROUP' is 'Year', then the dataset will exist in each model run year group. If the value for 'GROUP' is 'BaseYear' then the dataset will only exist in the base year group (e.g. '2010'). If the value for 'GROUP' is 'Global' then the dataset will only exist in the 'Global' group.
-
-TYPE - The data type. The framework uses the type to check units and inputs. Refer to the model system design and users guide for information on allowed types.
-
-UNITS - The units that input values need to represent. Some data types have defined units that are represented as abbreviations or combinations of abbreviations. For example 'MI/HR' means miles per hour. Many of these abbreviations are self evident, but the VisionEval model system design and users guide should be consulted.
-
-PROHIBIT - Values that are prohibited. Values in the datastore do not meet any of the listed conditions.
-
-ISELEMENTOF - Categorical values that are permitted. Values in the datastore are one or more of the listed values.
-
-|NAME     |TABLE |GROUP |TYPE      |UNITS |PROHIBIT |ISELEMENTOF |
-|:--------|:-----|:-----|:---------|:-----|:--------|:-----------|
-|RuralPop |Marea |Year  |people    |PRSN  |NA, < 0  |            |
-|TownPop  |Marea |Year  |people    |PRSN  |NA, < 0  |            |
-|UrbanPop |Marea |Year  |people    |PRSN  |NA, < 0  |            |
-|Marea    |Marea |Year  |character |ID    |         |            |
+This module uses no datasets that are in the datastore.
 
 ## Datasets Produced by the Module
 This module produces no datasets to store in the datastore.

@@ -5,7 +5,7 @@
 #<doc>
 #
 ## CalculateRoadDvmt Module
-#### January 23, 2019
+#### January 27, 2019
 #
 #When run for the base year, this module computes several factors used in computing roadway DVMT including factors for calculating commercial service vehicle travel and heavy truck travel. While base year heavy truck DVMT and commercial service vehicle DVMT are calculated directly from inputs and model parameters, future year DVMT is calculated as a function of the declared growth basis which for heavy trucks may be population or income, and for commercial service vehicles may be population, income, or household DVMT. Factors are calculated for each basis. In non-base years, the module uses these factors to compute heavy truck and commercial service DVMT.
 #
@@ -308,6 +308,38 @@ CalculateRoadDvmtSpecifications <- list(
   #Specify data to saved in the data store
   Set = items(
     item(
+      NAME = "HvyTrkDvmt",
+      TABLE = "Region",
+      GROUP = "Global",
+      TYPE = "compound",
+      UNITS = "MI/DAY",
+      NAVALUE = -1,
+      SIZE = 0,
+      PROHIBIT = "< 0",
+      ISELEMENTOF = "",
+      DESCRIPTION = "Average daily vehicle miles of travel on roadways in the region by heavy trucks during the base year. The value for this input may be NA instead of number. In that case, if a state abbreviation is provided, the base year value is calculated from the state per capita rate tabulated by the LoadDefaultRoadDvmtValues.R script and the base year population. If the state abbreviation is NA (as for a metropolitan model) the base year value is calculated from metropolitan area per capita rates and metropolitan area population."
+    ),
+    item(
+      NAME =
+        items(
+          "UrbanLdvDvmt",
+          "UrbanHvyTrkDvmt"
+        ),
+      TABLE = "Marea",
+      GROUP = "Global",
+      TYPE = "compound",
+      UNITS = "MI/DAY",
+      NAVALUE = -1,
+      SIZE = 0,
+      PROHIBIT = "< 0",
+      ISELEMENTOF = "",
+      DESCRIPTION =
+        items(
+          "Average daily vehicle miles of travel on roadways in the urbanized portion of the Marea by light-duty vehicles during the base year. This value may be omitted if a value for UzaNameLookup is provided so that a value may be computed from the urbanized area per capita rate tabulated by the LoadDefaultRoadDvmtValues.R script and the base year urban population.",
+          "Average daily vehicle miles of travel on roadways in the urbanized portion of the Marea by heavy trucks during he base year. This value may be omitted if a value for UzaNameLookup is provided so that a value may be computed from the urbanized area per capita rate tabulated by the LoadDefaultRoadDvmtValues.R script and the base year urban population."
+        )
+    ),
+    item(
       NAME = "HvyTrkDvmtIncomeFactor",
       TABLE = "Region",
       GROUP = "Global",
@@ -344,8 +376,8 @@ CalculateRoadDvmtSpecifications <- list(
       ISELEMENTOF = "",
       SIZE = 0,
       DESCRIPTION = items(
-        "Base year Region heavy truck daily vehicle miles of travel in urbanized areas",
-        "Base year Region heavy truck daily vehicle miles of travel outside of urbanized areas (i.e. in town or rural areas)"
+        "Region heavy truck daily vehicle miles of travel in urbanized areas",
+        "Region heavy truck daily vehicle miles of travel outside of urbanized areas (i.e. in town or rural areas)"
       )
     ),
     item(
@@ -637,6 +669,62 @@ CalculateRoadDvmt <- function(L) {
   TownHhDvmt_Ma <- L$Year$Marea$TownHhDvmt
   RuralHhDvmt_Ma <- L$Year$Marea$RuralHhDvmt
   HhDvmt_Ma <- UrbanHhDvmt_Ma + TownHhDvmt_Ma + RuralHhDvmt_Ma
+
+  #Calculate base year urban HvyTrk and LDV roadDVMT and regional HvyTrk DVMT
+  #--------------------------------------------------------------------------
+  #Only run for base year
+  if (L$G$Year == L$G$BaseYear) {
+    #Make a data frame of Marea data to use in checks and calculations
+    Marea_df <- data.frame(
+      Name = L$Global$Marea$Marea,
+      LookupName = L$Global$Marea$UzaNameLookup,
+      UrbanPop = L$Year$Marea$UrbanPop,
+      TotalPop = with(L$Year$Marea, (UrbanPop + TownPop + RuralPop)),
+      UrbanHvyTrkDvmt = L$Global$Marea$UrbanHvyTrkDvmt,
+      UrbanLdvDvmt = L$Global$Marea$UrbanLdvDvmt
+    )
+    #Calculate urban road HvyTrk DVMT rates and values using default per capita
+    #rate if value has not been specified in inputs
+    HasHvyTrkDvmt <- !is.na(Marea_df$UrbanHvyTrkDvmt)
+    if (any(!HasHvyTrkDvmt)) {
+      Marea_df$UrbanHvyTrkDvmtPC <- Marea_df$UrbanHvyTrkDvmt / Marea_df$UrbanPop
+      Marea_df$UrbanHvyTrkDvmtPC[!HasHvyTrkDvmt] <-
+        RoadDvmtModel_ls$UzaHvyTrkDvmtPC_Ua[Marea_df$LookupName[!HasHvyTrkDvmt]]
+      Marea_df$UrbanHvyTrkDvmt <- with(Marea_df, UrbanHvyTrkDvmtPC * UrbanPop)
+      L$Global$Marea$UrbanHvyTrkDvmt <- Marea_df$UrbanHvyTrkDvmt
+    }
+    rm(HasHvyTrkDvmt)
+    #Calculate urban road LDV DVMT rates and values using default per capita
+    #rate if value has not been specified in inputs
+    HasLdvDvmt <- !is.na(Marea_df$UrbanLdvDvmt)
+    if (any(!HasLdvDvmt)) {
+      Marea_df$UrbanLdvDvmtPC <- Marea_df$UrbanLdvDvmt / Marea_df$UrbanPop
+      Marea_df$UrbanLdvDvmtPC[!HasLdvDvmt] <-
+        RoadDvmtModel_ls$UzaLDVDvmtPC_Ua[Marea_df$LookupName[!HasLdvDvmt]]
+      Marea_df$UrbanLdvDvmt <- with(Marea_df, UrbanLdvDvmtPC * UrbanPop)
+      L$Global$Marea$UrbanLdvDvmt <- Marea_df$UrbanLdvDvmt
+    }
+    rm(HasLdvDvmt)
+    #Check whether region heavy truck data are complete
+    RegionHvyTrkDvmt <- L$Global$Region$HvyTrkDvmt
+    if (is.na(RegionHvyTrkDvmt)) {
+      State <- L$Global$Region$StateAbbrLookup
+      if (!is.na(State)) {
+        RegionPop <- Pop
+        RegionHvyTrkDvmt <- RoadDvmtModel_ls$HvyTrkDvmtPC_St[State] * RegionPop
+        rm(RegionPop)
+      } else {
+        RegionHvyTrkDvmt <- with(Marea_df, sum(UrbanHvyTrkDvmtPC * TotalPop))
+      }
+      L$Global$Region$HvyTrkDvmt <- RegionHvyTrkDvmt
+      rm(State)
+    }
+    rm(RegionHvyTrkDvmt, Marea_df)
+  }
+  #Update the values for HvyTrk and LDV DVMT
+  Out_ls$Global$Region$HvyTrkDvmt <- L$Global$Region$HvyTrkDvmt
+  Out_ls$Global$Marea$UrbanHvyTrkDvmt <- L$Global$Marea$UrbanHvyTrkDvmt
+  Out_ls$Global$Marea$UrbanLdvDvmt <- L$Global$Marea$UrbanLdvDvmt
 
   #Calculate heavy truck prediction factors and DVMT
   #-------------------------------------------------
