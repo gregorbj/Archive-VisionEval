@@ -283,10 +283,14 @@ processEstimationInputs <- function(Inp_ls, FileName, ModuleName) {
 #' @return The identified dataset.
 #' @export
 loadPackageDataset <- function(DatasetName) {
-  Dat_df <- getModelState()$DatasetsByPackage_df
-  PkgName <- with(Dat_df, Package[Dataset == DatasetName])
-  FullName <- paste(PkgName, DatasetName, sep = "::")
-  eval(parse(text = FullName))
+  if (exists(DatasetName)) {
+    return(eval(parse(text = DatasetName)))
+  } else {
+    Dat_df <- getModelState()$DatasetsByPackage_df
+    PkgName <- with(Dat_df, Package[Dataset == DatasetName])
+    FullName <- paste(PkgName, DatasetName, sep = "::")
+    return(eval(parse(text = FullName)))
+  }
 }
 
 
@@ -457,6 +461,12 @@ checkModuleOutputs <-
 #'   preprocess inputs. For this purpose, the module will identify any errors in
 #'   the input data, the 'initializeModel' function will collate all the data
 #'   errors and print them to the log.
+#' @param RequiredPackages A character vector identifying any packages that
+#'   must be installed in order to test the module because the module either
+#'   has a soft reference to a module in the package (i.e. the Call spec only
+#'   identifies the name of the module being called) or a soft reference to a
+#'   dataset in the module (i.e. only identifies the name of the dataset). The
+#'   default value is NULL.
 #' @return If DoRun is FALSE, the return value is a list containing the module
 #'   specifications. If DoRun is TRUE, there is no return value. The function
 #'   writes out messages to the console and to the log as the testing proceeds.
@@ -475,7 +485,8 @@ testModule <-
            SaveDatastore = TRUE,
            DoRun = TRUE,
            RunFor = "AllYears",
-           StopOnErr = TRUE) {
+           StopOnErr = TRUE,
+           RequiredPackages = NULL) {
 
     #Set working directory to tests and return to main module directory on exit
     #--------------------------------------------------------------------------
@@ -497,38 +508,41 @@ testModule <-
     #Make correspondence tables of modules and datasets to packages
     #--------------------------------------------------------------
     #This supports soft call and dataset references in modules
-    RequiredPkg_ <- getModelState()$RequiredVEPackages
-    #Make sure all required packages are present
-    InstalledPkgs_ <- rownames(installed.packages())
-    MissingPkg_ <- RequiredPkg_[!(RequiredPkg_ %in% InstalledPkgs_)]
-    if (length(MissingPkg_ != 0)) {
-      Msg <-
-        paste0("One or more required packages need to be installed in order ",
-               "to run the model. Following are the missing package(s): ",
-               paste(MissingPkg_, collapse = ", "), ".")
-      stop(Msg)
+    RequiredPkg_ <- RequiredPackages
+    #If RequiredPkg_ is not NULL make a list of modules and datasets in packages
+    if (!is.null(RequiredPkg_)) {
+      #Make sure all required packages are present
+      InstalledPkgs_ <- rownames(installed.packages())
+      MissingPkg_ <- RequiredPkg_[!(RequiredPkg_ %in% InstalledPkgs_)]
+      if (length(MissingPkg_ != 0)) {
+        Msg <-
+          paste0("One or more required packages need to be installed in order ",
+                 "to run the model. Following are the missing package(s): ",
+                 paste(MissingPkg_, collapse = ", "), ".")
+        stop(Msg)
+      }
+      #Identify all modules and datasets in required packages
+      Datasets_df <-
+        data.frame(
+          do.call(
+            rbind,
+            lapply(RequiredPkg_, function(x) {
+              data(package = x)$results[,c("Package", "Item")]
+            })
+          ), stringsAsFactors = FALSE
+        )
+      WhichAreModules_ <- grep("Specifications", Datasets_df$Item)
+      ModulesByPackage_df <- Datasets_df[WhichAreModules_,]
+      ModulesByPackage_df$Module <-
+        gsub("Specifications", "", ModulesByPackage_df$Item)
+      ModulesByPackage_df$Item <- NULL
+      DatasetsByPackage_df <- Datasets_df[-WhichAreModules_,]
+      names(DatasetsByPackage_df) <- c("Package", "Dataset")
+      #Save the modules and datasets lists in the model state
+      setModelState(list(ModulesByPackage_df = ModulesByPackage_df,
+                         DatasetsByPackage_df = DatasetsByPackage_df))
+      rm(Datasets_df, WhichAreModules_)
     }
-    #Identify all modules and datasets in required packages
-    Datasets_df <-
-      data.frame(
-        do.call(
-          rbind,
-          lapply(RequiredPkg_, function(x) {
-            data(package = x)$results[,c("Package", "Item")]
-          })
-        ), stringsAsFactors = FALSE
-      )
-    WhichAreModules_ <- grep("Specifications", Datasets_df$Item)
-    ModulesByPackage_df <- Datasets_df[WhichAreModules_,]
-    ModulesByPackage_df$Module <-
-      gsub("Specifications", "", ModulesByPackage_df$Item)
-    ModulesByPackage_df$Item <- NULL
-    DatasetsByPackage_df <- Datasets_df[-WhichAreModules_,]
-    names(DatasetsByPackage_df) <- c("Package", "Dataset")
-    #Save the modules and datasets lists in the model state
-    setModelState(list(ModulesByPackage_df = ModulesByPackage_df,
-                       DatasetsByPackage_df = DatasetsByPackage_df))
-    rm(Datasets_df, WhichAreModules_)
 
     #Load datastore if specified or initialize new datastore
     #-------------------------------------------------------
