@@ -906,24 +906,28 @@ documentModule("CalculateRoadDvmt")
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions
 #-------------------------------------------------------------------------------
+# #Load libraries and test functions
+# library(visioneval)
+# library(filesstrings)
+# source("tests/scripts/test_functions.R")
+# #Set up test environment
+# TestSetup_ls <- list(
+#   TestDataRepo = "../Test_Data/VE-RSPM",
+#   DatastoreName = "Datastore.tar",
+#   LoadDatastore = TRUE,
+#   TestDocsDir = "verspm",
+#   ClearLogs = TRUE,
+#   # SaveDatastore = TRUE
+#   SaveDatastore = FALSE
+# )
+# setUpTests(TestSetup_ls)
+# #Run test module
 # TestDat_ <- testModule(
 #   ModuleName = "CalculateRoadDvmt",
 #   LoadDatastore = TRUE,
 #   SaveDatastore = TRUE,
-#   DoRun = FALSE,
-#   RunFor = "AllYears"
+#   DoRun = FALSE
 # )
 # L <- TestDat_$L
 # R <- CalculateRoadDvmt(L)
 
-#Test code to check everything including running the module and checking whether
-#the outputs are consistent with the 'Set' specifications
-#-------------------------------------------------------------------------------
-# load("data/RoadDvmtModel_ls.rda")
-# TestDat_ <- testModule(
-#   ModuleName = "CalculateRoadDvmt",
-#   LoadDatastore = TRUE,
-#   SaveDatastore = TRUE,
-#   DoRun = TRUE,
-#   RunFor = "AllYears"
-# )

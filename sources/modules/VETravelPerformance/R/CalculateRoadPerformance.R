@@ -226,13 +226,6 @@
 #</doc>
 
 
-#=================================
-#Packages used in code development
-#=================================
-#Uncomment following lines during code development. Recomment when done.
-#library(visioneval)
-
-
 #==========================================
 #SECTION 1A: LOAD URBAN MOBILITY STUDY DATA
 #==========================================
@@ -1957,30 +1950,28 @@ documentModule("CalculateRoadPerformance")
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions
 #-------------------------------------------------------------------------------
+# #Load libraries and test functions
+# library(visioneval)
+# library(filesstrings)
+# source("tests/scripts/test_functions.R")
+# #Set up test environment
+# TestSetup_ls <- list(
+#   TestDataRepo = "../Test_Data/VE-RSPM",
+#   DatastoreName = "Datastore.tar",
+#   LoadDatastore = TRUE,
+#   TestDocsDir = "verspm",
+#   ClearLogs = TRUE,
+#   # SaveDatastore = TRUE
+#   SaveDatastore = FALSE
+# )
+# setUpTests(TestSetup_ls)
+# #Run test module
 # TestDat_ <- testModule(
 #   ModuleName = "CalculateRoadPerformance",
 #   LoadDatastore = TRUE,
 #   SaveDatastore = TRUE,
-#   DoRun = FALSE,
-#   RunFor = "BaseYear"
+#   DoRun = FALSE
 # )
 # L <- TestDat_$L
 # R <- CalculateRoadPerformance(L)
 
-#Test code to check everything including running the module and checking whether
-#the outputs are consistent with the 'Set' specifications
-#-------------------------------------------------------------------------------
-# TestDat_ <- testModule(
-#   ModuleName = "CalculateRoadPerformance",
-#   LoadDatastore = TRUE,
-#   SaveDatastore = TRUE,
-#   DoRun = TRUE,
-#   RunFor = "BaseYear"
-# )
-# TestDat_ <- testModule(
-#   ModuleName = "CalculateRoadPerformance",
-#   LoadDatastore = TRUE,
-#   SaveDatastore = TRUE,
-#   DoRun = TRUE,
-#   RunFor = "NotBaseYear"
-# )
