@@ -1,32 +1,32 @@
 Test
 Test of VESimHouseholds package modules
-2019-01-25_13:29:49
+2019-01-28_13:37:33
 
-2019-01-25 13:29:49 : Testing AssignLocTypes. 
+2019-01-28 13:37:34 : Testing AssignLocTypes. 
 
-2019-01-25 13:29:49 : Attempting to load datastore. 
+2019-01-28 13:37:34 : Attempting to load datastore. 
 
-2019-01-25 13:29:49 : Datastore loaded. 
+2019-01-28 13:37:34 : Datastore loaded. 
 
-2019-01-25 13:29:49 : Attempting to load and check specifications. 
+2019-01-28 13:37:34 : Attempting to load and check specifications. 
 
-2019-01-25 13:29:49 : Module specifications successfully loaded and checked for errors. 
+2019-01-28 13:37:34 : Module specifications successfully loaded and checked for errors. 
 
-2019-01-25 13:29:50 : Attempting to process, check and load module inputs. 
+2019-01-28 13:37:34 : Attempting to process, check and load module inputs. 
 
-2019-01-25 13:29:52 : Module inputs successfully checked and loaded into datastore. 
+2019-01-28 13:37:36 : Module inputs successfully checked and loaded into datastore. 
 
-2019-01-25 13:29:52 : Checking whether datastore contains all datasets in Get specifications. 
+2019-01-28 13:37:37 : Checking whether datastore contains all datasets in Get specifications. 
 
-2019-01-25 13:29:52 : Datastore contains all datasets identified in module Get specifications. 
+2019-01-28 13:37:37 : Datastore contains all datasets identified in module Get specifications. 
 
-2019-01-25 13:29:52 : Running module and checking whether outputs meet Set specifications. 
+2019-01-28 13:37:37 : Running module and checking whether outputs meet Set specifications. 
 
-2019-01-25 13:29:52 : Also saving module outputs to datastore. 
+2019-01-28 13:37:37 : Also saving module outputs to datastore. 
 
-2019-01-25 13:30:03 : Module run successfully and outputs meet Set specifications. 
+2019-01-28 13:37:45 : Module run successfully and outputs meet Set specifications. 
 
-2019-01-25 13:30:03 : Module outputs saved to datastore. 
+2019-01-28 13:37:45 : Module outputs saved to datastore. 
 
-2019-01-25 13:30:03 : Congratulations. Module AssignLocTypes passed all tests. 
+2019-01-28 13:37:45 : Congratulations. Module AssignLocTypes passed all tests. 
 
