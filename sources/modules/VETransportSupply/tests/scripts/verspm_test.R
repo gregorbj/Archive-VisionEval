@@ -20,8 +20,10 @@ TestSetup_ls <- list(
 
 #Define the module tests
 Tests_ls <- list(
-  list(ModuleName = "AssignTransitService", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
-  list(ModuleName = "AssignRoadMiles", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE)
+  list(ModuleName = "AssignTransitService",
+       LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
+  list(ModuleName = "AssignRoadMiles",
+       LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE)
 )
 
 #Set up, run tests, and save test results
