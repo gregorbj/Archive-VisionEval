@@ -19,9 +19,13 @@ TestSetup_ls <- list(
 
 #Define the module tests
 Tests_ls <- list(
-  list(ModuleName = "Initialize", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
-  list(ModuleName = "CalculateCarbonIntensity", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
-  list(ModuleName = "AssignHhVehiclePowertrain", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE)
+  list(ModuleName = "Initialize",
+       LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
+  list(ModuleName = "CalculateCarbonIntensity",
+       LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
+  list(ModuleName = "AssignHhVehiclePowertrain",
+       LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE,
+       RequiredPackages = "VEHouseholdTravel")
 )
 
 #Set up, run tests, and save test results
