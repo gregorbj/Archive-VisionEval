@@ -20,13 +20,21 @@ TestSetup_ls <- list(
 
 #Define the module tests
 Tests_ls <- list(
-  list(ModuleName = "AssignDrivers", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
-  list(ModuleName = "AssignVehicleOwnership", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
-  list(ModuleName = "AssignVehicleType", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
-  list(ModuleName = "CreateVehicleTable", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
-  list(ModuleName = "AssignVehicleAge", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
-  list(ModuleName = "CalculateVehicleOwnCost", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
-  list(ModuleName = "AdjustVehicleOwnership", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE)
+  list(ModuleName = "AssignDrivers",
+       LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
+  list(ModuleName = "AssignVehicleOwnership",
+       LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
+  list(ModuleName = "AssignVehicleType",
+       LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
+  list(ModuleName = "CreateVehicleTable",
+       LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
+  list(ModuleName = "AssignVehicleAge",
+       LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
+  list(ModuleName = "CalculateVehicleOwnCost",
+       LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE,
+       RequiredPackages = "VEHouseholdTravel"),
+  list(ModuleName = "AdjustVehicleOwnership",
+       LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE)
 )
 
 #Set up, run tests, and save test results
