@@ -20,11 +20,16 @@ TestSetup_ls <- list(
 
 #Define the module tests
 Tests_ls <- list(
-  list(ModuleName = "CalculateHouseholdDvmt", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
-  list(ModuleName = "CalculateAltModeTrips", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
-  list(ModuleName = "CalculateVehicleTrips", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
-  list(ModuleName = "DivertSovTravel", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
-  list(ModuleName = "ApplyDvmtReductions", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE)
+  list(ModuleName = "CalculateHouseholdDvmt",
+       LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
+  list(ModuleName = "CalculateAltModeTrips",
+       LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
+  list(ModuleName = "CalculateVehicleTrips",
+       LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
+  list(ModuleName = "DivertSovTravel",
+       LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
+  list(ModuleName = "ApplyDvmtReductions",
+       LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE)
 )
 
 #Set up, run tests, and save test results
