@@ -619,6 +619,9 @@ testModule <-
     #--------------------------------------
     if (is.null(Specs_ls$Inp)) {
       writeLog("No inputs to process.", Print = TRUE)
+      # If no inputs and is Initialize module return
+      # i.e. all inputs are optional and none are provided
+      if (ModuleName == "Initialize") return()
     } else {
       writeLog("Attempting to process, check and load module inputs.",
              Print = TRUE)
