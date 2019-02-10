@@ -110,7 +110,7 @@ initializeModel <-
         }
       } else {
         if (file.exists(getModelState()[["DatastoreName"]])) {
-          LoadDatastore <- getModelState()[["DatastoreName"]]
+          DatastoreName <- getModelState()[["DatastoreName"]]
           loadDatastore(
             FileToLoad = DatastoreName,
             GeoFile = GeoFile,

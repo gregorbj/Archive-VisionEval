@@ -8,6 +8,9 @@
 #--------------
 library(visioneval)
 
+# Set future::plan for number of processors
+planType <- 'multiprocess'
+
 #Initialize model
 #----------------
 initializeModel(

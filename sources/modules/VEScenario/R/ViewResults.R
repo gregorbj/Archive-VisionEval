@@ -133,23 +133,36 @@ usethis::use_data(ViewResultsSpecifications, overwrite = TRUE)
 ViewResults <- function(L){
   # Setup
   # -------------
-  # Set input directory
-  ModelPath <- getwd()
-  JsonFile <- list.files(file.path(ModelPath, L$Global$Model$ScenarioOutputFolder), recursive = FALSE, pattern = "*.js$", full.names = TRUE)
+  
+  # Clear old Visualizer
   if(dir.exists("Visualizer")){
     unlink("Visualizer", recursive = TRUE, force = TRUE)
   }
   dir.create("Visualizer")
-  # Load html files
+  
+  # Set input directory
+  ModelPath <- getwd()
+
+  # Load html files from tar archive
   if("VEScenario" %in% rownames(installed.packages())){
     HtmlFilePath <- system.file("extdata", "VEScenarioViewer.tar", package = "VEScenario")
     untar(HtmlFilePath, exdir = file.path(ModelPath, "Visualizer"))
   }
-  modelFile <- grepl("(ve(rpat|rspm|state)).js$",JsonFile, ignore.case = FALSE)
-  file.copy(JsonFile, file.path(ModelPath, "Visualizer", "data"), overwrite = TRUE)
-  htmlName <- paste0(gsub(".*(ve.*).js$","\\1",JsonFile),".html")[modelFile]
-  browseURL(paste0(ModelPath, "/Visualizer/",htmlName))
-  # browseURL(paste0(ModelPath, "/Visualizer/verpat.html"))
+  
+  JsonFiles <- list.files(file.path(ModelPath, L$Global$Model$ScenarioOutputFolder),
+                          recursive = FALSE, pattern = "*.js$", full.names = TRUE)
+  
+  modelFile <- JsonFiles[grepl("(ve(rpat|rspm|state)).js$", JsonFiles, ignore.case = FALSE)]
+  model <- gsub('[.]js$', '', basename(modelFile))
+
+  JsonDir <- file.path(ModelPath, "Visualizer", "data", toupper(model))
+  file.copy(JsonFiles, JsonDir, overwrite = TRUE)
+  
+  htmlPath <- file.path(ModelPath, "Visualizer", paste0(model, '.html'))
+  
+  # Open file in browser
+  browseURL(htmlPath)
+
   # Clean up
   gc()
   #Return the results
