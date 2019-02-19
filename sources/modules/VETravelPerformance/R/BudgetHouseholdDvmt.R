@@ -283,11 +283,29 @@ usethis::use_data(OpPropModel_ls, overwrite = TRUE)
 #------------------------------
 BudgetHouseholdDvmtSpecifications <- list(
   #Level of geography module is applied at
-  RunBy = "Marea",
+  RunBy = "Region",
   #Specify new tables to be created by Inp if any
   #Specify input data
   #Specify data to be loaded from data store
   Get = items(
+    item(
+      NAME = "Marea",
+      TABLE = "Marea",
+      GROUP = "Year",
+      TYPE = "character",
+      UNITS = "ID",
+      PROHIBIT = "",
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "Marea",
+      TABLE = "Household",
+      GROUP = "Year",
+      TYPE = "character",
+      UNITS = "ID",
+      PROHIBIT = "",
+      ISELEMENTOF = ""
+    ),
     item(
       NAME = "HhId",
       TABLE = "Household",
@@ -589,6 +607,24 @@ usethis::use_data(BudgetHouseholdDvmtSpecifications, overwrite = TRUE)
 #' @import visioneval
 #' @export
 BudgetHouseholdDvmt <- function(L, M) {
+  #Setup
+  #-----
+  #Index to match household data with vehicle data
+  HhToVehIdx_Ve <- match(L$Year$Vehicle$HhId, L$Year$Household$HhId)
+  #Index to match household data with worker data
+  HhToWkrIdx_Wk <- match(L$Year$Worker$HhId, L$Year$Household$HhId)
+  #Faster function than tapply to sum up to household level
+  NumHh <- length(L$Year$Household$HhId)
+  sumToHousehold <- function(Data_, Index_) {
+    Data_Hh <- numeric(NumHh)
+    Data_Hx <- tapply(Data_, Index_, sum)
+    Data_Hh[as.numeric(names(Data_Hx))] <- Data_Hx
+    Data_Hh
+  }
+  #Define Marea
+  Ma <- L$Year$Marea$Marea
+  #Define LocType
+  Lt <- c("Urban", "Town", "Rural")
 
   #Calculate household budget proportion of income
   #-----------------------------------------------
@@ -600,13 +636,9 @@ BudgetHouseholdDvmt <- function(L, M) {
     #Cash out parking adjustments
     CashOutAdj_Wk <-
       with(L$Year$Worker, ParkingCost * IsCashOut * PaysForParking)
-    CashOutAdj_Hh <-
-      tapply(CashOutAdj_Wk, L$Year$Worker$HhId, sum)[L$Year$Household$HhId]
-    CashOutAdj_Hh <- 365 * CashOutAdj_Hh #Convert daily to annual
-    CashOutAdj_Hh[is.na(CashOutAdj_Hh)] <- 0
+    CashOutAdj_Hh <- sumToHousehold(CashOutAdj_Wk, HhToWkrIdx_Wk) * 365
     #Pay as you drive insurance adjustment
-    InsCost_Hh <-
-      tapply(L$Year$Vehicle$InsCost, L$Year$Vehicle$HhId, sum)[L$Year$Household$HhId]
+    InsCost_Hh <- sumToHousehold(L$Year$Vehicle$InsCost, HhToVehIdx_Ve)
     InsCostAdj_Hh <- InsCost_Hh * L$Year$Household$HasPaydIns
     #Ownership cost savings (for households substituting car service)
     OwnCostSavings_Hh <- L$Year$Household$OwnCostSavings
@@ -635,16 +667,20 @@ BudgetHouseholdDvmt <- function(L, M) {
     #Reduce DVMT to account for TDM and SOV reductions
     L$ReduceDvmt$Year$Household$Dvmt <- AdjDvmt_Hh
     AdjDvmt_Hh <- M$ReduceDvmt(L$ReduceDvmt)$Year$Household$Dvmt
-    #Calculate adjusted urban and rural DVMT for the Marea
-    UrbanDvmt <- sum(AdjDvmt_Hh[L$Year$Household$LocType == "Urban"])
-    RuralDvmt <- sum(AdjDvmt_Hh[L$Year$Household$LocType == "Rural"])
-    TownDvmt <- sum(AdjDvmt_Hh[L$Year$Household$LocType == "Town"])
+    #Calculate adjusted urban and rural DVMT by Marea and location type
+    AdjDvmt_MaLt <- array(0, dim = c(length(Ma), length(Lt)), dimnames = list(Ma, Lt))
+    AdjDvmt_MxLx <- tapply(
+      AdjDvmt_Hh,
+      list(L$Year$Household$Marea, L$Year$Household$LocType),
+      sum)
+    AdjDvmt_MaLt[rownames(AdjDvmt_MxLx), colnames(AdjDvmt_MxLx)] <- AdjDvmt_MxLx
+    AdjDvmt_MaLt[is.na(AdjDvmt_MaLt)] <- 0
     #Return list of results
     list(
       Dvmt_Hh = AdjDvmt_Hh,
-      UrbanDvmt = UrbanDvmt,
-      TownDvmt = TownDvmt,
-      RuralDvmt = RuralDvmt
+      UrbanDvmt = unname(AdjDvmt_MaLt[,"Urban"]),
+      TownDvmt = unname(AdjDvmt_MaLt[,"Town"]),
+      RuralDvmt = unname(AdjDvmt_MaLt[,"Rural"])
     )
   })
 
@@ -696,10 +732,10 @@ documentModule("BudgetHouseholdDvmt")
 # source("tests/scripts/test_functions.R")
 # #Set up test environment
 # TestSetup_ls <- list(
-#   TestDataRepo = "../Test_Data/VE-RSPM",
+#   TestDataRepo = "../Test_Data/VE-State",
 #   DatastoreName = "Datastore.tar",
 #   LoadDatastore = TRUE,
-#   TestDocsDir = "verspm",
+#   TestDocsDir = "vestate",
 #   ClearLogs = TRUE,
 #   # SaveDatastore = TRUE
 #   SaveDatastore = FALSE
@@ -714,4 +750,14 @@ documentModule("BudgetHouseholdDvmt")
 #   RequiredPackages = "VEHouseholdTravel"
 # )
 # L <- TestDat_$L
-# R <- BudgetHouseholdDvmt(L)
+# M <- TestDat_$M
+# R <- BudgetHouseholdDvmt(TestDat_$L, TestDat_$M)
+#
+# TestDat_ <- testModule(
+#   ModuleName = "BudgetHouseholdDvmt",
+#   LoadDatastore = TRUE,
+#   SaveDatastore = TRUE,
+#   DoRun = TRUE,
+#   RequiredPackages = "VEHouseholdTravel"
+# )
+

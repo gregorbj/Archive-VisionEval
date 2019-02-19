@@ -642,6 +642,8 @@ CalculateVehicleTrips <- function(L) {
   #Calculate the average number of vehicle trips
   #---------------------------------------------
   VehicleTrips_Hh <- Hh_df$Dvmt / AveTrpLen_Hh
+  MaxVehicleTrips <- quantile(VehicleTrips_Hh, probs = 0.999)
+  VehicleTrips_Hh[VehicleTrips_Hh > MaxVehicleTrips] <- MaxVehicleTrips
 
   #Return results
   #--------------
@@ -671,10 +673,10 @@ documentModule("CalculateVehicleTrips")
 # source("tests/scripts/test_functions.R")
 # #Set up test environment
 # TestSetup_ls <- list(
-#   TestDataRepo = "../Test_Data/VE-RSPM",
+#   TestDataRepo = "../Test_Data/VE-State",
 #   DatastoreName = "Datastore.tar",
 #   LoadDatastore = TRUE,
-#   TestDocsDir = "verspm",
+#   TestDocsDir = "vestate",
 #   ClearLogs = TRUE,
 #   # SaveDatastore = TRUE
 #   SaveDatastore = FALSE
@@ -689,3 +691,11 @@ documentModule("CalculateVehicleTrips")
 # )
 # L <- TestDat_
 # R <- CalculateVehicleTrips(TestDat_)
+#
+#Run test module
+# TestDat_ <- testModule(
+#   ModuleName = "CalculateVehicleTrips",
+#   LoadDatastore = TRUE,
+#   SaveDatastore = TRUE,
+#   DoRun = TRUE
+# )

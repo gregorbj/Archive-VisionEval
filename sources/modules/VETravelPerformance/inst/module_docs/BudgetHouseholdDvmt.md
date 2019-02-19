@@ -150,6 +150,8 @@ ISELEMENTOF - Categorical values that are permitted. Values in the datastore are
 
 |NAME           |TABLE     |GROUP |TYPE      |UNITS    |PROHIBIT |ISELEMENTOF        |
 |:--------------|:---------|:-----|:---------|:--------|:--------|:------------------|
+|Marea          |Marea     |Year  |character |ID       |         |                   |
+|Marea          |Household |Year  |character |ID       |         |                   |
 |HhId           |Household |Year  |character |ID       |NA       |                   |
 |HhSize         |Household |Year  |people    |PRSN     |NA, <= 0 |                   |
 |Income         |Household |Year  |currency  |USD.2001 |NA, < 0  |                   |

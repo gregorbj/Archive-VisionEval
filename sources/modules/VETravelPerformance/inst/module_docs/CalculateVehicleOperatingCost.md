@@ -320,6 +320,7 @@ ISELEMENTOF - Categorical values that are permitted. Values in the datastore are
 |LdvAveSpeed          |Marea     |Year   |compound  |MI/HR      |< 0          |                           |
 |NonUrbanAveSpeed     |Marea     |Year   |compound  |MI/HR      |< 0          |                           |
 |AveCongPrice         |Marea     |Year   |currency  |USD.2010   |< 0          |                           |
+|Azone                |Azone     |Year   |character |ID         |             |                           |
 |OwnedVehAccessTime   |Azone     |Year   |time      |MIN        |NA, < 0      |                           |
 |HighCarSvcAccessTime |Azone     |Year   |time      |MIN        |NA, < 0      |                           |
 |LowCarSvcAccessTime  |Azone     |Year   |time      |MIN        |NA, < 0      |                           |
@@ -331,6 +332,7 @@ ISELEMENTOF - Categorical values that are permitted. Values in the datastore are
 |HighCarSvcCost       |Azone     |Year   |currency  |USD.2010   |NA, < 0      |                           |
 |LowCarSvcCost        |Azone     |Year   |currency  |USD.2010   |NA, < 0      |                           |
 |Marea                |Household |Year   |character |ID         |             |                           |
+|Azone                |Household |Year   |character |ID         |             |                           |
 |HhId                 |Household |Year   |character |ID         |             |                           |
 |Income               |Household |Year   |currency  |USD.2010   |NA, < 0      |                           |
 |Dvmt                 |Household |Year   |compound  |MI/DAY     |NA, < 0      |                           |
@@ -338,6 +340,7 @@ ISELEMENTOF - Categorical values that are permitted. Values in the datastore are
 |HasPaydIns           |Household |Year   |integer   |binary     |             |0, 1                       |
 |VehicleTrips         |Household |Year   |compound  |TRIP/DAY   |NA, < 0      |                           |
 |OtherParkingCost     |Household |Year   |currency  |USD.2010   |NA, < 0      |                           |
+|Azone                |Vehicle   |Year   |character |ID         |NA           |                           |
 |Marea                |Vehicle   |Year   |character |ID         |NA           |                           |
 |HhId                 |Vehicle   |Year   |character |ID         |NA           |                           |
 |VehId                |Vehicle   |Year   |character |ID         |NA           |                           |

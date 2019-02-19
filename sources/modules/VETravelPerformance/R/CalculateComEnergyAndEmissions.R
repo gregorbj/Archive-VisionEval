@@ -73,7 +73,7 @@ CalculateComEnergyAndEmissionsSpecifications <- list(
     ),
     item(
       NAME = "AveComSvcVehicleAge",
-      FILE = "region_comsvc_ave_veh_age.csv",
+      FILE = "region_comsvc_veh_mean_age.csv",
       TABLE = "Region",
       GROUP = "Year",
       TYPE = "time",
@@ -306,7 +306,7 @@ CalculateComEnergyAndEmissionsSpecifications <- list(
       TYPE = "compound",
       UNITS = "GM/MI",
       NAVALUE = -1,
-      PROHIBIT = c("NA", "< 0"),
+      PROHIBIT = "< 0",
       ISELEMENTOF = "",
       SIZE = 0,
       DESCRIPTION = items(
@@ -687,6 +687,18 @@ CalculateComEnergyAndEmissions <- function(L) {
     ))
   })
 
+  #Calculate commercial services and heavy truck vehicle urban emissions rates
+  #---------------------------------------------------------------------------
+  UrbanCo2eRatesByMarea_ls <- data.frame(
+    ComSvcAuto = with(ComSvcUrbanEE_ls, CO2e_MaVt[,"Auto"] / Dvmt_MaVt[,"Auto"]),
+    ComSvcLtTrk = with(ComSvcUrbanEE_ls, CO2e_MaVt[,"LtTrk"] / Dvmt_MaVt[,"LtTrk"]),
+    HvyTrk = with(HvyTrkUrbanEE_ls, CO2e_Ma / Dvmt_Ma)
+  )
+  UrbanCo2eRatesByMarea_ls <- lapply(UrbanCo2eRatesByMarea_ls, function(x) {
+    x[is.nan(x)] <- NA
+    x
+  })
+
   #Return the results
   #------------------
   Out_ls <- initDataList()
@@ -701,9 +713,9 @@ CalculateComEnergyAndEmissions <- function(L) {
     ComSvcUrbanCO2e = apply(ComSvcUrbanEE_ls$CO2e_MaVt, 1, sum),
     ComSvcNonUrbanCO2e = apply(ComSvcRuralEE_ls$CO2e_MaVt, 1, sum),
     HvyTrkUrbanCO2e = HvyTrkUrbanEE_ls$CO2e_Ma,
-    ComSvcAveUrbanAutoCO2eRate = with(ComSvcUrbanEE_ls, CO2e_MaVt[,"Auto"] / Dvmt_MaVt[,"Auto"]),
-    ComSvcAveUrbanLtTrkCO2eRate = with(ComSvcUrbanEE_ls, CO2e_MaVt[,"LtTrk"] / Dvmt_MaVt[,"LtTrk"]),
-    HvyTrkAveUrbanCO2eRate = with(HvyTrkUrbanEE_ls, CO2e_Ma / Dvmt_Ma)
+    ComSvcAveUrbanAutoCO2eRate = UrbanCo2eRatesByMarea_ls$ComSvcAuto,
+    ComSvcAveUrbanLtTrkCO2eRate = UrbanCo2eRatesByMarea_ls$ComSvcLtTrk,
+    HvyTrkAveUrbanCO2eRate = UrbanCo2eRatesByMarea_ls$HvyTrk
   )
   Out_ls$Year$Region <- list(
     HvyTrkNonUrbanGGE = unname(HvyTrkRuralEE_ls$Energy_Et["GGE"]),
@@ -742,13 +754,23 @@ documentModule("CalculateComEnergyAndEmissions")
 #   # SaveDatastore = TRUE
 #   SaveDatastore = FALSE
 # )
-# setUpTests(TestSetup_ls)
+# # setUpTests(TestSetup_ls)
 # #Run test module
 # TestDat_ <- testModule(
 #   ModuleName = "CalculateComEnergyAndEmissions",
 #   LoadDatastore = TRUE,
-#   SaveDatastore = TRUE,
-#   DoRun = FALSE
+#   SaveDatastore = FALSE,
+#   DoRun = FALSE,
+#   RequiredPackages = "VEPowertrainsAndFuels"
 # )
 # L <- TestDat_$L
 # R <- CalculateComEnergyAndEmissions(L)
+#
+# TestDat_ <- testModule(
+#   ModuleName = "CalculateComEnergyAndEmissions",
+#   LoadDatastore = TRUE,
+#   SaveDatastore = TRUE,
+#   DoRun = TRUE,
+#   RequiredPackages = "VEPowertrainsAndFuels"
+# )
+

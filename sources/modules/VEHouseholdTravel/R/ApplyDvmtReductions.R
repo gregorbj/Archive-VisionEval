@@ -34,7 +34,7 @@
 #------------------------------
 ApplyDvmtReductionsSpecifications <- list(
   #Level of geography module is applied at
-  RunBy = "Azone",
+  RunBy = "Region",
   #Specify new tables to be created by Inp if any
   #Specify new tables to be created by Set if any
   #Specify input data
@@ -166,6 +166,7 @@ ApplyDvmtReductions <- function(L) {
   SovMilesDivert_Hh <- L$Year$Household$PropDvmtDiverted * L$Year$Household$Dvmt
   #Yearly trips diverted
   SovToBikeTrip_Hh <- 365 * SovMilesDivert_Hh / L$Year$Household$AveTrpLenDiverted
+  SovToBikeTrip_Hh[is.nan(SovToBikeTrip_Hh)] <- 0
 
   #Return the results
   #------------------
@@ -197,10 +198,10 @@ documentModule("ApplyDvmtReductions")
 # source("tests/scripts/test_functions.R")
 # #Set up test environment
 # TestSetup_ls <- list(
-#   TestDataRepo = "../Test_Data/VE-RSPM",
+#   TestDataRepo = "../Test_Data/VE-State",
 #   DatastoreName = "Datastore.tar",
 #   LoadDatastore = TRUE,
-#   TestDocsDir = "verspm",
+#   TestDocsDir = "vestate",
 #   ClearLogs = TRUE,
 #   # SaveDatastore = TRUE
 #   SaveDatastore = FALSE
@@ -213,5 +214,5 @@ documentModule("ApplyDvmtReductions")
 #   SaveDatastore = TRUE,
 #   DoRun = FALSE
 # )
-# L <- TestDat_
-# R <- ApplyDvmtReductions(TestDat_)
+# L <- TestDat_$L
+# R <- ApplyDvmtReductions(L)

@@ -349,7 +349,7 @@ usethis::use_data(GQIncModel_ls, overwrite = TRUE)
 #------------------------------
 PredictIncomeSpecifications <- list(
   #Level of geography module is applied at
-  RunBy = "Azone",
+  RunBy = "Region",
   #Specify new tables to be created by Inp if any
   #Specify new tables to be created by Set if any
   #Specify input data
@@ -515,6 +515,9 @@ PredictIncome <- function(L) {
   #Calculate the number of regular and group quarters households
   NumHH <- sum(!IsGroupQuarters_)
   NumGQ <- sum(IsGroupQuarters_)
+  #Azones
+  Az <- L$Year$Azone$Azone
+
   #Initialize output list
   #----------------------
   Out_ls <- initDataList()
@@ -527,18 +530,27 @@ PredictIncome <- function(L) {
   #Create data frame for regular households
   Data_df <-
     data.frame(L$Year$Household)[!IsGroupQuarters_,]
+  #Index vector to match household records with Azone records
+  HhToAzIdx_Hh <- match(Data_df$Azone, L$Year$Azone$Azone)
   #Add Azone average per capita income to data frame
-  Data_df$AvePerCapInc <- L$Year$Azone$HHIncomePC
-  #Calculate average household income target to match
-  HHIncomeTarget <-
-    L$Year$Azone$HHIncomePC * sum(Data_df$HhSize) / nrow(Data_df)
-  #Predict the income for regular households
-  Out_ls$Year$Household$Income[!IsGroupQuarters_] <-
-    applyLinearModel(
-    HHIncModel_ls,
-    Data_df,
-    TargetMean = HHIncomeTarget,
-    CheckTargetSearchRange = FALSE)
+  Data_df$AvePerCapInc <- L$Year$Azone$HHIncomePC[HhToAzIdx_Hh]
+  #Predict income for households by Azone using Azone household income target
+  HhIncome_Hh <- numeric(NumHH)
+  for (az in Az) {
+    IsAz <- Data_df$Azone == az
+    #Calculate average household income target to match
+    HHIncomeTarget <-
+      L$Year$Azone$HHIncomePC[L$Year$Azone$Azone == az] * sum(Data_df$HhSize[IsAz]) / sum(IsAz)
+    #Predict the income for regular households
+     HhIncome_Hh[IsAz] <-
+      applyLinearModel(
+        HHIncModel_ls,
+        Data_df[IsAz,],
+        TargetMean = HHIncomeTarget,
+        CheckTargetSearchRange = FALSE)
+  }
+  Out_ls$Year$Household$Income[!IsGroupQuarters_] <- HhIncome_Hh
+
   #Predict income for persons in noninstitutional group quarters
   #-------------------------------------------------------------
   #Only run group quarters model if there is a group quarters population
@@ -546,18 +558,28 @@ PredictIncome <- function(L) {
     #Create data frame for group quarters persons
     Data_df <-
       data.frame(L$Year$Household)[IsGroupQuarters_,]
+    #Index vector to match group quarters records with Azone records
+    GqToAzIdx_Gq <- match(Data_df$Azone, L$Year$Azone$Azone)
     #Add Azone average per capita income to data frame
-    Data_df$AvePerCapInc <- L$Year$Azone$GQIncomePC
-    #Calculate average household income target to match
-    #is the same as the average per capita income because household size is 1
-    GQIncomeTarget <- L$Year$Azone$GQIncomePC
-    #Predict the income for noninstitutional group quarters population
-    Out_ls$Year$Household$Income[IsGroupQuarters_] <-
-      applyLinearModel(
-        GQIncModel_ls,
-        Data_df,
-        TargetMean = GQIncomeTarget,
-        CheckTargetSearchRange = FALSE)
+    Data_df$AvePerCapInc <- L$Year$Azone$GQIncomePC[GqToAzIdx_Gq]
+    #Predict income for group quarters by Azone using Azone household income target
+    GqIncome_Gq <- numeric(NumGQ)
+    for (az in Az) {
+      IsAz <- Data_df$Azone == az
+      if (sum(IsAz) > 0) {
+        #Calculate average group quarters income target to match
+        #is the same as the average per capita income because household size is 1
+        GQIncomeTarget <- L$Year$Azone$GQIncomePC[L$Year$Azone$Azone == az]
+        #Predict the income for noninstitutional group quarters population
+        GqIncome_Gq[IsAz] <-
+          applyLinearModel(
+            GQIncModel_ls,
+            Data_df[IsAz,],
+            TargetMean = GQIncomeTarget,
+            CheckTargetSearchRange = FALSE)
+      }
+    }
+    Out_ls$Year$Household$Income[IsGroupQuarters_] <- GqIncome_Gq
   }
   #Return the result
   #-----------------
@@ -582,10 +604,10 @@ documentModule("PredictIncome")
 # source("tests/scripts/test_functions.R")
 # #Set up test environment
 # TestSetup_ls <- list(
-#   TestDataRepo = "../Test_Data/VE-RSPM",
+#   TestDataRepo = "../Test_Data/VE-State",
 #   DatastoreName = "Datastore.tar",
 #   LoadDatastore = TRUE,
-#   TestDocsDir = "verspm",
+#   TestDocsDir = "vestate",
 #   ClearLogs = TRUE,
 #   # SaveDatastore = TRUE
 #   SaveDatastore = FALSE
@@ -595,8 +617,16 @@ documentModule("PredictIncome")
 # TestDat_ <- testModule(
 #   ModuleName = "PredictIncome",
 #   LoadDatastore = TRUE,
-#   SaveDatastore = TRUE,
+#   SaveDatastore = FALSE,
 #   DoRun = FALSE
 # )
-# L <- TestDat_
-# R <- PredictIncome(TestDat_)
+# L <- TestDat_$L
+# system.time(R <- PredictIncome(TestDat_$L))
+#
+# TestDat_ <- testModule(
+#   ModuleName = "PredictIncome",
+#   LoadDatastore = TRUE,
+#   SaveDatastore = TRUE,
+#   DoRun = TRUE
+# )
+

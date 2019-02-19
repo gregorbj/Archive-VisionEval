@@ -35,12 +35,15 @@
 #Packages used in code development
 #=================================
 #Uncomment following lines during code development. Recomment when done.
-# library(visioneval)
+library(visioneval)
 
 
 #=============================================
 #SECTION 1: ESTIMATE AND SAVE MODEL PARAMETERS
 #=============================================
+
+#' @import visioneval
+#' @import VESimLandUseData
 
 UzaProfileNames_ls <- list()
 
@@ -195,6 +198,31 @@ InitializeSpecifications <- list(
       DESCRIPTION = items(
         "Average activity density (households and jobs per acre) of rural (i.e. not metropolitan or town) portions of the Azone not including large waterbodies or large tracts of agricultural lands, forest lands, or otherwise protected lands"
       )
+    ),
+    item(
+      NAME = items(
+        "PropGQPopCenter",
+        "PropGQPopInner",
+        "PropGQPopOuter",
+        "PropGQPopFringe"),
+      FILE = "azone_gq_pop-prop_by_area-type.csv",
+      TABLE = "Azone",
+      GROUP = "Year",
+      TYPE = "double",
+      UNITS = "proportion",
+      NAVALUE = -1,
+      SIZE = 0,
+      PROHIBIT = c("< 0", "> 1"),
+      ISELEMENTOF = "",
+      UNLIKELY = "",
+      TOTAL = "",
+      DESCRIPTION = items(
+        "Proportion of Azone non-institutional group quarters population located in center area type",
+        "Proportion of Azone non-institutional group quarters population located in inner area type",
+        "Proportion of Azone non-institutional group quarters population located in outer area type",
+        "Proportion of Azone non-institutional group quarters population located in fringe area type"
+      ),
+      OPTIONAL = TRUE
     )
   )
 )
@@ -261,7 +289,9 @@ Initialize <- function(L) {
     #If more than one year, then need to evaluate multiple values
     if (length(Values_ls[[1]]) > 1) {
       Values_mx <- do.call(cbind, Values_ls)
-      SumDiff_ <- abs(1 - rowSums(Values_mx))
+      #Identify rows that have data
+      HasData_ <- apply(Values_mx, 1, function(x) !all(is.na(x)))
+      SumDiff_ <- abs(1 - rowSums(Values_mx[HasData_,]))
       if (any(SumDiff_ > 0.01)) {
         Msg <- paste0(
           "Error in input values for ",
@@ -287,27 +317,29 @@ Initialize <- function(L) {
       #Otherwise only need to evaluate single values
     } else {
       Values_ <- unlist(Values_ls)
-      SumDiff <- abs(1 - sum(Values_))
-      if (SumDiff > 0.01) {
-        Msg <- paste0(
-          "Error in input values for ",
-          paste(Names_, collapse = ", "),
-          ". The sum of these values is off by more than 1%. ",
-          "They should add up to 1."
-        )
-        Errors_ <<- c(Errors_, Msg)
-      }
-      if (SumDiff > 0 & SumDiff < 0.01) {
-        Msg <- paste0(
-          "Warning regarding input values for ",
-          paste(Names_, collapse = ", "),
-          ". The sum of these values do not add up to 1 ",
-          "but are off by 1% or less so they have been adjusted to add up to 1."
-        )
-        Warnings_ <<- c(Warnings_, Msg)
-        Values_ <- Values_ / sum(Values_)
-        for (nm in names(Values_)) {
-          Values_ls[[nm]] <- Values_[nm]
+      if (!all(is.na(Values_))) {
+        SumDiff <- abs(1 - sum(Values_))
+        if (SumDiff > 0.01) {
+          Msg <- paste0(
+            "Error in input values for ",
+            paste(Names_, collapse = ", "),
+            ". The sum of these values is off by more than 1%. ",
+            "They should add up to 1."
+          )
+          Errors_ <<- c(Errors_, Msg)
+        }
+        if (SumDiff > 0 & SumDiff < 0.01) {
+          Msg <- paste0(
+            "Warning regarding input values for ",
+            paste(Names_, collapse = ", "),
+            ". The sum of these values do not add up to 1 ",
+            "but are off by 1% or less so they have been adjusted to add up to 1."
+          )
+          Warnings_ <<- c(Warnings_, Msg)
+          Values_ <- Values_ / sum(Values_)
+          for (nm in names(Values_)) {
+            Values_ls[[nm]] <- Values_[nm]
+          }
         }
       }
     }
@@ -318,7 +350,7 @@ Initialize <- function(L) {
   #----------------------------------------------------
   Names_ <- c("PropMetroHh", "PropTownHh", "PropRuralHh")
   if (all(Names_ %in% names(Out_ls$Data$Year$Azone))) {
-    Out_ls$Data$Year$Region[Names_] <- checkProps(Names_, "Azone")
+    Out_ls$Data$Year$Azone[Names_] <- checkProps(Names_, "Azone")
   } else {
     Msg <- paste0(
       "azone_hh_loc_type_prop.csv input file is present but not complete"
@@ -331,7 +363,7 @@ Initialize <- function(L) {
   #-------------------------------------------------
   Names_ <- c("PropWkrInMetroJobs", "PropWkrInTownJobs", "PropWkrInRuralJobs")
   if (all(Names_ %in% names(Out_ls$Data$Year$Azone))) {
-    Out_ls$Data$Year$Region[Names_] <- checkProps(Names_, "Azone")
+    Out_ls$Data$Year$Azone[Names_] <- checkProps(Names_, "Azone")
   } else {
     Msg <- paste0(
       "azone_hh_loc_type_prop.csv input file is present but not complete"
@@ -359,6 +391,25 @@ Initialize <- function(L) {
       }
     }
   }
+
+  #Check and adjust group quarters area type proportions
+  #-----------------------------------------------------
+  Names_ <- c(
+    "PropGQPopCenter",
+    "PropGQPopInner",
+    "PropGQPopOuter",
+    "PropGQPopFringe")
+  if (any(Names_ %in% names(Out_ls$Data$Year$Azone))) {
+    if (all(Names_ %in% names(Out_ls$Data$Year$Azone))) {
+      Out_ls$Data$Year$Azone[Names_] <- checkProps(Names_, "Azone")
+    } else {
+      Msg <- paste0(
+        "azone_gq_pop-prop_by_area-type.csv input file is present but not complete"
+      )
+      Errors_ <- c(Errors_, Msg)
+    }
+  }
+  rm(Names_)
 
   #Add Errors and Warnings to Out_ls and return
   #--------------------------------------------

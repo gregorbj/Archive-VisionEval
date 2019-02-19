@@ -514,5 +514,5 @@ documentModule("Calculate4DMeasures")
 #   SaveDatastore = TRUE,
 #   DoRun = FALSE
 # )
-# L <- TestDat_
-# R <- Calculate4DMeasures(TestDat_)
+# L <- TestDat_$L
+# R <- Calculate4DMeasures(L)

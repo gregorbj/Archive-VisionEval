@@ -204,7 +204,6 @@ documentModule("AssignRoadMiles")
 #-------------------------------------------------------------------------------
 # library(filesstrings)
 # library(visioneval)
-# library(fields)
 # source("tests/scripts/test_functions.R")
 # #Set up test environment
 # TestSetup_ls <- list(
@@ -224,5 +223,5 @@ documentModule("AssignRoadMiles")
 #   SaveDatastore = TRUE,
 #   DoRun = FALSE
 # )
-# L <- TestDat_
-# R <- AssignRoadMiles(TestDat_)
+# L <- TestDat_$L
+# R <- AssignRoadMiles(L)

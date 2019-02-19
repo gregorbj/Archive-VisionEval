@@ -919,6 +919,8 @@ CalculateHouseholdDvmt <- function(L) {
   AveDvmt_[!IsUr_] <-
     as.vector(eval(parse(text = DvmtModel_ls$NonMetro$Ave),
                    envir = Hh_df[!IsUr_,])) ^ (1 / DvmtModel_ls$NonMetro$Pow)
+  #Replace NaN values (model predicts below zero)
+  AveDvmt_[is.na(AveDvmt_)] <- quantile(AveDvmt_[!is.na(AveDvmt_)], 0.01)
   #Limit the household DVMT to be no greater than 99th percentile for the population
   AveDvmt_[AveDvmt_ > quantile(AveDvmt_, 0.99)] <- quantile(AveDvmt_, 0.99)
 
@@ -936,12 +938,22 @@ CalculateHouseholdDvmt <- function(L) {
                    envir = Hh_df[!IsUr_,]))
 
   #Sum the DVMT by Marea
-  #---------------------
-  MaDvmtByLocType_df <-
-    data.frame(tapply(Hh_df$Dvmt, list(Hh_df$Marea, Hh_df$LocType), sum))
-  if (is.null(MaDvmtByLocType_df$Urban)) MaDvmtByLocType_df$Urban <- 0
-  if (is.null(MaDvmtByLocType_df$Town)) MaDvmtByLocType_df$Town <- 0
-  if (is.null(MaDvmtByLocType_df$Rural)) MaDvmtByLocType_df$Rural <- 0
+  #--------------------
+  tabulateMareaDvmt <- function(LocType) {
+    IsType <- Hh_df$LocType == LocType
+    Dvmt_Ma <- setNames(numeric(length(Ma)), Ma)
+    if (any(IsType)) {
+      Dvmt_Mx <- tapply(Hh_df$Dvmt[IsType], Hh_df$Marea[IsType], sum)
+      Dvmt_Ma[names(Dvmt_Mx)] <- Dvmt_Mx
+      Dvmt_Ma[is.na(Dvmt_Ma)] <- 0
+      Dvmt_Ma
+    } else {
+      Dvmt_Ma
+    }
+  }
+  UrbanDvmt_Ma <- tabulateMareaDvmt("Urban")
+  TownDvmt_Ma <- tabulateMareaDvmt("Town")
+  RuralDvmt_Ma <- tabulateMareaDvmt("Rural")
 
   #Return the results
   #------------------
@@ -952,9 +964,9 @@ CalculateHouseholdDvmt <- function(L) {
       Dvmt = AveDvmt_,
       Dvmt95th = Dvmt95th_)
   Out_ls$Year$Marea <-
-    list(UrbanHhDvmt = MaDvmtByLocType_df$Urban,
-         TownHhDvmt = MaDvmtByLocType_df$Town,
-         RuralHhDvmt = MaDvmtByLocType_df$Rural)
+    list(UrbanHhDvmt = UrbanDvmt_Ma,
+         TownHhDvmt = TownDvmt_Ma,
+         RuralHhDvmt = RuralDvmt_Ma)
   #Return the outputs list
   Out_ls
 }
@@ -979,10 +991,10 @@ documentModule("CalculateHouseholdDvmt")
 # source("tests/scripts/test_functions.R")
 # #Set up test environment
 # TestSetup_ls <- list(
-#   TestDataRepo = "../Test_Data/VE-RSPM",
+#   TestDataRepo = "../Test_Data/VE-State",
 #   DatastoreName = "Datastore.tar",
 #   LoadDatastore = TRUE,
-#   TestDocsDir = "verspm",
+#   TestDocsDir = "vestate",
 #   ClearLogs = TRUE,
 #   # SaveDatastore = TRUE
 #   SaveDatastore = FALSE
@@ -993,7 +1005,15 @@ documentModule("CalculateHouseholdDvmt")
 #   ModuleName = "CalculateHouseholdDvmt",
 #   LoadDatastore = TRUE,
 #   SaveDatastore = TRUE,
-#   DoRun = FALSE
+#   DoRun = FALSE,
+#   RunFor = "NotBaseYear"
 # )
-# L <- TestDat_
-# R <- CalculateHouseholdDvmt(TestDat_)
+# L <- TestDat_$L
+# R <- CalculateHouseholdDvmt(L)
+#
+# TestDat_ <- testModule(
+#   ModuleName = "CalculateHouseholdDvmt",
+#   LoadDatastore = TRUE,
+#   SaveDatastore = TRUE,
+#   DoRun = TRUE
+# )

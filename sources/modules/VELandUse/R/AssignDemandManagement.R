@@ -355,7 +355,7 @@ usethis::use_data(AssignDemandManagementSpecifications, overwrite = TRUE)
 #-------------------------------------------------------------------------
 #' Main module function to assign TDM participation and effect on DVMT.
 #'
-#' \code{AssignParkingRestrictions} assigns households and workers to
+#' \code{AssignDemandManagement} assigns households and workers to
 #' participation in TDM programs and calculates the proportional reduction in
 #' household DVMT due to this participation.
 #'
@@ -452,5 +452,5 @@ documentModule("AssignDemandManagement")
 #   SaveDatastore = TRUE,
 #   DoRun = FALSE
 # )
-# L <- TestDat_
-# R <- AssignDemandManagement(TestDat_)
+# L <- TestDat_$L
+# R <- AssignDemandManagement(L)

@@ -189,7 +189,10 @@ AssignLocTypesSpecifications <- list(
       DESCRIPTION = "Name of metropolitan area (Marea) that household is in or NA if none"
     ),
     item(
-      NAME = "UrbanPop",
+      NAME = items(
+        "UrbanPop",
+        "TownPop",
+        "RuralPop"),
       TABLE = "Bzone",
       GROUP = "Year",
       TYPE = "people",
@@ -198,34 +201,16 @@ AssignLocTypesSpecifications <- list(
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
       SIZE = 0,
-      DESCRIPTION = "Urbanized area population in the Bzone"
+      DESCRIPTION = items(
+        "Urbanized area population in the Bzone",
+        "Town (i.e. urban but non-urbanized area) population in the Bzone",
+        "Rural (i.e. not urbanized and not town) population in the Bzone")
     ),
     item(
-      NAME = "TownPop",
-      TABLE = "Bzone",
-      GROUP = "Year",
-      TYPE = "people",
-      UNITS = "PRSN",
-      NAVALUE = -1,
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = "",
-      SIZE = 0,
-      DESCRIPTION = "Town (i.e. urban but non-urbanized area) population in the Bzone"
-    ),
-    item(
-      NAME = "RuralPop",
-      TABLE = "Bzone",
-      GROUP = "Year",
-      TYPE = "people",
-      UNITS = "PRSN",
-      NAVALUE = -1,
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = "",
-      SIZE = 0,
-      DESCRIPTION = "Rural (i.e. not urbanized and not town) population in the Bzone"
-    ),
-    item(
-      NAME = "UrbanPop",
+      NAME = items(
+        "UrbanPop",
+        "TownPop",
+        "RuralPop"),
       TABLE = "Marea",
       GROUP = "Year",
       TYPE = "people",
@@ -234,34 +219,16 @@ AssignLocTypesSpecifications <- list(
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
       SIZE = 0,
-      DESCRIPTION = "Urbanized area population in the Marea"
+      DESCRIPTION = items(
+        "Urbanized area population in the Marea",
+        "Town (i.e. urban but non-urbanized area) in the Marea",
+        "Rural (i.e. not urbanized and not town) population in the Marea")
     ),
     item(
-      NAME = "TownPop",
-      TABLE = "Marea",
-      GROUP = "Year",
-      TYPE = "people",
-      UNITS = "PRSN",
-      NAVALUE = -1,
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = "",
-      SIZE = 0,
-      DESCRIPTION = "Town (i.e. urban but non-urbanized area) in the Marea"
-    ),
-    item(
-      NAME = "RuralPop",
-      TABLE = "Marea",
-      GROUP = "Year",
-      TYPE = "people",
-      UNITS = "PRSN",
-      NAVALUE = -1,
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = "",
-      SIZE = 0,
-      DESCRIPTION = "Rural (i.e. not urbanized and not town) population in the Marea"
-    ),
-    item(
-      NAME = "UrbanIncome",
+      NAME = items(
+        "UrbanIncome",
+        "TownIncome",
+        "RuralIncome"),
       TABLE = "Marea",
       GROUP = "Year",
       TYPE = "currency",
@@ -270,31 +237,10 @@ AssignLocTypesSpecifications <- list(
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
       SIZE = 0,
-      DESCRIPTION = "Total household income of the urbanized area population in the Marea"
-    ),
-    item(
-      NAME = "TownIncome",
-      TABLE = "Marea",
-      GROUP = "Year",
-      TYPE = "currency",
-      UNITS = "USD.2010",
-      NAVALUE = -1,
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = "",
-      SIZE = 0,
-      DESCRIPTION = "Total household income of the town (i.e. urban but non-urbanized area) population in the Marea"
-    ),
-    item(
-      NAME = "RuralIncome",
-      TABLE = "Marea",
-      GROUP = "Year",
-      TYPE = "currency",
-      UNITS = "USD.2010",
-      NAVALUE = -1,
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = "",
-      SIZE = 0,
-      DESCRIPTION = "Total household income of the rural (i.e. not urbanized and not town) population in the Marea"
+      DESCRIPTION = items(
+        "Total household income of the urbanized area population in the Marea",
+        "Total household income of the town (i.e. urban but non-urbanized area) population in the Marea",
+        "Total household income of the rural (i.e. not urbanized and not town) population in the Marea")
     )
   )
 )
@@ -492,5 +438,5 @@ documentModule("AssignLocTypes")
 #   SaveDatastore = TRUE,
 #   DoRun = FALSE
 # )
-# L <- TestDat_
-# R <- AssignLocTypes(TestDat_)
+# L <- TestDat_$L
+# R <- AssignLocTypes(L)

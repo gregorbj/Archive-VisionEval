@@ -330,6 +330,7 @@ CalculatePtranEnergyAndEmissions <- function(L) {
     CI_MaEt[,1] <- L$Year$Marea[[paste0("Transit", Type, "FuelCI")]]
     #Calculate CO2e emissions
     CO2e_MaEt <- EnergyMJ_MaEt * CI_MaEt
+    CO2e_MaEt[is.na(CO2e_MaEt)] <- 0
     CO2e_Ma <- apply(CO2e_MaEt, 1, sum)
     #Calculate CO2e rate
     CO2eRate_Ma <- Dvmt_Ma
@@ -401,8 +402,17 @@ documentModule("CalculatePtranEnergyAndEmissions")
 # TestDat_ <- testModule(
 #   ModuleName = "CalculatePtranEnergyAndEmissions",
 #   LoadDatastore = TRUE,
-#   SaveDatastore = TRUE,
-#   DoRun = FALSE
+#   SaveDatastore = FALSE,
+#   DoRun = FALSE,
+#   RequiredPackages = "VEPowertrainsAndFuels"
 # )
 # L <- TestDat_$L
 # R <- CalculatePtranEnergyAndEmissions(L)
+#
+# TestDat_ <- testModule(
+#   ModuleName = "CalculatePtranEnergyAndEmissions",
+#   LoadDatastore = TRUE,
+#   SaveDatastore = TRUE,
+#   DoRun = TRUE,
+#   RequiredPackages = "VEPowertrainsAndFuels"
+# )

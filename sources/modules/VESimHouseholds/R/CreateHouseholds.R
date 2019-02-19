@@ -794,8 +794,8 @@ documentModule("CreateHouseholds")
 # TestDat_ <- testModule(
 #   ModuleName = "CreateHouseholds",
 #   LoadDatastore = TRUE,
-#   SaveDatastore = TRUE,
+#   SaveDatastore = FALSE,
 #   DoRun = FALSE
 # )
-# L <- TestDat_
-# R <- CreateHouseholds(TestDat_)
+# L <- TestDat_$L
+# R <- CreateHouseholds(L)

@@ -626,10 +626,10 @@ documentModule("AssignDrivers")
 # source("tests/scripts/test_functions.R")
 # #Set up test environment
 # TestSetup_ls <- list(
-#   TestDataRepo = "../Test_Data/VE-RSPM",
+#   TestDataRepo = "../Test_Data/VE-State",
 #   DatastoreName = "Datastore.tar",
 #   LoadDatastore = TRUE,
-#   TestDocsDir = "verspm",
+#   TestDocsDir = "vestate",
 #   ClearLogs = TRUE,
 #   # SaveDatastore = TRUE
 #   SaveDatastore = FALSE
@@ -642,5 +642,13 @@ documentModule("AssignDrivers")
 #   SaveDatastore = TRUE,
 #   DoRun = FALSE
 # )
-# L <- TestDat_
-# R <- AssignDrivers(TestDat_)
+# L <- TestDat_$L
+# R <- AssignDrivers(L)
+#
+# #Run test module
+# TestDat_ <- testModule(
+#   ModuleName = "AssignDrivers",
+#   LoadDatastore = TRUE,
+#   SaveDatastore = TRUE,
+#   DoRun = TRUE
+# )

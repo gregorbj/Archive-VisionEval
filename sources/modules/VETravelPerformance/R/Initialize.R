@@ -185,7 +185,7 @@ InitializeSpecifications <- list(
       UNITS = "ID",
       NAVALUE = "NA",
       SIZE = 50,
-      PROHIBIT = "",
+      PROHIBIT = "NA",
       ISELEMENTOF = "",
       UNLIKELY = "",
       TOTAL = "",
@@ -437,55 +437,59 @@ Initialize <- function(L) {
     Values_df <- data.frame(L$Data$Global$Marea[FieldNames_])
     for (i in 1:nrow(Values_df)) {
       Marea <- L$Data$Global$Marea$Geo[i]
-      HasUzaName <- UzaNames_[i] %in% Ua
-      HasAllVals <- all(!(unlist(Values_df[i,]) %in% c(NA, "")))
-      Complete <- HasUzaName | HasAllVals
-      if (!Complete) {
-        Msg <- paste0(
-          "The 'marea_dvmt_split_by_road_class.csv' file has errors for ",
-          TypeName, " inputs for Marea ", Marea, ". The DVMT inputs need to ",
-          "be complete or they need to be omitted and a valid 'UzaNameLookup' ",
-          "must be provided in the 'marea_base_year_dvmt.csv file'."
-        )
-        Err_ <- c(Err_, Msg)
-        rm(Msg)      }
-      if (HasAllVals) {
-        SumDiff <- abs(1 - sum(Values_df[i,]))
-        if (SumDiff >= 0.01) {
+      if (Marea != "None") {
+        HasUzaName <- UzaNames_[i] %in% Ua
+        HasAllVals <- all(!(unlist(Values_df[i,]) %in% c(NA, "")))
+        Complete <- HasUzaName | HasAllVals
+        if (!Complete) {
           Msg <- paste0(
-            "Error in input values for ", TypeName, " inputs for Marea ", Marea,
-            ". The sum of values is off by more than 1%. They should add up to 1."
+            "The 'marea_dvmt_split_by_road_class.csv' file has errors for ",
+            TypeName, " inputs for Marea ", Marea, ". The DVMT inputs need to ",
+            "be complete or they need to be omitted and a valid 'UzaNameLookup' ",
+            "must be provided in the 'marea_base_year_dvmt.csv file'."
           )
           Err_ <- c(Err_, Msg)
+          rm(Msg)      }
+        if (HasAllVals) {
+          SumDiff <- abs(1 - sum(Values_df[i,]))
+          if (SumDiff >= 0.01) {
+            Msg <- paste0(
+              "Error in input values for ", TypeName, " inputs for Marea ", Marea,
+              ". The sum of values is off by more than 1%. They should add up to 1."
+            )
+            Err_ <- c(Err_, Msg)
+          }
+          if (SumDiff > 0 & SumDiff < 0.01) {
+            Msg <- paste0(
+              "Warning regarding input values for ", TypeName, " inputs for Marea ", Marea,
+              ". The sum of the values do not add up to 1 but are off by 1% or ",
+              "less so they have been adjusted to add up to 1."
+            )
+            Warn_ <- c(Warn_, Msg)
+            rm(Msg)
+            Values_df[i,] <- Values_df[i,] / sum(Values_df[i,])
+          }
         }
-        if (SumDiff > 0 & SumDiff < 0.01) {
-          Msg <- paste0(
-            "Warning regarding input values for ", TypeName, " inputs for Marea ", Marea,
-            ". The sum of the values do not add up to 1 but are off by 1% or ",
-            "less so they have been adjusted to add up to 1."
-          )
-          Warn_ <- c(Warn_, Msg)
-          rm(Msg)
-          Values_df[i,] <- Values_df[i,] / sum(Values_df[i,])
+        if (!HasAllVals & HasUzaName) {
+          Vals_ <- RoadDvmtModel_ls$UzaRcProps_UaVtRc[UzaNames_[i], TypeName,]
+          if (TypeName == "LDV") {
+            Values_df[i, "LdvFwyDvmtProp"] <- Vals_["Fwy"]
+            Values_df[i, "LdvArtDvmtProp"] <- Vals_["Art"]
+            Values_df[i, "LdvOthDvmtProp"] <- Vals_["Oth"]
+          }
+          if (TypeName == "HvyTrk") {
+            Values_df[i, "HvyTrkFwyDvmtProp"] <- Vals_["Fwy"]
+            Values_df[i, "HvyTrkArtDvmtProp"] <- Vals_["Art"]
+            Values_df[i, "HvyTrkOthDvmtProp"] <- Vals_["Oth"]
+          }
+          if (TypeName == "Bus") {
+            Values_df[i, "BusFwyDvmtProp"] <- Vals_["Fwy"]
+            Values_df[i, "BusArtDvmtProp"] <- Vals_["Art"]
+            Values_df[i, "BusOthDvmtProp"] <- Vals_["Oth"]
+          }
         }
-      }
-      if (!HasAllVals & HasUzaName) {
-        Vals_ <- RoadDvmtModel_ls$UzaRcProps_UaVtRc[UzaNames_[i], TypeName,]
-        if (TypeName == "Ldv") {
-          Values_df[i, "LdvFwyDvmtProp"] <- Vals_["Fwy"]
-          Values_df[i, "LdvArtDvmtProp"] <- Vals_["Art"]
-          Values_df[i, "LdvOthDvmtProp"] <- Vals_["Oth"]
-        }
-        if (TypeName == "HvyTrk") {
-          Values_df[i, "HvyTrkFwyDvmtProp"] <- Vals_["Fwy"]
-          Values_df[i, "HvyTrkArtDvmtProp"] <- Vals_["Art"]
-          Values_df[i, "HvyTrkOthDvmtProp"] <- Vals_["Oth"]
-        }
-        if (TypeName == "Bus") {
-          Values_df[i, "BusFwyDvmtProp"] <- Vals_["Fwy"]
-          Values_df[i, "BusArtDvmtProp"] <- Vals_["Art"]
-          Values_df[i, "BusOthDvmtProp"] <- Vals_["Oth"]
-        }
+      } else {
+        Values_df[i,] <- 0
       }
     }
     list(
@@ -505,7 +509,7 @@ Initialize <- function(L) {
   FieldNames_ <- c("LdvFwyDvmtProp", "LdvArtDvmtProp", "LdvOthDvmtProp")
   if (all(FieldNames_ %in% names(Out_ls$Data$Global$Marea))) {
     CheckResults_ls <-
-      checkProps(FieldNames_, UzaNames_, Ua, "Ldv")
+      checkProps(FieldNames_, UzaNames_, Ua, "LDV")
     Out_ls$Data$Global$Marea[FieldNames_] <- CheckResults_ls$Values_ls
     Errors_ <- c(Errors_, CheckResults_ls$Errors)
     Warnings_ <- c(Warnings_, CheckResults_ls$Warnings)
@@ -670,7 +674,7 @@ Initialize <- function(L) {
       "metropolitan model rather than a state model. ",
       "There could be mismatch of regional and urban area heavy truck DVMT ",
       "because a state name abbreviation has been specified in the ",
-      "StateAbbrLookup field of the 'region_base_year_hvytrk_dvmt.csv' file ",
+      "StateAbbrLookup field of the 'region_base_year_dvmt.csv' file ",
       "rather than NA. Because of that, if regional heavy truck DVMT has not ",
       "been specified, it will be calculated from the state per capita heavy ",
       "truck DVMT rate and the regional population for the model. ",
@@ -813,15 +817,15 @@ documentModule("Initialize")
 # source("tests/scripts/test_functions.R")
 # #Set up test environment
 # TestSetup_ls <- list(
-#   TestDataRepo = "../Test_Data/VE-RSPM",
+#   TestDataRepo = "../Test_Data/VE-State",
 #   DatastoreName = "Datastore.tar",
 #   LoadDatastore = TRUE,
-#   TestDocsDir = "verspm",
+#   TestDocsDir = "vestate",
 #   ClearLogs = TRUE,
 #   # SaveDatastore = TRUE
 #   SaveDatastore = FALSE
 # )
-# setUpTests(TestSetup_ls)
+# # setUpTests(TestSetup_ls)
 # #Run test module
 # TestDat_ <- testModule(
 #   ModuleName = "Initialize",
@@ -830,4 +834,4 @@ documentModule("Initialize")
 #   DoRun = FALSE
 # )
 # L <- TestDat_
-# R <- Initialize(TestDat_)
+# R <- Initialize(L)

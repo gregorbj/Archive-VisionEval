@@ -68,8 +68,6 @@ ISELEMENTOF - Categorical values that are permitted. Values in the datastore are
 |LdIceFactor         |Marea     |Year  |double    |proportion |<= 0         |                           |
 |LdHevFactor         |Marea     |Year  |double    |proportion |<= 0         |                           |
 |LdEvFactor          |Marea     |Year  |double    |proportion |<= 0         |                           |
-|Marea               |Azone     |Year  |character |ID         |             |                           |
-|Azone               |Azone     |Year  |character |ID         |             |                           |
 |HhId                |Household |Year  |character |ID         |NA           |                           |
 |IsEcoDrive          |Household |Year  |integer   |binary     |NA           |0, 1                       |
 |LocType             |Household |Year  |character |category   |NA           |Urban, Town, Rural         |
@@ -79,7 +77,6 @@ ISELEMENTOF - Categorical values that are permitted. Values in the datastore are
 |Dvmt                |Household |Year  |compound  |MI/DAY     |NA, < 0      |                           |
 |UrbanDvmtProp       |Household |Year  |double    |proportion |NA, < 0, > 1 |                           |
 |Marea               |Vehicle   |Year  |character |ID         |             |                           |
-|Azone               |Vehicle   |Year  |character |ID         |             |                           |
 |HhId                |Vehicle   |Year  |character |ID         |NA           |                           |
 |VehId               |Vehicle   |Year  |character |ID         |NA           |                           |
 |Type                |Vehicle   |Year  |character |category   |NA           |Auto, LtTrk                |

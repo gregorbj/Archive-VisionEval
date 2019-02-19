@@ -34,12 +34,21 @@
 #------------------------------
 AdjustVehicleOwnershipSpecifications <- list(
   #Level of geography module is applied at
-  RunBy = "Azone",
+  RunBy = "Region",
   #Specify new tables to be created by Inp if any
   #Specify new tables to be created by Set if any
   #Specify input data
   #Specify data to be loaded from data store
   Get = items(
+    item(
+      NAME = "Azone",
+      TABLE = "Azone",
+      GROUP = "Year",
+      TYPE = "character",
+      UNITS = "ID",
+      PROHIBIT = "",
+      ISELEMENTOF = ""
+    ),
     item(
       NAME =
         items(
@@ -102,6 +111,15 @@ AdjustVehicleOwnershipSpecifications <- list(
       UNITS = "category",
       PROHIBIT = "",
       ISELEMENTOF = c("Low", "High")
+    ),
+    item(
+      NAME = "Azone",
+      TABLE = "Vehicle",
+      GROUP = "Year",
+      TYPE = "character",
+      UNITS = "ID",
+      PROHIBIT = "NA",
+      ISELEMENTOF = ""
     ),
     item(
       NAME = "HhId",
@@ -362,34 +380,36 @@ usethis::use_data(AdjustVehicleOwnershipSpecifications, overwrite = TRUE)
 AdjustVehicleOwnership <- function(L) {
   #Set the seed for random draws
   set.seed(L$G$Seed)
+  #Household to vehicle index
+  HhToVehIdx_Ve <- match(L$Year$Vehicle$HhId, L$Year$Household$HhId)
+  #Azone to vehicle index
+  AzToVehIdx_Ve <- match(L$Year$Vehicle$Azone, L$Year$Azone$Azone)
 
   #Identify the vehicles that will be changed from owned to car service
   #--------------------------------------------------------------------
   #Identify the car service level corresponding to each vehicle
   NumVeh <- length(L$Year$Vehicle$VehId)
-  CarSvcLvl_Ve <-
-    L$Year$Household$CarSvcLevel[match(L$Year$Vehicle$HhId, L$Year$Household$HhId)]
+  CarSvcLvl_Ve <- L$Year$Household$CarSvcLevel[HhToVehIdx_Ve]
   #Identify candidates for swapping owned vehicle for car services
   IsOwnedVeh <- L$Year$Vehicle$VehicleAccess == "Own"
   IsHighCS <- CarSvcLvl_Ve == "High"
-  CSIsLess <- L$Year$Azone$HighCarSvcCost < L$Year$Vehicle$OwnCostPerMile
+  CSIsLess <-
+    L$Year$Azone$HighCarSvcCost[AzToVehIdx_Ve] < L$Year$Vehicle$OwnCostPerMile
   IsCandidate <- IsOwnedVeh & IsHighCS & CSIsLess
   #Get the change probabilities
-  CandidateTypes_ <- L$Year$Vehicle$Type[IsCandidate]
-  ChangeProb_<- c(
-    Auto = L$Year$Azone$AutoCarSvcSubProp,
-    LtTrk = L$Year$Azone$LtTrkCarSvcSubProp
-    )[CandidateTypes_]
-  #Make vector to identify vehicles to change
+  ChangeProb_Ve <- L$Year$Azone$AutoCarSvcSubProp[AzToVehIdx_Ve]
+  IsLtTrk <- L$Year$Vehicle$Type == "LtTrk"
+  ChangeProb_Ve[IsLtTrk] <- L$Year$Azone$LtTrkCarSvcSubProp[AzToVehIdx_Ve][IsLtTrk]
+  #Identify vehicles to change
   DoChange <- logical(NumVeh)
-  DoChange[IsCandidate] <- runif(length(ChangeProb_)) < ChangeProb_
+  DoChange[IsCandidate] <- runif(sum(IsCandidate)) < ChangeProb_Ve[IsCandidate]
 
   #Modify vehicle values to reflect change to change in ownership
   #--------------------------------------------------------------
   Out_ls <- initDataList()
   Out_ls$Year$Vehicle <-
     L$Year$Vehicle[c("Age", "VehicleAccess", "OwnCost", "OwnCostPerMile", "InsCost")]
-  Out_ls$Year$Vehicle$Age[DoChange] <- L$Year$Azone$AveCarSvcVehicleAge
+  Out_ls$Year$Vehicle$Age[DoChange] <- L$Year$Azone$AveCarSvcVehicleAge[AzToVehIdx_Ve][DoChange]
   Out_ls$Year$Vehicle$VehicleAccess[DoChange] <- "HighCarSvc"
   Out_ls$Year$Vehicle$OwnCost[DoChange] <- 0
   Out_ls$Year$Vehicle$OwnCostPerMile[DoChange] <- 0
@@ -398,22 +418,27 @@ AdjustVehicleOwnership <- function(L) {
 
   #Tabulate household values to reflect changes
   #--------------------------------------------
+  #Faster tapply to sum up to household level
+  NumHh <- length(L$Year$Household$HhId)
+  sumToHousehold <- function(Data_, Index_) {
+    Data_Hh <- numeric(NumHh)
+    Data_Hx <- tapply(Data_, Index_, sum)
+    Data_Hh[as.numeric(names(Data_Hx))] <- Data_Hx
+    Data_Hh
+  }
+  #Populate outputs list
   Out_ls$Year$Household <- list()
   VehCat_Ve <- L$Year$Vehicle$Type
   VehCat_Ve[Out_ls$Year$Vehicle$VehicleAccess == "HighCarSvc"] <- "HighCarSvc"
   VehCat_Ve[Out_ls$Year$Vehicle$VehicleAccess == "LowCarSvc"] <- "LowCarSvc"
-  Out_ls$Year$Household$NumAuto <-
-    tapply(VehCat_Ve == "Auto", L$Year$Vehicle$HhId, sum)[L$Year$Household$HhId]
-  Out_ls$Year$Household$NumLtTrk <-
-    tapply(VehCat_Ve == "LtTrk", L$Year$Vehicle$HhId, sum)[L$Year$Household$HhId]
-  Out_ls$Year$Household$NumHighCarSvc <-
-    tapply(VehCat_Ve == "HighCarSvc", L$Year$Vehicle$HhId, sum)[L$Year$Household$HhId]
+  Out_ls$Year$Household$NumAuto <- sumToHousehold(VehCat_Ve == "Auto", HhToVehIdx_Ve)
+  Out_ls$Year$Household$NumLtTrk <- sumToHousehold(VehCat_Ve == "LtTrk", HhToVehIdx_Ve)
+  Out_ls$Year$Household$NumHighCarSvc <- sumToHousehold(VehCat_Ve == "HighCarSvc", HhToVehIdx_Ve)
   Out_ls$Year$Household$Vehicles <-
     with(Out_ls$Year$Household, NumAuto + NumLtTrk + NumHighCarSvc)
-  Out_ls$Year$Household$OwnCost <-
-    tapply(Out_ls$Year$Vehicle$OwnCost, L$Year$Vehicle$HhId, sum)[L$Year$Household$HhId]
+  Out_ls$Year$Household$OwnCost <- sumToHousehold(Out_ls$Year$Vehicle$OwnCost, HhToVehIdx_Ve)
   Out_ls$Year$Household$OwnCostSavings <-
-    tapply(L$Year$Vehicle$OwnCost * DoChange, L$Year$Vehicle$HhId, sum)[L$Year$Household$HhId]
+    sumToHousehold(L$Year$Vehicle$OwnCost * DoChange, HhToVehIdx_Ve)
 
   #Return the outputs list
   #-----------------------
@@ -439,10 +464,10 @@ documentModule("AdjustVehicleOwnership")
 # source("tests/scripts/test_functions.R")
 # #Set up test environment
 # TestSetup_ls <- list(
-#   TestDataRepo = "../Test_Data/VE-RSPM",
+#   TestDataRepo = "../Test_Data/VE-State",
 #   DatastoreName = "Datastore.tar",
 #   LoadDatastore = TRUE,
-#   TestDocsDir = "verspm",
+#   TestDocsDir = "vestate",
 #   ClearLogs = TRUE,
 #   # SaveDatastore = TRUE
 #   SaveDatastore = FALSE
@@ -452,8 +477,16 @@ documentModule("AdjustVehicleOwnership")
 # TestDat_ <- testModule(
 #   ModuleName = "AdjustVehicleOwnership",
 #   LoadDatastore = TRUE,
-#   SaveDatastore = TRUE,
+#   SaveDatastore = FALSE,
 #   DoRun = FALSE
 # )
-# L <- TestDat_
-# R <- AdjustVehicleOwnership(TestDat_)
+# L <- TestDat_$L
+# R <- AdjustVehicleOwnership(TestDat_$L)
+#
+# #Run test module
+# TestDat_ <- testModule(
+#   ModuleName = "AdjustVehicleOwnership",
+#   LoadDatastore = TRUE,
+#   SaveDatastore = TRUE,
+#   DoRun = TRUE
+# )

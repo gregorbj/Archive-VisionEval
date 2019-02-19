@@ -373,8 +373,16 @@ documentModule("BalanceRoadCostsAndRevenues")
 # TestDat_ <- testModule(
 #   ModuleName = "BalanceRoadCostsAndRevenues",
 #   LoadDatastore = TRUE,
-#   SaveDatastore = TRUE,
-#   DoRun = FALSE"
+#   SaveDatastore = FALSE,
+#   DoRun = FALSE
 # )
 # L <- TestDat_$L
 # R <- BalanceRoadCostsAndRevenues(L)
+
+# TestDat_ <- testModule(
+#   ModuleName = "BalanceRoadCostsAndRevenues",
+#   LoadDatastore = TRUE,
+#   SaveDatastore = TRUE,
+#   DoRun = TRUE
+# )
+

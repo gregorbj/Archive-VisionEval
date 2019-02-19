@@ -451,5 +451,5 @@ documentModule("CalculateUrbanMixMeasure")
 #   SaveDatastore = TRUE,
 #   DoRun = FALSE
 # )
-# L <- TestDat_
-# R <- CalculateUrbanMixMeasure(TestDat_)
+# L <- TestDat_$L
+# R <- CalculateUrbanMixMeasure(L)

@@ -63,6 +63,8 @@ ISELEMENTOF - Categorical values that are permitted. Values in the datastore are
 |HhId          |Household |Year  |character |ID       |         |            |
 |Azone         |Household |Year  |character |ID       |         |            |
 |Marea         |Household |Year  |character |ID       |         |            |
+|NumLtTrk      |Household |Year  |vehicles  |VEH      |NA, < 0  |            |
+|NumAuto       |Household |Year  |vehicles  |VEH      |NA, < 0  |            |
 |Vehicles      |Household |Year  |vehicles  |VEH      |NA, < 0  |            |
 |DrvAgePersons |Household |Year  |people    |PRSN     |NA, < 0  |            |
 |CarSvcLevel   |Household |Year  |character |category |         |Low, High   |
@@ -93,3 +95,4 @@ DESCRIPTION - A description of the data.
 |Azone         |Vehicle |Year  |character |ID       |         |                           |Azone ID                                                                                                                                                      |
 |Marea         |Vehicle |Year  |character |ID       |         |                           |Marea ID                                                                                                                                                      |
 |VehicleAccess |Vehicle |Year  |character |category |         |Own, LowCarSvc, HighCarSvc |Identifier whether vehicle is owned by household (Own), if vehicle is low level car service (LowCarSvc), or if vehicle is high level car service (HighCarSvc) |
+|Type          |Vehicle |Year  |character |category |NA       |Auto, LtTrk                |Vehicle body type: Auto = automobile, LtTrk = light trucks (i.e. pickup, SUV, Van)                                                                            |

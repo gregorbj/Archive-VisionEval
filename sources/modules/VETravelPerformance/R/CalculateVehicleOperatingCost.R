@@ -488,7 +488,7 @@ rm(VehCost_AgTy, AAAOpCost_, RelBLSOpCost_, CO2eCost_, Deflators_Yr, OtherExtCos
 #------------------------------
 CalculateVehicleOperatingCostSpecifications <- list(
   #Level of geography module is applied at
-  RunBy = "Azone",
+  RunBy = "Region",
   #Specify new tables to be created by Inp if any
   Inp = items(
     item(
@@ -679,6 +679,15 @@ CalculateVehicleOperatingCostSpecifications <- list(
       ISELEMENTOF = ""
     ),
     item(
+      NAME = "Azone",
+      TABLE = "Azone",
+      GROUP = "Year",
+      TYPE = "character",
+      UNITS = "ID",
+      PROHIBIT = "",
+      ISELEMENTOF = ""
+    ),
+    item(
       NAME =
         items(
           "OwnedVehAccessTime",
@@ -735,7 +744,9 @@ CalculateVehicleOperatingCostSpecifications <- list(
       ISELEMENTOF = ""
     ),
     item(
-      NAME = "Marea",
+      NAME = items(
+        "Marea",
+        "Azone"),
       TABLE = "Household",
       GROUP = "Year",
       TYPE = "character",
@@ -808,6 +819,7 @@ CalculateVehicleOperatingCostSpecifications <- list(
     ),
     item(
       NAME = items(
+        "Azone",
         "Marea",
         "HhId",
         "VehId"),
@@ -1082,7 +1094,12 @@ CalculateVehicleOperatingCost <- function(L) {
 
   #Index to match household data with vehicle data
   HhToVehIdx_Ve <- match(L$Year$Vehicle$HhId, L$Year$Household$HhId)
-
+  #Index to match household data with worker data
+  HhToWkrIdx_Wk <- match(L$Year$Worker$HhId, L$Year$Household$HhId)
+  #Index to match Azone data with vehicle data
+  AzToVehIdx_Ve <- match(L$Year$Vehicle$Azone, L$Year$Azone$Azone)
+  #Index to match Marea data with vehicle data
+  MaToVehIdx_Ve <- match(L$Year$Vehicle$Marea, L$Year$Marea$Marea)
   #Proportion of vehicle DVMT on urban roads
   UrbanVmtProp_Ve <- L$Year$Household$UrbanDvmtProp[HhToVehIdx_Ve]
 
@@ -1118,24 +1135,24 @@ CalculateVehicleOperatingCost <- function(L) {
   NetGPM_Ve <- L$Year$Vehicle$GPM * (1 - L$Year$Vehicle$ElecDvmtProp)
   NetKWHPM_Ve <- L$Year$Vehicle$KWHPM * L$Year$Vehicle$ElecDvmtProp
   EnergyCostRate_Ve <- local({
-    FuelCostRate_Ve <- NetGPM_Ve * L$Year$Azone$FuelCost
-    ElecCostRate_Ve <- NetKWHPM_Ve * L$Year$Azone$PowerCost
+    FuelCostRate_Ve <- NetGPM_Ve * L$Year$Azone$FuelCost[AzToVehIdx_Ve]
+    ElecCostRate_Ve <- NetKWHPM_Ve * L$Year$Azone$PowerCost[AzToVehIdx_Ve]
     unname(FuelCostRate_Ve + ElecCostRate_Ve)
   })
 
   #Road use taxes
   RoadUseCostRate_Ve <- local({
-    FuelTax_Ve <- L$Year$Azone$FuelTax * L$Year$Vehicle$GPM
-    PevChrg <- mean(FuelTax_Ve) * L$Year$Azone$PevSurchgTaxProp
+    FuelTax_Ve <- L$Year$Azone$FuelTax[AzToVehIdx_Ve] * L$Year$Vehicle$GPM
+    PevChrg <- mean(FuelTax_Ve) * L$Year$Azone$PevSurchgTaxProp[AzToVehIdx_Ve]
     ElecProp_Ve <- L$Year$Vehicle$ElecDvmtProp
-    VmtTax <- L$Year$Azone$VmtTax
+    VmtTax_Ve <- L$Year$Azone$VmtTax[AzToVehIdx_Ve]
     if (!is.null(L$Year$Region$ExtraVmtTax)) {
       ExtraVmtTax <- L$Year$Region$ExtraVmtTax
     } else {
       ExtraVmtTax <- 0
     }
-    CongPrice_Ve <- L$Year$Marea$AveCongPrice * UrbanVmtProp_Ve
-    unname(VmtTax + ElecProp_Ve * PevChrg + (1 - ElecProp_Ve) * FuelTax_Ve + ExtraVmtTax + CongPrice_Ve)
+    CongPrice_Ve <- L$Year$Marea$AveCongPrice[MaToVehIdx_Ve] * UrbanVmtProp_Ve
+    unname(VmtTax_Ve + ElecProp_Ve * PevChrg + (1 - ElecProp_Ve) * FuelTax_Ve + ExtraVmtTax + CongPrice_Ve)
   })
 
   #Average CO2e per mile
@@ -1174,17 +1191,24 @@ CalculateVehicleOperatingCost <- function(L) {
   #Parking cost
   ParkingCostRate_Ve <- local({
     #Calculate work parking cost for each household
-    WrkPkgCost_Hh <-
-      with(L$Year$Worker, tapply(ParkingCost * PaysForParking, HhId, sum))[L$Year$Household$HhId]
-    WrkPkgCost_Hh[is.na(WrkPkgCost_Hh)] <- 0
+    WrkPkgCost_Wk <- with(L$Year$Worker, ParkingCost * PaysForParking)
+    WrkPkgCost_Hx <- tapply(WrkPkgCost_Wk, HhToWkrIdx_Wk, sum)
+    WrkPkgCost_Hh <- numeric(length(L$Year$Household$HhId))
+    WrkPkgCost_Hh[as.numeric(names(WrkPkgCost_Hx))] <- WrkPkgCost_Hx
+    rm(WrkPkgCost_Wk, WrkPkgCost_Hx)
     #Retrieve other parking cost for each household
     OthPkgCost_Hh <- L$Year$Household$OtherParkingCost
-    #Scale by normalized number of vehicle trips
+    #Scale by normalized number of vehicle trips for the Marea
+    VehTrp_Hh <- L$Year$Household$VehicleTrips
+    MeanVehTrp_Ma <-
+      tapply(L$Year$Household$VehicleTrips, L$Year$Household$Marea, mean)
     OthPkgCost_Hh <-
-      OthPkgCost_Hh * with(L$Year$Household, VehicleTrips / mean(VehicleTrips))
+      OthPkgCost_Hh * with(L$Year$Household, VehicleTrips / MeanVehTrp_Ma[Marea])
     #Sum daily parking cost and calculate cost per mile
     PkgCost_Hh <- WrkPkgCost_Hh + OthPkgCost_Hh
     PkgCostRate_Hh <- PkgCost_Hh / L$Year$Household$Dvmt
+    MaxPkgCostRate <- quantile(PkgCostRate_Hh, 0.99)
+    PkgCostRate_Hh[PkgCostRate_Hh > MaxPkgCostRate] <- MaxPkgCostRate
     #Assign values to owned household vehicles
     ParkingCostRate_Ve <- PkgCostRate_Hh[HhToVehIdx_Ve]
     ParkingCostRate_Ve[L$Year$Vehicle$VehicleAccess != "Own"] <- 0
@@ -1195,39 +1219,52 @@ CalculateVehicleOperatingCost <- function(L) {
   PaydInsCostRate_Ve <- local({
     HasPaydIns_Hh <- L$Year$Household$HasPaydIns
     InsCost_Ve <- L$Year$Vehicle$InsCost
-    InsCost_Hh <-
-      tapply(InsCost_Ve, L$Year$Vehicle$HhId, sum)[L$Year$Household$HhId]
+    InsCost_Hx <- tapply(InsCost_Ve, HhToVehIdx_Ve, sum)
+    InsCost_Hh <- numeric(length(L$Year$Household$HhId))
+    InsCost_Hh[as.numeric(names(InsCost_Hx))] <- InsCost_Hx
     InsCostRate_Hh <- HasPaydIns_Hh * InsCost_Hh / L$Year$Household$Dvmt / 365
-    unname(InsCostRate_Hh[HhToVehIdx_Ve])
+    MaxInsCostRate <- quantile(InsCostRate_Hh[InsCostRate_Hh > 0], 0.99)
+    InsCostRate_Hh[InsCostRate_Hh > MaxInsCostRate] <- MaxInsCostRate
+    InsCostRate_Ve <- unname(InsCostRate_Hh[HhToVehIdx_Ve])
+    InsCostRate_Ve[L$Year$Vehicle$VehicleAccess != "Own"] <- 0
+    InsCostRate_Ve
   })
 
   #Car service cost
   CarSvcCostRate_Ve <- local({
     VehAccType_Ve <- L$Year$Vehicle$VehicleAccess
     CarSvcCostRate_Ve <- rep(0, length(VehAccType_Ve))
-    CarSvcCostRate_Ve[VehAccType_Ve == "LowCarSvc"] <- L$Year$Azone$LowCarSvcCost
-    CarSvcCostRate_Ve[VehAccType_Ve == "HighCarSvc"] <- L$Year$Azone$HighCarSvcCost
+    CarSvcCostRate_Ve[VehAccType_Ve == "LowCarSvc"] <-
+      L$Year$Azone$LowCarSvcCost[AzToVehIdx_Ve][VehAccType_Ve == "LowCarSvc"]
+    CarSvcCostRate_Ve[VehAccType_Ve == "HighCarSvc"] <-
+      L$Year$Azone$HighCarSvcCost[AzToVehIdx_Ve][VehAccType_Ve == "HighCarSvc"]
     unname(CarSvcCostRate_Ve)
   })
 
   #Calculate value of time per mile
   TTCostRate_Ve <- local({
     #Running time rate of travel
-    UrbanRunTimeRate <- 1 / L$Year$Marea$LdvAveSpeed
-    NonUrbanRunTimeRate <- 1 / L$Year$Marea$NonUrbanAveSpeed
-    if (is.na(UrbanRunTimeRate)) {
-      RunTimeRate_Ve <- NonUrbanRunTimeRate
-    } else {
+    Ma <- L$Year$Marea$Marea
+    UrbanRunTimeRate_Ve <- (1 / L$Year$Marea$LdvAveSpeed)[MaToVehIdx_Ve]
+    if (!any(is.na(L$Year$Marea$NonUrbanAveSpeed))) {
+      NonUrbanRunTimeRate_Ve <- (1 / L$Year$Marea$NonUrbanAveSpeed)[MaToVehIdx_Ve]
       RunTimeRate_Ve <-
-        UrbanVmtProp_Ve * UrbanRunTimeRate + (1 - UrbanVmtProp_Ve) * NonUrbanRunTimeRate
+        UrbanVmtProp_Ve * UrbanRunTimeRate_Ve + (1 - UrbanVmtProp_Ve) * NonUrbanRunTimeRate_Ve
+      RunTimeRate_Ve[is.na(RunTimeRate_Ve)] <- NonUrbanRunTimeRate_Ve[is.na(RunTimeRate_Ve)]
+    } else {
+      RunTimeRate_Ve <- UrbanRunTimeRate_Ve
     }
     #Access time equivalent rate of travel
     TripsPerDvmt_Ve <- with(L$Year$Household, VehicleTrips / Dvmt)[HhToVehIdx_Ve]
-    AccTimePerTrip_Ve <- c(
+    MaxTripsPerDvmt <- quantile(TripsPerDvmt_Ve, probs = 0.99)
+    TripsPerDvmt_Ve[TripsPerDvmt_Ve > MaxTripsPerDvmt] <- MaxTripsPerDvmt
+    AccTimePerTrip_AzAt <- as.matrix(data.frame(
       Own = unname(L$Year$Azone$OwnedVehAccessTime / 60),
       HighCarSvc = unname(L$Year$Azone$HighCarSvcAccessTime / 60),
       LowCarSvc = unname(L$Year$Azone$LowCarSvcAccessTime / 60)
-    )[L$Year$Vehicle$VehicleAccess]
+    ))
+    AccToVehIdx_Ve <- match(L$Year$Vehicle$VehicleAccess, colnames(AccTimePerTrip_AzAt))
+    AccTimePerTrip_Ve <- AccTimePerTrip_AzAt[cbind(AzToVehIdx_Ve, AccToVehIdx_Ve)]
     AccTimeRate_Ve <- TripsPerDvmt_Ve * AccTimePerTrip_Ve
     #Calculate value of time per mile
     unname((RunTimeRate_Ve + AccTimeRate_Ve) * L$Global$Model$ValueOfTime)
@@ -1242,14 +1279,17 @@ CalculateVehicleOperatingCost <- function(L) {
       MRTCostRate_Ve + EnergyCostRate_Ve + RoadUseCostRate_Ve +
       ClimateCostRate_Ve + SocialCostRate_Ve + ParkingCostRate_Ve +
       PaydInsCostRate_Ve + CarSvcCostRate_Ve + TTCostRate_Ve
+    names(Price_Ve) <- L$Year$Vehicle$VehId
     #Function to split travel among household vehicles in proportion to
     #the inverse of price
     splitDvmt <- function(Price_) {
       (1 / Price_) / sum(1 / Price_)
     }
-    #Apply splitHhDvmt by household
-    unlist(tapply(Price_Ve, L$Year$Vehicle$HhId, splitDvmt)[L$Year$Household$HhId])
-  })
+    #Calculate DVMT proportions by household vehicle
+    Price_Hh_Ve <- lapply(split(Price_Ve, L$Year$Vehicle$HhId), splitDvmt)
+    names(Price_Hh_Ve) <- NULL
+    unlist(Price_Hh_Ve, use.names = TRUE)[L$Year$Vehicle$VehId]
+   })
 
   #Calculate average household costs, impacts, taxes per mile
   #----------------------------------------------------------
@@ -1323,7 +1363,7 @@ documentModule("CalculateVehicleOperatingCost")
 #   SaveDatastore = FALSE
 # )
 # setUpTests(TestSetup_ls)
-# #Run test module
+#Run test module
 # TestDat_ <- testModule(
 #   ModuleName = "CalculateVehicleOperatingCost",
 #   LoadDatastore = TRUE,
@@ -1332,3 +1372,10 @@ documentModule("CalculateVehicleOperatingCost")
 # )
 # L <- TestDat_$L
 # R <- CalculateVehicleOperatingCost(L)
+#
+# TestDat_ <- testModule(
+#   ModuleName = "CalculateVehicleOperatingCost",
+#   LoadDatastore = TRUE,
+#   SaveDatastore = TRUE,
+#   DoRun = TRUE
+# )

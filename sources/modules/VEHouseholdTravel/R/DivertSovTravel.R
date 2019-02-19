@@ -628,7 +628,7 @@ usethis::use_data(SovModel_ls, overwrite = TRUE)
 #------------------------------
 DivertSovTravelSpecifications <- list(
   #Level of geography module is applied at
-  RunBy = "Azone",
+  RunBy = "Region",
   #Specify new tables to be created by Inp if any
   #Specify new tables to be created by Set if any
   #Specify input data
@@ -706,25 +706,11 @@ DivertSovTravelSpecifications <- list(
       ISELEMENTOF = ""
     ),
     item(
-      NAME = "Marea",
-      TABLE = "Household",
-      GROUP = "Year",
-      TYPE = "character",
-      UNITS = "ID",
-      PROHIBIT = "",
-      ISELEMENTOF = ""
-    ),
-    item(
-      NAME = "Azone",
-      TABLE = "Household",
-      GROUP = "Year",
-      TYPE = "character",
-      UNITS = "ID",
-      PROHIBIT = "",
-      ISELEMENTOF = ""
-    ),
-    item(
-      NAME = "Bzone",
+      NAME = items(
+        "Marea",
+        "Azone",
+        "Bzone",
+        "HhId"),
       TABLE = "Household",
       GROUP = "Year",
       TYPE = "character",
@@ -891,69 +877,94 @@ usethis::use_data(DivertSovTravelSpecifications, overwrite = TRUE)
 #' @import visioneval
 #' @export
 DivertSovTravel <- function(L) {
-  #Set up household variables to apply SOV model
-  #---------------------------------------------
-  Hh_df <- data.frame(L$Year$Household, stringsAsFactors = FALSE)
-  Hh_df$Density <-
-    L$Year$Bzone$D1B[match(Hh_df$Bzone, L$Year$Bzone$Bzone)]
-  Hh_df$FwyLaneMiPC <-
-    L$Year$Marea$FwyLaneMiPC[match(Hh_df$Marea, L$Year$Marea$Marea)]
-  IsMetro <- Hh_df$LocType == "Urban"
-  IsRural <- Hh_df$LocType == "Rural"
+  #Set up
+  #------
+  #Random seed
+  set.seed(L$G$Seed)
+  #Bzone to household index
+  BzToHhIdx_Hh <- match(L$Year$Household$Bzone, L$Year$Bzone$Bzone)
+  #Marea to household index
+  MaToHhIdx_Hh <- match(L$Year$Household$Marea, L$Year$Marea$Marea)
+  #Add density and freeway lane miles to household data
+  L$Year$Household$Density <- L$Year$Bzone$D1B[BzToHhIdx_Hh]
+  L$Year$Household$FwyLaneMiPC <- L$Year$Marea$FwyLaneMiPC[MaToHhIdx_Hh]
 
-  #Calculate proportions of household DVMT in SOV tours of non-rural households
-  #----------------------------------------------------------------------------
-  SovProp_ <- applyLinearModel(SovModel_ls$SovPropModel, Hh_df)[!IsRural]
+  #Iterate through Azones and calculate
+  #------------------------------------
+  Az <- L$Year$Azone$Azone
+  AllPropDvmtDiverted_Hh <-
+    setNames(numeric(length(L$Year$Household$HhId)), L$Year$Household$HhId)
+  AllSovTrpLen_Hh <-
+    setNames(numeric(length(L$Year$Household$HhId)), L$Year$Household$HhId)
+  for (az in Az) {
+    IsAzHh <- L$Year$Household$Azone == az
+    Hh_df <- data.frame(lapply(L$Year$Household, function(x) x[IsAzHh]), stringsAsFactors = FALSE)
+    IsMetro <- Hh_df$LocType == "Urban"
+    IsRural <- Hh_df$LocType == "Rural"
 
-  #Calculate total DVMT to be diverted from households that are not rural
-  #----------------------------------------------------------------------
-  TotSovDvmt <- sum(L$Year$Household$Dvmt[!IsRural] * SovProp_)
-  SovDiversionProp <- L$Year$Azone$PropSovDvmtDiverted
-  TotSovDvmtDiverted <- TotSovDvmt * SovDiversionProp
+    #Calculate proportions of household DVMT in SOV tours of non-rural households
+    #----------------------------------------------------------------------------
+    SovProp_ <- applyLinearModel(SovModel_ls$SovPropModel, Hh_df)[!IsRural]
 
-  #Calculate household DVMT in SOV tours of non-rural households
-  #-------------------------------------------------------------
-  SovDvmt_ <- L$Year$Household$Dvmt[!IsRural] * SovProp_
+    #Calculate total DVMT to be diverted from households that are not rural
+    #----------------------------------------------------------------------
+    TotSovDvmt <- sum(Hh_df$Dvmt[!IsRural] * SovProp_)
+    SovDiversionProp <- L$Year$Azone$PropSovDvmtDiverted[L$Year$Azone$Azone == az]
+    TotSovDvmtDiverted <- TotSovDvmt * SovDiversionProp
 
-  #Calculate average length of diverted trips
-  #------------------------------------------
-  SovTrpLen_ <- rep(NA, nrow(Hh_df))
-  SovTrpLen_[IsMetro] <-
-    applyLinearModel(SovModel_ls$SovTrpLenModel$Metro, Hh_df[IsMetro,])
-  SovTrpLen_[!IsMetro] <-
-    applyLinearModel(SovModel_ls$SovTrpLenModel$NonMetro, Hh_df[!IsMetro,])
-  #Limit to non-rural households
-  AllSovTrpLen_ <- SovTrpLen_
-  SovTrpLen_ <- SovTrpLen_[!IsRural]
-
-  #Allocate the DVMT diversion to households
-  #-----------------------------------------
-  #Define function to check if AltTrip scaling keeps max diversion in bounds
-  checkMaxDiversion <- function(B) {
-    U_ <-
-      log(SovDvmt_ / mean(SovDvmt_)) + B * log(mean(SovTrpLen_) / SovTrpLen_)
-    SovDvmtDiverted_ <- TotSovDvmtDiverted * exp(U_) / sum(exp(U_))
-    SovDiversionProp_ <- SovDvmtDiverted_ / SovDvmt_
-    MaxDiversionProp - max(SovDiversionProp_)
+    #Calculate diversion by household if there is total diversion is not 0
+    #---------------------------------------------------------------------
+    if (TotSovDvmtDiverted > 0) {
+      #Calculate household DVMT in SOV tours of non-rural households
+      SovDvmt_ <- Hh_df$Dvmt[!IsRural] * SovProp_
+      #Calculate average length of diverted trips
+      SovTrpLen_ <- setNames(rep(NA, nrow(Hh_df)), Hh_df$HhId)
+      if (any(IsMetro)) {
+        SovTrpLen_[IsMetro] <-
+          applyLinearModel(SovModel_ls$SovTrpLenModel$Metro, Hh_df[IsMetro,])
+      }
+      if (any(!IsMetro)) {
+        SovTrpLen_[!IsMetro] <-
+          applyLinearModel(SovModel_ls$SovTrpLenModel$NonMetro, Hh_df[!IsMetro,])
+      }
+      #Limit to non-rural households
+      AllSovTrpLen_ <- SovTrpLen_
+      SovTrpLen_ <- SovTrpLen_[!IsRural]
+      #Allocate the DVMT diversion to households
+      #Define function to check if AltTrip scaling keeps max diversion in bounds
+      checkMaxDiversion <- function(B) {
+        U_ <-
+          log(SovDvmt_ / mean(SovDvmt_)) + B * log(mean(SovTrpLen_) / SovTrpLen_)
+        SovDvmtDiverted_ <- TotSovDvmtDiverted * exp(U_) / sum(exp(U_))
+        SovDiversionProp_ <- SovDvmtDiverted_ / SovDvmt_
+        MaxDiversionProp - max(SovDiversionProp_)
+      }
+      #Set maximum bounds halfway between average and 1 and calculate AltTrip scaling
+      MaxDiversionProp <- (SovDiversionProp + 1) / 2
+      B <- binarySearch(checkMaxDiversion, c(0, 1), DoWtAve = TRUE, Tolerance = 0.01)
+      #Allocate SOV DVMT diversion to households
+      U_ <-  log(SovDvmt_ / mean(SovDvmt_)) + B * log(mean(SovTrpLen_) / SovTrpLen_)
+      SovDvmtDiverted_ <- TotSovDvmtDiverted * exp(U_) / sum(exp(U_))
+      #Calculate the proportion of household DVMT that is diverted
+      PropDvmtDiverted_ <- SovDvmtDiverted_ / Hh_df$Dvmt[!IsRural]
+      #Assign to output vector
+      AllPropDvmtDiverted_ <- setNames(numeric(nrow(Hh_df)), Hh_df$HhId)
+      AllPropDvmtDiverted_[!IsRural] <- PropDvmtDiverted_
+    } else {
+      #Otherwise set diversion to 0
+      AllPropDvmtDiverted_ <- setNames(numeric(nrow(Hh_df)), Hh_df$HhId)
+      AllSovTrpLen_ <- setNames(numeric(nrow(Hh_df)), Hh_df$HhId)
+    }
+    AllPropDvmtDiverted_Hh[names(AllPropDvmtDiverted_)] <- AllPropDvmtDiverted_
+    AllSovTrpLen_Hh[names(AllSovTrpLen_)] <- AllSovTrpLen_
   }
-  #Set maximum bounds halfway between average and 1 and calculate AltTrip scaling
-  MaxDiversionProp <- (SovDiversionProp + 1) / 2
-  B <- binarySearch(checkMaxDiversion, c(0, 1), DoWtAve = TRUE, Tolerance = 0.01)
-  #Allocate SOV DVMT diversion to households
-  U_ <-  log(SovDvmt_ / mean(SovDvmt_)) + B * log(mean(SovTrpLen_) / SovTrpLen_)
-  SovDvmtDiverted_ <- TotSovDvmtDiverted * exp(U_) / sum(exp(U_))
-  #Calculate the proportion of household DVMT that is diverted
-  PropDvmtDiverted_ <- SovDvmtDiverted_ / L$Year$Household$Dvmt[!IsRural]
-  #
-  AllPropDvmtDiverted_ <- numeric(nrow(Hh_df))
-  AllPropDvmtDiverted_[!IsRural] <- PropDvmtDiverted_
 
   #Return the results
   #------------------
   Out_ls <- initDataList()
   Out_ls$Year$Household <-
-    list(PropDvmtDiverted = AllPropDvmtDiverted_,
-         AveTrpLenDiverted = AllSovTrpLen_)
+    list(PropDvmtDiverted = AllPropDvmtDiverted_Hh,
+         AveTrpLenDiverted = AllSovTrpLen_Hh)
   #Return the outputs list
   Out_ls
 }
@@ -978,10 +989,10 @@ documentModule("DivertSovTravel")
 # source("tests/scripts/test_functions.R")
 # #Set up test environment
 # TestSetup_ls <- list(
-#   TestDataRepo = "../Test_Data/VE-RSPM",
+#   TestDataRepo = "../Test_Data/VE-State",
 #   DatastoreName = "Datastore.tar",
 #   LoadDatastore = TRUE,
-#   TestDocsDir = "verspm",
+#   TestDocsDir = "vestate",
 #   ClearLogs = TRUE,
 #   # SaveDatastore = TRUE
 #   SaveDatastore = FALSE
@@ -991,8 +1002,17 @@ documentModule("DivertSovTravel")
 # TestDat_ <- testModule(
 #   ModuleName = "DivertSovTravel",
 #   LoadDatastore = TRUE,
-#   SaveDatastore = TRUE,
-#   DoRun = FALSE
+#   SaveDatastore = FALSE,
+#   DoRun = FALSE,
+#   TestGeoName = az
 # )
-# L <- TestDat_
-# R <- DivertSovTravel(TestDat_)
+# L <- TestDat_$L
+# R <- DivertSovTravel(TestDat_$L)
+#
+# TestDat_ <- testModule(
+#   ModuleName = "DivertSovTravel",
+#   LoadDatastore = TRUE,
+#   SaveDatastore = TRUE,
+#   DoRun = TRUE,
+#   TestGeoName = az
+# )

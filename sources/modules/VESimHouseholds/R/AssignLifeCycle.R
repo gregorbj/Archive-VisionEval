@@ -43,7 +43,7 @@
 #------------------------------
 AssignLifeCycleSpecifications <- list(
   #Level of geography module is applied at
-  RunBy = "Azone",
+  RunBy = "Region",
   #Specify data to be loaded from data store
   Get = items(
     item(
@@ -225,10 +225,10 @@ documentModule("AssignLifeCycle")
 # source("tests/scripts/test_functions.R")
 # #Set up test environment
 # TestSetup_ls <- list(
-#   TestDataRepo = "../Test_Data/VE-RSPM",
+#   TestDataRepo = "../Test_Data/VE-State",
 #   DatastoreName = "Datastore.tar",
 #   LoadDatastore = TRUE,
-#   TestDocsDir = "verspm",
+#   TestDocsDir = "vestate",
 #   ClearLogs = TRUE,
 #   # SaveDatastore = TRUE
 #   SaveDatastore = FALSE
@@ -238,8 +238,15 @@ documentModule("AssignLifeCycle")
 # TestDat_ <- testModule(
 #   ModuleName = "AssignLifeCycle",
 #   LoadDatastore = TRUE,
-#   SaveDatastore = TRUE,
+#   SaveDatastore = FALSE,
 #   DoRun = FALSE
 # )
-# L <- TestDat_
-# R <- AssignLifeCycle(TestDat_)
+# L <- TestDat_$L
+# R <- AssignLifeCycle(L)
+#
+# TestDat_ <- testModule(
+#   ModuleName = "AssignLifeCycle",
+#   LoadDatastore = TRUE,
+#   SaveDatastore = FALSE,
+#   DoRun = TRUE
+# )

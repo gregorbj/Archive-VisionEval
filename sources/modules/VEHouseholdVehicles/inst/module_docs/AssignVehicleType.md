@@ -65,9 +65,9 @@ The model and all of its independent variables are significant, but it only expl
 
 |Prediction        | Proportion|
 |:-----------------|----------:|
-|Under Predict     |      0.270|
-|Correctly Predict |      0.459|
-|Over Predict      |      0.270|
+|Under Predict     |      0.271|
+|Correctly Predict |      0.461|
+|Over Predict      |      0.268|
 
 ## How the Module Works
 
@@ -91,7 +91,7 @@ UNLIKELY - Values that are unlikely. Values that meet any of the listed conditio
 
 DESCRIPTION - A description of the data.
 
-### azone_lttrk_prop.csv
+### azone_hh_lttrk_prop.csv
 |NAME      |TYPE   |UNITS      |PROHIBIT       |ISELEMENTOF |UNLIKELY |DESCRIPTION                                                               |
 |:---------|:------|:----------|:--------------|:-----------|:--------|:-------------------------------------------------------------------------|
 |Geo       |       |           |               |Azones      |         |Must contain a record for each Azone and model run year.                  |
@@ -117,11 +117,14 @@ ISELEMENTOF - Categorical values that are permitted. Values in the datastore are
 
 |NAME            |TABLE     |GROUP |TYPE      |UNITS      |PROHIBIT       |ISELEMENTOF |
 |:---------------|:---------|:-----|:---------|:----------|:--------------|:-----------|
+|Azone           |Azone     |Year  |character |ID         |               |            |
 |LtTrkProp       |Azone     |Year  |double    |proportion |NA, <= 0, >= 1 |            |
 |D1B             |Bzone     |Year  |compound  |PRSN/SQMI  |NA, < 0        |            |
 |Bzone           |Bzone     |Year  |character |ID         |               |            |
+|Azone           |Bzone     |Year  |character |ID         |               |            |
 |HhId            |Household |Year  |character |ID         |               |            |
 |Bzone           |Household |Year  |character |ID         |               |            |
+|Azone           |Household |Year  |character |ID         |               |            |
 |HhSize          |Household |Year  |people    |PRSN       |NA, <= 0       |            |
 |Age0to14        |Household |Year  |people    |PRSN       |NA, < 0        |            |
 |Age15to19       |Household |Year  |people    |PRSN       |NA, < 0        |            |

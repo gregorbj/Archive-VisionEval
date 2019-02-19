@@ -492,5 +492,5 @@ documentModule("AssignParkingRestrictions")
 #   SaveDatastore = TRUE,
 #   DoRun = FALSE
 # )
-# L <- TestDat_
-# R <- AssignParkingRestrictions(TestDat_)
+# L <- TestDat_$L
+# R <- AssignParkingRestrictions(L)

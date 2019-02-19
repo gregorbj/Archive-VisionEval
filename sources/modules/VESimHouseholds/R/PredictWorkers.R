@@ -392,8 +392,8 @@ documentModule("PredictWorkers")
 # TestDat_ <- testModule(
 #   ModuleName = "PredictWorkers",
 #   LoadDatastore = TRUE,
-#   SaveDatastore = TRUE,
+#   SaveDatastore = FALSE,
 #   DoRun = FALSE
 # )
-# L <- TestDat_
-# R <- PredictWorkers(TestDat_)
+# L <- TestDat_$L
+# R <- PredictWorkers(L)

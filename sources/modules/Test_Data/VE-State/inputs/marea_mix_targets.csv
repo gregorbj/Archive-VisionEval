@@ -1,4 +1,4 @@
-Geo,Year,MixedUseProp
+Geo,Year,UrbanMixProp
 Albany,2010,NA
 Bend,2010,NA
 Corvallis,2010,NA
@@ -7,6 +7,7 @@ Grants Pass,2010,NA
 Medford,2010,NA
 Portland,2010,NA
 Salem,2010,NA
+None,2010,NA
 Albany,2040,NA
 Bend,2040,NA
 Corvallis,2040,NA
@@ -15,3 +16,4 @@ Grants Pass,2040,NA
 Medford,2040,NA
 Portland,2040,NA
 Salem,2040,NA
+None,2040,NA

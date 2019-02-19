@@ -481,5 +481,5 @@ documentModule("LocateEmployment")
 #   SaveDatastore = TRUE,
 #   DoRun = FALSE
 # )
-# L <- TestDat_
-# R <- LocateEmployment(TestDat_)
+# L <- TestDat_$L
+# R <- LocateEmployment(L)

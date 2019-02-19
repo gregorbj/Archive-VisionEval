@@ -1717,7 +1717,7 @@ CalculateRoadPerformance <- function(L) {
     #Initialize LambdaAdj
     LambdaAdj_Ma <- numeric(length(Ma))
     names(LambdaAdj_Ma) <- Ma
-    LambdaAdj_Ma["None"] <- NA
+    if (any(names(LambdaAdj_Ma) == "None")) LambdaAdj_Ma["None"] <- NA
     #Calculate input ratio of freeway to arterial DVMT
     FwyArtTargetRatio_Ma <- with(L$Global$Marea, LdvFwyDvmtProp / LdvArtDvmtProp)
     names(FwyArtTargetRatio_Ma) <- Ma
@@ -1741,7 +1741,7 @@ CalculateRoadPerformance <- function(L) {
 
   #Run model to balance DVMT between freeways and arterials
   #--------------------------------------------------------
-  BalanceResults_ls <- list()
+  BalanceResults_ls <- sapply(Ma, function(x) list())
   for (ma in Ma[Ma != "None"]) {
     #Calculate the balanced DVMT
     BalanceResults_ls[[ma]] <- balanceFwyArtDvmt(ma)
@@ -1750,7 +1750,7 @@ CalculateRoadPerformance <- function(L) {
     Vt <- c("Ldv", "HvyTrk", "Bus")
     Cl <- c("None", "Mod", "Hvy", "Sev", "Ext")
     BalanceResults_ls$None <- list(
-      Dvmt_VtRc = array(0, dim = c(length(Vt), length(Cl)), dimnames = list(Vt,Cl)),
+      Dvmt_VtRc = array(0, dim = c(length(Vt), length(Rc)), dimnames = list(Vt,Rc)),
       FwyDvmt_Cl = setNames(numeric(length(Cl)), Cl),
       ArtDvmt_Cl = setNames(numeric(length(Cl)), Cl)
     )
@@ -1811,15 +1811,16 @@ CalculateRoadPerformance <- function(L) {
   #Calculate average speed and total vehicle delay by marea and vehicle type
   #-------------------------------------------------------------------------
   #Initialize average speed array
+  Vt <- c("Ldv", "HvyTrk", "Bus")
   AveSpeed_MaVt <- array(
     0,
     dim = c(length(Ma), 3),
-    dimnames = list(Ma, c("Ldv", "HvyTrk", "Bus")))
+    dimnames = list(Ma, Vt))
   #Initialize vehicle delay array
   VehDelay_MaVt <- array(
     0,
     dim = c(length(Ma), 3),
-    dimnames = list(Ma, c("Ldv", "HvyTrk", "Bus")))
+    dimnames = list(Ma, Vt))
   #Iterate by marea and calculate average speed and total delay
   for (ma in Ma[Ma != "None"]) {
     Dvmt_VtRc <- BalanceResults_ls[[ma]]$Dvmt_VtRc
@@ -1834,6 +1835,16 @@ CalculateRoadPerformance <- function(L) {
     AveSpeed_MaVt["None",] <- NA
     VehDelay_MaVt["None",] <- NA
   }
+  #Remove NaN (because no DVMT of type)
+  AveSpeed_MaVt <- apply(AveSpeed_MaVt, 2, function(x) {
+    x[is.nan(x)] <- max(x[!is.nan(x)], na.rm = TRUE)
+    x
+  })
+  #Create 1-d matrix is AveSpeed_MaVt or VehDelay_MaVt are vectors
+  AveSpeed_MaVt <-
+    array(AveSpeed_MaVt, dim = c(length(Ma), 3), dimnames = list(Ma, Vt))
+  VehDelay_MaVt <-
+    array(VehDelay_MaVt, dim = c(length(Ma), 3), dimnames = list(Ma, Vt))
 
   #Calculate average vehicle speed for non-urban roads
   #---------------------------------------------------
@@ -1847,7 +1858,11 @@ CalculateRoadPerformance <- function(L) {
   #Calculate speed ratio
   RoadSpeedRatio_Ma <- calcUrbRurHhSpeedRatio()
   #Calculate non-urban road speeds
-  NonUrbanAveSpeed_Ma <- RoadSpeedRatio_Ma * AveSpeed_MaVt[,"Ldv"]
+  if (length(Ma) > 1) {
+    NonUrbanAveSpeed_Ma <- RoadSpeedRatio_Ma * AveSpeed_MaVt[,"Ldv"]
+  } else {
+    NonUrbanAveSpeed_Ma <- RoadSpeedRatio_Ma * AveSpeed_MaVt["Ldv"]
+  }
   #Constrain average non-urban speed to be in reasonable bounds
   NonUrbanAveSpeed_Ma[NonUrbanAveSpeed_Ma > 60] <- 60
   #If any marea is named 'None', assign maximum non-urban speed
@@ -1857,34 +1872,35 @@ CalculateRoadPerformance <- function(L) {
     rm(MaxSpeed)
   }
 
+  #Proportions of freeway and arterial DVMT by congestion level
+  #------------------------------------------------------------
+  Cl <- c("None", "Mod", "Hvy", "Sev", "Ext")
+  #Proportion of freeway DVMT by congestion level
+  FwyDvmt_MaCl <-
+    do.call(rbind, lapply(BalanceResults_ls, function(x) x$FwyDvmt_Cl))[Ma,]
+  FwyDvmt_MaCl <-
+    array(FwyDvmt_MaCl, dim = c(length(Ma), length(Cl)), dimnames = list(Ma, Cl))
+  FwyDvmtPropByLevel_MaCl <- sweep(FwyDvmt_MaCl, 1, rowSums(FwyDvmt_MaCl), "/")
+  FwyDvmtPropByLevel_MaCl[is.na(FwyDvmtPropByLevel_MaCl)] <- 0
+  FwyDvmtPropByLevel_ls <- as.list(data.frame(FwyDvmtPropByLevel_MaCl))
+  names(FwyDvmtPropByLevel_ls) <-
+    paste0("FwyDvmtProp", names(FwyDvmtPropByLevel_ls), "Cong")
+  #Proportion of arterial DVMT by congestion level
+  ArtDvmt_MaCl <-
+    do.call(rbind, lapply(BalanceResults_ls, function(x) x$ArtDvmt_Cl))[Ma,]
+  ArtDvmt_MaCl <-
+    array(ArtDvmt_MaCl, dim = c(length(Ma), length(Cl)), dimnames = list(Ma, Cl))
+  ArtDvmtPropByLevel_MaCl <- sweep(ArtDvmt_MaCl, 1, rowSums(ArtDvmt_MaCl), "/")
+  ArtDvmtPropByLevel_MaCl[is.na(ArtDvmtPropByLevel_MaCl)] <- 0
+  ArtDvmtPropByLevel_ls <- as.list(data.frame(ArtDvmtPropByLevel_MaCl))
+  names(ArtDvmtPropByLevel_ls) <-
+    paste0("ArtDvmtProp", names(ArtDvmtPropByLevel_ls), "Cong")
+
   #Calculate average congestion cost per mile
   #------------------------------------------
-  FwyDvmt_MaCl <-
-    do.call(rbind, lapply(BalanceResults_ls, function(x) x$FwyDvmt_Cl))
-  ArtDvmt_MaCl <-
-    do.call(rbind, lapply(BalanceResults_ls, function(x) x$ArtDvmt_Cl))
   AveCongPrice_Ma <-
     (rowSums(FwyPrices_MaCl * FwyDvmt_MaCl) + rowSums(ArtPrices_MaCl * ArtDvmt_MaCl)) /
     sum(FwyDvmt_MaCl + ArtDvmt_MaCl)
-
-  #Proportions of freeway and arterial DVMT by congestion level
-  #------------------------------------------------------------
-  #Proportion of freeway DVMT by congestion level
-  FwyDvmt_MaCl <-
-    do.call(rbind, lapply(BalanceResults_ls, function(x) x$FwyDvmt_Cl))
-  FwyDvmtPropByLevel_ls <-
-    as.list(data.frame(sweep(FwyDvmt_MaCl, 1, rowSums(FwyDvmt_MaCl), "/")))
-  names(FwyDvmtPropByLevel_ls) <-
-    paste0("FwyDvmtProp", names(FwyDvmtPropByLevel_ls), "Cong")
-  rm(FwyDvmt_MaCl)
-  #Proportion of arterial DVMT by congestion level
-  ArtDvmt_MaCl <-
-    do.call(rbind, lapply(BalanceResults_ls, function(x) x$ArtDvmt_Cl))
-  ArtDvmtPropByLevel_ls <-
-    as.list(data.frame(sweep(ArtDvmt_MaCl, 1, rowSums(ArtDvmt_MaCl), "/")))
-  names(ArtDvmtPropByLevel_ls) <-
-    paste0("ArtDvmtProp", names(ArtDvmtPropByLevel_ls), "Cong")
-  rm(ArtDvmt_MaCl)
 
   #Freeway and arterial speeds by congestion level
   #-----------------------------------------------
@@ -1964,14 +1980,29 @@ documentModule("CalculateRoadPerformance")
 #   # SaveDatastore = TRUE
 #   SaveDatastore = FALSE
 # )
-# setUpTests(TestSetup_ls)
+# # setUpTests(TestSetup_ls)
 # #Run test module
 # TestDat_ <- testModule(
 #   ModuleName = "CalculateRoadPerformance",
 #   LoadDatastore = TRUE,
-#   SaveDatastore = TRUE,
+#   SaveDatastore = FALSE,
 #   DoRun = FALSE
 # )
 # L <- TestDat_$L
 # R <- CalculateRoadPerformance(L)
-
+#
+# TestDat_ <- testModule(
+#   ModuleName = "CalculateRoadPerformance",
+#   LoadDatastore = TRUE,
+#   SaveDatastore = TRUE,
+#   DoRun = TRUE,
+#   RunFor = "BaseYear"
+# )
+#
+# TestDat_ <- testModule(
+#   ModuleName = "CalculateRoadPerformance",
+#   LoadDatastore = TRUE,
+#   SaveDatastore = TRUE,
+#   DoRun = TRUE,
+#   RunFor = "NotBaseYear"
+# )

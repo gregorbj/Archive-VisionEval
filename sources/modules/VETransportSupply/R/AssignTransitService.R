@@ -622,7 +622,6 @@ documentModule("AssignTransitService")
 #-------------------------------------------------------------------------------
 # library(filesstrings)
 # library(visioneval)
-# library(fields)
 # source("tests/scripts/test_functions.R")
 # #Set up test environment
 # TestSetup_ls <- list(
@@ -642,5 +641,5 @@ documentModule("AssignTransitService")
 #   SaveDatastore = TRUE,
 #   DoRun = FALSE
 # )
-# L <- TestDat_
-# R <- AssignTransitService(TestDat_)
+# L <- TestDat_$L
+# R <- AssignTransitService(L)

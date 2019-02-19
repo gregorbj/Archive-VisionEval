@@ -673,6 +673,7 @@ CalculateMpgMpkwhAdjustments <- function(L) {
   for (ma in Ma) {
     AveSmoothFactors_MaVt[ma,] <- sapply(Vt, function(x) calcAveSpdSmAdj(x, ma))
   }
+  AveSmoothFactors_MaVt[is.na(AveSmoothFactors_MaVt)] <- 1
 
   #-------------------------------------------------
   #CALCULATE ECO-DRIVING ADJUSTMENTS BY VEHICLE TYPE
@@ -703,8 +704,9 @@ CalculateMpgMpkwhAdjustments <- function(L) {
   }
   AveEcoDriveFactors_MaVt <- do.call(rbind, lapply(EcoDrive_ls, function(x) x["WtAve",]))
   AveEcoDriveFactorsFf_MaVt <- do.call(rbind, lapply(EcoDrive_ls, function(x) x["Ff",]))
-  AveEcoDriveFactorsFf_Vt <- apply(AveEcoDriveFactorsFf_MaVt, 2, min)
+  AveEcoDriveFactorsFf_Vt <- apply(AveEcoDriveFactorsFf_MaVt, 2, min, na.rm = TRUE)
   rm(EcoDrive_ls, AveEcoDriveFactorsFf_MaVt)
+  AveEcoDriveFactors_MaVt[is.na(AveEcoDriveFactors_MaVt)] <- 1
 
   #-----------------------------------------------------------
   #CALCULATE CONGESTION ADJUSTMENTS BY VEHICLE/POWERTRAIN TYPE
@@ -795,8 +797,9 @@ CalculateMpgMpkwhAdjustments <- function(L) {
     Adj_ls[[ma]] <- sapply(Vp, function(x) calcMpgMpkwhAdj(x, ma))
   }
   MpgMpkwhAdj_MaVp <- do.call(rbind, lapply(Adj_ls, function(x) x["WtAve",]))
+  MpgMpkwhAdj_MaVp[is.na(MpgMpkwhAdj_MaVp)] <- 1
   MpgMpkwhAdjFf_MaVp <- do.call(rbind, lapply(Adj_ls, function(x) x["Ff",]))
-  MpgMpkwhAdjFf_Vp <- apply(MpgMpkwhAdjFf_MaVp, 2, min)
+  MpgMpkwhAdjFf_Vp <- apply(MpgMpkwhAdjFf_MaVp, 2, min, na.rm = TRUE)
 
   #------------------
   #RETURN THE RESULTS
@@ -846,16 +849,16 @@ documentModule("CalculateMpgMpkwhAdjustments")
 # source("tests/scripts/test_functions.R")
 # #Set up test environment
 # TestSetup_ls <- list(
-#   TestDataRepo = "../Test_Data/VE-RSPM",
+#   TestDataRepo = "../Test_Data/VE-State",
 #   DatastoreName = "Datastore.tar",
 #   LoadDatastore = TRUE,
-#   TestDocsDir = "verspm",
+#   TestDocsDir = "vestate",
 #   ClearLogs = TRUE,
 #   # SaveDatastore = TRUE
 #   SaveDatastore = FALSE
 # )
 # setUpTests(TestSetup_ls)
-# #Run test module
+#Run test module
 # TestDat_ <- testModule(
 #   ModuleName = "CalculateMpgMpkwhAdjustments",
 #   LoadDatastore = TRUE,
@@ -865,3 +868,11 @@ documentModule("CalculateMpgMpkwhAdjustments")
 # )
 # L <- TestDat_$L
 # R <- CalculateMpgMpkwhAdjustments(L)
+#
+# TestDat_ <- testModule(
+#   ModuleName = "CalculateMpgMpkwhAdjustments",
+#   LoadDatastore = TRUE,
+#   SaveDatastore = TRUE,
+#   DoRun = TRUE,
+#   RequiredPackages = "VEPowertrainsAndFuels"
+# )

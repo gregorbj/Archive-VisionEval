@@ -35,6 +35,7 @@ ISELEMENTOF - Categorical values that are permitted. Values in the datastore are
 
 |NAME                |TABLE     |GROUP |TYPE      |UNITS      |PROHIBIT     |ISELEMENTOF                |
 |:-------------------|:---------|:-----|:---------|:----------|:------------|:--------------------------|
+|Azone               |Azone     |Year  |character |ID         |             |                           |
 |HighCarSvcCost      |Azone     |Year  |currency  |USD        |NA, < 0      |                           |
 |LowCarSvcCost       |Azone     |Year  |currency  |USD        |NA, < 0      |                           |
 |AveCarSvcVehicleAge |Azone     |Year  |time      |YR         |NA, < 0      |                           |
@@ -45,6 +46,7 @@ ISELEMENTOF - Categorical values that are permitted. Values in the datastore are
 |NumLtTrk            |Household |Year  |vehicles  |VEH        |NA, < 0      |                           |
 |NumAuto             |Household |Year  |vehicles  |VEH        |NA, < 0      |                           |
 |CarSvcLevel         |Household |Year  |character |category   |             |Low, High                  |
+|Azone               |Vehicle   |Year  |character |ID         |NA           |                           |
 |HhId                |Vehicle   |Year  |character |ID         |NA           |                           |
 |VehId               |Vehicle   |Year  |character |ID         |NA           |                           |
 |VehicleAccess       |Vehicle   |Year  |character |category   |             |Own, LowCarSvc, HighCarSvc |

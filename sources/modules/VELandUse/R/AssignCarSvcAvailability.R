@@ -196,5 +196,5 @@ documentModule("AssignCarSvcAvailability")
 #   SaveDatastore = TRUE,
 #   DoRun = FALSE
 # )
-# L <- TestDat_
-# R <- AssignCarSvcAvailability(TestDat_)
+# L <- TestDat_$L
+# R <- AssignCarSvcAvailability(L)

@@ -49,7 +49,7 @@
 #------------------------------
 AdjustHhVehicleMpgMpkwhSpecifications <- list(
   #Level of geography module is applied at
-  RunBy = "Azone",
+  RunBy = "Marea",
   #Specify new tables to be created by Inp if any
   #Specify new tables to be created by Set if any
   #Specify input data
@@ -119,24 +119,6 @@ AdjustHhVehicleMpgMpkwhSpecifications <- list(
       ISELEMENTOF = ""
     ),
     item(
-      NAME = "Marea",
-      TABLE = "Azone",
-      GROUP = "Year",
-      TYPE = "character",
-      UNITS = "ID",
-      PROHIBIT = "",
-      ISELEMENTOF = ""
-    ),
-    item(
-      NAME = "Azone",
-      TABLE = "Azone",
-      GROUP = "Year",
-      TYPE = "character",
-      UNITS = "ID",
-      PROHIBIT = "",
-      ISELEMENTOF = ""
-    ),
-    item(
       NAME = "HhId",
       TABLE = "Household",
       GROUP = "Year",
@@ -196,15 +178,6 @@ AdjustHhVehicleMpgMpkwhSpecifications <- list(
     ),
     item(
       NAME = "Marea",
-      TABLE = "Vehicle",
-      GROUP = "Year",
-      TYPE = "character",
-      UNITS = "ID",
-      PROHIBIT = "",
-      ISELEMENTOF = ""
-    ),
-    item(
-      NAME = "Azone",
       TABLE = "Vehicle",
       GROUP = "Year",
       TYPE = "character",
@@ -679,10 +652,10 @@ documentModule("AdjustHhVehicleMpgMpkwh")
 # source("tests/scripts/test_functions.R")
 # #Set up test environment
 # TestSetup_ls <- list(
-#   TestDataRepo = "../Test_Data/VE-RSPM",
+#   TestDataRepo = "../Test_Data/VE-State",
 #   DatastoreName = "Datastore.tar",
 #   LoadDatastore = TRUE,
-#   TestDocsDir = "verspm",
+#   TestDocsDir = "vestate",
 #   ClearLogs = TRUE,
 #   # SaveDatastore = TRUE
 #   SaveDatastore = FALSE
@@ -697,4 +670,14 @@ documentModule("AdjustHhVehicleMpgMpkwh")
 #   RequiredPackages = c("VEHouseholdTravel", "VEPowertrainsAndFuels")
 # )
 # L <- TestDat_$L
-# R <- AdjustHhVehicleMpgMpkwh(L)
+# M <- TestDat_$M
+# R <- AdjustHhVehicleMpgMpkwh(TestDat_$L, TestDat_$M)
+
+# TestDat_ <- testModule(
+#   ModuleName = "AdjustHhVehicleMpgMpkwh",
+#   LoadDatastore = TRUE,
+#   SaveDatastore = TRUE,
+#   DoRun = TRUE,
+#   RequiredPackages = c("VEHouseholdTravel", "VEPowertrainsAndFuels")
+# )
+

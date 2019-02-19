@@ -51,7 +51,7 @@ DESCRIPTION - A description of the data.
 |:---------------|:------|:----------|:------------|:-----------|:--------|:------------------------------------------------------------------------|
 |Year            |       |           |             |            |         |Must contain a record for each model run year                            |
 |ComSvcLtTrkProp |double |proportion |NA, < 0, > 1 |            |         |Regional proportion of commercial service vehicles that are light trucks |
-### region_comsvc_ave_veh_age.csv
+### region_comsvc_veh_mean_age.csv
 |NAME                |TYPE |UNITS |PROHIBIT |ISELEMENTOF |UNLIKELY |DESCRIPTION                                   |
 |:-------------------|:----|:-----|:--------|:-----------|:--------|:---------------------------------------------|
 |Year                |     |      |         |            |         |Must contain a record for each model run year |
@@ -141,9 +141,9 @@ DESCRIPTION - A description of the data.
 |ComSvcUrbanCO2e             |Marea  |Year  |mass     |GM    |NA, < 0  |            |Average daily amount of carbon-dioxide equivalents produced by commercial service vehicles associated with urban household activity in grams                  |
 |ComSvcNonUrbanCO2e          |Marea  |Year  |mass     |GM    |NA, < 0  |            |Average daily amount of carbon-dioxide equivalents produced by commercial service vehicles associated with rural and town household activity in grams         |
 |HvyTrkUrbanCO2e             |Marea  |Year  |mass     |GM    |NA, < 0  |            |Average daily amount of carbon-dioxide equivalents produced by heavy trucks on urbanized area roadways in the Marea in grams                                  |
-|ComSvcAveUrbanAutoCO2eRate  |Marea  |Year  |compound |GM/MI |NA, < 0  |            |Average amount of carbon-dioxide equivalents produced by commercial service automobiles per mile of travel on urbanized area roadways in grams per mile       |
-|ComSvcAveUrbanLtTrkCO2eRate |Marea  |Year  |compound |GM/MI |NA, < 0  |            |Average amount of carbon-dioxide equivalents produced by commercial service light trucks per mile of travel on urbanized area roadways in grams per mile      |
-|HvyTrkAveUrbanCO2eRate      |Marea  |Year  |compound |GM/MI |NA, < 0  |            |Average amount of carbon-dioxide equivalents produced by heavy trucks per mile of travel on urbanized area roadways in grams per mile                         |
+|ComSvcAveUrbanAutoCO2eRate  |Marea  |Year  |compound |GM/MI |< 0      |            |Average amount of carbon-dioxide equivalents produced by commercial service automobiles per mile of travel on urbanized area roadways in grams per mile       |
+|ComSvcAveUrbanLtTrkCO2eRate |Marea  |Year  |compound |GM/MI |< 0      |            |Average amount of carbon-dioxide equivalents produced by commercial service light trucks per mile of travel on urbanized area roadways in grams per mile      |
+|HvyTrkAveUrbanCO2eRate      |Marea  |Year  |compound |GM/MI |< 0      |            |Average amount of carbon-dioxide equivalents produced by heavy trucks per mile of travel on urbanized area roadways in grams per mile                         |
 |HvyTrkNonUrbanGGE           |Region |Year  |energy   |GGE   |NA, < 0  |            |Average daily amount of hydrocarbon fuels consumed by heavy trucks on rural and town roadways in the Region in gas gallon equivalents                         |
 |HvyTrkUrbanGGE              |Region |Year  |energy   |GGE   |NA, < 0  |            |Average daily amount of hydrocarbon fuels consumed by heavy trucks on urbanized area roadways in the Region in gas gallon equivalents                         |
 |HvyTrkNonUrbanKWH           |Region |Year  |energy   |KWH   |NA, < 0  |            |Average daily amount of electricity consumed by heavy trucks on rural and town roadways in the Region in kilowatt-hours                                       |

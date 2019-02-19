@@ -4,7 +4,6 @@
 #Load packages and test functions
 library(filesstrings)
 library(visioneval)
-library(fields)
 source("tests/scripts/test_functions.R")
 
 #Define test setup parameters

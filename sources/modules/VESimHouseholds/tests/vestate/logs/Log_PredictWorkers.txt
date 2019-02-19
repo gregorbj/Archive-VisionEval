@@ -1,32 +1,32 @@
 Test
 Test of VESimHouseholds package modules
-2018-11-27_10:43:42
+2019-02-15_08:06:18
 
-2018-11-27 10:43:42 : Testing PredictWorkers. 
+2019-02-15 08:06:19 : Testing PredictWorkers. 
 
-2018-11-27 10:43:42 : Attempting to load datastore. 
+2019-02-15 08:06:19 : Attempting to load datastore. 
 
-2018-11-27 10:43:42 : Datastore loaded. 
+2019-02-15 08:06:19 : Datastore loaded. 
 
-2018-11-27 10:43:42 : Attempting to load and check specifications. 
+2019-02-15 08:06:19 : Attempting to load and check specifications. 
 
-2018-11-27 10:43:42 : Module specifications successfully loaded and checked for errors. 
+2019-02-15 08:06:19 : Module specifications successfully loaded and checked for errors. 
 
-2018-11-27 10:43:43 : Attempting to process, check and load module inputs. 
+2019-02-15 08:06:20 : Attempting to process, check and load module inputs. 
 
-2018-11-27 10:43:45 : Module inputs successfully checked and loaded into datastore. 
+2019-02-15 08:06:27 : Module inputs successfully checked and loaded into datastore. 
 
-2018-11-27 10:43:45 : Checking whether datastore contains all datasets in Get specifications. 
+2019-02-15 08:06:27 : Checking whether datastore contains all datasets in Get specifications. 
 
-2018-11-27 10:43:45 : Datastore contains all datasets identified in module Get specifications. 
+2019-02-15 08:06:27 : Datastore contains all datasets identified in module Get specifications. 
 
-2018-11-27 10:43:45 : Running module and checking whether outputs meet Set specifications. 
+2019-02-15 08:06:27 : Running module and checking whether outputs meet Set specifications. 
 
-2018-11-27 10:43:45 : Also saving module outputs to datastore. 
+2019-02-15 08:06:27 : Also saving module outputs to datastore. 
 
-2018-11-27 10:44:44 : Module run successfully and outputs meet Set specifications. 
+2019-02-15 08:07:28 : Module run successfully and outputs meet Set specifications. 
 
-2018-11-27 10:44:45 : Module outputs saved to datastore. 
+2019-02-15 08:07:28 : Module outputs saved to datastore. 
 
-2018-11-27 10:44:45 : Congratulations. Module PredictWorkers passed all tests. 
+2019-02-15 08:07:28 : Congratulations. Module PredictWorkers passed all tests. 
 

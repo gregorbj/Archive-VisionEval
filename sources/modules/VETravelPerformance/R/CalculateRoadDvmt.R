@@ -578,17 +578,31 @@ assignHhUrbanDvmtProp <- function(Hh_ls, HhUrbanRoadDvmt_Ma) {
   Prop_ <- numeric(NumHh)
   UrbanHhPropUrbanDvmt_Ma <- setNames(numeric(length(Ma)), Ma)
   NonUrbanHhPropUrbanDvmt_Ma <- setNames(numeric(length(Ma)), Ma)
+  HasUrbanDvmt <- setNames(HhUrbanRoadDvmt_Ma > 0, Ma)
   for (ma in Ma) {
-    Dvmt_ <- Hh_ls$Dvmt[Hh_ls$Marea == ma]
-    LocType_ <- Hh_ls$LocType[Hh_ls$Marea == ma]
-    Prob_ <- as.numeric(LocType_ == "Urban")
-    UrbanRoadProp_ <- Prob_ * HhUrbanRoadDvmt_Ma[ma] / sum(Dvmt_ * Prob_)
-    HhDvmt_ <- tapply(Dvmt_, LocType_, sum)
-    HhUrbanDvmt_ <- tapply(UrbanRoadProp_ * Dvmt_, LocType_, sum)
-    Prop_[Hh_ls$Marea == ma] <- UrbanRoadProp_
-    UrbanHhPropUrbanDvmt_Ma[ma] <- HhUrbanDvmt_["Urban"] / HhDvmt_["Urban"]
-    NonUrbanHhPropUrbanDvmt_Ma[ma] <-
-      (sum(HhUrbanDvmt_) - HhUrbanDvmt_["Urban"])  / (sum(HhDvmt_) - HhDvmt_["Urban"])
+    if (HasUrbanDvmt[ma]) {
+      Dvmt_ <- Hh_ls$Dvmt[Hh_ls$Marea == ma]
+      LocType_ <- Hh_ls$LocType[Hh_ls$Marea == ma]
+      Prob_ <- as.numeric(LocType_ == "Urban")
+      UrbanRoadProp_ <- Prob_ * HhUrbanRoadDvmt_Ma[ma] / sum(Dvmt_ * Prob_)
+      if (any(UrbanRoadProp_ > 1)) {
+        UrbanRoadProp_[UrbanRoadProp_ > 1] <- 1
+        RoadDvmtDiff <- HhUrbanRoadDvmt_Ma[ma] - sum(UrbanRoadProp_ * Dvmt_)
+        UrbanRoadProp_[LocType_ != "Urban"] <-
+          RoadDvmtDiff / sum(Dvmt_[LocType_ != "Urban"])
+      }
+      UrbanRoadProp_[UrbanRoadProp_ > 1] <- 1
+      HhDvmt_ <- tapply(Dvmt_, LocType_, sum)
+      HhUrbanDvmt_ <- tapply(UrbanRoadProp_ * Dvmt_, LocType_, sum)
+      Prop_[Hh_ls$Marea == ma] <- UrbanRoadProp_
+      UrbanHhPropUrbanDvmt_Ma[ma] <- HhUrbanDvmt_["Urban"] / HhDvmt_["Urban"]
+      NonUrbanHhPropUrbanDvmt_Ma[ma] <-
+        (sum(HhUrbanDvmt_) - HhUrbanDvmt_["Urban"])  / (sum(HhDvmt_) - HhDvmt_["Urban"])
+    } else {
+      Prop_[Hh_ls$Marea == ma] <- 0
+      UrbanHhPropUrbanDvmt_Ma[ma] <- 0
+      NonUrbanHhPropUrbanDvmt_Ma[ma] <- 0
+    }
   }
   list(
     HhUrbanProp_Hh = Prop_,
@@ -658,6 +672,7 @@ CalculateRoadDvmt <- function(L) {
   RuralPop_Ma <- L$Year$Marea$RuralPop
   Pop_Ma <- UrbanPop_Ma + TownPop_Ma + RuralPop_Ma
   Pop <- sum(Pop_Ma)
+  HasUrb <- UrbanPop_Ma > 0
   #Income
   UrbanIncome_Ma <- L$Year$Marea$UrbanIncome
   TownIncome_Ma <- L$Year$Marea$TownIncome
@@ -681,24 +696,29 @@ CalculateRoadDvmt <- function(L) {
       UrbanPop = L$Year$Marea$UrbanPop,
       TotalPop = with(L$Year$Marea, (UrbanPop + TownPop + RuralPop)),
       UrbanHvyTrkDvmt = L$Global$Marea$UrbanHvyTrkDvmt,
-      UrbanLdvDvmt = L$Global$Marea$UrbanLdvDvmt
+      UrbanLdvDvmt = L$Global$Marea$UrbanLdvDvmt,
+      stringsAsFactors = FALSE
     )
     #Calculate urban road HvyTrk DVMT rates and values using default per capita
     #rate if value has not been specified in inputs
     HasHvyTrkDvmt <- !is.na(Marea_df$UrbanHvyTrkDvmt)
     if (any(!HasHvyTrkDvmt)) {
       Marea_df$UrbanHvyTrkDvmtPC <- Marea_df$UrbanHvyTrkDvmt / Marea_df$UrbanPop
+      Marea_df$UrbanHvyTrkDvmtPC[!HasUrb] <- 0
       Marea_df$UrbanHvyTrkDvmtPC[!HasHvyTrkDvmt] <-
         RoadDvmtModel_ls$UzaHvyTrkDvmtPC_Ua[Marea_df$LookupName[!HasHvyTrkDvmt]]
       Marea_df$UrbanHvyTrkDvmt <- with(Marea_df, UrbanHvyTrkDvmtPC * UrbanPop)
       L$Global$Marea$UrbanHvyTrkDvmt <- Marea_df$UrbanHvyTrkDvmt
+    } else {
+      Marea_df$UrbanHvyTrkDvmtPC <- Marea_df$UrbanHvyTrkDvmt / Marea_df$UrbanPop
     }
     rm(HasHvyTrkDvmt)
     #Calculate urban road LDV DVMT rates and values using default per capita
     #rate if value has not been specified in inputs
     HasLdvDvmt <- !is.na(Marea_df$UrbanLdvDvmt)
     if (any(!HasLdvDvmt)) {
-      Marea_df$UrbanLdvDvmtPC <- Marea_df$UrbanLdvDvmt / Marea_df$UrbanPop
+     Marea_df$UrbanLdvDvmtPC <- Marea_df$UrbanLdvDvmt / Marea_df$UrbanPop
+      Marea_df$UrbanLdvDvmtPC[!HasUrb] <- 0
       Marea_df$UrbanLdvDvmtPC[!HasLdvDvmt] <-
         RoadDvmtModel_ls$UzaLDVDvmtPC_Ua[Marea_df$LookupName[!HasLdvDvmt]]
       Marea_df$UrbanLdvDvmt <- with(Marea_df, UrbanLdvDvmtPC * UrbanPop)
@@ -722,7 +742,7 @@ CalculateRoadDvmt <- function(L) {
     rm(RegionHvyTrkDvmt, Marea_df)
   }
   #Update the values for HvyTrk and LDV DVMT
-  Out_ls$Global$Region$HvyTrkDvmt <- L$Global$Region$HvyTrkDvmt
+  Out_ls$Global$Region$HvyTrkDvmt <- unname(L$Global$Region$HvyTrkDvmt)
   Out_ls$Global$Marea$UrbanHvyTrkDvmt <- L$Global$Marea$UrbanHvyTrkDvmt
   Out_ls$Global$Marea$UrbanLdvDvmt <- L$Global$Marea$UrbanLdvDvmt
 
@@ -733,7 +753,9 @@ CalculateRoadDvmt <- function(L) {
     #Calculate values
     UrbanHvyTrkDvmt_Ma <- L$Global$Marea$UrbanHvyTrkDvmt
     HvyTrkDvmtPopulationFactor_Ma <- UrbanHvyTrkDvmt_Ma / UrbanPop_Ma
+    HvyTrkDvmtPopulationFactor_Ma[!HasUrb] <- 0
     HvyTrkDvmtIncomeFactor_Ma <- UrbanHvyTrkDvmt_Ma / UrbanIncome_Ma
+    HvyTrkDvmtIncomeFactor_Ma[!HasUrb] <- 0
     HvyTrkDvmt <- L$Global$Region$HvyTrkDvmt
     HvyTrkUrbanDvmt <- sum(L$Global$Marea$UrbanHvyTrkDvmt)
     HvyTrkDvmtPopulationFactor <- HvyTrkDvmt / Pop
@@ -852,8 +874,8 @@ CalculateRoadDvmt <- function(L) {
   #Calculate urban DVMT proportion of each household and urban and non-urban household averages
   UrbanDvmtProp_ls <- assignHhUrbanDvmtProp(L$Year$Household, HhUrbanRoadDvmt_Ma)
   Out_ls$Year$Household$UrbanDvmtProp <- UrbanDvmtProp_ls$HhUrbanProp_Hh
-  Out_ls$Year$Marea$UrbanHhPropUrbanDvmt <- UrbanDvmtProp_ls$UrbanHhPropUrbanDvmt_Ma
-  Out_ls$Year$Marea$NonUrbanHhPropUrbanDvmt <- UrbanDvmtProp_ls$NonUrbanHhPropUrbanDvmt_Ma
+  Out_ls$Year$Marea$UrbanHhPropUrbanDvmt <- unname(UrbanDvmtProp_ls$UrbanHhPropUrbanDvmt_Ma)
+  Out_ls$Year$Marea$NonUrbanHhPropUrbanDvmt <- unname(UrbanDvmtProp_ls$NonUrbanHhPropUrbanDvmt_Ma)
 
   #Calculate DVMT by vehicle type and roadway type
   #-----------------------------------------------
@@ -910,12 +932,13 @@ documentModule("CalculateRoadDvmt")
 # library(visioneval)
 # library(filesstrings)
 # source("tests/scripts/test_functions.R")
+# load("data/RoadDvmtModel_ls.rda")
 # #Set up test environment
 # TestSetup_ls <- list(
-#   TestDataRepo = "../Test_Data/VE-RSPM",
+#   TestDataRepo = "../Test_Data/VE-CLMPO",
 #   DatastoreName = "Datastore.tar",
 #   LoadDatastore = TRUE,
-#   TestDocsDir = "verspm",
+#   TestDocsDir = "veclmpo",
 #   ClearLogs = TRUE,
 #   # SaveDatastore = TRUE
 #   SaveDatastore = FALSE
@@ -925,9 +948,26 @@ documentModule("CalculateRoadDvmt")
 # TestDat_ <- testModule(
 #   ModuleName = "CalculateRoadDvmt",
 #   LoadDatastore = TRUE,
-#   SaveDatastore = TRUE,
-#   DoRun = FALSE
+#   SaveDatastore = FALSE,
+#   DoRun = FALSE,
+#   RunFor = "BaseYear"
 # )
 # L <- TestDat_$L
 # R <- CalculateRoadDvmt(L)
+#
+# TestDat_ <- testModule(
+#   ModuleName = "CalculateRoadDvmt",
+#   LoadDatastore = TRUE,
+#   SaveDatastore = TRUE,
+#   DoRun = TRUE,
+#   RunFor = "BaseYear"
+# )
+#
+# TestDat_ <- testModule(
+#   ModuleName = "CalculateRoadDvmt",
+#   LoadDatastore = TRUE,
+#   SaveDatastore = TRUE,
+#   DoRun = TRUE,
+#   RunFor = "NotBaseYear"
+# )
 

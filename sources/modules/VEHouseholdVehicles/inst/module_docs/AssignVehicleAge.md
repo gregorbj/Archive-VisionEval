@@ -71,16 +71,17 @@ ISELEMENTOF - Categorical values that are permitted. Values in the datastore are
 
 |NAME                |TABLE     |GROUP |TYPE      |UNITS    |PROHIBIT |ISELEMENTOF                |
 |:-------------------|:---------|:-----|:---------|:--------|:--------|:--------------------------|
+|Azone               |Azone     |Year  |character |ID       |         |                           |
 |AutoMeanAge         |Azone     |Year  |time      |YR       |NA, <= 0 |                           |
 |LtTrkMeanAge        |Azone     |Year  |time      |YR       |NA, <= 0 |                           |
+|Azone               |Household |Year  |character |ID       |         |                           |
 |HhId                |Household |Year  |character |ID       |         |                           |
 |Income              |Household |Year  |currency  |USD.2001 |NA, < 0  |                           |
-|Vehicles            |Household |Year  |vehicles  |VEH      |NA, < 0  |                           |
-|NumLtTrk            |Household |Year  |vehicles  |VEH      |NA, < 0  |                           |
-|NumAuto             |Household |Year  |vehicles  |VEH      |NA, < 0  |                           |
+|Azone               |Vehicle   |Year  |character |ID       |         |                           |
 |HhId                |Vehicle   |Year  |character |ID       |NA       |                           |
 |VehId               |Vehicle   |Year  |character |ID       |NA       |                           |
 |VehicleAccess       |Vehicle   |Year  |character |category |         |Own, LowCarSvc, HighCarSvc |
+|Type                |Vehicle   |Year  |character |category |NA       |Auto, LtTrk                |
 |AveCarSvcVehicleAge |Azone     |Year  |time      |YR       |NA, < 0  |                           |
 
 ## Datasets Produced by the Module
@@ -102,7 +103,6 @@ ISELEMENTOF - Categorical values that are permitted. Values in the datastore are
 
 DESCRIPTION - A description of the data.
 
-|NAME |TABLE   |GROUP |TYPE      |UNITS    |PROHIBIT |ISELEMENTOF |DESCRIPTION                                                                        |
-|:----|:-------|:-----|:---------|:--------|:--------|:-----------|:----------------------------------------------------------------------------------|
-|Type |Vehicle |Year  |character |category |NA       |Auto, LtTrk |Vehicle body type: Auto = automobile, LtTrk = light trucks (i.e. pickup, SUV, Van) |
-|Age  |Vehicle |Year  |time      |YR       |NA, < 0  |            |Vehicle age in years                                                               |
+|NAME |TABLE   |GROUP |TYPE |UNITS |PROHIBIT |ISELEMENTOF |DESCRIPTION          |
+|:----|:-------|:-----|:----|:-----|:--------|:-----------|:--------------------|
+|Age  |Vehicle |Year  |time |YR    |NA, < 0  |            |Vehicle age in years |
