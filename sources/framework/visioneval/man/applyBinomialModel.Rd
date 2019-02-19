@@ -5,7 +5,8 @@
 \title{Applies an estimated binomial model to a set of input values.}
 \usage{
 applyBinomialModel(Model_ls, Data_df, TargetProp = NULL,
-  CheckTargetSearchRange = FALSE, ApplyRandom = TRUE)
+  CheckTargetSearchRange = FALSE, ApplyRandom = TRUE,
+  ReturnProbs = FALSE)
 }
 \arguments{
 \item{Model_ls}{a list which contains the following components:
@@ -45,6 +46,9 @@ the function will run the model and will not check the target search range.}
 be affected by random draws (i.e. if a random number in range 0 - 1 is less
 than the computed probability) or if a probability cutoff is used (i.e. if
 the computed probability is greater than 0.5)}
+
+\item{ReturnProbs}{a logical identifying whether to return the calculated
+probabilities rather than the assigned results. The default value is FALSE.}
 }
 \value{
 a vector of choice values for each record of the input data frame if
