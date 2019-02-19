@@ -467,6 +467,14 @@ checkModuleOutputs <-
 #'   identifies the name of the module being called) or a soft reference to a
 #'   dataset in the module (i.e. only identifies the name of the dataset). The
 #'   default value is NULL.
+#' @param TestGeoName A character vector identifying the name of the geographic
+#'   area for which data is to be loaded. This argument has effect only if the
+#'   DoRun argument is FALSE. It enables the module developer to choose the
+#'   geographic area data is to be loaded for when developing a module that
+#'   is run for geography other than the region. For example if a module is
+#'   run at the Azone level, the user can specify the name of the Azone that
+#'   data is to be loaded for. If the name is misspecified an error will be
+#'   flagged.
 #' @return If DoRun is FALSE, the return value is a list containing the module
 #'   specifications. If DoRun is TRUE, there is no return value. The function
 #'   writes out messages to the console and to the log as the testing proceeds.
@@ -486,7 +494,8 @@ testModule <-
            DoRun = TRUE,
            RunFor = "AllYears",
            StopOnErr = TRUE,
-           RequiredPackages = NULL) {
+           RequiredPackages = NULL,
+           TestGeoName = NULL) {
 
     #Set working directory to tests and return to main module directory on exit
     #--------------------------------------------------------------------------
@@ -637,6 +646,7 @@ testModule <-
           "Input files for module ", ModuleName,
           " have errors. Check the log for details."
         )
+        writeLog(ProcessedInputs_ls$Errors)
         stop(Msg)
       }
       # If module is NOT Initialize, save the inputs in the datastore
@@ -987,11 +997,47 @@ testModule <-
       if (RunFor == "AllYears") Year <- getYears()[1]
       if (RunFor == "BaseYear") Year <- G$BaseYear
       if (RunFor == "NotBaseYear") Year <- getYears()[!getYears() %in% G$BaseYear][1]
-      L <- getFromDatastore(Specs_ls, RunYear = Year, Geo = NULL)
+      #Identify the units of geography to iterate over
+      GeoCategory <- Specs_ls$RunBy
+      #Create the geographic index list
+      GeoIndex_ls <- createGeoIndexList(Specs_ls$Get, GeoCategory, Year)
       if (exists("Call")) {
         for (Alias in names(Call$Specs)) {
-          L[[Alias]] <-
-            getFromDatastore(Call$Specs[[Alias]], RunYear = Year, Geo = NULL)
+          GeoIndex_ls[[Alias]] <-
+            createGeoIndexList(Call$Specs[[Alias]]$Get, GeoCategory, Year)
+        }
+      }
+      #Get the data required
+      if (GeoCategory == "Region") {
+        L <- getFromDatastore(Specs_ls, RunYear = Year, Geo = NULL)
+        if (exists("Call")) {
+          for (Alias in names(Call$Specs)) {
+            L[[Alias]] <-
+              getFromDatastore(Call$Specs[[Alias]], RunYear = Year, Geo = NULL)
+          }
+        }
+      } else {
+        Geo_ <- readFromTable(GeoCategory, GeoCategory, Year)
+        #Check whether the TestGeoName is proper
+        if (!is.null(TestGeoName)) {
+          if (!(TestGeoName %in% Geo_)) {
+            stop(paste0(
+              "The 'TestGeoName' value - ", TestGeoName,
+              " - is not a recognized name for the ",
+              GeoCategory, " geography that this module is specified to be run ",
+              "for."
+            ))
+          }
+        }
+        #If TestGeoName is NULL get the data for the first name in the list
+        if (is.null(TestGeoName)) TestGeoName <- Geo_[1]
+        #Get the data
+        L <- getFromDatastore(Specs_ls, RunYear = Year, Geo = TestGeoName, GeoIndex_ls = GeoIndex_ls)
+        if (exists("Call")) {
+          for (Alias in names(Call$Specs)) {
+            L[[Alias]] <-
+              getFromDatastore(Call$Specs[[Alias]], RunYear = Year, Geo = TestGeoName, GeoIndex_ls = GeoIndex_ls)
+          }
         }
       }
       #Return the specifications, data list, and called functions
@@ -1194,6 +1240,8 @@ makeModelFormulaString <- function (EstimatedModel) {
 #' be affected by random draws (i.e. if a random number in range 0 - 1 is less
 #' than the computed probability) or if a probability cutoff is used (i.e. if
 #' the computed probability is greater than 0.5)
+#' @param ReturnProbs a logical identifying whether to return the calculated
+#' probabilities rather than the assigned results. The default value is FALSE.
 #' @return a vector of choice values for each record of the input data frame if
 #' the model is being run, or if the function is run to only check the target
 #' search range, a two-element vector identifying if the search range produces
@@ -1204,7 +1252,8 @@ applyBinomialModel <-
            Data_df,
            TargetProp = NULL,
            CheckTargetSearchRange = FALSE,
-           ApplyRandom = TRUE) {
+           ApplyRandom = TRUE,
+           ReturnProbs = FALSE) {
     #Check that model is 'binomial' type
     if (Model_ls$Type != "binomial") {
       Msg <- paste0("Wrong model type. ",
@@ -1269,7 +1318,11 @@ applyBinomialModel <-
       }
     }
     #Return values
-    Result_
+    if (ReturnProbs) {
+      Probs_
+    } else {
+      Result_
+    }
   }
 
 
