@@ -1,6 +1,6 @@
 ## VisionEval Model System Design and Users Guide
 **Brian Gregor, Oregon Systems Analytics LLC**  
-**January 29, 2018**  
+**February 19, 2019**  
 **DRAFT**
 
 
@@ -31,7 +31,7 @@ A submodel is the component of a model that calculates one or a few closely rela
 
 
 - **Module**  
-A module, at its heart, is a collection of data and functions that meet the specifications described in this document and that implement a submodel. Modules also include documentation of the submodel. Modules as made available to users as R packages.
+A module, at its heart, is a collection of data and functions that meet the specifications described in this document and that implement a submodel. Modules also include documentation of the submodel. Modules as made available to users in R packages. Typically a set of related modules is included in a package.
 
 
 - **Software Framework**  
@@ -160,7 +160,7 @@ for(Year in getYears()) {
 A full model run script is shown in Appendix A.   
 
 The script calls two functions that are defined by the software framework; *initializeModel* and *runModule*. The *initializeModel* function initializes the model environment and model datastore, checks that all necessary modules are installed, and checks whether all module data dependencies can be satisfied. The arguments of the *initializeModel* function identify where key model definition data are found. The *runModule* function, as the name suggests, runs a module. The arguments of the *runModule* function identify the name of the module to be run, the package the module is in, and whether the module should be run for all years, only the base year, or for all years except for the base year. This approach makes it easy for users to combine modules in a 'plug-and-play' fashion. One simply identifies the modules that will be run and the sequence that they will be run in. This is possible in large part for the following reasons:  
-1) The modules are loosely coupled. Modules only communicate to one another by passing information to and from the datastore.  
+1) The modules are loosely coupled. Modules only communicate to one another by passing information to and from the datastore or by calling the services of another module. Module calling is described in detail in section 8.1.2.2.
 2) The framework establishes standards for key shared aspects of modules including how data attributes are specified and how geography is represented.  
 3) Every module includes detailed specifications for the data that are inputs to the module and for the data that are outputs from the module. These data specifications serve as contracts that the framework software enforces.  
   These features and how they are designed are described in detail in following sections.  
@@ -237,9 +237,11 @@ The "run_parameters.json" file specifies the following parameters:
     "2010": "../BaseYear/datastore.h5"  
   }
   
-- **Seed** This is a number that modules use as a random seed to make model runs reproducible.  
+- **Seed** This is a number that modules use as a random seed to make model runs reproducible.
 
-The "model_parameters.json" can contain global parameters for a particular model configuration that may be used by multiple modules. For example, a model configuration to be a GreenSTEP model may require some parameters that are not required by a model configuration for an RSPM model. For example, the GreenSTEP model uses a parameter that is the total base year DVMT by light-duty vehicles to calibrate a factor used to compute commercial service vehicle travel. Parameters in this file should not include parameters that are specific to a module or data that would more properly be model inputs. While this file is available to establish global model parameters, it should be used sparingly in order enhance transferrability of modules between different models.
+- **RequiredVEPackages** Lists all of the VisionEval packages that contain modules that are called by the model.
+
+The "model_parameters.json" can contain global parameters for a particular model configuration that may be used by multiple modules. For example, a model configuration to be a GreenSTEP model may require some parameters that are not required by a model configuration for an RSPM model. Parameters in this file should not include parameters that are specific to a module or data that would more properly be model inputs. While this file is available to establish global model parameters such as the value of time, it should be used sparingly in order enhance transferrability of modules between different models.
 
 The "geography.csv" file describes all of the geographic relationships for the model and the names of geographic entities in a [CSV-formatted](https://en.wikipedia.org/wiki/Comma-separated_values) text file. The CSV format, like the JSON format is a plain text file. It is used rather than the JSON format because the geographic relationships are best described in table form and the CSV format is made for tabular data. In addition, a number of different open source and commercial spreadsheet and GIS programs can export tabular data in a CSV-formatted files. The structure of the model system geography is described in detail in Section 6.2 below.  
 
@@ -258,10 +260,8 @@ Following is the definition of the geographic structure of the VisionEval model 
 - **Region**  
 The region is the entire model area. Large-scale characteristics that don't vary across the region are specified at the region level. Examples include fuel prices and the carbon intensities of fuels.  
 
-
 - **Azones**  
 Azones are large subdivisions of the region containing populations that are similar in size to those of counties or Census Public Use Microdata Areas (PUMA). The counties used in the GreenSTEP and EERPAT models and metropolitan divisions used in the RSPM are examples of Azones. Azones are used to represent population and economic characteristics that vary across the region such as demographic forecasts of persons by age group and average per capita income. Azones are the only level of geography that is required to represent actual geographic areas and may not be simulated.  
-
 
 - **Bzones**  
 Bzones are subdivisions of Azones that are similar in size to Census Block Groups. The districts used in RSPM models are examples of Bzones. Bzones are used to represent neighborhood characteristics and policies that may be applied differently by neighborhood, for example in the RSPM:  
@@ -269,16 +269,12 @@ Bzones are subdivisions of Azones that are similar in size to Census Block Group
   - An inventory of housing units by type by district is a land use input; and,  
   - Carsharing inputs are specified by district.  
 
-  In rural areas, Bzones can be used to distinguish small cities from unincorporated areas. Bzones may correspond to actual geographic areas or may be simulated. For example, a submodel of the GreenSTEP model estimates the likely distribution of Census Tract densities for a metropolitan area given an overall population density for the metropolitan area. This submodel will be converted in the model system so that it creates a set of simulated Bzones having densities that represent the likely distribution of Census Tract densities.  
-
-
-- **Czones**  
-Czones are optional subdivisions of Bzones that describe more detailed land use characteristics such as whether an area is typified by residential development, commercial development, or mixed-use development. These characteristics may be described using a classification system such as the *development type* system, used by the GreenSTEP and RSPM models, or the *place type* system used by the RPAT model. A Czone may be any size, up to and including the Bzone that it is located within. As with Bzones, Czones may correspond to actual geographic areas such as the traffic analysis zones defined for an urban travel demand model. Perhaps more commonly, Czones will be synthesized based on scenario inputs and attributes of the Azones and Bzones they are situated within.  
-
+  In rural areas, Bzones can be used to distinguish small cities from unincorporated areas. 
+  
+  Bzones may correspond to actual geographic areas or may be simulated. Bzone simulation greatly reduces model data requirements while still enabling the modeling of land-use-related policies and the effects of land use on various aspects of travel behavior. In VE-RPAT models, Bzones are simulated as *place types* which characterize the intensity and nature of development. In VE-State models, Bzones are synthesized to represent characteristics likely to be found in an actual set of Bzones within each Azone.
 
 - **Mareas**  
-Mareas are associated with urbanized portions of metropolitan areas. Mareas are used to specify and model urbanized area transportation characteristics such as overall transportation supply (transit, highways) and congestion. A Marea does not exist in a strict hierarchical relationship with Azones and Bzones because the Marea boundary is likely to change over time as the urbanized area population grows. While a Marea will be associated with one or more Azones and Bzones, its boundary may be located inside or outside the boundaries of the Azones and Bzones it is associated with. Czones may be used to represent the geographic extent of the Marea and land use characteristics of portions of it. Changes in the urbanized area boundary are modeled as changes in Czone designations.
-
+Mareas are collections of Azones associated with an urbanized area either because a portion of the urbanized area is located in the Azone or because a substantial proportion of the workers residing in the Azone work at jobs located in the urbanized area. Metropolitan models typically only have one assigned Marea whereas state models may have several. The model system requires that each Azone may be associated with only one Marea. It is also required that all Azones be associated with an Marea. A special Marea named '**None**' is used to apply to Azones that are not associated with any urbanized area. Mareas are used to specify and model urbanized area transportation characteristics such as overall transportation supply (transit, highways) and congestion. They are also used to specify large scale land-use-related characteristics and policies in models that use Bzone synthesis.
 
 Geographical relationships for a model are described in the "geography.csv" file contained in the "defs" directory. This file tabulates the names of each geographic unit (except for Region) and the relationships between them. Each row shows a unique relationship. Where a unit of geography is not explictly defined (i.e. it will be simulated), "NA" values are placed in the table. Appendix B shows examples of the "geography.csv" file where only Azones are specified and where Azones and Bzones are specified. It should be noted that there are no naming conventions for individual zones. The user is free to choose what conventions they will use.
 
@@ -310,25 +306,28 @@ Although the units specified by a module for a complex data type may be any of t
 
 For 'currency' data it's not sufficient to convert values to different units, it's also necessary to convert currency values between years to account for the effects of inflation. Because the model parameters estimated in different modules may come from datasets collected in different years, and because model users will most likely want to report currency values in current year terms, it is necessary to convert currency values between years. Currency denominated datasets are stored in the datastore as base year values. When a module needs to use a currency denominated dataset, the framework converts base year values to the year values that the module needs. If a module calculates a currency denominated dataset that is to be saved in the datastore, the framework converts those values from the currency year that the module uses to base year values to save in the datastore. The software framework takes care of the process of converting currency values between years automatically and in a consistent manner. This eliminates the need for model developers to convert currency values. It also allows more flexibility for model users and module developers, and for the evolution of the VisionEval model system with new and improved modules, because it eliminates the need to establish a reference year that is to be used for all modules and models. 
 
-Modules specify the year of a currency dataset using a modifier to the the UNITS specification. This is done by adding a period and 4-digit year to the specification. For example, the UNITS specification for year 2000 dollars would be 'USD.2000'. Note, however, that this convention does not apply to specifications for currency data that is read in from input file because the model user is free to establish any currency year they choose for currency inputs. In those cases, the year is specified in the input file. This is explained in Section 6.4.
+Modules specify the year of a currency dataset using a modifier to the the UNITS specification. This is done by adding a period and 4-digit year to the specification. For example, the UNITS specification for year 2000 dollars would be 'USD.2000'. Note, however, that this convention does not apply to specifications for currency data that is read in from an input file because the model user is free to establish any currency year they choose for currency inputs. In those cases, the year is specified in the input file. This is explained in Section 6.4.
 
-Currency values are converted between years using a deflator series is defined for the model in the "deflators.csv" file in the "defs" directory. This file has 2 columns, 'Year' and 'Value'. Values are needed for all years specified by modules used in a model in addition to the base year and any other years that currency values in input files will be denominated in. For example, if the modules to be used in a model use dollar denominated values for the years 2000 and 2009, the model base year is 2010, and some input data are denominated in 2015 dollars, then at a minimum the "deflators.csv" file must include deflators for those years. A more flexible approach would be to have an annual series of deflators running from the earliest year through the latest year.
+Currency values are converted between years using a deflator series is defined for the model in the "deflators.csv" file in the "defs" directory. This file has 2 columns, 'Year' and 'Value'. Values are needed for all years specified by modules used in a model in addition to the base year and any other years that currency values in input files will be denominated in. For example, if the modules to be used in a model use dollar denominated values for the years 2000 and 2009, the model base year is 2010, and some input data are denominated in 2015 dollars, then at a minimum the "deflators.csv" file must include deflators for those years. A more flexible approach would be to have an annual series of deflators running from the earliest year through the latest year. **Note**: it is not necessary to specify deflators for any future model years (e.g. 2030, 2050). All modules in the model system make calculations in constant (uninflated) dollar terms. Deflators are only used to convert user input values to a constant base and to convert values to the year that is consistent with a module's estimation data.
 
-The UNITS value may also specify a multiplier option for complex and compound data types. This capability exists because modules may use data that are represented in thousands or millions when numbers are very large. For example total income and total VMT are often reported in this way. A multiplier option is added to a units name by adding a period and then the multiplier expressed in scientific notion where the leading digit must be a 1 (e.g. 1e3 for thousands). For currency units, the multiplier option must follow the year notation. For example, 2010 dollars expressed in millions would be expressed as 'USD.2010.1e6'. Miles traveled expressed in millions would be 'MI.1e6'.
+The UNITS value may also specify a multiplier option for complex and compound data types. This capability exists because modules may use data that are represented in thousands or millions when numbers are very large. For example, freeway and arterial construction costs may be represented in thousands of dollars per mile. A multiplier option is added to a units name by adding a period and then the multiplier expressed in scientific notion where the leading digit must be a 1 (e.g. 1e3 for thousands). For currency units, the multiplier option must follow the year notation. For example, 2010 dollars expressed in thousands would be expressed as 'USD.2010.1e3'. Miles traveled expressed in millions would be 'MI.1e6'.
 
 #### 6.4. Model Inputs
-The *inputs* directory contains all of the model inputs for a scenario. A model input file is a table that relates one or more input fields to geographic units and years. Because of the tabular nature of the data, all input files are CSV-formatted text files.  
 
-At present, two types of input files are accommodated. These files differ with respect to whether the specified attribute values vary by 'forecast' year. For example, a file containing input assumptions about the cost of fuel, road use taxes, etc. would have values that vary  by 'forecast' year. In contrast, the files used to specify the characteristics of vehicles of different powertrain types have values that vary by vehicle model year, not 'forecast' year. The structure of these two types of input files, and how their values are organized in the datastore, differ.
+The *inputs* directory contains all of the model inputs for a scenario. A model input file is a table that relates one or more input fields to geographic units and years. Because of the tabular nature of the data, all input files are CSV-formatted text files. The first row of the file contains the headers identifying the data in each column. The columns include each of the data items specified in the input specifications for the module the input file is used for. In addition, the file may be required to have columns labeled **Geo** and **Year** depending on which of the following 4 types the input file is:
 
-All input files that have values which vary by 'forecast' year have at least three columns; two mandatory columns that specify geography ("Geo") and year ("Year"), and one or more data columns. Each row specifies a unique geographic unit and year combination. For example, if a model that has 10 Azones is being run for 2 'forecast' years, then an a table of inputs specified at the Azone level would contain 20 rows (in addition to the header row). The software framework checks these files to make sure that they contain values for all the required combinations of geography and year. 
+* **Inputs apply to the entire region and to all years**: In this case, the input file consists of one data row and each column corresponds to a data item.
+
+* **Inputs apply to parts of the region and to all model years**: In this case, the input file consists of one data row for each geographic area and the file must include a column labeled **Geo** that is used for identifying the geographic areas. For example, if the input file applies to Azones and the model has 10 Azones, the file must have 10 rows in addition to the header. The **Geo** column identifies each of the Azones. Note that only the geographic areas specified in the *geo.csv* may be included in this file. If unlisted geographic areas are included, the model run will stop during initialization and the log will contain messages identifying the error(s).
+
+* **Inputs apply to the entire region but vary by model year**: In this case, the input file consists of one data row for each model year and the file much include a column labeled **Year** that is used for identifying the model years. For example, if the model run parameters specify that the model is to be run for the years 2010 and 2040, the input file must contain 2 rows in addition to the header. The **Year** column identifies each of the model run years. Note that only the specified model run years may be included in this file. If unspecified model run years are included, the model run will stop during initialization and the log will contain messages identifying the error(s).
+
+* **Inputs apply to parts of the region and vary by model year**: In this case the input file consists of one data row for each combination of geographic area and model year. The file must include a **Geo** column and a **Year** column. There must be as many rows as there are combinations of geography and years. For example if an input file applies to Azones and the model specifies 10 Azones and 2 model run years, the file must have 20 rows to accommodate all the combinations in addition to a header row. The **Geo** and **Year** columns may only contain values specified for the model. If they contain any unspecified values, the model run will stop during initialization and the log will contain messages identifying the error(s).
 
 By convention, input file names which include inputs that vary by level of geography, include the level of geography in the input file name. File names should be descriptive. Following are some examples:  
 - azone_hh_pop_by_age.csv  
 - azone_hhsize_targets.csv  
 - bzone_dwelling_units.csv
-
-Input files that do not vary by 'forecast' year do not have a required 'Year' column. They may have a 'Geo' column if they have values that vary by geographic area. In that case, the software framework checks that the dataset accounts for all the specified geographic areas.
 
 The name of an input file and the names of all the columns except for the "Geo" and "Year" columns are specified by the module that requires the input data. In addition to specifying the file and column names, the module specifies:  
 - The level of geography the inputs are specified for (e.g. Region, Azone, Bzone, Czone, Marea);  
@@ -351,7 +350,8 @@ Where:
 The the VisionEval framework uses the year and multiplier information to convert the data to be stored in the datastore. All currency values are stored in base year currency units and all values are stored without exponents.
 
 #### 6.5. The Datastore
-Currently GreenSTEP/RSPM and related models store data in R binary files (rda files). The largest of these files are the simulated household files which store all of the information for all simulated households in an Azone (e.g. counties in GreenSTEP). All the data for households in the Azone are stored in a data frame where each row corresponds to a record of an individual household and the columns are household attributes. Vehicle data for households are stored as lists in the data frame. This approach had some benefits:  
+
+VisionEval changes the approach to storing model data from that of the GreenSTEP and RSPM models and related models. Those models stored data primarily in R data frames as binary files (rda files). The largest of these files are the simulated household files which store all of the information for all simulated households in an Azone (e.g. counties in GreenSTEP). All the data for households in the Azone are stored in a single data frame where each row corresponds to a record of an individual household and the columns are household attributes. Vehicle data for households are stored as lists in the data frame. This approach had some benefits:  
 - Storage and retrieval are part of the R language: one line of code to store a data frame, and one line of code to retrieve;  
 - It is easy to apply models to data frames; and  
 - Vehicle data can be stored as lists within a household data frame, eliminating the need to join tables.  
@@ -361,9 +361,9 @@ The simplicity of this approach helped with getting GreenSTEP from a concept int
 - It is not easy to produce summary statistics from the simulated household files for a region; and  
 - The number of non-household data files has proliferated in order to store various aggregations for use in the model and for later summarization.
 
-Finally, because the GreenSTEP/RSPM approach did not define a consistent data model, it does not sufficiently support the goal of modularity, and it does not support the use of alternative datastores. To overcome these limitations the VisionEval model system specifies a consistent datastore design. This design has been implemented in two types of datastores. One uses the HDF5 file format for storing model data. The HDF5 file format was developed by the National Center for Supercomputing Applications (NCSA) at the University of Illinois and other contributors to handle extremely large and complex data collections. For example, it is used to store data from particle simulations and climate models. It also is the basis for the new open matrix standard for transportation modeling, [OMX](https://github.com/osPlanning/omx). The other uses R binary files within a hierarchical directory structure.  
+Finally, because the GreenSTEP/RSPM approach did not define a consistent data model, it does not sufficiently support the goal of modularity, and it does not support the use of alternative datastores. To overcome these limitations the VisionEval model system specifies a consistent datastore design. This design has been implemented in two types of datastores. One uses R binary files within a hierarchical directory structure. The other uses the HDF5 file format for storing model data. The HDF5 file format was developed by the National Center for Supercomputing Applications (NCSA) at the University of Illinois and other contributors to handle extremely large and complex data collections. For example, it is used to store data from particle simulations and climate models. It also is the basis for the new open matrix standard for transportation modeling, [OMX](https://github.com/osPlanning/omx). 
 
-VisionEval datastores are organized in a 'column-oriented' and hierarchical structure illustrated below. The lowest level of the hierarchy are datasets which are vectors of data values. This matches well the data objects (lists and data frames) commonly used in R programs and calculation methods which are commonly vectorized. Datasets in R datastores are R binary files. In HDF5 datastores, they are a portion of the HDF5 file and are called datasets in the HDF5 nomenclature. Datasets are organized in tables which are groups of datasets that all have the length. For example in the diagram below, Azone is a dataset containing the names of each of the Azones, and Age0to14 is a dataset containing the number of people of age 0 to 14 in each each Azone. These datasets and all those listed directly below them are contained in the Azone table. In R datastores, tables are represented by directories. In HDF5 nomenclature they are called groups. Tables that represent values for a particular model run year are grouped together.  The year groups are named with the model run years (e.g. 2010, 2050) and they contain tables for every geographic level (Czone is optional) as well as 'Household' and 'Vehicle' tables.  Tables that contain datasets whose values don't vary by model run year are contained in the 'Global' group (directory). These include tables of model parameters, geographic tables, and any other table of datasets that apply to all model run years.
+VisionEval datastores are organized in a 'column-oriented' and hierarchical structure illustrated below. The lowest level of the hierarchy are datasets which are vectors of data values. This matches well the data objects (lists and data frames) commonly used in R programs and calculation methods which are commonly vectorized. Datasets in R datastores are R binary files. In HDF5 datastores, they are a portion of the HDF5 file and are called datasets in the HDF5 nomenclature. Datasets are organized in tables which are groups of datasets that all have the length. For example in the diagram below, Azone is a dataset containing the names of each of the Azones, and Age0to14 is a dataset containing the number of people of age 0 to 14 in each each Azone. These datasets and all those listed directly below them are contained in the Azone table. In R datastores, tables are represented by directories. In HDF5 nomenclature they are called groups. Tables that represent values for a particular model run year are grouped together.  The year groups are named with the model run years (e.g. 2010, 2050) and they contain tables for every geographic level as well as 'Household', 'Worker', and 'Vehicle' tables.  Tables that contain datasets whose values don't vary by model run year are contained in the 'Global' group (directory). These include tables of model parameters, geographic tables, and any other table of datasets that apply to all model run years.
 
 ```    
 |____Global
@@ -380,6 +380,7 @@ VisionEval datastores are organized in a 'column-oriented' and hierarchical stru
 |    |
 |    |____Azone
 |    |        Azone
+|    |        Marea
 |    |        Age0to14
 |    |        Age15to19
 |    |        Age20to29
@@ -397,6 +398,9 @@ VisionEval datastores are organized in a 'column-oriented' and hierarchical stru
 |    |____Household
 |    |        ...
 |    |
+|    |____Worker
+|    |        ...
+|    |
 |    |____Vehicle
 |    |        ...
 |    :
@@ -411,6 +415,8 @@ VisionEval datastores are organized in a 'column-oriented' and hierarchical stru
 
 This structure is adequate to store all of the data that are used by the GreenSTEP/RSPM models and their offshoots. It can also be easily expanded to serve new modeling capabilites. For example if a module is added to model building stock, a 'Buildings' table could be added to each 'forecast year' group. In addition, this structure can accommodate matrix data as well as vector data, if a future module makes use of a distance matrix, that matrix could be added to either the 'Global' group or the 'forecast years' groups.  
 
+Note that the Azone table in the diagram includes an Marea dataset. This datasets identifies the Marea associated with each Azone. Every table includes datasets that enable data to be joined between tables. Some are geographic as in the example. Others use other identifiers. For example the Worker table includes a household identifier. Although the tables include the identifiers which enable data to be joined between tables, the VisionEval framework does not include special features for joining datasets that come from different tables. That is done by the module code.
+
 #### 6.6 The Model State File  
 The model state file, "ModelState.Rda", maintains a record of all of the model run parameters and an inventory of the contents of the datastore. The software framework functions use this information to control the model run and to perform checks on module and data validity. The model state file contains a list which has the following components:  
 - Model: The name of the model  
@@ -424,12 +430,15 @@ The model state file, "ModelState.Rda", maintains a record of all of the model r
 - LastChanged: The date and time of the last change to the model state  
 - Deflators: A data frame of deflator values by year  
 - Units: A data frame of default units for complex data types  
+- RequireVEPackages: A list of all the VisionEval packages that must be installed in order for the model to run
 - LogFile: The file name of the log file  
 - Datastore: A data frame containing an inventory of the contents of the datastore  
 - Geo_df: A data frame containing the geographic definitions for the model  
 - BzoneSpecified: A logical value identifying whether Bzones are specified for the model  
 - CzoneSpecified: A logical value identifying whether Czones are specified for the model  
-- ModuleCalls_df: A data frame identifying the sequence of 'runModule' function calls and arguments  
+- ModuleCalls_df: A data frame identifying the sequence of 'runModule' function calls and arguments
+- ModulesByPackage_df: A data frame identifying the modules located in each of the VisionEval packages required to run the model
+- DatasetsByPackage_df: A data frame identifying the datasets located in each of the VisionEval packages required to run the model 
 
 The Datastore component is updated every time the data is written to the datastore. This enables framework functions to 'know' the contents of the datastore without having to access the datastore. The Datastore component keeps track of all groups and datasets in the datastore and their attributes such as the length of tables and the specifications of datasets.
 
@@ -456,10 +465,12 @@ When the software framework "runs" a module it does several things. First, it re
 
 If a module calls another module, the list also contains a component named with the alias the module assigns to the called module. This component includes Global, Year, and BaseYear components containing datasets identified in the specifications for the called module. Module calling is explained in detail in section 8.1.2.
 
-When the module executes, it return a list containing all of the information that the module specifies is to be written to the datastore. By convention, this list is called 'R'. This list also has Global, Year, and BaseYear components which are structured in the same way that 'L' is structured. The table and dataset components of the list also include some attributes (metadata) which are described in Section 8.
+When the module executes, it returns a list containing all of the information that the module specifies is to be written to the datastore. By convention, this list is called 'R'. This list also has Global, Year, and BaseYear components which are structured in the same way that 'L' is structured. The table and dataset components of the list also include some attributes (metadata) which are described in Section 8.
 
 ### 8. Modules  
-All modules are made available in the form of standard R packages that meet framework specifications. A package may contain more than one module. The package organization follows the standard organization of R packages. The structure is shown in the following diagram. The components are described below in the order that they are presented in the diagram. The file names are examples.
+All modules are made available in the form of standard R packages that meet framework specifications. Packages may be in source form or installed form. The following presentation refers to the source form of VisionEval packages. When a package is installed (built) the R system runs the scripts in the R directory and saves functions that are defined within and datasets that are saved by the script. The structure of this installed package is not covered by this document with the exception of the *module_docs* directory in the installed package. If the module developer follows the guidelines for module documentation, a *module_docs* directory will be included in the installed package. This will include module documentation in the form of markdown documents.
+
+A package may contain more than one module. The package organization follows the standard organization of R packages. The structure is shown in the following diagram. The components are described below in the order that they are presented in the diagram. The file names are examples.
 
 ```
 VESimHouseholds
@@ -486,43 +497,23 @@ VESimHouseholds
 |         
 |
 |____tests
-|    |____defs
-|    |    |   run_parameters.json
-|    |    |   model_parameters.json
-|    |    |   geography.csv  
-|    |    |   units.csv  
-|    |    |   deflators.csv  
-|    |
-|    |____inputs
-|    |    |   azone_hh_pop_by_age.csv
-|    |    |   azone_gq_pop_by_age.csv
-|    |    |   ...
-|    |
-|    |----scripts
-|    |    |   test.R
-|    |    |   ...
-|
-|
-|____vignettes
-|    |   VESimHouseholds.Rmd
-|    |   CreateHouseholds.Rmd
-|    |   PredictWorkers.Rmd
-|    |   ...
-|
-|
-|____data
-|    |   Hh_df.rda
-|    |   CreateHouseholdsSpecifications.rda
-|    |   HtProb_HtAp.rda
-|    |   PredictWorkersSpecifications.rda
-|    |   PropHhWkr_HtAg.rda
-|    |   ...
-|
-|
-|____man
-     |   CreateHouseholds.Rd
-     |   PredictWorkers.Rd
-     |   ...
+     |____scripts
+     |    |   test.R
+     |    |   test_functions.R
+     |    |   verspm_test.R 
+     |    |   vestate_test.R    
+     |
+     |____verspm
+     |    |   logs
+	 |    |   |   Log_CreateHouseholds.txt
+	 |    |   |   ...
+	 |    |
+	 |    |   ModelState.Rda
+	 |    
+     |____vestate
+     |    |   ...
+     |
+     |    ...
 
 ```
 
@@ -535,7 +526,7 @@ The *R* directory is where all the R scripts are placed which define the modules
 3) It defines all of the functions that implement the submodel.
 4) It includes test code used during module development
 
-When a binary package is built from the source package, each R script is run; estimation datasets are processed, model parameters are saved, module specifications are saved, functions are parsed into a more efficient form. Following section describe the structure of a module R script in more detail. An example of the *AssignTransitService* module script from the *VETransportSupply* package is included in Appendix E.  
+When a binary (installed) package is built from the source package, each R script is run; estimation datasets are processed, model parameters are saved, module specifications are saved, functions are parsed into a more efficient form. Following section describe the structure of a module R script in more detail. An example of the *AssignTransitService* module script from the *VETransportSupply* package is included in Appendix E.  
 
 By convention, the module script is organized into 4 sections reflecting the list above. Following sections 8.1.1 to 8.1.4 explain each module script section in detail. Section 8.1.1 explains how model specification and estimation is handled. Subsection 8.1.1.1 focuses in on the handling of model estimation data which, in some cases, may use specialized scripts. Section 8.1.2 explains how to write module specifications which tell the framework how the module is to be run, what input data are to be processed, what data are to be retrieved from the datastore, and what data are to be saved to the datastore. Subsection 8.1.2.1 focuses in on the *OPTIONAL* specification that module developers can use to enable optional model inputs. Subsection 8.1.2.2 focues in the the *CALL* specification that enables modules to call other modules to perform calculation services. Section 8.1.3 describes how to write a main function and supporting functions to implement a module. Section 8.1.4 explains test code that is commonly included in a module to assist the module developer in the module development process. Finally, Section 8.1.5 explains a special module named *Initialize* that may be included in a package. The purpose of this module is to enable module developers to include specialized input data checks and preparation. 
 
@@ -551,7 +542,59 @@ Models vary in their complexity. In some modules the model may simply be an algo
 - Estimate a linear model of average DVMT using the simulation data
 - Estimate models of the DVMT quantiles as a function of the average DVMT  
 
-Model estimation data preparation may also be extensive. Whether it is or not, documenting the data used in building a model and making those data available are key to making the models reproducible and extensible. Moreover, for some modules it is important that model users be able to have model parameters reflect the conditions for their region. For example, the *CreateHouseholds*, *PredictWorkers*, and *PredictIncome* modules use Census public use microdata sample data for the region to estimate parameters. There are several ways that model estimation data can be handled in the VisionEval model system. These are described in detail in Section 8.1.1.1. 
+Model estimation data preparation may also be extensive. Whether it is or not, documenting the data used in building a model and making those data available are key to making the models reproducible and extensible. Moreover, for some modules it is important that model users be able to have model parameters reflect the conditions for their region. For example, the *CreateHouseholds*, *PredictWorkers*, and *PredictIncome* modules use Census public use microdata sample data for the region to estimate parameters. There are several ways that model estimation data can be handled in the VisionEval model system. These are described in detail in Section 8.1.1.1.
+
+The model estimation code should also save objects to use in documenting the modules such as:
+1. Model summary statistics such as is produced when a model object (such as a linear model estimated using the *lm* function) is processed by the *summary* function;
+2. Data frames, tables, and matrices; and,
+3. Graphs or other static data visualizations.
+
+The first two should be saved as objects just like any other object saved to implement a model. It is suggested that these documentation objects be stored in a list along with the model that they document. For example, follow is a portion of the *PredictIncome.R* script which saves (and documents) a list which contains the household income model including documentation of the summary statistics for the model.
+
+```
+#Save the household income model
+#-------------------------------
+#' Household income model
+#'
+#' A list containing the income model equation and other information needed to
+#' implement the household income model.
+#'
+#' @format A list having the following components:
+#' \describe{
+#'   \item{Type}{a string identifying the type of model ("linear")}
+#'   \item{Formula}{makeModelFormulaString(IncModel_LM)}
+#'   \item{PrepFun}{a function that prepares inputs to be applied in the linear model}
+#'   \item{OutFun}{a function that transforms the result of applying the linear model}
+#'   \item{Summary}{the summary of the linear model estimation results}
+#'   \item{SearchRange}{a two-element vector specifying the range of search values}
+#' }
+#' @source PredictIncome.R script.
+"HHIncModel_ls"
+usethis::use_data(HHIncModel_ls, overwrite = TRUE)
+```
+The *Summary* component of this list shows the summary statistics for the model. As explained in the module documentation section below, this can be automatically inserted into the module documentation. It is recommended that the *capture.output* function be used rather than the *print* function to capture model summary statistics because the *print* function will insert line numbers. This method can be used to save other text that can then be inserted into module documentation. This example also shows how objects are documented and saved.
+
+It can also be useful to save data frames, tables, matrices to use in the model documentation. These can be saved like any other data object and then inserted as described in the module documentation section.
+
+Graphs or other visualizations are saved in a different manner. If these are saved as an image file in "png" format, they can be inserted into the module documentation. They must be saved to the "data" directory to do so. Following is an example:
+
+```
+#Plot comparison of observed and estimated income distributions
+png(
+  filename = "data/reg-hh-inc_obs-vs-est_distributions.png",
+  width = 480,
+  height = 480
+)
+plot(
+  density(IncObs_),
+  xlim = c(0, 200000),
+  xlab = "Annual Dollars ($2000)",
+  main = "Distributions of Observed and Predicted Household Income \nRegular Households"
+  )
+lines(density(IncEst_), lty = 2)
+legend("topright", legend = c("Observed", "Predicted"), lty = c(1,2))
+dev.off()
+```
 
 There are many ways that a module developer can code the model specification and parameter estimation procedures. However this is done, the code should be well organized and commented so that it is understandable to reviewers. All code should follow the VisionEval coding guidelines. In addition, it is highly recommended that code be grouped into functions to aid understandability and reduce unnecessary code repetition which can lead to errors. Complex functions should be well documented. Function documentation is done using [Roxygen syntax](http://r-pkgs.had.co.nz/man.html). Following is an example of the code which estimates a housing choice model (single-family vs. multifamily) in the *PredictHousing* module of the *VELandUse* package.  
 
@@ -704,12 +747,16 @@ After a model has been estimated, the model objects which embody the model need 
 #' }
 #' @source PredictHousing.R script.
 "HouseTypeModel_ls"
-devtools::use_data(HouseTypeModel_ls, overwrite = TRUE)
+usethis::use_data(HouseTypeModel_ls, overwrite = TRUE)
 
 ```
 
+The *use_data* function in the *usethis* package saves the data and documention correctly in the package and simplifies the procedure for doing so.
+
+Although model estimation code is usually included in the module script, in some instances it may be more understandable to estimate the models for several modules in one script. This is what is done in the *CreateSimBzoneModels.R* script in the *VESimLandUse* package. This script estimates all the models for modules in the package. Model estimation is handled this way because the same model estimation dataset is used for all the models and the models build upon each other. Including all the model estimations in one file makes it easier to code and easier to review.
+
 ###### 8.1.1.1 Model Estimation Datasets
-Model estimation datasets may be red in from several sources. If model estimation data are large and are used by multiple modules located in different packages, then they may be housed in their own package. This is the case with the 2001 NHTS data which are in the *VE2001NHTS* package. The estimation data in the package can be directly addressed in the model estimation code using the standard 'PackageName::DatasetName' notation as shown in the following example:  
+Model estimation datasets may be read in from several sources. If model estimation data are large and are used by multiple modules located in different packages, then they may be housed in their own package. This is the case with the 2001 NHTS data which are in the *VE2001NHTS* package. The estimation data in the package can be directly addressed in the model estimation code using the standard 'PackageName::DatasetName' notation as shown in the following example:  
 
 ```
 Hh_df <- VE2001NHTS::Hh_df
@@ -968,7 +1015,7 @@ MyModuleSpecifications <- list(
 ```  
 Following are detailed descriptions and examples of each component of the specifications list.  
 
-The **RunBy** component specifies the level of geography that the model is to be run at. For example, the congestion submodel in the GreenSTEP and RSPM models runs at the Marea level. This specification is used by the software framework to determine how to index data that is read from the datastore and data that is written to the datastore. Acceptable values are "Region", "Azone", "Bzone", "Czone", and "Marea". The *RunBy* specification looks like the following example:
+The **RunBy** component specifies the level of geography that the model is to be run at. For example, the congestion submodel in the GreenSTEP and RSPM models runs at the Marea level. This specification is used by the software framework to determine how to index data that is read from the datastore and data that is written to the datastore. Acceptable values are "Region", "Azone", "Bzone", and "Marea". The *RunBy* specification looks like the following example:
 
 ```
 RunBy = "Marea",
@@ -1164,17 +1211,18 @@ If an input (*Inp*) item is identified as optional, the framework checks whether
 
 ###### 8.1.2.2 CALL Specification
 
-If same calculation code needs to be executed a number of times, it is best to define a function to encapsulate the code and then call the function whenever the calculation needs to be carried out. This reduces errors and code maintenance hassles. Modules can do this by calling call functions in any installed package. However, there are times when a module needs to call another module, not just another function. For example, the *AssignHhVehiclePowertrain* module in the *VEEnergyAndEmissions* package calls the *CalculateHouseholdDvmt* module in the *VEHouseholdTravel* package. Calling a module is more involved than just calling the function that carries out the module's calculations because that function will not work unless it is supplied with the datasets identified in its *Get* specifications. Of course the calling module could include those specifications in its own specifications, but that would create a significant potential for coding errors and maintenance problems (e.g. if the called module is module is modified at a later time). For this reason the software design includes functionality for calling modules in a simple manner which leaves the data management details to the framework behind the scenes.  
+If same calculation code needs to be executed a number of times, it is best to define a function to encapsulate the code and then call the function whenever the calculation needs to be carried out. This reduces errors and code maintenance hassles. Likewise, module code duplication is reduced in the VisionEval model system by allowing modules to call other modules for their calculation services. For example, the *BudgetHouseholdDvmt* module in the *VETravelPerformance* package calls the *CalculateAltModeTrips* module in the *VEHouseholdTravel* package to recalculate trips by alternate modes (walk, bike, transit) to reflect budget-adjusted household DVMT. Calling a module is more involved than just calling the function that carries out the module's calculations because the module function will not work unless it is supplied with the datasets identified in its *Get* specifications. Of course the calling module could include those specifications in its own specifications, but that would create a significant potential for coding errors and maintenance problems (e.g. if the called module is module is modified at a later time). For this reason the software design includes functionality for calling modules in a simple manner which leaves the data management details to the framework behind the scenes.  
 
-A module's call status is specified in the *Call* component of the module specifications. There are 3 possibilities for a module's call status. First, a module may be called by other modules. In this case the specification is `Call = TRUE`. Second, the module may call other modules. In this case the call specification is a list that identifies each of the modules that are called, assigning a reference to the module to an alias according to the following template:  
+A module's call status is specified in the *Call* component of the module specifications. There are 3 possibilities for a module's call status. First, a module may be called by other modules. In this case the specification is `Call = TRUE`. Second, the module may call other modules. In this case the call specification is a list that identifies each of the modules that are called, assigning a reference to the module to an alias (i.e. *alias = module*) as shown in the following example:  
 ```
 Call = items(
-  Alias = PackageName::ModuleName,
-  Alias = PackageName::ModuleName,
-  ...
+  CalcDvmt = "CalculateHouseholdDvmt",
+  ReduceDvmt = "ApplyDvmtReductions",
+  CalcVehTrips = "CalculateVehicleTrips",
+  CalcAltTrips = "CalculateAltModeTrips"
 )
 ```
-Where appropriate names are substituted for *Alias*, *PackageName*, and *ModuleName*. The *Alias* is the name that the called module will be referred to by the calling module code. *PackageName* is the name of the package where the called module resides. *ModuleName* is the name of the called module. Following is the *Call* component from the *AssignedHhVehiclePowertrain* example given above:  
+The *alias* is the name that the called module will be referred to by the calling module code. The *module* is the name of the called module. The VisionEval framework software identifies which package the module resides in from the *ModulesByPackage_df* table in the *ModelState_ls* list. It is also possible to hard code the package name in the call definition. For example the *CalcDvmt* alias could be assign to `VEHouseholdTravel::CalculateHouseholdDvmt`. This is discouraged, however, because doing so limits the ability to maintain different versions of packages that have module modifications.  
 ```
 Call = items(
   CalcDvmt = "VEHouseholdTravel::CalculateHouseholdDvmt"
@@ -1182,7 +1230,7 @@ Call = items(
 ```  
 The third possibility is that a module may not be called and calls no other modules. In that case a *Call* component is not included in the module specifications.
 
-There are some important restrictions to module calling. First, a module that may be called cannot call another module. If this restriction did not exist, there could be deeply nested module calls which could make understanding how a model works very difficult. Second, a module that may be called cannot have any inputs (i.e. *Inp* component). The reason for this restriction is that the function of called modules is to provide calculation services and those are hidden from model users. Unless a called module was also called directly in the model run script, there would be no way model user would know to supply input files without diving into the details about the module doing the calling. 
+There are some important restrictions to module calling. First, a module that may be called cannot call another module. If this restriction did not exist, there could be deeply nested module calls which could make debugging and understanding how a model works very difficult. Second, a module that may be called cannot have any inputs (i.e. *Inp* component). The reason for this restriction is that the function of called modules is to provide calculation services and those are hidden from model users. Unless a called module was also called directly in the model run script, there would be no way model user would know to supply input files without diving into the details about the module doing the calling. 
 
 The framework does the following when a module is run which calls one or more other modules. For each of the modules that are called, the framework:  
 1) Reads the 'Get' specifications for the called module, gets the datasets from the datastore, puts them in the standard list structure, and adds to the list that will be returned to the calling module as a component whose name is the assigned alias. In the example above, the retrieved datasets would be in a component named "CalcDvmt".  
@@ -1263,187 +1311,125 @@ Warnings are handled in a similar way. If the module code is checks for warning 
 
 The functionality for processing module errors and warnings is used primarily by *Initialize* modules as explained in Section 8.1.5.  
 
-##### 8.1.4 Module Development Test Code
+##### 8.1.4 Module Documentation
+
+It is recommended that module documentation be included at the top of the module script file if possible to make it easier to review and analyze the module. A standardized approach has been developed to do this that produces documentation in [markdown](https://en.wikipedia.org/wiki/Markdown) format that can be viewed as a web page or converted to other formats for printing. At the end of the module script the *documentModule* function like this `documentModule("PredictIncome")`. The *documentModule* parses the module script, extracts the documentation block at the head of the file and inserts any text, tables, or figures that are saved by the script and inserted into the documentation using special *tags* as explained below. In addition, the *documentModule* function reads the module specifications and creates formatted tables showing module inputs, datasets used, and datasets produced. The documentation file(s) are then saved to a *model_docs* directory in the *inst/extdata* directory which is in turn a directory in the installed package. The *documentModule* function is called at the end of the script because the rest of the script must be executed to produce the datasets that are inserted into the documentation file. Following is an example of what a documentation block looks like.
+
+```
+#<doc>
+## PredictIncome Module
+#### September 6, 2018
+#
+#This module predicts the income for each simulated household given the number of workers in each age group and the average per capita income for the Azone where the household resides.
+#
+### Model Parameter Estimation
+#Household income models are estimated for *regular* households and for *group quarters* households.
+#
+#The household income models are estimated using Census public use microsample (PUMS) data that are compiled into a R dataset (HhData_df) by the 'CreateEstimationDatasets.R' script when the VESimHouseholds package is built. The data that are supplied with the VESimHouseholds package downloaded from the VisionEval repository may be used, but it is preferrable to use data for the region being modeled. How this is done is explained in the documentation for the *CreateEstimationDatasets.R* script.
+#
+#The household income models are linear regression models in which the dependent variable is a power transformation of income. Power transformation is needed in order to normalize the income data distribution which has a long right-hand tail. The power transform is found which minimizes the skewness of the income distribution. The power transform for *regular* households is:
+#
+#<txt:HHIncModel_ls$Pow>
+#
+#The power transform for *group quarters* households is:
+#
+#<txt:GQIncModel_ls$Pow>
+#
+#The independent variables for the linear models are power transformed per capita income for the area, the number of workers in each of 4 worker age groups (15-19, 20-29, 30-54, 55-64), and the number of persons in the 65+ age group. In addition, power-transformed per capita income is interacted with each of the 4 worker groups and 65+ age group variable. The summary statistics for the *regular* household model are as follows:
+#
+#<txt:HHIncModel_ls$Summary>
+#
+#The summary statistics for the *group quarters* household model are as follows:
+#
+#<txt:GQIncModel_ls$Summary>
+#
+#An additional step must be carried out in order to predict household income. Because the linear model does not account for all of the observed variance, and because income is power distribution, the average of the predicted per capita income is less than the average per capita income of the population. To compensate, random variation needs to be added to each household prediction of power-transformed income by randomly selecting from a normal distribution that is centered on the value predicted by the linear model and has a standard deviation that is calculated so as the resulting average per capita income of households match the input value. A binary search process is used to find the suitable standard deviation. Following is the comparison of mean values for the observed *regular* household income for the estimation dataset and the corresponding predicted values for the estimation dataset.
+#
+#<tab:HHIncModel_ls$MeanCompare>
+#
+#The following figure compares the distributions of the observed and predicted incomes of *regular* households.
+#
+#<fig:reg-hh-inc_obs-vs-est_distributions.png>
+#
+#Following is the comparison of mean values for the observed *group quarters* household income for the estimation dataset and the corresponding predicted values for the estimation dataset.
+#
+#<tab:GQIncModel_ls$MeanCompare>
+#
+#The following figure compares the distributions of the observed and predicted incomes of *groups quarters* households.
+#
+#<fig:gq-hh-inc_obs-vs-est_distributions.png>
+#
+### How the Module Works
+#This module runs at the Azone level. Azone household average per capita income and group quarters average per capita income are user inputs to the model. The other model inputs are in the datastore, having been created by the CreateHouseholds and PredictWorkers modules. Household income is predicted separately for *regular* and *group quarters* households. Per capita income is transformed using the estimated power transform, the model dependent variables are calculated, and the linear model is applied. Random variation is applied so that the per capita mean income for the predicted household income matches the input value.
+#
+
+#</doc>
+
+```
+
+There are several things to note about this example. The first is that all text in the block is commented out (preceded by #). Since R doesn't support block comments, each line must be commented. It may not look this way in the example because of word wrapping, but every line is commented. Second, the start and end of the documentation block are denoted by matching `<doc>` and `</doc>` tags. The parser uses these to extract the documentation from the script. After the document has been extracted, the leading comments are stripped off, resulting in markdown-formatted text. The other comment (#) symbols in the text are actually markdown formatting to identify headings of different levels. Documentation can include any standard markdown formatting such as emphasis, links, and tables. In addition, the documentation can include special tags as shown in the example. Three types of tags are available:
+
+* `<txt:xxxx>` inserts a block of text that is contained in the referenced object. For example the `<txt:GQIncModel_ls$Summary>` tag in the example will insert summary statistics for the group quarters income model.
+
+* `<tab:xxxx>` inserts data that can be presented in table for such as a data frame. For example the `<tab:HHIncModel_ls$MeanCompare>` tag in the example will insert a table which compares observed and estimated mean values.
+
+* `<fig:xxxx>` creates a markdown reference to an image file so that it will be show in the proper place when the markdown is displayed in a browser or converted to another document form. For example the `<fig:reg-hh-inc_obs-vs-est_distributions.png>` tag in the example will insert a figure which compares observed and estimated income distributions when the markdown is displayed.
 
 It is helpful to include test code in the module script to aid with module development. The framework includes a *testModule* function to assist with module testing. This function is described in detail in Section 9.2.1. Testing requires having sample input files containing datasets specified by the modules *Inp* specifications. These are stored in the 'inputs' directory of the 'tests' directory. The 'tests' directory also must contain a 'defs' directory which contains all the required model definitions files (see Section 6.1). Finally, the 'tests' directory must contain a datastore of the type specified in the 'run_parameters.json' file, which contains all of the datasets specified in the modules *Get* specifications. In the first stage of module testing, the module specifications are checked, all input files are checked, the presence of all required data is checked, and an input list (L) is returned for use in module development. For this test, the *DoRun* argument of the *testModule* function needs to be set to *FALSE*. After the module code has been written, the module is tested again to check whether the module code is working correctly and that it returns results that are consistent with the *Set* specifications for the module. For this test, the *DoRun* argument of the *testModule* function must be *TRUE*. After the module has been tested, it is important to comment out all the testing code in the script because it must not be run when the package is built. Following is an example of testing code in a module that has been commented out.  
-```
-#Test code to check specifications, loading inputs, and whether datastore
-#contains data needed to run module. Return input list (L) to use for developing
-#module functions
-#-------------------------------------------------------------------------------
-# TestDat_ <- testModule(
-#   ModuleName = "AssignTransitService",
-#   LoadDatastore = TRUE,
-#   SaveDatastore = TRUE,
-#   DoRun = FALSE
-# )
-# L <- TestDat_$L
 
-#Test code to check everything including running the module and checking whether
-#the outputs are consistent with the 'Set' specifications
-#-------------------------------------------------------------------------------
-# TestDat_ <- testModule(
-#   ModuleName = "AssignTransitService",
-#   LoadDatastore = TRUE,
-#   SaveDatastore = TRUE,
-#   DoRun = TRUE
-# )
-```  
 
 ##### 8.1.5 Initialize Module
-Although the framework performs several checks on module input data based on the module specifications, there will be times when additional checks of inputs will be necessary and possibly transformations as well. For example, several datasets may could have the proportions data that must add up to 1 across the datasets. For example, 4 input datasets for the *PredictHousing* module of the *VELandUse** package give the proportions of households in each Bzone that are in each of 4 income quartiles for the Azone that the Bzones are located in. These inputs should be checked to assure that the sum of all quartile proportions for each Bzone adds up to one. If any sums are not close to 1, then the model user needs to be alerted to the fact so that they can correct the input file. If all the sums are close to 1 but some are not exactly 1 (due to rounding errors in preparing inputs), the inputs should be automatically adjusted to equal 1 before they are saved in the datastore. If a module developer needs to establish more complex checks and transformations like this, they do so in a special module that they name *Initialize*. 
+Although the framework performs several checks on module input data based on the module specifications, there will be times when additional checks of inputs will be necessary and possibly transformations as well. For example, several datasets could have proportions data that must add up to 1 across the datasets. For example, 4 input datasets for the *PredictHousing* module of the *VELandUse** package give the proportions of households in each Bzone that are in each of 4 income quartiles for the Azone that the Bzones are located in. These inputs should be checked to assure that the sum of all quartile proportions for each Bzone adds up to one. If any sums are not close to 1, then the model user needs to be alerted to the fact so that they can correct the input file. If all the sums are close to 1 but some are not exactly 1 (due to rounding errors in preparing inputs), the inputs should be automatically adjusted to equal 1 before they are saved in the datastore. If a module developer needs to establish more complex checks and transformations like this, they do so in a special module that they name *Initialize*. 
 
 In the *Initialize* module, the module specifications identify all of the input datasets that need to be checked. This is done in same manner as described in Section 8.1.2. The module specifications will not have *Get* or *Set* components since the only purpose of the *Initialize* module is to process inputs. There can only be one *Initialize* module in a package and so all inputs that need additional checking, regardless of which module in the package will use them, need to be processed in the *Initialize* module. Datasets that are listed in the *Inp* specifications of the *Initialize* module must not be included in the *Inp* specifications of any other module in the package.   
 
-When a model is intialized by the *initializeModel* function in the *run_model.R* script (Section 5 and Appendix A), each of the module packages that will be run by the script is checked for the presence of an *Initialize* module. Any that are found are added to a list of modules that require input processing. When the *initializeModel* function processes the inputs for an *Initialize* module it does so in two steps. In the first step, it performs the standard input processing that is done for all modules (input files are read and datasets are checked for completeness and correctness). The output of this checking process is a standard outputs list with *Global*, *BaseYear*, and *Year* components. In the second step, the framework calls the *Initialize* module function and passes it the outputs list from the first step. The *Initialize* module does whatever enhanced data checking and transformation is necessary and returns an outputs list having the same structure as the inputs list with the addition of *Errors* and *Warnings* components (see Section 8.1.3). If the inputs checking procedures of the *Initialize* module find any errors, instructive error messages are added to the *Errors* component. Likewise, if warning conditions are found, instructive messages are added to the *Warnings* component. The following code from the *Initialize* module in the *VEEnergyAndEmissions* package provides an example of how how advanced input data checks and transformations are handled. The *checkProps* function that is defined within the *Initialize* function checks that the sum of values of proportions data is 1 and if the sum is off by more than 1%. If the sum is exactly equal to 1, then the function returns the input values. If the sum is within 1% of what it should be (assumes rounding is to blame), the function scales the inputs to equal 1 and returns the scaled inputs. It also adds a warning message to the *Warnings* component. If the sum is off by more than 1%, the function returns the input values and adds an error message to the *Errors* component. The *Initialize* function then applies the *checkProps* function to several sets of inputs. For example, heavy truck powertrain proportion datasets (ICEV = internal combustion engine vehicle, HEV = hybrid electric vehicle, BEV = battery electric vehicle) are checked. Note that the inputs to this example *Initialize* function are all optional. That is why the the presence of the datasets is confirmed before the *checkProps* function is called.   
-```
-Initialize <- function(L) {
-  #Set up
-  #------
-  #Initialize error and warnings message vectors
-  Errors_ <- character(0)
-  Warnings_ <- character(0)
-  #Initialize output list with input values
-  Out_ls <- L
-  #Define function to check and adjust proportions
-  checkProps <- function(Names_, Geo) {
-    Values_ls <- L$Data$Year[[Geo]][Names_]
-    #If more than one year, then need to evaluate multiple values
-    if (length(Values_ls[[1]]) > 1) {
-      Values_mx <- do.call(cbind, Values_ls)
-      SumDiff_ <- abs(1 - rowSums(Values_mx))
-      if (any(SumDiff_ > 0.01)) {
-        Msg <- paste0(
-          "Error in input values for ",
-          paste(Names_, collapse = ", "),
-          ". The sum of values for a year is off by more than 1%. ",
-          "They should add up to 1."
-        )
-        Errors_ <- c(Errors_, Msg)
-      }
-      if (any(SumDiff_ > 0 & SumDiff_ < 0.01)) {
-        Msg <- paste0(
-          "Warning regarding input values for ",
-          paste(Names_, collapse = ", "),
-          ". The sum of the values for a year do not add up to 1 ",
-          "but are off by 1% or less so they have been adjusted to add up to 1."
-        )
-        Warnings_ <- c(Warnings_, Msg)
-        Values_mx <- sweep(Values_mx, 1, rowSums(Values_mx), "/")
-        for (nm in colnames(Values_mx)) {
-          Values_ls[[nm]] <- Values_mx[,nm]
-        }
-      }
-    #Otherwise only need to evaluate single values
-    } else {
-      Values_ <- unlist(Values_ls)
-      SumDiff <- abs(1 - sum(Values_))
-      if (SumDiff > 0.01) {
-        Msg <- paste0(
-          "Error in input values for ",
-          paste(Names_, collapse = ", "),
-          ". The sum of these values is off by more than 1%. ",
-          "They should add up to 1."
-        )
-        Errors_ <- c(Errors_, Msg)
-      }
-      if (SumDiff > 0 & SumDiff < 0.01) {
-        Msg <- paste0(
-          "Warning regarding input values for ",
-          paste(Names_, collapse = ", "),
-          ". The sum of these values do not add up to 1 ",
-          "but are off by 1% or less so they have been adjusted to add up to 1."
-        )
-        Warnings_ <- c(Warnings_, Msg)
-        Values_ <- Values_ / sum(Values_)
-        for (nm in names(Values_)) {
-          Values_ls[[nm]] <- Values_[nm]
-        }
-      }
-    }
-    Values_ls
-  }
-
-  #Check powertrain and fuel proportions
-  #-------------------------------------
-  #Check and adjust car service vehicle powertrain proportions
-  Names_ <- c("CarSvcAutoPropIcev", "CarSvcAutoPropHev", "CarSvcAutoPropBev")
-  if (all(Names_ %in% names(Out_ls$Data$Year$Region))) {
-    Out_ls$Data$Year$Region[Names_] <- checkProps(Names_, "Region")
-  }
-  Names_ <- c("CarSvcLtTrkPropIcev", "CarSvcLtTrkPropHev", "CarSvcLtTrkPropBev")
-  if (all(Names_ %in% names(Out_ls$Data$Year$Region))) {
-    Out_ls$Data$Year$Region[Names_] <- checkProps(Names_, "Region")
-  }
-  #Check and adjust commercial service vehicle powertrain proportions
-  Names_ <- c("ComSvcAutoPropIcev", "ComSvcAutoPropHev", "ComSvcAutoPropBev")
-  if (all(Names_ %in% names(Out_ls$Data$Year$Region))) {
-    Out_ls$Data$Year$Region[Names_] <- checkProps(Names_, "Region")
-  }
-  Names_ <- c("ComSvcLtTrkPropIcev", "ComSvcLtTrkPropHev", "ComSvcLtTrkPropBev")
-  if (all(Names_ %in% names(Out_ls$Data$Year$Region))) {
-    Out_ls$Data$Year$Region[Names_] <- checkProps(Names_, "Region")
-  }
-  #Check heavy truck powertrain proportions
-  Names_ <- c("HvyTrkPropIcev", "HvyTrkPropHev", "HvyTrkPropBev")
-  if (all(Names_ %in% names(Out_ls$Data$Year$Region))) {
-    Out_ls$Data$Year$Region[Names_] <- checkProps(Names_, "Region")
-  }
-  #Check transit van fuel proportions
-  Names_ <- c("VanPropDiesel", "VanPropGasoline", "VanPropCng")
-  if (all(Names_ %in% names(Out_ls$Data$Year$Marea))) {
-    Out_ls$Data$Year$Marea[Names_] <- checkProps(Names_, "Marea")
-  }
-  #Check transit bus fuel proportions
-  Names_ <- c("BusPropDiesel", "BusPropGasoline", "BusPropCng")
-  if (all(Names_ %in% names(Out_ls$Data$Year$Marea))) {
-    Out_ls$Data$Year$Marea[Names_] <- checkProps(Names_, "Marea")
-  }
-  #Check transit rail fuel proportions
-  Names_ <- c("RailPropDiesel", "RailPropGasoline")
-  if (all(Names_ %in% names(Out_ls$Data$Year$Marea))) {
-    Out_ls$Data$Year$Marea[Names_] <- checkProps(Names_, "Marea")
-  }
-  #Check transit van powertrain proportions
-  Names_ <- c("VanPropIcev", "VanPropHev", "VanPropBev")
-  if (all(Names_ %in% names(Out_ls$Data$Year$Marea))) {
-    Out_ls$Data$Year$Marea[Names_] <- checkProps(Names_, "Marea")
-  }
-  #Check transit bus powertrain proportions
-  Names_ <- c("BusPropIcev", "BusPropHev", "BusPropBev")
-  if (all(Names_ %in% names(Out_ls$Data$Year$Marea))) {
-    Out_ls$Data$Year$Marea[Names_] <- checkProps(Names_, "Marea")
-  }
-  #Check transit rail powertrain proportions
-  Names_ <- c("RailPropIcev", "RailPropHev", "RailPropEv")
-  if (all(Names_ %in% names(Out_ls$Data$Year$Marea))) {
-    Out_ls$Data$Year$Marea[Names_] <- checkProps(Names_, "Marea")
-  }
-  #Add Errors and Warnings to Out_ls and return
-  Out_ls$Errors <- Errors_
-  Out_ls$Warnings <- Warnings_
-  Out_ls
-}
-```   
+When a model is intialized by the *initializeModel* function in the *run_model.R* script (Section 5 and Appendix A), each of the module packages that will be run by the script is checked for the presence of an *Initialize* module. Any that are found are added to a list of modules that require input processing. When the *initializeModel* function processes the inputs for an *Initialize* module it does so in two steps. In the first step, it performs the standard input processing that is done for all modules (input files are read and datasets are checked for completeness and correctness). The output of this checking process is a standard outputs list with *Global*, *BaseYear*, and *Year* components. In the second step, the framework calls the *Initialize* module function and passes it the outputs list from the first step. The *Initialize* module does whatever enhanced data checking and transformation is necessary and returns an outputs list having the same structure as the inputs list with the addition of *Errors* and *Warnings* components (see Section 8.1.3). Several of the VisionEval packages include *Initialize* modules and can be used as examples.
 
 #### 8.2. The inst/extdata Directory
-By convention, the 'inst/extdata' directory is the standard place to put external (raw) data files as opposed to R datasets which are placed in the 'data' directory. This is where most model estimation data. Section 8.1.1.1 provides a detailed explanation.   
+By convention, the 'inst/extdata' directory is the standard place to put external (raw) data files as opposed to R datasets which are placed in the 'data' directory. This is where most model estimation data is kept. Section 8.1.1.1 provides a detailed explanation. The directory should include a subdirectory named 'sources' to hold reports or other external documentation if needed.
 
 #### 8.3. The tests Directory
-The 'tests' directory contains an R script to run and data to be used to test all the modules in a package. The software framework includes a 'testModule' function that module developers can use to assist module development and testing. The testing script is named 'test.R'. Appendix F includes an example of a test script. Test data mirrors the setup for running a model. A 'defs' directory includes all the files described in Section 6.1. An 'inputs' directory includes all the input files specified by the modules. A datastore must be present which contains all the data items identified in the module 'Get' specifications that will not be provided by the input files.
+The 'tests' directory contains R scripts and the results of module tests. The *scripts* directory contains all the scripts used to carry out module tests. The directory also contains subdirectories for each of the model types the module is to be tested with (e.g VE-RSPM, VE-State, VE-RPAT). Two approaches are available for handing module data that includes input files the module uses, all the *defs* files, and a datastore which contains all the datasets used by the module aside from those in the input files. These data can be included in the package or they may be kept in a central repository. If they are included in the package, they must be placed in the directory for the corresponding model. This is necessary to avoid conflicts in the test data for different models. The scripts directory includes a testing script which runs the tests on all modules in a package for a particular module. For example, the script for testing modules in a VE-State application is named *vestate_test.R*. The scripts directory also includes a *test.R* script which calls the individual model test scripts for automated package testing. If the centralized data testing approach is used, a *test_functions.R* script needs to be included. This includes functions needed to support the centralized test data approach. The test process is still not finalized. In the future this functionality will be included in the framework software. Following is an example of a test script using the central data approach:
 
-#### 8.4. The vignettes Directory  
-Whereas package help files provide basic documentation of package functions and datasets, vignettes provide a vehicle for longer-form documentation of packages and the modules included in packages. Vignettes enable literate programming, where R code is embedded within  a vignette source file and evaluated when that document is compiled into it's final form. R code embedded in a vignette source file can be used to produce tables and graphs that are embedded in the document. This makes vignettes very useful for documenting how submodels are designed and how their parameters are estimated. 
+```
+#vestate_test.R
+#--------------
 
-Source files for producing vignettes are composed in R Markdown format text files (Rmd extension). When the package is built, the source files are evaluated and final versions are produced in HTML or PDF formats. The process for preparing vignettes in packages is [well documented.](http://r-pkgs.had.co.nz/vignettes.html)
+#Load packages and test functions
+library(visioneval)
+library(filesstrings)
+source("tests/scripts/test_functions.R")
 
-There is no limit to the number of vignettes that are included in a package, and module developers are encouraged include vignettes that throughly document the submodels that the package implements, but some standard vignettes are required to be included in a package. One vignette is must be included which describes the package as a whole. This vignette identifies the modules included in the package, provides a brief description of each module, any provides any other information about the package and what is included in it. A vignette must be included to document each module contained in the package as well. Appendix F shows an example of a source file for a package vignette and Appendix G shows an example source file for a module vignette.
+#Define test setup parameters
+TestSetup_ls <- list(
+  TestDataRepo = "../Test_Data/VE-State",
+  DatastoreName = "Datastore.tar",
+  LoadDatastore = FALSE,
+  TestDocsDir = "vestate",
+  ClearLogs = TRUE,
+  # SaveDatastore = TRUE
+  SaveDatastore = FALSE
+)
 
-#### 8.5. The data and man Directories
-The 'data' and 'man' directories and the files within them are created automatically when a package is built (i.e. when the sources are compiled into a version that can be used by the R language environment). The 'data' directory contains R binary files for all of the module parameters and specifications. These are created by the save commands in the module scripts. The 'man' directory contains the documentation files for the functions and data that are defined by the module scripts. These documentation files are created from the documentation annotations (in Roxygen format) included in the module scripts.
+#Define the module tests
+Tests_ls <- list(
+  list(ModuleName = "CreateHouseholds", LoadDatastore = FALSE, SaveDatastore = TRUE, DoRun = TRUE),
+  list(ModuleName = "PredictWorkers", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
+  list(ModuleName = "AssignLifeCycle", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
+  list(ModuleName = "PredictIncome", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE)
+)
+
+#Set up, run tests, and save test results
+setUpTests(TestSetup_ls)
+doTests(Tests_ls, TestSetup_ls)
+saveTestResults(TestSetup_ls)
+
+```
+
+Section 9.2.1 provides more information on using the *testModule* function.
 
 ### 9. Software Framework 
-The software framework for the VisionEval model system is implemented by a set of functions contained in the **visioneval** package. These functions are classified in four groups: user, developer, control, and datastore. Model *user* functions are those used to write scripts to run VisionEval models. Section 9.1 describes how these are used. Appendix G contains full documentation of model user functions. The package contains contains standard documentation for all of the functions. Module *developer* functions are those that module developer may call in their module code or that otherwise aid in module developing and testing. Section 9.2 describes the most important module development functions and Appendix H includes full documentation of all the functions. Most of the functions in the VisionEval framework are functions that *control* the initialization of a VisionEval model run and the execution of VisionEval modules. These functions are internal to the VisionEval software framework and are not to be used by model users or module developers. Section 9.3 provides an overview of these functions and Appendix I includes full function documentation. The remaining functions are functions which directly interact with the model datastore. Section 9.4 provides an overview of these functions and Appendix J provides full documentation.
+The software framework for the VisionEval model system is implemented by a set of functions contained in the **visioneval** package. These functions are classified in four groups: user, developer, control, and datastore. Model *user* functions are those used to write scripts to run VisionEval models. Section 9.1 describes how these are used. Appendix G contains full documentation of model user functions. The package contains contains standard documentation for all of the functions. Module *developer* functions are those that module developers may call in their module code or that otherwise aid in module developing and testing. Section 9.2 describes the most important module development functions and Appendix H includes full documentation of all the functions. Most of the functions in the VisionEval framework are functions that *control* the initialization of a VisionEval model run and the execution of VisionEval modules. These functions are internal to the VisionEval software framework and are not to be used by model users or module developers. Section 9.3 provides an overview of these functions and Appendix I includes full function documentation. The remaining functions are functions which directly interact with the model datastore. Section 9.4 provides an overview of these functions and Appendix J provides full documentation.
 
 Additional documentation which shows the calling relationships between functions is available in a [interactive visualization](https://gregorbj.github.io/VisionEval/website/visioneval_functions.html). This visualization shows the names of the functions as nodes in a network graph with arrows connecting the nodes showing the functions that are called by each function (arrows point from the calling function to the called function). The nodes are colored-coded to indicate the function groups: blue indicates model *user* functions, green indicates module *developer* functions, yellow indicates framework *control* functions, and red indicates *datastore* interaction functions. Clicking on a function in the visualization highlights the function and all the arrows connected to it. It also provides summary information about the function including a description of what it does, descriptions of all the function arguments, and a description of the function's return value.
 
@@ -1535,13 +1521,13 @@ The function arguments are as follows:
 - **ModelParamFile** A string identifying the name of the file which contains model parameters. The default value is model_parameters.json.
 - **LoadDatastore** A logical value identifying whether to load an existing datastore. If TRUE, it loads the datastore whose name is identified in the run_parameters.json file. If FALSE it initializes a new datastore.
 - **SaveDatastore** A logical value identifying whether the module outputs will be written to the datastore. If TRUE the module outputs are written to the datastore. If FALSE the outputs are not written to the datastore.
-- **DoRun** A logical value identifying whether the module should be run. If FALSE, the function will initialize a datastore, check specifications, and load inputs but will not run the module. If TRUE, the module will be run and results will be checked for consistency with the module's 'Set' specifications.
+- **DoRun** A logical value identifying whether the module should be run. If FALSE, the function will initialize a datastore, check specifications, and load inputs but will not run the module. It will return the list of module inputs. This is described in more detail below. If TRUE, the module will be run and results will be checked for consistency with the module's 'Set' specifications.
 - **RunFor** A string identifying whether to run the module for all years (AllYears), only the base year (BaseYear), or for all years except the base year (NotBaseYear)
 - **StopOnErr** A logical value indicating whether model execution should be stopped if the module transmits one or more error messages or whether execution should continue with the next module. The default value is TRUE. This is how error handling will ordinarily proceed during a model run. A value of FALSE is used when 'Initialize' modules in packages are run during model initialization. These 'Initialize' modules are used to check and preprocess inputs. For this purpose, the module will identify any errors in the input data, the 'initializeModel' function will collate all the data errors and print them to the log.
+- **RequiredPackages** A string vector identifying any other VisionEval packages that the module calls modules from or access datasets from.
+- **TestGeoName** A string identifying the name of a geographic area to return the data for. If the DoRun argument is FALSE, the function returns a list containing all the data the module requests. It will only return the data for one geographic area in the set identified in the RunBy specification. For example if the RunBy specification is Marea, the function will return the list of data for only one Marea. This argument can be used to specify which geographic area the data is to be returned for. Otherwise the data for the first area identified in the datastore is returned.
 
-but will return the list of module specifications. That setting is useful for module development in order to create the all the data needed to assist with module programming. It is used in conjunction with the getFromDatastore function to create the dataset that will be provided by the framework. The default value for this parameter is TRUE. In that case, the module will be run and the results will checked for consistency with the Set specifications.
-
-If the DoRun argument is TRUE, the module will be run and there will be no return value. If that argument is FALSE, the return value of the function is a list containing the module specifications. That setting is useful for module development in order to create the all the data needed to assist with module programming. It is used in conjunction with the 'getFromDatastore' function to create the dataset that will be provided by the framework. The example module script in Appendix E shows how this aspect of the 'testModule' function can be used by module developers to make the development of their code easier. The function also writes out messages to the console and to the log as the testing proceeds. These messages include the time when each test starts and when it ends. When a key test fails, requiring a fix before other tests can be run, execution stops and an error message is written to the console. Detailed error messages are also written to the log.
+If the DoRun argument is TRUE, the module will be run and there will be no return value. The module will run for all geographic areas and the outputs will be checked for consistency with the module's *Set* specifications. If that argument is FALSE, the return value of the function is a list containing the data identified in the module's *Get* specifications. That setting is useful for module development in order to create the all the data needed to assist with module programming. It is used in conjunction with the 'getFromDatastore' function to create the dataset that will be provided by the framework. The example module script in Appendix E shows how this aspect of the 'testModule' function can be used by module developers to make the development of their code easier. The function also writes out messages to the console and to the log as the testing proceeds. These messages include the time when each test starts and when it ends. When a key test fails, requiring a fix before other tests can be run, execution stops and an error message is written to the console. Detailed error messages are also written to the log.
 
 ##### 9.2.2. Functions to Assist Specification Writing
 As was explained above in Sections 4.1 and 8.1, the VisionEval model system uses data specifications to help assure that modules can work properly with one another. The data specifications are saved as attributes for each dataset that are saved to the datastore by a module. The specifications are checked for consistency for each dataset a module requests to be retrieved from the datastore. A couple of functions assist a module developer with identifying datasets that registered modules produce and for retrieving 'Get' specifications for the datasets the developer's module will use.
@@ -1581,7 +1567,11 @@ The 'applyBinomialModel' function applies a binomial model and optionally adjust
 - **TargetProp** A number identifying a target proportion for the default choice to be achieved for the input data or NULL if there is no target proportion to be achieved.  
 - **CheckTargetSearchRange** A logical identifying whether the function is to only check whether the specified 'SearchRange' for the model will produce acceptable values (i.e. no NA or NaN values). If FALSE (the default), the function will run the model and will not check the target search range.  
 
-The function returns a vector of choice values for each record of the input data frame if the model is being run, or if the function is run to only check the target search range, a two-element vector identifying if the search range produces NA or NaN values.  
+- **ApplyRandom** A logical value which determines how the binomial choice is made. The binomial choice model returns a probability that modeled selection is chosen. For example a housing type model could predict the probability that a household lives in a single-family home. If the *ApplyRandom* argument is TRUE, the function takes a sample from a uniform distribution from 0 to 1 and if the value is less than the probability the modeled choice is selected. Otherwise the alternate choice is selected. If the *ApplyRandom* argument is FALSE the modeled choice is selected if the modeled probability is greater than 0.5.
+
+- **ReturnProbs** A logical value which if TRUE returns the modeled choice probabilities instead of the modeled choices.
+
+The function returns a vector of choice values for each record of the input data frame if the neither the *CheckTargetSearchRange* or *ReturnProbs* arguments are TRUE. If the *ReturnProbs* argument is TRUE the choice probabilities are returned. If the *CheckTargetSearchRange* argument is TRUE the function is run to only check the target search range, a two-element vector identifying if the search range produces NA or NaN values.  
 
 The third function, 'binarySearch', is called by the 'applyLinearModel' function if the value of the 'TargetMean' argument is not NULL, and called by the 'applyBinomialModel' function if the value of the 'TargetProp' argument is not NULL. Module developers may find this function to be useful in their own module implementation code. The arguments of the function are:  
 - **Function** A function which returns a value which is compared to the Target argument. The function must take as its first argument a value which from the SearchRange_. It must return a value that may be compared to the Target value.  
@@ -1594,6 +1584,9 @@ The third function, 'binarySearch', is called by the 'applyLinearModel' function
 The function returns a value within the 'SearchRange_' for the function parameter which matches the target value.
 
 Developers can refer to the source code for the 'applyLinearModel' and 'applyBinomialModel' functions to help understand how to use this function.
+
+##### 9.2.4. Module Documentation Function
+Section 8.1.4 describes how module documentation is to be included in the module script. The 'documentModule' prepares formatted documentation from the script documentation. Refer to that section for more details.
 
 ### Appendix A: Example Model Run Script  
 ```
@@ -1961,47 +1954,51 @@ HHJOB
 ![Forecast Year Input](img/forecast_year_input_file.png)  
 
 ### Appendix E: Example Module Script from the VETransportSupply Package
+
 ```
 #======================
 #AssignTransitService.R
 #======================
-#This module assigns transit service level to the metropolitan area (Marea) and
-#neighborhoods (Bzone). Annual revenue-miles (i.e. transit miles in revenue
-#service) by transit mode type are read from input file and then converted to
-#bus equivalents using factors derived from urbanized are data from the National
-#Transit Database (NTD). This script reads in data taken from the 2015 NTD and
-#calculates the conversion factors which are the only model parameters at this
-#time. The AssignTransitService function calculates the bus equivalent revenue
-#miles for the metropolitan area from inputs for revenue miles by mode type. The
-#module also reads in an input file of neighborhood transit service level and
-#assigns to Bzones.
 
-# Copyright [2017] [AASHTO]
-# Based in part on works previously copyrighted by the Oregon Department of
-# Transportation and made available under the Apache License, Version 2.0 and
-# compatible open-source licenses.
-
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+#<doc>
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+## AssignTransitService Module
+#### November 5, 2018
 #
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-
-#=================================
-#Packages used in code development
-#=================================
-#The following commented lines of code are in the script for code development
-#purposes only. Uncomment them if needed to work on the script. Recomment when
-#done.
-# library(visioneval)
-# library(car)
+#This module assigns transit service level to the metropolitan area (Marea) and neighborhoods (Bzones). Annual revenue-miles (i.e. transit miles in revenue service) by transit mode type are read from an input file. The following 8 modes are recognized:
+#* DR = Demand-responsive
+#* VP = Vanpool and similar
+#* MB = Standard motor bus
+#* RB = Bus rapid transit and commuter bus
+#* MG = Monorail/automated guideway
+#* SR = Streetcar/trolley bus/inclined plain
+#* HR = Heavy Rail/Light Rail
+#* CR = Commuter Rail/Hybrid Rail/Cable Car/Aerial Tramway
+#
+#Revenue miles are converted to bus (i.e. MB) equivalents using factors derived from urbanized are data from the National Transit Database (NTD). Bus-equivalent revenue miles are used in models which predict vehicle ownership and household DVMT.
+#
+#Revenue miles by mode type are also translated (using NTD data) into vehicle miles by 3 vehicle types: van, bus, and rail. Miles by vehicle type are used to calculate public transit energy consumption and emissions.
+#
+#The module also reads in user supplied data on relative public transit accessibility by Bzone as explained below.
+#
+### Model Parameter Estimation
+#
+#Parameters are calculated to convert the revenue miles for each of the 8 recognized public transit modes into bus equivalents, and to convert revenue miles into vehicle miles. Data extracted from the 2015 National Transit Database (NTD) are used to calculate these parameters. The extracted datasets are in the *2015_Service.csv* and *2015_Agency_information.csv* files in the *inst/extdata* directory of this package. These files contain information about transit service and transit service providers located within urbanized areas. Documentation of the data are contained in the accompanying *2015_Service.txt* and *2015_Agency_information.txt* files.
+#
+#Bus equivalent factors for each of the 8 modes is calculated on the basis of the average productivity of each mode as measured by the ratio of passenger miles to revenue miles. The bus-equivalency factor of each mode is the ratio of the average productivity of the mode to the average productivity of the bus (MB) mode.
+#
+#Factors to compute vehicle miles by mode from revenue miles by mode are calculated from the NTD data on revenue miles and deadhead (i.e. out of service) miles. The vehicle mile factor is the sum of revenue and deadhead miles divided by the revenue miles. These factors vary by mode.
+#
+### How the Module Work
+#
+#The user supplies data on the annual revenue miles of service by each of the 8 transit modes for the Marea. These revenue miles are converted to bus equivalents using the estimated bus-equivalency factors and summed to calculate total bus-equivalent revenue miles. This value is divided by the urbanized area population of the Marea to compute bus-equivalent revenue miles per capita. This public transit service measure is used in models of household vehicle ownership and household vehicle travel.
+#
+#The user supplied revenue miles by mode are translated into vehicle miles by mode using the estimated conversion factors. The results are then simplified into 3 vehicle types (Van, Bus, Rail) where the DR and VP modes are assumed to be served by vans, the MB and RB modes are assumed to be served by buses, and the MG, SR, HR, and CR modes are assumed to be served by rail.
+#
+#The user also supplies information on the aggregate frequency of peak period transit service within 0.25 miles of the Bzone boundary per hour during evening peak period. This is the *D4c* measure included in the Environmental Protection Agency's (EPA) [Smart Location Database] (https://www.epa.gov/smartgrowth/smart-location-database-technical-documentation-and-user-guide). Following is the description of the measure from the user guide:
+#>EPA analyzed GTFS data to calculate the frequency of service for each transit route between 4:00 and 7:00 PM on a weekday. Then, for each block group, EPA identified transit routes with service that stops within 0.4 km (0.25 miles). Finally EPA summed total aggregate service frequency by block group. Values for this metric are expressed as service frequency per hour of service.
+#
+#</doc>
 
 
 #=============================================
@@ -2038,6 +2035,7 @@ ServiceInp_ls <- items(
   item(
     NAME =
       items("RevenueMiles",
+            "DeadheadMiles",
             "PassengerMiles"),
     TYPE = "double",
     PROHIBIT = c("< 0"),
@@ -2061,6 +2059,25 @@ ServiceInp_ls <- items(
 
 #Define function to estimate public transit model parameters
 #-----------------------------------------------------------
+#' Estimate public transit model parameters.
+#'
+#' \code{estimateTransitModel} estimates transit model parameters.
+#'
+#' This function estimates transit model parameters from 2015 National Transit
+#' Database information on transit agencies and service levels. The function
+#' calculates factors for converting annual revenue miles by transit mode to
+#' total bus-equivalent revenue miles. It also calculates factors to convert
+#' revenue miles by mode into vehicle miles by mode.
+#'
+#' @return A list containing the following elements:
+#' BusEquivalents_df: factors to convert revenue miles by mode into bus
+#' equivalents,
+#' UZABusEqRevMile_df: data on bus equivalent revenue miles by urbanized area,
+#' VehMiFactors_df: factors to convert revenue miles by mode into vehicle miles
+#' by mode.
+#' @name estimateTransitModel
+#' @import stats
+#' @export
 estimateTransitModel <- function() {
   #Read in and process transit datasets
   #------------------------------------
@@ -2122,6 +2139,31 @@ estimateTransitModel <- function() {
       BusEquivalents = unname(BusEquiv_Cm)
     )
 
+  #Calculate revenue miles to total vehicle mile factors by mode
+  #-------------------------------------------------------------
+  #Convert DeadheadMiles for mode DT from NA to 0
+  Service_df$DeadheadMiles[Service_df$Mode == "DT"] <- 0
+  #Create data frame of complete cases of revenue miles and deadhead miles
+  Veh_df <- Service_df[, c("Mode", "RevenueMiles", "DeadheadMiles")]
+  Veh_df <- Veh_df[complete.cases(Veh_df),]
+  #Calculate total revenue miles by combined mode
+  RevMi_Md <- tapply(Veh_df$RevenueMiles, Veh_df$Mode, sum)
+  RevMi_Cm <- unlist(lapply(CombinedCode_ls, function(x) {
+    sum(RevMi_Md[x])
+  }))
+  #Calculate total deadhead miles by combined mode
+  DeadMi_Md <- tapply(Veh_df$DeadheadMiles, Veh_df$Mode, sum)
+  DeadMi_Cm <- unlist(lapply(CombinedCode_ls, function(x) {
+    sum(DeadMi_Md[x])
+  }))
+  #Calculate vehicle mile factors by combined mode
+  VehMiFactors_Cm <- (RevMi_Cm + DeadMi_Cm) / RevMi_Cm
+  VehMiFactors_df <-
+    data.frame(
+      Mode = names(VehMiFactors_Cm),
+      VehMiFactors = unname(VehMiFactors_Cm)
+    )
+
   #Calculate bus equivalent transit service by urbanized area
   #----------------------------------------------------------
   #Attach urbanized area code to service data
@@ -2161,7 +2203,8 @@ estimateTransitModel <- function() {
   #------------------
   list(
     BusEquivalents_df = BusEquiv_df,
-    UZABusEqRevMile_df = UZABusEqRevMile_df
+    UZABusEqRevMile_df = UZABusEqRevMile_df,
+    VehMiFactors_df = VehMiFactors_df
   )
 }
 
@@ -2170,6 +2213,7 @@ estimateTransitModel <- function() {
 TransitParam_ls <- estimateTransitModel()
 BusEquivalents_df <- TransitParam_ls$BusEquivalents_df
 UZABusEqRevMile_df <- TransitParam_ls$UZABusEqRevMile_df
+VehMiFactors_df <- TransitParam_ls$VehMiFactors_df
 rm(AgencyInp_ls)
 rm(ServiceInp_ls)
 
@@ -2201,7 +2245,38 @@ rm(ServiceInp_ls)
 #' }
 #' @source AssignTransitService.R script.
 "BusEquivalents_df"
-devtools::use_data(BusEquivalents_df, overwrite = TRUE)
+usethis::use_data(BusEquivalents_df, overwrite = TRUE)
+
+#Save the vehicle mile factors
+#-----------------------------
+#' Revenue miles to vehicle miles conversion factors
+#'
+#' Vehicle mile factors convert revenue miles for various modes to vehicle
+#' miles for those modes.
+#'
+#' @format A data frame with 8 rows and 2 variables containing factors for
+#' converting revenue miles of various modes to vehicle miles.
+#' Mode names are 2-character codes corresponding to consolidated mode types.
+#' Consolidated mode types represent modes that have similar characteristics and
+#' bus equivalency values. The consolidate mode codes and their meanings are as
+#' follows:
+#' DR = Demand-responsive
+#' VP = Vanpool and similar
+#' MB = Standard motor bus
+#' RB = Bus rapid transit and commuter bus
+#' MG = Monorail/automated guideway
+#' SR = Streetcar/trolley bus/inclined plain
+#' HR = Heavy Rail/Light Rail
+#' CR = Commuter Rail/Hybrid Rail/Cable Car/Aerial Tramway
+#'
+#' \describe{
+#'   \item{Mode}{abbreviation for consolidated mode}
+#'   \item{VehMiFactors}{numeric factors for converting revenue miles to
+#'   vehicle miles}
+#' }
+#' @source AssignTransitService.R script.
+"VehMiFactors_df"
+usethis::use_data(VehMiFactors_df, overwrite = TRUE)
 
 #Save the urbanized area bus equivalency data
 #--------------------------------------------
@@ -2222,7 +2297,7 @@ devtools::use_data(BusEquivalents_df, overwrite = TRUE)
 #' }
 #' @source AssignTransitService.R script.
 "UZABusEqRevMile_df"
-devtools::use_data(UZABusEqRevMile_df, overwrite = TRUE)
+usethis::use_data(UZABusEqRevMile_df, overwrite = TRUE)
 
 #Clean up
 rm(TransitParam_ls)
@@ -2255,8 +2330,8 @@ AssignTransitServiceSpecifications <- list(
       FILE = "marea_transit_service.csv",
       TABLE = "Marea",
       GROUP = "Year",
-      TYPE = "distance",
-      UNITS = "MI",
+      TYPE = "compound",
+      UNITS = "MI/YR",
       NAVALUE = -1,
       SIZE = 0,
       PROHIBIT = c("NA", "< 0"),
@@ -2324,8 +2399,8 @@ AssignTransitServiceSpecifications <- list(
           "CRRevMi"),
       TABLE = "Marea",
       GROUP = "Year",
-      TYPE = "distance",
-      UNITS = "MI",
+      TYPE = "compound",
+      UNITS = "MI/YR",
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = ""
     ),
@@ -2335,7 +2410,7 @@ AssignTransitServiceSpecifications <- list(
       GROUP = "Year",
       TYPE = "people",
       UNITS = "PRSN",
-      PROHIBIT = c("NA", "<= 0"),
+      PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = ""
     )
   ),
@@ -2346,12 +2421,33 @@ AssignTransitServiceSpecifications <- list(
       TABLE = "Marea",
       GROUP = "Year",
       TYPE = "compound",
-      UNITS = "MI/PRSN",
+      UNITS = "MI/PRSN/YR",
       NAVALUE = -1,
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
       SIZE = 0,
-      DESCRIPTION = "Ratio of bus-equivalent revenue-miles (i.e. revenue-miles at the same productivity - passenger miles per revenue mile - as standard bus) to urbanized area population"
+      DESCRIPTION = "Ratio of annual bus-equivalent revenue-miles (i.e. revenue-miles at the same productivity - passenger miles per revenue mile - as standard bus) to urbanized area population"
+    ),
+    item(
+      NAME =
+        items(
+          "VanDvmt",
+          "BusDvmt",
+          "RailDvmt"
+        ),
+      TABLE = "Marea",
+      GROUP = "Year",
+      TYPE = "compound",
+      UNITS = "MI/DAY",
+      NAVALUE = -1,
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      SIZE = 0,
+      DESCRIPTION = items(
+        "Total daily miles traveled by vans of various sizes to provide demand responsive, vanpool, and similar services.",
+        "Total daily miles traveled by buses of various sizes to provide bus service of various types.",
+        "Total daily miles traveled by light rail, heavy rail, commuter rail, and similar types of vehicles."
+        )
     )
   )
 )
@@ -2372,7 +2468,7 @@ AssignTransitServiceSpecifications <- list(
 #' }
 #' @source AssignTransitService.R script.
 "AssignTransitServiceSpecifications"
-devtools::use_data(AssignTransitServiceSpecifications, overwrite = TRUE)
+usethis::use_data(AssignTransitServiceSpecifications, overwrite = TRUE)
 
 
 #=======================================================
@@ -2395,6 +2491,7 @@ devtools::use_data(AssignTransitServiceSpecifications, overwrite = TRUE)
 #' for the module.
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
+#' @name AssignTransitService
 #' @import visioneval
 #' @export
 AssignTransitService <- function(L) {
@@ -2428,24 +2525,74 @@ AssignTransitService <- function(L) {
   #Calculate Marea bus equivalent revenue miles per capita
   TranRevMiPC_Ma <- BusEqRevMi_Ma / UrbanPop_Ma
 
+  #Calculate vehicle miles by vehicle type
+  #---------------------------------------
+  #Make vector of vehicle miles factors conforming with RevMi_df
+  VehMiFactors_Md <- VehMiFactors_df$VehMiFactors
+  names(VehMiFactors_Md) <- VehMiFactors_df$Mode
+  VehMiFactors_Md <- VehMiFactors_Md[names(RevMi_df)]
+  #Calculate daily vehicle miles by Marea and mode
+  VehMi_MaMd <- as.matrix(sweep(RevMi_df, 2, VehMiFactors_Md, "*")) / 365
+  #Define correspondence between modes and vehicle types
+  ModeToVehType_ <- c(
+    DR = "Van",
+    VP = "Van",
+    MB = "Bus",
+    RB = "Bus",
+    MG = "Rail",
+    SR = "Rail",
+    HR = "Rail",
+    CR = "Rail"
+  )
+  ModeToVehType_ <- ModeToVehType_[colnames(VehMi_MaMd)]
+  VehMi_df <-
+    data.frame(
+      t(
+        apply(VehMi_MaMd, 1, function(x) {
+          tapply(x, ModeToVehType_, sum) })
+        )
+      )
+
   #Return the results
   #------------------
   #Initialize output list
   Out_ls <- initDataList()
   Out_ls$Year$Marea <-
-    list(TranRevMiPC = TranRevMiPC_Ma)
+    list(TranRevMiPC = TranRevMiPC_Ma,
+         VanDvmt = VehMi_df$Van,
+         BusDvmt = VehMi_df$Bus,
+         RailDvmt = VehMi_df$Rail)
   #Return the outputs list
   Out_ls
 }
 
 
-#================================
-#Code to aid development and test
-#================================
+#===============================================================
+#SECTION 4: MODULE DOCUMENTATION AND AUXILLIARY DEVELOPMENT CODE
+#===============================================================
+#Run module automatic documentation
+#----------------------------------
+documentModule("AssignTransitService")
+
 #Test code to check specifications, loading inputs, and whether datastore
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions
 #-------------------------------------------------------------------------------
+# library(filesstrings)
+# library(visioneval)
+# source("tests/scripts/test_functions.R")
+# #Set up test environment
+# TestSetup_ls <- list(
+#   TestDataRepo = "../Test_Data/VE-RSPM",
+#   DatastoreName = "Datastore.tar",
+#   LoadDatastore = TRUE,
+#   TestDocsDir = "verspm",
+#   ClearLogs = TRUE,
+#   # SaveDatastore = TRUE
+#   SaveDatastore = FALSE
+# )
+# setUpTests(TestSetup_ls)
+# #Run test module
 # TestDat_ <- testModule(
 #   ModuleName = "AssignTransitService",
 #   LoadDatastore = TRUE,
@@ -2453,67 +2600,45 @@ AssignTransitService <- function(L) {
 #   DoRun = FALSE
 # )
 # L <- TestDat_$L
-
-#Test code to check everything including running the module and checking whether
-#the outputs are consistent with the 'Set' specifications
-#-------------------------------------------------------------------------------
-# TestDat_ <- testModule(
-#   ModuleName = "AssignTransitService",
-#   LoadDatastore = TRUE,
-#   SaveDatastore = TRUE,
-#   DoRun = TRUE
-# )
+# R <- AssignTransitService(L)
 ```  
 
 ### Appendix F: Example Test Script from the VESimHouseholds Package  
 ```
-#Test CreateHouseholds module
-source("R/CreateHouseholds.R")
-testModule(
-  ModuleName = "CreateHouseholds",
+#vestate_test.R
+#--------------
+
+#Load packages and test functions
+library(visioneval)
+library(filesstrings)
+source("tests/scripts/test_functions.R")
+
+#Define test setup parameters
+TestSetup_ls <- list(
+  TestDataRepo = "../Test_Data/VE-State",
+  DatastoreName = "Datastore.tar",
   LoadDatastore = FALSE,
-  SaveDatastore = TRUE,
-  DoRun = TRUE
+  TestDocsDir = "vestate",
+  ClearLogs = TRUE,
+  # SaveDatastore = TRUE
+  SaveDatastore = FALSE
 )
 
-#Test PredictWorkers module
-source("R/PredictWorkers.R")
-testModule(
-  ModuleName = "PredictWorkers",
-  LoadDatastore = TRUE,
-  SaveDatastore = TRUE,
-  DoRun = TRUE
+#Define the module tests
+Tests_ls <- list(
+  list(ModuleName = "CreateHouseholds", LoadDatastore = FALSE, SaveDatastore = TRUE, DoRun = TRUE),
+  list(ModuleName = "PredictWorkers", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
+  list(ModuleName = "AssignLifeCycle", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
+  list(ModuleName = "PredictIncome", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE)
 )
 
-#Test AssignLifeCycle module
-source("R/AssignLifeCycle.R")
-testModule(
-  ModuleName = "AssignLifeCycle",
-  LoadDatastore = TRUE,
-  SaveDatastore = TRUE,
-  DoRun = TRUE
-)
-
-#Test PredictIncome module
-source("R/PredictIncome.R")
-testModule(
-  ModuleName = "PredictIncome",
-  LoadDatastore = TRUE,
-  SaveDatastore = TRUE,
-  DoRun = TRUE
-)
-
-#Test PredictHousing module
-source("R/PredictHousing.R")
-testModule(
-  ModuleName = "PredictHousing",
-  LoadDatastore = TRUE,
-  SaveDatastore = TRUE,
-  DoRun = TRUE
-)
+#Set up, run tests, and save test results
+setUpTests(TestSetup_ls)
+doTests(Tests_ls, TestSetup_ls)
+saveTestResults(TestSetup_ls)
 ```  
 
-### Appendix G: VisionEval User Functions
+### Appendix G: VisionEval Model User Functions
 
 
 ### `getYears`: Retrieve years
@@ -2566,9 +2691,10 @@ getModelState
 #### Usage
 
 ```r
-initializeModel(ParamDir = "defs", RunParamFile = "run_parameters.json",
-  GeoFile = "geo.csv", ModelParamFile = "model_parameters.json",
-  LoadDatastore = FALSE, DatastoreName = NULL, SaveDatastore = TRUE)
+initializeModel(ParamDir = "defs",
+  RunParamFile = "run_parameters.json", GeoFile = "geo.csv",
+  ModelParamFile = "model_parameters.json", LoadDatastore = FALSE,
+  DatastoreName = NULL, SaveDatastore = TRUE)
 ```
 
 
@@ -2614,7 +2740,61 @@ Argument      |Description
 
 
 #### Calls
-assignDatastoreFunctions, checkModuleExists, checkModuleSpecs, getModelState, getModuleSpecs, initDatastoreGeography, initLog, initModelStateFile, inputsToDatastore, loadDatastore, loadModelParameters, parseModelScript, processModuleInputs, processModuleSpecs, readGeography, readModelState, setModelState, simDataTransactions, writeLog
+assignDatastoreFunctions, checkDataset, checkModuleExists, checkModuleSpecs, getModelState, getModuleSpecs, initDatastoreGeography, initLog, initModelStateFile, inputsToDatastore, loadDatastore, loadModelParameters, parseModelScript, processModuleInputs, processModuleSpecs, readGeography, readModelState, setModelState, simDataTransactions, writeLog
+
+
+### `readDatastoreTables`: Read multiple datasets from multiple tables in datastores
+
+#### Description
+
+
+ `readDatastoreTables` a visioneval framework model user function that
+ reads datasets from one or more tables in a specified group in one or more
+ datastores
+
+
+#### Usage
+
+```r
+readDatastoreTables(Tables_ls, Group, DstoreLocs_, DstoreType)
+```
+
+
+#### Arguments
+
+Argument      |Description
+------------- |----------------
+```Tables_ls```     |     a named list where the name of each component is the name of a table in a datastore group and the value is a string vector of the names of the datasets to be retrieved.
+```Group```     |     a string that is the name of the group to retrieve the table datasets from.
+```DstoreLocs_```     |     a string vector identifying the paths to all of the datastores to extract the datasets from. Each entry must be the full relative path to a datastore (e.g. 'tests/Datastore').
+```DstoreType```     |     a string identifying the type of datastore (e.g. 'RD', 'H5'). Note
+
+#### Details
+
+
+ This function can read multiple datasets in one or more tables in a group.
+ More than one datastore my be specified so that if datastore references are
+ used in a model run, datasets from the referenced datastores may be queried
+ as well. Note that the capability for querying multiple datastores is only
+ for the purpose of querying datastores for a single model scenario. This
+ capability should not be used to compare multiple scenarios. The function
+ does not segregate datasets by datastore. Attempting to use this function to
+ compare multiple scenarios could produce unpredictable results.
+
+
+#### Value
+
+
+ A named list having two components. The 'Data' component is a list
+ containing the datasets from the datastores where the name of each component
+ of the list is the name of a table from which identified datasets are
+ retrieved and the value is a data frame containing the identified datasets.
+ The 'Missing' component is a list which identifies the datasets that are
+ missing in each table.
+
+
+#### Calls
+checkDataset, checkTableExistence, readModelState
 
 
 ### `runModule`: Run module.
@@ -2658,7 +2838,6 @@ Argument      |Description
 
 #### Calls
 createGeoIndexList, getFromDatastore, getModelState, processModuleSpecs, setInDatastore, writeLog
-
 
 ### Appendix H: VisionEval Module Developer Functions
 
@@ -2776,7 +2955,8 @@ Argument      |Description
 
 ```r
 applyBinomialModel(Model_ls, Data_df, TargetProp = NULL,
-  CheckTargetSearchRange = FALSE)
+  CheckTargetSearchRange = FALSE, ApplyRandom = TRUE,
+  ReturnProbs = FALSE)
 ```
 
 
@@ -2784,10 +2964,12 @@ applyBinomialModel(Model_ls, Data_df, TargetProp = NULL,
 
 Argument      |Description
 ------------- |----------------
-```Model_ls```     |     a list which contains the following components: 'Type' which has a value of 'binomial'; 'Formula' a string representation of the model equation; 'Choices' a two-element vector listing the choice set. The first element is the choice that the binary logit model equation predicts the odds of; 'PrepFun' a function which prepares the input data frame for the model application. If no preparation, this element of the list should not be present or should be set equal to NULL; 'SearchRange' a two-element numeric vector which specifies the acceptable search range to use when determining the factor for adjusting the model constant. 'RepeatVar' a string which identifies the name of a field to use for repeated draws of the model. This is used in the case where for example the input data is households and the output is vehicles and the repeat variable is the number of vehicles in the household.
+```Model_ls```     |     a list which contains the following components: 'Type' which has a value of 'binomial'; 'Formula' a string representation of the model equation; 'Choices' a two-element vector listing the choice set. The first element is the choice that the binary logit model equation predicts the odds of; 'PrepFun' a function which prepares the input data frame for the model application. If no preparation, this element of the list should not be present or should be set equal to NULL; 'SearchRange' a two-element numeric vector which specifies the acceptable search range to use when determining the factor for adjusting the model constant. 'RepeatVar' a string which identifies the name of a field to use for repeated draws of the model. This is used in the case where for example the input data is households and the output is vehicles and the repeat variable is the number of vehicles in the household. 'ApplyRandom' a logical identifying whether the results will be affected by random draws (i.e. if a random number in range 0 - 1 is less than the computed probability) or if a probability cutoff is used (i.e. if the computed probability is greater then 0.5). This is an optional component. If it isn't present, the function runs with ApplyRandom = TRUE.
 ```Data_df```     |     a data frame containing the data required for applying the model.
 ```TargetProp```     |     a number identifying a target proportion for the default choice to be achieved for the input data or NULL if there is no target proportion to be achieved.
 ```CheckTargetSearchRange```     |     a logical identifying whether the function is to only check whether the specified 'SearchRange' for the model will produce acceptable values (i.e. no NA or NaN values). If FALSE (the default), the function will run the model and will not check the target search range.
+```ApplyRandom```     |     a logical identifying whether the outcome will be be affected by random draws (i.e. if a random number in range 0 - 1 is less than the computed probability) or if a probability cutoff is used (i.e. if the computed probability is greater than 0.5)
+```ReturnProbs```     |     a logical identifying whether to return the calculated probabilities rather than the assigned results. The default value is FALSE.
 
 #### Details
 
@@ -2980,6 +3162,76 @@ Argument      |Description
 checkDataConsistency, processModuleSpecs
 
 
+### `documentModule`: Produces markdown documentation for a module
+
+#### Description
+
+
+ `documentModule` a visioneval framework module developer function
+ that creates a vignettes directory if one does not exist and produces
+ module documentation in markdown format which is saved in the vignettes
+ directory.
+
+
+#### Usage
+
+```r
+documentModule(ModuleName)
+```
+
+
+#### Arguments
+
+Argument      |Description
+------------- |----------------
+```ModuleName```     |     A string identifying the name of the module (e.g. 'CalculateHouseholdDvmt')
+
+#### Details
+
+
+ This function produces documentation for a module in markdown format. A
+ 'vignettes' directory is created if it does not exist and the markdown file
+ and any associated resources such as image files are saved in that directory.
+ The function is meant to be called within and at the end of the module
+ script. The documentation is created from a commented block within the
+ module script which is enclosed by the opening tag, <doc>, and the closing
+ tag, </doc>. (Note, these tags must be commented along with all the other
+ text in the block). This commented block may also include tags which identify
+ resources to include within the documentation. These tags identify the
+ type of resource and the name of the resource which is located in the 'data'
+ directory. A colon (:) is used to separate the resource type and resource
+ name identifiers. For example:
+ <txt:DvmtModel_ls$EstimationStats$NonMetroZeroDvmt_GLM$Summary>
+ is a tag which will insert text which is located in a component of the
+ DvmtModel_ls list that is saved as an rdata file in the 'data' directory
+ (i.e. data/DvmtModel_ls.rda). The following 3 resource types are recognized:
+ * txt - a vector of strings which are inserted as lines of text in a code block
+ * fig - a png file which is inserted as an image
+ * tab - a matrix or data frame which is inserted as a table
+ The function also reads in the module specifications and creates
+ tables that document user input files, data the module gets from the
+ datastore, and the data the module produces that is saved in the datastore.
+ This function is intended to be called in the R script which defines the
+ module. It is placed near the end of the script (after the portions of the
+ script which estimate module parameters and define the module specifications)
+ so that it is run when the package is built. It may not properly in other
+ contexts.
+
+
+#### Value
+
+
+ None. The function has the side effects of creating a 'vignettes'
+ directory if one does not exist, copying identified 'fig' resources to the
+ 'vignettes' directory, and saving the markdown documentation file to the
+ 'vignettes' directory. The markdown file is named with the module name and
+ has a 'md' suffix.
+
+
+#### Calls
+expandSpec, processModuleSpecs
+
+
 ### `getRegisteredGetSpecs`: Returns Get specifications for registered datasets.
 
 #### Description
@@ -3134,6 +3386,55 @@ items()
 
 
 
+### `loadPackageDataset`: Load a VisionEval package dataset
+
+#### Description
+
+
+ `loadPackageDataset` a visioneval framework module developer function
+ which loads a dataset identified by name from the VisionEval package
+ containing the dataset.
+
+
+#### Usage
+
+```r
+loadPackageDataset(DatasetName)
+```
+
+
+#### Arguments
+
+Argument      |Description
+------------- |----------------
+```DatasetName```     |     A string identifying the name of the dataset.
+
+#### Details
+
+
+ This function is used to load a dataset identified by name from the
+ VisionEval package which contains the dataset. Using this function is the
+ preferred alternative to hard-wiring the loading using package::dataset
+ notation because it enables users to switch between module versions contained
+ in different packages. For example, there may be different versions of the
+ VEPowertrainsAndFuels package which have different default assumptions about
+ light-duty vehicle powertrain mix and characteristics by model year. Using
+ this function, the module developer only needs to identify the dataset name.
+ The function uses DatasetsByPackage_df data frame in the model state list
+ to identify the package which contains the dataset. It then retrieves and
+ returns the dataset
+
+
+#### Value
+
+
+ The identified dataset.
+
+
+#### Calls
+getModelState
+
+
 ### `makeModelFormulaString`: Makes a string representation of a model equation.
 
 #### Description
@@ -3223,11 +3524,14 @@ Argument      |Description
 #### Value
 
 
- A data frame containing the estimation data.
+ A data frame containing the estimation data according to
+ specifications with data types consistent with specifications and columns
+ not specified removed. Execution stops if any errors are found. Error
+ messages are printed to the console. Warnings are also printed to the console.
 
 
 #### Calls
-checkDataConsistency, expandSpec
+checkDataConsistency, expandSpec, Types
 
 
 ### `readVENameRegistry`: Reads the VisionEval name registry.
@@ -3292,7 +3596,7 @@ testModule(ModuleName, ParamDir = "defs",
   RunParamFile = "run_parameters.json", GeoFile = "geo.csv",
   ModelParamFile = "model_parameters.json", LoadDatastore = FALSE,
   SaveDatastore = TRUE, DoRun = TRUE, RunFor = "AllYears",
-  StopOnErr = TRUE)
+  StopOnErr = TRUE, RequiredPackages = NULL, TestGeoName = NULL)
 ```
 
 
@@ -3310,6 +3614,8 @@ Argument      |Description
 ```DoRun```     |     A logical value identifying whether the module should be run. If FALSE, the function will initialize a datastore, check specifications, and load inputs but will not run the module but will return the list of module specifications. That setting is useful for module development in order to create the all the data needed to assist with module programming. It is used in conjunction with the getFromDatastore function to create the dataset that will be provided by the framework. The default value for this parameter is TRUE. In that case, the module will be run and the results will checked for consistency with the Set specifications.
 ```RunFor```     |     A string identifying what years the module is to be tested for. The value must be the same as the value that is used when the module is run in a module. Allowed values are 'AllYears', 'BaseYear', and 'NotBaseYear'.
 ```StopOnErr```     |     A logical identifying whether model execution should be stopped if the module transmits one or more error messages or whether execution should continue with the next module. The default value is TRUE. This is how error handling will ordinarily proceed during a model run. A value of FALSE is used when 'Initialize' modules in packages are run during model initialization. These 'Initialize' modules are used to check and preprocess inputs. For this purpose, the module will identify any errors in the input data, the 'initializeModel' function will collate all the data errors and print them to the log.
+```RequiredPackages```     |     A character vector identifying any packages that must be installed in order to test the module because the module either has a soft reference to a module in the package (i.e. the Call spec only identifies the name of the module being called) or a soft reference to a dataset in the module (i.e. only identifies the name of the dataset). The default value is NULL.
+```TestGeoName```     |     A character vector identifying the name of the geographic area for which data is to be loaded. This argument has effect only if the DoRun argument is FALSE. It enables the module developer to choose the geographic area data is to be loaded for when developing a module that is run for geography other than the region. For example if a module is run at the Azone level, the user can specify the name of the Azone that data is to be loaded for. If the name is misspecified an error will be flagged.
 
 #### Details
 
@@ -3346,7 +3652,7 @@ Argument      |Description
 
 
 #### Calls
-assignDatastoreFunctions, checkDataset, checkModuleOutputs, checkModuleSpecs, createGeoIndexList, getFromDatastore, getModelState, getYears, initDatastoreGeography, initLog, initModelStateFile, inputsToDatastore, loadDatastore, loadModelParameters, processModuleInputs, processModuleSpecs, readGeography, readModelState, setInDatastore, writeLog
+assignDatastoreFunctions, checkDataset, checkModuleOutputs, checkModuleSpecs, createGeoIndexList, getFromDatastore, getModelState, getYears, initDatastoreGeography, initLog, initModelStateFile, inputsToDatastore, loadDatastore, loadModelParameters, processModuleInputs, processModuleSpecs, readGeography, readModelState, setInDatastore, setModelState, writeLog
 
 
 ### Appendix I: VisionEval Framework Control Functions
@@ -4345,61 +4651,6 @@ Argument      |Description
 getModelState
 
 
-### `doProcessGetSpec`: Filters Get specifications list based on OPTIONAL specification attributes.
-
-#### Description
-
-
- `doProcessGetSpec` a visioneval framework control function that filters
- out Get specifications whose OPTIONAL specification attribute is TRUE but the
- specified dataset is not included in the corresponding Inp specifications nor
- is it present in the datastore.
-
-
-#### Usage
-
-```r
-doProcessGetSpec(GetSpecs_ls, DstoreListing_df, RunYears_)
-```
-
-
-#### Arguments
-
-Argument      |Description
-------------- |----------------
-```GetSpecs_ls```     |     A standard specifications list for Get specifications.
-```DstoreListing_df```     |     A standard datastore listing dataframe.
-```RunYears_```     |     A string vector of the model run years.
-
-#### Details
-
-
- A Get specification component may have an OPTIONAL specification whose value
- is TRUE. If so, and if the specified dataset will be created by processing
- the corresponding Inp specifications or if the dataset is already present in
- the datastore then the get specification needs to be processed. This function
- checks whether the OPTIONAL specification is present, whether its value is
- TRUE, and whether the dataset will be created by processing the corresponding
- Inp specifications or if it exists in the datastore for all model run years.
- If all of these are true, then the get specification needs to be processed.
- The get specification also needs to be processed if it is not optional. A
- specification is not optional if the OPTIONAL attribute is not present or if
- it is present and the value is not TRUE. The function returns a list of all
- the Get specifications that meet these criteria.
-
-
-#### Value
-
-
- A list containing the Get specification components that meet the
- criteria of either not being optional or being optional and the specified
- input file is present.
-
-
-#### Calls
-checkDataset
-
-
 ### `doProcessInpSpec`: Filters Inp specifications list based on OPTIONAL specification attributes.
 
 #### Description
@@ -4450,62 +4701,6 @@ Argument      |Description
 
 
 
-### `doProcessSetSpec`: Filters Set specifications list based on OPTIONAL specification attributes.
-
-#### Description
-
-
- `doProcessSetSpec` a visioneval framework control function that filters
- out Set specifications whose OPTIONAL specification attribute is TRUE but the
- specified dataset is not included in the corresponding Get specifications.
-
-
-#### Usage
-
-```r
-doProcessSetSpec(SetSpecs_ls, ProcessedGetSpecs_ls)
-```
-
-
-#### Arguments
-
-Argument      |Description
-------------- |----------------
-```SetSpecs_ls```     |     A standard specifications list for Set specifications.
-```ProcessedGetSpecs_ls```     |     A processed specifications of Get specifications that has been processed by the 'doProcessGetSpec' to remove all OPTIONAL specifications that will not be processed.
-
-#### Details
-
-
- A Set specification component may have an OPTIONAL specification whose value
- is TRUE. If so, and if the specified dataset is included in the corresponding
- Get specifications then the Set specification component needs to be
- processed. This function checks whether the OPTIONAL specification is
- present, whether its value is TRUE, and whether the dataset will be created
- by processing the corresponding Get specifications. If all of these are true,
- then the Set specification needs to be processed. The Set specification also
- needs to be processed if it is not optional. A specification is not optional
- if the OPTIONAL attribute is not present or if it is present and the value is
- not TRUE. The function returns a list of all the Set specifications that meet
- these criteria. It is important to note that optional Set specifications only
- exist to enable modules to do additional processing of input data. For
- example, to adjust proportions so that they exactly equal 1. In this general
- use case, optional input datasets are loaded, then they are retrieved from
- the datastore, processed, and then resaved to the datastore.
-
-
-#### Value
-
-
- A list containing the Set specification components that meet the
- criteria of either not being optional or being optional and the specified
- input file is present.
-
-
-#### Calls
-
-
-
 ### `expandSpec`: Expand a Inp, Get, or Set specification so that is can be used by other
  functions to process inputs and to read from or write to the datastore.
 
@@ -4524,7 +4719,7 @@ Argument      |Description
 #### Usage
 
 ```r
-expandSpec(SpecToExpand_ls)
+expandSpec(SpecToExpand_ls, ComponentName)
 ```
 
 
@@ -4533,6 +4728,7 @@ expandSpec(SpecToExpand_ls)
 Argument      |Description
 ------------- |----------------
 ```SpecToExpand_ls```     |     A standard specifications list for a specification whose NAME attribute has multiple values.
+```ComponentName```     |     A string that is the name of the specifications that the specification is a part of (e.g. "Inp", "Get", "Set").
 
 #### Details
 
@@ -4660,7 +4856,8 @@ Argument      |Description
 #### Usage
 
 ```r
-getFromDatastore(ModuleSpec_ls, RunYear, Geo = NULL, GeoIndex_ls = NULL)
+getFromDatastore(ModuleSpec_ls, RunYear, Geo = NULL,
+  GeoIndex_ls = NULL)
 ```
 
 
@@ -4705,7 +4902,7 @@ checkDataset, convertMagnitude, convertUnits, createGeoIndex, deflateCurrency, g
 #### Usage
 
 ```r
-getModelState(Names_ = "All", FileName = "ModelState.Rda")
+getModelState(Names_ = "All")
 ```
 
 
@@ -4714,7 +4911,6 @@ getModelState(Names_ = "All", FileName = "ModelState.Rda")
 Argument      |Description
 ------------- |----------------
 ```Names_```     |     A string vector of the components to extract from the ModelState_ls list.
-```FileName```     |     A string that is the file name of the model state file. The default value is ModelState.Rda.
 
 #### Details
 
@@ -5209,7 +5405,7 @@ setModelState, writeLog
 #### Usage
 
 ```r
-parseUnitsSpec(Spec_ls)
+parseUnitsSpec(Spec_ls, ComponentName)
 ```
 
 
@@ -5218,6 +5414,7 @@ parseUnitsSpec(Spec_ls)
 Argument      |Description
 ------------- |----------------
 ```Spec_ls```     |     A standard specifications list for a Inp, Get, or Set item.
+```ComponentName```     |     A string that is the name of the specifications the the specification comes from (e.g. "Inp", "Get", "Set).
 
 #### Details
 
@@ -5226,7 +5423,14 @@ Argument      |Description
  addition to the units name. This includes a value units multiplier and in
  the case of currency values the year for the currency measurement. The
  multiplier element can only be expressed in scientific notation where the
- number before the 'e' can only be 1.
+ number before the 'e' can only be 1. If the year element for a currency
+ specification is missing, it is replaced by the model base year which is
+ recorded in the model state file. If this is done, a WARN attribute is added
+ to the specifications list notifying the module developer that there is no
+ year element and the model base year will be used when the module is called.
+ The test module function reads this warning and writes it to the module test
+ log. This way the module developer is made aware of the situation so that it
+ may be corrected if necessary. The model user is not bothered by the warning.
 
 
 #### Value
@@ -5238,12 +5442,17 @@ Argument      |Description
  or NaN. The value is NA if the multiplier is missing. It is a number if the
  multiplier is a valid number. The value is NaN if the multiplier is not a
  valid number. The YEAR component is a character string that is a 4-digit
- representation of a year or NA if the component is missing or not a proper
- year. The UNITS component is modified to only be the units name.
+ representation of a year or NA if the component is not a proper year. If the
+ year component is missing from the UNITS specification for currency data,
+ the model base year is substituted. In that case, a WARN attribute is added
+ to the returned specifications list. This is read by the testModule function
+ and written to the module test log to notify the module developer. After the
+ UNITS component has been parsed and the YEAR and MULTIPLIER components
+ extracted, the UNITS component is modified to only be the units name.
 
 
 #### Calls
-
+getModelState
 
 
 ### `processModuleInputs`: Process module input files
@@ -5343,7 +5552,7 @@ Argument      |Description
 
 
 #### Calls
-doProcessGetSpec, doProcessInpSpec, doProcessSetSpec, expandSpec, readModelState
+doProcessInpSpec, expandSpec, getModelState
 
 
 ### `readGeography`: Read geographic specifications.
@@ -5970,7 +6179,7 @@ initDatastoreRD()
 
 
 #### Calls
-getModelState, getYears, listDatastoreRD
+getModelState, getYears, listDatastoreRD, setModelState
 
 
 ### `initTableH5`: Initialize table in an HDF5 (H5) type datastore.
@@ -6132,7 +6341,7 @@ Argument      |Description
 
 
 #### Calls
-getModelState, setModelState
+getModelState, readModelState, setModelState
 
 
 ### `readFromTableH5`: Read from an HDF5 (H5) type datastore table.
@@ -6147,7 +6356,8 @@ getModelState, setModelState
 #### Usage
 
 ```r
-readFromTableH5(Name, Table, Group, File = "datastore.h5", Index = NULL)
+readFromTableH5(Name, Table, Group, File = NULL, Index = NULL,
+  ReadAttr = FALSE)
 ```
 
 
@@ -6160,6 +6370,7 @@ Argument      |Description
 ```Group```     |     a string representation of the name of the datastore group the data is to be read from.
 ```File```     |     a string representation of the file path of the datastore
 ```Index```     |     A numeric vector identifying the positions the data is to be written to. NULL if the entire dataset is to be read.
+```ReadAttr```     |     A logical identifying whether to return the attributes of the stored dataset. The default value is FALSE.
 
 #### Details
 
@@ -6175,7 +6386,7 @@ Argument      |Description
 
 
 #### Calls
-checkDataset, readModelState, writeLog
+checkDataset, getModelState, readModelState, writeLog
 
 
 ### `readFromTableRD`: Read from an RData (RD) type datastore table.
@@ -6190,7 +6401,8 @@ checkDataset, readModelState, writeLog
 #### Usage
 
 ```r
-readFromTableRD(Name, Table, Group, DstoreLoc = NULL, Index = NULL)
+readFromTableRD(Name, Table, Group, DstoreLoc = NULL, Index = NULL,
+  ReadAttr = FALSE)
 ```
 
 
@@ -6201,8 +6413,9 @@ Argument      |Description
 ```Name```     |     A string identifying the name of the dataset to be read from.
 ```Table```     |     A string identifying the complete name of the table where the dataset is located.
 ```Group```     |     a string representation of the name of the datastore group the data is to be read from.
-```DstoreLoc```     |     a string representation of the file path of the datastore. NULL if the datastore is the directory identified in the 'DatastoreName' property of the model state file.
+```DstoreLoc```     |     a string representation of the file path of the datastore. NULL if the datastore is the current directory.
 ```Index```     |     A numeric vector identifying the positions the data is to be written to. NULL if the entire dataset is to be read.
+```ReadAttr```     |     A logical identifying whether to return the attributes of the stored dataset. The default value is FALSE.
 
 #### Details
 
@@ -6218,7 +6431,7 @@ Argument      |Description
 
 
 #### Calls
-checkDataset, readModelState, writeLog
+checkDataset, getModelState, readModelState, writeLog
 
 
 ### `writeToTableH5`: Write to an RData (RD) type datastore table.
@@ -6306,6 +6519,6 @@ Argument      |Description
 
 
 #### Calls
-checkDataset, getModelState, initDatasetRD, readFromTableRD, writeLog
+checkDataset, getModelState, listDatastoreRD, readFromTableRD, Types, writeLog
 
 
