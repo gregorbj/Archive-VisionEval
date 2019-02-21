@@ -994,61 +994,6 @@ Argument      |Description
 getModelState
 
 
-### `doProcessGetSpec`: Filters Get specifications list based on OPTIONAL specification attributes.
-
-#### Description
-
-
- `doProcessGetSpec` a visioneval framework control function that filters
- out Get specifications whose OPTIONAL specification attribute is TRUE but the
- specified dataset is not included in the corresponding Inp specifications nor
- is it present in the datastore.
-
-
-#### Usage
-
-```r
-doProcessGetSpec(GetSpecs_ls, DstoreListing_df, RunYears_)
-```
-
-
-#### Arguments
-
-Argument      |Description
-------------- |----------------
-```GetSpecs_ls```     |     A standard specifications list for Get specifications.
-```DstoreListing_df```     |     A standard datastore listing dataframe.
-```RunYears_```     |     A string vector of the model run years.
-
-#### Details
-
-
- A Get specification component may have an OPTIONAL specification whose value
- is TRUE. If so, and if the specified dataset will be created by processing
- the corresponding Inp specifications or if the dataset is already present in
- the datastore then the get specification needs to be processed. This function
- checks whether the OPTIONAL specification is present, whether its value is
- TRUE, and whether the dataset will be created by processing the corresponding
- Inp specifications or if it exists in the datastore for all model run years.
- If all of these are true, then the get specification needs to be processed.
- The get specification also needs to be processed if it is not optional. A
- specification is not optional if the OPTIONAL attribute is not present or if
- it is present and the value is not TRUE. The function returns a list of all
- the Get specifications that meet these criteria.
-
-
-#### Value
-
-
- A list containing the Get specification components that meet the
- criteria of either not being optional or being optional and the specified
- input file is present.
-
-
-#### Calls
-checkDataset
-
-
 ### `doProcessInpSpec`: Filters Inp specifications list based on OPTIONAL specification attributes.
 
 #### Description
@@ -1099,62 +1044,6 @@ Argument      |Description
 
 
 
-### `doProcessSetSpec`: Filters Set specifications list based on OPTIONAL specification attributes.
-
-#### Description
-
-
- `doProcessSetSpec` a visioneval framework control function that filters
- out Set specifications whose OPTIONAL specification attribute is TRUE but the
- specified dataset is not included in the corresponding Get specifications.
-
-
-#### Usage
-
-```r
-doProcessSetSpec(SetSpecs_ls, ProcessedGetSpecs_ls)
-```
-
-
-#### Arguments
-
-Argument      |Description
-------------- |----------------
-```SetSpecs_ls```     |     A standard specifications list for Set specifications.
-```ProcessedGetSpecs_ls```     |     A processed specifications of Get specifications that has been processed by the 'doProcessGetSpec' to remove all OPTIONAL specifications that will not be processed.
-
-#### Details
-
-
- A Set specification component may have an OPTIONAL specification whose value
- is TRUE. If so, and if the specified dataset is included in the corresponding
- Get specifications then the Set specification component needs to be
- processed. This function checks whether the OPTIONAL specification is
- present, whether its value is TRUE, and whether the dataset will be created
- by processing the corresponding Get specifications. If all of these are true,
- then the Set specification needs to be processed. The Set specification also
- needs to be processed if it is not optional. A specification is not optional
- if the OPTIONAL attribute is not present or if it is present and the value is
- not TRUE. The function returns a list of all the Set specifications that meet
- these criteria. It is important to note that optional Set specifications only
- exist to enable modules to do additional processing of input data. For
- example, to adjust proportions so that they exactly equal 1. In this general
- use case, optional input datasets are loaded, then they are retrieved from
- the datastore, processed, and then resaved to the datastore.
-
-
-#### Value
-
-
- A list containing the Set specification components that meet the
- criteria of either not being optional or being optional and the specified
- input file is present.
-
-
-#### Calls
-
-
-
 ### `expandSpec`: Expand a Inp, Get, or Set specification so that is can be used by other
  functions to process inputs and to read from or write to the datastore.
 
@@ -1173,7 +1062,7 @@ Argument      |Description
 #### Usage
 
 ```r
-expandSpec(SpecToExpand_ls)
+expandSpec(SpecToExpand_ls, ComponentName)
 ```
 
 
@@ -1182,6 +1071,7 @@ expandSpec(SpecToExpand_ls)
 Argument      |Description
 ------------- |----------------
 ```SpecToExpand_ls```     |     A standard specifications list for a specification whose NAME attribute has multiple values.
+```ComponentName```     |     A string that is the name of the specifications that the specification is a part of (e.g. "Inp", "Get", "Set").
 
 #### Details
 
@@ -1309,7 +1199,8 @@ Argument      |Description
 #### Usage
 
 ```r
-getFromDatastore(ModuleSpec_ls, RunYear, Geo = NULL, GeoIndex_ls = NULL)
+getFromDatastore(ModuleSpec_ls, RunYear, Geo = NULL,
+  GeoIndex_ls = NULL)
 ```
 
 
@@ -1354,7 +1245,7 @@ checkDataset, convertMagnitude, convertUnits, createGeoIndex, deflateCurrency, g
 #### Usage
 
 ```r
-getModelState(Names_ = "All", FileName = "ModelState.Rda")
+getModelState(Names_ = "All")
 ```
 
 
@@ -1363,7 +1254,6 @@ getModelState(Names_ = "All", FileName = "ModelState.Rda")
 Argument      |Description
 ------------- |----------------
 ```Names_```     |     A string vector of the components to extract from the ModelState_ls list.
-```FileName```     |     A string that is the file name of the model state file. The default value is ModelState.Rda.
 
 #### Details
 
@@ -1858,7 +1748,7 @@ setModelState, writeLog
 #### Usage
 
 ```r
-parseUnitsSpec(Spec_ls)
+parseUnitsSpec(Spec_ls, ComponentName)
 ```
 
 
@@ -1867,6 +1757,7 @@ parseUnitsSpec(Spec_ls)
 Argument      |Description
 ------------- |----------------
 ```Spec_ls```     |     A standard specifications list for a Inp, Get, or Set item.
+```ComponentName```     |     A string that is the name of the specifications the the specification comes from (e.g. "Inp", "Get", "Set).
 
 #### Details
 
@@ -1875,7 +1766,14 @@ Argument      |Description
  addition to the units name. This includes a value units multiplier and in
  the case of currency values the year for the currency measurement. The
  multiplier element can only be expressed in scientific notation where the
- number before the 'e' can only be 1.
+ number before the 'e' can only be 1. If the year element for a currency
+ specification is missing, it is replaced by the model base year which is
+ recorded in the model state file. If this is done, a WARN attribute is added
+ to the specifications list notifying the module developer that there is no
+ year element and the model base year will be used when the module is called.
+ The test module function reads this warning and writes it to the module test
+ log. This way the module developer is made aware of the situation so that it
+ may be corrected if necessary. The model user is not bothered by the warning.
 
 
 #### Value
@@ -1887,12 +1785,17 @@ Argument      |Description
  or NaN. The value is NA if the multiplier is missing. It is a number if the
  multiplier is a valid number. The value is NaN if the multiplier is not a
  valid number. The YEAR component is a character string that is a 4-digit
- representation of a year or NA if the component is missing or not a proper
- year. The UNITS component is modified to only be the units name.
+ representation of a year or NA if the component is not a proper year. If the
+ year component is missing from the UNITS specification for currency data,
+ the model base year is substituted. In that case, a WARN attribute is added
+ to the returned specifications list. This is read by the testModule function
+ and written to the module test log to notify the module developer. After the
+ UNITS component has been parsed and the YEAR and MULTIPLIER components
+ extracted, the UNITS component is modified to only be the units name.
 
 
 #### Calls
-
+getModelState
 
 
 ### `processModuleInputs`: Process module input files
@@ -1992,7 +1895,7 @@ Argument      |Description
 
 
 #### Calls
-doProcessGetSpec, doProcessInpSpec, doProcessSetSpec, expandSpec, readModelState
+doProcessInpSpec, expandSpec, getModelState
 
 
 ### `readGeography`: Read geographic specifications.

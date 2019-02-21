@@ -151,7 +151,7 @@ initDatastoreRD()
 
 
 #### Calls
-getModelState, getYears, listDatastoreRD
+getModelState, getYears, listDatastoreRD, setModelState
 
 
 ### `initTableH5`: Initialize table in an HDF5 (H5) type datastore.
@@ -313,7 +313,7 @@ Argument      |Description
 
 
 #### Calls
-getModelState, setModelState
+getModelState, readModelState, setModelState
 
 
 ### `readFromTableH5`: Read from an HDF5 (H5) type datastore table.
@@ -328,7 +328,8 @@ getModelState, setModelState
 #### Usage
 
 ```r
-readFromTableH5(Name, Table, Group, File = "datastore.h5", Index = NULL)
+readFromTableH5(Name, Table, Group, File = NULL, Index = NULL,
+  ReadAttr = FALSE)
 ```
 
 
@@ -341,6 +342,7 @@ Argument      |Description
 ```Group```     |     a string representation of the name of the datastore group the data is to be read from.
 ```File```     |     a string representation of the file path of the datastore
 ```Index```     |     A numeric vector identifying the positions the data is to be written to. NULL if the entire dataset is to be read.
+```ReadAttr```     |     A logical identifying whether to return the attributes of the stored dataset. The default value is FALSE.
 
 #### Details
 
@@ -356,7 +358,7 @@ Argument      |Description
 
 
 #### Calls
-checkDataset, readModelState, writeLog
+checkDataset, getModelState, readModelState, writeLog
 
 
 ### `readFromTableRD`: Read from an RData (RD) type datastore table.
@@ -371,7 +373,8 @@ checkDataset, readModelState, writeLog
 #### Usage
 
 ```r
-readFromTableRD(Name, Table, Group, DstoreLoc = NULL, Index = NULL)
+readFromTableRD(Name, Table, Group, DstoreLoc = NULL, Index = NULL,
+  ReadAttr = FALSE)
 ```
 
 
@@ -382,8 +385,9 @@ Argument      |Description
 ```Name```     |     A string identifying the name of the dataset to be read from.
 ```Table```     |     A string identifying the complete name of the table where the dataset is located.
 ```Group```     |     a string representation of the name of the datastore group the data is to be read from.
-```DstoreLoc```     |     a string representation of the file path of the datastore. NULL if the datastore is the directory identified in the 'DatastoreName' property of the model state file.
+```DstoreLoc```     |     a string representation of the file path of the datastore. NULL if the datastore is the current directory.
 ```Index```     |     A numeric vector identifying the positions the data is to be written to. NULL if the entire dataset is to be read.
+```ReadAttr```     |     A logical identifying whether to return the attributes of the stored dataset. The default value is FALSE.
 
 #### Details
 
@@ -399,7 +403,7 @@ Argument      |Description
 
 
 #### Calls
-checkDataset, readModelState, writeLog
+checkDataset, getModelState, readModelState, writeLog
 
 
 ### `writeToTableH5`: Write to an RData (RD) type datastore table.
@@ -487,6 +491,6 @@ Argument      |Description
 
 
 #### Calls
-checkDataset, getModelState, initDatasetRD, readFromTableRD, writeLog
+checkDataset, getModelState, listDatastoreRD, readFromTableRD, Types, writeLog
 
 
