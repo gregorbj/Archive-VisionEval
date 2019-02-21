@@ -1461,6 +1461,53 @@ writeVENameRegistry <-
         NameRegistry_df[[x]]$PACKAGE == PackageName
       NameRegistry_ls[[x]] <- NameRegistry_ls[[x]][!ExistingModuleEntries_]
     }
+    #Define function to process module specifications
+    processModuleSpecs <- function(Spec_ls) {
+      #Define a function to expand a specification having multiple NAMEs
+      expandSpec <- function(SpecToExpand_ls, ComponentName) {
+        Names_ <- unlist(SpecToExpand_ls$NAME)
+        Descriptions_ <- unlist(SpecToExpand_ls$DESCRIPTION)
+        Expanded_ls <- list()
+        for (i in 1:length(Names_)) {
+          Temp_ls <- SpecToExpand_ls
+          Temp_ls$NAME <- Names_[i]
+          Temp_ls$DESCRIPTION <- Descriptions_[i]
+          Expanded_ls <- c(Expanded_ls, list(Temp_ls))
+        }
+        Expanded_ls
+      }
+      #Define a function to process a component of a specifications list
+      processComponent <- function(Component_ls, ComponentName) {
+        Result_ls <- list()
+        for (i in 1:length(Component_ls)) {
+          Temp_ls <- Component_ls[[i]]
+          Result_ls <- c(Result_ls, expandSpec(Temp_ls, ComponentName))
+        }
+        Result_ls
+      }
+      #Process the list components and return the results
+      Out_ls <- list()
+      Out_ls$RunBy <- Spec_ls$RunBy
+      if (!is.null(Spec_ls$NewInpTable)) {
+        Out_ls$NewInpTable <- Spec_ls$NewInpTable
+      }
+      if (!is.null(Spec_ls$NewSetTable)) {
+        Out_ls$NewSetTable <- Spec_ls$NewSetTable
+      }
+      if (!is.null(Spec_ls$Inp)) {
+        Out_ls$Inp <- processComponent(Spec_ls$Inp, "Inp")
+      }
+      if (!is.null(Spec_ls$Get)) {
+        Out_ls$Get <- processComponent(Spec_ls$Get, "Get")
+      }
+      if (!is.null(Spec_ls$Set)) {
+        Out_ls$Set <- processComponent(Spec_ls$Set, "Set")
+      }
+      if (!is.null(Spec_ls$Call)) {
+        Out_ls$Call <- Spec_ls$Call
+      }
+      Out_ls
+    }
     #Process the Inp and Set specifications
     ModuleSpecs_ls <-
       processModuleSpecs(getModuleSpecs(ModuleName, PackageName))
