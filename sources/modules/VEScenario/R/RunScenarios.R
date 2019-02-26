@@ -419,10 +419,16 @@ RunScenarios <- function(L){
 
   # A list to store currently running scenarios
   ScenarioInProcess_ls <- list()
-  NWorkers <- L$Global$Model$NWorkers
-  NWorkers <- min(max(availableCores()-1, 1), NWorkers)
-  plan(multiprocess, workers = NWorkers, gc=TRUE)
-
+  
+  # Set future processors
+  if ( exists('planType') && planType == 'multiprocess'){
+    NWorkers <- L$Global$Model$NWorkers
+    NWorkers <- min(max(availableCores()-1, 1), NWorkers)
+    plan(multiprocess, workers = NWorkers, gc=TRUE)
+  } else {
+    plan(sequential)
+  }
+  
   # Update the Scenario Progress Report
   Scenarios_df  <- read.csv(file.path(ModelPath,
                                       L$Global$Model$ScenarioOutputFolder,
