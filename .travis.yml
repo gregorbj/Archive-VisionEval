@@ -77,7 +77,7 @@ script:
       fi
     done
     
-    # run module or model tests
+    # run module or model tests, comment out to finish Travis tests in < 50 min to rebuild caches and then uncomment and rerun
   - |
     cd $FOLDER
     if ( [ $TYPE == "module" ] ); then  Rscript -e 'devtools::install_deps(".")'; fi  

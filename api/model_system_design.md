@@ -76,7 +76,7 @@ Since the intent of the model system is to support the development of strategic 
 
 - **Operating System Independence**
 The model system will run on any of the 3 major operating systems; Windows, Apple, or Linux. As is the case with GreenSTEP and related models, the VisionEval model system is written in the R programming language. Well-supported and easily installed R implementations exist for these operating systems. Modules will be distributed as standard R packages that can be compiled on all operating systems. Code that is written in another language may be included in a module package as long as it can be compiled in an R package that is usable on all 3 operating systems.  
-
+To help ease maintenance of VE, it is recommended to minimize the use of new R libraries, and to reuse R libraries used by existing VE modules when possible.
 
 - **Preemptive Error Checking**  
 The model system will incorporate extensive data checking to identify errors in the model setup and inputs at the very beginning of the model run. Error messages will clearing identify the causes of the errors. The objective of early error checking is to avoid model runtime errors that waste model execution time and are difficult to debug.
