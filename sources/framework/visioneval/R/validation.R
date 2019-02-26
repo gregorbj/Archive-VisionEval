@@ -1705,6 +1705,19 @@ processModuleInputs <-
       }
       #Read in the data file
       Data_df <- read.csv(file.path(Dir, File), as.is = TRUE)
+      
+      # Remove the Byte order mark that sometimes appears in the beginning of
+      # UTF-8 files on Windows.  Byte Order Mark can't be saved in this
+      # windows encoded text file so I include it as raw
+      # The real solution is to use read.csv with fileEncoding='UTF-8-BOM'
+      # but that requires knowing the encoding of the CSV file ahead of time
+      # The BOM is \uEFBBBF or rawToChar(as.raw(c(0xef, 0xbb, 0xbf)))
+      # but it gets converted to 0xef 0x2e 0x2e when it is read in on a 
+      # machine using WIN1252 locale.  
+      # See https://stackoverflow.com/questions/39593637/dealing-with-byte-order-mark-bom-in-r
+      bom <- rawToChar(as.raw(c(0xef, 0x2e, 0x2e)))
+      names(Data_df) <- stringr::str_replace(names(Data_df), bom, "")
+      
       #Parse the field names of the data file
       ParsedNames_ls <- parseInputFieldNames(names(Data_df), Spec_ls, File)
       ParsingErrors_ <- unlist(lapply(ParsedNames_ls, function(x) x$Error))
