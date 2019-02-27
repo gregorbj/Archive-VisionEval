@@ -305,59 +305,62 @@ VERPATResults <- function(L){
   setnames(Levels_dt,colnames(Levels_dt),LevelNames_ar)
   ScenTab_dt <- cbind(ScenTab_dt,Levels_dt)
   ScenTab_dt <- ScenTab_dt[FinalResults_dt,on=.(Scenario)]
-  ScenTab_dt <- ScenTab_dt[,{Bzone <- Data[Table=="Bzone"][[1]]
-  Marea <- Data[Table=="Marea"][[1]]
-  Azone <- Data[Table=="Azone"][[1]]
-  BzoneUnits <- Units[Table=="Bzone"][[1]]
-  MareaUnits <- Units[Table=="Marea"][[1]]
-  AzoneUnits <- Units[Table=="Azone"][[1]]
-  #Get the population to compute per capita values
-  Pop <- sum(Bzone$UrbanPop)
-  #Calculate fatalities and injuries per 1000 persons by scenario
-  FatalityInjury <- sum(Marea[,.(FatalIncidentMetric, InjuryIncidentMetric)])
-  FatalityInjuryRate <- 1000 * FatalityInjury / Pop
-  #Calculate average cost per person
-  Cost <- sum(Bzone$CostsMetric)
-  AveCost <- Cost / Pop
-  #Calculate average DVMT per person
-  Dvmt <- sum(Bzone$DvmtPolicy)
-  AveDvmt <- Dvmt / Pop
-  AveDvmt <- convertUnits(AveDvmt, "compound",
-                          BzoneUnits[which(colnames(Bzone)=="DvmtPolicy")],
-                          "MI/DAY")$Value
-  #Calculate average emissions per person
-  # Withouth EV
-  # Emissions <- sum(Bzone$EmissionsMetric)
-  # AveEmissions <- 365 * Emissions / Pop
-  # AveEmissions <- convertUnits(AveEmissions, "compound",
-  #                              BzoneUnits[which(colnames(Bzone)=="EmissionsMetric")],
-  #                              "MT/YR")$Value
-  FuelEmissions <- sum(Bzone$FuelEmissionsMetric)
-  PowerEmissions <- sum(Bzone$PowerEmissionsMetric)
-  AveFuelEmissions <- 365 * FuelEmissions / Pop
-  AvePowerEmissions <- 365 * PowerEmissions / Pop
-  AveEmissions <- convertUnits(AveFuelEmissions, "compound",
-                               BzoneUnits[which(colnames(Bzone)=="FuelEmissionsMetric")],
-                               "MT/DAY")$Value +
-    convertUnits(AvePowerEmissions, "compound",
-                 BzoneUnits[which(colnames(Bzone)=="PowerEmissionsMetric")],
-                 "MT/YR")$Value
-  #Calculate average fuel consumed per person
-  Fuel <- sum(Bzone$FuelMetric)
-  AveFuel <- 365 * Fuel / Pop
-  AveFuel <- convertUnits(AveFuel, "compound",
-                          BzoneUnits[which(colnames(Bzone)=="FuelMetric")],
-                          "GAL/DAY")$Value
-  #Calculate average vehicle hours per person
-  VehHr <- Marea$VehHrLtVehPolicy
-  AveVehHr <- VehHr / Pop
-  AveVehHr <- convertUnits(AveVehHr, "time",
-                           BzoneUnits[which(colnames(Bzone)=="VehHrLtVehPolicy")],
-                           "HR")$Value
-  .(FatalityInjuryRate=FatalityInjuryRate, AveCost=AveCost,
-    AveDvmt=AveDvmt, AveEmissions=AveEmissions,
-    AveFuel=AveFuel, AveVehHr=AveVehHr)
-  },by=c("Scenario", InputLabels_ar)]
+  ScenTab_dt <- ScenTab_dt[, {
+    Bzone <- Data[Table=="Bzone"][[1]]
+    Marea <- Data[Table=="Marea"][[1]]
+    Azone <- Data[Table=="Azone"][[1]]
+    BzoneUnits <- Units[Table=="Bzone"][[1]]
+    MareaUnits <- Units[Table=="Marea"][[1]]
+    AzoneUnits <- Units[Table=="Azone"][[1]]
+    #Get the population to compute per capita values
+    Pop <- sum(Bzone$UrbanPop)
+    #Calculate fatalities and injuries per 1000 persons by scenario
+    FatalityInjury <- sum(Marea[,.(FatalIncidentMetric, InjuryIncidentMetric)])
+    FatalityInjuryRate <- 1000 * FatalityInjury / Pop
+    #Calculate average cost per person
+    Cost <- sum(Bzone$CostsMetric)
+    AveCost <- Cost / Pop
+    #Calculate average DVMT per person
+    Dvmt <- sum(Bzone$DvmtPolicy)
+    AveDvmt <- Dvmt / Pop
+    AveDvmt <- convertUnits(AveDvmt, "compound",
+                            BzoneUnits[which(colnames(Bzone)=="DvmtPolicy")],
+                            "MI/DAY")$Value
+    #Calculate average emissions per person
+    # Withouth EV
+    # Emissions <- sum(Bzone$EmissionsMetric)
+    # AveEmissions <- 365 * Emissions / Pop
+    # AveEmissions <- convertUnits(AveEmissions, "compound",
+    #                              BzoneUnits[which(colnames(Bzone)=="EmissionsMetric")],
+    #                              "MT/YR")$Value
+    FuelEmissions <- sum(Bzone$FuelEmissionsMetric)
+    PowerEmissions <- sum(Bzone$PowerEmissionsMetric)
+    AveFuelEmissions <- 365 * FuelEmissions / Pop
+    AvePowerEmissions <- 365 * PowerEmissions / Pop
+    AveEmissions <- convertUnits(AveFuelEmissions, "compound",
+                                 BzoneUnits[which(colnames(Bzone)=="FuelEmissionsMetric")],
+                                 "MT/DAY")$Value +
+      convertUnits(AvePowerEmissions, "compound",
+                   BzoneUnits[which(colnames(Bzone)=="PowerEmissionsMetric")],
+                   "MT/YR")$Value
+    #Calculate average fuel consumed per person
+    Fuel <- sum(Bzone$FuelMetric)
+    AveFuel <- 365 * Fuel / Pop
+    AveFuel <- convertUnits(AveFuel, "compound",
+                            BzoneUnits[which(colnames(Bzone)=="FuelMetric")],
+                            "GAL/DAY")$Value
+    #Calculate average vehicle hours per person
+    VehHr <- Marea$VehHrLtVehPolicy
+    AveVehHr <- VehHr / Pop
+    AveVehHr <- convertUnits(AveVehHr, "time",
+                             BzoneUnits[which(colnames(Bzone)=="VehHrLtVehPolicy")],
+                             "HR")$Value
+    .(FatalityInjuryRate=FatalityInjuryRate, AveCost=AveCost,
+      AveDvmt=AveDvmt, AveEmissions=AveEmissions,
+      AveFuel=AveFuel, AveVehHr=AveVehHr)
+  },
+  by=c("Scenario", InputLabels_ar)]
+
   # Write the output to JSON file
   JSON <- toJSON(ScenTab_dt)
   JSON <- paste("var data = ", JSON, ";", sep="")

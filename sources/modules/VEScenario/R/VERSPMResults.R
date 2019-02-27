@@ -57,7 +57,7 @@ verspm_output_config_txt <-
   "INSTRUCTIONS": "annual residents walk trips (not including recreation or walk to transit) divided by population",
   "METRIC": "Average",
   "UNIT": "annual trips",
-    "COLUMN": "WalkTraverPerCapita"
+    "COLUMN": "WalkTravelPerCapita"
   },
 {
     "NAME": "Air Pollution Emissions",
@@ -93,7 +93,7 @@ verspm_output_config_txt <-
   "INSTRUCTIONS": "average percentage of income spent by all households on owning and operating light-duty vehicles.",
   "METRIC": "Average",
   "UNIT": "%",
-    "COLUMN": "VehilceCost"
+    "COLUMN": "VehicleCost"
 },
 {
     "NAME": "Low Income Household Vehicle Cost as Percentage of Income",
@@ -102,7 +102,7 @@ verspm_output_config_txt <-
   "INSTRUCTIONS": "average percentage of income spent by low-income (< $20,000 USD2005) households on owning and operating light-duty vehicles.",
   "METRIC": "Average",
   "UNIT": "%",
-    "COLUMN": "VehilceCostLow"
+    "COLUMN": "VehicleCostLow"
   }
 ]'
 
@@ -434,7 +434,7 @@ VERSPMResults <- function(L){
                             #Get the DVMT per capita
                             DVMTPerCapita <- sum(Household$Dvmt)/sum(Bzone$Pop)
                             #Walk travel per capita
-                            WalkTraverPerCapita <- sum(Household$WalkTrips)/sum(Bzone$Pop)
+                            WalkTravelPerCapita <- sum(Household$WalkTrips)/sum(Bzone$Pop)
                             #Air pollution emiisions placeholder
                             AirPollutionEm <- sum(Household$DailyCO2e) #incorrect calculations
                             #Annual fuel use
@@ -449,18 +449,18 @@ VERSPMResults <- function(L){
                             OperationCost <- Household$AveVehCostPM  * Household$Dvmt
                             OwnCost <- Household$OwnCost
                             TotalCost <- OwnCost+OperationCost
-                            VehilceCost <- sum(TotalCost)/sum(Household$Income) * 100
+                            VehicleCost <- sum(TotalCost)/sum(Household$Income) * 100
 
                             #Vehicle ownership cost as percentage of income for low income people
                             #“low income” assumption is defined as  <$20K (2005$).
                             Income2005 <- deflateCurrency(Household$Income,BaseYear,"2005")
                             IsLowIncome <- Income2005 < 20000
-                            VehilceCostLow <- sum(TotalCost[IsLowIncome])/sum(Household$Income[IsLowIncome]) * 100
+                            VehicleCostLow <- sum(TotalCost[IsLowIncome])/sum(Household$Income[IsLowIncome]) * 100
 
                             .(GHGReduction=GHGReduction,DVMTPerCapita=DVMTPerCapita,
-                              WalkTraverPerCapita=WalkTraverPerCapita, TruckDelay=TruckDelay,
+                              WalkTravelPerCapita=WalkTravelPerCapita, TruckDelay=TruckDelay,
                               AirPollutionEm=AirPollutionEm, FuelUse=FuelUse,
-                              VehilceCost=VehilceCost, VehilceCostLow=VehilceCostLow)
+                              VehicleCost=VehicleCost, VehicleCostLow=VehicleCostLow)
                           },by=c("Scenario", InputLabels_ar)]
 
   # Write the output to JSON file
