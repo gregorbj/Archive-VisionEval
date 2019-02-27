@@ -1,15 +1,38 @@
 #==================================
 #CalculatePtranEnergyAndEmissions.R
 #==================================
-#This module calculates the energy consumption and carbon emissions of public
-#transit vehicle emissions in urbanized areas.
 
-
-#=================================
-#Packages used in code development
-#=================================
-#Uncomment following lines during code development. Recomment when done.
-#library(visioneval)
+#<doc>
+#
+## CalculatePtranEnergyAndEmissions Module
+#### January 23, 2019
+#
+#This module calculates the energy consumption and carbon emissions from public transportation vehicles in urbanized areas. Note that fuel consumption and emissions from car services (e.g. taxi, Uber, Lyft) are calculated in conjunction with the calculation of household vehicle emissions and are attributed to the household.
+#
+### Model Parameter Estimation
+#
+#This module has no estimated parameters.
+#
+### How the Module Works
+#
+#This module calculates the energy consumption and carbon emissions production public transit vehicles in urbanized areas in the following steps:
+#
+#* The energy consumption characteristics (i.e. MPG, MPKWH) by vehicle type (van, bus, rail) and powertrain type (ICEV, HEV, BEV, EV) are loaded (these are default values set up in the version of the 'VEPowertrainAndFuels' package used to represent the vehicles and fuels scenario being modeled).
+#
+#* Energy consumption and emissions for each vehicle type and marea are calculated by the following steps:
+#
+#  * Get the DVMT for the vehicle type by marea produced by the 'AssignTransitService' module
+#
+#  * Allocate DVMT for the type and marea to powertrains using the powertrain proportions that are default values or user inputs ('Initialize' module of 'VEPowertrainsAndFuels' package).
+#
+#  * Calculate energy consumption for the vehicle type by powertrain type using the DVMT by powertrain type and the energy consumption characteristics (MPG, MPKWH) for the powertrain type. Energy consumption for ICEV and HEV vehicles is calculated in gas gallon equivalents (GGE) while energy consumption for BEV and EV vehicles are in kilowatt hours (KWH). Convert to equivalent megajoule (MJ) values.
+#
+#  * Get the average carbon intensity of fuels for the vehicle type by marea and the average carbon intensity of electricity production by azone that are either default values or user inputs ('Initialize' module of the 'VEPowertrainsAndFuels' package). Multiply the carbon intensities by energy type and the energy consumption by type and sum to calculate the carbon emissions for the vehicle type by marea.
+#
+#  * Calculate the average emissions per mile by marea for the vehicle type from the total emissions by marea for the vehicle type and the DVMT for the vehicle type by marea.
+#
+#
+#</doc>
 
 
 #=============================================
@@ -212,20 +235,6 @@ usethis::use_data(CalculatePtranEnergyAndEmissionsSpecifications, overwrite = TR
 #=======================================================
 #SECTION 3: DEFINE FUNCTIONS THAT IMPLEMENT THE SUBMODEL
 #=======================================================
-#This function calculates the energy consumption and carbon emissions production
-#from commercial travel. This includes travel by commercial service vehicles and
-#by heavy trucks. Commercial service vehicle energy and emissions are associated
-#with households in urban and rural areas in each Marea. Heavy truck energy and
-#emissions are calculated for urban and rural roadways at the Region level and
-#for urban roadways at the Marea level. Emissions for car service and public
-#transit vehicles are calculated separately. Car service emissions are included
-#in the calculation of household emissions. public transit emissions are
-#calculated in another module. Fuel consumption is calculated in gasoline gallon
-#equivalents. Electricity consumption is calculated in kilowatt hours. Vehicle
-#average MPG and MPkWh is adjusted to account for eco-driving, speed smoothing,
-#and congestion. Carbon emissions are calculated in carbon dioxide equivents
-#(CO2e) using the carbon intensities calculated by the CalculateCarbonIntensity
-#module.
 
 #Main module function that calculates public transit energy and emissions
 #------------------------------------------------------------------------
@@ -252,7 +261,7 @@ CalculatePtranEnergyAndEmissions <- function(L) {
   Ma <- L$Year$Marea$Marea
   Pt <- c("ICEV", "HEV", "BEV")
   Year <- L$G$Year
-  EnergyEmissionsDefaults_ls <- VEPowertrainsAndFuels::PowertrainFuelDefaults_ls
+  EnergyEmissionsDefaults_ls <- loadPackageDataset("PowertrainFuelDefaults_ls")
 
   #Calculate the transit powertrain characteristics for the year
   #---------------------------------------------------------------
@@ -321,6 +330,7 @@ CalculatePtranEnergyAndEmissions <- function(L) {
     CI_MaEt[,1] <- L$Year$Marea[[paste0("Transit", Type, "FuelCI")]]
     #Calculate CO2e emissions
     CO2e_MaEt <- EnergyMJ_MaEt * CI_MaEt
+    CO2e_MaEt[is.na(CO2e_MaEt)] <- 0
     CO2e_Ma <- apply(CO2e_MaEt, 1, sum)
     #Calculate CO2e rate
     CO2eRate_Ma <- Dvmt_Ma
@@ -362,34 +372,47 @@ CalculatePtranEnergyAndEmissions <- function(L) {
 }
 
 
-#================================
-#Code to aid development and test
-#================================
+#===============================================================
+#SECTION 4: MODULE DOCUMENTATION AND AUXILLIARY DEVELOPMENT CODE
+#===============================================================
+#Run module automatic documentation
+#----------------------------------
+documentModule("CalculatePtranEnergyAndEmissions")
+
 #Test code to check specifications, loading inputs, and whether datastore
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions
 #-------------------------------------------------------------------------------
-# load("data/EnergyEmissionsDefaults_ls.rda")
-# attach(EnergyEmissionsDefaults_ls)
+# #Load libraries and test functions
+# library(visioneval)
+# library(filesstrings)
+# source("tests/scripts/test_functions.R")
+# #Set up test environment
+# TestSetup_ls <- list(
+#   TestDataRepo = "../Test_Data/VE-RSPM",
+#   DatastoreName = "Datastore.tar",
+#   LoadDatastore = TRUE,
+#   TestDocsDir = "verspm",
+#   ClearLogs = TRUE,
+#   # SaveDatastore = TRUE
+#   SaveDatastore = FALSE
+# )
+# setUpTests(TestSetup_ls)
+# #Run test module
+# TestDat_ <- testModule(
+#   ModuleName = "CalculatePtranEnergyAndEmissions",
+#   LoadDatastore = TRUE,
+#   SaveDatastore = FALSE,
+#   DoRun = FALSE,
+#   RequiredPackages = "VEPowertrainsAndFuels"
+# )
+# L <- TestDat_$L
+# R <- CalculatePtranEnergyAndEmissions(L)
+#
 # TestDat_ <- testModule(
 #   ModuleName = "CalculatePtranEnergyAndEmissions",
 #   LoadDatastore = TRUE,
 #   SaveDatastore = TRUE,
-#   DoRun = FALSE
+#   DoRun = TRUE,
+#   RequiredPackages = "VEPowertrainsAndFuels"
 # )
-# L <- TestDat_$L
-# TestOut_ls <- CalculatePtranEnergyAndEmissions(L)
-
-#Test code to check everything including running the module and checking whether
-#the outputs are consistent with the 'Set' specifications
-#-------------------------------------------------------------------------------
-# load("data/EnergyEmissionsDefaults_ls.rda")
-# TestDat_ <- testModule(
-#   ModuleName = "CalculateComEnergyAndEmissions",
-#   LoadDatastore = TRUE,
-#   SaveDatastore = TRUE,
-#   DoRun = TRUE
-# )
-# setwd("tests")
-# untar("Datastore.tar")
-# setwd("..")

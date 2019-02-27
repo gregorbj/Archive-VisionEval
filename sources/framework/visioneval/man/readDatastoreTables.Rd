@@ -30,8 +30,9 @@ The 'Missing' component is a list which identifies the datasets that are
 missing in each table.
 }
 \description{
-\code{readDatastoreTables} reads datasets from one or more tables in a
-specified group in one or more datastores
+\code{readDatastoreTables} a visioneval framework model user function that
+reads datasets from one or more tables in a specified group in one or more
+datastores
 }
 \details{
 This function can read multiple datasets in one or more tables in a group.

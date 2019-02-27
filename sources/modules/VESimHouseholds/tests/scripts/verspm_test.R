@@ -12,15 +12,17 @@ TestSetup_ls <- list(
   DatastoreName = "Datastore.tar",
   LoadDatastore = FALSE,
   TestDocsDir = "verspm",
-  ClearLogs = TRUE
+  ClearLogs = TRUE,
+  # SaveDatastore = TRUE
+  SaveDatastore = FALSE
 )
 
 #Define the module tests
 Tests_ls <- list(
-  CreateHouseholds = c(LoadDatastore = FALSE, SaveDatastore = TRUE, DoRun = TRUE),
-  PredictWorkers = c(LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
-  AssignLifeCycle = c(LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
-  PredictIncome = c(LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE)
+  list(ModuleName = "CreateHouseholds", LoadDatastore = FALSE, SaveDatastore = TRUE, DoRun = TRUE),
+  list(ModuleName = "PredictWorkers", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
+  list(ModuleName = "AssignLifeCycle", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE),
+  list(ModuleName = "PredictIncome", LoadDatastore = TRUE, SaveDatastore = TRUE, DoRun = TRUE)
 )
 
 #Set up, run tests, and save test results

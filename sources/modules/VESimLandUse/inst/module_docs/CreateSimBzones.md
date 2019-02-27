@@ -1,5 +1,5 @@
 # CreateSimBzones Module
-### November 28, 2018
+### February 1, 2019
 
 This module synthesizes Bzones and their land use attributes as a function of Azone characteristics as well as data derived from the US Environmental Protection Agency's Smart Location Database (SLD) augmented with US Census housing and household income data, and data from the National Transit Database. Details on these data are included in the VESimLandUseData package. The combined dataset contains a number of land use attributes at the US Census block group level. The goal of Bzone synthesis to generate a set of SimBzones in each Azone that reasonably represent block group land use characteristics given the characteristics of the Azone, the Marea that the Azone is a part of, and scenario inputs provided by the user.
 
@@ -18,6 +18,10 @@ The models and procedures in this module create SimBzones within each Azone that
 * **Land Use Diversity**: Measures of the degree of mixing of households and jobs
 
 * **Destination Accessibility**: Measures of proximity to households and jobs
+
+* **Area Type and Development Type**: Categories which describe the relative urban nature of the SimBzone (area type) and the character of development in the SimBzone (development type).
+
+* **Employment Split**: Number of retail, service, and other jobs in each SimBzone.
 
 ## Model Parameter Estimation
 
@@ -41,11 +45,11 @@ The module creates SimBzones in the following steps:
 
 7) **Assign Destination Accessibility Measure Values to SimBzones**: Destination accessibility levels are assigned to SimBzones as a function of SimBzone density levels using the models described in the *Assign Destination Accessibility Measure Values to SimBzones* section of the *CreateSimBzonesModel* module documentation.
 
-8) **Split SimBzone Employment Into Sectors**: SimBzone employment is split between 3 sectors (retail, service, other). This is done for the purpose of enabling the calculation of an entropy measure of land use mixing that is used in the forthcoming multimodal household travel for VisionEval (described below). The models described in the *Split SimBzone Employment Into Sectors* section of the *CreateSimBzonesModel* module documentation are applied to carry out the splits. The entropy measure is calculated in the same way as the `D2a_EpHHm` measure is calculated in the Smart Location Database (SLD) with the exception that only 3 employment sectors are used instead of 5. The calculations are described in Table 5 of SLD [users guide](https://www.epa.gov/smartgrowth/smart-location-database-technical-documentation-and-user-guide).
+8) **Model Housing Types**: Housing types (single family, multifamily) to be occupied by households in each SimBzone are calculated using models described in the *Model Housing Types* section of the *CreateSimBzonesModel* module documentation. These values are used in the *PredictHousing* module to assign a housing type to each household and then assign households to SimBzones as a function of their housing type choice.
 
-9) **Model Housing Types**: Housing types (single family, multifamily) to be occupied by households in each SimBzone are calculated using models described in the *Model Housing Types* section of the *CreateSimBzonesModel* module documentation. These values are used in the *PredictHousing* module to assign a housing type to each household and then assign households to SimBzones as a function of their housing type choice.
+9) **Designate Place Types**: Place types simplify the characterization of land use patterns. They are used in the VESimLandUse package modules to simplify the management of inputs for land use related policies. They are also used in the models for splitting employment into sectors and for establish the pedestrian-oriented network design value. There are three dimensions to the place type system. Location type identifies whether the SimBzone is located in an urbanized area (Urban), a smaller urban-type area (Town), or a non-urban area (Rural). Area types identify the relative urban nature of the SimBzone: center, inner, outer, fringe. Development types identify the character of development in the SimBzone: residential, employment, mix. The methods used for designating SimBzone place types are described in detail in the *Designate Place Types* section of the *CreateSimBzonesModel* module documentation.
 
-10) **Designate Place Types**: Place types simplify the characterization of land use patterns. They are used in the VESimLandUse package modules to simplify the management of inputs for land use related policies. There are three dimensions to the place type system. Location type identifies whether the SimBzone is located in an urbanized area (Metropolitan), a smaller urban-type area (Town), or a non-urban area (Rural). Area types identify the relative urban nature of the SimBzone: center, inner, outer, fringe. Development types identify the character of development in the SimBzone: residential, employment, mix. The methods used for designating SimBzone place types are described in detail in the *Designate Place Types* section of the *CreateSimBzonesModel* module documentation.
+10) **Split SimBzone Employment Into Sectors**: SimBzone employment is split between 3 sectors (retail, service, other). This is done for the purpose of enabling the calculation of an entropy measure of land use mixing that is used in the forthcoming multimodal household travel for VisionEval (described below). The models described in the *Split SimBzone Employment Into Sectors* section of the *CreateSimBzonesModel* module documentation are applied to carry out the splits. The entropy measure is calculated in the same way as the `D2a_EpHHm` measure is calculated in the Smart Location Database (SLD) with the exception that only 3 employment sectors are used instead of 5. The calculations are described in Table 5 of SLD [users guide](https://www.epa.gov/smartgrowth/smart-location-database-technical-documentation-and-user-guide).
 
 11) **Model Pedestrian-Oriented Network Design (D3bpo4)**: The D3pbo4 pedestrian-oriented network design measure described in the SLD users guide is assigned to each SimBzone using models described in the *Model Pedestrian-Oriented Network Design (D3bpo4)* section of the *CreateSimBzonesModel* module documentation.
 
@@ -109,11 +113,23 @@ ISELEMENTOF - Categorical values that are permitted. Values in the datastore are
 
 DESCRIPTION - A description of the data.
 
-|NAME    |TABLE |GROUP |TYPE       |UNITS    |PROHIBIT |ISELEMENTOF        |DESCRIPTION                                                                 |
-|:-------|:-----|:-----|:----------|:--------|:--------|:------------------|:---------------------------------------------------------------------------|
-|Bzone   |Bzone |Year  |character  |ID       |         |                   |Unique ID for SimBzone                                                      |
-|Azone   |Bzone |Year  |character  |ID       |         |                   |Azone that SimBzone is located in                                           |
-|Marea   |Bzone |Year  |character  |ID       |         |                   |Marea associated with Azone that SimBzone is located in                     |
-|LocType |Bzone |Year  |character  |category |NA       |Urban, Town, Rural |Location type (Urban, Town, Rural) of the place where the household resides |
-|NumHh   |Bzone |Year  |households |HH       |NA, < 0  |                   |Number of households allocated to the SimBzone                              |
-|NumJob  |Bzone |Year  |employment |JOB      |NA, < 0  |                   |Number of jobs allocated to SimBzone                                        |
+|NAME      |TABLE |GROUP |TYPE       |UNITS      |PROHIBIT |ISELEMENTOF                  |DESCRIPTION                                                                                                          |
+|:---------|:-----|:-----|:----------|:----------|:--------|:----------------------------|:--------------------------------------------------------------------------------------------------------------------|
+|Bzone     |Bzone |Year  |character  |ID         |         |                             |Unique ID for SimBzone                                                                                               |
+|Azone     |Bzone |Year  |character  |ID         |         |                             |Azone that SimBzone is located in                                                                                    |
+|Marea     |Bzone |Year  |character  |ID         |         |                             |Marea associated with Azone that SimBzone is located in                                                              |
+|LocType   |Bzone |Year  |character  |category   |NA       |Urban, Town, Rural           |Location type (Urban, Town, Rural) of the place where the household resides                                          |
+|NumHh     |Bzone |Year  |households |HH         |NA, < 0  |                             |Number of households allocated to the SimBzone                                                                       |
+|TotEmp    |Bzone |Year  |people     |PRSN       |NA, < 0  |                             |Total number of jobs in zone                                                                                         |
+|RetEmp    |Bzone |Year  |people     |PRSN       |NA, < 0  |                             |Number of jobs in retail sector in zone                                                                              |
+|SvcEmp    |Bzone |Year  |people     |PRSN       |NA, < 0  |                             |Number of jobs in service sector in zone                                                                             |
+|OthEmp    |Bzone |Year  |people     |PRSN       |NA, < 0  |                             |Number of jobs in other than the retail and service sectors in zone                                                  |
+|AreaType  |Bzone |Year  |character  |category   |NA       |center, inner, outer, fringe |Area type (center, inner, outer, fringe) of the Bzone                                                                |
+|DevType   |Bzone |Year  |character  |category   |NA       |emp, mix, res                |Location type (Urban, Town, Rural) of the Bzone                                                                      |
+|D1D       |Bzone |Year  |compound   |HHJOB/ACRE |NA, < 0  |                             |Gross activity density (employment + households) on unprotected land in zone (Ref: EPA 2010 Smart Location Database) |
+|D5        |Bzone |Year  |double     |NA         |NA, < 0  |                             |Destination accessibility of zone calculated as harmonic mean of jobs within 2 miles and population within 5 miles   |
+|UrbanArea |Bzone |Year  |area       |ACRE       |NA, < 0  |                             |Area that is Urban and unprotected (i.e. developable) within the zone                                                |
+|TownArea  |Bzone |Year  |area       |ACRE       |NA, < 0  |                             |Area that is Town and unprotected (i.e. developable) within the zone                                                 |
+|RuralArea |Bzone |Year  |area       |ACRE       |NA, < 0  |                             |Area that is Rural and unprotected (i.e. developable) within the zone                                                |
+|SFDU      |Bzone |Year  |integer    |DU         |NA, < 0  |                             |Number of single family dwelling units (PUMS codes 01 - 03) in zone                                                  |
+|MFDU      |Bzone |Year  |integer    |DU         |NA, < 0  |                             |Number of multi-family dwelling units (PUMS codes 04 - 09) in zone                                                   |

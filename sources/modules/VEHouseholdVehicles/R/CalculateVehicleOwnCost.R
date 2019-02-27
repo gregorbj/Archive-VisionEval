@@ -4,7 +4,7 @@
 #
 #<doc>
 #
-## AssignVehicleType Module
+## CalculateVehicleOwnCost Module
 #### November 23, 2018
 #
 #This module calculates average vehicle ownership cost for each vehicle based on the vehicle type and age using data from the American Automobile Association (AAA). To this are added the cost of parking at the vehicle residence if free parking is not available for all household vehicles. The ownership cost is converted into an average ownership cost per mile by predicting the household DVMT given the number of owned vehicles and splitting the miles equally among the vehicles. Vehicle ownership costs are used by the AdjustVehicleOwnership module to determine whether it would be more cost-effective for a household to substitute the use of car services for one or more of vehicles that they otherwise would own.
@@ -70,13 +70,6 @@
 #The module also identifies which households will be assigned PAYD insurance given user inputs on the proportion of households having PAYD insurance. The module identifies which households qualify for PAYD insurance based on whether any of their vehicles are 1996 model year vehicles or later. The vehicle and household characteristics (identified above) are evaluated and points assigned. The total points are calculated for each households. Random sampling is used to choose a number of households to equal the input proportion where the probability that each household is chosen is a function of the ratio of the household weight to the maximum household weight.
 #
 #</doc>
-
-
-#=================================
-#Packages used in code development
-#=================================
-#Uncomment following lines during code development. Recomment when done.
-# library(visioneval)
 
 
 #=============================================
@@ -414,7 +407,7 @@ usethis::use_data(PaydWts_, overwrite = TRUE)
 #------------------------------
 CalculateVehicleOwnCostSpecifications <- list(
   #Level of geography module is applied at
-  RunBy = "Azone",
+  RunBy = "Region",
   #Specify new tables to be created by Inp if any
   #Specify new tables to be created by Set if any
   #Specify input data
@@ -471,6 +464,15 @@ CalculateVehicleOwnCostSpecifications <- list(
   #Specify data to be loaded from data store
   Get = items(
     item(
+      NAME = "Azone",
+      TABLE = "Azone",
+      GROUP = "Year",
+      TYPE = "character",
+      UNITS = "ID",
+      PROHIBIT = "",
+      ISELEMENTOF = ""
+    ),
+    item(
       NAME = "VehOwnFlatRateFee",
       TABLE = "Azone",
       GROUP = "Year",
@@ -498,6 +500,15 @@ CalculateVehicleOwnCostSpecifications <- list(
       ISELEMENTOF = ""
     ),
     item(
+      NAME = "Azone",
+      TABLE = "Household",
+      GROUP = "Year",
+      TYPE = "character",
+      UNITS = "ID",
+      PROHIBIT = "",
+      ISELEMENTOF = ""
+    ),
+    item(
       NAME = "HhId",
       TABLE = "Household",
       GROUP = "Year",
@@ -522,6 +533,15 @@ CalculateVehicleOwnCostSpecifications <- list(
       TYPE = "character",
       UNITS = "ID",
       PROHIBIT = "NA",
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "Azone",
+      TABLE = "Vehicle",
+      GROUP = "Year",
+      TYPE = "character",
+      UNITS = "ID",
+      PROHIBIT = "",
       ISELEMENTOF = ""
     ),
     item(
@@ -677,7 +697,7 @@ CalculateVehicleOwnCostSpecifications <- list(
   ),
   #Specify call status of module
   Call = items(
-    CalcDvmt = "VEHouseholdTravel::CalculateHouseholdDvmt"
+    CalcDvmt = "CalculateHouseholdDvmt"
   )
 )
 
@@ -786,42 +806,36 @@ calcAdValoremTax <- function(Type_, Age_, TaxRate) {
 #' whether the household lives in a metropolitan area. All household vehicles
 #' must be a 1996 or later model year.
 #'
-#' @param L A list containing the components listed in the Get specifications
+#' @param Household A list containing the Household component of the list (L)
+#' including Household table data listed in the Get specifications limited to
+#' data for households in a specified Azone
+#' @param PaydHhProp A number identifying the proportion of households having
+#' pay-as-you-drive insurance
 #' for the module.
 #' @return A numeric vector of weights assigned to each household
-idPaydHh <- function(L) {
+idPaydHh <- function(Household, PaydHhProp) {
   #Set up
   #------
-  set.seed(L$G$Seed)
-  NumHh <- length(L$Year$Household$HhId)
-  NumPayd <- round(NumHh * L$Year$Azone$PaydHhProp)
-
-  #Identify qualifying househouseholds
-  #----------------------------------------------------------------------------
-  #Household qualifies if all household vehicles are later than 1995 model year
-  AgeThreshold <- as.numeric(L$G$Year) - 1996
-  Qualifies_Hh <-
-    tapply(L$Year$Vehicle$Age, L$Year$Vehicle$HhId, function(x) {
-      any(x >= AgeThreshold)
-    })[L$Year$Household$HhId]
-  Qualifies_Hh[L$Year$Household$Vehicles == 0] <- FALSE
+  NumHh <- length(Household$HhId)
+  NumPayd <- round(NumHh * PaydHhProp)
+  Qualifies_Hh <- Household$PaydQualifies
 
   #Identify PAYD households
   #------------------------
   if (sum(Qualifies_Hh) <= NumPayd) {
   #Return all qualifying households if less than or equal to NumPayd
-    HasPaydIns_Hh <- as.integer(Qualifies_Hh)
+    HasPaydIns_Hh <- setNames(as.integer(Qualifies_Hh), Household$HhId)
   } else {
   #Otherwise calculate PAYD weights and choose based on weights
-    Weight_Hh <- rep(1, length(L$Year$Household$HhId))
+    Weight_Hh <- rep(1, length(Household$HhId))
     #Add weight for teenage drivers
     Weight_Hh <- local({
-      HasTeenDrv_Hh <- with(L$Year$Household, Drv15to19 > 0)
+      HasTeenDrv_Hh <- with(Household, Drv15to19 > 0)
       Weight_Hh + HasTeenDrv_Hh * PaydWts_["HasTeenDrv"]
     })
     #Add weight for average annual vehicle miles is less than 15,000
     Weight_Hh <- local({
-      VmtPerVeh_Hh <- with(L$Year$Household, 365 * Dvmt / Vehicles)
+      VmtPerVeh_Hh <- with(Household, 365 * Dvmt / Vehicles)
       VmtPerVeh_Hh[is.na(VmtPerVeh_Hh)] <- 0
       LowerMileage_Hh <- VmtPerVeh_Hh < 15000
       Weight_Hh + LowerMileage_Hh * PaydWts_["LowerMileage"]
@@ -829,35 +843,35 @@ idPaydHh <- function(L) {
     #Add weight for the proportion of drivers 30 or older
     Weight_Hh <- local({
       OlderDrvProp_Hh <-
-        with(L$Y$Household, (Drivers - Drv15to19 - Drv20to29) / Drivers)
+        with(Household, (Drivers - Drv15to19 - Drv20to29) / Drivers)
       OlderDrvProp_Hh[is.na(OlderDrvProp_Hh)] <- 0
       Weight_Hh + OlderDrvProp_Hh * PaydWts_["OlderDrvProp"]
     })
     #Add weight for lower income households
     Weight_Hh <- local({
-      LowerIncome_Hh <- L$Year$Household$Income < 45000
+      LowerIncome_Hh <- Household$Income < 45000
       Weight_Hh + LowerIncome_Hh * PaydWts_["LowerIncome"]
     })
     #Add weight for the proportion of vehicles that are autos
     Weight_Hh <- local({
-      AutoProp_Hh <- with(L$Year$Household, NumAuto / Vehicles)
+      AutoProp_Hh <- with(Household, NumAuto / Vehicles)
       AutoProp_Hh[is.na(AutoProp_Hh)] <- 0
       Weight_Hh + AutoProp_Hh * PaydWts_["AutoProp"]
     })
     #Add weight for households that are located within a metropolitan area
     Weight_Hh <- local({
-      InMetroArea <- L$Y$Household$LocType == "Urban"
+      InMetroArea <- Household$LocType == "Urban"
       Weight_Hh + PaydWts_["InMetroArea"]
     })
     #Use weights to identify PAYD households
-    HasPaydIns_Hh <- integer(NumHh)
+    HasPaydIns_Hh <- setNames(integer(NumHh), Household$HhId)
     HhIdx_ <- (1:NumHh)[Qualifies_Hh]
     Wts_ <- Weight_Hh[Qualifies_Hh]
     PaydIdx_ <- sample(HhIdx_, NumPayd, prob = Wts_ / max(Wts_))
     HasPaydIns_Hh[PaydIdx_] <- 1L
   }
   #Return the result where only qualifying households have weights
-  unname(HasPaydIns_Hh)
+  HasPaydIns_Hh
 }
 
 #Main module function to calculate household vehicle ownership cost
@@ -882,31 +896,35 @@ idPaydHh <- function(L) {
 #' @import visioneval
 #' @export
 CalculateVehicleOwnCost <- function(L,M) {
-  #Estimate the household DVMT
-  Dvmt_ls <- M$CalcDvmt(L$CalcDvmt)
-  Dvmt_Hh <- Dvmt_ls$Year$Household$Dvmt
-  L$Year$Household$Dvmt <- Dvmt_Hh
-
-  #Create an index between the household data and vehicle table
+  #Set Up
+  #------
+  #Set seed
+  set.seed(L$G$Seed)
+  #Create crosswalk from households to vehicles
+  HhToVehIdx_Ve <- match(L$Year$Vehicle$HhId, L$Year$Household$HhId)
+  #Crosswalk from Azones to vehicles
+  AzToVehIdx_Ve <- match(L$Year$Vehicle$Azone, L$Year$Azone$Azone)
+  #Identify vehicle-owning households
   HasVeh <- L$Year$Household$Vehicles > 0
-  DataID_ <-
-    with(L$Year$Household,
-         paste(
-           rep(HhId[HasVeh], Vehicles[HasVeh]),
-           unlist(sapply(Vehicles[HasVeh], function(x) 1:x)),
-           sep = "-"
-         ))
-  DatOrd <- match(DataID_, L$Year$Vehicle$VehId)
-
-  #Calculate annual household VMT per vehicle
-  NumVeh_Hh <- L$Year$Household$Vehicles
-  AnnVmtPerVeh_ <-
-    rep(365 * Dvmt_Hh[HasVeh] / NumVeh_Hh[HasVeh], NumVeh_Hh[HasVeh])
-  AnnVmt_Ve <- rep(NA, length(L$Year$Vehicle$VehId))
-  AnnVmt_Ve[DatOrd] <- AnnVmtPerVeh_
-
-  #Identify vehicles that are car service vehicles
+  #Identify owned and car sevice vehicles
+  IsOwn <- L$Year$Vehicle$VehicleAccess == "Own"
   IsCarSvc <- L$Year$Vehicle$VehicleAccess != "Own"
+  #Number of households
+  NumHh <- length(L$Year$Household$HhId)
+  #Azones
+  Az <- L$Year$Azone$Azone
+
+  #Calculate annual VMT by vehicle
+  #-------------------------------
+  #Estimate the household DVMT
+  L$Year$Household$Dvmt <- M$CalcDvmt(L$CalcDvmt)$Year$Household$Dvmt
+  AnnualVmt_Hh <- 365 * L$Year$Household$Dvmt
+  L$CalcDvmt <- NULL
+  #Calculate annual household VMT per vehicle
+  AveAnnVmtPV_Hh <- AnnualVmt_Hh / L$Year$Household$Vehicles
+  AveAnnVmtPV_Hh[L$Year$Household$Vehicles == 0] <- 0
+  AnnVmt_Ve <- AveAnnVmtPV_Hh[HhToVehIdx_Ve]
+  AnnVmt_Ve[IsCarSvc] <- 0
 
   #Calculate annual depreciation cost
   DeprCost_Ve <-
@@ -923,30 +941,54 @@ CalculateVehicleOwnCost <- function(L,M) {
   InsCost_Ve[IsCarSvc] <- 0
 
   #Calculate annual taxes
-  TaxCost_Ve <- L$Year$Azone$VehOwnFlatRateFee +
+  TaxCost_Ve <- L$Year$Azone$VehOwnFlatRateFee[AzToVehIdx_Ve] +
     calcAdValoremTax(
       L$Year$Vehicle$Type,
       L$Year$Vehicle$Age,
-      L$Year$Azone$VehOwnAdValoremTax)
+      L$Year$Azone$VehOwnAdValoremTax[AzToVehIdx_Ve])
   TaxCost_Ve[IsCarSvc] <- 0
 
   #Calculate residential parking cost
-  NumPaidPkgSp_ <-
-    pmax(0, with(L$Year$Household, Vehicles[HasVeh] - FreeParkingSpaces[HasVeh]))
-  AnnUnitPkgCost_ <- L$Year$Household$ParkingUnitCost[HasVeh] * 365
-  AveAnnVehPkgCost_ <-
-    rep(NumPaidPkgSp_ * AnnUnitPkgCost_ / NumVeh_Hh[HasVeh], NumVeh_Hh[HasVeh])
-  PkgCost_Ve <- numeric(length(TaxCost_Ve))
-  PkgCost_Ve[DatOrd] <- AveAnnVehPkgCost_
-  PkgCost_Ve[IsCarSvc] <- 0
+  PkgCost_Ve <- local({
+    NumPaidPkgSp_Hh <-
+      pmax(0, with(L$Year$Household, Vehicles - FreeParkingSpaces))
+    AnnPkgCost_Hh <- 365 * L$Year$Household$ParkingUnitCost * NumPaidPkgSp_Hh
+    AnnPkgCostPV_Hh <- AnnPkgCost_Hh / L$Year$Household$Vehicles
+    PkgCost_Ve <- AnnPkgCostPV_Hh[HhToVehIdx_Ve]
+    PkgCost_Ve[IsCarSvc] <- 0
+    PkgCost_Ve
+  })
 
   #Calculate total ownership cost
   TotCost_Ve <- DeprCost_Ve + FinCost_Ve + InsCost_Ve + TaxCost_Ve + PkgCost_Ve
-  TotCostPerMi_Ve <- TotCost_Ve / AnnVmt_Ve
-  TotCostPerMi_Ve[is.na(TotCostPerMi_Ve)] <- 0
+  TotCostPerMi_Ve <- local({
+    TotCostPerMi_Ve <- TotCost_Ve / AnnVmt_Ve
+    TotCostPerMi_Ve[is.na(TotCostPerMi_Ve)] <- 0
+    TotCostPerMi_Ve[IsCarSvc] <- 0
+    MaxCostPerMi <- quantile(TotCostPerMi_Ve[IsOwn], 0.9999)
+    TotCostPerMi_Ve[TotCostPerMi_Ve > MaxCostPerMi] <- MaxCostPerMi
+    TotCostPerMi_Ve
+  })
 
   #Assign PAYD insurance
-  HasPaydIns_Hh <- idPaydHh(L)
+  L$Year$Household$PaydQualifies <- local({
+    AgeThreshold <- as.numeric(L$G$Year) - 1996
+    CanBePayd_Ve <- L$Year$Vehicle$Age <= AgeThreshold
+    CanBePayd_Ve[IsCarSvc] <- TRUE
+    Qualifies_Hh <-
+      tapply(CanBePayd_Ve, L$Year$Vehicle$HhId, function(x) all(x))[L$Year$Household$HhId]
+    Qualifies_Hh[L$Year$Household$Vehicles == 0] <- FALSE
+    Qualifies_Hh
+  })
+  HasPaydIns_Hh <- setNames(integer(NumHh), L$Year$Household$HhId)
+  for (az in Az) {
+    HhIsAz <- L$Year$Household$Azone == az
+    HasPaydIns_Hx <- idPaydHh(
+      Household = lapply(L$Year$Household, function(x) x[HhIsAz]),
+      PaydHhProp = L$Year$Azone$PaydHhProp[L$Year$Azone$Azone == az]
+    )
+    HasPaydIns_Hh[names(HasPaydIns_Hx)] <- HasPaydIns_Hx
+  }
 
   #Return the results
   Out_ls <- initDataList()
@@ -956,7 +998,7 @@ CalculateVehicleOwnCost <- function(L,M) {
     InsCost = InsCost_Ve
   )
   Out_ls$Year$Household <- list(
-    HasPaydIns = HasPaydIns_Hh
+    HasPaydIns = unname(HasPaydIns_Hh)
   )
   Out_ls
 }
@@ -973,22 +1015,38 @@ documentModule("CalculateVehicleOwnCost")
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions
 #-------------------------------------------------------------------------------
+# #Load packages and test functions
+# library(filesstrings)
+# library(visioneval)
+# library(ordinal)
+# source("tests/scripts/test_functions.R")
+# #Set up test environment
+# TestSetup_ls <- list(
+#   TestDataRepo = "../Test_Data/VE-RSPM",
+#   DatastoreName = "Datastore.tar",
+#   LoadDatastore = TRUE,
+#   TestDocsDir = "verspm",
+#   ClearLogs = TRUE,
+#   # SaveDatastore = TRUE
+#   SaveDatastore = FALSE
+# )
+# setUpTests(TestSetup_ls)
+# #Run test module
 # TestDat_ <- testModule(
 #   ModuleName = "CalculateVehicleOwnCost",
 #   LoadDatastore = TRUE,
-#   SaveDatastore = TRUE,
-#   DoRun = FALSE
+#   SaveDatastore = FALSE,
+#   DoRun = FALSE,
+#   RequiredPackages = "VEHouseholdTravel"
 # )
 # L <- TestDat_$L
 # M <- TestDat_$M
-# TestOut_ls <- CalculateVehicleOwnCost(L, M)
-
-#Test code to check everything including running the module and checking whether
-#the outputs are consistent with the 'Set' specifications
-#-------------------------------------------------------------------------------
+# R <- CalculateVehicleOwnCost(TestDat_$L, TestDat_$M)
+#
 # TestDat_ <- testModule(
 #   ModuleName = "CalculateVehicleOwnCost",
 #   LoadDatastore = TRUE,
 #   SaveDatastore = TRUE,
-#   DoRun = TRUE
+#   DoRun = TRUE,
+#   RequiredPackages = "VEHouseholdTravel"
 # )

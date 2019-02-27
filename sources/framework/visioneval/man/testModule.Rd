@@ -8,7 +8,7 @@ testModule(ModuleName, ParamDir = "defs",
   RunParamFile = "run_parameters.json", GeoFile = "geo.csv",
   ModelParamFile = "model_parameters.json", LoadDatastore = FALSE,
   SaveDatastore = TRUE, DoRun = TRUE, RunFor = "AllYears",
-  StopOnErr = TRUE)
+  StopOnErr = TRUE, RequiredPackages = NULL, TestGeoName = NULL)
 }
 \arguments{
 \item{ModuleName}{A string identifying the module name.}
@@ -58,6 +58,22 @@ model initialization. These 'Initialize' modules are used to check and
 preprocess inputs. For this purpose, the module will identify any errors in
 the input data, the 'initializeModel' function will collate all the data
 errors and print them to the log.}
+
+\item{RequiredPackages}{A character vector identifying any packages that
+must be installed in order to test the module because the module either
+has a soft reference to a module in the package (i.e. the Call spec only
+identifies the name of the module being called) or a soft reference to a
+dataset in the module (i.e. only identifies the name of the dataset). The
+default value is NULL.}
+
+\item{TestGeoName}{A character vector identifying the name of the geographic
+area for which data is to be loaded. This argument has effect only if the
+DoRun argument is FALSE. It enables the module developer to choose the
+geographic area data is to be loaded for when developing a module that
+is run for geography other than the region. For example if a module is
+run at the Azone level, the user can specify the name of the Azone that
+data is to be loaded for. If the name is misspecified an error will be
+flagged.}
 }
 \value{
 If DoRun is FALSE, the return value is a list containing the module
