@@ -269,6 +269,8 @@ VERPATResults <- function(L){
     NWorkers <- L$Global$Model$NWorkers
     NWorkers <- min(max(availableCores()-1, 1), NWorkers)
     plan(multiprocess, workers = NWorkers, gc=TRUE)
+    # Make sure that child processes inherit the libraries from master
+    libs <- .libPaths() # Set .libPaths(libs) in call to child process
   } else {
     plan(sequential)
   }
@@ -279,14 +281,19 @@ VERPATResults <- function(L){
                                                    Table=NA,
                                                    Data=NA,
                                                    Units=NA)
-    Results_env[[basename(sc_path)]] %<-% tryCatch({ScResults <- getScenarioResults(
-      ScenarioPath = sc_path,
-      Output = L$Global$Tables$Name,
-      Year = L$G$Year,
-      Table = TRUE
-    )
-    Scenarios_df$Results[which(Scenarios_df$Name==basename(sc_path))] <<- "Completed"
-    ScResults},
+    Results_env[[basename(sc_path)]] %<-% tryCatch({
+      
+      # Ensure libraries from master process are inherited
+      .libPaths(libs)
+      ScResults <- getScenarioResults(
+        ScenarioPath = sc_path,
+        Output = L$Global$Tables$Name,
+        Year = L$G$Year,
+        Table = TRUE
+      )
+      Scenarios_df$Results[which(Scenarios_df$Name==basename(sc_path))] <<- "Completed"
+      ScResults
+    },
     warning = function(w) print(w),
     error = function(e) {print(e)
       Scenarios_df$Results[which(Scenarios_df$Name==basename(sc_path))] <<- "Result Error"}

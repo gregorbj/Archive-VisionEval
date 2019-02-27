@@ -425,6 +425,9 @@ RunScenarios <- function(L){
     NWorkers <- L$Global$Model$NWorkers
     NWorkers <- min(max(availableCores()-1, 1), NWorkers)
     plan(multiprocess, workers = NWorkers, gc=TRUE)
+    
+    # Make sure that child processes inherit the libraries from master
+    libs <- .libPaths() # Set .libPaths(libs) in call to child process
   } else {
     plan(sequential)
   }
@@ -478,6 +481,9 @@ RunScenarios <- function(L){
       startAsyncTask(asyncTasksRunning = ScenarioInProcess_ls,
                      asyncTaskName = taskName,
                      futureObj = future({
+                       # Ensure child processes inherit libraries
+                       .libPaths(libs)
+                       
                        currWd <- getwd()
                        on.exit(setwd(currWd))
                        write(print(paste0(Sys.time(),

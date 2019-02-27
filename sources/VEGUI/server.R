@@ -842,6 +842,11 @@ server <- function(input, output, session) {
       #   remove(reactiveFilePaths_rv[[MODEL_STATE_FILE]])
       # }
       #reference ModelState_ls so future will recognize it as a global
+      
+      # set lib paths to global variable so child process inherits
+      # all the library paths as the master session
+      .libPaths(libs)
+      
       getScriptOutput(datapath, isolate(reactiveFilePaths_rv[[CAPTURED_SOURCE]]))
     }),
     callback = function(asyncResult) {

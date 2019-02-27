@@ -45,6 +45,10 @@ if ( exists('planType') && planType == 'multiprocess'){
   plan(sequential)
 }
 
+# Set a global variable of the library paths so it can be passed to any 
+# child processes called with future
+libs <- .libPaths()
+
 if (interactive()) {
   options(shiny.reactlog = TRUE)
 }

@@ -10,16 +10,6 @@
 if (!require(future)) install.packages("future")
 library(future)
 
-# Set an environment variable so any additional library paths will be passed
-# to child processes. See https://github.com/HenrikBengtsson/future/issues/219
-R_LIBS <- Sys.getenv("R_LIBS") 
-R_LIBS <- ifelse(
-  R_LIBS == "",
-  paste(.libPaths(), collapse=";"),
-  paste(R_LIBS, paste(.libPaths(), collapse=";"), sep=";")
-)
-Sys.setenv(R_LIBS=R_LIBS)
-
 
 asyncTasksRunning <- list()
 
