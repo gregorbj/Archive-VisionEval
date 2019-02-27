@@ -531,6 +531,7 @@ server <- function(input, output, session) {
         reactiveFilePaths_rv[[VE_LOG]] <- file.path(scriptInfo_ls$fileDirectory, readModelState()$LogFile)
         reactiveFilePaths_rv[[DATASTORE]] <- file.path(scriptInfo_ls$fileDirectory, readModelState()$DatastoreName)
 
+        # FIXME: These should not be hard-coded.  But should be read from run_model.R
         defsDirectory <- file.path(scriptInfo_ls$fileDirectory, "defs")
 
         reactiveFilePaths_rv[[MODEL_PARAMETERS_FILE]] <- file.path(defsDirectory, "model_parameters.json")
