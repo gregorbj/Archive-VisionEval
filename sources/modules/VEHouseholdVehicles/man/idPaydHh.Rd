@@ -4,10 +4,15 @@
 \alias{idPaydHh}
 \title{Assign pay-as-you-drive insurance propensity weights to households}
 \usage{
-idPaydHh(L)
+idPaydHh(Household, PaydHhProp)
 }
 \arguments{
-\item{L}{A list containing the components listed in the Get specifications
+\item{Household}{A list containing the Household component of the list (L)
+including Household table data listed in the Get specifications limited to
+data for households in a specified Azone}
+
+\item{PaydHhProp}{A number identifying the proportion of households having
+pay-as-you-drive insurance
 for the module.}
 }
 \value{

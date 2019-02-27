@@ -5,9 +5,9 @@
 #<doc>
 #
 ## DivertSovTravel Module
-#### November 21, 2018
+#### December 20, 2018
 #
-#This module reduces household single-occupant vehicle (SOV) travel to achieve goals that are inputs to the model. The purpose of this module is to enable users to do 'what if' analysis of the potential of light-weight vehicles (e.g. bicycles, electric bikes, electric scooters) and infrastructure to support their use to reduce SOV travel. The user inputs a goal for diverting a portion of SOV travel within a 20-mile tour distance (round trip distance). The module predicts the amount of each household's DVMT that occurs in SOV tours having round trip distances of 20 miles or less. It also predicts for each household the average length of trips that are in those SOV tours. It then reduces the SOV travel of each household to achieve the overall goal. The reductions are allocated to households as a function of the household's SOV DVMT and the inverse of SOV trip length (described in more detail below). The proportions of diverted DVMT are saved as are the average SOV trip length of diverted DVMT. These datasets are used in the ApplyDvmtReductions module to calculate reductions in household DVMT and to calculate trips to be added to the bike mode category trips.
+#This module reduces household single-occupant vehicle (SOV) travel to achieve goals that are inputs to the model. The purpose of this module is to enable users to do 'what if' analysis of the potential of light-weight vehicles (e.g. bicycles, electric bikes, electric scooters) and infrastructure to support their use to reduce SOV travel. The user inputs a goal for diverting a portion of SOV travel within a 20-mile tour distance (round trip distance). The module predicts the amount of each household's DVMT that occurs in SOV tours having round trip distances of 20 miles or less. It also predicts for each household the average length of trips that are in those SOV tours. It then reduces the SOV travel of each household to achieve the overall goal. The reductions are allocated to households as a function of the household's SOV DVMT and the inverse of SOV trip length (described in more detail below). The proportions of diverted DVMT are saved as are the average SOV trip length of diverted DVMT. These datasets are used in the ApplyDvmtReductions module to calculate reductions in household DVMT and to calculate trips to be added to the bike mode category trips. SOV DVMT reduction is only applied to households in urban and town location types (LocTypes) because it is unlikely that actions/services could be provided in rural areas that could significantly divert SOV DVMT to bicyles, electric bicycles, scooters or other similar modes.
 #
 ### Model Parameter Estimation
 #
@@ -73,17 +73,17 @@
 #
 ### How the Module Works
 #
-#This function calculates the proportional reduction in the DVMT of individual households to meet the user-supplied goal for diverting a proportion of travel in SOV tours 20 miles or less in length to bikes, electric bikes, scooters or other similar modes. The user supplies the diversion goal for each Azone and model year. The following procedural steps are followed to complete the calculation:
+#This function calculates the proportional reduction in the DVMT of individual households to meet the user-supplied goal for diverting a proportion of travel in SOV tours 20 miles or less in length to bikes, electric bikes, scooters or other similar modes. The user supplies the diversion goal for each Azone and model year. SOV DVMT reduction is only applied to households in urban and town location types (LocTypes) because it is unlikely that actions/services could be provided in rural areas that could significantly divert SOV DVMT to bicyles, electric bicycles, scooters or other similar modes. The following procedural steps are followed to complete the calculation:
 #
 #* The SOV proportions model described is applied to calculate the proportion of the DVMT of each household that is in qualifying SOV tours (i.e. having lengths of 20 miles or less);
 #
-#* The total diversion of DVMT in qualifying SOV tours for the Azone is calculated by:
+#* The total diversion of DVMT in qualifying SOV tours (of urban and town households) for the Azone is calculated by:
 #
 #  * Calculating the qualifying SOV tour DVMT of each household by multiplying the modeled proportion of DVMT in qualifying tours by the household DVMT;
 #
-#  * Summing the qualifying SOV tour DVMT of households in the Azone and multiplying by the diversion goal for the Azone;
+#  * Summing the qualifying SOV tour DVMT of urban and town households in the Azone and multiplying by the diversion goal for the Azone;
 #
-#* The total DVMT diverted is allocated to households in the Azone as a function of their relative amounts of qualifying SOV travel and the inverse of the average length of trips in qualifying tours. In other words, it is assumed that households having more qualifying SOV travel and households having shorter SOV trips will be more likely to divert SOV travel. This is implemented in the following steps:
+#* The total DVMT diverted is allocated to urban and town households in the Azone as a function of their relative amounts of qualifying SOV travel and the inverse of the average length of trips in qualifying tours. In other words, it is assumed that households having more qualifying SOV travel and households having shorter SOV trips will be more likely to divert SOV travel. This is implemented in the following steps:
 #
 #  * A utility function is defined as follows:
 #
@@ -101,17 +101,9 @@
 #
 #  * The value of `B` is solved such that the maximum proportional diversion for any household is midway between the objective of the Azone and 1. For example, if the Azone objective is 0.2, the maximum diversion would be 0.6. The value is solved iteratively using a binary search algorithm.
 #
-#* The DVMT diversion allocated to each household is divided by the average DVMT of each household to calculate the proportion of household DVMT that is diverted. This and the average trip length by household are outputs to be saved in the datastore.
+#* The DVMT diversion allocated to each household is divided by the average DVMT of each household to calculate the proportion of household DVMT that is diverted. The DVMT diversion of rural households is set at 0. This and the average trip length by household are outputs to be saved in the datastore.
 #
 #</doc>
-
-
-#=================================
-#Packages used in code development
-#=================================
-#Uncomment following lines during code development. Recomment when done.
-# library(visioneval)
-# library(data.table)
 
 
 #=============================================
@@ -636,7 +628,7 @@ usethis::use_data(SovModel_ls, overwrite = TRUE)
 #------------------------------
 DivertSovTravelSpecifications <- list(
   #Level of geography module is applied at
-  RunBy = "Azone",
+  RunBy = "Region",
   #Specify new tables to be created by Inp if any
   #Specify new tables to be created by Set if any
   #Specify input data
@@ -714,25 +706,11 @@ DivertSovTravelSpecifications <- list(
       ISELEMENTOF = ""
     ),
     item(
-      NAME = "Marea",
-      TABLE = "Household",
-      GROUP = "Year",
-      TYPE = "character",
-      UNITS = "ID",
-      PROHIBIT = "",
-      ISELEMENTOF = ""
-    ),
-    item(
-      NAME = "Azone",
-      TABLE = "Household",
-      GROUP = "Year",
-      TYPE = "character",
-      UNITS = "ID",
-      PROHIBIT = "",
-      ISELEMENTOF = ""
-    ),
-    item(
-      NAME = "Bzone",
+      NAME = items(
+        "Marea",
+        "Azone",
+        "Bzone",
+        "HhId"),
       TABLE = "Household",
       GROUP = "Year",
       TYPE = "character",
@@ -899,62 +877,94 @@ usethis::use_data(DivertSovTravelSpecifications, overwrite = TRUE)
 #' @import visioneval
 #' @export
 DivertSovTravel <- function(L) {
-  #Set up household variables to apply SOV model
-  #---------------------------------------------
-  Hh_df <- data.frame(L$Year$Household, stringsAsFactors = FALSE)
-  Hh_df$Density <-
-    L$Year$Bzone$D1B[match(Hh_df$Bzone, L$Year$Bzone$Bzone)]
-  Hh_df$FwyLaneMiPC <-
-    L$Year$Marea$FwyLaneMiPC[match(Hh_df$Marea, L$Year$Marea$Marea)]
-  IsMetro <- Hh_df$LocType == "Urban"
+  #Set up
+  #------
+  #Random seed
+  set.seed(L$G$Seed)
+  #Bzone to household index
+  BzToHhIdx_Hh <- match(L$Year$Household$Bzone, L$Year$Bzone$Bzone)
+  #Marea to household index
+  MaToHhIdx_Hh <- match(L$Year$Household$Marea, L$Year$Marea$Marea)
+  #Add density and freeway lane miles to household data
+  L$Year$Household$Density <- L$Year$Bzone$D1B[BzToHhIdx_Hh]
+  L$Year$Household$FwyLaneMiPC <- L$Year$Marea$FwyLaneMiPC[MaToHhIdx_Hh]
 
-  #Calculate proportions of household DVMT in SOV tours
-  #------------------------------------------
-  SovProp_ <- applyLinearModel(SovModel_ls$SovPropModel, Hh_df)
+  #Iterate through Azones and calculate
+  #------------------------------------
+  Az <- L$Year$Azone$Azone
+  AllPropDvmtDiverted_Hh <-
+    setNames(numeric(length(L$Year$Household$HhId)), L$Year$Household$HhId)
+  AllSovTrpLen_Hh <-
+    setNames(numeric(length(L$Year$Household$HhId)), L$Year$Household$HhId)
+  for (az in Az) {
+    IsAzHh <- L$Year$Household$Azone == az
+    Hh_df <- data.frame(lapply(L$Year$Household, function(x) x[IsAzHh]), stringsAsFactors = FALSE)
+    IsMetro <- Hh_df$LocType == "Urban"
+    IsRural <- Hh_df$LocType == "Rural"
 
-  #Calculate total DVMT to be diverted
-  #-----------------------------------
-  TotSovDvmt <- sum(L$Year$Household$Dvmt * SovProp_)
-  SovDiversionProp <- L$Year$Azone$PropSovDvmtDiverted
-  TotSovDvmtDiverted <- TotSovDvmt * SovDiversionProp
+    #Calculate proportions of household DVMT in SOV tours of non-rural households
+    #----------------------------------------------------------------------------
+    SovProp_ <- applyLinearModel(SovModel_ls$SovPropModel, Hh_df)[!IsRural]
 
-  #Calculate household DVMT in tours of 20 miles or less in length
-  #---------------------------------------------------------------
-  SovDvmt_ <- L$Year$Household$Dvmt * SovProp_
+    #Calculate total DVMT to be diverted from households that are not rural
+    #----------------------------------------------------------------------
+    TotSovDvmt <- sum(Hh_df$Dvmt[!IsRural] * SovProp_)
+    SovDiversionProp <- L$Year$Azone$PropSovDvmtDiverted[L$Year$Azone$Azone == az]
+    TotSovDvmtDiverted <- TotSovDvmt * SovDiversionProp
 
-  #Calculate average length of diverted trips
-  #------------------------------------------
-  SovTrpLen_ <- rep(NA, nrow(Hh_df))
-  SovTrpLen_[IsMetro] <-
-    applyLinearModel(SovModel_ls$SovTrpLenModel$Metro, Hh_df[IsMetro,])
-  SovTrpLen_[!IsMetro] <-
-    applyLinearModel(SovModel_ls$SovTrpLenModel$NonMetro, Hh_df[!IsMetro,])
-
-  #Allocate the DVMT diversion to households
-  #-----------------------------------------
-  #Define function to check if AltTrip scaling keeps max diversion in bounds
-  checkMaxDiversion <- function(B) {
-    U_ <-
-      log(SovDvmt_ / mean(SovDvmt_)) + B * log(mean(SovTrpLen_) / SovTrpLen_)
-    SovDvmtDiverted_ <- TotSovDvmtDiverted * exp(U_) / sum(exp(U_))
-    SovDiversionProp_ <- SovDvmtDiverted_ / SovDvmt_
-    MaxDiversionProp - max(SovDiversionProp_)
+    #Calculate diversion by household if there is total diversion is not 0
+    #---------------------------------------------------------------------
+    if (TotSovDvmtDiverted > 0) {
+      #Calculate household DVMT in SOV tours of non-rural households
+      SovDvmt_ <- Hh_df$Dvmt[!IsRural] * SovProp_
+      #Calculate average length of diverted trips
+      SovTrpLen_ <- setNames(rep(NA, nrow(Hh_df)), Hh_df$HhId)
+      if (any(IsMetro)) {
+        SovTrpLen_[IsMetro] <-
+          applyLinearModel(SovModel_ls$SovTrpLenModel$Metro, Hh_df[IsMetro,])
+      }
+      if (any(!IsMetro)) {
+        SovTrpLen_[!IsMetro] <-
+          applyLinearModel(SovModel_ls$SovTrpLenModel$NonMetro, Hh_df[!IsMetro,])
+      }
+      #Limit to non-rural households
+      AllSovTrpLen_ <- SovTrpLen_
+      SovTrpLen_ <- SovTrpLen_[!IsRural]
+      #Allocate the DVMT diversion to households
+      #Define function to check if AltTrip scaling keeps max diversion in bounds
+      checkMaxDiversion <- function(B) {
+        U_ <-
+          log(SovDvmt_ / mean(SovDvmt_)) + B * log(mean(SovTrpLen_) / SovTrpLen_)
+        SovDvmtDiverted_ <- TotSovDvmtDiverted * exp(U_) / sum(exp(U_))
+        SovDiversionProp_ <- SovDvmtDiverted_ / SovDvmt_
+        MaxDiversionProp - max(SovDiversionProp_)
+      }
+      #Set maximum bounds halfway between average and 1 and calculate AltTrip scaling
+      MaxDiversionProp <- (SovDiversionProp + 1) / 2
+      B <- binarySearch(checkMaxDiversion, c(0, 1), DoWtAve = TRUE, Tolerance = 0.01)
+      #Allocate SOV DVMT diversion to households
+      U_ <-  log(SovDvmt_ / mean(SovDvmt_)) + B * log(mean(SovTrpLen_) / SovTrpLen_)
+      SovDvmtDiverted_ <- TotSovDvmtDiverted * exp(U_) / sum(exp(U_))
+      #Calculate the proportion of household DVMT that is diverted
+      PropDvmtDiverted_ <- SovDvmtDiverted_ / Hh_df$Dvmt[!IsRural]
+      #Assign to output vector
+      AllPropDvmtDiverted_ <- setNames(numeric(nrow(Hh_df)), Hh_df$HhId)
+      AllPropDvmtDiverted_[!IsRural] <- PropDvmtDiverted_
+    } else {
+      #Otherwise set diversion to 0
+      AllPropDvmtDiverted_ <- setNames(numeric(nrow(Hh_df)), Hh_df$HhId)
+      AllSovTrpLen_ <- setNames(numeric(nrow(Hh_df)), Hh_df$HhId)
+    }
+    AllPropDvmtDiverted_Hh[names(AllPropDvmtDiverted_)] <- AllPropDvmtDiverted_
+    AllSovTrpLen_Hh[names(AllSovTrpLen_)] <- AllSovTrpLen_
   }
-  #Set maximum bounds halfway between average and 1 and calculate AltTrip scaling
-  MaxDiversionProp <- (SovDiversionProp + 1) / 2
-  B <- binarySearch(checkMaxDiversion, c(0, 1), DoWtAve = TRUE, Tolerance = 0.01)
-  #Allocate SOV DVMT diversion to households
-  U_ <-  log(SovDvmt_ / mean(SovDvmt_)) + B * log(mean(SovTrpLen_) / SovTrpLen_)
-  SovDvmtDiverted_ <- TotSovDvmtDiverted * exp(U_) / sum(exp(U_))
-  #Calculate the proportion of household DVMT that is diverted
-  PropDvmtDiverted_ <- SovDvmtDiverted_ / L$Year$Household$Dvmt
 
   #Return the results
   #------------------
   Out_ls <- initDataList()
   Out_ls$Year$Household <-
-    list(PropDvmtDiverted = PropDvmtDiverted_,
-         AveTrpLenDiverted = SovTrpLen_)
+    list(PropDvmtDiverted = AllPropDvmtDiverted_Hh,
+         AveTrpLenDiverted = AllSovTrpLen_Hh)
   #Return the outputs list
   Out_ls
 }
@@ -971,22 +981,38 @@ documentModule("DivertSovTravel")
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions
 #-------------------------------------------------------------------------------
+# #Load libraries and test functions
+# library(filesstrings)
+# library(visioneval)
+# library(data.table)
+# library(pscl)
+# source("tests/scripts/test_functions.R")
+# #Set up test environment
+# TestSetup_ls <- list(
+#   TestDataRepo = "../Test_Data/VE-State",
+#   DatastoreName = "Datastore.tar",
+#   LoadDatastore = TRUE,
+#   TestDocsDir = "vestate",
+#   ClearLogs = TRUE,
+#   # SaveDatastore = TRUE
+#   SaveDatastore = FALSE
+# )
+# setUpTests(TestSetup_ls)
+# #Run test module
 # TestDat_ <- testModule(
 #   ModuleName = "DivertSovTravel",
 #   LoadDatastore = TRUE,
-#   SaveDatastore = TRUE,
-#   DoRun = FALSE
+#   SaveDatastore = FALSE,
+#   DoRun = FALSE,
+#   TestGeoName = az
 # )
 # L <- TestDat_$L
-# R <- DivertSovTravel(L)
-
-
-#Test code to check everything including running the module and checking whether
-#the outputs are consistent with the 'Set' specifications
-#-------------------------------------------------------------------------------
+# R <- DivertSovTravel(TestDat_$L)
+#
 # TestDat_ <- testModule(
 #   ModuleName = "DivertSovTravel",
 #   LoadDatastore = TRUE,
 #   SaveDatastore = TRUE,
-#   DoRun = TRUE
+#   DoRun = TRUE,
+#   TestGeoName = az
 # )

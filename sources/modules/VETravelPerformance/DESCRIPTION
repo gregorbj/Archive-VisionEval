@@ -1,15 +1,15 @@
 Package: VETravelPerformance
 Type: Package
 Title: Balances cost and travel and calculates travel performance measures
-Version: 0.8.0
-Date: 4/23/18
+Version: 0.9.0
+Date: 1/23/19
 Author: Brian Gregor [aut, cre],
 Maintainer: Brian Gregor <gregorb@or-analytics.com>
 Copyright: AASHTO
 Description: Contains modules for calculating fuel consumption, emissions, 
     roadway speeds and delay, and vehicle use costs. Working together, these
     modules also balance household travel costs and the amount of household
-    DVMT. Household DVMT is split among household vehilcles and between
+    DVMT. Household DVMT is split among household vehicles and between
     household vehicles and car services based on composite costs (out-of-pocket
     and travel time). Calculates fuel consumption (including electricity) and
     greenhouse gas emissions for households, light-duty commercial service
@@ -19,9 +19,6 @@ LazyData: TRUE
 Depends: R (>= 3.1.0)
 Imports:
     visioneval,
-    devtools,
-	usethis,
-    VEHouseholdTravel,
-    VEPowertrainsAndFuels
+    usethis
 Encoding: UTF-8
-RoxygenNote: 6.1.0.9000
+RoxygenNote: 6.1.1

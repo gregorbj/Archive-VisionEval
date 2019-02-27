@@ -44,13 +44,6 @@
 #</doc>
 
 
-#=================================
-#Packages used in code development
-#=================================
-#Uncomment following lines during code development. Recomment when done.
-# library(visioneval)
-
-
 #=============================================
 #SECTION 1: ESTIMATE AND SAVE MODEL PARAMETERS
 #=============================================
@@ -260,14 +253,14 @@ usethis::use_data(VehicleTypeModel_ls, overwrite = TRUE)
 #------------------------------
 AssignVehicleTypeSpecifications <- list(
   #Level of geography module is applied at
-  RunBy = "Azone",
+  RunBy = "Region",
   #Specify new tables to be created by Inp if any
   #Specify new tables to be created by Set if any
   #Specify input data
   Inp = items(
     item(
       NAME = "LtTrkProp",
-      FILE = "azone_lttrk_prop.csv",
+      FILE = "azone_hh_lttrk_prop.csv",
       TABLE = "Azone",
       GROUP = "Year",
       TYPE = "double",
@@ -284,6 +277,15 @@ AssignVehicleTypeSpecifications <- list(
   ),
   #Specify data to be loaded from data store
   Get = items(
+    item(
+      NAME = "Azone",
+      TABLE = "Azone",
+      GROUP = "Year",
+      TYPE = "character",
+      UNITS = "ID",
+      PROHIBIT = "",
+      ISELEMENTOF = ""
+    ),
     item(
       NAME = "LtTrkProp",
       TABLE = "Azone",
@@ -303,7 +305,9 @@ AssignVehicleTypeSpecifications <- list(
       ISELEMENTOF = ""
     ),
     item(
-      NAME = "Bzone",
+      NAME = items(
+        "Bzone",
+        "Azone"),
       TABLE = "Bzone",
       GROUP = "Year",
       TYPE = "character",
@@ -321,7 +325,9 @@ AssignVehicleTypeSpecifications <- list(
       ISELEMENTOF = ""
     ),
     item(
-      NAME = "Bzone",
+      NAME = items(
+        "Bzone",
+        "Azone"),
       TABLE = "Household",
       GROUP = "Year",
       TYPE = "character",
@@ -463,52 +469,49 @@ AssignVehicleType <- function(L) {
   #------
   #Fix seed as synthesis involves sampling
   set.seed(L$G$Seed)
-  #Define vector of Bzones
-  Bz <- L$Year$Bzone$Bzone
 
-  #Set up data frame of household data needed for model
-  #----------------------------------------------------
-  Data_df <- data.frame(L$Year$Household)
-  Data_df$PrsnPerVeh <- Data_df$HhSize / Data_df$Vehicles
-  Data_df$NumChild <- Data_df$Age0to14 + Data_df$Age15to19
-  Data_df$NumVehGtNumDvr <- as.numeric(Data_df$Vehicles > Data_df$Drivers)
-  Data_df$NumVehEqNumDvr <- as.numeric(Data_df$Vehicles == Data_df$Drivers)
-  Data_df$IsSF <- as.numeric(Data_df$HouseType == "SF")
-  Data_df$OnlyOneVeh <- as.numeric(Data_df$Vehicles == 1)
-  Data_df$IsLowIncome <- as.numeric(Data_df$Income <= 20000)
-  Data_df$Density <-
-    L$Year$Bzone$D1B[match(L$Year$Household$Bzone, L$Year$Bzone$Bzone)]
-  Data_df$LogDensity <- log(Data_df$Density)
-  #Identify households that have vehicles
-  HasVeh_Hh <- Data_df$Vehicles != 0
-
-  #Run the model
-  #-------------
-  VehType_Hx <-
-    applyBinomialModel(
-      VehicleTypeModel_ls,
-      Data_df[HasVeh_Hh,],
-      TargetProp = L$Year$Azone$LtTrkProp
-    )
-
-  #Tabulate autos and light trucks by household
-  #--------------------------------------------
-  HhId_Hx <-
-    rep(Data_df$HhId[HasVeh_Hh], Data_df$Vehicles[HasVeh_Hh])
-  NumLtTrk_Hx <- tapply(VehType_Hx == "LtTrk", HhId_Hx, sum)
-  NumAuto_Hx <- tapply(VehType_Hx == "Auto", HhId_Hx, sum)
-  NumLtTrk_Hh <- NumLtTrk_Hx[Data_df$HhId]
-  NumLtTrk_Hh[is.na(NumLtTrk_Hh)] <- 0
-  NumAuto_Hh <- NumAuto_Hx[Data_df$HhId]
-  NumAuto_Hh[is.na(NumAuto_Hh)] <- 0
+  #Iterate through Azones to estimate model matching Azone light-truck average
+  #---------------------------------------------------------------------------
+  NumLtTrk_Hh <- with(L$Year$Household, setNames(numeric(length(HhId)), HhId))
+  NumAuto_Hh <- with(L$Year$Household, setNames(numeric(length(HhId)), HhId))
+  Az <- L$Year$Azone$Az
+  for (az in Az) {
+    #Set up data frame of household data needed for model
+    Use <- L$Year$Household$Azone == az & L$Year$Household$Vehicles > 0
+    Data_df <- data.frame(lapply(L$Year$Household, function(x) x[Use]))
+    #Add variables needed for vehicle type model
+    Data_df$PrsnPerVeh <- Data_df$HhSize / Data_df$Vehicles
+    Data_df$NumChild <- Data_df$Age0to14 + Data_df$Age15to19
+    Data_df$NumVehGtNumDvr <- as.numeric(Data_df$Vehicles > Data_df$Drivers)
+    Data_df$NumVehEqNumDvr <- as.numeric(Data_df$Vehicles == Data_df$Drivers)
+    Data_df$IsSF <- as.numeric(Data_df$HouseType == "SF")
+    Data_df$OnlyOneVeh <- as.numeric(Data_df$Vehicles == 1)
+    Data_df$IsLowIncome <- as.numeric(Data_df$Income <= 20000)
+    Data_df$Density <- L$Year$Bzone$D1B[match(Data_df$Bzone, L$Year$Bzone$Bzone)]
+    Data_df$Density[Data_df$Density == 0] <- 1e-6
+    Data_df$LogDensity <- log(Data_df$Density)
+    #Run the model
+    VehType_Hx <-
+      applyBinomialModel(
+        VehicleTypeModel_ls,
+        Data_df,
+        TargetProp = L$Year$Azone$LtTrkProp[L$Year$Azone$Azone == az]
+      )
+    #Tabulate autos and light trucks by household
+    HhId_Hx <- rep(Data_df$HhId, Data_df$Vehicles)
+    NumLtTrk_Hx <- tapply(VehType_Hx == "LtTrk", HhId_Hx, sum)
+    NumAuto_Hx <- tapply(VehType_Hx == "Auto", HhId_Hx, sum)
+    NumLtTrk_Hh[names(NumLtTrk_Hx)] <- NumLtTrk_Hx
+    NumAuto_Hh[names(NumAuto_Hx)] <- NumAuto_Hx
+  }
 
   #Return the results
   #------------------
   #Initialize output list
   Out_ls <- initDataList()
   Out_ls$Year$Household <-
-    list(NumLtTrk = NumLtTrk_Hh,
-         NumAuto = NumAuto_Hh)
+    list(NumLtTrk = unname(NumLtTrk_Hh),
+         NumAuto = unname(NumAuto_Hh))
   #Return the outputs list
   Out_ls
 }
@@ -523,18 +526,33 @@ documentModule("AssignVehicleType")
 #Test code to check specifications, loading inputs, and whether datastore
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions
-# #-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+# #Load packages and test functions
+# library(filesstrings)
+# library(visioneval)
+# library(ordinal)
+# source("tests/scripts/test_functions.R")
+# #Set up test environment
+# TestSetup_ls <- list(
+#   TestDataRepo = "../Test_Data/VE-State",
+#   DatastoreName = "Datastore.tar",
+#   LoadDatastore = TRUE,
+#   TestDocsDir = "vestate",
+#   ClearLogs = TRUE,
+#   # SaveDatastore = TRUE
+#   SaveDatastore = FALSE
+# )
+# setUpTests(TestSetup_ls)
+# #Run test module
 # TestDat_ <- testModule(
 #   ModuleName = "AssignVehicleType",
 #   LoadDatastore = TRUE,
-#   SaveDatastore = TRUE,
+#   SaveDatastore = FALSE,
 #   DoRun = FALSE
 # )
 # L <- TestDat_$L
-
-#Test code to check everything including running the module and checking whether
-#the outputs are consistent with the 'Set' specifications
-#-------------------------------------------------------------------------------
+# R <- AssignVehicleType(L)
+#
 # TestDat_ <- testModule(
 #   ModuleName = "AssignVehicleType",
 #   LoadDatastore = TRUE,

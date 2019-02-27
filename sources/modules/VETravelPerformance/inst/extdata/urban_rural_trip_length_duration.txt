@@ -1,0 +1,21 @@
+======================================================
+Documentation for urban_rural_trip_length_duration.csv
+======================================================
+Data in this file is used in the CalculateRoadPerformance.R script to calculate average travel speed in rural areas (i.e. not in an urbanized area) from travel speed in urban areas (i.e. in an urbanized area). Data on urban and rural average vehicle trip length and average vehicle trip duration by census region are used to calculate average vehicle trip speed for urban and rural areas by census region. The ratios of the rural to urban speeds calculates a scaling factor that is used to scale average travel speed on urban roads in an marea to get average travel speed on non-urban roads.
+
+File Structure
+--------------
+Rows contain data by census region
+Column names as follows:
+Region: Census Region - Northeast, Midwest, South, West, All 
+UrbanTripLength: Average vehicle trip length (miles) for households in urban areas (i.e. in an urbanized area)
+RuralTripLength: Average vehicle trip length (miles) for households in rural areas (i.e. not in an urbanized area)
+UrbanTripDuration: Average vehicle trip duration (minutes) for households in urban areas (i.e. in an urbanized area)
+RuralTripDuration: Average vehicle trip duration (minutes) for households in rural areas (i.e. not in an urbanized area)
+
+Source:
+-------
+National Household Travel Survey (2017), https://nhts.ornl.gov/, last accessed January 20, 2019. Explore NHTS Data - 2017 Table Designer used to retrieve values for "Average vehicle trip length (Travel Day VT)" and "Average vehicle trip duration (Travel Day VT)" by "CENSUS_R" and "URBRUR" variables.
+
+
+

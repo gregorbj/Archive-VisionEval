@@ -223,7 +223,7 @@ initializeModel <-
     #Get list of installed packages
     InstalledPkgs_ <- rownames(installed.packages())
     #Check that all module packages are in list of installed packages
-    RequiredPkg_ <- unique(ModuleCalls_df$PackageName)
+    RequiredPkg_ <- getModelState()$RequiredVEPackages
     MissingPkg_ <- RequiredPkg_[!(RequiredPkg_ %in% InstalledPkgs_)]
     if (length(MissingPkg_ != 0)) {
       Msg <-
@@ -233,7 +233,8 @@ initializeModel <-
       stop(Msg)
     }
     #Check for 'Initialize' module in each package if so add to ModuleCalls_df
-    for (Pkg in RequiredPkg_) {
+    Add_ls <- list()
+    for (Pkg in unique(ModuleCalls_df$PackageName)) {
       PkgData <- data(package = Pkg)$results[,"Item"]
       if ("InitializeSpecifications" %in% PkgData) {
         Add_df <-
@@ -243,9 +244,43 @@ initializeModel <-
             RunFor = "AllYears",
             Year = "Year"
           )
-        ModuleCalls_df <- rbind(ModuleCalls_df, Add_df)
+        Add_ls[[Pkg]] <- Add_df
       }
     }
+    #Insert Initialize module entries into ModuleCalls_df
+    Pkg_ <- names(Add_ls)
+    for (Pkg in Pkg_) {
+      Idx <- head(grep(Pkg, ModuleCalls_df$PackageName), 1)
+      End <- nrow(ModuleCalls_df)
+      ModuleCalls_df <- rbind(
+        ModuleCalls_df[1:(Idx - 1),],
+        Add_ls[[Pkg]],
+        ModuleCalls_df[Idx:End,]
+      )
+      rm(Idx, End)
+    }
+    rm(Pkg, Pkg_, Add_ls)
+    #Identify all modules and datasets in required packages
+    Datasets_df <-
+      data.frame(
+        do.call(
+          rbind,
+          lapply(RequiredPkg_, function(x) {
+            data(package = x)$results[,c("Package", "Item")]
+            })
+        ), stringsAsFactors = FALSE
+      )
+    WhichAreModules_ <- grep("Specifications", Datasets_df$Item)
+    ModulesByPackage_df <- Datasets_df[WhichAreModules_,]
+    ModulesByPackage_df$Module <-
+      gsub("Specifications", "", ModulesByPackage_df$Item)
+    ModulesByPackage_df$Item <- NULL
+    DatasetsByPackage_df <- Datasets_df[-WhichAreModules_,]
+    names(DatasetsByPackage_df) <- c("Package", "Dataset")
+    #Save the modules and datasets lists in the model state
+    setModelState(list(ModulesByPackage_df = ModulesByPackage_df,
+                       DatasetsByPackage_df = DatasetsByPackage_df))
+    rm(Datasets_df, WhichAreModules_)
     #Iterate through each module call and check availability and specifications
     #create combined list of all specifications
     Errors_ <- character(0)
@@ -277,16 +312,30 @@ initializeModel <-
       if (!is.null(Specs_ls$Call)) {
         #If it is a list of module calls
         if (is.list(Specs_ls$Call)) {
-        #Iterate through module calls
+          #Iterate through module calls
           for (j in 1:length(Specs_ls$Call)) {
             Call_ <- unlist(strsplit(Specs_ls$Call[[j]], "::"))
             #Check module availability
-            Err <-
-              checkModuleExists(
-                Call_[2],
-                Call_[1],
-                InstalledPkgs_,
-                c(Module = ModuleName, Package = PackageName))
+            if (length(Call_) == 2) {
+              Err <-
+                checkModuleExists(
+                  Call_[2],
+                  Call_[1],
+                  InstalledPkgs_,
+                  c(Module = ModuleName, Package = PackageName))
+            }
+            if (length(Call_) == 1) {
+              if (!Call_ %in% ModulesByPackage_df$Module) {
+                Err <- paste0("Error in runModule call for module ", Call_,
+                              ". Is not present in any package identified in ",
+                              "the model run script.")
+              } else {
+                Pkg <-
+                  ModulesByPackage_df$Package[ModulesByPackage_df$Module == Call_]
+                Call_ <- c(Pkg, Call_)
+                rm(Pkg)
+              }
+            }
             if (length(Err) > 0) {
               Errors_ <- c(Errors_, Err)
               next()
@@ -341,7 +390,8 @@ initializeModel <-
         if (Module == "Initialize") {
           if (length(ProcessedInputs_ls[[Module]]$Errors) == 0) {
             initFunc <- eval(parse(text = paste(Package, Module, sep = "::")))
-            InitializedInputs_ls <- initFunc(ProcessedInputs_ls[[EntryName]])
+            InitData_ls <- ProcessedInputs_ls[[EntryName]]
+            InitializedInputs_ls <- initFunc(InitData_ls)
             ProcessedInputs_ls[[EntryName]]$Data <- InitializedInputs_ls$Data
             ProcessedInputs_ls[[EntryName]]$Errors <- InitializedInputs_ls$Errors
             if (length(InitializedInputs_ls$Warnings > 0)) {
@@ -443,8 +493,18 @@ runModule <- function(ModuleName, PackageName, RunFor, RunYear, StopOnErr = TRUE
       Specs = list()
     )
     for (Alias in names(M$Specs$Call)) {
+      #Called module function when specified as package::module
       Function <- M$Specs$Call[[Alias]]
-      Specs <- paste0(M$Specs$Call[[Alias]], "Specifications")
+      #Called module function when only module is specified
+      if (length(unlist(strsplit(Function, "::"))) == 1) {
+        Pkg_df <- getModelState()$ModulesByPackage_df
+        Function <-
+          paste(Pkg_df$Package[Pkg_df$Module == Function], Function, sep = "::")
+        rm(Pkg_df)
+      }
+      #Called module specifications
+      Specs <- paste0(Function, "Specifications")
+      #Assign the function and specifications of called module to alias
       Call$Func[[Alias]] <- eval(parse(text = Function))
       Call$Specs[[Alias]] <- processModuleSpecs(eval(parse(text = Specs)))
       Call$Specs[[Alias]]$RunBy <- M$Specs$RunBy

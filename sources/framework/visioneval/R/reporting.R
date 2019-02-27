@@ -10,8 +10,9 @@
 #======================================
 #' Read multiple datasets from multiple tables in datastores
 #'
-#' \code{readDatastoreTables} reads datasets from one or more tables in a
-#' specified group in one or more datastores
+#' \code{readDatastoreTables} a visioneval framework model user function that
+#' reads datasets from one or more tables in a specified group in one or more
+#' datastores
 #'
 #' This function can read multiple datasets in one or more tables in a group.
 #' More than one datastore my be specified so that if datastore references are

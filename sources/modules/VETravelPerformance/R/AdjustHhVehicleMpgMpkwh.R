@@ -1,15 +1,39 @@
 #=========================
 #AdjustHhVehicleMpgMpkwh.R
 #=========================
-#This module adjusts the fuel economy and power efficiency of household vehicles
-#to reflect roadway congestion.
 
-
-#=================================
-#Packages used in code development
-#=================================
-#Uncomment following lines during code development. Recomment when done.
-# library(visioneval)
+#<doc>
+#
+## AdjustHhVehicleMpgMpkwh Module
+#### January 23, 2019
+#
+#This module adjusts the fuel economy (MPG) and power efficiency (MPKWH) of household vehicles to reflect the effects of congestion, speed smoothing, and eco-driving that are calculated by the CalculateMpgMpkwhAdjustments module.
+#
+### Model Parameter Estimation
+#
+#This module has no estimated parameters
+#
+### How the Module Works
+#
+#The module adjusts the average MPG and MPKWH of household vehicles, including the car services used, to reflect the effects of congestion, speed smoothing, and eco-driving. The methods are described below. To simplify the presentation, all adjustments are referred to as fuel economy (FE) adjustments.
+#
+#* **Calculate household vehicle FE adjustments to reflect congestion**: FE adjustments are calculated for each household vehicle as a function of the vehicle powertrain type and the proportion of the household's travel that is assigned to urban roads. If the vehicle powertrain is ICEV, the LdIceFactor is used to calculate MPG adjustments. The urban travel adjustment factor is the marea value and the rural travel adjustment is the regional value. These values are averaged using the urban and non-urban travel proportions for the household. If the vehicle powertrain is HEV, the urban and non-urban LdHevFactor values are used to calculate the MPG adjustment. If the vehicle powertrain is BEV, the urban and non-urban LdEvFactor values are used to calculate the MPKWH adjustment. If the vehicle powertrain is PHEV, the urban and non-urban LdHevFactor values are used to calculate the MPG adjustment and the urban and non-urban LdEvFactor values are used to calculate the MPKWH adjustment.
+#
+#* **Calculate car service FE adjustments to reflect congestion**: Fleetwide FE adjustments are calculated for car service vehicles. The car service powertrains are classified as ICEV, HEV, and BEV. The relative powertrain proportions for car service autos and light trucks are loaded from the PowertrainFuelDefaults_ls in the PowertrainsAndFuels package version used in the model run. The MPG adjustment factor for car service autos is calculated by averaging the marea LdIceFactor and LdHevFactor values using the scaled ICEV and HEV proportions for automobiles. The MPG adjustment for light-trucks is calculated in a similar fashion. These average MPG adjustment factors are applied to the household vehicles listed as car service according to the vehicle type. The marea value for LdEvFactor is assigned to the MPKWH adjustment factor.
+#
+#* **Calculate eco-driving adjustments**: Eco-driving households are assigned at random in sufficient numbers to satisfy the 'LdvEcoDrive' proportion specified for the marea in the 'marea_speed_smooth_ecodrive.csv' input file. For the ICEV vehicles owned by the eco-driving households, the eco-drive MPG adjustment factor is calculated by averaging the marea LdvEcoDrive factor and regional LdvEcoDrive factors with urban and non-urban DVMT proportions for the household. Eco-driving adjustments for non-eco-driving household vehicles and non-ICEV vehicles are set equal to 1.
+#
+#* **Calculate speed smoothing adjustments**: The speed smoothing adjustment for urban travel is the marea LdvSpdSmoothFactor value. The non-urban value is 1. The value for each household is the average of the urban and non-urban speed smoothing adjustments using the household urban and rural travel proportions as the respective weights. The household average values are assigned to the household vehicles. As with eco-driving, the speed smoothing adjustments are only applied to ICEV vehicles.
+#
+#* **Reconcile eco-driving and speed smoothing adjustments**: The maximum of the eco-driving and speed smoothing adjustments assigned to each vehicle is used to account for the joint effect of eco-driving and speed smoothing.
+#
+#* **Calculate the joint effect of congestion adjustments and eco-driving & speed smoothing adjustments**: The joint effect of the congestion-related FE adjustment and the eco-driving & speed smoothing adjustment is the product of the two adjustments.
+#
+#* **Calculate the adjusted MPG and MPKWH**: The MPG assigned to each vehicle is updated by multiplying its value by the MPG adjustment value assigned to the vehicle. Likewise, the MPKWH assigned to each vehicle is updated by multiplying its value by the MPKWH adjustment value assigned to the vehicle.
+#
+#* **Adjust related vehicle fuel, energy, and emissions values**: The GPM (gallons per mile) values are updated by calculating the reciprocal of the updated MPG values. The ratio of the updated GPM value to the previous GPM value is used to scale the fuel emissions rate (FuelCO2ePM). Likewise the KWHPM (kilowatt-hours per mile) values are updated in the same way and so is the electricity emissions rate (ElecCO2ePM).
+#
+#</doc>
 
 
 #=============================================
@@ -25,7 +49,7 @@
 #------------------------------
 AdjustHhVehicleMpgMpkwhSpecifications <- list(
   #Level of geography module is applied at
-  RunBy = "Azone",
+  RunBy = "Marea",
   #Specify new tables to be created by Inp if any
   #Specify new tables to be created by Set if any
   #Specify input data
@@ -48,6 +72,19 @@ AdjustHhVehicleMpgMpkwhSpecifications <- list(
       PROHIBIT = c("NA", "< 0", "> 1"),
       ISELEMENTOF = "",
       OPTIONAL = TRUE
+    ),
+    item(
+      NAME = items(
+        "LdvEcoDriveFactor",
+        "LdIceFactor",
+        "LdHevFactor",
+        "LdEvFactor"),
+      TABLE = "Region",
+      GROUP = "Year",
+      TYPE = "double",
+      UNITS = "proportion",
+      PROHIBIT = "<= 0",
+      ISELEMENTOF = ""
     ),
     item(
       NAME = "Marea",
@@ -79,24 +116,6 @@ AdjustHhVehicleMpgMpkwhSpecifications <- list(
       TYPE = "double",
       UNITS = "proportion",
       PROHIBIT = "<= 0",
-      ISELEMENTOF = ""
-    ),
-    item(
-      NAME = "Marea",
-      TABLE = "Azone",
-      GROUP = "Year",
-      TYPE = "character",
-      UNITS = "ID",
-      PROHIBIT = "",
-      ISELEMENTOF = ""
-    ),
-    item(
-      NAME = "Azone",
-      TABLE = "Azone",
-      GROUP = "Year",
-      TYPE = "character",
-      UNITS = "ID",
-      PROHIBIT = "",
       ISELEMENTOF = ""
     ),
     item(
@@ -149,16 +168,16 @@ AdjustHhVehicleMpgMpkwhSpecifications <- list(
       ISELEMENTOF = ""
     ),
     item(
-      NAME = "Marea",
-      TABLE = "Vehicle",
+      NAME = "UrbanDvmtProp",
+      TABLE = "Household",
       GROUP = "Year",
-      TYPE = "character",
-      UNITS = "ID",
-      PROHIBIT = "",
+      TYPE = "double",
+      UNITS = "proportion",
+      PROHIBIT = c("NA", "< 0", "> 1"),
       ISELEMENTOF = ""
     ),
     item(
-      NAME = "Azone",
+      NAME = "Marea",
       TABLE = "Vehicle",
       GROUP = "Year",
       TYPE = "character",
@@ -390,7 +409,7 @@ AdjustHhVehicleMpgMpkwhSpecifications <- list(
   ),
   #Specify call status of module
   Call = items(
-    CalcDvmt = "VEHouseholdTravel::CalculateHouseholdDvmt"
+    CalcDvmt = "CalculateHouseholdDvmt"
   )
 )
 
@@ -449,27 +468,40 @@ AdjustHhVehicleMpgMpkwh <- function(L, M) {
   NumVeh <- length(L$Year$Vehicle$VehId)
   #Powertrains of vehicles
   Powertrain_Ve <- L$Year$Vehicle$Powertrain
+  #Load energy and emissions defaults
+  EnergyEmissionsDefaults_ls <- loadPackageDataset("PowertrainFuelDefaults_ls")
 
   #Identify congestion factors for household-owned vehicles
   #--------------------------------------------------------
-  IsMetro_Ve <- L$Year$Household$LocType[HhToVehIdx_Ve] == "Urban"
+  UrbanProp_Ve <- L$Year$Household$UrbanDvmtProp[HhToVehIdx_Ve]
   MpgCongFactor_Ve <- rep(1, NumVeh)
   MpkwhCongFactor_Ve <- rep(1, NumVeh)
+  #Function to calculate congestion factors to apply to vehicles
+  calcVehCongFactor <- function(FactorName, UrbanProp_) {
+    UrbanFactor <- L$Year$Marea[[FactorName]]
+    NonUrbanFactor <- L$Year$Region[[FactorName]]
+    UrbanFactor * UrbanProp_ + NonUrbanFactor * (1 - UrbanProp_)
+  }
   #ICEV congestion factors
-  MpgCongFactor_Ve[IsMetro_Ve & Powertrain_Ve == "ICEV"] <- L$Year$Marea$LdIceFactor
-  MpkwhCongFactor_Ve[IsMetro_Ve & Powertrain_Ve == "ICEV"] <- 1
+  MpgCongFactor_Ve[Powertrain_Ve == "ICEV"] <-
+    calcVehCongFactor("LdIceFactor", UrbanProp_Ve[Powertrain_Ve == "ICEV"])
+  MpkwhCongFactor_Ve[Powertrain_Ve == "ICEV"] <- 1
   #HEV congestion factors
-  MpgCongFactor_Ve[IsMetro_Ve & Powertrain_Ve == "HEV"] <- L$Year$Marea$LdHevFactor
-  MpkwhCongFactor_Ve[IsMetro_Ve & Powertrain_Ve == "HEV"] <- 1
+  MpgCongFactor_Ve[Powertrain_Ve == "HEV"] <-
+    calcVehCongFactor("LdHevFactor", UrbanProp_Ve[Powertrain_Ve == "HEV"])
+  MpkwhCongFactor_Ve[Powertrain_Ve == "HEV"] <- 1
   #BEV congestion factors
-  MpgCongFactor_Ve[IsMetro_Ve & Powertrain_Ve == "BEV"] <- 1
-  MpkwhCongFactor_Ve[IsMetro_Ve & Powertrain_Ve == "BEV"] <- L$Year$Marea$LdEvFactor
+  MpgCongFactor_Ve[Powertrain_Ve == "BEV"] <- 1
+  MpkwhCongFactor_Ve[Powertrain_Ve == "BEV"] <-
+    calcVehCongFactor("LdEvFactor", UrbanProp_Ve[Powertrain_Ve == "BEV"])
   #PHEV congestion factors
-  MpgCongFactor_Ve[IsMetro_Ve & Powertrain_Ve == "PHEV"] <- L$Year$Marea$LdHevFactor
-  MpkwhCongFactor_Ve[IsMetro_Ve & Powertrain_Ve == "PHEV"] <- L$Year$Marea$LdEvFactor
+  MpgCongFactor_Ve[Powertrain_Ve == "PHEV"] <-
+    calcVehCongFactor("LdHevFactor", UrbanProp_Ve[Powertrain_Ve == "PHEV"])
+  MpkwhCongFactor_Ve[Powertrain_Ve == "PHEV"] <-
+    calcVehCongFactor("LdEvFactor", UrbanProp_Ve[Powertrain_Ve == "PHEV"])
 
-  #Calculate characteristics of car service vehicles
-  #-------------------------------------------------
+  #Calculate congestion factors for car service vehicles assigned to households
+  #----------------------------------------------------------------------------
   #Identify which vehicles are car service
   IsCarSvc_Ve <- L$Year$Vehicle$VehicleAccess != "Own"
   #Retrieve car service powertrain proportions
@@ -489,23 +521,25 @@ AdjustHhVehicleMpgMpkwh <- function(L, M) {
       )$y
     }
   }
-  #Calculate MPG congestion factors
+  #Function to calculate MPG adjustment factor by vehicle type
   calcAveCarSvcMpgCongFactor <- function(Type) {
     PtNames_ <- paste0(Type, c("PropIcev", "PropHev"))
     PtProp_ <- CSPwrtnProp_[PtNames_]
     PtProp_ <- PtProp_ / sum(PtProp_)
-    CongFactors_ <- c(L$Year$Marea$LdIceFactor, L$Year$Marea$LdHevFactor)
-    sum(PtProp_ * CongFactors_)
+    Factors_ <- with(L$Year$Marea, c(LdIceFactor, LdHevFactor))
+    sum(PtProp_ * Factors_)
   }
-  MpgCongFactor_Ve[IsMetro_Ve & IsCarSvc_Ve & L$Year$Vehicle$Type == "Auto"] <-
-    calcAveCarSvcMpgCongFactor("Auto")
-  MpgCongFactor_Ve[IsMetro_Ve & IsCarSvc_Ve & L$Year$Vehicle$Type == "LtTrk"] <-
-    calcAveCarSvcMpgCongFactor("LtTrk")
-  #Calculate MPKWH congestion factors
-  MpkwhCongFactor_Ve[IsMetro_Ve & IsCarSvc_Ve & L$Year$Vehicle$Type == "Auto"] <-
-    L$Year$Marea$LdEvFactor
+  #Calculate MPG adjustment factors for car service autos
+  Sel_ <- IsCarSvc_Ve & L$Year$Vehicle$Type == "Auto"
+  MpgCongFactor_Ve[Sel_] <- calcAveCarSvcMpgCongFactor("Auto")
+  #Calculate MPG adjustment factors for car service light trucks
+  Sel_ <- IsCarSvc_Ve & L$Year$Vehicle$Type == "LtTrk"
+  MpgCongFactor_Ve[Sel_] <- calcAveCarSvcMpgCongFactor("LtTrk")
+  rm(Sel_, calcAveCarSvcMpgCongFactor)
+  #Calculate MPKWH adjustment factor by vehicle type
+  MpkwhCongFactor_Ve[IsCarSvc_Ve] <- L$Year$Marea$LdEvFactor
   #Clean up
-  rm(CSPwrtnNames_, CSPwrtnProp_ ,calcAveCarSvcMpgCongFactor)
+  rm(CSPwrtnNames_, CSPwrtnProp_)
 
   #Identify eco-driving and speed smoothing factors to adjust MPG & MPKWH
   #----------------------------------------------------------------------
@@ -519,20 +553,39 @@ AdjustHhVehicleMpgMpkwh <- function(L, M) {
   } else {
     IsEcoDrive_Hh <- L$Year$Household$IsEcoDrive
   }
-  #Identify eco-drive factor
-  EcoDriveFactor_Ve <-
-    IsEcoDrive_Hh[HhToVehIdx_Ve] * L$Year$Marea$LdvEcoDriveFactor
-  #Create eco-drive/speed-smoothing factors and populate with smoothing factors
-  IsMetro_Ve <- L$Year$Household$LocType[HhToVehIdx_Ve] == "Urban"
-  EcoSmooth_Ve <- rep(1, NumVeh)
-  EcoSmooth_Ve[IsMetro_Ve] <- L$Year$Marea$LdvSpdSmoothFactor
-  #Substitute eco-drive factor where greater
-  EcoSmooth_Ve <- pmax(EcoDriveFactor_Ve, EcoSmooth_Ve)
+  #Create matrix of urban and non-urban DVMT proportions of households
+  UrbanDrProp_HhX <- cbind(
+    Urban = L$Year$Household$UrbanDvmtProp,
+    NonUrban = 1 - L$Year$Household$UrbanDvmtProp
+  )
+  #Calculate eco-drive factor for households
+  EcoDrFactor_ <- c(
+    Urban = L$Year$Marea$LdvEcoDriveFactor,
+    NonUrban = L$Year$Region$LdvEcoDriveFactor)
+  EcoDrFactor_Hh <- rowSums(sweep(UrbanDrProp_HhX, 2, EcoDrFactor_, "*"))
+  EcoDrFactor_Hh[!IsEcoDrive_Hh] <- 1
+  #Assign eco-drive factor to vehicles
+  EcoDriveFactor_Ve <- EcoDrFactor_Hh[HhToVehIdx_Ve]
+  rm(EcoDrFactor_, EcoDrFactor_Hh)
+  #Calculate speed-smoothing factors and apply to vehicles
+  SpdSmFactor_ <- c(
+    Urban = L$Year$Marea$LdvSpdSmoothFactor,
+    NonUrban = 1
+  )
+  SpdSmFactor_Hh <- rowSums(sweep(UrbanDrProp_HhX, 2, SpdSmFactor_, "*"))
+  #Assign speed smooth factor to vehicles
+  SpdSmFactor_Ve <- SpdSmFactor_Hh[HhToVehIdx_Ve]
+  rm(SpdSmFactor_, SpdSmFactor_Hh)
+  #Create a combined eco-drive speed smooth that is the maximum improvement
+  EcoSmooth_Ve <- pmax(EcoDriveFactor_Ve, SpdSmFactor_Ve)
+  #Set eco-smooth factor of non-ICE vehicles to 1
+  EcoSmooth_Ve[Powertrain_Ve != "ICEV"] <- 1
+  rm(EcoDriveFactor_Ve, SpdSmFactor_Ve)
 
   #Calculate adjusted MPG and MPKWH
   #--------------------------------
   MPG_Ve <- L$Year$Vehicle$MPG * EcoSmooth_Ve * MpgCongFactor_Ve
-  MPKWH_Ve <- L$Year$Vehicle$MPKWH * EcoSmooth_Ve * MpkwhCongFactor_Ve
+  MPKWH_Ve <- L$Year$Vehicle$MPKWH * MpkwhCongFactor_Ve
 
   #Adjust fuel consumption, electricity consumption, and GHG per mile
   #------------------------------------------------------------------
@@ -582,34 +635,49 @@ AdjustHhVehicleMpgMpkwh <- function(L, M) {
 }
 
 
-#================================
-#Code to aid development and test
-#================================
+#===============================================================
+#SECTION 4: MODULE DOCUMENTATION AND AUXILLIARY DEVELOPMENT CODE
+#===============================================================
+#Run module automatic documentation
+#----------------------------------
+documentModule("AdjustHhVehicleMpgMpkwh")
+
 #Test code to check specifications, loading inputs, and whether datastore
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions
 #-------------------------------------------------------------------------------
+# #Load libraries and test functions
+# library(visioneval)
+# library(filesstrings)
+# source("tests/scripts/test_functions.R")
+# #Set up test environment
+# TestSetup_ls <- list(
+#   TestDataRepo = "../Test_Data/VE-State",
+#   DatastoreName = "Datastore.tar",
+#   LoadDatastore = TRUE,
+#   TestDocsDir = "vestate",
+#   ClearLogs = TRUE,
+#   # SaveDatastore = TRUE
+#   SaveDatastore = FALSE
+# )
+# setUpTests(TestSetup_ls)
+# #Run test module
 # TestDat_ <- testModule(
 #   ModuleName = "AdjustHhVehicleMpgMpkwh",
 #   LoadDatastore = TRUE,
 #   SaveDatastore = TRUE,
-#   DoRun = FALSE
+#   DoRun = FALSE,
+#   RequiredPackages = c("VEHouseholdTravel", "VEPowertrainsAndFuels")
 # )
 # L <- TestDat_$L
 # M <- TestDat_$M
-# TestOut_ls <- AdjustHhVehicleMpgMpkwh(L, M)
+# R <- AdjustHhVehicleMpgMpkwh(TestDat_$L, TestDat_$M)
 
-#Test code to check everything including running the module and checking whether
-#the outputs are consistent with the 'Set' specifications
-#-------------------------------------------------------------------------------
 # TestDat_ <- testModule(
 #   ModuleName = "AdjustHhVehicleMpgMpkwh",
 #   LoadDatastore = TRUE,
 #   SaveDatastore = TRUE,
-#   DoRun = TRUE
+#   DoRun = TRUE,
+#   RequiredPackages = c("VEHouseholdTravel", "VEPowertrainsAndFuels")
 # )
-#
-# setwd("tests")
-# untar("Datastore.tar")
-# setwd("..")
 

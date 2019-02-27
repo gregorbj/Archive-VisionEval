@@ -1,0 +1,59 @@
+==================================
+Documentation for 2015_Service.csv
+==================================
+
+File Structure
+--------------
+Each row is a record for a public transportation agency, transit mode, and service time period
+Column names as follows:
+AgencyID: The 5-digit transit agency identifier number
+AgencyName: Transit agency name
+Mode: Abbreviation for transit mode (see notes below for meaning)
+TimePeriod: Time period for which data is reported (e.g. Average Weekday, Annual Total)
+RevenueMiles: Vehicle/passenger car miles in revenue service
+DeadheadMiles: Vehicle/passenger car miles not in revenue service
+PassengerMiles: Passenger miles
+
+Source:
+-------
+Federal Transit Administration
+National Transit Database (https://www.transit.dot.gov)
+2015_Service.xlsx
+https://www.transit.dot.gov/ntd/data-product/2015-annual-database-service
+
+Notes:
+------
+The following data columns were extracted from 2015_Service.xlsx file and renamed as follows:
+
+Original Name					Revised Name
+--------------          			------------
+5 Digit NTD ID          			AgencyID
+Agency Name					AgencyName
+Mode						Mode
+Time Period					TimePeriod
+Actual Vehicles/ Passenger Car  Revenue Miles	RevenueMiles
+Actual Vehicles/ Passenger Deadhead Miles       DeadheadMiles
+Passenger Miles					PassengerMiles
+
+The Mode values are abbreviations that have the following values:
+    HR = "Heavy Rail"
+    CR = "Commuter Rail"
+    LR = "Light Rail"
+    SR = "Streetcar"
+    MG = "Monorail/Automated Guideway"
+    CC = "Cable Car"
+    YR = "Hybrid Rail"
+    IP = "Inclined Plain"
+    AR = "Alaska Railroad"
+    MB = "Bus"
+    DR = "Demand Response"
+    TB = "TrolleyBus"
+    CB = "Commuter Bus"
+    FB = "Ferryboat"
+    RB = "Bus Rapid Transit"
+    VP = "Vanpool"
+    PB = "Publico"
+    DT = "Demand Response Taxi"
+    TR = "Aerial Tramway"
+    JT = "Jitney"
+    OR = "Other"

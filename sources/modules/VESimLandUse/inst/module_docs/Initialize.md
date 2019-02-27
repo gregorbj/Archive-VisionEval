@@ -260,6 +260,17 @@ DESCRIPTION - A description of the data.
 |9  |MetroLandArea   |area     |SQMI       |NA, < 0  |            |         |Land area (excluding large water bodies and large tracts of undevelopable land) in the metropolitan (i.e. urbanized) portion of the Azone                                                                                                |
 |10 |TownLandArea    |area     |SQMI       |NA, < 0  |            |         |Land area (excluding large water bodies and large tracts of undevelopable land) in towns (i.e. urban-like but not urbanized) in the Azone                                                                                                |
 |11 |RuralAveDensity |compound |HHJOB/ACRE |NA, < 0  |            |> 0.5    |Average activity density (households and jobs per acre) of rural (i.e. not metropolitan or town) portions of the Azone not including large waterbodies or large tracts of agricultural lands, forest lands, or otherwise protected lands |
+### azone_gq_pop-prop_by_area-type.csv
+This input file is OPTIONAL.
+
+|   |NAME            |TYPE   |UNITS      |PROHIBIT |ISELEMENTOF |UNLIKELY |DESCRIPTION                                                                                 |
+|:--|:---------------|:------|:----------|:--------|:-----------|:--------|:-------------------------------------------------------------------------------------------|
+|1  |Geo             |       |           |         |Azones      |         |Must contain a record for each Azone and model run year.                                    |
+|11 |Year            |       |           |         |            |         |Must contain a record for each Azone and model run year.                                    |
+|12 |PropGQPopCenter |double |proportion |< 0, > 1 |            |         |Proportion of Azone non-institutional group quarters population located in center area type |
+|13 |PropGQPopInner  |double |proportion |< 0, > 1 |            |         |Proportion of Azone non-institutional group quarters population located in inner area type  |
+|14 |PropGQPopOuter  |double |proportion |< 0, > 1 |            |         |Proportion of Azone non-institutional group quarters population located in outer area type  |
+|15 |PropGQPopFringe |double |proportion |< 0, > 1 |            |         |Proportion of Azone non-institutional group quarters population located in fringe area type |
 
 ## Datasets Used by the Module
 This module uses no datasets that are in the datastore.

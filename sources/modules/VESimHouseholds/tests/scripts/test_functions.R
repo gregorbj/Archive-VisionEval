@@ -1,5 +1,7 @@
 #test_functions.R
-#
+
+#Define function to set up environment for module tests
+#------------------------------------------------------
 setUpTests <- function(TestSetup_ls) {
   with(TestSetup_ls, {
     #Copy datastore if required
@@ -35,19 +37,16 @@ setUpTests <- function(TestSetup_ls) {
   })
 }
 
+#Define function to run a list of tests
+#--------------------------------------
 doTests <- function(Tests_ls, TestSetup_ls) {
-  ModuleNames_ <- names(Tests_ls)
   TestDocsDir <- TestSetup_ls$TestDocsDir
-  for (mn in ModuleNames_) {
-    source(paste0("R/", mn, ".R"))
-    L <- Tests_ls[[mn]]
-    testModule(
-      ModuleName = mn,
-      LoadDatastore = L["LoadDatastore"],
-      SaveDatastore = L["SaveDatastore"],
-      DoRun = L["DoRun"]
-    )
-    LogFile <- paste0("Log_", mn, ".txt")
+  for (i in 1:length(Tests_ls)) {
+    ModuleName <- Tests_ls[[i]]$ModuleName
+    source(paste0("R/", ModuleName, ".R"))
+    L <- Tests_ls[[i]]
+    do.call(testModule, L)
+    LogFile <- paste0("Log_", ModuleName, ".txt")
     file.copy(
       file.path("tests", LogFile),
       file.path("tests", TestDocsDir, "logs", LogFile))
@@ -55,6 +54,8 @@ doTests <- function(Tests_ls, TestSetup_ls) {
   }
 }
 
+#Define function to save test results and clean up test environment
+#------------------------------------------------------------------
 saveTestResults <- function(TestSetup_ls) {
   with(TestSetup_ls, {
     #Tar the datastore directory if DatastoreName is Datastore.tar
@@ -64,11 +65,15 @@ saveTestResults <- function(TestSetup_ls) {
       dir.remove("Datastore")
       setwd("..")
     }
-    #Copy the datastore
-    file.copy(
-      file.path("tests", DatastoreName),
-      file.path(TestDataRepo, DatastoreName)
-    )
+    #Save the datastore if SaveDatastore = TRUE
+    if (SaveDatastore) {
+      file.copy(
+        file.path("tests", DatastoreName),
+        file.path(TestDataRepo, DatastoreName),
+        overwrite = TRUE
+      )
+    }
+    #Remove the datastore
     file.remove(file.path("tests", DatastoreName))
     #Remove the defs directory
     dir.remove("tests/defs")
@@ -77,7 +82,8 @@ saveTestResults <- function(TestSetup_ls) {
     #Move the model state file to the test documentation directory
     file.copy(
       file.path("tests", "ModelState.Rda"),
-      file.path("tests", TestDocsDir, "ModelState.Rda"))
+      file.path("tests", TestDocsDir, "ModelState.Rda"),
+      overwrite = TRUE)
     file.remove(file.path("tests", "ModelState.Rda"))
   })
 }

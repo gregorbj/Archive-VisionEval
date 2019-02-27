@@ -1,8 +1,8 @@
 Package: VESimLandUse
 Type: Package
 Title: Create simulated Bzones (SimBzones) with attributes
-Version: 0.2
-Date: 11/27/18
+Version: 0.9
+Date: 02/11/19
 Author: Brian Gregor [aut, cre],
 Maintainer: Brian Gregor <gregorb@or-analytics.com>
 Copyright: AASHTO
@@ -16,12 +16,24 @@ LazyData: TRUE
 Depends: R (>= 3.1.0)
 Imports:
     visioneval,
-    devtools,
-    usethis
+    usethis,
+    plot3D,
+    VELandUse,
+    VESimLandUseData
 Suggests:
     knitr,
     rmarkdown
 VignetteBuilder: knitr
 Encoding: UTF-8
-RoxygenNote: 6.0.1
-
+RoxygenNote: 6.1.1
+Collate:
+    CreateSimBzoneModels.R
+    Initialize.R
+    CreateSimBzones.R
+    SimulateHousing.R
+    SimulateEmployment.R
+    Simulate4DMeasures.R
+    SimulateUrbanMixMeasure.R
+    AssignCarSvcAvailability.R
+    AssignDemandManagement.R
+    AssignParkingRestrictions.R

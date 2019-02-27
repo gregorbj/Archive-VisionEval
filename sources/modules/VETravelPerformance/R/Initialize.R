@@ -5,15 +5,9 @@
 #<doc>
 #
 ## Initialize Module
-#### November 24, 2018
+#### January 27, 2019
 #
-#This module reads and processes roadway DVMT and operations inputs.
-#
-#The following input files are optional. If these data are not provided, the model calculates values based on default data included with the package and processed by the `LoadDefaultRoadDvmtValues.R` script.
-#
-#*
-#The optional roadway DVMT inputs allow users to specify base year roadway DVMT by vehicle type and how the DVMT by type splits across road classes.
-#
+#This module reads and processes roadway DVMT and operations inputs to check for inconsistent values which standard VisionEval data checks will not pick up.
 #
 ### Model Parameter Estimation
 #
@@ -21,23 +15,77 @@
 #
 ### How the Module Works
 #
+#This module checks the values in the following input files for missing values and inconsistencies that the standard VisionEval data checks will not identify:
 #
+#* region_base_year_hvytrk_dvmt.csv
+#
+#* marea_base_year_dvmt.csv
+#
+#* marea_dvmt_split_by_road_class.csv
+#
+#* marea_operations_deployment.csv
+#
+#* other_ops_effectiveness.csv
+#
+#* marea_congestion_charges.csv
+#
+#The `region_base_year_hvytrk_dvmt.csv` and `marea_base_year_dvmt.csv` files are checked to assure that there is enough information to compute base year urban heavy truck DVMT and base year urban light-duty vehicle DVMT. These values are used in the calculation of vehicle travel on urban area roads which is are used in road performance calculations. The values in the 2 files are also checked for consistency. These inputs enable users to either declare explict values for regional heavy truck DVMT, marea urban heavy truck DVMT, and marea urban light-duty vehicle DVMT, or to specify locations (state and/or urbanized area) which are used for calculating DVMT from per capita rates tabulated for the areas from Highway Statistics data by the LoadDefaultRoadDvmtValues.R script. In addition, a check is made on if the model is likely to be a metropolitan model, not a state model, but a state is specified and state per capita heavy truck DVMT rates are used to calculate regional heavy truck DVMT. The value for StateAbbrLookup in the 'region_base_year_hvytrk_dvmt.csv' file should be NA in metropolitan models rather than a specific state if the regional heavy truck DVMT is not provided because the state rates may not be representative of the metropolitan rates. A warning is issued if this is the case.
+#
+#If a value, rather than NA, is provided in the `StateAbbrLookup` field of the `region_base_year_hvytrk_dvmt.csv` file, the value must be a standard 2-character postal code for the state.
+#
+#If a value other than NA is provided in the `UzaNameLookup` field of the `marea_base_year_dvmt.csv` file, it must be a name that is present in the following list of urbanized areas for which per capita rates are available for urban area light-duty vehicle DVMT and for urban area heavy-truck DVMT. Note that if the name of an urbanized area is not found in the list, the user can specify the name of any other urbanized area that is representative of the urbanized area being modeled.
+#
+#<tab:UzaDvmtNames_ls$Table>
+#
+#The `marea_dvmt_split_by_road_class.csv` input file specifies the proportions of DVMT by road class for light-duty vehicles, for heavy trucks, and for buses. While this file is not optional, the user may leave entries blank. Where values are not provided, the model computes the splits using data tabulated for urbanized areas from Highway Statistics data by the LoadDefaultRoadDvmtValues.R script. The UzaNameLookup must be specified in the 'marea_base_year_dvmt.csv' for any marea for which complete data are not specified. The procedures check whether values are present for each marea or can be computed using name lookups. If values are provided, the procedures check that the sum of the splits for each vehicle type are equal to 1. If the sum is off by 1% or more, an error is flagged and a message to the log identifies the problem. If the sum is off by less than 1%, the splits are adjusted so that they sum to 1 and a warning message is written to the log. Input values are updated using values calculated from name lookups where necessary.
+#
+#The `marea_operations_deployment.csv` and `other_ops_effectiveness.csv` are checked for consistency if the `other_ops_effectiveness.csv` file, which is optional, is present. If the `other_ops_effectiveness.csv` file is not present, then the values for the 'OtherFwyOpsDeployProp' and 'OtherArtOpsDeployProp' fields of the `marea_operations_deployment.csv` must be zero. If the `other_ops_effectiveness.csv` file is present but the values for delay reduction for freeways and/or arterials are 0, then the respective freeway and arterial values in the `marea_operations_deployment.csv` file must be 0 as well.
+#
+#The `marea_congestion_charges.csv` is checked to determine whether congestion charges increase with congestion level (if they are not 0). If higher charges are found at lower levels than at higher levels, warnings are written to the log identifying the issue.
 #
 #</doc>
-
-
-
-#=================================
-#Packages used in code development
-#=================================
-#Uncomment following lines during code development. Recomment when done.
-#library(visioneval)
 
 
 #=============================================
 #SECTION 1: ESTIMATE AND SAVE MODEL PARAMETERS
 #=============================================
-#This module has no estimated parameters.
+#This module has no estimated parameters. The following code documents
+#urbanized area names for urbanized area default data.
+
+#Create a list of recognized urbanized area names and data frame to display
+#--------------------------------------------------------------------------
+UzaDvmtNames_ls <- list()
+#Create a vector of urbanized area names ordered by state and name
+load("data/RoadDvmtModel_ls.rda")
+Ua <- names(RoadDvmtModel_ls$UzaLDVDvmtPC_Ua)
+Ua_mx <- do.call(rbind, strsplit(Ua, "/"))
+UzaNames_ <- Ua[order(Ua_mx[,2], Ua_mx[,1])]
+UzaDvmtNames_ls$Names <- UzaNames_
+rm(Ua, Ua_mx)
+#Make a matrix having 3 columns
+UzaNamesPad_ <- c(UzaNames_, rep("", 3 - (length(UzaNames_) %% 3)))
+UzaNames_mx <- matrix(UzaNamesPad_, ncol = 3, byrow = TRUE)
+#Make a data frame having 3 columns of the names
+UzaDvmtNames_df <- data.frame(UzaNames_mx)
+names(UzaDvmtNames_df) <- c("Column 1", "Column 2", "Column 3")
+UzaDvmtNames_ls$Table <- UzaDvmtNames_df
+rm(UzaNames_, UzaNamesPad_, UzaNames_mx, UzaDvmtNames_df)
+
+#Save the urbanized area names list
+#----------------------------------
+#' Urbanized area names list
+#'
+#' A list containing the names of urbanized areas included in the profiles of
+#' urbanized area DVMT characteristics.
+#'
+#' @format A list containing 2 components:
+#' \describe{
+#'  \item{Names}{a vector of urbanized area names sorted by state and name}
+#'  \item{Table}{a 3-column data frame of the names to include in documentation}
+#' }
+#' @source Initialize.R script.
+"UzaDvmtNames_ls"
+usethis::use_data(UzaDvmtNames_ls, overwrite = TRUE)
 
 
 #================================================
@@ -62,7 +110,7 @@ InitializeSpecifications <- list(
   Inp = items(
     item(
       NAME = "StateAbbrLookup",
-      FILE = "region_base_year_hvytrk_dvmt.csv",
+      FILE = "region_base_year_dvmt.csv",
       TABLE = "Region",
       GROUP = "Global",
       TYPE = "character",
@@ -75,16 +123,15 @@ InitializeSpecifications <- list(
         "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI",
         "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC",
         "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT",
-        "VT", "VA", "WA", "WV", "WI", "WY", "DC", "PR", "NA"),
+        "VT", "VA", "WA", "WV", "WI", "WY", "DC", "PR", NA),
       UNLIKELY = "",
       TOTAL = "",
       DESCRIPTION =
-        "Postal code abbreviation of state where the region is located",
-      OPTIONAL = TRUE
+        "Postal code abbreviation of state where the region is located. It is recommended that the value be NA if the model is not a state model (i.e. is a model for a metropolitan area). See the module documentation for details."
     ),
     item(
       NAME = "HvyTrkDvmtGrowthBasis",
-      FILE = "region_base_year_hvytrk_dvmt.csv",
+      FILE = "region_base_year_dvmt.csv",
       TABLE = "Region",
       GROUP = "Global",
       TYPE = "character",
@@ -96,12 +143,11 @@ InitializeSpecifications <- list(
       UNLIKELY = "",
       TOTAL = "",
       DESCRIPTION =
-        "Factor used to grow heavy truck DVMT from base year value",
-      OPTIONAL = TRUE
+        "Factor used to grow heavy truck DVMT from base year value"
     ),
     item(
       NAME = "HvyTrkDvmt",
-      FILE = "region_base_year_hvytrk_dvmt.csv",
+      FILE = "region_base_year_dvmt.csv",
       TABLE = "Region",
       GROUP = "Global",
       TYPE = "compound",
@@ -112,45 +158,12 @@ InitializeSpecifications <- list(
       ISELEMENTOF = "",
       UNLIKELY = "",
       TOTAL = "",
-      DESCRIPTION = "Average daily vehicle miles of travel on roadways in the region by heavy trucks during he base year",
-      OPTIONAL = TRUE
-    ),
-    item(
-      NAME = "HvyTrkDvmtUrbanProp",
-      FILE = "region_base_year_hvytrk_dvmt.csv",
-      TABLE = "Region",
-      GROUP = "Global",
-      TYPE = "double",
-      UNITS = "proportion",
-      NAVALUE = -1,
-      SIZE = 0,
-      PROHIBIT = c("< 0", "> 1"),
-      ISELEMENTOF = "",
-      UNLIKELY = "",
-      TOTAL = "",
-      DESCRIPTION = "Proportion of Region heavy truck daily vehicle miles of travel occurring on urbanized area roadways",
-      OPTIONAL = TRUE
-    ),
-    item(
-      NAME = "UzaNameLookup",
-      FILE = "marea_base_year_dvmt.csv",
-      TABLE = "Marea",
-      GROUP = "Global",
-      TYPE = "character",
-      UNITS = "ID",
-      NAVALUE = "NA",
-      SIZE = 50,
-      PROHIBIT = "",
-      ISELEMENTOF = "",
-      UNLIKELY = "",
-      TOTAL = "",
-      DESCRIPTION =
-        "Name of urbanized area in default tables corresponding to the Marea"
+      DESCRIPTION = "Average daily vehicle miles of travel on roadways in the region by heavy trucks during the base year. The value for this input may be NA instead of number. In that case, if a state abbreviation is provided, the base year value is calculated from the state per capita rate tabulated by the LoadDefaultRoadDvmtValues.R script and the base year population. If the state abbreviation is NA (as for a metropolitan model) the base year value is calculated from metropolitan area per capita rates and metropolitan area population."
     ),
     item(
       NAME = "ComSvcDvmtGrowthBasis",
-      FILE = "marea_base_year_dvmt.csv",
-      TABLE = "Marea",
+      FILE = "region_base_year_dvmt.csv",
+      TABLE = "Region",
       GROUP = "Global",
       TYPE = "character",
       UNITS = "ID",
@@ -164,20 +177,20 @@ InitializeSpecifications <- list(
         "Factor used to grow commercial service vehicle DVMT in Marea from base year value"
     ),
     item(
-      NAME = "HvyTrkDvmtGrowthBasis",
+      NAME = "UzaNameLookup",
       FILE = "marea_base_year_dvmt.csv",
       TABLE = "Marea",
       GROUP = "Global",
       TYPE = "character",
       UNITS = "ID",
       NAVALUE = "NA",
-      SIZE = 10,
-      PROHIBIT = "",
-      ISELEMENTOF = c("Income", "Population"),
+      SIZE = 50,
+      PROHIBIT = "NA",
+      ISELEMENTOF = "",
       UNLIKELY = "",
       TOTAL = "",
       DESCRIPTION =
-        "Factor used to grow heavy truck DVMT from base year value"
+        "Name(s) of urbanized area(s) in default tables corresponding to the Marea(s). This may be omitted if values are provided for both UrbanLdvDvmt and UrbanHvyTrkDvmt. The name(s) must be consistent with names in the urbanized area names in the default data. See module documentation for a listing."
     ),
     item(
       NAME =
@@ -198,14 +211,15 @@ InitializeSpecifications <- list(
       TOTAL = "",
       DESCRIPTION =
         items(
-          "Average daily vehicle miles of travel on roadways in the urbanized portion of the Marea by light-duty vehicles during the base year",
-          "Average daily vehicle miles of travel on roadways in the urbanized portion of the Marea by heavy trucks during he base year"
+          "Average daily vehicle miles of travel on roadways in the urbanized portion of the Marea by light-duty vehicles during the base year. This value may be omitted if a value for UzaNameLookup is provided so that a value may be computed from the urbanized area per capita rate tabulated by the LoadDefaultRoadDvmtValues.R script and the base year urban population.",
+          "Average daily vehicle miles of travel on roadways in the urbanized portion of the Marea by heavy trucks during he base year. This value may be omitted if a value for UzaNameLookup is provided so that a value may be computed from the urbanized area per capita rate tabulated by the LoadDefaultRoadDvmtValues.R script and the base year urban population."
         )
     ),
     item(
       NAME =
         items(
-          "LdvFwyArtDvmtProp",
+          "LdvFwyDvmtProp",
+          "LdvArtDvmtProp",
           "LdvOthDvmtProp",
           "HvyTrkFwyDvmtProp",
           "HvyTrkArtDvmtProp",
@@ -227,7 +241,8 @@ InitializeSpecifications <- list(
       TOTAL = "",
       DESCRIPTION =
         items(
-          "Proportion of light-duty daily vehicle miles of travel in the urbanized portion of the Marea occurring on freeway or arterial roadways",
+          "Proportion of light-duty daily vehicle miles of travel in the urbanized portion of the Marea occurring on freeways",
+          "Proportion of light-duty daily vehicle miles of travel in the urbanized portion of the Marea occurring on arterial roadways",
           "Proportion of light-duty daily vehicle miles of travel in the urbanized portion of the Marea occurring on other roadways",
           "Proportion of heavy truck daily vehicle miles of travel in the urbanized portion of the Marea occurring on freeways",
           "Proportion of heavy truck daily vehicle miles of travel in the urbanized portion of the Marea occurring on arterial roadways",
@@ -235,8 +250,7 @@ InitializeSpecifications <- list(
           "Proportion of bus daily vehicle miles of travel in the urbanized portion of the Marea occurring on freeways",
           "Proportion of bus daily vehicle miles of travel in the urbanized portion of the Marea occurring on arterial roadways",
           "Proportion of bus daily vehicle miles of travel in the urbanized portion of the Marea occuring on other roadways"
-        ),
-      OPTIONAL = TRUE
+        )
     ),
     item(
       NAME = items(
@@ -253,7 +267,7 @@ InitializeSpecifications <- list(
       UNITS = "proportion",
       NAVALUE = -1,
       SIZE = 0,
-      PROHIBIT = c("< 0", "> 1"),
+      PROHIBIT = c("< 0", "> 1", "NA"),
       ISELEMENTOF = "",
       UNLIKELY = "",
       TOTAL = "",
@@ -292,7 +306,7 @@ InitializeSpecifications <- list(
       TABLE = "OtherOpsEffectiveness",
       GROUP = "Global",
       TYPE = "double",
-      UNITS = "proportion",
+      UNITS = "percentage",
       NAVALUE = "-1",
       SIZE = 0,
       PROHIBIT = c("< 0", "> 100"),
@@ -393,14 +407,16 @@ usethis::use_data(InitializeSpecifications, overwrite = TRUE)
 #' @export
 Initialize <- function(L) {
 
+  #------
   #Set up
   #------
   #Initialize error and warnings message vectors
   Errors_ <- character(0)
   Warnings_ <- character(0)
   #Initialize output list with input values
-  Out_ls <- L
+  Out_ls <- L[c("Errors", "Warnings", "Data")]
 
+  #--------------------------------------
   #Define function to check for NA values
   #--------------------------------------
   checkNA <- function(Names_, Geo) {
@@ -412,45 +428,68 @@ Initialize <- function(L) {
     list(None = NoNA, SomeNotAll = SomeNotAllNA)
   }
 
+  #-----------------------------------------------
   #Define function to check and adjust proportions
   #-----------------------------------------------
-  checkProps <- function(FieldNames_, UzaNames_, TypeName) {
+  checkProps <- function(FieldNames_, UzaNames_, Ua, TypeName) {
     Err_ <- character(0)
     Warn_ <- character(0)
     Values_df <- data.frame(L$Data$Global$Marea[FieldNames_])
     for (i in 1:nrow(Values_df)) {
       Marea <- L$Data$Global$Marea$Geo[i]
-      HasUzaName <- !(UzaNames_[i] %in% c(NA, ""))
-      HasAllVals <- all(!(unlist(Values_df[i,]) %in% c(NA, "")))
-      Complete <- HasUzaName | HasAllVals
-      if (!Complete) {
-        Msg <- paste0(
-          "The 'marea_dvmt_split_by_road_class.csv' file has errors for ",
-          TypeName, " inputs for Marea ", Marea, ". The DVMT inputs need to ",
-          "be complete or they need to be omitted and a valid 'UzaNameLookup' ",
-          "must be provided in the 'marea_base_year_dvmt.csv file'."
-        )
-        Err_ <- c(Err_, Msg)
-        rm(Msg)      }
-      if (HasAllVals) {
-        SumDiff <- abs(1 - sum(Values_df[i,]))
-        if (SumDiff >= 0.01) {
+      if (Marea != "None") {
+        HasUzaName <- UzaNames_[i] %in% Ua
+        HasAllVals <- all(!(unlist(Values_df[i,]) %in% c(NA, "")))
+        Complete <- HasUzaName | HasAllVals
+        if (!Complete) {
           Msg <- paste0(
-            "Error in input values for ", TypeName, " inputs for Marea ", Marea,
-            ". The sum of values is off by more than 1%. They should add up to 1."
+            "The 'marea_dvmt_split_by_road_class.csv' file has errors for ",
+            TypeName, " inputs for Marea ", Marea, ". The DVMT inputs need to ",
+            "be complete or they need to be omitted and a valid 'UzaNameLookup' ",
+            "must be provided in the 'marea_base_year_dvmt.csv file'."
           )
           Err_ <- c(Err_, Msg)
+          rm(Msg)      }
+        if (HasAllVals) {
+          SumDiff <- abs(1 - sum(Values_df[i,]))
+          if (SumDiff >= 0.01) {
+            Msg <- paste0(
+              "Error in input values for ", TypeName, " inputs for Marea ", Marea,
+              ". The sum of values is off by more than 1%. They should add up to 1."
+            )
+            Err_ <- c(Err_, Msg)
+          }
+          if (SumDiff > 0 & SumDiff < 0.01) {
+            Msg <- paste0(
+              "Warning regarding input values for ", TypeName, " inputs for Marea ", Marea,
+              ". The sum of the values do not add up to 1 but are off by 1% or ",
+              "less so they have been adjusted to add up to 1."
+            )
+            Warn_ <- c(Warn_, Msg)
+            rm(Msg)
+            Values_df[i,] <- Values_df[i,] / sum(Values_df[i,])
+          }
         }
-        if (SumDiff > 0 & SumDiff < 0.01) {
-          Msg <- paste0(
-            "Warning regarding input values for ", TypeName, " inputs for Marea ", Marea,
-            ". The sum of the values do not add up to 1 but are off by 1% or ",
-            "less so they have been adjusted to add up to 1."
-          )
-          Warn_ <- c(Warn_, Msg)
-          rm(Msg)
-          Values_df[i,] <- Values_df[i,] / sum(Values_df[i,])
+        if (!HasAllVals & HasUzaName) {
+          Vals_ <- RoadDvmtModel_ls$UzaRcProps_UaVtRc[UzaNames_[i], TypeName,]
+          if (TypeName == "LDV") {
+            Values_df[i, "LdvFwyDvmtProp"] <- Vals_["Fwy"]
+            Values_df[i, "LdvArtDvmtProp"] <- Vals_["Art"]
+            Values_df[i, "LdvOthDvmtProp"] <- Vals_["Oth"]
+          }
+          if (TypeName == "HvyTrk") {
+            Values_df[i, "HvyTrkFwyDvmtProp"] <- Vals_["Fwy"]
+            Values_df[i, "HvyTrkArtDvmtProp"] <- Vals_["Art"]
+            Values_df[i, "HvyTrkOthDvmtProp"] <- Vals_["Oth"]
+          }
+          if (TypeName == "Bus") {
+            Values_df[i, "BusFwyDvmtProp"] <- Vals_["Fwy"]
+            Values_df[i, "BusArtDvmtProp"] <- Vals_["Art"]
+            Values_df[i, "BusOthDvmtProp"] <- Vals_["Oth"]
+          }
         }
+      } else {
+        Values_df[i,] <- 0
       }
     }
     list(
@@ -460,91 +499,17 @@ Initialize <- function(L) {
     )
   }
 
-  #Check consistency of Region base year heavy truck DVMT
-  #------------------------------------------------------
-  if (!is.null(L$Data$Global$Region)) {
-    #Extract state abbreviation, population, and DVMT values
-    State <- L$Data$Global$Region$StateAbbrLookup
-    TrkDvmt <- L$Data$Global$Region$HvyTrkDvmt
-    UrbanProp <- L$Data$Global$Region$HvyTrkDvmtUrbanProp
-    #Check whether the inputs have values
-    HasState <- !is.na(State) & State != ""
-    HasTrkDvmt <- !is.na(TrkDvmt) & TrkDvmt != ""
-    HasUrbanProp <- !is.na(UrbanProp) & UrbanProp != ""
-    #Check completeness
-    if (!HasState & (!HasTrkDvmt | !HasUrbanProp)) {
-      Msg <- paste0(
-        "The 'region_base_year_hvytrk_dvmt.csv' file is incomplete. A value ",
-        "for 'StateAbbrLookup' must be provided if no value is provided for ",
-        "'HvyTrkDvmt' or for 'HvyTrkDvmtUrbanProp'."
-      )
-      Errors_ <- c(Errors_, Msg)
-      rm(Msg)
-    }
-    #Set missing values to NA values in the outputs and clean up
-    if (!HasState) {
-      Out_ls$Data$Global$Region$StateAbbrLookup <- NA
-    }
-    if (!HasTrkDvmt) {
-      Out_ls$Data$Global$Region$HvyTrkDvmt <- NA
-    }
-    if (!HasTrkDvmt) {
-      Out_ls$Data$Global$Region$HvyTrkDvmtUrbanProp <- NA
-    }
-    rm(State, TrkDvmt, HasState, HasTrkDvmt, HasUrbanProp)
-  }
-
-  #Check consistency of Marea base year DVMT
-  #-----------------------------------------
-  #Extract values
-  UzaName <- L$Data$Global$Marea$UzaNameLookup
-  LdvDvmt <- L$Data$Global$Marea$UrbanLdvDvmt
-  TrkDvmt <- L$Data$Global$Marea$UrbanHvyTrkDvmt
-  #Check whether the inputs have values
-  HasUzaName <- !is.na(UzaName) & UzaName != ""
-  HasLdvDvmt <- !is.na(LdvDvmt) & LdvDvmt != ""
-  HasTrkDvmt <- !is.na(TrkDvmt) & TrkDvmt != ""
-  #Check whether urbanized area names are correct
-  Ua <- names(RoadDvmtModel_ls$UzaLDVDvmtPC_Ua)
-  if (any(HasUzaName) & !all(UzaName[HasUzaName] %in% Ua)) {
-    Wrong_ <- UzaName[HasUzaName][!(UzaName[HasUzaName] %in% Ua)]
-    Msg <- paste0(
-      "The 'marea_base_year_dvmt.csv' file has errors. The following urbanized ",
-      "area names listed in the 'UzaNameLookup' field are not recognized ",
-      "urbanized area names -- ", paste(Wrong_, collapse = ", "),
-      " -- Check the VERoadPerformance package documentation to find the list ",
-      "of recognized names."
-    )
-    Errors_ <- c(Errors_, Msg)
-    rm(Msg, Wrong_)
-  }
-  #Check that required inputs are provided for all Mareas
-  if (any(!(HasLdvDvmt & HasTrkDvmt) & !HasUzaName)) {
-    Msg <- paste0(
-      "The 'marea_base_year_dvmt.csv' file is incomplete. For each Marea, either ",
-      "an urbanized area name must be provided in the 'UzaNameLookup' field or ",
-      "DVMT values must be provided in the 'UrbanLdvDvmt' and the ",
-      "'UrbanHvyTrkDvmt' fields for the Marea."
-    )
-    Errors_ <- c(Errors_, Msg)
-    rm(Msg)
-  }
-  #Set all missing values as NA
-  Out_ls$Data$Global$Marea$UzaNameLookup[UzaName == ""] <- NA
-  Out_ls$Data$Global$Marea$UrbanLdvDvmt[LdvDvmt == ""] <- NA
-  Out_ls$Data$Global$Marea$UrbanHvyTrkDvmt[TrkDvmt == ""] <- NA
-  rm(UzaName, LdvDvmt, TrkDvmt, HasUzaName, HasLdvDvmt, HasTrkDvmt, Ua)
-
+  #-----------------------------------------------------------
   #Check and adjust roadway DVMT proportions for vehicle types
   #-----------------------------------------------------------
-  #Extra the urbanized area names and the allowed names
+  #Extract the urbanized area names and the allowed names
   UzaNames_ <- L$Data$Global$Marea$UzaNameLookup
-  Ua <- names(RoadDvmtModel_ls$UzaLDVDvmtPC_Ua)
+  Ua <- rownames(RoadDvmtModel_ls$UzaRcProps_UaVtRc)
   #Check the light-duty vehicle DVMT proportions by road class
-  FieldNames_ <- c("LdvFwyArtDvmtProp", "LdvOthDvmtProp")
+  FieldNames_ <- c("LdvFwyDvmtProp", "LdvArtDvmtProp", "LdvOthDvmtProp")
   if (all(FieldNames_ %in% names(Out_ls$Data$Global$Marea))) {
     CheckResults_ls <-
-      checkProps(FieldNames_, UzaNames_, "Ldv")
+      checkProps(FieldNames_, UzaNames_, Ua, "LDV")
     Out_ls$Data$Global$Marea[FieldNames_] <- CheckResults_ls$Values_ls
     Errors_ <- c(Errors_, CheckResults_ls$Errors)
     Warnings_ <- c(Warnings_, CheckResults_ls$Warnings)
@@ -552,7 +517,7 @@ Initialize <- function(L) {
     Msg <- paste0(
       "The 'marea_dvmt_split_by_road_class.csv' input file is present but ",
       "does not contain all the required light-duty vehicle fields. The ",
-      "required fields are 'LdvFwyArtDvmtProp' and 'LdvOthDvmtProp'."
+      "required fields are 'LdvFwyDvmtProp', 'LdvArtDvmtProp' and 'LdvOthDvmtProp'."
     )
     Errors_ <- c(Errors_, Msg)
     rm(Msg)
@@ -561,7 +526,7 @@ Initialize <- function(L) {
   FieldNames_ <- c("HvyTrkFwyDvmtProp", "HvyTrkArtDvmtProp", "HvyTrkOthDvmtProp")
   if (all(FieldNames_ %in% names(Out_ls$Data$Global$Marea))) {
     CheckResults_ls <-
-      checkProps(FieldNames_, UzaNames_, "HvyTrk")
+      checkProps(FieldNames_, UzaNames_, Ua, "HvyTrk")
     Out_ls$Data$Global$Marea[FieldNames_] <- CheckResults_ls$Values_ls
     Errors_ <- c(Errors_, CheckResults_ls$Errors)
     Warnings_ <- c(Warnings_, CheckResults_ls$Warnings)
@@ -579,7 +544,7 @@ Initialize <- function(L) {
   FieldNames_ <- c("BusFwyDvmtProp", "BusArtDvmtProp", "BusOthDvmtProp")
   if (all(FieldNames_ %in% names(Out_ls$Data$Global$Marea))) {
     CheckResults_ls <-
-      checkProps(FieldNames_, UzaNames_, "Bus")
+      checkProps(FieldNames_, UzaNames_, Ua, "Bus")
     Out_ls$Data$Global$Marea[FieldNames_] <- CheckResults_ls$Values_ls
     Errors_ <- c(Errors_, CheckResults_ls$Errors)
     Warnings_ <- c(Warnings_, CheckResults_ls$Warnings)
@@ -593,6 +558,240 @@ Initialize <- function(L) {
     rm(Msg)
   }
 
+  #---------------------------------------------------------------------
+  #Check region and marea base year heavy truck DVMT and light-duty DVMT
+  #---------------------------------------------------------------------
+  #Identify which year values correspond to base year in Get data
+  IsBaseYear <- L$Get$Year$Marea$Year == getModelState("BaseYear")
+  #Make a data frame of Marea data to use in checks and calculations
+  Marea_df <- data.frame(
+    Name = L$Data$Global$Marea$Geo,
+    LookupName = L$Data$Global$Marea$UzaNameLookup,
+    UrbanHvyTrkDvmt = L$Data$Global$Marea$UrbanHvyTrkDvmt,
+    UrbanLdvDvmt = L$Data$Global$Marea$UrbanLdvDvmt
+  )
+  #Identify whether there is an Marea called 'None'
+  IsNone <- Marea_df$Name == "None"
+  #If any IsNone, then check whether urban heavy truck and LDV DVMT are NA
+  #substitute 0 if so and warn
+  if (any(IsNone)) {
+    if (is.na(Marea_df[IsNone, "UrbanHvyTrkDvmt"])) {
+      Marea_df[IsNone, "UrbanHvyTrkDvmt"] <- 0
+      Msg <- paste0(
+        "Warning for the 'marea_base_year_dvmt.csv' input file. ",
+        "The value for 'UrbanHvyTrkDvmt' for Marea 'None' must be 0, ",
+        "because 'None' represents areas that have no urbanized area. ",
+        "The value in the file is NA or missing and 0 will be substituted ",
+        "when the data is loaded into the datastore."
+      )
+      Errors_ <- c(Errors_, Msg)
+      rm(Msg)
+    }
+    if (is.na(Marea_df[IsNone, "UrbanLdvDvmt"])) {
+      Marea_df[IsNone, "UrbanLdvDvmt"] <- 0
+      Msg <- paste0(
+        "Warning for the 'marea_base_year_dvmt.csv' input file. ",
+        "The value for 'UrbanLdvDvmt' for Marea 'None' must be 0, ",
+        "because 'None' represents areas that have no urbanized area. ",
+        "The value in the file is NA or missing and 0 will be substituted ",
+        "when the data is loaded into the datastore."
+      )
+      Errors_ <- c(Errors_, Msg)
+      rm(Msg)
+    }
+  }
+  #If any IsNone, then check whether urban heavy truck and LDV DVMT are a value
+  #other than 0 and error if so
+  if (any(IsNone)) {
+    if (Marea_df[IsNone, "UrbanHvyTrkDvmt"] != 0) {
+      Msg <- paste0(
+        "Error in the 'marea_base_year_dvmt.csv' input file. ",
+        "The value for 'UrbanHvyTrkDvmt' for Marea 'None' must be 0, ",
+        "because 'None' represents areas that have no urbanized area."
+      )
+      Errors_ <- c(Errors_, Msg)
+      rm(Msg)
+    }
+    if (Marea_df[IsNone, "UrbanLdvDvmt"] != 0) {
+      Msg <- paste0(
+        "Error in the 'marea_base_year_dvmt.csv' input file. ",
+        "The value for 'UrbanLdvDvmt' for Marea 'None' must be 0, ",
+        "because 'None' represents areas that have no urbanized area."
+      )
+      Errors_ <- c(Errors_, Msg)
+      rm(Msg)
+    }
+  }
+  #Check whether the urbanized area names are recognized
+  Ua <- names(RoadDvmtModel_ls$UzaHvyTrkDvmtPC_Ua)
+  IsValidLookup <- Marea_df$LookupName %in% Ua
+  #Check whether marea heavy truck DVMT data are complete
+  HasHvyTrkDvmt <- !is.na(Marea_df$UrbanHvyTrkDvmt)
+  FullySpecdHvyTrk <- IsValidLookup | HasHvyTrkDvmt
+  if (any(!FullySpecdHvyTrk)) {
+    Msg <- paste0(
+      "The 'marea_base_year_dvmt.csv' file is incomplete. For each Marea, either ",
+      "an urbanized area name must be provided in the 'UzaNameLookup' field or ",
+      "DVMT values must be provided in the the 'UrbanHvyTrkDvmt' field for the Marea."
+    )
+    Errors_ <- c(Errors_, Msg)
+    rm(Msg)
+  }
+  #Check whether marea light-duty vehicle DVMT data are complete
+  HasLdvDvmt <- !is.na(Marea_df$UrbanLdvDvmt)
+  FullySpecdLdv <- IsValidLookup | HasLdvDvmt
+  if (any(!FullySpecdLdv)) {
+    Msg <- paste0(
+      "The 'marea_base_year_dvmt.csv' file is incomplete. For each Marea, either ",
+      "an urbanized area name must be provided in the 'UzaNameLookup' field or ",
+      "DVMT values must be provided in the the 'UrbanLdvDvmt' field for the Marea."
+    )
+    Errors_ <- c(Errors_, Msg)
+    rm(Msg)
+  }
+  #Check whether region heavy truck data are complete
+  RegionHvyTrkDvmt <- L$Data$Global$Region$HvyTrkDvmt
+  State <- L$Data$Global$Region$StateAbbrLookup
+  if (is.na(RegionHvyTrkDvmt) & is.na(State) & !all(FullySpecdHvyTrk)) {
+    Msg <- paste0(
+      "Region heavy truck DVMT can't be calculated from data in the ",
+      "'region_base_year_hvytrk_dvmt.csv' file and the 'marea_base_year_dvmt.csv ",
+      "files. Either a value needs to be provided in the 'HvyTrkDvmt' field of ",
+      "'region_base_year_dvmt.csv' file or the state abbreviation must be ",
+      "provided in the 'StateAbbrLookup' field of that file, or ",
+      "complete information needs to be provided in the ",
+      "'marea_base_year_dvmt.csv' file. ",
+      "Consult error messages in the log for additional details."
+    )
+    Errors_ <- c(Errors_, Msg)
+    rm(Msg)
+  }
+  #Flag a warning if not a state model but state abbreviation provided
+  State <- L$Data$Global$Region$StateAbbrLookup
+  if (!any(IsNone) & !is.na(State)) {
+    Msg <- paste0(
+      "Because there is no Marea name of 'None', this looks to be a ",
+      "metropolitan model rather than a state model. ",
+      "There could be mismatch of regional and urban area heavy truck DVMT ",
+      "because a state name abbreviation has been specified in the ",
+      "StateAbbrLookup field of the 'region_base_year_dvmt.csv' file ",
+      "rather than NA. Because of that, if regional heavy truck DVMT has not ",
+      "been specified, it will be calculated from the state per capita heavy ",
+      "truck DVMT rate and the regional population for the model. ",
+      "This may not be representative for the region and will ",
+      "affect all future year heavy truck DVMT calculations for the region. ",
+      "It is suggested that you either specify a region heavy truck DVMT ",
+      "value, or that you set the value of the StateAbbrLookup field as NA. ",
+      "In the latter case, the regional heavy truck DVMT will be computed from ",
+      "the Marea per capita rates of heavy truck DVMT and the Marea total ",
+      "population."
+    )
+    Warnings_ <- c(Warnings_, Msg)
+    rm(Msg)
+  }
+
+  #--------------------------------------------------------------
+  #Check that operations programs are not applied in marea "None"
+  #--------------------------------------------------------------
+  #Deployment proportion must be 0 for marea "None"
+  OpsNames_ <- c(
+    "RampMeterDeployProp", "IncidentMgtDeployProp", "SignalCoordDeployProp",
+    "AccessMgtDeployProp", "OtherFwyOpsDeployProp", "OtherArtOpsDeployProp"
+  )
+  Ma <- L$Data$Year$Marea$Geo
+  if (any(Ma == "None")) {
+    NoneOpsProp_df <- data.frame(L$Data$Year$Marea[OpsNames_])[Ma == "None",]
+    HasNon0Ops_ <- apply(NoneOpsProp_df, 1, function(x) any(x != 0))
+    if (any(HasNon0Ops_)) {
+      Msg <- paste0(
+        "Error in the 'marea_operations_deployment.csv' input file. ",
+        "Values for marea 'None' must be 0 because the effects of operations ",
+        "programs are only analyzed for urbanized areas and the 'None' marea ",
+        "contains no urbanized areas."
+      )
+      Errors_ <- c(Errors_, Msg)
+      rm(Msg)
+    }
+    rm(NoneOpsProp_df, HasNon0Ops_)
+  }
+  rm(OpsNames_, Ma)
+
+  #------------------------------------------------
+  #Check consistency of other operations deployment
+  #------------------------------------------------
+  HasOthOpsEff <- !is.null(L$Data$Global$OtherOpsEffectiveness)
+  if (HasOthOpsEff) {
+    OthOps_ls <- L$Data$Global$OtherOpsEffectiveness
+    HasNoArtOthOpsEff <-
+      all(OthOps_ls$Art_Rcr == 0) & all(OthOps_ls$Art_NonRcr == 0)
+    HasNoFwyOthOpsEff <-
+      all(OthOps_ls$Fwy_Rcr == 0) & all(OthOps_ls$Fwy_NonRcr == 0)
+  } else {
+    HasNoArtOthOpsEff <- TRUE
+    HasNoFwyOthOpsEff <- TRUE
+  }
+  OthFwyOps <- L$Data$Year$Marea$OtherFwyOpsDeployProp
+  OthArtOps <- L$Data$Year$Marea$OtherArtOpsDeployProp
+  if (any(OthFwyOps != 0) & HasNoFwyOthOpsEff) {
+    Msg <- paste0(
+      "There are values for 'OtherFwyOpsDeployProp' in the ",
+      "'marea_operations_deployment.csv' input file that are not 0, ",
+      "but either the 'other_ops_effectiveness.csv' optional input file is not ",
+      "present or all the values in the 'Fwy_Rcr' and 'Fwy_NonRcr' fields ",
+      "of that file are 0. This inconsistency must be corrected. Unless you ",
+      "are sure of what you are doing, it is recommended that the ",
+      "'other_ops_effectiveness.csv' file not be provided and that the values for ",
+      "'OtherFwyOpsDeployProp' in the 'marea_operations_deployment.csv' be 0."
+    )
+    Errors_ <- c(Errors_, Msg)
+    rm(Msg)
+  }
+  if (any(OthArtOps != 0) & HasNoArtOthOpsEff) {
+    Msg <- paste0(
+      "There are values for 'OtherArtOpsDeployProp' in the ",
+      "'marea_operations_deployment.csv' input file that are not 0, ",
+      "but either the 'other_ops_effectiveness.csv' optional input file is not ",
+      "present or all the values in the 'Art_Rcr' and 'Art_NonRcr' fields ",
+      "of that file are 0. This inconsistency must be corrected. Unless you ",
+      "are sure of what you are doing, it is recommended that the ",
+      "'other_ops_effectiveness.csv' file not be provided and that the values for ",
+      "'OtherArtOpsDeployProp' in the 'marea_operations_deployment.csv' be 0."
+    )
+    Errors_ <- c(Errors_, Msg)
+    rm(Msg)
+  }
+  rm(HasOthOpsEff, HasNoArtOthOpsEff, HasNoFwyOthOpsEff, OthFwyOps, OthArtOps)
+
+  #---------------------------------------------------------------
+  #Check that congestion charges increase with congestion severity
+  #---------------------------------------------------------------
+  #Make data frames of congestion charges ordered by congestion level
+  CongLvlNames_ <- c("None", "Mod", "Hvy", "Sev", "Ext")
+  ArtCongChgNames_ <- paste0("Art", CongLvlNames_, "CongChg")
+  FwyCongChgNames_ <- paste0("Fwy", CongLvlNames_, "CongChg")
+  ArtCongChg_df <- data.frame(L$Data$Year$Marea[ArtCongChgNames_])
+  FwyCongChg_df <- data.frame(L$Data$Year$Marea[FwyCongChgNames_])
+  #Check that arterial congestion charges increase with congestion level
+  if (any(apply(ArtCongChg_df, 1, function(x) any(diff(x) < 0)))) {
+    Msg <- paste0(
+      "Some arterial congestion charges are lower at higher congestion levels ",
+      "than at lower congestion levels. Is this what you intend?"
+    )
+    Warnings_ <- c(Warnings_, Msg)
+    rm(Msg)
+  }
+  #Check that freeway congestion charges increase with congestion level
+  if (any(apply(FwyCongChg_df, 1, function(x) any(diff(x) < 0)))) {
+    Msg <- paste0(
+      "Some freeway congestion charges are lower at higher congestion levels ",
+      "than at lower congestion levels. Is this what you intend?"
+    )
+    Warnings_ <- c(Warnings_, Msg)
+    rm(Msg)
+  }
+  rm(CongLvlNames_, ArtCongChgNames_, FwyCongChgNames_, ArtCongChg_df, FwyCongChg_df)
+
+  #--------------------------------------------
   #Add Errors and Warnings to Out_ls and return
   #--------------------------------------------
   Out_ls$Errors <- Errors_
@@ -601,13 +800,33 @@ Initialize <- function(L) {
 }
 
 
-#================================
-#Code to aid development and test
-#================================
+#===============================================================
+#SECTION 4: MODULE DOCUMENTATION AND AUXILLIARY DEVELOPMENT CODE
+#===============================================================
+#Run module automatic documentation
+#----------------------------------
+documentModule("Initialize")
+
 #Test code to check specifications, loading inputs, and whether datastore
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions
 #-------------------------------------------------------------------------------
+# #Load libraries and test functions
+# library(visioneval)
+# library(filesstrings)
+# source("tests/scripts/test_functions.R")
+# #Set up test environment
+# TestSetup_ls <- list(
+#   TestDataRepo = "../Test_Data/VE-State",
+#   DatastoreName = "Datastore.tar",
+#   LoadDatastore = TRUE,
+#   TestDocsDir = "vestate",
+#   ClearLogs = TRUE,
+#   # SaveDatastore = TRUE
+#   SaveDatastore = FALSE
+# )
+# # setUpTests(TestSetup_ls)
+# #Run test module
 # TestDat_ <- testModule(
 #   ModuleName = "Initialize",
 #   LoadDatastore = TRUE,
@@ -615,15 +834,4 @@ Initialize <- function(L) {
 #   DoRun = FALSE
 # )
 # L <- TestDat_
-# R <- Initialize(TestDat_)
-
-#Test code to check everything including running the module and checking whether
-#the outputs are consistent with the 'Set' specifications
-#-------------------------------------------------------------------------------
-# TestDat_ <- testModule(
-#   ModuleName = "Initialize",
-#   LoadDatastore = TRUE,
-#   SaveDatastore = TRUE,
-#   DoRun = FALSE
-# )
-
+# R <- Initialize(L)

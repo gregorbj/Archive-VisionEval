@@ -1,0 +1,869 @@
+AgencyID,PrimaryUZA,UZAName,Population
+1,14,"Seattle, WA",3059393
+2,96,"Spokane, WA",387847
+3,14,"Seattle, WA",3059393
+5,14,"Seattle, WA",3059393
+6,248,"Yakima, WA",129534
+7,151,"Eugene, OR",247421
+8,24,"Portland, OR-WA",1849898
+11,108,"Boise City, ID",349684
+12,149,"Anchorage, AK",251243
+16,431,"Longview, WA-OR",63952
+18,171,"Kennewick-Pasco, WA",210975
+19,195,"Olympia-Lacey, WA",176617
+20,180,"Bremerton, WA",198979
+21,275,"Bellingham, WA",114473
+22,395,"Pocatello, ID",69809
+23,14,"Seattle, WA",3059393
+24,24,"Portland, OR-WA",1849898
+25,156,"Salem, OR",236632
+28,14,"Seattle, WA",3059393
+29,14,"Seattle, WA",3059393
+34,213,"Medford, OR",154081
+35,14,"Seattle, WA",3059393
+40,14,"Seattle, WA",3059393
+41,149,"Anchorage, AK",251243
+42,321,"Idaho Falls, ID",90733
+43,412,"Wenatchee, WA",67227
+44,435,"Mount Vernon, WA",62966
+45,425,"Fairbanks, AK",64513
+46,24,"Portland, OR-WA",1849898
+47,436,"Corvallis, OR",62433
+48,483,"Lewiston, ID-WA",51924
+49,149,"Anchorage, AK",251243
+51,483,"Lewiston, ID-WA",51924
+53,304,"Coeur d'Alene, ID",98378
+54,14,"Seattle, WA",3059393
+55,304,"Coeur d'Alene, ID",98378
+57,344,"Bend, OR",83794
+58,24,"Portland, OR-WA",1849898
+59,494,"Grants Pass, OR",50520
+60,225,"Marysville, WA",145140
+61,459,"Albany, OR",56997
+63,464,"Walla Walla, WA-OR",55805
+64,464,"Walla Walla, WA-OR",55805
+65,436,"Corvallis, OR",62433
+10001,39,"Providence, RI-MA",1190956
+10002,209,"Manchester, NH",158377
+10003,10,"Boston, MA-NH-RI",4181019
+10004,10,"Boston, MA-NH-RI",4181019
+10005,10,"Boston, MA-NH-RI",4181019
+10006,219,"New Bedford, MA",149443
+10007,448,"Pittsfield, MA",59124
+10008,65,"Springfield, MA-CT",621300
+10013,10,"Boston, MA-NH-RI",4181019
+10014,81,"Worcester, MA-CT",486514
+10015,446,"Lewiston, ME",59397
+10016,177,"Portland, ME",203914
+10017,47,"Hartford, CT",924859
+10040,174,"Norwich-New London, CT-RI",209190
+10042,48,"Bridgeport-Stamford, CT-NY",923311
+10045,47,"Hartford, CT",924859
+10048,47,"Hartford, CT",924859
+10049,72,"New Haven, CT",562839
+10050,48,"Bridgeport-Stamford, CT-NY",923311
+10051,201,"Danbury, CT-NY",168136
+10053,10,"Boston, MA-NH-RI",4181019
+10055,72,"New Haven, CT",562839
+10056,48,"Bridgeport-Stamford, CT-NY",923311
+10057,48,"Bridgeport-Stamford, CT-NY",923311
+10061,269,"Leominster-Fitchburg, MA",116960
+10063,47,"Hartford, CT",924859
+10064,39,"Providence, RI-MA",1190956
+10066,285,"Burlington, VT",108740
+10069,177,"Portland, ME",203914
+10086,331,"Dover-Rochester, NH-ME",88087
+10087,160,"Nashua, NH-MA",226400
+10088,177,"Portland, ME",203914
+10096,441,"Bangor, ME",61210
+10098,446,"Lewiston, ME",59397
+10099,329,"Portsmouth, NH-ME",88200
+10102,47,"Hartford, CT",924859
+10105,152,"Barnstable Town, MA",246695
+10107,48,"Bridgeport-Stamford, CT-NY",923311
+10108,47,"Hartford, CT",924859
+10112,177,"Portland, ME",203914
+10114,177,"Portland, ME",203914
+10115,177,"Portland, ME",203914
+10117,10,"Boston, MA-NH-RI",4181019
+10118,10,"Boston, MA-NH-RI",4181019
+10119,331,"Dover-Rochester, NH-ME",88087
+10121,446,"Lewiston, ME",59397
+10122,329,"Portsmouth, NH-ME",88200
+10123,10,"Boston, MA-NH-RI",4181019
+10125,448,"Pittsfield, MA",59124
+10126,81,"Worcester, MA-CT",486514
+10127,48,"Bridgeport-Stamford, CT-NY",923311
+10128,185,"Waterbury, CT",194535
+10129,10,"Boston, MA-NH-RI",4181019
+10130,47,"Hartford, CT",924859
+10132,47,"Hartford, CT",924859
+10133,10,"Boston, MA-NH-RI",4181019
+10178,10,"Boston, MA-NH-RI",4181019
+10179,10,"Boston, MA-NH-RI",4181019
+10180,10,"Boston, MA-NH-RI",4181019
+10181,10,"Boston, MA-NH-RI",4181019
+10182,10,"Boston, MA-NH-RI",4181019
+10183,152,"Barnstable Town, MA",246695
+10184,152,"Barnstable Town, MA",246695
+11154,209,"Manchester, NH",158377
+20002,67,"Albany-Schenectady, NY",594962
+20003,210,"Binghamton, NY-PA",158084
+20004,46,"Buffalo, NY",935906
+20005,407,"Elmira, NY",67983
+20006,1,"New York-Newark, NY-NJ-CT",18351295
+20008,1,"New York-Newark, NY-NJ-CT",18351295
+20009,89,"Poughkeepsie-Newburgh, NY-NJ",423566
+20010,89,"Poughkeepsie-Newburgh, NY-NJ",423566
+20018,90,"Syracuse, NY",412317
+20071,1,"New York-Newark, NY-NJ-CT",18351295
+20072,1,"New York-Newark, NY-NJ-CT",18351295
+20075,5,"Philadelphia, PA-NJ-DE-MD",5441567
+20076,1,"New York-Newark, NY-NJ-CT",18351295
+20078,1,"New York-Newark, NY-NJ-CT",18351295
+20080,1,"New York-Newark, NY-NJ-CT",18351295
+20082,1,"New York-Newark, NY-NJ-CT",18351295
+20084,1,"New York-Newark, NY-NJ-CT",18351295
+20085,1,"New York-Newark, NY-NJ-CT",18351295
+20089,1,"New York-Newark, NY-NJ-CT",18351295
+20096,1,"New York-Newark, NY-NJ-CT",18351295
+20098,1,"New York-Newark, NY-NJ-CT",18351295
+20099,1,"New York-Newark, NY-NJ-CT",18351295
+20100,1,"New York-Newark, NY-NJ-CT",18351295
+20113,60,"Rochester, NY",720572
+20116,90,"Syracuse, NY",412317
+20120,419,"Glens Falls, NY",65443
+20122,1,"New York-Newark, NY-NJ-CT",18351295
+20126,1,"New York-Newark, NY-NJ-CT",18351295
+20128,1,"New York-Newark, NY-NJ-CT",18351295
+20135,1,"New York-Newark, NY-NJ-CT",18351295
+20137,89,"Poughkeepsie-Newburgh, NY-NJ",423566
+20143,89,"Poughkeepsie-Newburgh, NY-NJ",423566
+20145,473,"Ithaca, NY",53661
+20148,89,"Poughkeepsie-Newburgh, NY-NJ",423566
+20149,1,"New York-Newark, NY-NJ-CT",18351295
+20160,1,"New York-Newark, NY-NJ-CT",18351295
+20161,1,"New York-Newark, NY-NJ-CT",18351295
+20163,1,"New York-Newark, NY-NJ-CT",18351295
+20165,1,"New York-Newark, NY-NJ-CT",18351295
+20166,1,"New York-Newark, NY-NJ-CT",18351295
+20169,1,"New York-Newark, NY-NJ-CT",18351295
+20172,90,"Syracuse, NY",412317
+20175,1,"New York-Newark, NY-NJ-CT",18351295
+20176,1,"New York-Newark, NY-NJ-CT",18351295
+20177,1,"New York-Newark, NY-NJ-CT",18351295
+20178,89,"Poughkeepsie-Newburgh, NY-NJ",423566
+20179,89,"Poughkeepsie-Newburgh, NY-NJ",423566
+20182,89,"Poughkeepsie-Newburgh, NY-NJ",423566
+20183,89,"Poughkeepsie-Newburgh, NY-NJ",423566
+20185,268,"Utica, NY",117328
+20187,89,"Poughkeepsie-Newburgh, NY-NJ",423566
+20188,1,"New York-Newark, NY-NJ-CT",18351295
+20189,1,"New York-Newark, NY-NJ-CT",18351295
+20190,1,"New York-Newark, NY-NJ-CT",18351295
+20191,457,"Kingston, NY",57442
+20192,1,"New York-Newark, NY-NJ-CT",18351295
+20193,5,"Philadelphia, PA-NJ-DE-MD",5441567
+20194,429,"Twin Rivers-Hightstown, NJ",64037
+20195,5,"Philadelphia, PA-NJ-DE-MD",5441567
+20196,1,"New York-Newark, NY-NJ-CT",18351295
+20197,1,"New York-Newark, NY-NJ-CT",18351295
+20199,150,"Atlantic City, NJ",248402
+20200,150,"Atlantic City, NJ",248402
+20201,5,"Philadelphia, PA-NJ-DE-MD",5441567
+20202,1,"New York-Newark, NY-NJ-CT",18351295
+20203,489,"Villas, NJ",51291
+20204,5,"Philadelphia, PA-NJ-DE-MD",5441567
+20206,1,"New York-Newark, NY-NJ-CT",18351295
+20208,5,"Philadelphia, PA-NJ-DE-MD",5441567
+20209,1,"New York-Newark, NY-NJ-CT",18351295
+20210,1,"New York-Newark, NY-NJ-CT",18351295
+20211,128,"Trenton, NJ",296668
+20212,1,"New York-Newark, NY-NJ-CT",18351295
+20213,67,"Albany-Schenectady, NY",594962
+20214,89,"Poughkeepsie-Newburgh, NY-NJ",423566
+20215,455,"Watertown, NY",57840
+20216,89,"Poughkeepsie-Newburgh, NY-NJ",423566
+20217,1,"New York-Newark, NY-NJ-CT",18351295
+20219,1,"New York-Newark, NY-NJ-CT",18351295
+20220,1,"New York-Newark, NY-NJ-CT",18351295
+20221,1,"New York-Newark, NY-NJ-CT",18351295
+20222,1,"New York-Newark, NY-NJ-CT",18351295
+22930,1,"New York-Newark, NY-NJ-CT",18351295
+30001,214,"Charleston, WV",153199
+30002,178,"Huntington, WV-KY-OH",202637
+30003,411,"Parkersburg, WV-OH",67229
+30006,45,"Richmond, VA",953556
+30007,172,"Roanoke, VA",210111
+30008,271,"Lynchburg, VA",116636
+30009,45,"Richmond, VA",953556
+30010,61,"Allentown, PA-NJ",664651
+30011,359,"Altoona, PA",79930
+30012,400,"Johnstown, PA",69014
+30013,183,"Erie, PA",196611
+30014,86,"Harrisburg, PA",444474
+30015,99,"Scranton, PA",381502
+30018,91,"Lancaster, PA",402004
+30019,5,"Philadelphia, PA-NJ-DE-MD",5441567
+30022,27,"Pittsburgh, PA",1733853
+30023,27,"Pittsburgh, PA",1733853
+30024,140,"Reading, PA",266254
+30025,99,"Scranton, PA",381502
+30026,462,"Williamsport, PA",56142
+30027,158,"York, PA",232045
+30030,8,"Washington, DC-VA-MD",4586770
+30034,19,"Baltimore, MD",2203663
+30035,353,"Wheeling, WV-OH",81249
+30036,317,"Charlottesville, VA",92359
+30040,19,"Baltimore, MD",2203663
+30041,484,"Cumberland, MD-WV-PA",51899
+30042,189,"Hagerstown, MD-WV-PA",182696
+30044,27,"Pittsburgh, PA",1733853
+30045,317,"Charlottesville, VA",92359
+30048,19,"Baltimore, MD",2203663
+30051,8,"Washington, DC-VA-MD",4586770
+30053,397,"Bristol-Bristol, TN-VA",69501
+30054,335,"State College, PA",87454
+30055,97,"Youngstown, OH-PA",387550
+30057,5,"Philadelphia, PA-NJ-DE-MD",5441567
+30058,8,"Washington, DC-VA-MD",4586770
+30061,417,"Monessen-California, PA",66086
+30066,389,"Weirton-Steubenville, WV-OH-PA",70889
+30068,8,"Washington, DC-VA-MD",4586770
+30070,8,"Washington, DC-VA-MD",4586770
+30071,8,"Washington, DC-VA-MD",4586770
+30072,230,"Frederick, MD",141576
+30073,8,"Washington, DC-VA-MD",4586770
+30074,169,"Aberdeen-Bel Air South-Bel Air North, MD",213751
+30075,5,"Philadelphia, PA-NJ-DE-MD",5441567
+30076,371,"Williamsburg, VA",75689
+30077,287,"Pottstown, PA",107682
+30078,27,"Pittsburgh, PA",1733853
+30079,231,"Fredericksburg, VA",141238
+30080,8,"Washington, DC-VA-MD",4586770
+30081,8,"Washington, DC-VA-MD",4586770
+30083,34,"Virginia Beach, VA",1439666
+30085,8,"Washington, DC-VA-MD",4586770
+30087,487,"Uniontown-Connellsville, PA",51370
+30088,283,"Waldorf, MD",109919
+30089,393,"Morgantown, WV",70350
+30090,189,"Hagerstown, MD-WV-PA",182696
+30091,328,"Blacksburg, VA",88542
+30092,383,"Westminster-Eldersburg, MD",72714
+30093,460,"Hazleton, PA",56827
+30094,413,"Harrisonburg, VA",66784
+30095,366,"Lebanon, PA",77086
+30096,307,"Salisbury, MD-DE",98081
+30099,398,"Winchester, VA",69449
+30101,27,"Pittsburgh, PA",1733853
+30104,8,"Washington, DC-VA-MD",4586770
+30105,8,"Washington, DC-VA-MD",4586770
+30106,8,"Washington, DC-VA-MD",4586770
+30107,393,"Morgantown, WV",70350
+30108,5,"Philadelphia, PA-NJ-DE-MD",5441567
+30109,451,"Lexington Park-California-Chesapeake Ranch Estates, MD",58875
+30111,27,"Pittsburgh, PA",1733853
+30112,8,"Washington, DC-VA-MD",4586770
+30137,472,"East Stroudsburg, PA-NJ",54316
+30198,34,"Virginia Beach, VA",1439666
+30199,430,"Beckley, WV",64022
+30200,328,"Blacksburg, VA",88542
+30989,461,"Staunton-Waynesboro, VA",56611
+30990,27,"Pittsburgh, PA",1733853
+40001,100,"Chattanooga, TN-GA",381112
+40002,74,"Knoxville, TN",558696
+40003,41,"Memphis, TN-MS-AR",1060061
+40004,44,"Nashville-Davidson, TN",969587
+40005,133,"Asheville, NC",280648
+40006,161,"Wilmington, NC",219957
+40007,50,"Raleigh, NC",884891
+40008,38,"Charlotte, NC-SC",1249442
+40009,122,"Fayetteville, NC",310282
+40010,200,"Gastonia, NC-SC",169495
+40011,202,"High Point, NC",166485
+40012,95,"Winston-Salem, NC",391024
+40014,175,"Gulfport, MS",208948
+40015,107,"Jackson, MS",351478
+40016,178,"Huntington, WV-KY-OH",202637
+40017,131,"Lexington-Fayette, KY",290263
+40018,43,"Louisville/Jefferson County, KY-IN",972546
+40019,30,"Cincinnati, OH-KY-IN",1624827
+40020,391,"Owensboro, KY",70543
+40021,309,"Albany, GA",95779
+40022,9,"Atlanta, GA",4515419
+40023,98,"Augusta-Richmond County, GA-SC",386787
+40024,147,"Columbus, GA-AL",253602
+40025,144,"Savannah, GA",260677
+40026,64,"Sarasota-Bradenton, FL",643260
+40027,17,"Tampa-St. Petersburg, FL",2441770
+40028,78,"Cape Coral, FL",530290
+40029,4,"Miami, FL",5502379
+40030,187,"Gainesville, FL",187781
+40031,143,"Lakeland, FL",262596
+40032,109,"Palm Coast-Daytona Beach-Port Orange, FL",349064
+40034,4,"Miami, FL",5502379
+40035,32,"Orlando, FL",1510516
+40036,153,"Tallahassee, FL",240223
+40037,4,"Miami, FL",5502379
+40038,113,"Pensacola, FL-AL",340067
+40040,40,"Jacksonville, FL",1065219
+40041,17,"Tampa-St. Petersburg, FL",2441770
+40042,55,"Birmingham, AL",749495
+40043,115,"Mobile, AL",326183
+40044,142,"Montgomery, AL",263907
+40045,233,"Tuscaloosa, AL",139114
+40046,64,"Sarasota-Bradenton, FL",643260
+40047,249,"Athens-Clarke County, GA",128754
+40049,426,"Gadsden, AL",64172
+40051,110,"Durham, NC",347602
+40053,93,"Greenville, SC",400492
+40054,259,"Johnson City, TN",120415
+40055,397,"Bristol-Bristol, TN-VA",69501
+40056,325,"Florence, SC",89557
+40057,385,"Jackson, TN",71880
+40058,444,"Rome, GA",60851
+40060,357,"Hattiesburg, MS",80358
+40063,84,"Palm Bay-Melbourne, FL",452791
+40064,360,"Anniston-Oxford, AL",79796
+40068,368,"Florence, AL",77074
+40071,132,"Huntsville, AL",286692
+40073,374,"Auburn, AL",74741
+40074,17,"Tampa-St. Petersburg, FL",2441770
+40077,4,"Miami, FL",5502379
+40078,9,"Atlanta, GA",4515419
+40080,291,"Kingsport, TN-VA",106571
+40081,370,"Anderson, SC",75702
+40082,9,"Atlanta, GA",4515419
+40086,21,"San Juan, PR",2148346
+40087,110,"Durham, NC",347602
+40092,208,"Clarksville, TN-KY",158655
+40093,120,"Greensboro, NC",311810
+40094,21,"San Juan, PR",2148346
+40095,266,"Greenville, NC",117798
+40096,406,"Rocky Mount, NC",68243
+40097,101,"Port St. Lucie, FL",376047
+40100,380,"Sumter, SC",73107
+40101,192,"Spartanburg, SC",180786
+40102,166,"Myrtle Beach-Socastee, SC-NC",215304
+40103,402,"Dothan, AL",68781
+40104,220,"Sebastian-Vero Beach South-Florida Ridge, FL",149422
+40105,21,"San Juan, PR",2148346
+40108,110,"Durham, NC",347602
+40110,76,"Charleston-North Charleston, SC",548404
+40111,392,"Decatur, AL",70436
+40112,21,"San Juan, PR",2148346
+40114,124,"Aguadilla-Isabela-San Sebastian, PR",306196
+40115,21,"San Juan, PR",2148346
+40117,21,"San Juan, PR",2148346
+40120,211,"Ocala, FL",156909
+40121,284,"Mayaguez, PR",109572
+40122,21,"San Juan, PR",2148346
+40123,21,"San Juan, PR",2148346
+40124,21,"San Juan, PR",2148346
+40125,21,"San Juan, PR",2148346
+40126,21,"San Juan, PR",2148346
+40127,179,"Winter Haven, FL",201289
+40128,186,"Fort Walton Beach-Navarre-Wright, FL",191917
+40129,199,"North Port-Port Charlotte, FL",169541
+40130,234,"Macon, GA",137570
+40131,202,"High Point, NC",166485
+40132,442,"Goldsboro, NC",61054
+40133,120,"Greensboro, NC",311810
+40135,9,"Atlanta, GA",4515419
+40137,21,"San Juan, PR",2148346
+40138,9,"Atlanta, GA",4515419
+40140,121,"Bonita Springs, FL",310298
+40141,75,"Columbia, SC",549777
+40143,50,"Raleigh, NC",884891
+40144,245,"Gainesville, GA",130846
+40145,21,"San Juan, PR",2148346
+40146,221,"Spring Hill, FL",148220
+40147,50,"Raleigh, NC",884891
+40150,387,"Florida-Imbery-Barceloneta, PR",71747
+40151,232,"Arecibo, PR",139171
+40152,4,"Miami, FL",5502379
+40153,9,"Atlanta, GA",4515419
+40155,399,"St. Augustine, FL",69173
+40156,98,"Augusta-Richmond County, GA-SC",386787
+40158,244,"Leesburg-Eustis-Tavares, FL",131337
+40159,44,"Nashville-Davidson, TN",969587
+40160,232,"Arecibo, PR",139171
+40161,9,"Atlanta, GA",4515419
+40162,44,"Nashville-Davidson, TN",969587
+40164,339,"Fajardo, PR",85225
+40165,21,"San Juan, PR",2148346
+40166,294,"Jacksonville, NC",105419
+40167,167,"Concord, NC",214881
+40169,55,"Birmingham, AL",749495
+40170,414,"Cleveland, TN",66777
+40171,74,"Knoxville, TN",558696
+40172,170,"Hickory, NC",212195
+40173,120,"Greensboro, NC",311810
+40174,319,"Yauco, PR",90899
+40175,21,"San Juan, PR",2148346
+40176,9,"Atlanta, GA",4515419
+40178,44,"Nashville-Davidson, TN",969587
+40179,4,"Miami, FL",5502379
+40180,249,"Athens-Clarke County, GA",128754
+40181,9,"Atlanta, GA",4515419
+40182,21,"San Juan, PR",2148346
+40183,124,"Aguadilla-Isabela-San Sebastian, PR",306196
+40184,364,"Bowling Green, KY",78306
+40185,229,"Panama City, FL",143280
+40186,241,"Murfreesboro, TN",133228
+40187,295,"Rock Hill, SC",104996
+40188,600,"Virgin Islands, VI",106405
+40190,449,"Morristown, TN",59036
+40191,379,"Elizabethtown-Radcliff, KY",73467
+40192,101,"Port St. Lucie, FL",376047
+40193,486,"Hinesville, GA",51456
+40194,284,"Mayaguez, PR",109572
+40195,21,"San Juan, PR",2148346
+40196,43,"Louisville/Jefferson County, KY-IN",972546
+40197,124,"Aguadilla-Isabela-San Sebastian, PR",306196
+40198,21,"San Juan, PR",2148346
+40199,21,"San Juan, PR",2148346
+40200,17,"Tampa-St. Petersburg, FL",2441770
+40201,21,"San Juan, PR",2148346
+40203,9,"Atlanta, GA",4515419
+40204,241,"Murfreesboro, TN",133228
+40205,38,"Charlotte, NC-SC",1249442
+40206,76,"Charleston-North Charleston, SC",548404
+40208,93,"Greenville, SC",400492
+40209,122,"Fayetteville, NC",310282
+40210,495,"New Bern, NC",50503
+40213,142,"Montgomery, AL",263907
+40214,167,"Concord, NC",214881
+40215,38,"Charlotte, NC-SC",1249442
+40217,167,"Concord, NC",214881
+40218,43,"Louisville/Jefferson County, KY-IN",972546
+40220,266,"Greenville, NC",117798
+40221,200,"Gastonia, NC-SC",169495
+40222,50,"Raleigh, NC",884891
+40223,122,"Fayetteville, NC",310282
+40224,133,"Asheville, NC",280648
+40225,261,"Burlington, NC",119911
+40226,133,"Asheville, NC",280648
+40227,294,"Jacksonville, NC",105419
+40228,38,"Charlotte, NC-SC",1249442
+40229,133,"Asheville, NC",280648
+40230,9,"Atlanta, GA",4515419
+40231,110,"Durham, NC",347602
+40232,32,"Orlando, FL",1510516
+40233,167,"Concord, NC",214881
+40234,218,"Ponce, PR",149539
+40235,98,"Augusta-Richmond County, GA-SC",386787
+40236,9,"Atlanta, GA",4515419
+40237,38,"Charlotte, NC-SC",1249442
+40238,4,"Miami, FL",5502379
+40239,4,"Miami, FL",5502379
+40240,4,"Miami, FL",5502379
+40241,4,"Miami, FL",5502379
+40244,192,"Spartanburg, SC",180786
+40245,40,"Jacksonville, FL",1065219
+41068,109,"Palm Coast-Daytona Beach-Port Orange, FL",349064
+44929,4,"Miami, FL",5502379
+44932,4,"Miami, FL",5502379
+50001,165,"Appleton, WI",216154
+50002,176,"Green Bay, WI",206520
+50003,256,"Kenosha, WI-IL",124064
+50004,298,"La Crosse, WI-MN",100868
+50005,92,"Madison, WI",401661
+50006,239,"Racine, WI",133700
+50008,35,"Milwaukee, WI",1376476
+50009,376,"Oshkosh, WI",74495
+50010,71,"Akron, OH",569499
+50011,135,"Canton, OH",279245
+50012,30,"Cincinnati, OH-KY-IN",1624827
+50015,25,"Cleveland, OH",1780673
+50016,36,"Columbus, OH",1368035
+50017,59,"Dayton, OH",724091
+50019,308,"Middletown, OH",97503
+50020,337,"Springfield, OH",85256
+50021,71,"Akron, OH",569499
+50022,80,"Toledo, OH-MI",507643
+50024,97,"Youngstown, OH-PA",387550
+50025,260,"Duluth, MN-WI",120378
+50026,194,"Fargo, ND-MN",176676
+50027,16,"Minneapolis-St. Paul, MN-WI",2650890
+50028,281,"St. Cloud, MN",110621
+50029,390,"Bay City, MI",70585
+50030,363,"Battle Creek, MI",78393
+50031,11,"Detroit, MI",3734090
+50032,106,"Flint, MI",356218
+50033,70,"Grand Rapids, MI",569935
+50034,324,"Jackson, MI",90057
+50035,173,"Kalamazoo, MI",209703
+50036,118,"Lansing, MI",313532
+50037,207,"Muskegon, MI",161280
+50038,136,"South Bend, IN-MI",278165
+50039,253,"Saginaw, MI",126265
+50040,125,"Ann Arbor, MI",306022
+50041,330,"Anderson, IN",88133
+50042,3,"Chicago, IL-IN",8608208
+50043,159,"Evansville, IN-KY",229351
+50044,119,"Fort Wayne, IN",313492
+50045,3,"Chicago, IL-IN",8608208
+50047,243,"Bloomington-Normal, IL",132600
+50050,33,"Indianapolis, IN",1487483
+50051,223,"Lafayette, IN",147725
+50052,136,"South Bend, IN-MI",278165
+50053,316,"Terre Haute, IN",92742
+50054,322,"Muncie, IN",90580
+50056,139,"Peoria, IL",266921
+50057,134,"Davenport, IA-IL",280051
+50058,127,"Rockford, IL",296863
+50059,206,"Springfield, IL",161316
+50060,224,"Champaign, IL",145361
+50061,313,"Decatur, IL",93863
+50066,3,"Chicago, IL-IN",8608208
+50088,388,"Sheboygan, WI",71313
+50090,372,"Mansfield, OH",75250
+50091,375,"Wausau, WI",74632
+50092,288,"Rochester, MN",107677
+50093,381,"Lima, OH",72852
+50095,191,"Lorain-Elyria, OH",180956
+50096,35,"Milwaukee, WI",1376476
+50098,418,"Michigan City-La Porte, IN-MI",66025
+50099,297,"Eau Claire, WI",102852
+50103,3,"Chicago, IL-IN",8608208
+50104,3,"Chicago, IL-IN",8608208
+50107,159,"Evansville, IN-KY",229351
+50108,396,"Janesville, WI",69658
+50109,432,"Beloit, WI-IL",63835
+50110,286,"Bloomington, IN",108657
+50113,3,"Chicago, IL-IN",8608208
+50117,25,"Cleveland, OH",1780673
+50118,3,"Chicago, IL-IN",8608208
+50119,11,"Detroit, MI",3734090
+50131,3,"Chicago, IL-IN",8608208
+50132,443,"Benton Harbor-St. Joseph-Fair Plain, MI",61022
+50133,297,"Eau Claire, WI",102852
+50141,11,"Detroit, MI",3734090
+50142,389,"Weirton-Steubenville, WV-OH-PA",70889
+50143,25,"Cleveland, OH",1780673
+50145,437,"Kokomo, IN",62182
+50146,20,"St. Louis, MO-IL",2150706
+50148,336,"Port Huron, MI",87106
+50149,227,"Elkhart, IN-MI",143592
+50152,298,"La Crosse, WI-MN",100868
+50154,16,"Minneapolis-St. Paul, MN-WI",2650890
+50155,16,"Minneapolis-St. Paul, MN-WI",2650890
+50157,30,"Cincinnati, OH-KY-IN",1624827
+50158,125,"Ann Arbor, MI",306022
+50159,350,"Kankakee, IL",81926
+50160,35,"Milwaukee, WI",1376476
+50161,35,"Milwaukee, WI",1376476
+50162,418,"Michigan City-La Porte, IN-MI",66025
+50163,369,"Newark, OH",76068
+50165,59,"Dayton, OH",724091
+50166,30,"Cincinnati, OH-KY-IN",1624827
+50167,3,"Chicago, IL-IN",8608208
+50169,59,"Dayton, OH",724091
+50171,468,"Fond du Lac, WI",54901
+50174,492,"Danville, IL-IN",50996
+50176,404,"DeKalb, IL",68545
+50177,467,"Columbus, IN",54933
+50179,3,"Chicago, IL-IN",8608208
+50180,262,"South Lyon-Howell, MI",119509
+50182,3,"Chicago, IL-IN",8608208
+50183,3,"Chicago, IL-IN",8608208
+50184,299,"Holland, MI",99941
+50185,3,"Chicago, IL-IN",8608208
+50186,178,"Huntington, WV-KY-OH",202637
+50191,36,"Columbus, OH",1368035
+50193,11,"Detroit, MI",3734090
+50194,127,"Rockford, IL",296863
+50195,372,"Mansfield, OH",75250
+50196,207,"Muskegon, MI",161280
+50197,97,"Youngstown, OH-PA",387550
+50198,25,"Cleveland, OH",1780673
+50199,36,"Columbus, OH",1368035
+50200,30,"Cincinnati, OH-KY-IN",1624827
+50201,33,"Indianapolis, IN",1487483
+50202,405,"West Bend, WI",68444
+50204,408,"Carbondale, IL",67821
+50205,456,"Mankato, MN",57584
+50207,450,"Midland, MI",59014
+50208,450,"Midland, MI",59014
+50209,33,"Indianapolis, IN",1487483
+50210,405,"West Bend, WI",68444
+50211,408,"Carbondale, IL",67821
+50212,432,"Beloit, WI-IL",63835
+50213,11,"Detroit, MI",3734090
+50214,404,"DeKalb, IL",68545
+50215,404,"DeKalb, IL",68545
+50515,16,"Minneapolis-St. Paul, MN-WI",2650890
+50516,16,"Minneapolis-St. Paul, MN-WI",2650890
+50517,16,"Minneapolis-St. Paul, MN-WI",2650890
+50518,16,"Minneapolis-St. Paul, MN-WI",2650890
+50519,16,"Minneapolis-St. Paul, MN-WI",2650890
+55308,92,"Madison, WI",401661
+55311,30,"Cincinnati, OH-KY-IN",1624827
+55312,35,"Milwaukee, WI",1376476
+60001,182,"Amarillo, TX",196651
+60006,53,"El Paso, TX-NM",803086
+60007,6,"Dallas-Fort Worth-Arlington, TX",5121892
+60008,7,"Houston, TX",4944332
+60009,157,"Laredo, TX",235730
+60010,155,"Lubbock, TX",237356
+60011,26,"San Antonio, TX",1758210
+60012,196,"Waco, TX",172378
+60013,215,"Port Arthur, TX",153150
+60014,164,"Brownsville, TX",217585
+60016,222,"Beaumont, TX",147922
+60017,51,"Oklahoma City, OK",861505
+60018,62,"Tulsa, OK",655479
+60019,56,"Albuquerque, NM",741318
+60022,68,"Baton Rouge, LA",594309
+60023,228,"Lake Charles, LA",143440
+60024,126,"Shreveport, LA",298317
+60025,346,"Alexandria, LA",82804
+60026,272,"Monroe, LA",116533
+60032,49,"New Orleans, LA",899703
+60033,88,"Little Rock, AR",431388
+60034,475,"Pine Bluff, AR",53495
+60035,301,"Wichita Falls, TX",99437
+60038,148,"Lafayette, LA",252720
+60040,282,"Abilene, TX",110421
+60041,6,"Dallas-Fort Worth-Arlington, TX",5121892
+60048,37,"Austin, TX",1362416
+60049,250,"Las Cruces, NM",128600
+60051,116,"Corpus Christi, TX",320069
+60056,6,"Dallas-Fort Worth-Arlington, TX",5121892
+60058,49,"New Orleans, LA",899703
+60059,197,"College Station-Bryan, TX",171345
+60062,129,"Fayetteville-Springdale-Rogers, AR-MO",295083
+60068,6,"Dallas-Fort Worth-Arlington, TX",5121892
+60070,6,"Dallas-Fort Worth-Arlington, TX",5121892
+60072,129,"Fayetteville-Springdale-Rogers, AR-MO",295083
+60077,326,"Santa Fe, NM",89284
+60080,226,"Houma, LA",144875
+60081,302,"Longview, TX",98884
+60082,293,"Texas City, TX",106383
+60084,6,"Dallas-Fort Worth-Arlington, TX",5121892
+60086,257,"Fort Smith, AR-OK",122947
+60088,49,"New Orleans, LA",899703
+60089,247,"Tyler, TX",130247
+60090,57,"McAllen, TX",728825
+60091,163,"Killeen, TX",217630
+60093,365,"Texarkana-Texarkana, TX-AR",78162
+60094,312,"Lawton, OK",94457
+60095,434,"Victoria, TX",63683
+60096,296,"Norman, OK",103898
+60097,252,"Odessa, TX",126405
+60099,57,"McAllen, TX",728825
+60100,477,"Farmington, NM",53049
+60101,104,"Denton-Lewisville, TX",366174
+60102,315,"San Angelo, TX",92984
+60103,7,"Houston, TX",4944332
+60104,420,"Jonesboro, AR",65419
+60105,466,"Hot Springs, AR",55121
+60108,7,"Houston, TX",4944332
+60109,318,"Slidell, LA",91151
+60111,56,"Albuquerque, NM",741318
+60112,49,"New Orleans, LA",899703
+60113,6,"Dallas-Fort Worth-Arlington, TX",5121892
+60114,6,"Dallas-Fort Worth-Arlington, TX",5121892
+60115,6,"Dallas-Fort Worth-Arlington, TX",5121892
+60116,104,"Denton-Lewisville, TX",366174
+60117,6,"Dallas-Fort Worth-Arlington, TX",5121892
+60118,51,"Oklahoma City, OK",861505
+60119,7,"Houston, TX",4944332
+60120,7,"Houston, TX",4944332
+60121,7,"Houston, TX",4944332
+60122,226,"Houma, LA",144875
+60125,37,"Austin, TX",1362416
+60126,7,"Houston, TX",4944332
+60127,49,"New Orleans, LA",899703
+60128,49,"New Orleans, LA",899703
+60129,154,"Conroe-The Woodlands, TX",239938
+60130,26,"San Antonio, TX",1758210
+60131,479,"San Marcos, TX",52826
+60132,148,"Lafayette, LA",252720
+60133,6,"Dallas-Fort Worth-Arlington, TX",5121892
+60134,154,"Conroe-The Woodlands, TX",239938
+66270,7,"Houston, TX",4944332
+70001,145,"Lincoln, NE",258719
+70002,58,"Omaha, NE-IA",725008
+70003,138,"Springfield, MO",273724
+70005,31,"Kansas City, MO-KS",1519417
+70006,20,"St. Louis, MO-IL",2150706
+70007,134,"Davenport, IA-IL",280051
+70008,193,"Cedar Rapids, IA",177844
+70009,134,"Davenport, IA-IL",280051
+70010,85,"Des Moines, IA",450070
+70011,409,"Dubuque, IA-IL",67818
+70012,292,"Sioux City, IA-NE-SD",106494
+70013,278,"Waterloo, IA",113418
+70014,217,"Topeka, KS",150003
+70015,83,"Wichita, KS",472870
+70016,255,"Columbia, MO",124748
+70018,290,"Iowa City, IA",106621
+70019,290,"Iowa City, IA",106621
+70030,290,"Iowa City, IA",106621
+70032,354,"St. Joseph, MO-KS",81176
+70035,31,"Kansas City, MO-KS",1519417
+70040,347,"Joplin, MO",82775
+70041,445,"Ames, IA",60438
+70043,452,"Jefferson City, MO",58533
+70045,290,"Iowa City, IA",106621
+70046,31,"Kansas City, MO-KS",1519417
+70047,31,"Kansas City, MO-KS",1519417
+70048,332,"Lawrence, KS",88053
+70049,134,"Davenport, IA-IL",280051
+70050,478,"Cape Girardeau, MO-IL",52900
+70051,478,"Cape Girardeau, MO-IL",52900
+70052,496,"Grand Island, NE",50440
+70053,469,"Manhattan, KS",54622
+70054,83,"Wichita, KS",472870
+70055,83,"Wichita, KS",472870
+70056,83,"Wichita, KS",472870
+70057,20,"St. Louis, MO-IL",2150706
+70271,31,"Kansas City, MO-KS",1519417
+80001,42,"Salt Lake City-West Valley City, UT",1021243
+80002,212,"Sioux Falls, SD",156777
+80003,194,"Fargo, ND-MN",176676
+80004,273,"Billings, MT",114773
+80005,73,"Colorado Springs, CO",559409
+80006,18,"Denver-Aurora, CO",2374203
+80007,236,"Pueblo, CO",136550
+80008,440,"Grand Forks, ND-MN",61270
+80009,348,"Missoula, MT",82157
+80010,264,"Greeley, CO",117825
+80011,141,"Fort Collins, CO",264465
+80012,422,"Great Falls, MT",65207
+80013,424,"Casper, WY",64548
+80014,352,"Rapid City, SD",81251
+80016,251,"Grand Junction, CO",128124
+80019,349,"Bismarck, ND",81955
+80020,377,"Cheyenne, WY",73588
+80025,141,"Fort Collins, CO",264465
+80026,305,"St. George, UT",98370
+80028,311,"Logan, UT",94983
+80106,141,"Fort Collins, CO",264465
+80107,348,"Missoula, MT",82157
+80109,18,"Denver-Aurora, CO",2374203
+80110,194,"Fargo, ND-MN",176676
+90001,94,"Reno, NV-CA",392141
+90002,54,"Urban Honolulu, HI",802459
+90003,13,"San Francisco-Oakland, CA",3281212
+90004,79,"Bakersfield, CA",523994
+90006,204,"Santa Cruz, CA",163703
+90007,105,"Modesto, CA",358172
+90008,2,"Los Angeles-Long Beach-Anaheim, CA",12150996
+90009,13,"San Francisco-Oakland, CA",3281212
+90010,2,"Los Angeles-Long Beach-Anaheim, CA",12150996
+90012,102,"Stockton, CA",370583
+90013,29,"San Jose, CA",1664496
+90014,13,"San Francisco-Oakland, CA",3281212
+90015,13,"San Francisco-Oakland, CA",3281212
+90016,13,"San Francisco-Oakland, CA",3281212
+90017,123,"Santa Rosa, CA",308231
+90019,28,"Sacramento, CA",1723634
+90020,184,"Santa Barbara, CA",195861
+90022,2,"Los Angeles-Long Beach-Anaheim, CA",12150996
+90023,2,"Los Angeles-Long Beach-Anaheim, CA",12150996
+90024,2,"Los Angeles-Long Beach-Anaheim, CA",12150996
+90026,15,"San Diego, CA",2956746
+90027,63,"Fresno, CA",654628
+90029,22,"Riverside-San Bernardino, CA",1932666
+90030,15,"San Diego, CA",2956746
+90031,22,"Riverside-San Bernardino, CA",1932666
+90032,12,"Phoenix-Mesa, AZ",3629114
+90033,52,"Tucson, AZ",843168
+90034,12,"Phoenix-Mesa, AZ",3629114
+90035,103,"Oxnard, CA",367260
+90036,2,"Los Angeles-Long Beach-Anaheim, CA",12150996
+90039,2,"Los Angeles-Long Beach-Anaheim, CA",12150996
+90041,2,"Los Angeles-Long Beach-Anaheim, CA",12150996
+90042,2,"Los Angeles-Long Beach-Anaheim, CA",12150996
+90043,2,"Los Angeles-Long Beach-Anaheim, CA",12150996
+90044,2,"Los Angeles-Long Beach-Anaheim, CA",12150996
+90045,23,"Las Vegas-Henderson, NV",1886011
+90050,254,"Simi Valley, CA",125206
+90052,22,"Riverside-San Bernardino, CA",1932666
+90061,270,"Yuba City, CA",116719
+90062,276,"Seaside-Monterey, CA",114237
+90078,66,"Concord, CA",615968
+90079,111,"Indio-Cathedral City, CA",345580
+90086,22,"Riverside-San Bernardino, CA",1932666
+90087,246,"Santa Maria, CA",130447
+90088,342,"Napa, CA",83913
+90089,123,"Santa Rosa, CA",308231
+90090,28,"Sacramento, CA",1723634
+90091,162,"Visalia, CA",219454
+90092,240,"Fairfield, CA",133683
+90093,267,"Redding, CA",117731
+90095,15,"San Diego, CA",2956746
+90119,69,"Mission Viejo-Lake Forest-San Clemente, CA",583681
+90121,112,"Lancaster-Palmdale, CA",341219
+90131,12,"Phoenix-Mesa, AZ",3629114
+90134,13,"San Francisco-Oakland, CA",3281212
+90136,12,"Phoenix-Mesa, AZ",3629114
+90140,12,"Phoenix-Mesa, AZ",3629114
+90142,382,"Davis, CA",72794
+90144,66,"Concord, CA",615968
+90146,2,"Los Angeles-Long Beach-Anaheim, CA",12150996
+90147,2,"Los Angeles-Long Beach-Anaheim, CA",12150996
+90148,114,"Victorville-Hesperia, CA",328454
+90149,485,"Lompoc, CA",51509
+90151,2,"Los Angeles-Long Beach-Anaheim, CA",12150996
+90154,2,"Los Angeles-Long Beach-Anaheim, CA",12150996
+90155,314,"Vacaville, CA",93141
+90156,447,"San Luis Obispo, CA",59219
+90157,2,"Los Angeles-Long Beach-Anaheim, CA",12150996
+90159,13,"San Francisco-Oakland, CA",3281212
+90161,13,"San Francisco-Oakland, CA",3281212
+90162,137,"Antioch, CA",277634
+90163,386,"Camarillo, CA",71772
+90164,103,"Oxnard, CA",367260
+90165,168,"Thousand Oaks, CA",214811
+90166,2,"Los Angeles-Long Beach-Anaheim, CA",12150996
+90167,382,"Davis, CA",72794
+90168,28,"Sacramento, CA",1723634
+90169,12,"Phoenix-Mesa, AZ",3629114
+90171,146,"Santa Clarita, CA",258653
+90173,235,"Merced, CA",136969
+90175,403,"Lodi, CA",68738
+90182,102,"Stockton, CA",370583
+90191,52,"Tucson, AZ",843168
+90193,15,"San Diego, CA",2956746
+90194,423,"El Paso de Robles (Paso Robles)-Atascadero, CA",65088
+90196,28,"Sacramento, CA",1723634
+90197,334,"Tracy, CA",87569
+90198,394,"Porterville, CA",70272
+90199,362,"Madera, CA",78413
+90200,333,"Hanford, CA",87941
+90201,300,"Turlock, CA",99904
+90205,28,"Sacramento, CA",1723634
+90206,447,"San Luis Obispo, CA",59219
+90208,306,"Chico, CA",98176
+90209,12,"Phoenix-Mesa, AZ",3629114
+90211,2,"Los Angeles-Long Beach-Anaheim, CA",12150996
+90213,428,"Petaluma, CA",64078
+90214,2,"Los Angeles-Long Beach-Anaheim, CA",12150996
+90215,454,"Carson City, NV",58079
+90217,345,"Manteca, CA",83578
+90218,22,"Riverside-San Bernardino, CA",1932666
+90219,384,"Flagstaff, AZ",71957
+90220,28,"Sacramento, CA",1723634
+90222,52,"Tucson, AZ",843168
+90223,28,"Sacramento, CA",1723634
+90225,13,"San Francisco-Oakland, CA",3281212
+90226,289,"El Centro-Calexico, CA",107672
+90228,52,"Tucson, AZ",843168
+90229,28,"Sacramento, CA",1723634
+90230,333,"Hanford, CA",87941
+90231,2,"Los Angeles-Long Beach-Anaheim, CA",12150996
+90232,203,"Vallejo, CA",165074
+90233,238,"Yuma, AZ-CA",135267
+90234,13,"San Francisco-Oakland, CA",3281212
+90235,28,"Sacramento, CA",1723634
+90236,105,"Modesto, CA",358172
+90238,471,"Delano, CA",54372
+90239,480,"Sierra Vista, AZ",52745
+90241,463,"Kahului, HI",55934
+90242,23,"Las Vegas-Henderson, NV",1886011
+90243,184,"Santa Barbara, CA",195861
+90244,162,"Visalia, CA",219454
