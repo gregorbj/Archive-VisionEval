@@ -31,6 +31,8 @@
 #' 6) Checks all of the model input files to determine whether they they are
 #' complete and comply with specifications.
 #'
+#' @param ModelScriptFile A string identifying the path to the file that contains
+#'   the steps in the model to run (i.e. the calls to \code{runModule})
 #' @param ParamDir A string identifying the relative or absolute path to the
 #'   directory where the parameter and geography definition files are located.
 #'   The default value is "defs".
@@ -56,7 +58,7 @@
 #' @export
 initializeModel <-
   function(
-    ModelScriptFile = "Run_Model.R",
+    ModelScriptFile = "run_model.R",
     ParamDir = "defs",
     RunParamFile = "run_parameters.json",
     GeoFile = "geo.csv",
@@ -610,3 +612,5 @@ runModule <- function(ModuleName, PackageName, RunFor, RunYear, StopOnErr = TRUE
     )
   }
 }
+
+# TODO: Run the steps from ModelScriptFile (equivalently getModelState()$ModuleCalls_df)
