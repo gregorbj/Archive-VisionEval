@@ -11,6 +11,7 @@ library(visioneval)
 #Initialize model
 #----------------
 initializeModel(
+  ModelScriptFile = "../Run_Model.R",
   ParamDir = "defs",
   RunParamFile = "run_parameters.json",
   GeoFile = "geo.csv",
