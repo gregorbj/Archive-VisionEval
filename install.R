@@ -51,18 +51,21 @@ cat(paste0("\n","Download directory: ", destdir, "\n"))
 # VE framework and modules
 VE_framework <- "visioneval"
 VE_modules <- c(
-	"VE2001NHTS",
-	"VESyntheticFirms",
-	"VESimHouseholds",
-	"VELandUse",
-	"VETransportSupply",
-	"VETransportSupplyUse",
-	"VEHouseholdTravel",
-	"VEHouseholdVehicles",
-	"VEPowertrainsAndFuels",
-	"VETravelPerformance",
-	"VEReports",
-	"VEScenario"
+  "VE2001NHTS",
+  "VESyntheticFirms",
+  "VESimHouseholds",
+  "VELandUse",
+  "VETransportSupply",
+  "VETransportSupplyUse",
+  "VEHouseholdTravel",
+  "VEHouseholdVehicles",
+  "VEPowertrainsAndFuels",
+  "VETravelPerformance",
+  "VESimLandUseData",
+  "VESimLandUse",
+  "VESimTransportSupply",
+  "VEScenario",
+  "VEReports"
 )
 
 #Install the required VE framework package
