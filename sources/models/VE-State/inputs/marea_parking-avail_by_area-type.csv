@@ -1,0 +1,19 @@
+Geo,Year,CenterPkgSpacesPerSFDU,InnerPkgSpacesPerSFDU,OuterPkgSpacesPerSFDU,CenterPkgSpacesPerMFDU,InnerPkgSpacesPerMFDU,OuterPkgSpacesPerMFDU,CenterPkgSpacesPerGQ,InnerPkgSpacesPerGQ,OuterPkgSpacesPerGQ
+Albany,2010,3,4,4,2,2,2,1,1,1
+Bend,2010,3,4,4,2,2,2,1,1,1
+Corvallis,2010,3,4,4,2,2,2,1,1,1
+Eugene,2010,2,3,4,1,2,2,0,0,1
+Grants Pass,2010,3,4,4,2,2,2,1,1,1
+Medford,2010,2,3,4,1,2,2,0,0,1
+Portland,2010,1,2,4,0,1,2,0,0,1
+Salem,2010,2,3,4,1,2,2,0,0,1
+None,2010,4,4,4,4,4,4,1,1,1
+Albany,2040,3,4,4,2,2,2,1,1,1
+Bend,2040,3,4,4,2,2,2,1,1,1
+Corvallis,2040,3,4,4,2,2,2,1,1,1
+Eugene,2040,2,3,4,1,2,2,0,0,1
+Grants Pass,2040,3,4,4,2,2,2,1,1,1
+Medford,2040,3,3,4,1,2,2,0,0,1
+Portland,2040,1,2,4,0,1,2,0,0,1
+Salem,2040,2,3,4,1,2,2,0,0,1
+None,2040,4,4,4,4,4,4,1,1,1

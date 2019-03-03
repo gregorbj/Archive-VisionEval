@@ -5,7 +5,7 @@
 #<doc>
 #
 ### LoadDefaultRoadDvmtValues
-#### November 24, 2018
+#### January 23, 2019
 #
 #This script calculates default values for base year roadway DVMT by vehicle type (light-duty, heavy truck, bus), the distribution of roadway DVMT by vehicle type to roadway classes (freeway, arterial, other), and the ratio of commercial service light-duty vehicle travel to household vehicle travel. These values are calculated at the state level and at the urbanized area level. This simplifies how the modules in the VETravelPerformance package are used because the user may elect to use default data for their metropolitan or state model or they may supply their own data as user inputs. The following datasets are saved as a components of the RoadDvmtModel_ls list:
 #
@@ -55,7 +55,7 @@
 #
 #Two matrices are created which tabulate annual vehicle miles traveled (VMT) (in millions) for each road class (Fwy = freeway, Art = arterial, Oth = other) in each state. One matrix contains data for roadways classified as urban (i.e. located in Census urbanized areas) and the other contains data for roadways classified as rural. The data in these matrices is compiled from data contained in table VM-2 of the Highways Statistics data series. Since table VM-2 is a multi-level table, it has been split into 2 simpler tables where each table contains the data for urban or rural roads as follows:
 #
-#* functional_class_vmt_split_urban.csv
+#* functional_class_vmt_split_rural.csv
 #
 #* functional_class_vmt_split_urban.csv
 #
@@ -257,7 +257,7 @@ processVmtByFcData <- function(UrbanOrRural) {
     }))[, c("Fwy", "Art", "Oth")]
 }
 
-#Create matrices of urban and rual VMT by state and road class
+#Create matrices of urban and rural VMT by state and road class
 UrbanVmt_StRc <- processVmtByFcData("urban")
 RuralVmt_StRc <- processVmtByFcData("rural")
 Vmt_StRc <- UrbanVmt_StRc + RuralVmt_StRc
@@ -331,6 +331,7 @@ rm(UzaDvmt_df, RoadClass_, UzaDvmt_mx)
 UrbanVmt_StVtRc <- sweep(UrbanVtProps_StVtRc, c(1,3), UrbanVmt_StRc, "*")
 #Calculate rural VMT by state, vehicle type, and road class
 RuralVmt_StVtRc <- sweep(RuralVtProps_StVtRc, c(1,3), RuralVmt_StRc, "*")
+RoadDvmtModel_ls$RuralVmt_StVtRc <- RuralVmt_StVtRc
 #Expand the state urban vehicle type props to urbanized areas
 UzaVtProps_UaVtRc <- UrbanVtProps_StVtRc[attributes(UzaDvmt_UaRc)$State,,]
 #Calculate the urbanized area DVMT by vehicle type and road class
@@ -494,6 +495,8 @@ RoadDvmtModel_ls$ComSvcDvmtFactor <- local({
 #' road class in urbanized areas.
 #'
 #' @format A list having the following components:
+#' RuralVmt_StVtRc: array of DVMT on non-urban roads by state, vehicle type and
+#' road class used to calculate average split on non-urban roads;
 #' HvyTrkDvmtPC_St: the ratio of heavy truck DVMT to population by state;
 #' HvyTrkDvmtUrbanProp_St: the proportion of heavy truck DVMT occurring within
 #' urban areas of each state;

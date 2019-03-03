@@ -51,7 +51,7 @@ UNLIKELY - Values that are unlikely. Values that meet any of the listed conditio
 DESCRIPTION - A description of the data.
 
 ### azone_electricity_carbon_intensity.csv
-This input file is OPTIONAL. It is only needed if the user wants to modify the relative employment rates.
+This input file is OPTIONAL.
 
 |NAME          |TYPE     |UNITS |PROHIBIT |ISELEMENTOF |UNLIKELY |DESCRIPTION                                                                        |
 |:-------------|:--------|:-----|:--------|:-----------|:--------|:----------------------------------------------------------------------------------|
@@ -59,7 +59,7 @@ This input file is OPTIONAL. It is only needed if the user wants to modify the r
 |Year          |         |      |         |            |         |Must contain a record for each Azone and model run year.                           |
 |ElectricityCI |compound |GM/MJ |NA, < 0  |            |         |Carbon intensity of electricity at point of consumption (grams CO2e per megajoule) |
 ### marea_transit_ave_fuel_carbon_intensity.csv
-This input file is OPTIONAL. It is only needed if the user wants to modify the relative employment rates.
+This input file is OPTIONAL.
 
 |NAME              |TYPE     |UNITS |PROHIBIT |ISELEMENTOF |UNLIKELY |DESCRIPTION                                                                               |
 |:-----------------|:--------|:-----|:--------|:-----------|:--------|:-----------------------------------------------------------------------------------------|
@@ -69,7 +69,7 @@ This input file is OPTIONAL. It is only needed if the user wants to modify the r
 |TransitBusFuelCI  |compound |GM/MJ |< 0      |            |         |Average carbon intensity of fuel used by transit buses (grams CO2e per megajoule)         |
 |TransitRailFuelCI |compound |GM/MJ |< 0      |            |         |Average carbon intensity of fuel used by transit rail vehicles (grams CO2e per megajoule) |
 ### marea_transit_biofuel_mix.csv
-This input file is OPTIONAL. It is only needed if the user wants to modify the relative employment rates.
+This input file is OPTIONAL.
 
 |   |NAME                       |TYPE   |UNITS      |PROHIBIT     |ISELEMENTOF |UNLIKELY |DESCRIPTION                                                                         |
 |:--|:--------------------------|:------|:----------|:------------|:-----------|:--------|:-----------------------------------------------------------------------------------|
@@ -79,7 +79,7 @@ This input file is OPTIONAL. It is only needed if the user wants to modify the r
 |6  |TransitBiodieselPropDiesel |double |proportion |NA, < 0, > 1 |            |         |Biodiesel proportion of diesel used by transit vehicles                             |
 |7  |TransitRngPropCng          |double |proportion |NA, < 0, > 1 |            |         |Renewable natural gas proportion of compressed natural gas used by transit vehicles |
 ### marea_transit_fuel.csv
-This input file is OPTIONAL. It is only needed if the user wants to modify the relative employment rates.
+This input file is OPTIONAL.
 
 |   |NAME             |TYPE   |UNITS      |PROHIBIT |ISELEMENTOF |UNLIKELY |DESCRIPTION                                                                     |
 |:--|:----------------|:------|:----------|:--------|:-----------|:--------|:-------------------------------------------------------------------------------|
@@ -94,7 +94,7 @@ This input file is OPTIONAL. It is only needed if the user wants to modify the r
 |14 |RailPropDiesel   |double |proportion |< 0, > 1 |            |         |Proportion of non-electric transit rail travel powered by diesel                |
 |15 |RailPropGasoline |double |proportion |< 0, > 1 |            |         |Proportion of non-electric transit rail travel powered by gasoline              |
 ### marea_transit_powertrain_prop.csv
-This input file is OPTIONAL. It is only needed if the user wants to modify the relative employment rates.
+This input file is OPTIONAL.
 
 |   |NAME         |TYPE   |UNITS      |PROHIBIT |ISELEMENTOF |UNLIKELY |DESCRIPTION                                                                    |
 |:--|:------------|:------|:----------|:--------|:-----------|:--------|:------------------------------------------------------------------------------|
@@ -110,7 +110,7 @@ This input file is OPTIONAL. It is only needed if the user wants to modify the r
 |23 |RailPropHev  |double |proportion |< 0, > 1 |            |         |Proportion of transit rail travel using hybrid electric powertrains            |
 |24 |RailPropEv   |double |proportion |< 0, > 1 |            |         |Proportion of transit rail travel using electric powertrains                   |
 ### region_ave_fuel_carbon_intensity.csv
-This input file is OPTIONAL. It is only needed if the user wants to modify the relative employment rates.
+This input file is OPTIONAL.
 
 |   |NAME              |TYPE     |UNITS |PROHIBIT |ISELEMENTOF |UNLIKELY |DESCRIPTION                                                                                      |
 |:--|:-----------------|:--------|:-----|:--------|:-----------|:--------|:------------------------------------------------------------------------------------------------|
@@ -123,7 +123,7 @@ This input file is OPTIONAL. It is only needed if the user wants to modify the r
 |30 |TransitBusFuelCI  |compound |GM/MJ |< 0      |            |         |Average carbon intensity of fuels used by transit buses (grams CO2e per megajoule)               |
 |31 |TransitRailFuelCI |compound |GM/MJ |< 0      |            |         |Average carbon intensity of fuels used by transit rail vehicles (grams CO2e per megajoule)       |
 ### region_carsvc_powertrain_prop.csv
-This input file is OPTIONAL. It is only needed if the user wants to modify the relative employment rates.
+This input file is OPTIONAL.
 
 |   |NAME                |TYPE   |UNITS      |PROHIBIT     |ISELEMENTOF |UNLIKELY |DESCRIPTION                                                                                    |
 |:--|:-------------------|:------|:----------|:------------|:-----------|:--------|:----------------------------------------------------------------------------------------------|
@@ -135,7 +135,7 @@ This input file is OPTIONAL. It is only needed if the user wants to modify the r
 |36 |CarSvcLtTrkPropHev  |double |proportion |NA, < 0, > 1 |            |         |Proportion of car service light truck travel powered by hybrid electric powertrains            |
 |37 |CarSvcLtTrkPropBev  |double |proportion |NA, < 0, > 1 |            |         |Proportion of car service light truck travel powered by battery electric powertrains           |
 ### region_comsvc_powertrain_prop.csv
-This input file is OPTIONAL. It is only needed if the user wants to modify the relative employment rates.
+This input file is OPTIONAL.
 
 |   |NAME                |TYPE   |UNITS      |PROHIBIT     |ISELEMENTOF |UNLIKELY |DESCRIPTION                                                                                           |
 |:--|:-------------------|:------|:----------|:------------|:-----------|:--------|:-----------------------------------------------------------------------------------------------------|
@@ -147,7 +147,7 @@ This input file is OPTIONAL. It is only needed if the user wants to modify the r
 |42 |ComSvcLtTrkPropHev  |double |proportion |NA, < 0, > 1 |            |         |Proportion of commercial service light truck travel powered by hybrid electric powertrains            |
 |43 |ComSvcLtTrkPropBev  |double |proportion |NA, < 0, > 1 |            |         |Proportion of commercial service light truck travel powered by battery electric powertrains           |
 ### region_hvytrk_powertrain_prop.csv
-This input file is OPTIONAL. It is only needed if the user wants to modify the relative employment rates.
+This input file is OPTIONAL.
 
 |   |NAME           |TYPE   |UNITS      |PROHIBIT     |ISELEMENTOF |UNLIKELY |DESCRIPTION                                                                        |
 |:--|:--------------|:------|:----------|:------------|:-----------|:--------|:----------------------------------------------------------------------------------|

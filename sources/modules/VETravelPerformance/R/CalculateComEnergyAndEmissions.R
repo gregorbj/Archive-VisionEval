@@ -1,18 +1,39 @@
 #================================
 #CalculateComEnergyAndEmissions.R
 #================================
-#This module calculates the energy consumption and carbon emissions of heavy
-#trucks and light-duty commercial service vehicles. It does not calculate the
-#values for car service vehicles which are calculated as part of the household
-#emissions. It also does not calculate public transit emissions which are
-#calculated in the CalculateTransitEnergyAndEmissions module.
 
-
-#=================================
-#Packages used in code development
-#=================================
-#Uncomment following lines during code development. Recomment when done.
-#library(visioneval)
+#<doc>
+#
+## CalculateComEnergyAndEmissions Module
+#### January 23, 2019
+#
+#This module calculates the energy consumption and carbon emissions of heavy trucks and light-duty commercial service vehicles. It does not calculate the values for car service vehicles which are calculated as part of the household emissions. It also does not calculate public transit emissions which are calculated in the CalculatePtranEnergyAndEmissions module.
+#
+### Model Parameter Estimation
+#
+#This module has no estimated parameters.
+#
+### How the Module Works
+#
+#This module calculates the energy consumption and carbon emissions production from commercial travel in the following steps:
+#
+#* Calculate commercial service DVMT propportions by vehicle type and powertrain
+#
+#* Calculate heavy truck DVMT proportion by powertrain
+#
+#* Calculate net ecodriving and speed smoothing effects by powertrain
+#
+#* Identify congestion fuel economy effects by marea and powertrain type
+#
+#* Calculate adjusted MPG and MPKWH by vehicle type and powertrain
+#
+#* Calculate carbon intensity by marea and region
+#
+#* Calculate commercial service vehicle energy consumption and CO2e production
+#
+#* Calculate heavy truck energy consumption and CO2e production
+#
+#</doc>
 
 
 #=============================================
@@ -49,6 +70,22 @@ CalculateComEnergyAndEmissionsSpecifications <- list(
       TOTAL = "",
       DESCRIPTION =
         "Regional proportion of commercial service vehicles that are light trucks"
+    ),
+    item(
+      NAME = "AveComSvcVehicleAge",
+      FILE = "region_comsvc_veh_mean_age.csv",
+      TABLE = "Region",
+      GROUP = "Year",
+      TYPE = "time",
+      UNITS = "YR",
+      NAVALUE = -1,
+      SIZE = 0,
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = "",
+      UNLIKELY = "",
+      TOTAL = "",
+      DESCRIPTION =
+        "Average age of commercial service vehicles"
     )
   ),
   #Specify data to be loaded from data store
@@ -133,7 +170,7 @@ CalculateComEnergyAndEmissionsSpecifications <- list(
     item(
       NAME = items(
         "HvyTrkUrbanDvmt",
-        "HvyTrkRuralDvmt"),
+        "HvyTrkNonUrbanDvmt"),
       TABLE = "Region",
       GROUP = "Year",
       TYPE = "compound",
@@ -144,6 +181,7 @@ CalculateComEnergyAndEmissionsSpecifications <- list(
     item(
       NAME =
         items("ComSvcUrbanDvmt",
+              "ComSvcTownDvmt",
               "ComSvcRuralDvmt",
               "HvyTrkUrbanDvmt"),
       TABLE = "Marea",
@@ -192,13 +230,22 @@ CalculateComEnergyAndEmissionsSpecifications <- list(
       UNITS = "proportion",
       PROHIBIT = c("NA", "< 0", "> 1"),
       ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "AveComSvcVehicleAge",
+      TABLE = "Region",
+      GROUP = "Year",
+      TYPE = "time",
+      UNITS = "YR",
+      PROHIBIT = c("NA", "< 0"),
+      ISELEMENTOF = ""
     )
   ),
   Set = items(
     item(
       NAME = items(
         "ComSvcUrbanGGE",
-        "ComSvcRuralGGE",
+        "ComSvcNonUrbanGGE",
         "HvyTrkUrbanGGE"),
       TABLE = "Marea",
       GROUP = "Year",
@@ -210,13 +257,13 @@ CalculateComEnergyAndEmissionsSpecifications <- list(
       SIZE = 0,
       DESCRIPTION = items(
         "Average daily amount of hydrocarbon fuels consumed by commercial service vehicles associated with urban household activity in gas gallon equivalents",
-        "Average daily amount of hydrocarbon fuels consumed by commercial service vehicles associated with rural household activity in gas gallon equivalents",
+        "Average daily amount of hydrocarbon fuels consumed by commercial service vehicles associated with rural and town household activity in gas gallon equivalents",
         "Average daily amount of hydrocarbon fuels consumed by heavy trucks on urbanized area roadways in the Marea in gas gallon equivalents")
     ),
     item(
       NAME = items(
         "ComSvcUrbanKWH",
-        "ComSvcRuralKWH",
+        "ComSvcNonUrbanKWH",
         "HvyTrkUrbanKWH"),
       TABLE = "Marea",
       GROUP = "Year",
@@ -228,13 +275,13 @@ CalculateComEnergyAndEmissionsSpecifications <- list(
       SIZE = 0,
       DESCRIPTION = items(
         "Average daily amount of electricity consumed by commercial service vehicles associated with urban household activity in kilowatt-hours",
-        "Average daily amount of electricity consumed by commercial service vehicles associated with rural household activity in kilowatt-hours",
+        "Average daily amount of electricity consumed by commercial service vehicles associated with rural and town household activity in kilowatt-hours",
         "Average daily amount of electricity consumed by heavy trucks on urbanized area roadways in the Marea in kilowatt-hours")
     ),
     item(
       NAME = items(
         "ComSvcUrbanCO2e",
-        "ComSvcRuralCO2e",
+        "ComSvcNonUrbanCO2e",
         "HvyTrkUrbanCO2e"),
       TABLE = "Marea",
       GROUP = "Year",
@@ -246,7 +293,7 @@ CalculateComEnergyAndEmissionsSpecifications <- list(
       SIZE = 0,
       DESCRIPTION = items(
         "Average daily amount of carbon-dioxide equivalents produced by commercial service vehicles associated with urban household activity in grams",
-        "Average daily amount of carbon-dioxide equivalents produced by commercial service vehicles associated with rural household activity in grams",
+        "Average daily amount of carbon-dioxide equivalents produced by commercial service vehicles associated with rural and town household activity in grams",
         "Average daily amount of carbon-dioxide equivalents produced by heavy trucks on urbanized area roadways in the Marea in grams")
     ),
     item(
@@ -259,7 +306,7 @@ CalculateComEnergyAndEmissionsSpecifications <- list(
       TYPE = "compound",
       UNITS = "GM/MI",
       NAVALUE = -1,
-      PROHIBIT = c("NA", "< 0"),
+      PROHIBIT = "< 0",
       ISELEMENTOF = "",
       SIZE = 0,
       DESCRIPTION = items(
@@ -269,7 +316,7 @@ CalculateComEnergyAndEmissionsSpecifications <- list(
     ),
     item(
       NAME = items(
-        "HvyTrkRuralGGE",
+        "HvyTrkNonUrbanGGE",
         "HvyTrkUrbanGGE"),
       TABLE = "Region",
       GROUP = "Year",
@@ -280,12 +327,12 @@ CalculateComEnergyAndEmissionsSpecifications <- list(
       ISELEMENTOF = "",
       SIZE = 0,
       DESCRIPTION = items(
-        "Average daily amount of hydrocarbon fuels consumed by heavy trucks on rural roadways in the Region in gas gallon equivalents",
+        "Average daily amount of hydrocarbon fuels consumed by heavy trucks on rural and town roadways in the Region in gas gallon equivalents",
         "Average daily amount of hydrocarbon fuels consumed by heavy trucks on urbanized area roadways in the Region in gas gallon equivalents")
     ),
     item(
       NAME = items(
-        "HvyTrkRuralKWH",
+        "HvyTrkNonUrbanKWH",
         "HvyTrkUrbanKWH"),
       TABLE = "Region",
       GROUP = "Year",
@@ -296,12 +343,12 @@ CalculateComEnergyAndEmissionsSpecifications <- list(
       ISELEMENTOF = "",
       SIZE = 0,
       DESCRIPTION = items(
-        "Average daily amount of electricity consumed by heavy trucks on rural roadways in the Region in kilowatt-hours",
+        "Average daily amount of electricity consumed by heavy trucks on rural and town roadways in the Region in kilowatt-hours",
         "Average daily amount of electricity consumed by heavy trucks on urbanized area roadways in the Region in kilowatt-hours")
     ),
     item(
       NAME = items(
-        "HvyTrkRuralCO2e",
+        "HvyTrkNonUrbanCO2e",
         "HvyTrkUrbanCO2e"),
       TABLE = "Region",
       GROUP = "Year",
@@ -312,7 +359,7 @@ CalculateComEnergyAndEmissionsSpecifications <- list(
       ISELEMENTOF = "",
       SIZE = 0,
       DESCRIPTION = items(
-        "Average daily amount of carbon-dioxide equivalents produced by heavy trucks on rural roadways in the Region in grams",
+        "Average daily amount of carbon-dioxide equivalents produced by heavy trucks on rural and town roadways in the Region in grams",
         "Average daily amount of carbon-dioxide equivalents produced by heavy trucks on urbanized area roadways in the Region in grams")
     )
   )
@@ -339,20 +386,6 @@ usethis::use_data(CalculateComEnergyAndEmissionsSpecifications, overwrite = TRUE
 #=======================================================
 #SECTION 3: DEFINE FUNCTIONS THAT IMPLEMENT THE SUBMODEL
 #=======================================================
-#This function calculates the energy consumption and carbon emissions production
-#from commercial travel. This includes travel by commercial service vehicles and
-#by heavy trucks. Commercial service vehicle energy and emissions are associated
-#with households in urban and rural areas in each Marea. Heavy truck energy and
-#emissions are calculated for urban and rural roadways at the Region level and
-#for urban roadways at the Marea level. Emissions for car service and public
-#transit vehicles are calculated separately. Car service emissions are included
-#in the calculation of household emissions. public transit emissions are
-#calculated in another module. Fuel consumption is calculated in gasoline gallon
-#equivalents. Electricity consumption is calculated in kilowatt hours. Vehicle
-#average MPG and MPkWh is adjusted to account for eco-driving, speed smoothing,
-#and congestion. Carbon emissions are calculated in carbon dioxide equivents
-#(CO2e) using the carbon intensities calculated by the CalculateCarbonIntensity
-#module.
 
 #Main module function that calculates commercial vehicle energy and emissions
 #----------------------------------------------------------------------------
@@ -381,7 +414,7 @@ CalculateComEnergyAndEmissions <- function(L) {
   Ma <- L$Year$Marea$Marea
   Pt <- c("ICEV", "HEV", "BEV")
   Year <- L$G$Year
-  EnergyEmissionsDefaults_ls <- VEPowertrainsAndFuels::PowertrainFuelDefaults_ls
+  EnergyEmissionsDefaults_ls <- loadPackageDataset("PowertrainFuelDefaults_ls")
 
   #Calculate ComSvc DVMT proportions by vehicle type and powertrain
   #----------------------------------------------------------------
@@ -463,7 +496,8 @@ CalculateComEnergyAndEmissions <- function(L) {
       EnergyEmissionsDefaults_ls$LdvPowertrainCharacteristics_df
     EndIdx <-
       with(LdvPtChar_df, which(as.character(ModelYear) == as.character(Year)))
-    StartIdx <- EndIdx - 5
+    StartIdx <-
+      as.integer(round(EndIdx - (2 * L$Year$Region$AveComSvcVehicleAge)))
     LdvPtChar_ <- colMeans(LdvPtChar_df[StartIdx:EndIdx,], na.rm = TRUE)[-1]
     AutoMpgMpkwh_Pt <- c(
       ICEV = unname(LdvPtChar_["AutoIcevMpg"]),
@@ -506,7 +540,11 @@ CalculateComEnergyAndEmissions <- function(L) {
   calcComSvcEnergyEmissions <- function(Type) {
     Vt <- c("Auto", "LtTrk")
     #Calculate DVMT by powertrain, vehicle type, and Marea
-    Dvmt_Ma <- L$Year$Marea[[paste0("ComSvc", Type, "Dvmt")]]
+    if (Type == "Rural") {
+      Dvmt_Ma <- with(L$Year$Marea, ComSvcRuralDvmt + ComSvcTownDvmt)
+    } else {
+      Dvmt_Ma <- L$Year$Marea$ComSvcUrbanDvmt
+    }
     names(Dvmt_Ma) <- Ma
     Dvmt_PtVtMa <- outer(ComSvcProp_PtVt, Dvmt_Ma, "*")
     Dvmt_MaVt <- t(apply(Dvmt_PtVtMa, c(2,3), sum))
@@ -611,7 +649,7 @@ CalculateComEnergyAndEmissions <- function(L) {
   #------------------------------------------------
   HvyTrkRuralEE_ls <- local({
     #Rural regional DVMT
-    HvyTrkDvmt <- L$Year$Region$HvyTrkRuralDvmt
+    HvyTrkDvmt <- L$Year$Region$HvyTrkNonUrbanDvmt
     #If no rural DVMT, return list containing 0 values
     if (is.na(HvyTrkDvmt)) {
       return(list(Energy_Et = c(GGE = 0, KWH = 0), CO2e = 0, Dvmt = 0))
@@ -649,64 +687,90 @@ CalculateComEnergyAndEmissions <- function(L) {
     ))
   })
 
+  #Calculate commercial services and heavy truck vehicle urban emissions rates
+  #---------------------------------------------------------------------------
+  UrbanCo2eRatesByMarea_ls <- data.frame(
+    ComSvcAuto = with(ComSvcUrbanEE_ls, CO2e_MaVt[,"Auto"] / Dvmt_MaVt[,"Auto"]),
+    ComSvcLtTrk = with(ComSvcUrbanEE_ls, CO2e_MaVt[,"LtTrk"] / Dvmt_MaVt[,"LtTrk"]),
+    HvyTrk = with(HvyTrkUrbanEE_ls, CO2e_Ma / Dvmt_Ma)
+  )
+  UrbanCo2eRatesByMarea_ls <- lapply(UrbanCo2eRatesByMarea_ls, function(x) {
+    x[is.nan(x)] <- NA
+    x
+  })
+
   #Return the results
   #------------------
   Out_ls <- initDataList()
   Out_ls$Year <- list()
   Out_ls$Year$Marea <- list(
     ComSvcUrbanGGE = apply(ComSvcUrbanEE_ls$Energy_EtVtMa["GGE",,,drop = FALSE], 3, sum),
-    ComSvcRuralGGE = apply(ComSvcRuralEE_ls$Energy_EtVtMa["GGE",,,drop = FALSE], 3, sum),
+    ComSvcNonUrbanGGE = apply(ComSvcRuralEE_ls$Energy_EtVtMa["GGE",,,drop = FALSE], 3, sum),
     HvyTrkUrbanGGE = HvyTrkUrbanEE_ls$Energy_MaEt[,"GGE"],
     ComSvcUrbanKWH = apply(ComSvcUrbanEE_ls$Energy_EtVtMa["KWH",,,drop = FALSE], 3, sum),
-    ComSvcRuralKWH = apply(ComSvcRuralEE_ls$Energy_EtVtMa["KWH",,,drop = FALSE], 3, sum),
+    ComSvcNonUrbanKWH = apply(ComSvcRuralEE_ls$Energy_EtVtMa["KWH",,,drop = FALSE], 3, sum),
     HvyTrkUrbanKWH = HvyTrkUrbanEE_ls$Energy_MaEt[,"KWH"],
     ComSvcUrbanCO2e = apply(ComSvcUrbanEE_ls$CO2e_MaVt, 1, sum),
-    ComSvcRuralCO2e = apply(ComSvcRuralEE_ls$CO2e_MaVt, 1, sum),
+    ComSvcNonUrbanCO2e = apply(ComSvcRuralEE_ls$CO2e_MaVt, 1, sum),
     HvyTrkUrbanCO2e = HvyTrkUrbanEE_ls$CO2e_Ma,
-    ComSvcAveUrbanAutoCO2eRate = with(ComSvcUrbanEE_ls, CO2e_MaVt[,"Auto"] / Dvmt_MaVt[,"Auto"]),
-    ComSvcAveUrbanLtTrkCO2eRate = with(ComSvcUrbanEE_ls, CO2e_MaVt[,"LtTrk"] / Dvmt_MaVt[,"LtTrk"]),
-    HvyTrkAveUrbanCO2eRate = with(HvyTrkUrbanEE_ls, CO2e_Ma / Dvmt_Ma)
+    ComSvcAveUrbanAutoCO2eRate = UrbanCo2eRatesByMarea_ls$ComSvcAuto,
+    ComSvcAveUrbanLtTrkCO2eRate = UrbanCo2eRatesByMarea_ls$ComSvcLtTrk,
+    HvyTrkAveUrbanCO2eRate = UrbanCo2eRatesByMarea_ls$HvyTrk
   )
   Out_ls$Year$Region <- list(
-    HvyTrkRuralGGE = unname(HvyTrkRuralEE_ls$Energy_Et["GGE"]),
+    HvyTrkNonUrbanGGE = unname(HvyTrkRuralEE_ls$Energy_Et["GGE"]),
     HvyTrkUrbanGGE = sum(HvyTrkUrbanEE_ls$Energy_MaEt[,"GGE"]),
-    HvyTrkRuralKWH = unname(HvyTrkRuralEE_ls$Energy_Et["KWH"]),
+    HvyTrkNonUrbanKWH = unname(HvyTrkRuralEE_ls$Energy_Et["KWH"]),
     HvyTrkUrbanKWH = sum(HvyTrkUrbanEE_ls$Energy_MaEt[,"KWH"]),
-    HvyTrkRuralCO2e = HvyTrkRuralEE_ls$CO2e,
+    HvyTrkNonUrbanCO2e = HvyTrkRuralEE_ls$CO2e,
     HvyTrkUrbanCO2e = sum(HvyTrkUrbanEE_ls$CO2e_Ma)
   )
   Out_ls
 }
 
 
-#================================
-#Code to aid development and test
-#================================
+#===============================================================
+#SECTION 4: MODULE DOCUMENTATION AND AUXILLIARY DEVELOPMENT CODE
+#===============================================================
+#Run module automatic documentation
+#----------------------------------
+documentModule("CalculateComEnergyAndEmissions")
+
 #Test code to check specifications, loading inputs, and whether datastore
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions
 #-------------------------------------------------------------------------------
-# load("data/EnergyEmissionsDefaults_ls.rda")
-# attach(EnergyEmissionsDefaults_ls)
+# #Load libraries and test functions
+# library(visioneval)
+# library(filesstrings)
+# source("tests/scripts/test_functions.R")
+# #Set up test environment
+# TestSetup_ls <- list(
+#   TestDataRepo = "../Test_Data/VE-RSPM",
+#   DatastoreName = "Datastore.tar",
+#   LoadDatastore = TRUE,
+#   TestDocsDir = "verspm",
+#   ClearLogs = TRUE,
+#   # SaveDatastore = TRUE
+#   SaveDatastore = FALSE
+# )
+# # setUpTests(TestSetup_ls)
+# #Run test module
 # TestDat_ <- testModule(
 #   ModuleName = "CalculateComEnergyAndEmissions",
 #   LoadDatastore = TRUE,
-#   SaveDatastore = TRUE,
-#   DoRun = FALSE
+#   SaveDatastore = FALSE,
+#   DoRun = FALSE,
+#   RequiredPackages = "VEPowertrainsAndFuels"
 # )
 # L <- TestDat_$L
-# TestOut_ls <- CalculateComEnergyAndEmissions(L)
-
-#Test code to check everything including running the module and checking whether
-#the outputs are consistent with the 'Set' specifications
-#-------------------------------------------------------------------------------
-# load("data/EnergyEmissionsDefaults_ls.rda")
+# R <- CalculateComEnergyAndEmissions(L)
+#
 # TestDat_ <- testModule(
 #   ModuleName = "CalculateComEnergyAndEmissions",
 #   LoadDatastore = TRUE,
 #   SaveDatastore = TRUE,
-#   DoRun = TRUE
+#   DoRun = TRUE,
+#   RequiredPackages = "VEPowertrainsAndFuels"
 # )
-# setwd("tests")
-# untar("Datastore.tar")
-# setwd("..")
+

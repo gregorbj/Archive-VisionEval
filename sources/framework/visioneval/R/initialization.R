@@ -46,16 +46,32 @@ initModelStateFile <-
     Message <- paste("Missing", ParamFilePath, "file.")
     stop(Message)
   } else {
-    ModelState_ls <- jsonlite::fromJSON(ParamFilePath)
-    ModelState_ls$LastChanged <- Sys.time()
-    ModelState_ls$Deflators <- read.csv(DeflatorFilePath, as.is = TRUE)
-    ModelState_ls$Units <- read.csv(UnitsFilePath, as.is = TRUE)
-    save(ModelState_ls, file = "ModelState.Rda")
-    ModelState_ls <<- ModelState_ls
+    RunParam_ls <- jsonlite::fromJSON(ParamFilePath)
+    RequiredParam_ <- c(
+      "Model", "Scenario", "Description", "Region", "BaseYear", "Years",
+      "DatastoreName", "Seed", "RequiredVEPackages"
+    )
+    ParamExists_ <- RequiredParam_ %in% names(RunParam_ls)
+    if (any(!ParamExists_)) {
+      MissingParam_ <- RequiredParam_[!ParamExists_]
+      Message <- paste0(
+        "One or more parameters in the 'run_parameters.json' file are missing. ",
+        "Following are the missing parameters: ",
+        paste(MissingParam_, collapse = ", ")
+      )
+      stop(Message)
+    } else {
+      ModelState_ls <- jsonlite::fromJSON(ParamFilePath)
+      ModelState_ls$LastChanged <- Sys.time()
+      ModelState_ls$Deflators <- read.csv(DeflatorFilePath, as.is = TRUE)
+      ModelState_ls$Units <- read.csv(UnitsFilePath, as.is = TRUE)
+      save(ModelState_ls, file = "ModelState.Rda")
+      ModelState_ls <<- ModelState_ls
+    }
   }
   TRUE
 }
-#initModelStateFile(Dir = "defs")
+#initModelStateFile(Dir = "tests/defs")
 
 #GET MODEL STATE VALUES
 #======================
@@ -769,7 +785,7 @@ loadModelParameters <- function(ModelParamFile = "model_parameters.json") {
 #' identify the 'ModuleName', the 'PackageName', and the 'RunFor' value.
 #' @export
 parseModelScript <-
-  function(FilePath = "run_model.R",
+  function(FilePath = "Run_Model.R",
            TestMode = FALSE) {
     if (!TestMode) {
       writeLog("Parsing model script")

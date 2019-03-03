@@ -56,13 +56,6 @@
 #</doc>
 
 
-#=================================
-#Packages used in code development
-#=================================
-#Uncomment following lines during code development. Recomment when done.
-# library(visioneval)
-# library(pscl)
-
 #=============================================
 #SECTION 1: ESTIMATE AND SAVE MODEL PARAMETERS
 #=============================================
@@ -617,7 +610,7 @@ CalculateVehicleTrips <- function(L) {
 
   #Assign VehTrpLenModel_ls within function so it is in scope for module call
   if(!exists("VehTrpLenModel_ls")){
-    VehTrpLenModel_ls <- VEHouseholdTravel::VehTrpLenModel_ls
+    VehTrpLenModel_ls <- loadPackageDataset("VehTrpLenModel_ls")
   }
 
   #Set up data frame of household data needed for model
@@ -649,6 +642,8 @@ CalculateVehicleTrips <- function(L) {
   #Calculate the average number of vehicle trips
   #---------------------------------------------
   VehicleTrips_Hh <- Hh_df$Dvmt / AveTrpLen_Hh
+  MaxVehicleTrips <- quantile(VehicleTrips_Hh, probs = 0.999)
+  VehicleTrips_Hh[VehicleTrips_Hh > MaxVehicleTrips] <- MaxVehicleTrips
 
   #Return results
   #--------------
@@ -670,18 +665,34 @@ documentModule("CalculateVehicleTrips")
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions
 #-------------------------------------------------------------------------------
+# #Load libraries and test functions
+# library(filesstrings)
+# library(visioneval)
+# library(data.table)
+# library(pscl)
+# source("tests/scripts/test_functions.R")
+# #Set up test environment
+# TestSetup_ls <- list(
+#   TestDataRepo = "../Test_Data/VE-State",
+#   DatastoreName = "Datastore.tar",
+#   LoadDatastore = TRUE,
+#   TestDocsDir = "vestate",
+#   ClearLogs = TRUE,
+#   # SaveDatastore = TRUE
+#   SaveDatastore = FALSE
+# )
+# setUpTests(TestSetup_ls)
+# #Run test module
 # TestDat_ <- testModule(
 #   ModuleName = "CalculateVehicleTrips",
 #   LoadDatastore = TRUE,
 #   SaveDatastore = TRUE,
 #   DoRun = FALSE
 # )
-# L <- TestDat_$L
-# R <- CalculateVehicleTrips(L)
-
-#Test code to check everything including running the module and checking whether
-#the outputs are consistent with the 'Set' specifications
-#-------------------------------------------------------------------------------
+# L <- TestDat_
+# R <- CalculateVehicleTrips(TestDat_)
+#
+#Run test module
 # TestDat_ <- testModule(
 #   ModuleName = "CalculateVehicleTrips",
 #   LoadDatastore = TRUE,

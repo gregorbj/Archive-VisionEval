@@ -20,13 +20,6 @@
 #</doc>
 
 
-#=================================
-#Packages used in code development
-#=================================
-#Uncomment following lines during code development. Recomment when done.
-# library(visioneval)
-
-
 #=============================================
 #SECTION 1: ESTIMATE AND SAVE MODEL PARAMETERS
 #=============================================
@@ -80,8 +73,8 @@ CreateVehicleTableSpecifications <- list(
       TOTAL = "",
       DESCRIPTION =
         items(
-          "Average cost in dollars per mile for travel by high service level car service",
-          "Average cost in dollars per mile for travel by low service level car service"
+          "Average cost in dollars per mile for travel by high service level car service exclusive of the cost of fuel, road use taxes, and carbon taxes (and any other social costs charged to vehicle use).",
+          "Average cost in dollars per mile for travel by low service level car service exclusive of the cost of fuel, road use taxes, and carbon taxes (and any other social costs charged to vehicle use)."
         )
     ),
     item(
@@ -134,6 +127,17 @@ CreateVehicleTableSpecifications <- list(
       TYPE = "character",
       UNITS = "ID",
       PROHIBIT = "",
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = items(
+        "NumLtTrk",
+        "NumAuto"),
+      TABLE = "Household",
+      GROUP = "Year",
+      TYPE = "vehicles",
+      UNITS = "VEH",
+      PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = ""
     ),
     item(
@@ -196,6 +200,18 @@ CreateVehicleTableSpecifications <- list(
       ISELEMENTOF = c("Own", "LowCarSvc", "HighCarSvc"),
       SIZE = 10,
       DESCRIPTION = "Identifier whether vehicle is owned by household (Own), if vehicle is low level car service (LowCarSvc), or if vehicle is high level car service (HighCarSvc)"
+    ),
+    item(
+      NAME = "Type",
+      TABLE = "Vehicle",
+      GROUP = "Year",
+      TYPE = "character",
+      UNITS = "category",
+      NAVALUE = -1,
+      PROHIBIT = "NA",
+      ISELEMENTOF = c("Auto", "LtTrk"),
+      SIZE = 5,
+      DESCRIPTION = "Vehicle body type: Auto = automobile, LtTrk = light trucks (i.e. pickup, SUV, Van)"
     )
   )
 )
@@ -259,6 +275,8 @@ CreateVehicleTable <- function(L) {
   NumCarSvc_Hh <- L$Year$Household$DrvAgePersons - NumOwned_Hh
   NumCarSvc_Hh[NumCarSvc_Hh < 0] <- 0
   NumVeh_Hh <- NumOwned_Hh + NumCarSvc_Hh
+  NumLtTrk_Hh <- L$Year$Household$NumLtTrk
+  NumAuto_Hh <- L$Year$Household$NumAuto
   #Create a vehicle table
   Out_ls$Year$Vehicle <- list()
   attributes(Out_ls$Year$Vehicle)$LENGTH <- sum(NumVeh_Hh)
@@ -283,6 +301,12 @@ CreateVehicleTable <- function(L) {
   CarSvcLevel_Hh <- paste0(L$Year$Household$CarSvcLevel, "CarSvc")
   Out_ls$Year$Vehicle$VehicleAccess <-
     unlist(mapply(assignVehAccess, NumOwned_Hh, NumCarSvc_Hh, CarSvcLevel_Hh))
+  #Assign vehicle type designation
+  assignVehType <- function(NumLtTrk, NumAuto, NumCarSvc) {
+    c(rep("LtTrk", NumLtTrk), rep("Auto", NumAuto), rep("Auto", NumCarSvc))
+  }
+  Out_ls$Year$Vehicle$Type <-
+    unlist(mapply(assignVehType, NumLtTrk_Hh, NumAuto_Hh, NumCarSvc_Hh))
   #Return the outputs list
   Out_ls
 }
@@ -299,18 +323,33 @@ documentModule("CreateVehicleTable")
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions
 #-------------------------------------------------------------------------------
+# #Load packages and test functions
+# library(filesstrings)
+# library(visioneval)
+# library(ordinal)
+# source("tests/scripts/test_functions.R")
+# #Set up test environment
+# TestSetup_ls <- list(
+#   TestDataRepo = "../Test_Data/VE-RSPM",
+#   DatastoreName = "Datastore.tar",
+#   LoadDatastore = TRUE,
+#   TestDocsDir = "verspm",
+#   ClearLogs = TRUE,
+#   # SaveDatastore = TRUE
+#   SaveDatastore = FALSE
+# )
+# setUpTests(TestSetup_ls)
+# #Run test module
 # TestDat_ <- testModule(
 #   ModuleName = "CreateVehicleTable",
 #   LoadDatastore = TRUE,
-#   SaveDatastore = TRUE,
+#   SaveDatastore = FALSE,
 #   DoRun = FALSE
 # )
 # L <- TestDat_$L
 # R <- CreateVehicleTable(L)
-
-#Test code to check everything including running the module and checking whether
-#the outputs are consistent with the 'Set' specifications
-#-------------------------------------------------------------------------------
+#
+# #Run test module
 # TestDat_ <- testModule(
 #   ModuleName = "CreateVehicleTable",
 #   LoadDatastore = TRUE,

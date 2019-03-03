@@ -3,14 +3,19 @@
 #===========
 
 #This script demonstrates the VisionEval framework for the RSPM model.
-
+cat('run_model.R: script entered\n')
 #Load libraries
 #--------------
 library(visioneval)
+#devtools::load_all('C:/Users/matt.landis/Git/VisionEval/sources/framework/visioneval/')
+cat('run_model.R: library visioneval loaded\n')
+
+planType <- 'multiprocess'
 
 #Initialize model
 #----------------
 initializeModel(
+  ModelScriptFile = "run_model.R",
   ParamDir = "defs",
   RunParamFile = "run_parameters.json",
   GeoFile = "geo.csv",
@@ -19,7 +24,7 @@ initializeModel(
   DatastoreName = NULL,
   SaveDatastore = TRUE
   )  
-
+cat('run_model.R: initializeModel completed\n')
 #Run all demo module for all years
 #---------------------------------
 for(Year in getYears()) {
@@ -29,7 +34,7 @@ for(Year in getYears()) {
   runModule("PredictIncome",                   "VESimHouseholds",       RunFor = "AllYears",    RunYear = Year)
   runModule("PredictHousing",                  "VELandUse",             RunFor = "AllYears",    RunYear = Year)
   runModule("LocateEmployment",                "VELandUse",             RunFor = "AllYears",    RunYear = Year)
-  runModule("AssignDevTypes",                  "VELandUse",             RunFor = "AllYears",    RunYear = Year)
+  runModule("AssignLocTypes",                  "VELandUse",             RunFor = "AllYears",    RunYear = Year)
   runModule("Calculate4DMeasures",             "VELandUse",             RunFor = "AllYears",    RunYear = Year)
   runModule("CalculateUrbanMixMeasure",        "VELandUse",             RunFor = "AllYears",    RunYear = Year)
   runModule("AssignParkingRestrictions",       "VELandUse",             RunFor = "AllYears",    RunYear = Year)
@@ -51,13 +56,13 @@ for(Year in getYears()) {
   runModule("CalculateCarbonIntensity",        "VEPowertrainsAndFuels", RunFor = "AllYears",    RunYear = Year)
   runModule("AssignHhVehiclePowertrain",       "VEPowertrainsAndFuels", RunFor = "AllYears",    RunYear = Year)
   for (i in 1:2) {
-    runModule("CalculateBaseRoadDvmt",            "VETravelPerformance",   RunFor = "BaseYear",    RunYear = Year)
-    runModule("CalculateFutureRoadDvmt",          "VETravelPerformance",   RunFor = "NotBaseYear", RunYear = Year)
-    runModule("CalculateRoadPerformance",         "VETravelPerformance",   RunFor = "AllYears",    RunYear = Year)
-    runModule("CalculateMpgMpkwhAdjustments",     "VETravelPerformance",   RunFor = "AllYears",    RunYear = Year)
-    runModule("AdjustHhVehicleMpgMpkwh",          "VETravelPerformance",   RunFor = "AllYears",    RunYear = Year)
-    runModule("CalculateVehicleOperatingCost",    "VETravelPerformance",   RunFor = "AllYears",    RunYear = Year)
-    runModule("BudgetHouseholdDvmt",              "VETravelPerformance",   RunFor = "AllYears",    RunYear = Year)
+    runModule("CalculateRoadDvmt",             "VETravelPerformance",   RunFor = "AllYear",    RunYear = Year)
+    runModule("CalculateRoadPerformance",      "VETravelPerformance",   RunFor = "AllYears",    RunYear = Year)
+    runModule("CalculateMpgMpkwhAdjustments",  "VETravelPerformance",   RunFor = "AllYears",    RunYear = Year)
+    runModule("AdjustHhVehicleMpgMpkwh",       "VETravelPerformance",   RunFor = "AllYears",    RunYear = Year)
+    runModule("CalculateVehicleOperatingCost", "VETravelPerformance",   RunFor = "AllYears",    RunYear = Year)
+    runModule("BudgetHouseholdDvmt",           "VETravelPerformance",   RunFor = "AllYears",    RunYear = Year)
+    runModule("BalanceRoadCostsAndRevenues",   "VETravelPerformance",   RunFor = "AllYears",    RunYear = Year)
   }
   runModule("CalculateComEnergyAndEmissions",   "VETravelPerformance",   RunFor = "AllYears",    RunYear = Year)
   runModule("CalculatePtranEnergyAndEmissions", "VETravelPerformance",   RunFor = "AllYears",    RunYear = Year)

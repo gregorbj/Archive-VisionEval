@@ -35,6 +35,7 @@ ISELEMENTOF - Categorical values that are permitted. Values in the datastore are
 
 |NAME                |TABLE     |GROUP |TYPE      |UNITS      |PROHIBIT     |ISELEMENTOF                |
 |:-------------------|:---------|:-----|:---------|:----------|:------------|:--------------------------|
+|Azone               |Azone     |Year  |character |ID         |             |                           |
 |HighCarSvcCost      |Azone     |Year  |currency  |USD        |NA, < 0      |                           |
 |LowCarSvcCost       |Azone     |Year  |currency  |USD        |NA, < 0      |                           |
 |AveCarSvcVehicleAge |Azone     |Year  |time      |YR         |NA, < 0      |                           |
@@ -45,6 +46,7 @@ ISELEMENTOF - Categorical values that are permitted. Values in the datastore are
 |NumLtTrk            |Household |Year  |vehicles  |VEH        |NA, < 0      |                           |
 |NumAuto             |Household |Year  |vehicles  |VEH        |NA, < 0      |                           |
 |CarSvcLevel         |Household |Year  |character |category   |             |Low, High                  |
+|Azone               |Vehicle   |Year  |character |ID         |NA           |                           |
 |HhId                |Vehicle   |Year  |character |ID         |NA           |                           |
 |VehId               |Vehicle   |Year  |character |ID         |NA           |                           |
 |VehicleAccess       |Vehicle   |Year  |character |category   |             |Own, LowCarSvc, HighCarSvc |
@@ -78,8 +80,8 @@ DESCRIPTION - A description of the data.
 |Age            |Vehicle   |Year  |time      |YR       |NA, < 0  |                           |Vehicle age in years                                                                                                                                                                                                                       |
 |VehicleAccess  |Vehicle   |Year  |character |category |         |Own, LowCarSvc, HighCarSvc |Identifier whether vehicle is owned by household (Own), if vehicle is low level car service (LowCarSvc), or if vehicle is high level car service (HighCarSvc)                                                                              |
 |OwnCost        |Vehicle   |Year  |currency  |USD      |NA, < 0  |                           |Annual cost of vehicle ownership including depreciation, financing, insurance, taxes, and residential parking in dollars                                                                                                                   |
-|OwnCostPerMile |Vehicle   |Year  |currency  |USD.2017 |NA, < 0  |                           |Annual cost of vehicle ownership per mile of vehicle travel (dollars per mile)                                                                                                                                                             |
-|InsCost        |Vehicle   |Year  |currency  |USD.2017 |NA, < 0  |                           |Annual vehicle insurance cost in dollars                                                                                                                                                                                                   |
+|OwnCostPerMile |Vehicle   |Year  |currency  |USD      |NA, < 0  |                           |Annual cost of vehicle ownership per mile of vehicle travel (dollars per mile)                                                                                                                                                             |
+|InsCost        |Vehicle   |Year  |currency  |USD      |NA, < 0  |                           |Annual vehicle insurance cost in dollars                                                                                                                                                                                                   |
 |SwitchToCarSvc |Vehicle   |Year  |integer   |binary   |         |0, 1                       |Identifies whether a vehicle was switched from owned to car service                                                                                                                                                                        |
 |OwnCostSavings |Household |Year  |currency  |USD      |NA, < 0  |                           |Annual vehicle ownership cost (depreciation, finance, insurance, taxes) savings in dollars resulting from substituting the use of car services for a household vehicle                                                                     |
 |OwnCost        |Household |Year  |currency  |USD      |NA, < 0  |                           |Annual household vehicle ownership cost (depreciation, finance, insurance, taxes) savings in dollars                                                                                                                                       |

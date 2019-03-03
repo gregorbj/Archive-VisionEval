@@ -76,13 +76,6 @@
 #</doc>
 
 
-#=================================
-#Packages used in code development
-#=================================
-#Uncomment following lines during code development. Recomment when done.
-# library(visioneval)
-
-
 #=============================================
 #SECTION 1: ESTIMATE AND SAVE MODEL PARAMETERS
 #=============================================
@@ -599,8 +592,8 @@ AssignHhVehiclePowertrainSpecifications <- list(
   ),
   #Specify call status of module
   Call = items(
-    CalcDvmt = "VEHouseholdTravel::CalculateHouseholdDvmt",
-    ReduceDvmt = "VEHouseholdTravel::ApplyDvmtReductions"
+    CalcDvmt = "CalculateHouseholdDvmt",
+    ReduceDvmt = "ApplyDvmtReductions"
   )
 )
 
@@ -658,7 +651,7 @@ usethis::use_data(AssignHhVehiclePowertrainSpecifications, overwrite = TRUE)
 #' @return A list containing the components specified in the Set
 #' specifications for the module.
 #' @name AssignHhVehiclePowertrain
-#' @import visioneval VEHouseholdTravel stats
+#' @import visioneval stats
 #' @export
 #'
 AssignHhVehiclePowertrain <- function(L, M) {
@@ -668,7 +661,7 @@ AssignHhVehiclePowertrain <- function(L, M) {
   #Fix seed as synthesis involves sampling
   set.seed(L$G$Seed)
   if(!exists("PowertrainFuelDefaults_ls")){
-    PowertrainFuelDefaults_ls <- VEPowertrainsAndFuels::PowertrainFuelDefaults_ls
+    PowertrainFuelDefaults_ls <- loadPackageDataset("PowertrainFuelDefaults_ls")
   }
   #Match index from households to vehicles
   HhToVehIdx_Ve <- match(L$Year$Vehicle$HhId, L$Year$Household$HhId)
@@ -990,25 +983,28 @@ documentModule("AssignHhVehiclePowertrain")
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions
 #-------------------------------------------------------------------------------
-# load("data/PowertrainFuelDefaults_ls.rda")
+# #Load libraries and test functions
+# library(visioneval)
+# library(filesstrings)
+# source("tests/scripts/test_functions.R")
+# #Set up test environment
+# TestSetup_ls <- list(
+#   TestDataRepo = "../Test_Data/VE-RSPM",
+#   DatastoreName = "Datastore.tar",
+#   LoadDatastore = TRUE,
+#   TestDocsDir = "verspm",
+#   ClearLogs = TRUE,
+#   # SaveDatastore = TRUE
+#   SaveDatastore = FALSE
+# )
+# setUpTests(TestSetup_ls)
+# #Run test module
 # TestDat_ <- testModule(
 #   ModuleName = "AssignHhVehiclePowertrain",
 #   LoadDatastore = TRUE,
 #   SaveDatastore = TRUE,
-#   DoRun = FALSE
+#   DoRun = FALSE,
+#   RequiredPackages = "VEHouseholdTravel"
 # )
-# L <- TestDat_$L
-# M <- TestDat_$M
-# TestOut_ls <- AssignHhVehiclePowertrain(L, M)
-
-#Test code to check everything including running the module and checking whether
-#the outputs are consistent with the 'Set' specifications
-#-------------------------------------------------------------------------------
-# TestDat_ <- testModule(
-#   ModuleName = "AssignHhVehiclePowertrain",
-#   LoadDatastore = TRUE,
-#   SaveDatastore = TRUE,
-#   DoRun = TRUE
-# )
-
-
+# L <- TestDat_
+# R <- AssignHhVehiclePowertrain(TestDat_)

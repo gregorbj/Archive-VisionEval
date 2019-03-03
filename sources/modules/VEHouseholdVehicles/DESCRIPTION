@@ -24,12 +24,10 @@ Imports:
     ordinal,
     reshape2,
     stats,
-    devtools,
     usethis,
-    VE2001NHTS,
-    VEHouseholdTravel
+    VE2001NHTS
 Suggests:
     knitr
 Encoding: UTF-8
 VignetteBuilder: knitr
-RoxygenNote: 6.1.0
+RoxygenNote: 6.1.1

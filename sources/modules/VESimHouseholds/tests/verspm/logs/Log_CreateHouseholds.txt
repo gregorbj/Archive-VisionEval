@@ -1,38 +1,38 @@
 Test
 Test of VESimHouseholds package modules
-2018-11-27_10:33:06
+2019-02-15_15:29:04
 
-2018-11-27 10:33:06 : Testing CreateHouseholds. 
+2019-02-15 15:29:04 : Testing CreateHouseholds. 
 
-2018-11-27 10:33:06 : Attempting to initialize datastore. 
+2019-02-15 15:29:04 : Attempting to initialize datastore. 
 
-2018-11-27 10:33:08 : Geographical indices successfully read. 
+2019-02-15 15:29:05 : Geographical indices successfully read. 
 
-2018-11-27 10:33:19 : Geography sucessfully added to datastore. 
+2019-02-15 15:29:16 : Geography sucessfully added to datastore. 
 
-2018-11-27 10:33:20 : Loading model parameters file. 
+2019-02-15 15:29:16 : Loading model parameters file. 
 
-2018-11-27 10:33:22 : Datastore initialized. 
+2019-02-15 15:29:20 : Datastore initialized. 
 
-2018-11-27 10:33:22 : Attempting to load and check specifications. 
+2019-02-15 15:29:20 : Attempting to load and check specifications. 
 
-2018-11-27 10:33:23 : Module specifications successfully loaded and checked for errors. 
+2019-02-15 15:29:20 : Module specifications successfully loaded and checked for errors. 
 
-2018-11-27 10:33:23 : Attempting to process, check and load module inputs. 
+2019-02-15 15:29:20 : Attempting to process, check and load module inputs. 
 
-2018-11-27 10:33:35 : Module inputs successfully checked and loaded into datastore. 
+2019-02-15 15:29:32 : Module inputs successfully checked and loaded into datastore. 
 
-2018-11-27 10:33:35 : Checking whether datastore contains all datasets in Get specifications. 
+2019-02-15 15:29:33 : Checking whether datastore contains all datasets in Get specifications. 
 
-2018-11-27 10:33:35 : Datastore contains all datasets identified in module Get specifications. 
+2019-02-15 15:29:33 : Datastore contains all datasets identified in module Get specifications. 
 
-2018-11-27 10:33:35 : Running module and checking whether outputs meet Set specifications. 
+2019-02-15 15:29:33 : Running module and checking whether outputs meet Set specifications. 
 
-2018-11-27 10:33:35 : Also saving module outputs to datastore. 
+2019-02-15 15:29:33 : Also saving module outputs to datastore. 
 
-2018-11-27 10:33:46 : Module run successfully and outputs meet Set specifications. 
+2019-02-15 15:29:45 : Module run successfully and outputs meet Set specifications. 
 
-2018-11-27 10:33:46 : Module outputs saved to datastore. 
+2019-02-15 15:29:45 : Module outputs saved to datastore. 
 
-2018-11-27 10:33:46 : Congratulations. Module CreateHouseholds passed all tests. 
+2019-02-15 15:29:45 : Congratulations. Module CreateHouseholds passed all tests. 
 

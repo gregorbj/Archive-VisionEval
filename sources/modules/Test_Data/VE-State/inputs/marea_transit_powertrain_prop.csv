@@ -1,0 +1,19 @@
+Geo,Year,VanPropIcev,VanPropHev,VanPropBev,BusPropIcev,BusPropHev,BusPropBev,RailPropIcev,RailPropHev,RailPropEv
+Albany,2010,1,0,0,1,0,0,0,0,1
+Bend,2010,1,0,0,1,0,0,0,0,1
+Corvallis,2010,1,0,0,1,0,0,0,0,1
+Eugene,2010,1,0,0,1,0,0,0,0,1
+Grants Pass,2010,1,0,0,1,0,0,0,0,1
+Medford,2010,1,0,0,1,0,0,0,0,1
+Portland,2010,1,0,0,1,0,0,0,0,1
+Salem,2010,1,0,0,1,0,0,0,0,1
+None,2010,1,0,0,1,0,0,0,0,1
+Albany,2040,1,0,0,1,0,0,0,0,1
+Bend,2040,1,0,0,1,0,0,0,0,1
+Corvallis,2040,1,0,0,1,0,0,0,0,1
+Eugene,2040,1,0,0,1,0,0,0,0,1
+Grants Pass,2040,1,0,0,1,0,0,0,0,1
+Medford,2040,1,0,0,1,0,0,0,0,1
+Portland,2040,1,0,0,1,0,0,0,0,1
+Salem,2040,1,0,0,1,0,0,0,0,1
+None,2040,1,0,0,1,0,0,0,0,1

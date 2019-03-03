@@ -2,9 +2,10 @@
 #CreateSimBzoneModels.R
 #======================
 
+
 #<doc>
 ## CreateSimBzoneModels Module
-#### December 1, 2018
+#### February 3, 2018
 #
 #This module estimates all the models for synthesizing Bzones and their land use attributes as a function of Azone characteristics as well as data derived from the US Environmental Protection Agency's Smart Location Database (SLD) augmented with US Census housing and household income data, and data from the National Transit Database. Details on these data are included in the VESimLandUseData package. The combined dataset contains a number of land use attributes at the US Census block group level. The goal of Bzone synthesis to generate a set of SimBzones in each Azone that reasonably represent block group land use characteristics given the characteristics of the Azone, the Marea that the Azone is a part of, and scenario inputs provided by the user.
 #
@@ -24,17 +25,21 @@
 #
 #* **Destination Accessibility**: Measures of proximity to households and jobs
 #
-#* **Area Type**: Category identifying relative activity density and destination accessibility
+#* **Area Type**: Category identifying urban nature of the area (center, inner, outer, fringe)
 #
-#* **Development Type**: Category identifying whether development is characterized residential, employment, or mixed
+#* **Development Type**: Category identifying whether development is characterized by predominantly residential, or employment, or is mixed
 #
 #* **Housing Units**: Numbers of single-family dwellings and multifamily dwellings in each SimBzone
 #
-#* **Network Design**: Design of the transportation network to support non-motorized travel
+#* **Employment by Sector**: Numbers of retail, service, and other jobs in the SimBzone
+#
+#* **Pedestrian Network Design**: Design of the transportation network to support non-motorized travel
+#
+#* **Transit Accessibility**: Level of peak period transit service near the SimBzone
 #
 ### Model Parameter Estimation
 #
-#The process of developing SimBzones proceed in a series of steps. Model parameters are developed for each step. In a number of cases the parameters take the form of specific urbanized area or more general profiles.
+#The process of developing SimBzones proceeds in a series of steps. Model parameters are developed for each step. In a number of cases the parameters take the form of specific urbanized area or more general profiles.
 #
 #### Calculate the Number of Households by Azone and Location Type
 #
@@ -50,19 +55,25 @@
 #
 #<tab:SimBzone_ls$Docs$MedianActivity_df>
 #
+#**Table 1. Median Number of Households and Jobs in a Census Block Group by Location Type**
+#
 #The total amount of activity in each location type of the Azone is divided by the corresponding numbers in the table to arrive at the number of SimBzones by location type. Fractional remainders are allocated randomly among the SimBzones in each location type to get whole number amounts.
 #
 #### Assign an Activity Density to Each SimBzone
 #
 #Activity density (households and jobs per acre) is the key characteristic which drives the synthesis of all SimBzone characteristics. This measure is referred to as D1D in the SLD. The overall activity density of each location type in each Azone is determined by the allocations of households and jobs described above and user inputs on the areal extents of development. The activity density of SimBzones is determined by the overall density and by density distribution characteristics reflective of the area. Density distribution profiles developed for areas as noted above are used in the process.
 #
-#The distribution of activity density by block group is approximately lognormally distributed. This distribution is related to the overall density of the area. As the overall density increases, the density distribution shifts to the right. This is illustrated in the following figure which shows distributions for 9 urbanized areas having a range of overall densities from the least dense (Atlanta, GA) to the most dense (New York, NY). In each panel of the figure, the probability density of the activity density distribution of block groups in the urbanized area are shown by the solid line. The distribution for all urbanized areas is shown by the dashed line. As can be seen, as the overall density of the urbanized area increases the density distribution shifts to the right.
+#The distribution of activity density by block group is approximately lognormally distributed. This distribution is related to the overall density of the area. As the overall density increases, the density distribution shifts to the right. This is illustrated in the following figure which shows distributions for 9 urbanized areas having a range of overall densities from the least dense (Atlanta, GA) to the most dense (New York, NY). In each panel of the figure, the probability density of the activity density distribution of block groups in the urbanized area are shown by the solid line. The distribution for all urbanized areas is shown by the dashed line. As can be seen, as the overall density of the urbanized area increases, the density distribution shifts to the right.
 #
 #<fig:example-uza_d1_distributions.png>
+#
+#**Figure 1. Distributions of Block Group Activity Density for Selected Urbanized Areas**
 #
 #The characterization of activity density distributions is simplified by discretizing activity density values. The profile for each area is a combination of the proportion of activity at each level and the average density at each level. Levels for urbanized areas are created by dividing the lognormal distribution of activity density for all urbanized areas in the SLD into 20 equal intervals. Activity density levels for town and for rural areas are established in the same way. The following figure shows the distribution of urbanized area activity by activity density level and the average activity density at each level.
 #
 #<fig:uza_activity-density_level.png>
+#
+#**Figure 2. Proportions of Urbanized Area Activity and Average Density by Density Level**
 #
 #Profiles like those show in the figure are developed for each of the urbanized areas listed above, for each urbanized area size category, for towns (as a whole), and for rural areas (as a whole).
 #
@@ -76,11 +87,13 @@
 #
 #<fig:example-uza_d2_distributions.png>
 #
+#**Figure 3. Distribution of Block Group Jobs to Housing Ratio for Selected Urbanized Areas**
+#
 #As can be seen from the figure, the distributions for all of the areas are very similar to the distribution for all urbanized areas. There are, however, some differences that need to be accounted for. For example, the distribution of for the Portland (Oregon) urbanized area is more compressed with a much higher peak at the center of the distribution. This indicates that the jobs to housing ratio is closer to 1 for a much larger portion of block groups in that urbanized area than in other urbanized areas. The distribution for the San Francisco - Oakland urbanized area is similar. On the other hand, the distribution for the Dallas - Fort Worth - Arlington urbanized area is more spread out, indicating more segregation of jobs and households at the block group level.
 #
 #Differences among urbanized areas are accounted for by developing individual area profiles. As with activity density, these profiles are simplified by discretizing the D2A_JPHH variable into the following 5 activity mix levels:
 #
-#* **primarily-hh**: from 0 to 4 households per job
+#* **primarily-hh**: greater than 4 households per job
 #
 #* **largely-hh**: less than 4 households to 2 households per job
 #
@@ -94,74 +107,57 @@
 #
 #<fig:uza_d2group-prop-act_by_d1group.png>
 #
-#Several patterns in the relationship between activity density and mixing. Ignoring for now the lowest activity density levels, the jobs proportion of activity increases as activity density increases. Jobs dominate at the highest activity densities. This is consistent with the bid rent theory of spatial location. Businesses value higher density (more central) locations more highly than households and so outbid households for those locations. The greatest degree of activity mixing occurs in the 3rd quarter of the density range. There is no clear pattern at the lowest density levels which are represented by a very small number of block groups.
+#**Figure 4. Diversity Group Proportion of Activity by Density Group, All Urbanized Areas**
 #
-#the relationship between activity density and activity mix varies by metropolitan area as illustrated in the following figure which compares values for the 9 example urbanized areas. For example, it can be seen that jobs and housing are much more segregated in the Atlanta area than in the San Francisco-Oakland area.
+#Several patterns can be seen in the relationship between activity density and mixing. Ignoring for now the lowest activity density levels, the jobs proportion of activity increases as activity density increases. Jobs dominate at the highest activity densities. This is consistent with the bid rent theory of spatial location. Businesses value higher density (more central) locations more highly than households and so outbid households for those locations. The greatest degree of activity mixing occurs in the 3rd quarter of the density range. There is no clear pattern at the lowest density levels which are represented by a very small number of block groups.
+#
+#The relationship between activity density and activity mix varies by metropolitan area as illustrated in the following figure which compares values for the 9 example urbanized areas. For example, it can be seen that jobs and housing are much more segregated in the Atlanta area than in the San Francisco-Oakland area.
 #
 #<fig:example-uza_d2group-prop-act_by_d1group.png>
+#
+#**Figure 5. Comparison of Distribution of Activity by Diversity and Density for Selected Urbanized Areas**
 #
 #Profiles illustrated in the preceding figures are developed for each of the urbanized areas listed in the **Initialize** module documentation, for each urbanized area size category, and for towns (as a whole), and rural areas (as a whole). These are used by the **CreateSimBzones** module to assign a activity mix level to each SimBzone based on the activity density of the SimBzone.
 #
 #### Split SimBzone Activity Between Jobs and Households
 #
-#The process of splitting the activity of each SimBzone between jobs and households is done in 2 steps. In the first step an initial value for the jobs proportion of activity is selected by sampling from distributions associated with each activity mix level. In the second step, a balancing process is use to so that the distribution of jobs and households among SimBzones in an area is consistent with the control totals of jobs and households by Azone and location type.
+#The process of splitting the activity of each SimBzone between jobs and households is done in 2 steps. In the first step an initial value for the jobs proportion of activity is selected by sampling from distributions associated with each activity mix level. In the second step, a balancing process is used so that the distribution of jobs and households among SimBzones is consistent with the control totals of jobs and households by Azone and location type.
 #
 #The 1st step uses tabulations from the SLD of the numbers of block groups by employment proportion for each activity mix level. Those tabulations are converted into proportions of block groups that are then used as sampling distributions from which to choose an initial employment proportion based on the activity mix level of the SimBzone. The following figure shows the probability distributions of jobs proportions by activity mix levels. These are the sample distributions used to determine the initial jobs proportion for SimBzones located in urbanized areas. Similar sampling distributions are tabulated from the SLD for town locations and for rural locations.
 #
 #<fig:emp-prop-distribution_by_d2group.png>
 #
-#In the second step, jobs and household numbers by SimBzone are adjusted to be consistent with control totals by Azone and location type and activity totals by SimBzone.
+#**Figure 6. Distributions of Jobs Proportions of Total Activity by Activity Mix Level**
+#
+#In the second step, jobs and household numbers by SimBzone are adjusted to be consistent with control totals by Azone and location type and activity totals by SimBzone. The difference between the control total of jobs and the allocated jobs is allocated as a function of the initial jobs allocations among zones and the respective capacities to accommodate more (or fewer) jobs.
 #
 #### Assign Destination Accessibility Measure Values to SimBzones
 #
-#Destination accessibility is a measure of the amount of activity present in the vicinity of each SimBzone. The measure used is the harmonic mean of the population within 5 miles and employment within 2 miles of the SimBzone. This measure was computed for each block group in the SLD using straight line distances between block group centroids. This measure is used instead of destination accessibility measures in the SLD which are auto oriented (for example, jobs within 45 minute travel time) and not very useful for measuring destination accessibility within smaller urbanized areas. The harmonic mean of population and employment was found to be useful for distinguishing *area types*, one of the dimensions in the *place type* system that will be implemented in the Bzone synthesis process.
+#Destination accessibility is a measure of the amount of activity present in the vicinity of each SimBzone. The measure used is the harmonic mean of the population within 5 miles and employment within 2 miles of the SimBzone. This measure was computed for each block group in the SLD using straight line distances between block group centroids. This measure is used instead of destination accessibility measures in the SLD which are auto oriented (for example, jobs within 45 minute travel time) and not very useful for measuring destination accessibility within smaller urbanized areas. The harmonic mean of population and employment was found to be useful for distinguishing *area types*, one of the dimensions in the *place type* system that is implemented in the Bzone synthesis process.
 #
-#Destination accessibility at the block group level, like the distribution of activity density, is approximately lognormally distributed. However, unlike the activity density distribution, the distribution of the jobs to housing ratio has no apparent relationship with the overall activity density of the area. Is can be seen in the following figure which compares distributions for 9 urbanized areas. As with activity density, the distribution of destination accessibility is related to overall urbanized area density; shifting to the right as overall density increases.
+#Destination accessibility at the block group level, like the distribution of activity density, is approximately lognormally distributed. As with activity density, the distribution of destination accessibility is related to overall urbanized area density; shifting to the right as overall density increases.
 #
 #<fig:example-uza_d5_distributions.png>
+#
+#**Figure 7. Distributions of Destination Accessibility for Selected Urbanized Areas**
 #
 #The characterization of destination accessibility distributions is simplified by discretizing destination accessibility values. The profile for each area is a combination of the proportion of activity at each level and the average destination accessibility at each level. Levels for urbanized areas are created by dividing the lognormal distribution of destination accessibility for all urbanized areas in the SLD into 20 equal intervals. Destination accessibility levels for town and for rural areas are established in the same way. The following figure shows the distribution of urbanized area activity by destination accessibility level and the average destination accessibility at each level.
 #
 #<fig:uza_destination-accessibility_level.png>
 #
+#**Figure 8. Proportions of Urbanized Area Activity and Average Destination Accessibility by Destination Accessibility Level**
+#
 #Areas are profiled according to the distribution of activity among destination accessibility levels at each activity density level. In this way, the SimBzones created for an area can reasonably reflect observed conditions, and when a scenario having a different overall density is modeled, the joint distribution of activity density and destination accessibility will be a sensible result. The following figure illustrates the destination accessibility distributions by activity density level for 9 example metropolitan areas. It can be seen that except for low activity density levels (for which there are few census block groups) there is a relatively strong relationship between destination accessibility and activity density.
 #
 #<fig:example-uza_d5group-prop-act_by_d1group.png>
 #
+#**Figure 9. Activity Proportions by Destination Accessibility Level for Each Density Level for Selected Urbanized Areas**
+#
 #Profiles illustrated in the preceding figures are developed for each of the urbanized areas listed in the **Initialize** module documentation, for each urbanized area size category, and for towns (as a whole), and rural areas (as a whole). These are used by the **CreateSimBzone** module to assign a destination accessibility level to each SimBzone based on the activity density of the SimBzone.
-#
-#### Split SimBzone Employment Into Sectors
-#
-#SimBzone employment is split into 3 sectors (retail, service, other) to enable the calculation of an entropy measure of land use mixing that is used in the forthcoming multimodal household travel for VisionEval. A model is developed to carry out the splits for each SimBzone as a function of the activity density and mixing levels assigned to the SimBzone. This model is carried out in two steps. In the first step, the combined proportion of retail and service employment is determined. In the second step, the retail proportion of retail and service employment is determined. It is clear from graphing the relationship of retail and service proportions with density and mix, that while there are some trends, there is a very large amount of variability. The following figure shows the distribution of the combined retail and service proportion at different density and mixing levels.
-#
-#<fig:ua_retsvc-prop_by_diversity&density.png>
-#
-#The relationship is even less clear for the retail proportion of retail and service employment as shown in the following figure.
-#
-#<fig:ua_ret-prop_by_diversity&density.png>
-#
-#Because of the high degree of variability and limited number of predictive variables that may be employed, a very simple model structure is used. The mean values by density are calculated for each mix level and smoothed using splines with 4 degrees of freedom. In addition, the standard deviation of values at each mix level is computed. This is done for both model steps. In each step, the model randomly selects a proportion from a normal distribution described by the mean and standard deviation. The following figure shows the mean values for the retail and service proportion of employment by density and mix level.
-#
-#<fig:ua_mean_ret-svc-prop_by_diversity&density.png>
-#
-#The following figure shows the mean values for the retail proportion of retail and service employment by density and mix level.
-#
-#<fig:ua_mean_ret-prop_by_diversity&density.png>
-#
-#### Model Housing Types
-#
-#The housing types (single family, multifamily) occupied by households in each SimBzone are modeled and used in combination with a housing choice model to assign housing types to households, and to assign households to SimBzones. This is done for several reasons. First, dwelling type has a significant relationship to several important household transportation characteristics such as auto ownership. Second, modeling housing type provides a mechanism for assigning households to SimBzones (neighborhoods) having characteristics where they're more likely to live. For example, a large higher income household is more likely to live in a single-family dwelling and thus are more likely to live in a lower density neighborhood where single-family dwellings predominate.
-#
-#The proportion of housing units in multifamily dwellings is modeled as a function of SimBzone activity density. The following set of boxplots show the distributions of the multifamily dwelling proportions by activity density level for metropolitan, town, and rural areas. In general, the multifamily dwelling unit proportion increases with increased density. This is particularly evident for metropolitan areas where the multifamily proportion increases greatly at activity density levels beyond the midrange.
-#
-#<fig:mf-prop_by_loctype&density.png>
-#
-#The boxplots also show that the distribution of values (extent and skewness) varies by activity density. Given the complexity of the distributions and information limitations of the Bzone synthesis process, the multifamily proportions model has a simple design to capture central tendencies and variance patterns. The design is similar to the boxplot representation. Multifamily dwellings at each activity density level and for each location type are split into 8 quantiles. Each quantile has an associated range of multifamily proportions. The model selects a multifamily proportion for a SimBzone by selecting the corresponding set of quantiles corresponding to the location type and activity density level of the SimBzone. Then a quantile is randomly selected and a multifamily proportion is randomly selected within the range of the chosen quantile.
-#
 #
 #### Designate Place Types
 #
-#Place types simplify the characterization of land use patterns. They are used in the VESimLandUse package modules to simplify the management of inputs for land use related policies. There are three dimensions to the place type system. Location type identifies whether the SimBzone is located in an urbanized area (Metropolitan), a smaller urban-type area (Town), or a non-urban area (Rural). Area types identify the relative urban nature of the SimBzone: center, inner, outer, fringe. Development types identify the character of development in the SimBzone: residential, employment, mix.
+#Place types are a land use classification system which simplifies the characterization of land use patterns. They are used in the estimation of the housing type, employment sector, pedestrian network, and transit access models.  They are used to simplify the management of inputs for land use related policies. There are three dimensions to the place type system. Location type identifies whether the SimBzone is located in an urbanized area (Urban), a smaller urban-type area (Town), or a non-urban area (Rural). Area types identify the relative urban nature of the SimBzone: center, inner, outer, fringe. Development types identify the character of development in the SimBzone: residential (res), employment (emp), mix.
 #
 #Area types are designated based on a combination of activity density and destination accessibility levels. Each is split into 4 levels. Area type is determined by 16 combinations of those levels. Following are the activity density level definitions:
 #
@@ -174,8 +170,6 @@
 #* High (H): Greater than 10 households and jobs per acre
 #
 #Following are the destination accessiblity level definitions:
-#
-#c(0, 2e3, 1e4, 5e4, max(Values_Bz))
 #
 #* Very Low (VL): 0 to 2,000 units
 #
@@ -206,6 +200,56 @@
 #
 #<fig:ua_place-type_examples.png>
 #
+#**Figure 10. Area Type and Development Type Designations for Atlanta and Portland Urbanized Areas**
+#
+#### Model Housing Types
+#
+#The housing types (single family, multifamily) occupied by households in each SimBzone are modeled and used in combination with a housing choice model to assign housing types to households, and to assign households to SimBzones. This is done for several reasons. First, dwelling type has a significant relationship to several important household transportation characteristics such as auto ownership. Second, modeling housing type provides a mechanism for assigning households to SimBzones (neighborhoods) having characteristics where they're more likely to live. For example, a large higher income household is more likely to live in a single-family dwelling and thus are more likely to live in a lower density neighborhood where single-family dwellings predominate.
+#
+#The proportion of housing units in multifamily dwellings is modeled as a function of area type and development type which are combined as place types (e.g. center-emp, center-mix, center-res). The model is simply a table of block group percentiles (2% intervals) of the multifamily housing unit proportion by place type. This table is prepared using the area type and development type designations applied to SLD block groups using the area and development type models, and the multifamily housing unit proportion attached to the SLD (see documentation for the VESimLandUseData package). The model uses all the SLD records instead of segmented by urbanized area or location type.
+#
+#The model is applied to assign multifamily and single family dwelling unit numbers in a SimBzone as follows:
+#
+#1) Choose the multifamily percentile distribution corresponding to the place type of the SimBzone;
+#
+#2) Randomly select a percentile from the distribution and return the corresponding multifamily housing unit proportion;
+#
+#2) Multiply the household total for the SimBzone by the selected proportion and round the result to calculate the number of households in multifamily housing units;
+#
+#4) Subtract the multifamily housing units from the household total to calculate the number of households in single family dwelling units.
+#
+#Despite the simplicity of the model, it does a reasonable job of simulating the distributions of multifamily housing unit proportions. This can be seen in the following figure which compares the distributions of observed and simulated multifamily housing proportions in several urbanized areas.
+#
+#<fig:ua_mf-prop_compare.png>
+#
+#**Figure 10. Comparison of Observed and Simulated Distributions of Multifamily Housing Proportions for Selected Urbanized Areas**
+#
+#### Split SimBzone Employment Into Sectors
+#
+#SimBzone employment is split into 3 sectors (retail, service, other) to enable the calculation of an entropy measure of land use mixing that is used in the forthcoming multimodal household travel module for VisionEval. The model for doing this is similar to the housing split model except that two percentile tables are made; one which tablulates the combined retail and service employment proportion of total employment in the block group, and another which tabulated the retail employment proportion of combined retail and service employment.
+#
+#As with the housing split model, all of the records in the SLD are used to estimate the model rather than segmenting the model by urbanized area or location type. The SLD 'E5_Ret10' and 'E5_Svc10' variables are used to indentify the numbers of retail and service jobs respectively in each block group, and the 'TotEmp' variable to identify the total number of jobs. The required proportions are calculated from these values. The block group area types and development types are the values calculated using the area and development type models.
+#
+#The model is applied to calculate the amounts of retail, service, and other jobs in each SimBzone as follows:
+#
+#1) Choose a percentile distribution of the retail-service proportion of total employment corresponding to the place type of the SimBzone.
+#
+#2) Randomly select a percentile from the distribution and return the corresponding retail-service job proportion;
+#
+#3) Multiply the selected proportion by the total employment and round the result to calculate the combined retail and service employment. Subtract from the total to calculate the number of other jobs.
+#
+#4) Choose a percentile distribution of the retail proportion of retail-service employment corresponding to the place type of the SimBzone.
+#
+#5) Randomly select a percentile from the distribution and return the corresponding retail job proportion;
+#
+#6) Multiply the selected proportion by the retail-service employment and round the result to calculate the retail employment and subtract from the retail-service employment to calculate the number of service jobs.
+#
+#Despite its simplicity, the model produces employment splits which enable entropy measures calculated using them to reasonably represent entropy measures calculated from observed employment. This can be seen in the following figure which compares observed and simulated entropy distributions for 9 example urbanized areas.
+#
+#<fig:ua_entropy_compare.png>
+#
+#**Figure 11. Comparison of Observed and Simulated Distributions of Entropy Measures of Land Use Mixing for Selected Urbanized Areas**
+#
 #### Model Pedestrian-Oriented Network Design (D3bpo4)
 #
 #Pedestrian-oriented network design can significantly affect the amount of walking and other non-auto oriented trip making. Having a suitable measure can be an important indicator. It can also be used as a predictor variable of non-auto mode travel as it is in the forthcoming multimodal travel model. The D3bpo4 measure of pedestrian-oriented network design measure in the SLD is used for this purpose and the **CreateSimBzones** module needs to include a process for assigning reasonable values of this measure to SimBzones.
@@ -224,26 +268,47 @@
 #
 #* For all of the above, controlled access highways, tollways, highway ramps, ferries, parking lot roads, tunnels, and facilities having four or more lanes of travel in a single direction (implied eight lanes bi-directional) are excluded.
 #
-#This model is implemented using several datasets for each urbanized area in the database (see **Initialize** model documentation for details), for urbanized area size categories, and for towns in aggregate, and and rural areas in aggregate. The model has two steps. The first step is used to determine whether a SimBzone will have a D3bpo4 value of zero. The second step is used to determine what the D3bpo4 value is if it is not zero. This 2-step approach is used because a significant proportion (~ 10%) of block groups in the SLD have a zero value and because the distribution of values is highly skewed so transformation is required in order to develop normal sampling distributions.
+#The modeling approach for simulating the D3bpo4 measure is a variant of the approach used in the housing and employment split models. However, instead of modeling proportions using tables of percentiles by place type, normalized D3bpo4 values are modeled using these tables. The normalized D3bpo4 value for a zone (block group or SimBzone) is calculated by dividing the zonal value by the average of all zones in the urbanized area the zone is located in. Normalizing values helps to account for differences between urbanized areas and enables the data to be pooled to create a table of values by percentile and place type. For town locations and for rural locations the normalized values are calculated using the town and rural averages respectively.
 #
-#The parameters for the first model step (to determine if D3bpo4 is 0) are tables of the zero proportions for named urbanized areas, urbanized area size category, towns (as a whole), and rural areas (as a whole) tabulated from the SLD. Two tabulations are done. One of these is a tabulation for the location as a whole (e.g. the proportion of block groups in Seattle having a 0 value). The other is a tabulation for the location by place type where place types are combinations of area types and development types (12 in total). For many of the urbanized areas, there are missing values for one or more place types. Values are imputed for these by taking a weighted average of the values for all other urbanized areas where the weights measure how close the overall value of each urbanized area is to the overall value of the urbanized area for with a missing place value is calculated. From these tabulations, the ratio of the zero proportion by place type for each location to the zero proportion for the location is calculated. Calculation of this ratio enables the model to respond to user inputs for performance goals. For example, the user may specify a scenario where the proportion of neighborhoods having no pedestrian-oriented intersections cut in half. The model will use this input and the relative 0 ratios that have been calculated for the location to calculate what the 0 proportions would be by place type (assuming that the same proportional changes are made across the board by place type).
+#Tables of normalized D3bpo4 values by percentile and place type are calculated for urban, town, and rural locations. These are used in the same way as the housing and employment split tables are used. The location type of the SimBzone determines which table is used and the place type determines which set of percentiles are used. A percentile value is then selected as random from the selected set. If the SimBzone is located in an urbanized area, the selected normalized value is multiplied by the average for the urbanized area to compute the D3bpo4 value for the SimBzone. If the SimBzone is located in a town location or a rural location the selected value is multiplied by the town or rural average. The following figure compares the results of simulating D3bpo4 values using this approach with values from the SLD for 9 metropolitan areas. The log-transformed D3bpo4 values are shown to aid the comparison. The simplified model process does a reasonable job of reflecting observed values.
 #
-#The parameters for the second model step (to determine D3bpo4 if it is not 0) are tables of average D3pbo4 values for the same locations as above. Overall averages by location and averages by location and place type are calculated. Averages are weighted by block group activity. Because the distribution of D3bpo4 values is highly skewed, with a long right-hand tail, the averages are calculated for power-transformed values. Transformation powers are calculated for each location type (urban, town, rural). Missing values in the place type by location table are imputed using the method described above. The following figure compares the distributions of power-transformed averages by place type for urbanized areas as a whole. As can be seen from the figure, as expected, values drop as one moves from urban centers to fringe areas. The decline is greater for employment development types than for residential. For the residential areas, the D3bpo4 values for inner neighborhoods are as high as for center neighborhoods.
+#<fig:ua_d3bpo4_compare.png>
 #
-#<fig:ua_pwr-transform-d3_dist_by_place-type.png>
+#**Figure 12. Comparison of Observed and Simulated Distributions of D3bpo4 Values for Selected Urbanized Areas**
 #
-#From these tabulations, the ratio of the power-transformed average density by place type for each location to the power-transformed average density for the location is calculated. Calculation of this ratio enables the model to respond to user inputs for performance goals. For example, the user may specify a scenario where the average D3bpo4 value is doubled. The model will use this input, power transform it and calculate the power-transfomed values by place type.
+#### Model Transit Accessibility (D4c)
 #
-#In addition to computing the power-transformed average values by location and place type, the standard deviation of the power-transformed D3bpo4 values is computed by location type (urban, town, rural) and place type. The power-transformed average for the location and place type along with the standard deviation by location type and place type parameterize a normal sampling distribution for a location and place type from which a sample is drawn to be the selected power-transformed D3bpo4 value that is applied if the value is not 0.
+#Transit accessibility measures how easily transit service may be accessed from each zone. The SLD includes several transit accessibility measures. The D4c measure is the one used in the forthcoming multimodal household travel module. D4c is a measure of the aggregate frequency of transit service within 0.25 miles of the block group boundary per hour during evening peak period (4:00 PM to 7:00 PM). The measure was calculated by the EPA using Google GTFS data.
 #
-#The following figure compares the results of modeling the D3bpo4 values using the estimated parameters with values from the SLD for 9 metropolitan areas. The power-transformed D3bpo4 values are shown. The simplified model process does a reasonable job of replicating observed values.
+#The model to simulate D4c is only applied to urban locations. VisionEval does not model transit service and its effects in town or rural locations. The model has two parts. The first part is like the D3bpo4 model in that it uses a table of normalized D4c values by place type and percentile to select a normalized D4c value for a SimBzone which is multiplied by the average D4c value for the urbanized area the SimBzone is located in to calculate the D4c value for the SimBzone. The second model computes the average D4c value for an urbanized area as a function of the overall transit supply for the urbanized area (transit revenue miles) and urbanized area density. Because of limited availability of GTFS data at the time the SLD was being developed, D4c data are only present for about 30% of the urbanized areas included in the SLD. However since the urbanized areas for which data are missing are smaller urbanized areas, data are provided for over 70% of the block groups in the SLD. This provides plenty of datapoints for tabulating normalized values by percentile and place type, but is means that average D4c values are not available for the large majority of urbanized areas.
 #
-#<fig:ua_d3bpo4-test_.png>
+#Simulating D4c values as a function of place type using a table of normalized D4c values by percentile and place type does a reasonably good job of producing a sensible distribution of D4c values for urbanized areas. This can be seen in the following figure which compares log-transformed distributions for observed and simulated values for 8 urbanized areas. It should be noted that data for Jacksonville Florida are not shown, unlike figures presented above. This is because D4c data are missing for Jacksonville.
 #
-#The following shows the results of testing the model using Atlanta urbanized area data with reducing the 0 proportion in half and doubling the average D3bpo4 value for the urbanized area. Power-transformed D3bpo4 distributions are shown.
+#<fig:ua_d4c_compare1.png>
 #
-#<fig:atlanta_D3_test.png>
+#**Figure 13. Comparison of Observed and Simulated Distributions of D4c Values for Selected Urbanized Areas**
 #
+#An important goal of this model is to be sensitive to public transit service level (i.e. transit revenue miles). If the amount of transit service in an urbanized area changes, the average D4c value for the urbanized area should change as well. One would expect there to be a general relationship between the density of transit service (e.g. revenue miles per acre) and the average D4c value. This relationship can be calculated directly from the augmented SLD database (which contains transit revenue miles) for the urbanized areas for which D4c values are provided (~ 30% of the urbanized areas). For these urbanized areas, the ratio of average D4c and transit revenue mile density is calculated. This ratio is used in model applications to calculate the average D4c value for an urbanized area from the transit revenue miles and geographic area of the urbanized area. The following figure shows the distribution of values for these urbanized areas.
+#
+#<fig:ua_d4-supply-ratio_dist.png>
+#
+#**Figure 14: Distribution of Urbanized Area Ratios of Average D4c to Transit Service Density**
+#
+#For other urbanized areas a model of the relationship needs to be employed. This is developed from the data for the urbanized area that have recorded D4c values. The following chart plots the values of the log of average D4c against the log of transit revenue miles per acre for these urbanized areas. Plot symbols identify clusters that area described below. It can be seen that while the overall distribution shows no clear relationship, the data appear to be in several clusters and that the data points clustered near the top have an upward-trending relationship. Kmeans cluster analysis was used to split the data into two clusters based on the axis measures. These are shown in the figure by the different plotting symbols.
+#
+#<fig:ua_ave-d4_vs_rev-mi-density.png>
+#
+#**Figure 15: Urbanized Area Average D4c vs. Transit Service Density**
+#
+#A linear model is estimated to fit the data shown in the upper cluster. A summary of the model statistics follows.
+#
+#<txt:SimBzone_ls$UaProfiles$AveD4cModel_ls$Summary>
+#
+#This model is used to predict the urbanized area average D4c value if the ratio of average D4c and transit revenue mile density is not available. The following figure compares the simulated D4c distributions for the sample urbanized areas using the modeled average D4c values vs. the values calculated from the SLD. As can be seen, the model-bases values are close the calculated values for some of the areas but depart substantially for a couple.
+#
+#<fig:ua_d4c_compare2.png>
+#
+#**Figure 16. Comparison of Simulated Distributions of D4c Values Using Modeled Values of Average D4c for Selected Urbanized Areas**
 #
 #</doc>
 
@@ -260,6 +325,10 @@ library(plot3D)
 #============================================
 #SET UP DATA AND FUNCTIONS TO ESTIMATE MODELS
 #============================================
+#' @import visioneval
+#' @import plot3D
+#' @import VESimLandUseData
+
 
 #--------------------------
 #LOAD MODEL ESTIMATION DATA
@@ -720,28 +789,28 @@ rm(Ua, InitPar_ls, DispPal_)
 
 #Compare diversity patterns by urbanized area size group
 #-------------------------------------------------------
-png("data/uza-size-group_d2group-prop-act_by_d1group.png", width = 700, height = 500)
-DispPal_ <- colorRampPalette(c("black", "yellow"))(10)
-InitPar_ls <- par(mfrow = c(2,3), mar = c(3,4,3,3), oma = c(0, 0, 2.2, 0))
-for (sz in Sz) {
-  ImageDat_D1D2 <- SimBzone_ls$UaProfiles$D2ActProp_Ua_D1D2[[sz]]
-  image2D(ImageDat_D1D2,
-          x = 1:20, y = 1:5,
-          zlim = c(0,1),
-          xlab = "Density Group",
-          ylab = "Diversity Group",
-          col = DispPal_, NAcol = "black",
-          main = sz, axes = FALSE)
-  axis(1)
-  axis(2, at = 1:5,
-       labels = c("Prn\nHH", "Lrg\nHH", "Mix", "Lrg\nJOB", "Prn\nJOB"))
-  rm(ImageDat_D1D2)
-}
-mtext("Activity Proportions by Diversity Group for Each D1D Group\nBy Urbanized Area Size",
-      outer = TRUE, line = -0.5)
-par(InitPar_ls)
-dev.off()
-rm(InitPar_ls, DispPal_)
+# png("data/uza-size-group_d2group-prop-act_by_d1group.png", width = 700, height = 500)
+# DispPal_ <- colorRampPalette(c("black", "yellow"))(10)
+# InitPar_ls <- par(mfrow = c(2,3), mar = c(3,4,3,3), oma = c(0, 0, 2.2, 0))
+# for (sz in Sz) {
+#   ImageDat_D1D2 <- SimBzone_ls$UaProfiles$D2ActProp_Ua_D1D2[[sz]]
+#   image2D(ImageDat_D1D2,
+#           x = 1:20, y = 1:5,
+#           zlim = c(0,1),
+#           xlab = "Density Group",
+#           ylab = "Diversity Group",
+#           col = DispPal_, NAcol = "black",
+#           main = sz, axes = FALSE)
+#   axis(1)
+#   axis(2, at = 1:5,
+#        labels = c("Prn\nHH", "Lrg\nHH", "Mix", "Lrg\nJOB", "Prn\nJOB"))
+#   rm(ImageDat_D1D2)
+# }
+# mtext("Activity Proportions by Diversity Group for Each D1D Group\nBy Urbanized Area Size",
+#       outer = TRUE, line = -0.5)
+# par(InitPar_ls)
+# dev.off()
+# rm(InitPar_ls, DispPal_)
 
 #Calculate urbanized area distribution of job proportions by diversity level
 #---------------------------------------------------------------------------
@@ -988,16 +1057,16 @@ par(InitPar_ls)
 dev.off()
 rm(Ua, InitPar_ls)
 #Plot D5 group proportions for 6 urbanized area size groups
-png("data/uza-size-group_d5group-prop-act_by_d1group.png")
-InitPar_ls <- par(mfrow = c(3,2), mar = c(3,3,3,3), oma = c(0, 0, 2.2, 0))
-for (sz in Sz) {
-  imagePropAct(SimBzone_ls$UaProfiles$D5ActProp_Ua_D1D5[[sz]], main = sz)
-}
-mtext("Activity Proportions by D5 Group for Each D1D Group\nBy Urbanized Area Population Size Group",
-      outer = TRUE, line = -0.5)
-par(InitPar_ls)
-dev.off()
-rm(InitPar_ls)
+# png("data/uza-size-group_d5group-prop-act_by_d1group.png")
+# InitPar_ls <- par(mfrow = c(3,2), mar = c(3,3,3,3), oma = c(0, 0, 2.2, 0))
+# for (sz in Sz) {
+#   imagePropAct(SimBzone_ls$UaProfiles$D5ActProp_Ua_D1D5[[sz]], main = sz)
+# }
+# mtext("Activity Proportions by D5 Group for Each D1D Group\nBy Urbanized Area Population Size Group",
+#       outer = TRUE, line = -0.5)
+# par(InitPar_ls)
+# dev.off()
+# rm(InitPar_ls)
 rm(imagePropAct)
 
 #Calculate average destination accessibility by destination accessibility group
@@ -1084,332 +1153,6 @@ TotAct_D1D5 <- tapply(Ru_df$TOTACT, list(Ru_df$D1DGrp, Ru_df$D5Grp), sum)
 TotAct_D1D5[is.na(TotAct_D1D5)] <- 0
 SimBzone_ls$RuProfiles$D5ActProp_D1D5 <- sweep(TotAct_D1D5, 1, rowSums(TotAct_D1D5), "/")
 rm(TotAct_D1D5)
-
-
-#====================================================
-#DEVELOP MODELS FOR SPLITTING EMPLOYMENT INTO SECTORS
-#====================================================
-
-#---------------------------------------------
-#DEVELOP URBANIZED AREA EMPLOYMENT SPLIT MODEL
-#---------------------------------------------
-
-#Calculate the average retail proportion by urban area
-Tmp_Ua_df <- split(Ua_df, Ua_df$UZA_NAME)
-RetProp_Ua <- unlist(lapply(Tmp_Ua_df, function(x) {
-  sum(x$E5_RET10) / sum(x$EMPTOT)
-}))
-Tmp_Sz_df <- split(Ua_df, Ua_df$UZA_SIZE)
-RetProp_Sz <- unlist(lapply(Tmp_Sz_df, function(x) {
-  sum(x$E5_RET10) / sum(x$EMPTOT)
-}))
-SimBzone_ls$UaProfiles$RetProp_Ua <- c(RetProp_Ua, RetProp_Sz)
-rm(Tmp_Ua_df, Tmp_Sz_df, RetProp_Ua, RetProp_Sz)
-#Calculate the average service proportion by urban area
-Tmp_Ua_df <- split(Ua_df, Ua_df$UZA_NAME)
-SvcProp_Ua <- unlist(lapply(Tmp_Ua_df, function(x) {
-  sum(x$E5_SVC10) / sum(x$EMPTOT)
-}))
-Tmp_Sz_df <- split(Ua_df, Ua_df$UZA_SIZE)
-SvcProp_Sz <- unlist(lapply(Tmp_Sz_df, function(x) {
-  sum(x$E5_SVC10) / sum(x$EMPTOT)
-}))
-SimBzone_ls$UaProfiles$SvcProp_Ua <- c(SvcProp_Ua, SvcProp_Sz)
-rm(Tmp_Ua_df, Tmp_Sz_df, SvcProp_Ua, SvcProp_Sz)
-
-#Create data frame of variables to analyze
-Tmp_df <- data.frame(
-  RetSvcPropEmp = with(Ua_df, (E5_RET10 + E5_SVC10) / EMPTOT),
-  RetPropRetSvcEmp = with(Ua_df, E5_RET10 / (E5_RET10 + E5_SVC10)),
-  D1DGrp = Ua_df$D1DGrp,
-  D2Grp = Ua_df$D2Grp)
-
-#Split by diversity group
-Tmp_D2_df <- split(Tmp_df, Tmp_df$D2Grp)
-rm(Tmp_df)
-
-#Create boxplots of retail & service proportion by density group
-png("data/ua_retsvc-prop_by_diversity&density.png", width = 480, height = 480)
-Opar_ls <- par(mfrow = c(2,3), oma = c(0,0,3,0))
-for (d2 in D2) {
-  with(Tmp_D2_df[[d2]],
-       boxplot(RetSvcPropEmp ~ D1DGrp,
-               axes = FALSE,
-               xlab = "Density Group",
-               main = d2))
-  axis(1, at = 1:20, labels = 1:20)
-  axis(2)
-  box()
-  mtext(text = "Retail and Service Proportion of Employment\nBy Diversity and Density Group",
-        side = 3, outer = TRUE)
-}
-par(Opar_ls)
-rm(Opar_ls)
-dev.off()
-
-#Create boxplots of retail proportion of retail & service employment by density group
-png("data/ua_ret-prop_by_diversity&density.png", width = 480, height = 480)
-Opar_ls <- par(mfrow = c(2,3), oma = c(0,0,3,0))
-for (d2 in D2) {
-  with(Tmp_D2_df[[d2]],
-       boxplot(RetPropRetSvcEmp ~ D1DGrp,
-               axes = FALSE,
-               xlab = "Density Group",
-               main = d2))
-  axis(1, at = 1:20, labels = 1:20)
-  axis(2)
-  box()
-  mtext(text = "Retail Proportion of Retail and Service Employment\nBy Diversity and Density Group",
-        side = 3, outer = TRUE)
-}
-par(Opar_ls)
-rm(Opar_ls, d2)
-dev.off()
-
-#Calculate average retail and service proportion by density and diversity group
-MeanRetSvcProp_D1D2 <-
-  do.call(cbind, lapply(Tmp_D2_df, function(x) {
-    X_D1_df <- split(x, x$D1DGrp)
-    unlist(lapply(X_D1_df, function(y) {
-      mean(y$RetSvcPropEmp, na.rm = TRUE)
-    }))
-  }))
-#Make a smooth trend of the mean
-MeanRetSvcProp_D1D2 <-
-  apply(MeanRetSvcProp_D1D2, 2, function(x) {
-    X_SS <- smooth.spline(6:19, x[6:19], df = 4)
-    predict(X_SS, 1:20)$y
-  })
-rownames(MeanRetSvcProp_D1D2) <- levels(Ua_df$D1DGrp)
-SimBzone_ls$UaProfiles$MeanRetSvcProp_D1D2 <- MeanRetSvcProp_D1D2
-#Plot the smooth trend
-png("data/ua_mean_ret-svc-prop_by_diversity&density.png", width = 480, height = 360)
-matplot(MeanRetSvcProp_D1D2, type = "l",
-        xlab = "Activity Density (D1D) Level",
-        ylab = "Retail & Service Employment Proportion",
-        main = "Average Retail & Service Employment Proportion\nBy Density Level and Mix Level")
-legend("bottom", lty = 1:5, col = 1:5, ncol = 2, bty = "n",
-       legend = colnames(MeanRetSvcProp_D1D2))
-dev.off()
-rm(MeanRetSvcProp_D1D2)
-#Average standard deviation by diversity group
-SimBzone_ls$UaProfiles$SdRetSvcProp_D2 <- unlist(lapply(Tmp_D2_df, function(x) {
-  sd(x$RetSvcPropEmp, na.rm = TRUE)
-}))
-
-#Calculate average retail proportion of retail and service employment by density
-#and diversity group
-MeanRetPropRetSvc_D1D2 <-
-  do.call(cbind, lapply(Tmp_D2_df, function(x) {
-    X_D1_df <- split(x, x$D1DGrp)
-    unlist(lapply(X_D1_df, function(y) {
-      mean(y$RetPropRetSvcEmp, na.rm = TRUE)
-    }))
-  }))
-#Make smooth trend of the mean
-MeanRetPropRetSvc_D1D2 <-
-  apply(MeanRetPropRetSvc_D1D2, 2, function(x) {
-    X_SS <- smooth.spline(6:19, x[6:19], df = 4)
-    predict(X_SS, 1:20)$y
-  })
-rownames(MeanRetPropRetSvc_D1D2) <- levels(Ua_df$D1DGrp)
-SimBzone_ls$UaProfiles$MeanRetPropRetSvc_D1D2 <- MeanRetPropRetSvc_D1D2
-#Plot the smooth trend
-png("data/ua_mean_ret-prop_by_diversity&density.png", width = 480, height = 360)
-matplot(MeanRetPropRetSvc_D1D2, type = "l",
-        xlab = "Activity Density (D1D) Level",
-        ylab = "Retail Proportion of Retail & Service Employment",
-        main = "Average Retail Proportion of Retail & Service Employment\nBy Density Level and Mix Level")
-legend("bottom", lty = 1:5, col = 1:5, ncol = 2, bty = "n",
-       legend = colnames(MeanRetPropRetSvc_D1D2))
-dev.off()
-#Average standard deviation by diversity group
-SimBzone_ls$UaProfiles$SdRetPropRetSvc_D2 <- unlist(lapply(Tmp_D2_df, function(x) {
-  sd(x$RetPropRetSvcEmp, na.rm = TRUE)
-}))
-rm(MeanRetPropRetSvc_D1D2, Tmp_D2_df)
-
-
-#------------------------------------
-#DEVELOP TOWN EMPLOYMENT SPLIT MODELS
-#------------------------------------
-
-#Calculate town values
-#---------------------
-#Retail proportion
-SimBzone_ls$TnProfiles$RetProp <-
-  sum(Tn_df$E5_RET10, na.rm = TRUE) / sum(Tn_df$EMPTOT, na.rm = TRUE)
-#Service proportion
-SimBzone_ls$TnProfiles$SvcProp <-
-  sum(Tn_df$E5_SVC10, na.rm = TRUE) / sum(Tn_df$EMPTOT, na.rm = TRUE)
-#Create data frame of variables to analyze
-Tmp_df <- data.frame(
-  RetSvcPropEmp = with(Tn_df, (E5_RET10 + E5_SVC10) / EMPTOT),
-  RetPropRetSvcEmp = with(Tn_df, E5_RET10 / (E5_RET10 + E5_SVC10)),
-  D1DGrp = Tn_df$D1DGrp,
-  D2Grp = Tn_df$D2Grp)
-#Split by diversity group
-Tmp_D2_df <- split(Tmp_df, Tmp_df$D2Grp)
-rm(Tmp_df)
-#Calculate average retail and service proportion by density and diversity group
-MeanRetSvcProp_D1D2 <-
-  do.call(cbind, lapply(Tmp_D2_df, function(x) {
-    X_D1_df <- split(x, x$D1DGrp)
-    unlist(lapply(X_D1_df, function(y) {
-      mean(y$RetSvcPropEmp, na.rm = TRUE)
-    }))
-  }))
-#Make a smooth trend of the mean
-MeanRetSvcProp_D1D2 <-
-  apply(MeanRetSvcProp_D1D2, 2, function(x) {
-    X_SS <- smooth.spline(6:19, x[6:19], df = 4)
-    predict(X_SS, 1:20)$y
-  })
-rownames(MeanRetSvcProp_D1D2) <- levels(Tn_df$D1DGrp)
-SimBzone_ls$TnProfiles$MeanRetSvcProp_D1D2 <- MeanRetSvcProp_D1D2
-rm(MeanRetSvcProp_D1D2)
-#Average standard deviation by diversity group
-SimBzone_ls$TnProfiles$SdRetSvcProp_D2 <- unlist(lapply(Tmp_D2_df, function(x) {
-  sd(x$RetSvcPropEmp, na.rm = TRUE)
-}))
-#Calculate average retail proportion of retail and service employment by density
-#and diversity group
-MeanRetPropRetSvc_D1D2 <-
-  do.call(cbind, lapply(Tmp_D2_df, function(x) {
-    X_D1_df <- split(x, x$D1DGrp)
-    unlist(lapply(X_D1_df, function(y) {
-      mean(y$RetPropRetSvcEmp, na.rm = TRUE)
-    }))
-  }))
-#Make smooth trend of the mean
-MeanRetPropRetSvc_D1D2 <-
-  apply(MeanRetPropRetSvc_D1D2, 2, function(x) {
-    X_SS <- smooth.spline(6:19, x[6:19], df = 4)
-    predict(X_SS, 1:20)$y
-  })
-rownames(MeanRetPropRetSvc_D1D2) <- levels(Tn_df$D1DGrp)
-SimBzone_ls$TnProfiles$MeanRetPropRetSvc_D1D2 <- MeanRetPropRetSvc_D1D2
-#Average standard deviation by diversity group
-SimBzone_ls$TnProfiles$SdRetPropRetSvc_D2 <- unlist(lapply(Tmp_D2_df, function(x) {
-  sd(x$RetPropRetSvcEmp, na.rm = TRUE)
-}))
-rm(MeanRetPropRetSvc_D1D2, Tmp_D2_df)
-
-
-#-------------------------------------
-#DEVELOP RURAL EMPLOYMENT SPLIT MODELS
-#-------------------------------------
-
-#Retail proportion
-SimBzone_ls$RuProfiles$RetProp <-
-  sum(Ru_df$E5_RET10, na.rm = TRUE) / sum(Ru_df$EMPTOT, na.rm = TRUE)
-#Service proportion
-SimBzone_ls$RuProfiles$SvcProp <-
-  sum(Ru_df$E5_SVC10, na.rm = TRUE) / sum(Ru_df$EMPTOT, na.rm = TRUE)
-#Create data frame of variables to analyze
-Tmp_df <- data.frame(
-  RetSvcPropEmp = with(Ru_df, (E5_RET10 + E5_SVC10) / EMPTOT),
-  RetPropRetSvcEmp = with(Ru_df, E5_RET10 / (E5_RET10 + E5_SVC10)),
-  D1DGrp = Ru_df$D1DGrp,
-  D2Grp = Ru_df$D2Grp)
-#Split by diversity group
-Tmp_D2_df <- split(Tmp_df, Tmp_df$D2Grp)
-rm(Tmp_df)
-#Calculate average retail and service proportion by density and diversity group
-MeanRetSvcProp_D1D2 <-
-  do.call(cbind, lapply(Tmp_D2_df, function(x) {
-    X_D1_df <- split(x, x$D1DGrp)
-    unlist(lapply(X_D1_df, function(y) {
-      mean(y$RetSvcPropEmp, na.rm = TRUE)
-    }))
-  }))
-#Make a smooth trend of the mean
-MeanRetSvcProp_D1D2 <-
-  apply(MeanRetSvcProp_D1D2, 2, function(x) {
-    X_SS <- smooth.spline(6:19, x[6:19], df = 4)
-    predict(X_SS, 1:20)$y
-  })
-rownames(MeanRetSvcProp_D1D2) <- levels(Ru_df$D1DGrp)
-SimBzone_ls$RuProfiles$MeanRetSvcProp_D1D2 <- MeanRetSvcProp_D1D2
-rm(MeanRetSvcProp_D1D2)
-#Average standard deviation by diversity group
-SimBzone_ls$RuProfiles$SdRetSvcProp_D2 <- unlist(lapply(Tmp_D2_df, function(x) {
-  sd(x$RetSvcPropEmp, na.rm = TRUE)
-}))
-#Calculate average retail proportion of retail and service employment by density
-#and diversity group
-MeanRetPropRetSvc_D1D2 <-
-  do.call(cbind, lapply(Tmp_D2_df, function(x) {
-    X_D1_df <- split(x, x$D1DGrp)
-    unlist(lapply(X_D1_df, function(y) {
-      mean(y$RetPropRetSvcEmp, na.rm = TRUE)
-    }))
-  }))
-#Make smooth trend of the mean
-MeanRetPropRetSvc_D1D2 <-
-  apply(MeanRetPropRetSvc_D1D2, 2, function(x) {
-    X_SS <- smooth.spline(6:19, x[6:19], df = 4)
-    predict(X_SS, 1:20)$y
-  })
-rownames(MeanRetPropRetSvc_D1D2) <- levels(Ru_df$D1DGrp)
-SimBzone_ls$RuProfiles$MeanRetPropRetSvc_D1D2 <- MeanRetPropRetSvc_D1D2
-#Average standard deviation by diversity group
-SimBzone_ls$RuProfiles$SdRetPropRetSvc_D2 <- unlist(lapply(Tmp_D2_df, function(x) {
-  sd(x$RetPropRetSvcEmp, na.rm = TRUE)
-}))
-rm(MeanRetPropRetSvc_D1D2, Tmp_D2_df)
-
-
-#===========================
-#DEVELOP HOUSING SPLIT MODEL
-#===========================
-
-#Investigate relationship of multifamily proportions with activity density
-#-------------------------------------------------------------------------
-#Make a boxplot of multifamily dwelling unit proportion by activity density
-#level and location type
-boxplotMFProp <- function(Data_df, ...) {
-  PropMF_ <- Data_df$PropMF
-  D1DGrp_ <- as.integer(Data_df$D1DGrp)
-  D5Grp_ <- as.integer(Data_df$D5Grp)
-  boxplot(PropMF_ ~ D1DGrp_, ...)
-}
-png("data/mf-prop_by_loctype&density.png", width = 480, height = 480)
-Opar_ls <- par(mfrow = c(2,2), oma = c(0,0,2,0))
-boxplotMFProp(Ua_df, xlab = "Activity Density Level",
-              ylab = "Multifamily Proportion",
-              main = "Metropolitan")
-boxplotMFProp(Ru_df, xlab = "Activity Density Level",
-              ylab = "Multifamily Proportion",
-              main = "Town")
-boxplotMFProp(Ru_df, xlab = "Activity Density Level",
-              ylab = "Multifamily Proportion",
-              main = "Rural")
-mtext(text = "Multifamily Housing Proportion vs. Density Level by Location Type", side = 3,
-      outer = TRUE)
-par(Opar_ls)
-dev.off()
-rm(boxplotMFProp)
-
-#Calculate multifamily quantiles as function of density by location type
-#-----------------------------------------------------------------------
-#Define function to do the calculations
-calcMFProps <- function(Data_df) {
-  PropMF_ <- Data_df$PropMF
-  D1DGrp_ <- Data_df$D1DGrp
-  D5Grp_ <- Data_df$D5Grp
-  #Calculate quantiles
-  D1Qntl_mx <- do.call(rbind, tapply(PropMF_, D1DGrp_, function(x) {
-    quantile(x, prob = seq(0, 1, length.out = 9), na.rm = TRUE)
-  }))
-  D1Qntl_mx[is.na(D1Qntl_mx)] <- 0
-  #Return the results
-  D1Qntl_mx
-}
-#Add to the area profiles
-SimBzone_ls$UaProfiles$D1Qntl_mx <- calcMFProps(Ua_df)
-SimBzone_ls$TnProfiles$D1Qntl_mx <- calcMFProps(Tn_df)
-SimBzone_ls$RuProfiles$D1Qntl_mx <- calcMFProps(Ru_df)
 
 
 #===============================
@@ -1610,439 +1353,472 @@ dev.off()
 rm(mapAreaType, mapDevType)
 
 
-#=================================================
-#DEVELOP MODEL OF NETWORK DESIGN VARIABLE (D3BPO4)
-#=================================================
+#===========================
+#DEVELOP HOUSING SPLIT MODEL
+#===========================
+#Make dataset for developing model
+#---------------------------------
+Fields_ <-
+  c("HH", "PropSF", "PropMF", "AreaType", "DevType", "UZA_NAME")
+Tmp_df <- rbind(Ua_df[,Fields_], Tn_df[,Fields_], Ru_df[,Fields_])
+rm(Fields_)
+Tmp_df$PlaceType <- with(Tmp_df, paste(AreaType, DevType, sep = "."))
 
-#Define place type dimnames
-#--------------------------
-#Area type
-At <- c("center", "inner", "outer", "fringe")
-#Development type
-Dt <- c("emp", "mix", "res")
-#Place type
-Pt <- apply(expand.grid(At, Dt), 1, function(x) paste(x, collapse = "."))
-
-#Create D3 analysis dataset for urbanized areas
-#----------------------------------------------
-VarNm_ <-
-  c("UZA_NAME", "UZA_SIZE", "STATE", "D3bpo4", "TOTACT", "AreaType", "DevType")
-Tmp_df <- Ua_df[,VarNm_]
-Tmp_df$IsZero <- Tmp_df$D3bpo4 == 0
-Tmp_df$PlaceType <- paste(Tmp_df$AreaType, Tmp_df$DevType, sep = ".")
-Tmp_Ua_df <- split(Tmp_df, Tmp_df$UZA_NAME)
-Tmp_Sz_df <- split(Tmp_df, Tmp_df$UZA_SIZE)
-
-#Calculate the zero D3bpo4 proportion of activity by area
-#--------------------------------------------------------
-PropZeroD3_Ua <- unlist(lapply(Tmp_Ua_df, function(x) {
-  sum(x$TOTACT * as.numeric(x$IsZero), na.rm = TRUE) / sum(x$TOTACT, na.rm = TRUE)
-}))
-PropZeroD3_Sz <- unlist(lapply(Tmp_Sz_df, function(x) {
-  sum(x$TOTACT * as.numeric(x$IsZero), na.rm = TRUE) / sum(x$TOTACT, na.rm = TRUE)
-}))
-
-#Calculate the zero D3bpo4 proportions by area and place type
-#------------------------------------------------------------
-#Urbanized area calculations
-PropZeroD3_UaPt <- do.call(rbind, lapply(Tmp_Ua_df, function(x) {
-  PropZeroD3_Pt <- rep(NA, length(Pt))
-  names(PropZeroD3_Pt) <- Pt
-  PropZero_BY <- by(x, x$PlaceType, function(y) {
-    sum(y$TOTACT * as.numeric(y$IsZero), na.rm = TRUE) / sum(y$TOTACT, na.rm = TRUE)
-  })
-  PropZeroD3_Pt[names(PropZero_BY)] <- PropZero_BY
-  PropZeroD3_Pt
-}))
-#Urbanized area size group calculations
-PropZeroD3_SzPt <- do.call(rbind, lapply(Tmp_Sz_df, function(x) {
-  PropZeroD3_Pt <- rep(NA, length(Pt))
-  names(PropZeroD3_Pt) <- Pt
-  PropZero_BY <- by(x, x$PlaceType, function(y) {
-    sum(y$TOTACT * as.numeric(y$IsZero), na.rm = TRUE) / sum(y$TOTACT, na.rm = TRUE)
-  })
-  PropZeroD3_Pt[names(PropZero_BY)] <- PropZero_BY
-  PropZeroD3_Pt
-}))
-
-#Calculate the weighted average (non-zero) D3bpo4 value by area
-#--------------------------------------------------------------
-#Define function to calculate power transform to minimize skewness
-findPower <- function(Dat_) {
-  skewness <- function (x)
-  {
-    x <- x[!is.na(x)]
-    n <- length(x)
-    x <- x - mean(x)
-    y <- sqrt(n) * sum(x^3)/(sum(x^2)^(3/2))
-    y * ((1 - 1/n))^(3/2)
-  }
-  checkSkewMatch <- function(Pow) {
-    skewness(Dat_^Pow)
-  }
-  binarySearch(checkSkewMatch, c(0.001,1), Target = 0)
-}
-#Determine the power transform to best normalize the distribution of values
-D3bpo4_ <- with(Tmp_df, D3bpo4[!IsZero])
-D3Pow <- findPower(D3bpo4_)
-# png("data/ua_pwr-transform-d3_dist.png", width = 480, height = 480)
-# plot(density(D3bpo4_ ^ D3Pow), xlab = "Power-Transformed D3bpo4",
-#      ylab = "Probability Density",
-#      main = "Distribution of Block Group Power-Transformed D3bpo4")
-# dev.off()
-#Calculate the average D3bpo4 by urbanized area
-PowWtAveD3_Ua <- unlist(lapply(Tmp_Ua_df, function(x) {
-  D3bpo4_ <- x$D3bpo4[!x$IsZero]
-  PowD3bpo4_ <- D3bpo4_ ^ D3Pow
-  TotAct_ <- x$TOTACT[!x$IsZero]
-  PowWtAveD3 <-
-    sum(PowD3bpo4_ * TotAct_ / sum(TotAct_, na.rm = TRUE), na.rm = TRUE)
-  PowWtAveD3
-}))
-WtAveD3_Ua <- PowWtAveD3_Ua ^ (1 / D3Pow)
-#Calculate the average D3bpo4 by size group
-PowWtAveD3_Sz <- unlist(lapply(Tmp_Sz_df, function(x) {
-  D3bpo4_ <- x$D3bpo4[!x$IsZero]
-  PowD3bpo4_ <- D3bpo4_ ^ D3Pow
-  TotAct_ <- x$TOTACT[!x$IsZero]
-  PowWtAveD3 <-
-    sum(PowD3bpo4_ * TotAct_ / sum(TotAct_, na.rm = TRUE), na.rm = TRUE)
-  PowWtAveD3
-}))
-WtAveD3_Sz <- PowWtAveD3_Sz ^ (1 / D3Pow)
-
-#Tabulate the transformed mean D3bpo4 value by urbanized area and place type
-#---------------------------------------------------------------------------
-#Calculate activity-weighted block group average by urbanized area and place type
-PowWtAveD3_UaPt <- do.call(rbind, lapply(Tmp_Ua_df, function(x) {
-  X_df <- data.frame(
-    PowD3bpo4 = x$D3bpo4[!x$IsZero] ^ D3Pow,
-    TotAct = x$TOTACT[!x$IsZero],
-    PlaceType = x$PlaceType[!x$IsZero]
-  )
-  PowWtAveD3_Pt <- rep(NA, length(Pt))
-  names(PowWtAveD3_Pt) <- Pt
-  PowWtAveD3_BY <- by(X_df, X_df$PlaceType, function(y) {
-    sum((y$PowD3bpo4 * y$TotAct) / sum(y$TotAct, na.rm = TRUE), na.rm = TRUE)
-  })
-  PowWtAveD3_Pt[names(PowWtAveD3_BY)] <- PowWtAveD3_BY
-  PowWtAveD3_Pt
-}))
-#Calculate activity-weighted block group average by size and place type
-PowWtAveD3_SzPt <- do.call(rbind, lapply(Tmp_Sz_df, function(x) {
-  X_df <- data.frame(
-    PowD3bpo4 = x$D3bpo4[!x$IsZero] ^ D3Pow,
-    TotAct = x$TOTACT[!x$IsZero],
-    PlaceType = x$PlaceType[!x$IsZero]
-  )
-  PowWtAveD3_Pt <- rep(NA, length(Pt))
-  names(PowWtAveD3_Pt) <- Pt
-  PowWtAveD3_BY <- by(X_df, X_df$PlaceType, function(y) {
-    sum((y$PowD3bpo4 * y$TotAct) / sum(y$TotAct, na.rm = TRUE), na.rm = TRUE)
-  })
-  PowWtAveD3_Pt[names(PowWtAveD3_BY)] <- PowWtAveD3_BY
-  PowWtAveD3_Pt
-}))
-png("data/ua_pwr-transform-d3_dist_by_place-type.png", width = 480, height = 480)
-Opar_ls <- par(las = 2, mar = c(7, 4, 3, 1))
-boxplot(PowWtAveD3_UaPt, notch = TRUE,
-        ylab = "Power-Transformed D3bpo4",
-        main = "Distribution of Power-Transformed D3bpo4 by Place Type")
-par(Opar_ls)
-dev.off()
-
-#Impute values where urbanized area place type values are NA
-#-----------------------------------------------------------
-#Values for urbanized area place type NA values are imputed by taking the
-#weighted average of the non-NA place type values for other urbanized areas
-#where the weights are a function of the difference between the overall average
-#D3bpo4 value for the urbanized area and the other urbanized areas
-#Define function to impute values
-imputeValues <- function(Vals_, WtgVals_) {
-  #Function to calculate weight matrix
-  calcWts <- function(WtgVals_) {
-    Dist_mx <- abs(outer(WtgVals_, WtgVals_, "-"))
-    MinDist_ <- apply(Dist_mx, 1, function(x) min(x[x != 0]))
-    Wts_mx <- sweep(1 / Dist_mx, 1, MinDist_, "*")
-    Wts_mx[is.infinite(Wts_mx)] <- 0
-    Wts_mx
-  }
-  #Function to compute weighted average
-  wtAve <- function(Vals_, Wts_) {
-    sum(Vals_ * Wts_ / sum(Wts_, na.rm = TRUE), na.rm = TRUE)
-  }
-  #Impute values
-  Wts_mx <- calcWts(WtgVals_)
-  NaIdx_ <- which(is.na(Vals_))
-  Imp_ <- sapply(NaIdx_, function(x) {
-    wtAve(Vals_, Wts_mx[x,])
-  })
-  Vals_[NaIdx_] <- Imp_
-  Vals_
-}
-#Impute values for PowWtAveD3_UaPt
-PowWtAveD3_UaPt <- apply(PowWtAveD3_UaPt, 2, function(x) imputeValues(x, PowWtAveD3_Ua))
-#Impute values for PropZeroD3_UaPt
-PropZeroD3_UaPt <- apply(PropZeroD3_UaPt, 2, function(x) imputeValues(x, PropZeroD3_Ua))
-PropZeroD3_UaPt[PropZeroD3_Ua == 0,] <- 0
-
-#Calculate the relative place type values for urbanized areas
-#------------------------------------------------------------
-#Combine the individual urbanized area and urbanized size data
-PowWtAveD3_UaPt <- rbind(PowWtAveD3_UaPt, PowWtAveD3_SzPt)
-rm(PowWtAveD3_SzPt)
-PropZeroD3_UaPt <- rbind(PropZeroD3_UaPt, PropZeroD3_SzPt)
-rm(PropZeroD3_SzPt)
-PowWtAveD3_Ua <- c(PowWtAveD3_Ua, PowWtAveD3_Sz)
-rm(PowWtAveD3_Sz)
-PropZeroD3_Ua <- c(PropZeroD3_Ua, PropZeroD3_Sz)
-rm(PropZeroD3_Sz)
-#Calculate ratio of urbanized area values by place type and urbanized area mean
-RelPowWtAveD3_UaPt <- sweep(PowWtAveD3_UaPt, 1, PowWtAveD3_Ua, "/")
-RelPropZeroD3_UaPt <- sweep(PropZeroD3_UaPt, 1, PropZeroD3_Ua, "/")
-RelPropZeroD3_UaPt[is.nan(RelPropZeroD3_UaPt)] <- 0
-
-#Calculate the standard deviation of the urbanized means by place type
+#Calculate multi-family housing proportions by quantile and place type
 #---------------------------------------------------------------------
-Tmp_Pt_df <- split(Tmp_df[!Tmp_df$IsZero,], Tmp_df$PlaceType[!Tmp_df$IsZero])
-PowWtAveD3_Pt <- unlist(lapply(Tmp_Pt_df, function(x) {
-  PowD3bpo4_ <- x$D3bpo4 ^ D3Pow
-  Keep <- PowD3bpo4_ < quantile(PowD3bpo4_, probs = 0.99)
-  sum(PowD3bpo4_[Keep] * x$TOTACT[Keep] / sum(x$TOTACT[Keep], na.rm = TRUE),
-      na.rm = TRUE)
-}))[Pt]
-PowWtVarD3_Pt <- sapply(names(PowWtAveD3_Pt), function(x) {
-  PowD3bpo4_ <- Tmp_Pt_df[[x]]$D3bpo4 ^ D3Pow
-  Keep <- PowD3bpo4_ < quantile(PowD3bpo4_, probs = 0.99)
-  PowD3bpo4_ <- PowD3bpo4_[Keep]
-  TotAct_ <- Tmp_Pt_df[[x]]$TOTACT[Keep]
-  Wts_ <- TotAct_ / sum(TotAct_, na.rm = TRUE)
-  PowWtAveD3 <- PowWtAveD3_Pt[x]
-  sum(Wts_ * (PowD3bpo4_ - PowWtAveD3)^2, na.rm = TRUE)
-})
-PowWtSdD3_Pt <- sqrt(PowWtVarD3_Pt)
-rm(PowWtAveD3_Pt, PowWtVarD3_Pt)
+MFProp_PtQt <- do.call(rbind, tapply(Tmp_df$PropMF, Tmp_df$PlaceType, function(x) {
+  quantile(x, probs = seq(0, 1, 0.02), na.rm = TRUE)
+}))
 
-#Add the urbanized area D3bpo4 values to the SimBzone_ls
-#-------------------------------------------------------
-SimBzone_ls$UaProfiles$WtAveD3_Ua <- WtAveD3_Ua
-SimBzone_ls$UaProfiles$PropZeroD3_Ua <- PropZeroD3_Ua
-SimBzone_ls$UaProfiles$RelPowWtAveD3_UaPt <- RelPowWtAveD3_UaPt
-SimBzone_ls$UaProfiles$RelPropZeroD3_UaPt <- RelPropZeroD3_UaPt
-SimBzone_ls$UaProfiles$PowWtSdD3_Pt <- PowWtSdD3_Pt
-SimBzone_ls$UaProfiles$D3Pow <- D3Pow
-rm(WtAveD3_Ua, PropZeroD3_Ua, RelPowWtAveD3_UaPt, RelPropZeroD3_UaPt, PowWtSdD3_Pt)
-rm(Tmp_df, Tmp_Ua_df, Tmp_Sz_df)
-
-#Calculate D3bpo4 values for town and rural areas
-#------------------------------------------------
-#Define function for calculating values
-calcD3Values <- function(Data_df) {
-  #Data for analysis
-  VarNm_ <-
-    c("STATE", "D3bpo4", "TOTACT", "AreaType", "DevType")
-  Tmp_df <- Data_df[,VarNm_]
-  Tmp_df$IsZero <- Tmp_df$D3bpo4 == 0
-  Tmp_df$PlaceType <- paste(Tmp_df$AreaType, Tmp_df$DevType, sep = ".")
-  Tmp_Pt_df <- split(Tmp_df, Tmp_df$PlaceType)
-  #Calculate overall zero proportion
-  PropZeroD3 <-
-    with(Tmp_df,
-         sum(TOTACT * as.numeric(IsZero), na.rm = TRUE) / sum(TOTACT, na.rm = TRUE)
-    )
-  #Calculate the zero proportion by place type
-  PropZeroD3_Pt <- unlist(lapply(Tmp_Pt_df, function(x) {
-    sum(x$TOTACT * as.numeric(x$IsZero), na.rm = TRUE) / sum(x$TOTACT, na.rm = TRUE)
-  }))
-  #Calculate the relative zero proportion
-  RelPropZeroD3_Pt <- PropZeroD3_Pt / PropZeroD3
-  #Determine the power transform to best normalize the distribution of values
-  D3bpo4_ <- with(Tmp_df, D3bpo4[!IsZero])
-  D3Pow <- findPower(D3bpo4_)
-  PowD3bpo4_ <- D3bpo4_ ^ D3Pow
-  #Calculate the average D3bpo4 for all towns
-  TotAct_ <- with(Tmp_df, TOTACT[!IsZero])
-  PowWtAveD3 <- sum(PowD3bpo4_ * TotAct_ / sum(TotAct_, na.rm = TRUE), na.rm = TRUE)
-  WtAveD3 <- PowWtAveD3 ^ (1 / D3Pow)
-  #Calculate activity-weighted block group average by place type
-  PowWtAveD3_Pt <- unlist(lapply(Tmp_Pt_df, function(x) {
-    PowD3bpo4_ <- x$D3bpo4[!x$IsZero] ^ D3Pow
-    TotAct_ <- x$TOTACT[!x$IsZero]
-    Keep <- PowD3bpo4_ < quantile(PowD3bpo4_, probs = 0.99)
-    sum(PowD3bpo4_[Keep] * TotAct_[Keep] / sum(TotAct_[Keep], na.rm = TRUE),
-        na.rm = TRUE)
-  }))[Pt]
-  names(PowWtAveD3_Pt) <- Pt
-  PowWtAveD3_Pt[is.na(PowWtAveD3_Pt)] <- 0
-  #Calculate the relative place type average
-  RelPowWtAveD3_Pt <- PowWtAveD3_Pt / PowWtAveD3
-  #Calculate the standard deviation of the place type average
-  PowWtVarD3_Pt <- sapply(names(PowWtAveD3_Pt), function(x) {
-    PowD3bpo4_ <- Tmp_Pt_df[[x]]$D3bpo4 ^ D3Pow
-    Keep <- PowD3bpo4_ < quantile(PowD3bpo4_, probs = 0.99)
-    PowD3bpo4_ <- PowD3bpo4_[Keep]
-    TotAct_ <- Tmp_Pt_df[[x]]$TOTACT[Keep]
-    Wts_ <- TotAct_ / sum(TotAct_, na.rm = TRUE)
-    PowWtAveD3 <- PowWtAveD3_Pt[x]
-    sum(Wts_ * (PowD3bpo4_ - PowWtAveD3)^2, na.rm = TRUE)
-  })[Pt]
-  names(PowWtVarD3_Pt) <- Pt
-  PowWtSdD3_Pt <- sqrt(PowWtVarD3_Pt)
-  #Add the town D3bpo4 values to the SimBzone_ls
-  list(
-    WtAveD3 = WtAveD3,
-    PropZeroD3 = PropZeroD3,
-    RelPowWtAveD3_Pt = RelPowWtAveD3_Pt,
-    RelPropZeroD3_Pt = RelPropZeroD3_Pt,
-    PowWtSdD3_Pt = PowWtSdD3_Pt,
-    D3Pow = D3Pow
+#Define function to split housing and apply to dataset
+#-----------------------------------------------------
+#Define function to split employment
+splitHousing <- function(Hh_, PlaceType_) {
+  MfProp_ <- sapply(PlaceType_, function(x) {
+    sample(MFProp_PtQt[x,], 1)})
+  MfDu_ <- round(Hh_ * MfProp_)
+  SfDu_ <- Hh_ - MfDu_
+  data.frame(
+    MfDu = MfDu_,
+    SfDu = SfDu_,
+    MfProp = MfProp_
   )
 }
-#Calculate town values and add to SimBzone_ls
-TownD3_ls <- calcD3Values(Tn_df)
-SimBzone_ls$TnProfiles$WtAveD3 <- TownD3_ls$WtAveD3
-SimBzone_ls$TnProfiles$PropZeroD3 <- TownD3_ls$PropZeroD3
-SimBzone_ls$TnProfiles$RelPowWtAveD3_Pt <- TownD3_ls$RelPowWtAveD3_Pt
-SimBzone_ls$TnProfiles$RelPropZeroD3_Pt <- TownD3_ls$RelPropZeroD3_Pt
-SimBzone_ls$TnProfiles$PowWtSdD3_Pt <- TownD3_ls$PowWtSdD3_Pt
-SimBzone_ls$TnProfiles$D3Pow <- TownD3_ls$D3Pow
-rm(TownD3_ls)
-#Calculate rural values and add to SimBzone_ls
-RuralD3_ls <- calcD3Values(Ru_df)
-SimBzone_ls$RuProfiles$WtAveD3 <- RuralD3_ls$WtAveD3
-SimBzone_ls$RuProfiles$PropZeroD3 <- RuralD3_ls$PropZeroD3
-SimBzone_ls$RuProfiles$RelPowWtAveD3_Pt <- RuralD3_ls$RelPowWtAveD3_Pt
-SimBzone_ls$RuProfiles$RelPropZeroD3_Pt <- RuralD3_ls$RelPropZeroD3_Pt
-SimBzone_ls$RuProfiles$PowWtSdD3_Pt <- RuralD3_ls$PowWtSdD3_Pt
-SimBzone_ls$RuProfiles$D3Pow <- RuralD3_ls$D3Pow
-rm(RuralD3_ls)
+#Split housing
+DuSim_df <- splitHousing(Tmp_df$HH, Tmp_df$PlaceType)
 
-
-#Define a function to assign a D3bpo4 value to SimBzones
-#-------------------------------------------------------
-#Function is applied to location types within an Azone
-calcD3bpo4 <- function(
-  AreaType_Bz, DevType_Bz, AreaName, AveTarget = NULL, PropZeroTarget = NULL) {
-  N <- length(AreaType_Bz)
-  #Set WtAveD3 to AveTarget is not NULL
-  if (!is.null(AveTarget)){
-    WtAveD3 <- AveTarget
-  }
-  #Set PropZeroD3 if PropZeroTarget is not NULL
-  if (!is.null(PropZeroTarget)) {
-    PropZeroD3 <- PropZeroTarget
-  }
-  #Retrieve model values consistent with area name
-  if (AreaName %in% c("Town", "Rural")) {
-    if (AreaName == "Town") {
-      if (is.null(AveTarget)) {
-        WtAveD3 <- SimBzone_ls$TnProfiles$WtAveD3
-      }
-      if (is.null(PropZeroTarget)) {
-        PropZeroD3 <- SimBzone_ls$TnProfiles$PropZeroD3
-      }
-      RelPowWtAveD3_Pt <- SimBzone_ls$TnProfiles$RelPowWtAveD3_Pt
-      RelPropZeroD3_Pt <- SimBzone_ls$TnProfiles$RelPropZeroD3_Pt
-      PowWtSdD3_Pt <- SimBzone_ls$TnProfiles$PowWtSdD3_Pt
-      D3Pow <- SimBzone_ls$TnProfiles$D3Pow
-    } else {
-      if (is.null(AveTarget)) {
-        WtAveD3 <- SimBzone_ls$RuProfiles$WtAveD3
-      }
-      if (is.null(PropZeroTarget)) {
-        PropZeroD3 <- SimBzone_ls$RuProfiles$PropZeroD3
-      }
-      RelPowWtAveD3_Pt <- SimBzone_ls$RuProfiles$RelPowWtAveD3_Pt
-      RelPropZeroD3_Pt <- SimBzone_ls$RuProfiles$RelPropZeroD3_Pt
-      PowWtSdD3_Pt <- SimBzone_ls$RuProfiles$PowWtSdD3_Pt
-      D3Pow <- SimBzone_ls$RuProfiles$D3Pow
-    }
-  } else {
-    if (is.null(AveTarget)) {
-      WtAveD3 <- SimBzone_ls$UaProfiles$WtAveD3_Ua[AreaName]
-    }
-    if (is.null(PropZeroTarget)) {
-      PropZeroD3 <- SimBzone_ls$UaProfiles$PropZeroD3[AreaName]
-    }
-    RelPowWtAveD3_Pt <- SimBzone_ls$UaProfiles$RelPowWtAveD3_UaPt[AreaName,]
-    RelPropZeroD3_Pt <- SimBzone_ls$UaProfiles$RelPropZeroD3_UaPt[AreaName,]
-    PowWtSdD3_Pt <- SimBzone_ls$UaProfiles$PowWtSdD3_Pt
-    D3Pow <- SimBzone_ls$UaProfiles$D3Pow
-  }
-  if (!is.null(AveTarget)) WtAveD3 <- AveTarget
-  if (!is.null(PropZeroTarget)) PropZeroD3 <- PropZeroTarget
-  #Create the place type names
-  PlaceType_Bz <- paste(AreaType_Bz, DevType_Bz, sep = ".")
-  #Identify the SimBzones that have a value of zero
-  PropZeroD3_Pt <- PropZeroD3 * RelPropZeroD3_Pt
-  PropZeroD3_Bz <- PropZeroD3_Pt[PlaceType_Bz]
-  IsZero_Bz <- runif(N) < PropZeroD3_Bz
-  #Calculate a D3bpo4 values
-  PowWtAveD3_Pt <- RelPowWtAveD3_Pt * WtAveD3 ^ D3Pow
-  PowWtAveD3_Bz <- PowWtAveD3_Pt[PlaceType_Bz]
-  PowWtSdD3_Bz <- PowWtSdD3_Pt[PlaceType_Bz]
-  PowD3_Bz <- rnorm(N, PowWtAveD3_Bz, PowWtSdD3_Bz)
-  PowD3_Bz[IsZero_Bz] <- 0
-  #Return the result
-  PowD3_Bz ^ (1 / D3Pow)
-}
-
-#Test the D3bpo model for selected urbanized areas
-#-------------------------------------------------
-png("data/ua_d3bpo4-test_.png", height = 600, width = 600)
-Opar_ls <- par(mfrow = c(3,3), oma = c(0,0,3,0))
-plotCompareD3 <- function(UzaName) {
-  PtTest_ <- calcD3bpo4(
-    AreaType_Bz = Ua_df$AreaType[Ua_df$UZA_NAME == UzaName],
-    DevType_Bz = Ua_df$DevType[Ua_df$UZA_NAME == UzaName],
-    AreaName = UzaName,
-    AveTarget <- NULL,
-    PropZeroTarget <- NULL)
-  plot(density(PtTest_ ^ D3Pow), main = UzaName)
-  lines(density((Ua_df$D3bpo4[Ua_df$UZA_NAME == UzaName]) ^ D3Pow), lty = 2)
-}
+#Plot comparison of observed and simulated multifamily housing proportions
+#-------------------------------------------------------------------------
+png("data/ua_mf-prop_compare.png", height = 600, width = 600)
+Opar_ls <- par(mfrow = c(3,3))
 for (ua in UzaToPlot_) {
-  plotCompareD3(ua)
+  plot(density(Tmp_df$PropMF[Tmp_df$UZA_NAME == ua], na.rm = TRUE, bw = "SJ"), main = ua)
+  lines(density(DuSim_df$MfProp[Tmp_df$UZA_NAME == ua], na.rm = TRUE, bw = "SJ"), lty = 2, col = "red")
+  legend("topright", legend = c("Observed", "Simulated"), lty = 1:2, col = 1:2, bty = "n")
 }
-mtext(
-  text = paste0("Distribution of Modeled (solid line) and Observed (dashed line) D3bpo4 Values",
-                "\nFor Selected Metropolitan Areas"),
-  side = 3,
-  outer = TRUE
-)
 par(Opar_ls)
+rm(Opar_ls)
 dev.off()
 
-#Test for Atlanta, halving 0 proportion and doubling average value
-#-----------------------------------------------------------------
-UzaName <- "Atlanta, GA"
-ZeroProp <- SimBzone_ls$UaProfiles$PropZeroD3_Ua["Atlanta, GA"]
-AveVal <- SimBzone_ls$UaProfiles$WtAveD3_Ua["Atlanta, GA"]
-AtlD3_ <- calcD3bpo4(
-  AreaType_Bz = Ua_df$AreaType[Ua_df$UZA_NAME == UzaName],
-  DevType_Bz = Ua_df$DevType[Ua_df$UZA_NAME == UzaName],
-  AreaName = UzaName,
-  AveTarget <- NULL,
-  PropZeroTarget <- NULL)
-AtlD3Alt_ <- calcD3bpo4(
-  AreaType_Bz = Ua_df$AreaType[Ua_df$UZA_NAME == UzaName],
-  DevType_Bz = Ua_df$DevType[Ua_df$UZA_NAME == UzaName],
-  AreaName = UzaName,
-  AveTarget <- 2 * AveVal,
-  PropZeroTarget <- ZeroProp / 2)
-png("data/atlanta_D3_test.png", width = 500, height = 400)
-plot(density(AtlD3_ ^ SimBzone_ls$UaProfiles$D3Pow),
-     xlab = "Power-Transformed D3bpo4 Values",
-     ylab = "Probability Density",
-     main = "Effect on D3bpo4 Distribution of Halving 0 Proportion\nAnd Doubling Average Value")
-lines(density(AtlD3Alt_ ^ SimBzone_ls$UaProfiles$D3Pow), col = "red")
-LegendText_ <- c(
-  paste0("Zero Prop. = ", round(ZeroProp, 2), "\n", "Ave. D3bpo4 = ", round(AveVal, 1)),
-  paste0("Zero Prop. = ", round(ZeroProp / 2, 2), "\n", "Ave. D3bpo4 = ", round(AveVal * 2, 1))
-)
-legend("topleft", lty = 1, col = 1:2, legend = LegendText_, bty = "n")
+#Save the multi-family housing proportions table
+#-----------------------------------------------
+SimBzone_ls$HousingSplit$MFProp_PtQt <- MFProp_PtQt
+rm(Tmp_df, MFProp_PtQt, splitHousing, DuSim_df)
+
+
+#===================================================================
+#DEVELOP MODEL TO SPLIT EMPLOYMENT INTO SECTORS TO CALCULATE ENTROPY
+#===================================================================
+#Make dataset for developing model
+#---------------------------------
+Fields_ <-
+  c("E5_RET10", "E5_SVC10", "EMPTOT", "HH", "AreaType", "DevType", "D2A_EPHHM",
+    "UZA_NAME")
+Tmp_df <- rbind(Ua_df[,Fields_], Tn_df[,Fields_], Ru_df[,Fields_])
+rm(Fields_)
+Tmp_df$RetEmp <- Tmp_df$E5_RET10
+Tmp_df$SvcEmp <- Tmp_df$E5_SVC10
+Tmp_df$RetSvcEmp <- with(Tmp_df, RetEmp + SvcEmp)
+Tmp_df$TotEmp <- Tmp_df$EMPTOT
+Tmp_df$RetSvcEmpProp <- with(Tmp_df, RetSvcEmp / Tmp_df$TotEmp)
+Tmp_df$RetPropRetSvcEmp <- with(Tmp_df, RetEmp / RetSvcEmp)
+Tmp_df$PlaceType <- with(Tmp_df, paste(AreaType, DevType, sep = "."))
+
+#Calculate retail and service employment proportions by quantile and place type
+#------------------------------------------------------------------------------
+#Calculate retail service proportion of total employment quantiles by place type
+RetSvcProp_PtQt <- do.call(rbind, tapply(Tmp_df$RetSvcEmpProp, Tmp_df$PlaceType, function(x) {
+  quantile(x, probs = seq(0, 1, 0.02), na.rm = TRUE)
+}))
+#Calculate retail proportion of retail and service employment quantiles by place type
+RetProp_PtQt <- do.call(rbind, tapply(Tmp_df$RetPropRetSvcEmp, Tmp_df$PlaceType, function(x) {
+  quantile(x, probs = seq(0, 1, 0.02), na.rm = TRUE)
+}))
+
+#Define function to split employment and apply to dataset
+#--------------------------------------------------------
+#Define function to split employment
+splitEmployment <- function(TotEmp_, PlaceType_) {
+  RetSvcProp_ <- sapply(PlaceType_, function(x) {
+    sample(RetSvcProp_PtQt[x,], 1)})
+  RetSvcEmp_ <- TotEmp_ * RetSvcProp_
+  OthEmp_ <- TotEmp_ - RetSvcEmp_
+  RetProp_ <- sapply(PlaceType_, function(x) {
+    sample(RetProp_PtQt[x,], 1)
+  })
+  RetEmp_ <- RetSvcEmp_ * RetProp_
+  SvcEmp_ <- RetSvcEmp_ - RetEmp_
+  data.frame(
+    RetEmp = RetEmp_,
+    SvcEmp = SvcEmp_,
+    OthEmp = OthEmp_
+  )
+}
+#Split employment
+#----------------
+EmpSim_df <- splitEmployment(Tmp_df$TotEmp, Tmp_df$PlaceType)
+
+#Calculate entropy with simulated employment split and compare with observed
+#---------------------------------------------------------------------------
+#Define function to calculate entropy
+calcEntropy <- function(In_df) {
+  TotAct_ <- rowSums(In_df)
+  calcEntropyTerm <- function(Act_) {
+    ActRatio_ <- Act_ / TotAct_
+    LogActRatio_ <- ActRatio_ * 0
+    LogActRatio_[Act_ != 0] <- log(Act_[Act_ != 0] / TotAct_[Act_ != 0])
+    ActRatio_ * LogActRatio_
+  }
+  E_df <- data.frame(lapply(In_df, function(x) calcEntropyTerm(x)))
+  A_ <- rowSums(E_df)
+  N_ = apply(E_df, 1, function(x) sum(x != 0))
+  -A_ / log(N_)
+}
+#Calculate entropy with simulated employment split
+Act_df <- EmpSim_df
+Act_df$Hh <- Tmp_df$HH
+rm(EmpSim_df)
+SimEntropy_ <- calcEntropy(Act_df)
+#Plot comparison of simulated entropy
+png("data/ua_entropy_compare.png", height = 600, width = 600)
+Opar_ls <- par(mfrow = c(3,3))
+for (ua in UzaToPlot_) {
+  plot(density(Tmp_df$D2A_EPHHM[Tmp_df$UZA_NAME == ua], bw = "SJ"), main = ua)
+  lines(density(SimEntropy_[Tmp_df$UZA_NAME == ua], bw = "SJ"), lty = 2, col = "red")
+  legend(0.5, 0, legend = c("Observed", "Simulated"), lty = 1:2, col = 1:2,
+         xjust = 0.5, yjust = 0, bty = "n")
+}
+par(Opar_ls)
+rm(Opar_ls)
 dev.off()
-rm(UzaName, ZeroProp, AveVal, AtlD3_, AtlD3Alt_, LegendText_)
+
+#Save the proportions tables
+#---------------------------
+SimBzone_ls$EmpSplit$RetSvcProp_PtQt <- RetSvcProp_PtQt
+SimBzone_ls$EmpSplit$RetProp_PtQt <- RetProp_PtQt
+rm(Tmp_df, RetSvcProp_PtQt, RetProp_PtQt, splitEmployment, calcEntropy, Act_df,
+   SimEntropy_)
+
+
+#============================================================
+#DEVELOP MODEL OF PEDESTRIAN NETWORK DESIGN VARIABLE (D3BPO4)
+#============================================================
+
+#---------------------------------
+#DEVELOP MODEL FOR URBAN LOCATIONS
+#---------------------------------
+
+#Make dataset for developing model
+#---------------------------------
+Fields_ <-
+  c("D3bpo4", "AreaType", "DevType", "UZA_NAME", "UZA_SIZE")
+Tmp_df <- Ua_df[,Fields_]
+rm(Fields_)
+Tmp_df$PlaceType <- with(Tmp_df, paste(AreaType, DevType, sep = "."))
+
+#Calculate a normalized D3bpo4 value
+#-----------------------------------
+#Split the dataset by urbanized area
+Tmp_Ua_df <- split(Tmp_df, Tmp_df$UZA_NAME)
+#Calculate the urbanized area average and normalized values
+Tmp_Ua_df <- lapply(Tmp_Ua_df, function(x) {
+  x$AveD3bpo4 <- mean(x$D3bpo4)
+  x$NormD3bpo4 <- x$D3bpo4 / x$AveD3bpo4
+  x$NormD3bpo4[is.na(x$NormD3bpo4)] <- 0
+  x
+})
+Tmp_df <- do.call(rbind, Tmp_Ua_df)
+rm(Tmp_Ua_df)
+
+#Calculate normalized proportions by quantile and place type
+#-----------------------------------------------------------
+NormD3bpo4_PtQt <- do.call(rbind, tapply(Tmp_df$NormD3bpo4, Tmp_df$PlaceType, function(x) {
+  quantile(x, probs = seq(0, 1, 0.02), na.rm = TRUE)
+}))
+
+#Define function to simulate the D3bpo4 value
+#--------------------------------------------
+simulateD3bpo4 <- function(AveD3bpo4_, PlaceType_, NormD3bpo4_PtQt) {
+  NormD3bpo4_ <- sapply(PlaceType_, function(x) {
+    sample(NormD3bpo4_PtQt[x,], 1)})
+  NormD3bpo4_ * AveD3bpo4_
+}
+#Simulate values
+SimD3bpo4_ <- simulateD3bpo4(Tmp_df$AveD3bpo4, Tmp_df$PlaceType, NormD3bpo4_PtQt)
+
+#Plot comparison of simulated and observed D3bpo4
+#------------------------------------------------
+png("data/ua_d3bpo4_compare.png", height = 600, width = 600)
+Opar_ls <- par(mfrow = c(3,3))
+for (ua in UzaToPlot_) {
+  plot(density(log1p(Tmp_df$D3bpo4[Tmp_df$UZA_NAME == ua]), bw = 0.1), main = ua)
+  lines(density(log1p(SimD3bpo4_[Tmp_df$UZA_NAME == ua]), bw = 0.1), lty = 2, col = "red")
+  legend("topright", legend = c("Observed", "Simulated"), lty = 1:2, col = 1:2, bty = "n")
+}
+par(Opar_ls)
+rm(Opar_ls)
+dev.off()
+
+#Save the quantiles and urban area averages
+#------------------------------------------
+#Save the quantiles
+SimBzone_ls$UaProfiles$NormD3bpo4_PtQt <- NormD3bpo4_PtQt
+#Calculate and save average D3bpo4 by urbanized area
+SimBzone_ls$UaProfiles$AveD3bpo4_Ua <- c(
+  tapply(Tmp_df$D3bpo4, Tmp_df$UZA_NAME, mean),
+  tapply(Tmp_df$D3bpo4, Tmp_df$UZA_SIZE, mean)
+)
+#Clean up
+rm(Tmp_df, NormD3bpo4_PtQt, SimD3bpo4_)
+
+#--------------------------------
+#DEVELOP MODEL FOR TOWN LOCATIONS
+#--------------------------------
+
+#Make dataset for developing model
+#---------------------------------
+Fields_ <-
+  c("D3bpo4", "TOTACT", "AreaType", "DevType")
+Tmp_df <- Tn_df[,Fields_]
+rm(Fields_)
+Tmp_df$PlaceType <- with(Tmp_df, paste(AreaType, DevType, sep = "."))
+#Calculate a normalized D3bpo4 value
+Tmp_df$AveD3bpo4 <- mean(Tmp_df$D3bpo4)
+Tmp_df$NormD3bpo4 <- Tmp_df$D3bpo4 / Tmp_df$AveD3bpo4
+
+#Calculate normalized proportions by percentile and place type
+#-------------------------------------------------------------
+NormD3bpo4_PtQt <- do.call(rbind, tapply(Tmp_df$NormD3bpo4, Tmp_df$PlaceType, function(x) {
+  quantile(x, probs = seq(0, 1, 0.02), na.rm = TRUE)
+}))
+
+#Save the quantiles and town average
+#-----------------------------------
+#Save the quantiles
+SimBzone_ls$TnProfiles$NormD3bpo4_PtQt <- NormD3bpo4_PtQt
+#Calculate and save average D3bpo4
+SimBzone_ls$TnProfiles$AveD3bpo4 <- Tmp_df$AveD3bpo4[1]
+#Clean up
+rm(Tmp_df, NormD3bpo4_PtQt)
+
+#---------------------------------
+#DEVELOP MODEL FOR RURAL LOCATIONS
+#---------------------------------
+
+#Make dataset for developing model
+#---------------------------------
+Fields_ <-
+  c("D3bpo4", "TOTACT", "AreaType", "DevType")
+Tmp_df <- Ru_df[,Fields_]
+rm(Fields_)
+Tmp_df$PlaceType <- with(Tmp_df, paste(AreaType, DevType, sep = "."))
+#Calculate a normalized D3bpo4 value
+Tmp_df$AveD3bpo4 <- mean(Tmp_df$D3bpo4)
+Tmp_df$NormD3bpo4 <- Tmp_df$D3bpo4 / Tmp_df$AveD3bpo4
+
+#Calculate normalized proportions by percentile and place type
+#-------------------------------------------------------------
+#Calculate normalized proportions, note there are no 'center' area types
+NormD3bpo4_PtQt <- do.call(rbind, tapply(Tmp_df$NormD3bpo4, Tmp_df$PlaceType, function(x) {
+  quantile(x, probs = seq(0, 1, 0.02), na.rm = TRUE)
+}))
+#Rural locations don't have center area types and are unlikely to but to handle
+#the case that a model might, assign the inner place type values to center area
+#type values
+NormD3bpo4_PtQt <- rbind(
+  NormD3bpo4_PtQt,
+  center.emp = NormD3bpo4_PtQt["inner.emp",],
+  center.mix = NormD3bpo4_PtQt["inner.mix",],
+  center.res = NormD3bpo4_PtQt["inner.res",]
+)
+
+#Save the quantiles and rural average
+#------------------------------------
+#Save the quantiles
+SimBzone_ls$RuProfiles$NormD3bpo4_PtQt <- NormD3bpo4_PtQt
+#Calculate and save average D3bpo4
+SimBzone_ls$RuProfiles$AveD3bpo4 <- Tmp_df$AveD3bpo4[1]
+#Clean up
+rm(Tmp_df, NormD3bpo4_PtQt)
+
+
+#=================================================
+#DEVELOP MODEL OF ACCESS TO TRANSIT VARIABLE (D4C)
+#=================================================
+
+#Create D4 analysis dataset for urbanized areas
+#----------------------------------------------
+KeepVars_ <- c(
+  "UA_NAME", "TransitRevMi", "D4c", "TOTACT", "AreaType", "DevType", "AC_LAND", "D1D")
+#Limit to records that have D4c and TransitVehMi data
+D4_df <- Ua_df[!(is.na(Ua_df$D4c)) & !(is.na(Ua_df$TransitVehMi)), KeepVars_]
+rm(KeepVars_)
+names(D4_df) <-
+  c("UaName", "TranRevMi", "D4c", "TotAct", "AreaType", "DevType", "AcLand", "D1D")
+#Identify which D4 values are 0 and remove urbanized areas that have all 0 values
+Is0D4 <- D4_df$D4c == 0
+All0D4_Ua <- tapply(Is0D4, D4_df$UaName, all)
+RemoveUaName_ <- names(All0D4_Ua[All0D4_Ua])
+D4_df <- D4_df[!(D4_df$UaName %in% RemoveUaName_),]
+#Add a place type variable
+D4_df$PlaceType <- with(D4_df, paste(AreaType, DevType, sep = "."))
+rm(Is0D4, All0D4_Ua, RemoveUaName_)
+
+#Calculate and add urbanized area statistics to D4_df
+#-----------------------------------------------------
+#Split the dataset by urbanized area
+D4_Ua_df <- split(D4_df, D4_df$UaName)
+#Calculate urbanized area statistics
+D4_Ua_df <- lapply(D4_Ua_df, function(x) {
+  x$TranRevMiPerAc <- x$TranRevMi[1] / sum(x$AcLand)
+  x$AveD4c <- sum(x$D4c * x$AcLand) / sum(x$AcLand)
+  x$AveD1D <- sum(x$TotAct) / sum(x$AcLand)
+  x$NormD4c <- x$D4c / x$AveD4c
+  x
+})
+#Rebuild D4_df with the urbanized area statistics
+D4_df <- do.call(rbind, D4_Ua_df)
+
+#Calculate quantiles of normalized D4c values by place type
+#----------------------------------------------------------
+#Calculate quantiles by place type
+NormD4_PtQt <- do.call(rbind, tapply(D4_df$NormD4c, D4_df$PlaceType, function(x) {
+  quantile(x, probs = seq(0, 1, 0.02), na.rm = TRUE)
+}))
+#Add quantiles to SimBzone_ls
+SimBzone_ls$UaProfiles$NormD4_PtQt <- NormD4_PtQt
+
+#Define function to simulate the D4c value
+#-----------------------------------------
+#Define function to simulate D4c as a function of the average D4c value for the
+#urbanized area and the place type
+simulateD4c <- function(AveD4c_, PlaceType_, NormD4_PtQt) {
+  NormD4_ <- sapply(PlaceType_, function(x) {
+    sample(NormD4_PtQt[x,], 1)})
+  NormD4_ * AveD4c_
+}
+
+#Simulate values for the dataset and compare with SLD values
+#-----------------------------------------------------------
+SimD4c_ <- simulateD4c(D4_df$AveD4c, D4_df$PlaceType, NormD4_PtQt)
+#Identify urbanized areas to compare
+UaToPlot_ <- c("Atlanta, GA", "Cincinnati, OH-KY-IN",
+               "Dallas-Fort Worth-Arlington, TX",
+               "Baltimore, MD", "Denver-Aurora, CO",
+               "Portland, OR-WA", "San Francisco-Oakland, CA",
+               "New York-Newark, NY-NJ-CT")
+#Plot comparisons
+png("data/ua_d4c_compare1.png", height = 600, width = 600)
+Opar_ls <- par(mfrow = c(3,3))
+for (ua in UaToPlot_[UaToPlot_ %in% D4_df$UaName]) {
+  plot(density(log1p(D4_df$D4c[D4_df$UaName == ua]), bw = 0.05), main = ua)
+  lines(density(log1p(SimD4c_[D4_df$UaName == ua]), bw = 0.05), lty = 2, col = "red")
+  legend("topright", legend = c("Observed", "Simulated"), lty = 1:2, col = 1:2, bty = "n")
+}
+par(Opar_ls)
+rm(Opar_ls)
+dev.off()
+
+#Create dataset for estimating model to predict average D4c
+#----------------------------------------------------------
+#Create a data frame of urbanized area characteristics to use in model
+Fields_ <- c("UaName", "TranRevMiPerAc", "AveD4c", "AveD1D")
+UaD4_df <- do.call(rbind, lapply(D4_Ua_df, function(x) x[1, Fields_]))
+#Compute natural logs of variables to be used in model
+UaD4_df$LogTranRevMiPerAc <- log(UaD4_df$TranRevMiPerAc)
+UaD4_df$LogAveD4c <- log(UaD4_df$AveD4c)
+UaD4_df$LogAveD1D <- log(UaD4_df$AveD1D)
+
+#Calculate the relationship of average D4c to transit revenue mile density
+#-------------------------------------------------------------------------
+#Add a supply ratio variable which is the ratio of AveD4c and TranRevMiPerAc
+#This enables urbanized area AveD4c to be predicted from the TranRevMiPerAc
+UaD4_df$D4SupplyRatio <- UaD4_df$AveD4c / UaD4_df$TranRevMiPerAc
+#Show the distribution of ratio values
+png("data/ua_d4-supply-ratio_dist.png", width = 400, height = 400)
+plot(density(UaD4_df$D4SupplyRatio, bw = "SJ"), xlab = "AveD4c / RevMiPerAc",
+     ylab = "Probability Density", main = "")
+dev.off()
+#Create a vector of urbanized area supply ratios for all urbanized areas
+#Put NA if there isn't a ratio
+Uza_df <- do.call(rbind, lapply(split(Ua_df, Ua_df$UZA_NAME), function(x) {
+  x[1,c("UA_NAME", "UZA_NAME")]
+}))
+D4SupplyRatio_Ua <- UaD4_df$D4SupplyRatio[match(Uza_df$UA_NAME, UaD4_df$UaName)]
+names(D4SupplyRatio_Ua) <- Uza_df$UZA_NAME
+#Add D4 supply ratio to SimBzone_ls
+SimBzone_ls$UaProfiles$D4SupplyRatio_Ua <- D4SupplyRatio_Ua
+rm(Uza_df, D4SupplyRatio_Ua)
+
+#Use cluster analysis to identify useful dataset to model AveD4c
+#---------------------------------------------------------------
+#K-means cluster analysis to split into 2 clusters
+set.seed(1)
+D4_KM <- kmeans(UaD4_df[,c("LogTranRevMiPerAc", "LogAveD4c")], 2, nstart = 20)
+#Assign cluster values to urbanized area data frame
+UaD4_df$Cluster <- D4_KM$cluster
+#Identify the cluster that will be used. This is the top cluster (i.e. has a
+#higher mean value for LogAveD4c)
+ClusMeanLogAveD4c <- D4_KM$centers[,"LogAveD4c"]
+UseClus <- which(ClusMeanLogAveD4c == max(ClusMeanLogAveD4c))
+rm(D4_KM, ClusMeanLogAveD4c)
+
+#Estimate model of LogAveD4c
+#---------------------------
+#Create data frame for estimating linear model
+LmDat_df <-
+  UaD4_df[UaD4_df$Cluster == UseClus, c("LogTranRevMiPerAc", "LogAveD4c", "LogAveD1D")]
+#Estimate model
+AveD4c_LM <- lm(LogAveD4c ~ LogTranRevMiPerAc * LogAveD1D, data = LmDat_df)
+#Plot the data, highlight used cluster, show regression line
+png("data/ua_ave-d4_vs_rev-mi-density.png", width = 400, height = 400)
+Pch_ <- rep(4, nrow(UaD4_df))
+Pch_[UaD4_df$Cluster == UseClus] <- 16
+with(UaD4_df, plot(LogTranRevMiPerAc, LogAveD4c, pch = Pch_))
+abline(coefficients(AveD4c_LM)[1:2])
+dev.off()
+rm(Pch_)
+
+#Predict the average AveD4c values and compare D4c simulation results
+#--------------------------------------------------------------------
+#Predict average
+PredLogAveD4c_ <- predict(AveD4c_LM, newdata = UaD4_df)
+PredAveD4c_ <- exp(PredLogAveD4c_)
+names(PredAveD4c_) <- UaD4_df$UaName
+#Add to block group dataset
+D4_df$PredAveD4c <- PredAveD4c_[D4_df$UaName]
+#Simulate values
+SimPredD4c_ <- simulateD4c(D4_df$PredAveD4c, D4_df$PlaceType, NormD4_PtQt)
+#Plot comparison
+png("data/ua_d4c_compare2.png", height = 600, width = 600)
+Opar_ls <- par(mfrow = c(3,3))
+for (ua in UaToPlot_[UaToPlot_ %in% D4_df$UaName]) {
+  plot(density(log1p(D4_df$D4c[D4_df$UaName == ua]), bw = 0.05), main = ua)
+  lines(density(log1p(SimD4c_[D4_df$UaName == ua]), bw = 0.05), lty = 2, col = "red")
+  lines(density(log1p(SimPredD4c_[D4_df$UaName == ua]), bw = 0.05), lty = 3, col = "blue")
+  legend("topright", legend = c("Observed", "Simulated w/ Observed Ave.", "Simulated w/ Modeled Ave."), lty = 1:2, col = 1:2, bty = "n")
+}
+par(Opar_ls)
+rm(Opar_ls)
+dev.off()
+
+#Save the model to predict AveD4c
+#--------------------------------
+#Create a list which implements the operation cost proportions model
+AveD4cModel_ls <- list(
+  Type = "linear",
+  Formula = makeModelFormulaString(AveD4c_LM),
+  PrepFun = function(In_df) {
+    data.frame(
+      LogTranRevMiPerAc = max(log(In_df$TranRevMiPerAc), -100),
+      LogAveD1D = log(In_df$AveD1D),
+      Intercept = 1)
+  },
+  OutFun = function(Result_) exp(Result_),
+  Summary = capture.output(summary(AveD4c_LM))
+)
+#Add model to SimBzone_ls
+SimBzone_ls$UaProfiles$AveD4cModel_ls <- AveD4cModel_ls
 
 
 #====================================
@@ -2062,6 +1838,8 @@ rm(UzaName, ZeroProp, AveVal, AtlD3_, AtlD3Alt_, LegendText_)
 #'   \item{RuProfiles}{a list containing profiles for rural areas}
 #'   \item{Abbr}{a list containing dimension naming vectors}
 #'   \item{Docs}{a list containing miscellaneous model documentation objects}
+#'   \item{EmpSplit}{a list containing two matrices of employment proportions by placetype and quantile}
+#'   \item{HousingSplit}{a list containing a matrix of multi-family dwelling unit proportions by placetype and quantile}
 #' }
 #' @source CreateSimBzoneModels.R script.
 "SimBzone_ls"
@@ -2094,9 +1872,6 @@ UsaBlkGrpTypes_df <- rbind(Ua_df[,Keep_], Tn_df[,Keep_], Ru_df[,Keep_])
 "UsaBlkGrpTypes_df"
 usethis::use_data(UsaBlkGrpTypes_df, overwrite = TRUE)
 
-#Clean up workspace
-#------------------
-rm(list=ls(all=TRUE))
 
 
 #===============================================================

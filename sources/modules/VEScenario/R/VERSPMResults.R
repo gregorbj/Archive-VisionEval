@@ -57,7 +57,7 @@ verspm_output_config_txt <-
   "INSTRUCTIONS": "annual residents walk trips (not including recreation or walk to transit) divided by population",
   "METRIC": "Average",
   "UNIT": "annual trips",
-    "COLUMN": "WalkTraverPerCapita"
+    "COLUMN": "WalkTravelPerCapita"
   },
 {
     "NAME": "Air Pollution Emissions",
@@ -93,7 +93,7 @@ verspm_output_config_txt <-
   "INSTRUCTIONS": "average percentage of income spent by all households on owning and operating light-duty vehicles.",
   "METRIC": "Average",
   "UNIT": "%",
-    "COLUMN": "VehilceCost"
+    "COLUMN": "VehicleCost"
 },
 {
     "NAME": "Low Income Household Vehicle Cost as Percentage of Income",
@@ -102,7 +102,7 @@ verspm_output_config_txt <-
   "INSTRUCTIONS": "average percentage of income spent by low-income (< $20,000 USD2005) households on owning and operating light-duty vehicles.",
   "METRIC": "Average",
   "UNIT": "%",
-    "COLUMN": "VehilceCostLow"
+    "COLUMN": "VehicleCostLow"
   }
 ]'
 
@@ -376,24 +376,37 @@ VERSPMResults <- function(L){
   InputLabels_ar <- L$Global$Model$InputLabels
 
   # Set future processors
-  NWorkers <- L$Global$Model$NWorkers
-  NWorkers <- min(max(availableCores()-1, 1), NWorkers)
-  plan(multiprocess, workers = NWorkers, gc=TRUE)
-
+  if ( exists('planType') && planType == 'multiprocess'){
+    NWorkers <- L$Global$Model$NWorkers
+    NWorkers <- min(max(availableCores()-1, 1), NWorkers)
+    plan(multiprocess, workers = NWorkers, gc=TRUE)
+    
+    # Make sure that child processes inherit the libraries from master
+    libs <- .libPaths() # Set .libPaths(libs) in call to child process
+  } else {
+    plan(sequential)
+  }
+  
   Results_env <- new.env()
   for(sc_path in ScenariosPath_ar){
     Results_env[[basename(sc_path)]] <- data.table(Scenario=basename(sc_path),
                                                    Table=NA,
                                                    Data=NA,
                                                    Units=NA)
-    Results_env[[basename(sc_path)]] %<-% tryCatch({ScResults <- getScenarioResults(
-      ScenarioPath = sc_path,
-      Output = L$Global$Tables$Name,
-      Year = L$G$Year,
-      Table = FALSE
-    )
-    Scenarios_df$Results[which(Scenarios_df$Name==basename(sc_path))] <<- "Completed"
-    ScResults},
+    Results_env[[basename(sc_path)]] %<-% tryCatch({
+      
+      # Ensure libraries from master process are inherited
+      .libPaths(libs)
+      
+      ScResults <- getScenarioResults(
+        ScenarioPath = sc_path,
+        Output = L$Global$Tables$Name,
+        Year = L$G$Year,
+        Table = FALSE
+      )
+      Scenarios_df$Results[which(Scenarios_df$Name==basename(sc_path))] <<- "Completed"
+      ScResults
+    },
     warning = function(w) print(w),
     error = function(e) {print(e)
       Scenarios_df$Results[which(Scenarios_df$Name==basename(sc_path))] <<- "Result Error"}
@@ -430,7 +443,7 @@ VERSPMResults <- function(L){
                             #Get the DVMT per capita
                             DVMTPerCapita <- sum(Household$Dvmt)/sum(Bzone$Pop)
                             #Walk travel per capita
-                            WalkTraverPerCapita <- sum(Household$WalkTrips)/sum(Bzone$Pop)
+                            WalkTravelPerCapita <- sum(Household$WalkTrips)/sum(Bzone$Pop)
                             #Air pollution emiisions placeholder
                             AirPollutionEm <- sum(Household$DailyCO2e) #incorrect calculations
                             #Annual fuel use
@@ -445,18 +458,18 @@ VERSPMResults <- function(L){
                             OperationCost <- Household$AveVehCostPM  * Household$Dvmt
                             OwnCost <- Household$OwnCost
                             TotalCost <- OwnCost+OperationCost
-                            VehilceCost <- sum(TotalCost)/sum(Household$Income) * 100
+                            VehicleCost <- sum(TotalCost)/sum(Household$Income) * 100
 
                             #Vehicle ownership cost as percentage of income for low income people
                             #“low income” assumption is defined as  <$20K (2005$).
                             Income2005 <- deflateCurrency(Household$Income,BaseYear,"2005")
                             IsLowIncome <- Income2005 < 20000
-                            VehilceCostLow <- sum(TotalCost[IsLowIncome])/sum(Household$Income[IsLowIncome]) * 100
+                            VehicleCostLow <- sum(TotalCost[IsLowIncome])/sum(Household$Income[IsLowIncome]) * 100
 
                             .(GHGReduction=GHGReduction,DVMTPerCapita=DVMTPerCapita,
-                              WalkTraverPerCapita=WalkTraverPerCapita, TruckDelay=TruckDelay,
+                              WalkTravelPerCapita=WalkTravelPerCapita, TruckDelay=TruckDelay,
                               AirPollutionEm=AirPollutionEm, FuelUse=FuelUse,
-                              VehilceCost=VehilceCost, VehilceCostLow=VehilceCostLow)
+                              VehicleCost=VehicleCost, VehicleCostLow=VehicleCostLow)
                           },by=c("Scenario", InputLabels_ar)]
 
   # Write the output to JSON file

@@ -1,4 +1,6 @@
-##VisionEval: A New Framework for the GreenSTEP Family of Models: Overview and Approach
+## NOTE THIS DOCUMENTS IS PROVIDED FOR VISIONEVAL BACKGROUND, IT IS NOT A CURRENT SPECIFICATION OF THE VISIONEVAL MODEL SYSTEM 
+
+## VisionEval: A New Framework for the GreenSTEP Family of Models: Overview and Approach
 
 **Brian Gregor, Oregon Systems Analytics LLC**  
 **Tara Weidner, Oregon Department of Transportation**  
@@ -6,7 +8,7 @@
 
 This white paper outlines the vision, approach, and timeline for developing a new framework for the GreenSTEP family of models, VisionEval. It is intended to provide an understanding of key objectives and end products, as well as the path to get there.
 
-###Project Purpose and Vision
+### Project Purpose and Vision
 ODOT developed the GreenSTEP model for statewide use, and a rebranded metropolitan version of the model as the Regional Strategic Planning Model (RSPM). The GreenSTEP/RSPM models have proven to be successful in providing modeling support for several high profile state and metropolitan area planning applications. These **successes** include:
 
 - Development of a legislatively mandated statewide strategy for reducing greenhouse gas emissions from the transportation sector;
@@ -43,7 +45,7 @@ This project will create a new model framework for implementing disaggregate str
 
 6. Simple UI: A well structured user interface to facilitate a limited set of inputs and flexible outut processing  is essential. A Graphical User Interface may help, depending upon the user community.
 
-###General Approach to Development
+### General Approach to Development
 Even though the GreenSTEP/RSPM models are innovative, they were developed on tight timelines and with a strong customer orientation. This was made possible by following agile modeling practices and by developing and implementing the models in the [R  language](http://www.r-project.org) and environment for statistical computing and graphics. These **agile modeling practices** will be incorporated into the development of the new framework including:
 
 - Lightweight design up front.
@@ -70,7 +72,7 @@ The development of the new framework will follow these successful **practices**.
 
 - Organizational requirements will be kept as simple as possible for prospective module developers.
 
-###Framework Overview
+### Framework Overview
 The new framework is named *VisionEval*. This framework will enable many types of strategic planning models to be assembled for regions of many different sizes, from small metropolitan areas to multi-state regions. The GreenSTEP model will be one type of model built within the VisionEval framework. An overview of the envisioned framework is presented here to provide a context for understanding the work scope. Figure 1 illustrates the primary elements of the framework.
 
 **Figure 1. Overview of VisionEval Framework**
@@ -102,7 +104,7 @@ Three types of users are anticipated to use this framework:
 
 -   **Model users** prepare inputs for an assembled model, run the model, and extract model outputs typically to support planning decisions or research objectives.
 
-###Development Approach
+### Development Approach
 The development of the framework and conversion of existing models to the new framework will occur in two phases. In the first phase the framework functionality, specifications, application programming interface and prototype modules will be developed. A second phase will complete the conversion of ODOT [(GreenSTEP and RSPM)](http://www.oregon.gov/ODOT/TD/OSTI/Pages/scenario_planning.aspx#reg) and FHWA ([EERPAT](https://planning.dot.gov/FHWA_tool/) and [RPAT](https://planningtools.transportation.org/10/23/183/10/travelworks.html)) models into the new framework.
 
 **Phase I** of the new framework conversion effort will create and test all of the framework specifications and services. It will also demonstrate the specifications by creating several prototype modules that are bundled as R packages. In addition, common procedures used in the various model functions will be identified and generalized framework functions for

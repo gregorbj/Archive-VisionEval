@@ -259,6 +259,41 @@ processEstimationInputs <- function(Inp_ls, FileName, ModuleName) {
 }
 
 
+#LOAD A VE PACKAGE DATASET
+#=========================
+#' Load a VisionEval package dataset
+#'
+#' \code{loadPackageDataset} a visioneval framework module developer function
+#' which loads a dataset identified by name from the VisionEval package
+#' containing the dataset.
+#'
+#' This function is used to load a dataset identified by name from the
+#' VisionEval package which contains the dataset. Using this function is the
+#' preferred alternative to hard-wiring the loading using package::dataset
+#' notation because it enables users to switch between module versions contained
+#' in different packages. For example, there may be different versions of the
+#' VEPowertrainsAndFuels package which have different default assumptions about
+#' light-duty vehicle powertrain mix and characteristics by model year. Using
+#' this function, the module developer only needs to identify the dataset name.
+#' The function uses DatasetsByPackage_df data frame in the model state list
+#' to identify the package which contains the dataset. It then retrieves and
+#' returns the dataset
+#'
+#' @param DatasetName A string identifying the name of the dataset.
+#' @return The identified dataset.
+#' @export
+loadPackageDataset <- function(DatasetName) {
+  if (exists(DatasetName)) {
+    return(eval(parse(text = DatasetName)))
+  } else {
+    Dat_df <- getModelState()$DatasetsByPackage_df
+    PkgName <- with(Dat_df, Package[Dataset == DatasetName])
+    FullName <- paste(PkgName, DatasetName, sep = "::")
+    return(eval(parse(text = FullName)))
+  }
+}
+
+
 #CHECK MODULE OUTPUTS FOR CONSISTENCY WITH MODULE SPECIFICATIONS
 #===============================================================
 #' Check module outputs for consistency with specifications
@@ -426,6 +461,20 @@ checkModuleOutputs <-
 #'   preprocess inputs. For this purpose, the module will identify any errors in
 #'   the input data, the 'initializeModel' function will collate all the data
 #'   errors and print them to the log.
+#' @param RequiredPackages A character vector identifying any packages that
+#'   must be installed in order to test the module because the module either
+#'   has a soft reference to a module in the package (i.e. the Call spec only
+#'   identifies the name of the module being called) or a soft reference to a
+#'   dataset in the module (i.e. only identifies the name of the dataset). The
+#'   default value is NULL.
+#' @param TestGeoName A character vector identifying the name of the geographic
+#'   area for which data is to be loaded. This argument has effect only if the
+#'   DoRun argument is FALSE. It enables the module developer to choose the
+#'   geographic area data is to be loaded for when developing a module that
+#'   is run for geography other than the region. For example if a module is
+#'   run at the Azone level, the user can specify the name of the Azone that
+#'   data is to be loaded for. If the name is misspecified an error will be
+#'   flagged.
 #' @return If DoRun is FALSE, the return value is a list containing the module
 #'   specifications. If DoRun is TRUE, there is no return value. The function
 #'   writes out messages to the console and to the log as the testing proceeds.
@@ -444,7 +493,9 @@ testModule <-
            SaveDatastore = TRUE,
            DoRun = TRUE,
            RunFor = "AllYears",
-           StopOnErr = TRUE) {
+           StopOnErr = TRUE,
+           RequiredPackages = NULL,
+           TestGeoName = NULL) {
 
     #Set working directory to tests and return to main module directory on exit
     #--------------------------------------------------------------------------
@@ -462,6 +513,45 @@ testModule <-
     #Assign the correct datastore interaction functions
     #--------------------------------------------------
     assignDatastoreFunctions(readModelState()$DatastoreType)
+
+    #Make correspondence tables of modules and datasets to packages
+    #--------------------------------------------------------------
+    #This supports soft call and dataset references in modules
+    RequiredPkg_ <- RequiredPackages
+    #If RequiredPkg_ is not NULL make a list of modules and datasets in packages
+    if (!is.null(RequiredPkg_)) {
+      #Make sure all required packages are present
+      InstalledPkgs_ <- rownames(installed.packages())
+      MissingPkg_ <- RequiredPkg_[!(RequiredPkg_ %in% InstalledPkgs_)]
+      if (length(MissingPkg_ != 0)) {
+        Msg <-
+          paste0("One or more required packages need to be installed in order ",
+                 "to run the model. Following are the missing package(s): ",
+                 paste(MissingPkg_, collapse = ", "), ".")
+        stop(Msg)
+      }
+      #Identify all modules and datasets in required packages
+      Datasets_df <-
+        data.frame(
+          do.call(
+            rbind,
+            lapply(RequiredPkg_, function(x) {
+              data(package = x)$results[,c("Package", "Item")]
+            })
+          ), stringsAsFactors = FALSE
+        )
+      WhichAreModules_ <- grep("Specifications", Datasets_df$Item)
+      ModulesByPackage_df <- Datasets_df[WhichAreModules_,]
+      ModulesByPackage_df$Module <-
+        gsub("Specifications", "", ModulesByPackage_df$Item)
+      ModulesByPackage_df$Item <- NULL
+      DatasetsByPackage_df <- Datasets_df[-WhichAreModules_,]
+      names(DatasetsByPackage_df) <- c("Package", "Dataset")
+      #Save the modules and datasets lists in the model state
+      setModelState(list(ModulesByPackage_df = ModulesByPackage_df,
+                         DatasetsByPackage_df = DatasetsByPackage_df))
+      rm(Datasets_df, WhichAreModules_)
+    }
 
     #Load datastore if specified or initialize new datastore
     #-------------------------------------------------------
@@ -538,6 +628,9 @@ testModule <-
     #--------------------------------------
     if (is.null(Specs_ls$Inp)) {
       writeLog("No inputs to process.", Print = TRUE)
+      # If no inputs and is Initialize module return
+      # i.e. all inputs are optional and none are provided
+      if (ModuleName == "Initialize") return()
     } else {
       writeLog("Attempting to process, check and load module inputs.",
              Print = TRUE)
@@ -553,6 +646,7 @@ testModule <-
           "Input files for module ", ModuleName,
           " have errors. Check the log for details."
         )
+        writeLog(ProcessedInputs_ls$Errors)
         stop(Msg)
       }
       # If module is NOT Initialize, save the inputs in the datastore
@@ -717,8 +811,18 @@ testModule <-
           Specs = list()
         )
         for (Alias in names(Specs_ls$Call)) {
+          #Called module function when specified as package::module
           Function <- Specs_ls$Call[[Alias]]
-          Specs <- paste0(Specs_ls$Call[[Alias]], "Specifications")
+          #Called module function when only module is specified
+          if (length(unlist(strsplit(Function, "::"))) == 1) {
+            Pkg_df <- getModelState()$ModulesByPackage_df
+            Function <-
+              paste(Pkg_df$Package[Pkg_df$Module == Function], Function, sep = "::")
+            rm(Pkg_df)
+          }
+          #Called module specifications
+          Specs <- paste0(Function, "Specifications")
+          #Assign called module function and specifications for the alias
           Call$Func[[Alias]] <- eval(parse(text = Function))
           Call$Specs[[Alias]] <- processModuleSpecs(eval(parse(text = Specs)))
           Call$Specs[[Alias]]$RunBy <- Specs_ls$RunBy
@@ -876,7 +980,15 @@ testModule <-
         )
         for (Alias in names(Specs_ls$Call)) {
           Function <- Specs_ls$Call[[Alias]]
-          Specs <- paste0(Specs_ls$Call[[Alias]], "Specifications")
+          #Called module function when only module is specified
+          if (length(unlist(strsplit(Function, "::"))) == 1) {
+            Pkg_df <- getModelState()$ModulesByPackage_df
+            Function <-
+              paste(Pkg_df$Package[Pkg_df$Module == Function], Function, sep = "::")
+            rm(Pkg_df)
+          }
+          #Called module specifications
+          Specs <- paste0(Function, "Specifications")
           Call$Func[[Alias]] <- eval(parse(text = Function))
           Call$Specs[[Alias]] <- processModuleSpecs(eval(parse(text = Specs)))
         }
@@ -885,11 +997,47 @@ testModule <-
       if (RunFor == "AllYears") Year <- getYears()[1]
       if (RunFor == "BaseYear") Year <- G$BaseYear
       if (RunFor == "NotBaseYear") Year <- getYears()[!getYears() %in% G$BaseYear][1]
-      L <- getFromDatastore(Specs_ls, RunYear = Year, Geo = NULL)
+      #Identify the units of geography to iterate over
+      GeoCategory <- Specs_ls$RunBy
+      #Create the geographic index list
+      GeoIndex_ls <- createGeoIndexList(Specs_ls$Get, GeoCategory, Year)
       if (exists("Call")) {
         for (Alias in names(Call$Specs)) {
-          L[[Alias]] <-
-            getFromDatastore(Call$Specs[[Alias]], RunYear = Year, Geo = NULL)
+          GeoIndex_ls[[Alias]] <-
+            createGeoIndexList(Call$Specs[[Alias]]$Get, GeoCategory, Year)
+        }
+      }
+      #Get the data required
+      if (GeoCategory == "Region") {
+        L <- getFromDatastore(Specs_ls, RunYear = Year, Geo = NULL)
+        if (exists("Call")) {
+          for (Alias in names(Call$Specs)) {
+            L[[Alias]] <-
+              getFromDatastore(Call$Specs[[Alias]], RunYear = Year, Geo = NULL)
+          }
+        }
+      } else {
+        Geo_ <- readFromTable(GeoCategory, GeoCategory, Year)
+        #Check whether the TestGeoName is proper
+        if (!is.null(TestGeoName)) {
+          if (!(TestGeoName %in% Geo_)) {
+            stop(paste0(
+              "The 'TestGeoName' value - ", TestGeoName,
+              " - is not a recognized name for the ",
+              GeoCategory, " geography that this module is specified to be run ",
+              "for."
+            ))
+          }
+        }
+        #If TestGeoName is NULL get the data for the first name in the list
+        if (is.null(TestGeoName)) TestGeoName <- Geo_[1]
+        #Get the data
+        L <- getFromDatastore(Specs_ls, RunYear = Year, Geo = TestGeoName, GeoIndex_ls = GeoIndex_ls)
+        if (exists("Call")) {
+          for (Alias in names(Call$Specs)) {
+            L[[Alias]] <-
+              getFromDatastore(Call$Specs[[Alias]], RunYear = Year, Geo = TestGeoName, GeoIndex_ls = GeoIndex_ls)
+          }
         }
       }
       #Return the specifications, data list, and called functions
@@ -1092,6 +1240,8 @@ makeModelFormulaString <- function (EstimatedModel) {
 #' be affected by random draws (i.e. if a random number in range 0 - 1 is less
 #' than the computed probability) or if a probability cutoff is used (i.e. if
 #' the computed probability is greater than 0.5)
+#' @param ReturnProbs a logical identifying whether to return the calculated
+#' probabilities rather than the assigned results. The default value is FALSE.
 #' @return a vector of choice values for each record of the input data frame if
 #' the model is being run, or if the function is run to only check the target
 #' search range, a two-element vector identifying if the search range produces
@@ -1102,7 +1252,8 @@ applyBinomialModel <-
            Data_df,
            TargetProp = NULL,
            CheckTargetSearchRange = FALSE,
-           ApplyRandom = TRUE) {
+           ApplyRandom = TRUE,
+           ReturnProbs = FALSE) {
     #Check that model is 'binomial' type
     if (Model_ls$Type != "binomial") {
       Msg <- paste0("Wrong model type. ",
@@ -1167,7 +1318,11 @@ applyBinomialModel <-
       }
     }
     #Return values
-    Result_
+    if (ReturnProbs) {
+      Probs_
+    } else {
+      Result_
+    }
   }
 
 
@@ -1305,6 +1460,53 @@ writeVENameRegistry <-
         NameRegistry_df[[x]]$MODULE == ModuleName &
         NameRegistry_df[[x]]$PACKAGE == PackageName
       NameRegistry_ls[[x]] <- NameRegistry_ls[[x]][!ExistingModuleEntries_]
+    }
+    #Define function to process module specifications
+    processModuleSpecs <- function(Spec_ls) {
+      #Define a function to expand a specification having multiple NAMEs
+      expandSpec <- function(SpecToExpand_ls, ComponentName) {
+        Names_ <- unlist(SpecToExpand_ls$NAME)
+        Descriptions_ <- unlist(SpecToExpand_ls$DESCRIPTION)
+        Expanded_ls <- list()
+        for (i in 1:length(Names_)) {
+          Temp_ls <- SpecToExpand_ls
+          Temp_ls$NAME <- Names_[i]
+          Temp_ls$DESCRIPTION <- Descriptions_[i]
+          Expanded_ls <- c(Expanded_ls, list(Temp_ls))
+        }
+        Expanded_ls
+      }
+      #Define a function to process a component of a specifications list
+      processComponent <- function(Component_ls, ComponentName) {
+        Result_ls <- list()
+        for (i in 1:length(Component_ls)) {
+          Temp_ls <- Component_ls[[i]]
+          Result_ls <- c(Result_ls, expandSpec(Temp_ls, ComponentName))
+        }
+        Result_ls
+      }
+      #Process the list components and return the results
+      Out_ls <- list()
+      Out_ls$RunBy <- Spec_ls$RunBy
+      if (!is.null(Spec_ls$NewInpTable)) {
+        Out_ls$NewInpTable <- Spec_ls$NewInpTable
+      }
+      if (!is.null(Spec_ls$NewSetTable)) {
+        Out_ls$NewSetTable <- Spec_ls$NewSetTable
+      }
+      if (!is.null(Spec_ls$Inp)) {
+        Out_ls$Inp <- processComponent(Spec_ls$Inp, "Inp")
+      }
+      if (!is.null(Spec_ls$Get)) {
+        Out_ls$Get <- processComponent(Spec_ls$Get, "Get")
+      }
+      if (!is.null(Spec_ls$Set)) {
+        Out_ls$Set <- processComponent(Spec_ls$Set, "Set")
+      }
+      if (!is.null(Spec_ls$Call)) {
+        Out_ls$Call <- Spec_ls$Call
+      }
+      Out_ls
     }
     #Process the Inp and Set specifications
     ModuleSpecs_ls <-
@@ -1559,6 +1761,7 @@ documentModule <- function(ModuleName){
     FromFile <- paste0("data/", Reference)
     ToFile <- paste0("inst/module_docs/", Reference)
     if (file.exists(FromFile)) {
+      if (file.exists(ToFile)) file.remove(ToFile)
       file.copy(from = FromFile, to = ToFile)
       file.remove(FromFile)
       Markdown_ <- paste0("![", Reference, "](", Reference, ")")
@@ -1795,8 +1998,7 @@ documentModule <- function(ModuleName){
       if (IsOptional) {
         InpMarkdown_ <- c(
           InpMarkdown_,
-          paste("This input file is OPTIONAL.",
-                "It is only needed if the user wants to modify the relative employment rates."),
+          "This input file is OPTIONAL.",
           ""
         )
       }

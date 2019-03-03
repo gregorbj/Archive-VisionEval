@@ -24,7 +24,7 @@ var outputcfg = [
   "INSTRUCTIONS": "annual residents walk trips (not including recreation or walk to transit) divided by population",
   "METRIC": "Average",
   "UNIT": "annual trips",
-    "COLUMN": "WalkTraverPerCapita"
+    "COLUMN": "WalkTravelPerCapita"
   },
 {
     "NAME": "Air Pollution Emissions",
@@ -60,7 +60,7 @@ var outputcfg = [
   "INSTRUCTIONS": "average percentage of income spent by all households on owning and operating light-duty vehicles.",
   "METRIC": "Average",
   "UNIT": "%",
-    "COLUMN": "VehilceCost"
+    "COLUMN": "VehicleCost"
 },
 {
     "NAME": "Low Income Household Vehicle Cost as Percentage of Income",
@@ -69,6 +69,6 @@ var outputcfg = [
   "INSTRUCTIONS": "average percentage of income spent by low-income (< $20,000 USD2005) households on owning and operating light-duty vehicles.",
   "METRIC": "Average",
   "UNIT": "%",
-    "COLUMN": "VehilceCostLow"
+    "COLUMN": "VehicleCostLow"
   }
 ];

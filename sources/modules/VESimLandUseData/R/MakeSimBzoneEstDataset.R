@@ -4,7 +4,7 @@
 
 #<doc>
 ## MakeSimBzoneEstDataset Module
-#### October 31, 2018
+#### December 16, 2018
 #
 #This script combines data from the US Census, the EPA Smart Location Database (SLD), and the National Transit Database to prepare a block group dataset for use in estimating the models for synthesizing Bzones for VisionEval models where the Bzone level of geography is synthesized rather than explicitly defined. The script has 4 functions which carry out the operations of loading the 3 datasets and combining them into the final model estimation dataset. These functions are called as necessary. A function is only called if the dataset it creates is not present in the package. As a result, since the default package contains all of the datasets, no processing is done. If the user wishes to change the processing and/or what data is included in the datasets, they would need to remove the datasets in the 'data' directory and rebuild the package.
 #
@@ -26,14 +26,15 @@
 #* The activity density of block groups needs to "add up" to the overall density of the urban area they are a part of;
 #* The unprotected land area of the large majority of block groups is equal to the land area; and,
 #* A significant number of block groups had no recorded unprotected land area.
+#
 #The diversity measure (referred to as D2A_JPHH), the ratio of jobs to housing, is recalculated to assure that it is consistent with the numbers of jobs and households recorded in the SLD. In addition, the entropy measure is recalculated to be consistent with the entropy measure used in the multimodal travel model. This measure is calculated in the same way as the SLD entropy measures but with 3 employment sectors (retail, service, other), rather than 5.
 #</doc>
 
 #Temporary code for development
 #------------------------------
-library(visioneval)
-library(tidycensus)
-library(stringr)
+# library(visioneval)
+# library(tidycensus)
+# library(stringr)
 
 
 #======================================================================

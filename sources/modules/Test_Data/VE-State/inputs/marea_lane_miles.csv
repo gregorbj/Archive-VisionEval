@@ -1,0 +1,19 @@
+Geo,Year,FwyLaneMi,ArtLaneMi
+Albany,2010,30,150
+Bend,2010,48,165
+Corvallis,2010,10,147
+Eugene,2010,131,482
+Grants Pass,2010,30,150
+Medford,2010,91,356
+Portland,2010,532,2247
+Salem,2010,123,422
+None,2010,0,0
+Albany,2040,30,150
+Bend,2040,50,169
+Corvallis,2040,10,150
+Eugene,2040,137,493
+Grants Pass,2040,30,150
+Medford,2040,97,371
+Portland,2040,561,2325
+Salem,2040,128,441
+None,2040,0,0

@@ -8,9 +8,13 @@
 #--------------
 library(visioneval)
 
+# Set future::plan for number of processors
+planType <- 'multiprocess'
+
 #Initialize model
 #----------------
 initializeModel(
+  ModelScriptFile = "run_model.R",
   ParamDir = "defs",
   RunParamFile = "run_parameters.json",
   GeoFile = "geo.csv",
