@@ -34,13 +34,6 @@
 #</doc>
 
 
-#=================================
-#Packages used in code development
-#=================================
-#Uncomment following lines during code development. Recomment when done.
-# library(visioneval)
-
-
 #=============================================
 #SECTION 1: ESTIMATE AND SAVE MODEL PARAMETERS
 #=============================================
@@ -174,7 +167,7 @@ usethis::use_data(VehicleAgeModel_ls, overwrite = TRUE)
 #------------------------------
 AssignVehicleAgeSpecifications <- list(
   #Level of geography module is applied at
-  RunBy = "Azone",
+  RunBy = "Region",
   #Specify new tables to be created by Inp if any
   #Specify new tables to be created by Set if any
   #Specify input data
@@ -204,6 +197,15 @@ AssignVehicleAgeSpecifications <- list(
   #Specify data to be loaded from data store
   Get = items(
     item(
+      NAME = "Azone",
+      TABLE = "Azone",
+      GROUP = "Year",
+      TYPE = "character",
+      UNITS = "ID",
+      PROHIBIT = "",
+      ISELEMENTOF = ""
+    ),
+    item(
       NAME = "AutoMeanAge",
       TABLE = "Azone",
       GROUP = "Year",
@@ -219,6 +221,15 @@ AssignVehicleAgeSpecifications <- list(
       TYPE = "time",
       UNITS = "YR",
       PROHIBIT = c("NA", "<= 0"),
+      ISELEMENTOF = ""
+    ),
+    item(
+      NAME = "Azone",
+      TABLE = "Household",
+      GROUP = "Year",
+      TYPE = "character",
+      UNITS = "ID",
+      PROHIBIT = "",
       ISELEMENTOF = ""
     ),
     item(
@@ -240,23 +251,12 @@ AssignVehicleAgeSpecifications <- list(
       ISELEMENTOF = ""
     ),
     item(
-      NAME = "Vehicles",
-      TABLE = "Household",
+      NAME = "Azone",
+      TABLE = "Vehicle",
       GROUP = "Year",
-      TYPE = "vehicles",
-      UNITS = "VEH",
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = ""
-    ),
-    item(
-      NAME = items(
-        "NumLtTrk",
-        "NumAuto"),
-      TABLE = "Household",
-      GROUP = "Year",
-      TYPE = "vehicles",
-      UNITS = "VEH",
-      PROHIBIT = c("NA", "< 0"),
+      TYPE = "character",
+      UNITS = "ID",
+      PROHIBIT = "",
       ISELEMENTOF = ""
     ),
     item(
@@ -287,6 +287,15 @@ AssignVehicleAgeSpecifications <- list(
       ISELEMENTOF = c("Own", "LowCarSvc", "HighCarSvc")
     ),
     item(
+      NAME = "Type",
+      TABLE = "Vehicle",
+      GROUP = "Year",
+      TYPE = "character",
+      UNITS = "category",
+      PROHIBIT = "NA",
+      ISELEMENTOF = c("Auto", "LtTrk")
+    ),
+    item(
       NAME = "AveCarSvcVehicleAge",
       TABLE = "Azone",
       GROUP = "Year",
@@ -298,18 +307,6 @@ AssignVehicleAgeSpecifications <- list(
   ),
   #Specify data to saved in the data store
   Set = items(
-    item(
-      NAME = "Type",
-      TABLE = "Vehicle",
-      GROUP = "Year",
-      TYPE = "character",
-      UNITS = "category",
-      NAVALUE = -1,
-      PROHIBIT = "NA",
-      ISELEMENTOF = c("Auto", "LtTrk"),
-      SIZE = 5,
-      DESCRIPTION = "Vehicle body type: Auto = automobile, LtTrk = light trucks (i.e. pickup, SUV, Van)"
-    ),
     item(
       NAME = "Age",
       TABLE = "Vehicle",
@@ -525,108 +522,96 @@ AssignVehicleAge <- function(L) {
   #------
   #Fix seed as synthesis involves sampling
   set.seed(L$G$Seed)
-  #Calculate the total number of vehicle entries
-  VehId_Ve <- L$Year$Vehicle$VehId
-  VehAccess_Ve <- L$Year$Vehicle$VehicleAccess
-  NumVeh <- length(VehId_Ve)
-  #Make vector to match order of household owned vehicles to vehicle table
-  HasVeh <- L$Year$Household$Vehicles > 0
-  DataID_ <-
-    with(L$Year$Household,
-         paste(
-           rep(HhId[HasVeh], Vehicles[HasVeh]),
-           unlist(sapply(Vehicles[HasVeh], function(x) 1:x)),
-           sep = "-"
-         ))
-  DatOrd <- match(DataID_, L$Year$Vehicle$VehId)
+  #Create index to match household records with vehicle records
+  HhToVehIdx_Ve <- match(L$Year$Vehicle$HhId, L$Year$Household$HhId)
 
-  #Create vehicle type dataset
-  #---------------------------
-  #Initialize values with Autos
-  Type_Ve <- rep("Auto", NumVeh)
-  #Insert values for household-owned vehicles
-  assignVehType <- function(NumLtTrk, NumAuto) {
-    c(rep("LtTrk", NumLtTrk), rep("Auto", NumAuto))
-  }
-  Type_ <-
-    with(L$Year$Household, unlist(mapply(assignVehType, NumLtTrk, NumAuto)))
-  Type_Ve[DatOrd] <- Type_
-
-  #Calculate vehicle age distributions
-  #-----------------------------------
-  #Create an income group dataset
+  #Create an income group datase
+  #-----------------------------
   Ig <- c("0to20K", "20Kto40K", "40Kto60K", "60Kto80K", "80Kto100K", "100KPlus")
-  IncGrp_Hh <-
+  L$Year$Vehicle$IncGrp <-
     as.character(
       with(L$Year$Household,
            cut(Income,
                breaks = c(c(0, 20, 40, 60, 80, 100) * 1000, max(Income)),
                labels = Ig,
-               include.lowest = TRUE))
-    )
-  IncGrp_ <- rep(IncGrp_Hh[HasVeh], L$Year$Household$Vehicles[HasVeh])
-  #Calculate income group proportions by vehicle type
-  NumVeh_IgTy <- table(IncGrp_, Type_Ve[DatOrd])
-  IncProp_IgTy <- sweep(NumVeh_IgTy, 2, colSums(NumVeh_IgTy), "/")
-  #Calculate cumulative age distributions by type
-  AutoAgeProp_Ag <-
-    adjustAgeDistribution(
-      VehicleAgeModel_ls$Auto$AgeCDF_Ag,
-      L$Year$Azone$AutoMeanAge)$Dist
-  LtTrkAgeProp_Ag <-
-    adjustAgeDistribution(
-      VehicleAgeModel_ls$LtTrk$AgeCDF_Ag,
-      L$Year$Azone$LtTrkMeanAge)$Dist
-  #Calculate age distributions by income group
-  AutoAgePropByInc_AgIg <-
-    calcAgeDistributionByInc(
-      VehicleAgeModel_ls$Auto$AgeIncJointProp_AgIg,
-      AutoAgeProp_Ag,
-      IncProp_IgTy[,"Auto"]
-    )
-  LtTrkAgePropByInc_AgIg <-
-    calcAgeDistributionByInc(
-      VehicleAgeModel_ls$LtTrk$AgeIncJointProp_AgIg,
-      LtTrkAgeProp_Ag,
-      IncProp_IgTy[,"LtTrk"]
+               include.lowest = TRUE))[HhToVehIdx_Ve]
     )
 
-  #Sample vehicle ages and assign to vehicles
-  #------------------------------------------
-  #Create vector to hold ages of owned vehicles
-  Age_ <- integer(length(DataID_))
-  #Assign ages for automobiles
-  for (ig in Ig) {
-    Ages_ <-
-      sample(
-        0:30,
-        NumVeh_IgTy[ig, "Auto"],
-        replace = TRUE,
-        prob = AutoAgePropByInc_AgIg[,ig])
-    Age_[IncGrp_ == ig & Type_ == "Auto"] <- Ages_
+  #Iterate by Azone and assign vehicle age
+  #---------------------------------------
+  NumVeh <- length(L$Year$Vehicle$VehId)
+  Age_Ve <- rep(NA, NumVeh)
+  names(Age_Ve) <- L$Year$Vehicle$VehId
+  Az <- L$Year$Azone$Azone
+  for (az in Az) {
+    #Create owned vehicle data frame
+    UseOwn <- with(L$Year$Vehicle, Azone == az & VehicleAccess == "Own")
+    AutoMeanAge <- with(L$Year$Azone, AutoMeanAge[Azone == az])
+    LtTrkMeanAge <- with(L$Year$Azone, LtTrkMeanAge[Azone == az])
+    #Create data frame of data to use
+    Fields_ <- c("VehId", "Type", "IncGrp")
+    Own_df <-
+      data.frame(lapply(L$Year$Vehicle[Fields_], function(x) x[UseOwn]), stringsAsFactors = FALSE)
+    Own_df$Age <- NA
+    #Calculate income group proportions by vehicle type
+    NumVeh_IgTy <- with(Own_df, table(IncGrp, Type))
+    IncProp_IgTy <- sweep(NumVeh_IgTy, 2, colSums(NumVeh_IgTy), "/")
+    #Calculate cumulative age distributions by type
+    AutoAgeProp_Ag <-
+      adjustAgeDistribution(
+        VehicleAgeModel_ls$Auto$AgeCDF_Ag,
+        AutoMeanAge)$Dist
+    LtTrkAgeProp_Ag <-
+      adjustAgeDistribution(
+        VehicleAgeModel_ls$LtTrk$AgeCDF_Ag,
+        LtTrkMeanAge)$Dist
+    #Calculate age distributions by income group
+    AutoAgePropByInc_AgIg <-
+      calcAgeDistributionByInc(
+        VehicleAgeModel_ls$Auto$AgeIncJointProp_AgIg,
+        AutoAgeProp_Ag,
+        IncProp_IgTy[,"Auto"]
+      )
+    LtTrkAgePropByInc_AgIg <-
+      calcAgeDistributionByInc(
+        VehicleAgeModel_ls$LtTrk$AgeIncJointProp_AgIg,
+        LtTrkAgeProp_Ag,
+        IncProp_IgTy[,"LtTrk"]
+      )
+    #Assign ages for automobiles
+    for (ig in Ig) {
+      Ages_ <-
+        sample(
+          0:30,
+          NumVeh_IgTy[ig, "Auto"],
+          replace = TRUE,
+          prob = AutoAgePropByInc_AgIg[,ig])
+      Own_df$Age[Own_df$IncGrp == ig & Own_df$Type == "Auto"] <- Ages_
+    }
+    #Assign ages for light trucks
+    for (ig in Ig) {
+      Ages_ <-
+        sample(
+          0:30,
+          NumVeh_IgTy[ig, "LtTrk"],
+          replace = TRUE,
+          prob = LtTrkAgePropByInc_AgIg[,ig])
+      Own_df$Age[Own_df$IncGrp == ig & Own_df$Type == "LtTrk"] <- Ages_
+    }
+    #Add vehicle age for owned vehicles in Azone
+    Age_Ve[Own_df$VehId] <- Own_df$Age
+    #Add car service average vehicle age
+    CarSvcAge <- with(L$Year$Azone, AveCarSvcVehicleAge[Azone == az])
+    CarSvcVehId_ <-
+      with(L$Year$Vehicle, VehId[Azone == az & VehicleAccess != "Own"])
+    Age_Ve[CarSvcVehId_] <- CarSvcAge
   }
-  #Assign ages for light trucks
-  for (ig in Ig) {
-    Ages_ <-
-      sample(
-        0:30,
-        NumVeh_IgTy[ig, "LtTrk"],
-        replace = TRUE,
-        prob = LtTrkAgePropByInc_AgIg[,ig])
-    Age_[IncGrp_ == ig & Type_ == "LtTrk"] <- Ages_
-  }
-  #Initialize values for vehicle ages with the average car service age
-  Age_Ve <- rep(as.integer(L$Year$Azone$AveCarSvcVehicleAge), NumVeh)
-  Age_Ve[DatOrd] <- Age_
 
   #Return the results
   #------------------
   #Initialize output list
   Out_ls <- initDataList()
-  Out_ls$Year$Vehicle <- list(
-    Type = Type_Ve,
-    Age = Age_Ve
-  )
+  Out_ls$Year$Vehicle$Age <- unname(Age_Ve)
   #Return the outputs list
   Out_ls
 }
@@ -643,18 +628,32 @@ documentModule("AssignVehicleAge")
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions
 #-------------------------------------------------------------------------------
+# #Load packages and test functions
+# library(filesstrings)
+# library(visioneval)
+# library(ordinal)
+# source("tests/scripts/test_functions.R")
+# #Set up test environment
+# TestSetup_ls <- list(
+#   TestDataRepo = "../Test_Data/VE-RSPM",
+#   DatastoreName = "Datastore.tar",
+#   LoadDatastore = TRUE,
+#   TestDocsDir = "verspm",
+#   ClearLogs = TRUE,
+#   # SaveDatastore = TRUE
+#   SaveDatastore = FALSE
+# )
+# setUpTests(TestSetup_ls)
+# #Run test module
 # TestDat_ <- testModule(
 #   ModuleName = "AssignVehicleAge",
 #   LoadDatastore = TRUE,
-#   SaveDatastore = TRUE,
+#   SaveDatastore = FALSE,
 #   DoRun = FALSE
 # )
 # L <- TestDat_$L
 # R <- AssignVehicleAge(L)
-
-#Test code to check everything including running the module and checking whether
-#the outputs are consistent with the 'Set' specifications
-#-------------------------------------------------------------------------------
+#
 # TestDat_ <- testModule(
 #   ModuleName = "AssignVehicleAge",
 #   LoadDatastore = TRUE,

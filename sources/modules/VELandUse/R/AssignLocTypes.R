@@ -20,13 +20,6 @@
 #</doc>
 
 
-#=================================
-#Packages used in code development
-#=================================
-#Uncomment following lines during code development. Recomment when done.
-# library(visioneval)
-
-
 #=============================================
 #SECTION 1: ESTIMATE AND SAVE MODEL PARAMETERS
 #=============================================
@@ -196,7 +189,10 @@ AssignLocTypesSpecifications <- list(
       DESCRIPTION = "Name of metropolitan area (Marea) that household is in or NA if none"
     ),
     item(
-      NAME = "UrbanPop",
+      NAME = items(
+        "UrbanPop",
+        "TownPop",
+        "RuralPop"),
       TABLE = "Bzone",
       GROUP = "Year",
       TYPE = "people",
@@ -205,34 +201,16 @@ AssignLocTypesSpecifications <- list(
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
       SIZE = 0,
-      DESCRIPTION = "Urbanized area population in the Bzone"
+      DESCRIPTION = items(
+        "Urbanized area population in the Bzone",
+        "Town (i.e. urban but non-urbanized area) population in the Bzone",
+        "Rural (i.e. not urbanized and not town) population in the Bzone")
     ),
     item(
-      NAME = "TownPop",
-      TABLE = "Bzone",
-      GROUP = "Year",
-      TYPE = "people",
-      UNITS = "PRSN",
-      NAVALUE = -1,
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = "",
-      SIZE = 0,
-      DESCRIPTION = "Town (i.e. urban but non-urbanized area) population in the Bzone"
-    ),
-    item(
-      NAME = "RuralPop",
-      TABLE = "Bzone",
-      GROUP = "Year",
-      TYPE = "people",
-      UNITS = "PRSN",
-      NAVALUE = -1,
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = "",
-      SIZE = 0,
-      DESCRIPTION = "Rural (i.e. not urbanized and not town) population in the Bzone"
-    ),
-    item(
-      NAME = "UrbanPop",
+      NAME = items(
+        "UrbanPop",
+        "TownPop",
+        "RuralPop"),
       TABLE = "Marea",
       GROUP = "Year",
       TYPE = "people",
@@ -241,34 +219,16 @@ AssignLocTypesSpecifications <- list(
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
       SIZE = 0,
-      DESCRIPTION = "Urbanized area population in the Marea"
+      DESCRIPTION = items(
+        "Urbanized area population in the Marea",
+        "Town (i.e. urban but non-urbanized area) in the Marea",
+        "Rural (i.e. not urbanized and not town) population in the Marea")
     ),
     item(
-      NAME = "TownPop",
-      TABLE = "Marea",
-      GROUP = "Year",
-      TYPE = "people",
-      UNITS = "PRSN",
-      NAVALUE = -1,
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = "",
-      SIZE = 0,
-      DESCRIPTION = "Town (i.e. urban but non-urbanized area) in the Marea"
-    ),
-    item(
-      NAME = "RuralPop",
-      TABLE = "Marea",
-      GROUP = "Year",
-      TYPE = "people",
-      UNITS = "PRSN",
-      NAVALUE = -1,
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = "",
-      SIZE = 0,
-      DESCRIPTION = "Rural (i.e. not urbanized and not town) population in the Marea"
-    ),
-    item(
-      NAME = "UrbanIncome",
+      NAME = items(
+        "UrbanIncome",
+        "TownIncome",
+        "RuralIncome"),
       TABLE = "Marea",
       GROUP = "Year",
       TYPE = "currency",
@@ -277,31 +237,10 @@ AssignLocTypesSpecifications <- list(
       PROHIBIT = c("NA", "< 0"),
       ISELEMENTOF = "",
       SIZE = 0,
-      DESCRIPTION = "Total household income of the urbanized area population in the Marea"
-    ),
-    item(
-      NAME = "TownIncome",
-      TABLE = "Marea",
-      GROUP = "Year",
-      TYPE = "currency",
-      UNITS = "USD.2010",
-      NAVALUE = -1,
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = "",
-      SIZE = 0,
-      DESCRIPTION = "Total household income of the town (i.e. urban but non-urbanized area) population in the Marea"
-    ),
-    item(
-      NAME = "RuralIncome",
-      TABLE = "Marea",
-      GROUP = "Year",
-      TYPE = "currency",
-      UNITS = "USD.2010",
-      NAVALUE = -1,
-      PROHIBIT = c("NA", "< 0"),
-      ISELEMENTOF = "",
-      SIZE = 0,
-      DESCRIPTION = "Total household income of the rural (i.e. not urbanized and not town) population in the Marea"
+      DESCRIPTION = items(
+        "Total household income of the urbanized area population in the Marea",
+        "Total household income of the town (i.e. urban but non-urbanized area) population in the Marea",
+        "Total household income of the rural (i.e. not urbanized and not town) population in the Marea")
     )
   )
 )
@@ -476,6 +415,23 @@ documentModule("AssignLocTypes")
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions
 #-------------------------------------------------------------------------------
+# #Load packages and test functions
+# library(filesstrings)
+# library(visioneval)
+# library(fields)
+# source("tests/scripts/test_functions.R")
+# #Set up test environment
+# TestSetup_ls <- list(
+#   TestDataRepo = "../Test_Data/VE-RSPM",
+#   DatastoreName = "Datastore.tar",
+#   LoadDatastore = TRUE,
+#   TestDocsDir = "verspm",
+#   ClearLogs = TRUE,
+#   # SaveDatastore = TRUE
+#   SaveDatastore = FALSE
+# )
+# setUpTests(TestSetup_ls)
+# #Run test module
 # TestDat_ <- testModule(
 #   ModuleName = "AssignLocTypes",
 #   LoadDatastore = TRUE,
@@ -483,14 +439,4 @@ documentModule("AssignLocTypes")
 #   DoRun = FALSE
 # )
 # L <- TestDat_$L
-
-#Test code to check everything including running the module and checking whether
-#the outputs are consistent with the 'Set' specifications
-#-------------------------------------------------------------------------------
-# TestDat_ <- testModule(
-#   ModuleName = "AssignLocTypes",
-#   LoadDatastore = TRUE,
-#   SaveDatastore = TRUE,
-#   DoRun = TRUE
-# )
-
+# R <- AssignLocTypes(L)

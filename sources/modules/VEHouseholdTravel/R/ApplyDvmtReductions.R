@@ -20,13 +20,6 @@
 #</doc>
 
 
-#=================================
-#Packages used in code development
-#=================================
-#Uncomment following lines during code development. Recomment when done.
-# library(visioneval)
-
-
 #=============================================
 #SECTION 1: ESTIMATE AND SAVE MODEL PARAMETERS
 #=============================================
@@ -41,7 +34,7 @@
 #------------------------------
 ApplyDvmtReductionsSpecifications <- list(
   #Level of geography module is applied at
-  RunBy = "Azone",
+  RunBy = "Region",
   #Specify new tables to be created by Inp if any
   #Specify new tables to be created by Set if any
   #Specify input data
@@ -173,6 +166,7 @@ ApplyDvmtReductions <- function(L) {
   SovMilesDivert_Hh <- L$Year$Household$PropDvmtDiverted * L$Year$Household$Dvmt
   #Yearly trips diverted
   SovToBikeTrip_Hh <- 365 * SovMilesDivert_Hh / L$Year$Household$AveTrpLenDiverted
+  SovToBikeTrip_Hh[is.nan(SovToBikeTrip_Hh)] <- 0
 
   #Return the results
   #------------------
@@ -196,6 +190,24 @@ documentModule("ApplyDvmtReductions")
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions
 #-------------------------------------------------------------------------------
+# #Load libraries and test functions
+# library(filesstrings)
+# library(visioneval)
+# library(data.table)
+# library(pscl)
+# source("tests/scripts/test_functions.R")
+# #Set up test environment
+# TestSetup_ls <- list(
+#   TestDataRepo = "../Test_Data/VE-State",
+#   DatastoreName = "Datastore.tar",
+#   LoadDatastore = TRUE,
+#   TestDocsDir = "vestate",
+#   ClearLogs = TRUE,
+#   # SaveDatastore = TRUE
+#   SaveDatastore = FALSE
+# )
+# setUpTests(TestSetup_ls)
+# #Run test module
 # TestDat_ <- testModule(
 #   ModuleName = "ApplyDvmtReductions",
 #   LoadDatastore = TRUE,
@@ -204,14 +216,3 @@ documentModule("ApplyDvmtReductions")
 # )
 # L <- TestDat_$L
 # R <- ApplyDvmtReductions(L)
-
-#Test code to check everything including running the module and checking whether
-#the outputs are consistent with the 'Set' specifications
-#-------------------------------------------------------------------------------
-# TestDat_ <- testModule(
-#   ModuleName = "ApplyDvmtReductions",
-#   LoadDatastore = TRUE,
-#   SaveDatastore = TRUE,
-#   DoRun = TRUE
-# )
-

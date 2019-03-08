@@ -174,13 +174,6 @@
 #</doc>
 
 
-#=================================
-#Packages used in code development
-#=================================
-#Uncomment following lines during code development. Recomment when done.
-# library(visioneval)
-
-
 #=============================================
 #SECTION 1: ESTIMATE AND SAVE MODEL PARAMETERS
 #=============================================
@@ -892,7 +885,7 @@ CalculateHouseholdDvmt <- function(L) {
   NumHh <- length(L$Year$Household[[1]])
   #Assign the DvmtModel_ls so that it is in scope when module is called
   if(!exists("DvmtModel_ls")){
-    DvmtModel_ls <- VEHouseholdTravel::DvmtModel_ls
+    DvmtModel_ls <- loadPackageDataset("DvmtModel_ls")
   }
 
   #Set up data frame of household data needed for model
@@ -926,6 +919,8 @@ CalculateHouseholdDvmt <- function(L) {
   AveDvmt_[!IsUr_] <-
     as.vector(eval(parse(text = DvmtModel_ls$NonMetro$Ave),
                    envir = Hh_df[!IsUr_,])) ^ (1 / DvmtModel_ls$NonMetro$Pow)
+  #Replace NaN values (model predicts below zero)
+  AveDvmt_[is.na(AveDvmt_)] <- quantile(AveDvmt_[!is.na(AveDvmt_)], 0.01)
   #Limit the household DVMT to be no greater than 99th percentile for the population
   AveDvmt_[AveDvmt_ > quantile(AveDvmt_, 0.99)] <- quantile(AveDvmt_, 0.99)
 
@@ -943,12 +938,22 @@ CalculateHouseholdDvmt <- function(L) {
                    envir = Hh_df[!IsUr_,]))
 
   #Sum the DVMT by Marea
-  #---------------------
-  MaDvmtByLocType_df <-
-    data.frame(tapply(Hh_df$Dvmt, list(Hh_df$Marea, Hh_df$LocType), sum))
-  if (is.null(MaDvmtByLocType_df$Urban)) MaDvmtByLocType_df$Urban <- 0
-  if (is.null(MaDvmtByLocType_df$Town)) MaDvmtByLocType_df$Town <- 0
-  if (is.null(MaDvmtByLocType_df$Rural)) MaDvmtByLocType_df$Rural <- 0
+  #--------------------
+  tabulateMareaDvmt <- function(LocType) {
+    IsType <- Hh_df$LocType == LocType
+    Dvmt_Ma <- setNames(numeric(length(Ma)), Ma)
+    if (any(IsType)) {
+      Dvmt_Mx <- tapply(Hh_df$Dvmt[IsType], Hh_df$Marea[IsType], sum)
+      Dvmt_Ma[names(Dvmt_Mx)] <- Dvmt_Mx
+      Dvmt_Ma[is.na(Dvmt_Ma)] <- 0
+      Dvmt_Ma
+    } else {
+      Dvmt_Ma
+    }
+  }
+  UrbanDvmt_Ma <- tabulateMareaDvmt("Urban")
+  TownDvmt_Ma <- tabulateMareaDvmt("Town")
+  RuralDvmt_Ma <- tabulateMareaDvmt("Rural")
 
   #Return the results
   #------------------
@@ -959,9 +964,9 @@ CalculateHouseholdDvmt <- function(L) {
       Dvmt = AveDvmt_,
       Dvmt95th = Dvmt95th_)
   Out_ls$Year$Marea <-
-    list(UrbanHhDvmt = MaDvmtByLocType_df$Urban,
-         TownHhDvmt = MaDvmtByLocType_df$Town,
-         RuralHhDvmt = MaDvmtByLocType_df$Rural)
+    list(UrbanHhDvmt = UrbanDvmt_Ma,
+         TownHhDvmt = TownDvmt_Ma,
+         RuralHhDvmt = RuralDvmt_Ma)
   #Return the outputs list
   Out_ls
 }
@@ -978,19 +983,34 @@ documentModule("CalculateHouseholdDvmt")
 #contains data needed to run module. Return input list (L) to use for developing
 #module functions
 #-------------------------------------------------------------------------------
+# #Load libraries and test functions
+# library(filesstrings)
+# library(visioneval)
+# library(data.table)
+# library(pscl)
+# source("tests/scripts/test_functions.R")
+# #Set up test environment
+# TestSetup_ls <- list(
+#   TestDataRepo = "../Test_Data/VE-State",
+#   DatastoreName = "Datastore.tar",
+#   LoadDatastore = TRUE,
+#   TestDocsDir = "vestate",
+#   ClearLogs = TRUE,
+#   # SaveDatastore = TRUE
+#   SaveDatastore = FALSE
+# )
+# setUpTests(TestSetup_ls)
+# #Run test module
 # TestDat_ <- testModule(
 #   ModuleName = "CalculateHouseholdDvmt",
 #   LoadDatastore = TRUE,
 #   SaveDatastore = TRUE,
-#   DoRun = FALSE
+#   DoRun = FALSE,
+#   RunFor = "NotBaseYear"
 # )
 # L <- TestDat_$L
 # R <- CalculateHouseholdDvmt(L)
-
-
-#Test code to check everything including running the module and checking whether
-#the outputs are consistent with the 'Set' specifications
-#-------------------------------------------------------------------------------
+#
 # TestDat_ <- testModule(
 #   ModuleName = "CalculateHouseholdDvmt",
 #   LoadDatastore = TRUE,

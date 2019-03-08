@@ -1,8 +1,8 @@
 Package: VEHouseholdTravel
 Type: Package
 Title: Calculate Household Walk, Bike, and Transit Trips
-Version: 0.8.0
-Date: 4/9/18
+Version: 0.9
+Date: 1/24/19
 Author: Brian Gregor [aut, cre], Aditya Gore <aditya.gore@rsginc.com> [cre]
 Maintainer: Brian Gregor <gregorb@or-analytics.com>, Aditya Gore <aditya.gore@rsginc.com>
 Copyright: AASHTO
@@ -16,7 +16,6 @@ LazyData: TRUE
 Depends: R (>= 3.1.0)
 Imports:
     visioneval,
-    devtools,
     usethis,
     VE2001NHTS,
     data.table,
@@ -25,4 +24,4 @@ Suggests:
     knitr
 Encoding: UTF-8
 VignetteBuilder: knitr
-RoxygenNote: 6.1.0.9000
+RoxygenNote: 6.1.1

@@ -1,8 +1,8 @@
 
 # DivertSovTravel Module
-### November 21, 2018
+### December 20, 2018
 
-This module reduces household single-occupant vehicle (SOV) travel to achieve goals that are inputs to the model. The purpose of this module is to enable users to do 'what if' analysis of the potential of light-weight vehicles (e.g. bicycles, electric bikes, electric scooters) and infrastructure to support their use to reduce SOV travel. The user inputs a goal for diverting a portion of SOV travel within a 20-mile tour distance (round trip distance). The module predicts the amount of each household's DVMT that occurs in SOV tours having round trip distances of 20 miles or less. It also predicts for each household the average length of trips that are in those SOV tours. It then reduces the SOV travel of each household to achieve the overall goal. The reductions are allocated to households as a function of the household's SOV DVMT and the inverse of SOV trip length (described in more detail below). The proportions of diverted DVMT are saved as are the average SOV trip length of diverted DVMT. These datasets are used in the ApplyDvmtReductions module to calculate reductions in household DVMT and to calculate trips to be added to the bike mode category trips.
+This module reduces household single-occupant vehicle (SOV) travel to achieve goals that are inputs to the model. The purpose of this module is to enable users to do 'what if' analysis of the potential of light-weight vehicles (e.g. bicycles, electric bikes, electric scooters) and infrastructure to support their use to reduce SOV travel. The user inputs a goal for diverting a portion of SOV travel within a 20-mile tour distance (round trip distance). The module predicts the amount of each household's DVMT that occurs in SOV tours having round trip distances of 20 miles or less. It also predicts for each household the average length of trips that are in those SOV tours. It then reduces the SOV travel of each household to achieve the overall goal. The reductions are allocated to households as a function of the household's SOV DVMT and the inverse of SOV trip length (described in more detail below). The proportions of diverted DVMT are saved as are the average SOV trip length of diverted DVMT. These datasets are used in the ApplyDvmtReductions module to calculate reductions in household DVMT and to calculate trips to be added to the bike mode category trips. SOV DVMT reduction is only applied to households in urban and town location types (LocTypes) because it is unlikely that actions/services could be provided in rural areas that could significantly divert SOV DVMT to bicyles, electric bicycles, scooters or other similar modes.
 
 ## Model Parameter Estimation
 
@@ -56,18 +56,18 @@ lm(formula = PowSovDvmt ~ LogDensity + LogIncome + Drivers +
     NumChild + NumVehLtNumDvr + LogDvmt, data = TestHh_df)
 
 Residuals:
-    Min      1Q  Median      3Q     Max 
--2.2614 -0.5085  0.0422  0.5157  2.6226 
+     Min       1Q   Median       3Q      Max 
+-2.26149 -0.50852  0.04221  0.51570  2.62249 
 
 Coefficients:
                 Estimate Std. Error t value Pr(>|t|)    
-(Intercept)     1.108037   0.067759  16.353  < 2e-16 ***
-LogDensity     -0.006808   0.002868  -2.374 0.017593 *  
-LogIncome       0.031290   0.008084   3.871 0.000109 ***
-Drivers         0.155119   0.011837  13.105  < 2e-16 ***
-NumChild       -0.080309   0.005145 -15.610  < 2e-16 ***
-NumVehLtNumDvr -0.236038   0.016169 -14.598  < 2e-16 ***
-LogDvmt         0.173626   0.022678   7.656 1.98e-14 ***
+(Intercept)     1.109381   0.067695  16.388  < 2e-16 ***
+LogDensity     -0.006785   0.002869  -2.365 0.018037 *  
+LogIncome       0.031150   0.008095   3.848 0.000119 ***
+Drivers         0.155211   0.011825  13.126  < 2e-16 ***
+NumChild       -0.080327   0.005145 -15.611  < 2e-16 ***
+NumVehLtNumDvr -0.235996   0.016170 -14.594  < 2e-16 ***
+LogDvmt         0.173620   0.022671   7.658 1.95e-14 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -88,25 +88,25 @@ lm(formula = makeFormula(EndTerms_), data = EstData_df)
 
 Residuals:
      Min       1Q   Median       3Q      Max 
--1.34875 -0.03826  0.00383  0.04366  0.31916 
+-1.36441 -0.03856  0.00361  0.04384  0.30623 
 
 Coefficients:
                      Estimate Std. Error t value Pr(>|t|)    
-(Intercept)        -0.6762972  0.0107417  -62.96   <2e-16 ***
-LogDensity          0.1880949  0.0013059  144.04   <2e-16 ***
-IsSF                0.0605064  0.0007986   75.76   <2e-16 ***
-LogIncome           0.0376989  0.0005801   64.98   <2e-16 ***
-Drivers             0.4202335  0.0008938  470.15   <2e-16 ***
-NumChild           -0.1617095  0.0003716 -435.12   <2e-16 ***
-NumVehLtNumDvr     -0.5100785  0.0011427 -446.39   <2e-16 ***
-LogDvmt            -0.7197006  0.0033030 -217.89   <2e-16 ***
-LogDensity:LogDvmt -0.0278202  0.0003218  -86.45   <2e-16 ***
+(Intercept)        -0.6760583  0.0107243  -63.04   <2e-16 ***
+LogDensity          0.1878254  0.0013044  144.00   <2e-16 ***
+IsSF                0.0608259  0.0007982   76.20   <2e-16 ***
+LogIncome           0.0390107  0.0005807   67.17   <2e-16 ***
+Drivers             0.4210899  0.0008924  471.84   <2e-16 ***
+NumChild           -0.1614859  0.0003715 -434.66   <2e-16 ***
+NumVehLtNumDvr     -0.5112423  0.0011422 -447.61   <2e-16 ***
+LogDvmt            -0.7230400  0.0033002 -219.09   <2e-16 ***
+LogDensity:LogDvmt -0.0278201  0.0003215  -86.54   <2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Residual standard error: 0.06767 on 51915 degrees of freedom
-Multiple R-squared:  0.979,	Adjusted R-squared:  0.979 
-F-statistic: 3.024e+05 on 8 and 51915 DF,  p-value: < 2.2e-16
+Residual standard error: 0.06764 on 51915 degrees of freedom
+Multiple R-squared:  0.9791,	Adjusted R-squared:  0.9791 
+F-statistic: 3.036e+05 on 8 and 51915 DF,  p-value: < 2.2e-16
 
 ```
 
@@ -171,21 +171,21 @@ lm(formula = ModelFormula, data = Data_df)
 
 Residuals:
     Min      1Q  Median      3Q     Max 
--3.2382 -1.1593 -0.2256  0.9117 10.0060 
+-3.3987 -1.2406 -0.2541  0.9631 10.9931 
 
 Coefficients:
                 Estimate Std. Error t value Pr(>|t|)    
-(Intercept)     1.771937   0.173592  10.207   <2e-16 ***
-Drivers         0.161285   0.017780   9.071   <2e-16 ***
-LogIncome       0.149921   0.016872   8.886   <2e-16 ***
-LogDensity     -0.141624   0.006549 -21.626   <2e-16 ***
-NumVehLtNumDvr -0.373266   0.041456  -9.004   <2e-16 ***
+(Intercept)     1.839212   0.185757   9.901   <2e-16 ***
+Drivers         0.171430   0.019026   9.010   <2e-16 ***
+LogIncome       0.158677   0.018054   8.789   <2e-16 ***
+LogDensity     -0.152328   0.007008 -21.738   <2e-16 ***
+NumVehLtNumDvr -0.396049   0.044362  -8.928   <2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Residual standard error: 1.57 on 19021 degrees of freedom
-Multiple R-squared:  0.04439,	Adjusted R-squared:  0.04418 
-F-statistic: 220.9 on 4 and 19021 DF,  p-value: < 2.2e-16
+Residual standard error: 1.68 on 19021 degrees of freedom
+Multiple R-squared:  0.04434,	Adjusted R-squared:  0.04414 
+F-statistic: 220.6 on 4 and 19021 DF,  p-value: < 2.2e-16
 
 ```
 
@@ -200,24 +200,24 @@ lm(formula = makeFormula(EndTerms_), data = EstData_df)
 
 Residuals:
       Min        1Q    Median        3Q       Max 
--0.214649 -0.033459  0.000424  0.032921  0.256070 
+-0.175631 -0.034548 -0.000116  0.035103  0.231612 
 
 Coefficients:
                   Estimate Std. Error t value Pr(>|t|)    
-(Intercept)      2.460e+00  8.386e-03  293.36   <2e-16 ***
-Drivers          1.965e-01  7.651e-04  256.78   <2e-16 ***
-NonDrivers      -4.443e-02  4.820e-04  -92.18   <2e-16 ***
-LogIncome        7.126e-02  7.174e-04   99.34   <2e-16 ***
-LogDensity      -1.211e-01  4.101e-04 -295.27   <2e-16 ***
-IsUrbanMixNbrhd -1.179e-01  1.379e-03  -85.45   <2e-16 ***
-FwyLaneMiPC      3.792e+02  2.739e+00  138.44   <2e-16 ***
-VehLtDvr        -3.924e-01  1.729e-03 -226.96   <2e-16 ***
+(Intercept)      2.542e+00  8.926e-03  284.74   <2e-16 ***
+Drivers          2.115e-01  8.143e-04  259.70   <2e-16 ***
+NonDrivers      -4.676e-02  5.130e-04  -91.14   <2e-16 ***
+LogIncome        7.502e-02  7.635e-04   98.26   <2e-16 ***
+LogDensity      -1.293e-01  4.365e-04 -296.31   <2e-16 ***
+IsUrbanMixNbrhd -1.260e-01  1.468e-03  -85.86   <2e-16 ***
+FwyLaneMiPC      4.020e+02  2.915e+00  137.88   <2e-16 ***
+VehLtDvr        -4.245e-01  1.840e-03 -230.73   <2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Residual standard error: 0.04922 on 9815 degrees of freedom
-Multiple R-squared:  0.9782,	Adjusted R-squared:  0.9781 
-F-statistic: 6.281e+04 on 7 and 9815 DF,  p-value: < 2.2e-16
+Residual standard error: 0.05238 on 9815 degrees of freedom
+Multiple R-squared:  0.9784,	Adjusted R-squared:  0.9784 
+F-statistic: 6.348e+04 on 7 and 9815 DF,  p-value: < 2.2e-16
 
 ```
 
@@ -227,38 +227,38 @@ Call:
 lm(formula = makeFormula(EndTerms_), data = EstData_df)
 
 Residuals:
-      Min        1Q    Median        3Q       Max 
--0.127881 -0.024353  0.000179  0.024323  0.143838 
+       Min         1Q     Median         3Q        Max 
+-0.0091531 -0.0012994  0.0000337  0.0013097  0.0082655 
 
 Coefficients:
               Estimate Std. Error t value Pr(>|t|)    
-(Intercept)  2.0325331  0.0039887   509.6   <2e-16 ***
-Drivers      0.1099513  0.0004084   269.2   <2e-16 ***
-LogIncome    0.1027802  0.0003876   265.2   <2e-16 ***
-LogDensity  -0.0974167  0.0001510  -645.4   <2e-16 ***
-VehLtDvr    -0.2539384  0.0009523  -266.7   <2e-16 ***
+(Intercept)  1.097e+00  2.183e-04  5027.0   <2e-16 ***
+Drivers      5.687e-03  2.235e-05   254.5   <2e-16 ***
+LogIncome    5.527e-03  2.121e-05   260.6   <2e-16 ***
+LogDensity  -5.152e-03  8.260e-06  -623.7   <2e-16 ***
+VehLtDvr    -1.363e-02  5.211e-05  -261.6   <2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Residual standard error: 0.03606 on 19021 degrees of freedom
-Multiple R-squared:  0.9763,	Adjusted R-squared:  0.9763 
-F-statistic: 1.961e+05 on 4 and 19021 DF,  p-value: < 2.2e-16
+Residual standard error: 0.001973 on 19021 degrees of freedom
+Multiple R-squared:  0.9747,	Adjusted R-squared:  0.9747 
+F-statistic: 1.833e+05 on 4 and 19021 DF,  p-value: < 2.2e-16
 
 ```
 
 ## How the Module Works
 
-This function calculates the proportional reduction in the DVMT of individual households to meet the user-supplied goal for diverting a proportion of travel in SOV tours 20 miles or less in length to bikes, electric bikes, scooters or other similar modes. The user supplies the diversion goal for each Azone and model year. The following procedural steps are followed to complete the calculation:
+This function calculates the proportional reduction in the DVMT of individual households to meet the user-supplied goal for diverting a proportion of travel in SOV tours 20 miles or less in length to bikes, electric bikes, scooters or other similar modes. The user supplies the diversion goal for each Azone and model year. SOV DVMT reduction is only applied to households in urban and town location types (LocTypes) because it is unlikely that actions/services could be provided in rural areas that could significantly divert SOV DVMT to bicyles, electric bicycles, scooters or other similar modes. The following procedural steps are followed to complete the calculation:
 
 * The SOV proportions model described is applied to calculate the proportion of the DVMT of each household that is in qualifying SOV tours (i.e. having lengths of 20 miles or less);
 
-* The total diversion of DVMT in qualifying SOV tours for the Azone is calculated by:
+* The total diversion of DVMT in qualifying SOV tours (of urban and town households) for the Azone is calculated by:
 
   * Calculating the qualifying SOV tour DVMT of each household by multiplying the modeled proportion of DVMT in qualifying tours by the household DVMT;
 
-  * Summing the qualifying SOV tour DVMT of households in the Azone and multiplying by the diversion goal for the Azone;
+  * Summing the qualifying SOV tour DVMT of urban and town households in the Azone and multiplying by the diversion goal for the Azone;
 
-* The total DVMT diverted is allocated to households in the Azone as a function of their relative amounts of qualifying SOV travel and the inverse of the average length of trips in qualifying tours. In other words, it is assumed that households having more qualifying SOV travel and households having shorter SOV trips will be more likely to divert SOV travel. This is implemented in the following steps:
+* The total DVMT diverted is allocated to urban and town households in the Azone as a function of their relative amounts of qualifying SOV travel and the inverse of the average length of trips in qualifying tours. In other words, it is assumed that households having more qualifying SOV travel and households having shorter SOV trips will be more likely to divert SOV travel. This is implemented in the following steps:
 
   * A utility function is defined as follows:
 
@@ -276,7 +276,7 @@ This function calculates the proportional reduction in the DVMT of individual ho
 
   * The value of `B` is solved such that the maximum proportional diversion for any household is midway between the objective of the Azone and 1. For example, if the Azone objective is 0.2, the maximum diversion would be 0.6. The value is solved iteratively using a binary search algorithm.
 
-* The DVMT diversion allocated to each household is divided by the average DVMT of each household to calculate the proportion of household DVMT that is diverted. This and the average trip length by household are outputs to be saved in the datastore.
+* The DVMT diversion allocated to each household is divided by the average DVMT of each household to calculate the proportion of household DVMT that is diverted. The DVMT diversion of rural households is set at 0. This and the average trip length by household are outputs to be saved in the datastore.
 
 
 ## User Inputs
@@ -331,6 +331,7 @@ ISELEMENTOF - Categorical values that are permitted. Values in the datastore are
 |Marea               |Household |Year  |character |ID         |             |                   |
 |Azone               |Household |Year  |character |ID         |             |                   |
 |Bzone               |Household |Year  |character |ID         |             |                   |
+|HhId                |Household |Year  |character |ID         |             |                   |
 |Dvmt                |Household |Year  |compound  |MI/DAY     |NA, < 0      |                   |
 |Vehicles            |Household |Year  |vehicles  |VEH        |NA, < 0      |                   |
 |HhSize              |Household |Year  |people    |PRSN       |NA, < 0      |                   |

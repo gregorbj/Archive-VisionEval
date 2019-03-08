@@ -1,4 +1,4 @@
-### Appendix G: VisionEval User Functions
+### Appendix G: VisionEval Model User Functions
 
 
 ### `getYears`: Retrieve years
@@ -51,9 +51,10 @@ getModelState
 #### Usage
 
 ```r
-initializeModel(ParamDir = "defs", RunParamFile = "run_parameters.json",
-  GeoFile = "geo.csv", ModelParamFile = "model_parameters.json",
-  LoadDatastore = FALSE, DatastoreName = NULL, SaveDatastore = TRUE)
+initializeModel(ParamDir = "defs",
+  RunParamFile = "run_parameters.json", GeoFile = "geo.csv",
+  ModelParamFile = "model_parameters.json", LoadDatastore = FALSE,
+  DatastoreName = NULL, SaveDatastore = TRUE)
 ```
 
 
@@ -99,7 +100,61 @@ Argument      |Description
 
 
 #### Calls
-assignDatastoreFunctions, checkModuleExists, checkModuleSpecs, getModelState, getModuleSpecs, initDatastoreGeography, initLog, initModelStateFile, inputsToDatastore, loadDatastore, loadModelParameters, parseModelScript, processModuleInputs, processModuleSpecs, readGeography, readModelState, setModelState, simDataTransactions, writeLog
+assignDatastoreFunctions, checkDataset, checkModuleExists, checkModuleSpecs, getModelState, getModuleSpecs, initDatastoreGeography, initLog, initModelStateFile, inputsToDatastore, loadDatastore, loadModelParameters, parseModelScript, processModuleInputs, processModuleSpecs, readGeography, readModelState, setModelState, simDataTransactions, writeLog
+
+
+### `readDatastoreTables`: Read multiple datasets from multiple tables in datastores
+
+#### Description
+
+
+ `readDatastoreTables` a visioneval framework model user function that
+ reads datasets from one or more tables in a specified group in one or more
+ datastores
+
+
+#### Usage
+
+```r
+readDatastoreTables(Tables_ls, Group, DstoreLocs_, DstoreType)
+```
+
+
+#### Arguments
+
+Argument      |Description
+------------- |----------------
+```Tables_ls```     |     a named list where the name of each component is the name of a table in a datastore group and the value is a string vector of the names of the datasets to be retrieved.
+```Group```     |     a string that is the name of the group to retrieve the table datasets from.
+```DstoreLocs_```     |     a string vector identifying the paths to all of the datastores to extract the datasets from. Each entry must be the full relative path to a datastore (e.g. 'tests/Datastore').
+```DstoreType```     |     a string identifying the type of datastore (e.g. 'RD', 'H5'). Note
+
+#### Details
+
+
+ This function can read multiple datasets in one or more tables in a group.
+ More than one datastore my be specified so that if datastore references are
+ used in a model run, datasets from the referenced datastores may be queried
+ as well. Note that the capability for querying multiple datastores is only
+ for the purpose of querying datastores for a single model scenario. This
+ capability should not be used to compare multiple scenarios. The function
+ does not segregate datasets by datastore. Attempting to use this function to
+ compare multiple scenarios could produce unpredictable results.
+
+
+#### Value
+
+
+ A named list having two components. The 'Data' component is a list
+ containing the datasets from the datastores where the name of each component
+ of the list is the name of a table from which identified datasets are
+ retrieved and the value is a data frame containing the identified datasets.
+ The 'Missing' component is a list which identifies the datasets that are
+ missing in each table.
+
+
+#### Calls
+checkDataset, checkTableExistence, readModelState
 
 
 ### `runModule`: Run module.

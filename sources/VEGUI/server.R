@@ -531,6 +531,7 @@ server <- function(input, output, session) {
         reactiveFilePaths_rv[[VE_LOG]] <- file.path(scriptInfo_ls$fileDirectory, readModelState()$LogFile)
         reactiveFilePaths_rv[[DATASTORE]] <- file.path(scriptInfo_ls$fileDirectory, readModelState()$DatastoreName)
 
+        # FIXME: These should not be hard-coded.  But should be read from run_model.R
         defsDirectory <- file.path(scriptInfo_ls$fileDirectory, "defs")
 
         reactiveFilePaths_rv[[MODEL_PARAMETERS_FILE]] <- file.path(defsDirectory, "model_parameters.json")
@@ -841,6 +842,11 @@ server <- function(input, output, session) {
       #   remove(reactiveFilePaths_rv[[MODEL_STATE_FILE]])
       # }
       #reference ModelState_ls so future will recognize it as a global
+      
+      # set lib paths to global variable so child process inherits
+      # all the library paths as the master session
+      .libPaths(libs)
+      
       getScriptOutput(datapath, isolate(reactiveFilePaths_rv[[CAPTURED_SOURCE]]))
     }),
     callback = function(asyncResult) {

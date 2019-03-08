@@ -9,6 +9,10 @@
   \item{VehCost_AgTy}{a matrix of annual vehicle maintenance, repair and tire costs by vehicle type and age category in 2010 dollars}
   \item{CO2eCost_}{a vector of greenhouse gas emissions costs by forecast year in 2010 dollars per metric ton of carbon dioxide equivalents}
   \item{OtherExtCost_}{a vector of other social costs by cost category. Values are in 2010 dollars per vehicle mile except for EnergySecurity which is in 2010 dollars per gasoline equivalent gallon}
+  \item{BLSOpCost_df}{a data frame of household vehicle annual maintenance, repair, and tire cost by vehicle age}
+  \item{VehicleCostByAgeAndType_df}{a data frame of calculated vehicle maintenance, repair, and tire cost per mile by vehicle type and age}
+  \item{CO2eCost_df}{a data frame of estimated cost of carbon in dollars per tonne by year under various scenarios}
+  \item{OtherExtCost_df}{a data frame of other social costs by type}
 }}
 \source{
 CalculateVehicleOperatingCost.R script.

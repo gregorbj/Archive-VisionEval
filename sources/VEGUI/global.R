@@ -39,12 +39,20 @@ options(DT.options = list(dom = 'tip', rownames = 'f'))
 planType <- 'multiprocess'  # Will VEGUI work at all with sequential?
 
 if ( exists('planType') && planType == 'multiprocess'){
+<<<<<<< HEAD
   NWorkers <- L$Global$Model$NWorkers
   NWorkers <- min(max(availableCores()-1, 1), NWorkers)
+=======
+  NWorkers <- max(availableCores()-1, 1)
+>>>>>>> gregorbj/master
   plan(multiprocess, workers = NWorkers, gc=TRUE)
 } else {
   plan(sequential)
 }
+
+# Set a global variable of the library paths so it can be passed to any
+# child processes called with future
+libs <- .libPaths()
 
 if (interactive()) {
   options(shiny.reactlog = TRUE)
@@ -136,4 +144,3 @@ convertRunParam2Lst <- function(rp_df){
 
   lst2
 }
-

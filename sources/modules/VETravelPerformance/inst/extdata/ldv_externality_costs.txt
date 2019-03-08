@@ -7,13 +7,14 @@ File Structure
 --------------
 Rows contain data by cost impact category.
 Column names as follows:
-CostCategory: externality cost category
+CostCategory: externality cost categoryve
     AirPollution:   Cost of air pollution impacts in 2010 dollars per vehicle mile traveled
     OtherResource:  Cost of other resources impacts (e.g. water pollution) in 2010 dollars per vehicle mile traveled
     EnergySecurity: Cost to pay for energy security in 2010 dollars per gasoline equivalent gallon
     Safety:         Cost of crashes not covered by vehicle insurance in 2010 dollars per vehicle mile traveled
     Noise:          Cost of noise impacts in 2010 dollars per vehicle mile traveled
 UnitCost: Unit cost in 2010 dollars in the units described above
+Units: Cost units
 
 Source:
 -------

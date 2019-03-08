@@ -114,7 +114,8 @@ Argument      |Description
 
 ```r
 applyBinomialModel(Model_ls, Data_df, TargetProp = NULL,
-  CheckTargetSearchRange = FALSE)
+  CheckTargetSearchRange = FALSE, ApplyRandom = TRUE,
+  ReturnProbs = FALSE)
 ```
 
 
@@ -122,10 +123,12 @@ applyBinomialModel(Model_ls, Data_df, TargetProp = NULL,
 
 Argument      |Description
 ------------- |----------------
-```Model_ls```     |     a list which contains the following components: 'Type' which has a value of 'binomial'; 'Formula' a string representation of the model equation; 'Choices' a two-element vector listing the choice set. The first element is the choice that the binary logit model equation predicts the odds of; 'PrepFun' a function which prepares the input data frame for the model application. If no preparation, this element of the list should not be present or should be set equal to NULL; 'SearchRange' a two-element numeric vector which specifies the acceptable search range to use when determining the factor for adjusting the model constant. 'RepeatVar' a string which identifies the name of a field to use for repeated draws of the model. This is used in the case where for example the input data is households and the output is vehicles and the repeat variable is the number of vehicles in the household.
+```Model_ls```     |     a list which contains the following components: 'Type' which has a value of 'binomial'; 'Formula' a string representation of the model equation; 'Choices' a two-element vector listing the choice set. The first element is the choice that the binary logit model equation predicts the odds of; 'PrepFun' a function which prepares the input data frame for the model application. If no preparation, this element of the list should not be present or should be set equal to NULL; 'SearchRange' a two-element numeric vector which specifies the acceptable search range to use when determining the factor for adjusting the model constant. 'RepeatVar' a string which identifies the name of a field to use for repeated draws of the model. This is used in the case where for example the input data is households and the output is vehicles and the repeat variable is the number of vehicles in the household. 'ApplyRandom' a logical identifying whether the results will be affected by random draws (i.e. if a random number in range 0 - 1 is less than the computed probability) or if a probability cutoff is used (i.e. if the computed probability is greater then 0.5). This is an optional component. If it isn't present, the function runs with ApplyRandom = TRUE.
 ```Data_df```     |     a data frame containing the data required for applying the model.
 ```TargetProp```     |     a number identifying a target proportion for the default choice to be achieved for the input data or NULL if there is no target proportion to be achieved.
 ```CheckTargetSearchRange```     |     a logical identifying whether the function is to only check whether the specified 'SearchRange' for the model will produce acceptable values (i.e. no NA or NaN values). If FALSE (the default), the function will run the model and will not check the target search range.
+```ApplyRandom```     |     a logical identifying whether the outcome will be be affected by random draws (i.e. if a random number in range 0 - 1 is less than the computed probability) or if a probability cutoff is used (i.e. if the computed probability is greater than 0.5)
+```ReturnProbs```     |     a logical identifying whether to return the calculated probabilities rather than the assigned results. The default value is FALSE.
 
 #### Details
 
@@ -318,6 +321,76 @@ Argument      |Description
 checkDataConsistency, processModuleSpecs
 
 
+### `documentModule`: Produces markdown documentation for a module
+
+#### Description
+
+
+ `documentModule` a visioneval framework module developer function
+ that creates a vignettes directory if one does not exist and produces
+ module documentation in markdown format which is saved in the vignettes
+ directory.
+
+
+#### Usage
+
+```r
+documentModule(ModuleName)
+```
+
+
+#### Arguments
+
+Argument      |Description
+------------- |----------------
+```ModuleName```     |     A string identifying the name of the module (e.g. 'CalculateHouseholdDvmt')
+
+#### Details
+
+
+ This function produces documentation for a module in markdown format. A
+ 'vignettes' directory is created if it does not exist and the markdown file
+ and any associated resources such as image files are saved in that directory.
+ The function is meant to be called within and at the end of the module
+ script. The documentation is created from a commented block within the
+ module script which is enclosed by the opening tag, <doc>, and the closing
+ tag, </doc>. (Note, these tags must be commented along with all the other
+ text in the block). This commented block may also include tags which identify
+ resources to include within the documentation. These tags identify the
+ type of resource and the name of the resource which is located in the 'data'
+ directory. A colon (:) is used to separate the resource type and resource
+ name identifiers. For example:
+ <txt:DvmtModel_ls$EstimationStats$NonMetroZeroDvmt_GLM$Summary>
+ is a tag which will insert text which is located in a component of the
+ DvmtModel_ls list that is saved as an rdata file in the 'data' directory
+ (i.e. data/DvmtModel_ls.rda). The following 3 resource types are recognized:
+ * txt - a vector of strings which are inserted as lines of text in a code block
+ * fig - a png file which is inserted as an image
+ * tab - a matrix or data frame which is inserted as a table
+ The function also reads in the module specifications and creates
+ tables that document user input files, data the module gets from the
+ datastore, and the data the module produces that is saved in the datastore.
+ This function is intended to be called in the R script which defines the
+ module. It is placed near the end of the script (after the portions of the
+ script which estimate module parameters and define the module specifications)
+ so that it is run when the package is built. It may not properly in other
+ contexts.
+
+
+#### Value
+
+
+ None. The function has the side effects of creating a 'vignettes'
+ directory if one does not exist, copying identified 'fig' resources to the
+ 'vignettes' directory, and saving the markdown documentation file to the
+ 'vignettes' directory. The markdown file is named with the module name and
+ has a 'md' suffix.
+
+
+#### Calls
+expandSpec, processModuleSpecs
+
+
 ### `getRegisteredGetSpecs`: Returns Get specifications for registered datasets.
 
 #### Description
@@ -472,6 +545,55 @@ items()
 
 
 
+### `loadPackageDataset`: Load a VisionEval package dataset
+
+#### Description
+
+
+ `loadPackageDataset` a visioneval framework module developer function
+ which loads a dataset identified by name from the VisionEval package
+ containing the dataset.
+
+
+#### Usage
+
+```r
+loadPackageDataset(DatasetName)
+```
+
+
+#### Arguments
+
+Argument      |Description
+------------- |----------------
+```DatasetName```     |     A string identifying the name of the dataset.
+
+#### Details
+
+
+ This function is used to load a dataset identified by name from the
+ VisionEval package which contains the dataset. Using this function is the
+ preferred alternative to hard-wiring the loading using package::dataset
+ notation because it enables users to switch between module versions contained
+ in different packages. For example, there may be different versions of the
+ VEPowertrainsAndFuels package which have different default assumptions about
+ light-duty vehicle powertrain mix and characteristics by model year. Using
+ this function, the module developer only needs to identify the dataset name.
+ The function uses DatasetsByPackage_df data frame in the model state list
+ to identify the package which contains the dataset. It then retrieves and
+ returns the dataset
+
+
+#### Value
+
+
+ The identified dataset.
+
+
+#### Calls
+getModelState
+
+
 ### `makeModelFormulaString`: Makes a string representation of a model equation.
 
 #### Description
@@ -561,11 +683,14 @@ Argument      |Description
 #### Value
 
 
- A data frame containing the estimation data.
+ A data frame containing the estimation data according to
+ specifications with data types consistent with specifications and columns
+ not specified removed. Execution stops if any errors are found. Error
+ messages are printed to the console. Warnings are also printed to the console.
 
 
 #### Calls
-checkDataConsistency, expandSpec
+checkDataConsistency, expandSpec, Types
 
 
 ### `readVENameRegistry`: Reads the VisionEval name registry.
@@ -630,7 +755,7 @@ testModule(ModuleName, ParamDir = "defs",
   RunParamFile = "run_parameters.json", GeoFile = "geo.csv",
   ModelParamFile = "model_parameters.json", LoadDatastore = FALSE,
   SaveDatastore = TRUE, DoRun = TRUE, RunFor = "AllYears",
-  StopOnErr = TRUE)
+  StopOnErr = TRUE, RequiredPackages = NULL, TestGeoName = NULL)
 ```
 
 
@@ -648,6 +773,8 @@ Argument      |Description
 ```DoRun```     |     A logical value identifying whether the module should be run. If FALSE, the function will initialize a datastore, check specifications, and load inputs but will not run the module but will return the list of module specifications. That setting is useful for module development in order to create the all the data needed to assist with module programming. It is used in conjunction with the getFromDatastore function to create the dataset that will be provided by the framework. The default value for this parameter is TRUE. In that case, the module will be run and the results will checked for consistency with the Set specifications.
 ```RunFor```     |     A string identifying what years the module is to be tested for. The value must be the same as the value that is used when the module is run in a module. Allowed values are 'AllYears', 'BaseYear', and 'NotBaseYear'.
 ```StopOnErr```     |     A logical identifying whether model execution should be stopped if the module transmits one or more error messages or whether execution should continue with the next module. The default value is TRUE. This is how error handling will ordinarily proceed during a model run. A value of FALSE is used when 'Initialize' modules in packages are run during model initialization. These 'Initialize' modules are used to check and preprocess inputs. For this purpose, the module will identify any errors in the input data, the 'initializeModel' function will collate all the data errors and print them to the log.
+```RequiredPackages```     |     A character vector identifying any packages that must be installed in order to test the module because the module either has a soft reference to a module in the package (i.e. the Call spec only identifies the name of the module being called) or a soft reference to a dataset in the module (i.e. only identifies the name of the dataset). The default value is NULL.
+```TestGeoName```     |     A character vector identifying the name of the geographic area for which data is to be loaded. This argument has effect only if the DoRun argument is FALSE. It enables the module developer to choose the geographic area data is to be loaded for when developing a module that is run for geography other than the region. For example if a module is run at the Azone level, the user can specify the name of the Azone that data is to be loaded for. If the name is misspecified an error will be flagged.
 
 #### Details
 
@@ -684,6 +811,6 @@ Argument      |Description
 
 
 #### Calls
-assignDatastoreFunctions, checkDataset, checkModuleOutputs, checkModuleSpecs, createGeoIndexList, getFromDatastore, getModelState, getYears, initDatastoreGeography, initLog, initModelStateFile, inputsToDatastore, loadDatastore, loadModelParameters, processModuleInputs, processModuleSpecs, readGeography, readModelState, setInDatastore, writeLog
+assignDatastoreFunctions, checkDataset, checkModuleOutputs, checkModuleSpecs, createGeoIndexList, getFromDatastore, getModelState, getYears, initDatastoreGeography, initLog, initModelStateFile, inputsToDatastore, loadDatastore, loadModelParameters, processModuleInputs, processModuleSpecs, readGeography, readModelState, setInDatastore, setModelState, writeLog
 
 

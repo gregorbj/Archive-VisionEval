@@ -419,16 +419,18 @@ RunScenarios <- function(L){
 
   # A list to store currently running scenarios
   ScenarioInProcess_ls <- list()
-  
+
   # Set future processors
   if ( exists('planType') && planType == 'multiprocess'){
     NWorkers <- L$Global$Model$NWorkers
     NWorkers <- min(max(availableCores()-1, 1), NWorkers)
     plan(multiprocess, workers = NWorkers, gc=TRUE)
+    # Make sure that child processes inherit the libraries from master
+    libs <- .libPaths() # Set .libPaths(libs) in call to child process
   } else {
     plan(sequential)
   }
-  
+
   # Update the Scenario Progress Report
   Scenarios_df  <- read.csv(file.path(ModelPath,
                                       L$Global$Model$ScenarioOutputFolder,
@@ -478,6 +480,9 @@ RunScenarios <- function(L){
       startAsyncTask(asyncTasksRunning = ScenarioInProcess_ls,
                      asyncTaskName = taskName,
                      futureObj = future({
+                       # Ensure child processes inherit libraries
+                       .libPaths(libs)
+
                        currWd <- getwd()
                        on.exit(setwd(currWd))
                        write(print(paste0(Sys.time(),

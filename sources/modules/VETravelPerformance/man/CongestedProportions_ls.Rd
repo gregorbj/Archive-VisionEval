@@ -3,16 +3,14 @@
 \docType{data}
 \name{CongestedProportions_ls}
 \alias{CongestedProportions_ls}
-\title{Congestion lookup tables of proportions of VMT and VHT by congestion level
-for freeways and arterials by demand level (average ADT per lane)}
-\format{A list of matrices. The list has two components, Vmt and Vht, that
-contain lookup tables for VMT and VHT proportions by congestion level,
-respectively. Each component has two components, Fwy and Art, that contains
-the lookup tables for freeways and arterials respectively. Each table is a
-matrix containing 5 columns corresponding the 5 congestion levels (none,
-moderate, heavy, severe, extreme). The rows correspond to demand levels with
-the rownames specifying the demand levels. The values are proportions by
-congestion level. The values in each row sum to 1.}
+\title{Congestion lookup tables of proportions of DVMT by congestion level
+for freeways and arterials by demand to supply ratio (average DVMT per lane-mile)}
+\format{A list of matrices. The list has two components, Fwy and Art, that
+  are lookup tables for DVMT by congestion level for freeways and arterials
+  respectively. Each table is a matrix containing 5 columns corresponding the
+  5 congestion levels (None, Mod, Hvy, Sev, Ext). The rows correspond to
+  demand to supply ratios with the rownames specifying the ratios. The values
+  are proportions by congestion level. The values in each row sum to 1.}
 \source{
 CalculateCongestion.R script.
 }
@@ -20,7 +18,7 @@ CalculateCongestion.R script.
 CongestedProportions_ls
 }
 \description{
-Bus revenue mile equivalency factors to convert revenue miles for various
-modes to bus-equivalent revenue miles.
+Congestion lookup tables of proportions of DVMT by congestion level
+for freeways and arterials by demand to supply ratio (average DVMT per lane-mile)
 }
 \keyword{datasets}
