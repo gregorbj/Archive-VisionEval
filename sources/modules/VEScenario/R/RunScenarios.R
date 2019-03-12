@@ -425,12 +425,15 @@ RunScenarios <- function(L){
     NWorkers <- L$Global$Model$NWorkers
     NWorkers <- min(max(availableCores()-1, 1), NWorkers)
     plan(multiprocess, workers = NWorkers, gc=TRUE)
-    # Make sure that child processes inherit the libraries from master
-    libs <- .libPaths() # Set .libPaths(libs) in call to child process
+    message("Executing with ", NWorkers, " processors\n")
   } else {
     plan(sequential)
+    message("Executing with sequential processing\n")
   }
 
+  # Make sure that child processes inherit the libraries from master
+  libs <- .libPaths() # Set .libPaths(libs) in call to child process
+  
   # Update the Scenario Progress Report
   Scenarios_df  <- read.csv(file.path(ModelPath,
                                       L$Global$Model$ScenarioOutputFolder,

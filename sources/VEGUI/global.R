@@ -39,12 +39,7 @@ options(DT.options = list(dom = 'tip', rownames = 'f'))
 planType <- 'multiprocess'  # Will VEGUI work at all with sequential?
 
 if ( exists('planType') && planType == 'multiprocess'){
-<<<<<<< HEAD
-  NWorkers <- L$Global$Model$NWorkers
-  NWorkers <- min(max(availableCores()-1, 1), NWorkers)
-=======
   NWorkers <- max(availableCores()-1, 1)
->>>>>>> gregorbj/master
   plan(multiprocess, workers = NWorkers, gc=TRUE)
 } else {
   plan(sequential)
