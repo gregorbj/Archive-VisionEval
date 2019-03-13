@@ -365,7 +365,7 @@ for(Year in getYears()) {
 
 ## 1.7. Model Definition Files
 
-### run_parameters.json 
+#### run_parameters.json 
 **Defines parameters that control the model run**
 
 ```
@@ -391,7 +391,7 @@ for(Year in getYears()) {
 }
 ```
 ---
-### model_parameters.json
+#### model_parameters.json
 **Defines global model parameters**
 ```
 [
@@ -422,7 +422,7 @@ for(Year in getYears()) {
 |...  |...          |...  |...  |
 
 ---
-### deflators.csv
+#### deflators.csv
 **Defines deflators used to converting money inputs (e.g. fuel price) for current and past years to base year values**
 
 |Year|Value|
@@ -433,7 +433,7 @@ for(Year in getYears()) {
 |2015|244.2|
 
 ---
-### units.csv
+#### units.csv
 **Defines default units for complex data types**
 
 |Type      |Units|
@@ -522,8 +522,7 @@ for(Year in getYears()) {
 
 ![VE-RSPM_Inputs_by_Geo](VE-RSPM_Inputs_by_Geo.png)
 
-Built in Model Checking and Input File Checking
------------------------------------------------
+## 1.9. Built in Model Checking and Input File Checking
 
 -   VisionEval will check the model run script to determine that data used by each module will be available when the module is run
 
@@ -557,8 +556,7 @@ Error in initializeModel(ParamDir = "defs", RunParamFile = "run_parameters.json"
 2019-03-12 15:18:02 : Input file error for module 'PredictHousing' for input file 'bzone_dwelling_units.csv'. Is missing inputs for the following Year/Bzone combinations: 2010/D410290013012, 2010/D410290013021, 2010/D410290013025, 2010/D410290014001, 2010/D410290014002, 2010/D410290014003 
 ```
 
-Summary of VE-RSPM Changes from RSPM & GreenSTEP
-================================================
+# 2. Summary of VE-RSPM Changes from RSPM & GreenSTEP
 
 1.  New module to simulate number of workers by age group in each household. Simulation method includes ability to adjust employment rate by age group. Done at the Azone (division) level. [***PredictWorkers module***]
 
@@ -616,8 +614,7 @@ Summary of VE-RSPM Changes from RSPM & GreenSTEP
 
 28. The model automatically handles deflation of money values. There is no need to pre-process money values to put in base year terms. The user just inputs a set of deflator values (Oregon data is included in example model) and specifies the data year in the input field name.
 
-VESimHouseholds Package
-=======================
+# 3. VESimHouseholds Package
 
 -   Modules create a set of simulated households for model run years. Each household has:
 
@@ -631,8 +628,8 @@ VESimHouseholds Package
 
 -   Uses Census PUMS (public use micro-sample) data but rather than drawing samples from the PUMS dataset, a technique often used in population synthesis, it applies sequential models as explained below.
 
-CreateHouseholds Module
------------------------
+## 3.1. CreateHouseholds Module
+[Documentation](https://github.com/gregorbj/VisionEval/blob/master/sources/modules/VESimHouseholds/inst/module_docs/CreateHouseholds.md)
 
 ### What the Module Does
 
@@ -690,10 +687,8 @@ CreateHouseholds Module
 
 -   Simulated non-institutional group quarters households are simulated as single-person households
 
-----
-
-PredictWorkers Module
----------------------
+## 3.2. PredictWorkers Module
+[Documentation](https://github.com/gregorbj/VisionEval/blob/master/sources/modules/VESimHouseholds/inst/module_docs/PredictWorkers.md)
 
 ### What the Module Does
 
@@ -713,10 +708,8 @@ PredictWorkers Module
 
 -   If the user has supplied optional inputs for the ratio of employment for the age group in the forecast year relative to the year of the model estimation dataset, that input is multiplied by the estimated worker probability to determine the sampling probability. For example, if the year of the model estimation data is 2000 and the forecast year is 2010, and if the user specifies that the employment rate of 20-29 year olds in 2010 was 95% of the employment rate of that age group in 2000, then the worker probability in the example above (0.7) is multiplied by 0.95 to calculate the sampling probability.
 
-----
-
-AssignLifeCycle Module
-----------------------
+## 3.3. AssignLifeCycle Module
+[Documentation](https://github.com/gregorbj/VisionEval/blob/master/sources/modules/VESimHouseholds/inst/module_docs/AssignLifeCycle.md)
 
 ### What the Module Does
 
@@ -756,8 +749,8 @@ AssignLifeCycle Module
 
 -   If children are present in the household with retired persons, then the life cycle category is 03 or 04 rather than 09 or 10.
 
-PredictIncome Module
---------------------
+## 3.4. PredictIncome Module
+[Documentation](https://github.com/gregorbj/VisionEval/blob/master/sources/modules/VESimHouseholds/inst/module_docs/PredictIncome.md)
 
 ### What the Module Does
 
@@ -797,8 +790,7 @@ PredictIncome Module
 
 -   The random term is adjusted so that the resulting per capita income for the synthetic households in the Azone matches the per capita income input.
 
-VELandUse Package
-=================
+# 4. VELandUse Package
 
 -   Modules assign households to Bzone residence locations and workers to Bzone job locations
 
@@ -806,8 +798,8 @@ VELandUse Package
 
 -   Modules assign Bzone level policy inputs: parking, travel demand management, car service availability
 
-PredictHousing Module
----------------------
+## 4.1. PredictHousing Module
+[Documentation](https://github.com/gregorbj/VisionEval/blob/master/sources/modules/VELandUse/inst/module_docs/PredictHousing.md)
 
 ### What the Module Does
 
@@ -865,8 +857,8 @@ PredictHousing Module
 
 -   Non-institutionalized group-quarters households are assigned randomly to Bzones based on the number of group-quarters housing units in each Bzone.
 
-LocateEmployment Module
------------------------
+## 4.2. LocateEmployment Module
+[Documentation](https://github.com/gregorbj/VisionEval/blob/master/sources/modules/VELandUse/inst/module_docs/LocateEmployment.md)
 
 ### What the Module Does
 
@@ -900,8 +892,8 @@ LocateEmployment Module
 
 -   Identify the Azone and Marea of the worker job location and the distance from home to work.
 
-AssignLocTypes Module
----------------------
+## 4.3. AssignLocTypes Module
+[Documentation](https://github.com/gregorbj/VisionEval/blob/master/sources/modules/VELandUse/inst/module_docs/AssignLocTypes.md)
 
 ### What the Module Does
 
@@ -925,8 +917,8 @@ AssignLocTypes Module
 
 -   Each household in each Bzone is randomly assigned as *Urban*, *Town*, or *Rural* based on its housing type and urban/town/rural proportions of housing units of that housing type in that Bzone.
 
-Calculate4DMeasures Module
---------------------------
+## 4.4. Calculate4DMeasures Module
+[Documentation](https://github.com/gregorbj/VisionEval/blob/master/sources/modules/VELandUse/inst/module_docs/Calculate4DMeasures.md)
 
 ### What the Module Does
 
@@ -966,8 +958,8 @@ Calculate4DMeasures Module
 
 -   One pedestrian-oriented network design measures (D3bpo4) is an input.
 
-CalculateUrbanMixMeasure Module
--------------------------------
+## 4.5. CalculateUrbanMixMeasure Module
+[Documentation](https://github.com/gregorbj/VisionEval/blob/master/sources/modules/VELandUse/inst/module_docs/CalculateUrbanMixMeasure.md)
 
 ### What the Module Does
 
@@ -989,8 +981,8 @@ CalculateUrbanMixMeasure Module
 
 -   If a target urban mixed-use proportion for the Bzone has been supplied by the user, the model is run repeatedly for households in the Bzone using a binary search algorithm to adjust the model intercept so that the modeled proportion is equal to the target.
 
-AssignParkingRestrictions Module
---------------------------------
+## 4.6. AssignParkingRestrictions Module
+[Documentation](https://github.com/gregorbj/VisionEval/blob/master/sources/modules/VELandUse/inst/module_docs/AssignParkingRestrictions.md)
 
 ### What the Module Does
 
@@ -1044,10 +1036,8 @@ AssignParkingRestrictions Module
 
     -   The average daily parking cost for residents of a Bzone is the sum of the product of the attraction proportion to each Bzone and the daily parking cost in each Bzone.
 
-----
-
-AssignDemandManagement Module
------------------------------
+## 4.7. AssignDemandManagement Module
+[Documentation](https://github.com/gregorbj/VisionEval/blob/master/sources/modules/VELandUse/inst/module_docs/AssignDemandManagement.md)
 
 ### What the Module Does
 
@@ -1073,8 +1063,8 @@ AssignDemandManagement Module
 
     -   The proportional reduction in VMT due to ECO participation is product of the model value (see above), the modeled proportion of household VMT in work travel per worker for the household size, and the number of workers who participate.
 
-AssignCarSvcAvailability Module
--------------------------------
+## 4.8. AssignCarSvcAvailability Module
+[Documentation](https://github.com/gregorbj/VisionEval/blob/master/sources/modules/VELandUse/inst/module_docs/AssignCarSvcAvailability.md)
 
 ### What the Module Does
 
@@ -1092,8 +1082,7 @@ AssignCarSvcAvailability Module
 
 -   The module assigns the car service level to each household based on the Bzone the household resides in.
 
-VETransportSupply Package
-=========================
+# 5. VETransportSupply Package
 
 Modules in this package:
 
@@ -1107,8 +1096,8 @@ Modules in this package:
 
 -   Process inputs on freeway lane-miles and arterial lane-miles and calculate freeway lane-miles per capita and arterial lane-miles per capita
 
-AssignTransitService Module
----------------------------
+## 5.1. AssignTransitService Module
+[Documentation](https://github.com/gregorbj/VisionEval/blob/master/sources/modules/VETransportSupply/inst/module_docs/AssignTransitService.md)
 
 ### What the Module Does
 
@@ -1160,10 +1149,8 @@ AssignTransitService Module
 
 -   The user supplied information on the aggregate frequency of peak period transit service within 0.25 miles of the Bzone boundary per hour during evening peak period is input.
 
-----
-
-AssignRoadMiles Module
-----------------------
+## 5.2. AssignRoadMiles Module
+[Documentation](https://github.com/gregorbj/VisionEval/blob/master/sources/modules/VETransportSupply/inst/module_docs/AssignRoadMiles.md)
 
 ### What the Module Does
 
@@ -1181,8 +1168,7 @@ AssignRoadMiles Module
 
 -   Users provide inputs on the numbers of freeway lane-miles and arterial lane-miles by Marea and year. In addition to saving these inputs, the module loads the urbanized area population of each Marea and year from the datastore and computes the value of freeway lane-miles per capita.
 
-VEHouseholdVehicles Package
-===========================
+# 6. VEHouseholdVehicles Package
 
 Modules in this package:
 
@@ -1200,8 +1186,8 @@ Modules in this package:
 
 -   Adjust household vehicle ownership based on the availability and cost of high level car service
 
-AssignDrivers Module
---------------------
+## 6.1. AssignDrivers Module
+[Documentation](https://github.com/gregorbj/VisionEval/blob/master/sources/modules/VEHouseholdVehicles/inst/module_docs/AssignDrivers.md)
 
 ### What the Module Does
 
@@ -1233,8 +1219,8 @@ AssignDrivers Module
 
 -   The resulting number of drivers in the age group is then tabulated by household.
 
-AssignVehicleOwnership Module
------------------------------
+## 6.2. AssignVehicleOwnership Module
+[Documentation](https://github.com/gregorbj/VisionEval/blob/master/sources/modules/VEHouseholdVehicles/inst/module_docs/AdjustVehicleOwnership.md)
 
 ### What the Module Does
 
@@ -1262,10 +1248,8 @@ AssignVehicleOwnership Module
 
 -   For each household, the metropolitan or non-metropolitan binary logit model is run to predict the probability that the household owns no vehicles. A random number is drawn from a uniform distribution in the interval from 0 to 1 and if the result is less than the probability of zero-vehicle ownership, the household is assigned no vehicles. Households that have no drivers are also assigned 0 vehicles. The metropolitan or non-metropolitan ordered logit model is run to predict the number of vehicles owned by the household if they own any.
 
-----
-
-AssignVehicleType
------------------
+## 6.3. AssignVehicleType
+[Documentation](https://github.com/gregorbj/VisionEval/blob/master/sources/modules/VEHouseholdVehicles/inst/module_docs/AssignVehicleType.md)
 
 ### What the Module Does
 
@@ -1303,8 +1287,8 @@ AssignVehicleType
 
 -   The user inputs the light truck proportion of vehicles observed or assumed each each Azone. The module calls the applyBinomialModel function (part of the visioneval framework package), passing it the estimated binomial logit model and a data frame of values for the independent variables, and the user-supplied light truck proportion. The applyBinomialModel function uses a binary search algorithm to adjust the intercept of the model so that the resulting light truck proportion of all household vehicles in the Azone equals the user input.
 
-CreateVehicleTable
-------------------
+## 6.4. CreateVehicleTable
+[Documentation](https://github.com/gregorbj/VisionEval/blob/master/sources/modules/VEHouseholdVehicles/inst/module_docs/CreateVehicleTable.md)
 
 ### What the Module Does
 
@@ -1332,8 +1316,8 @@ CreateVehicleTable
 
 -   This module initializes the 'Vehicle' table and populates it with the household ID (HhId), vehicle ID (VehID), Azone ID (Azone), Marea ID (Marea), and vehicle access type (VehicleAccess) datasets. The Vehicle table has a record for every vehicle owned by the household. If there are more driving age persons than vehicles in the household, there is also a record for each driving age person for which there is no vehicle. The VehicleAccess designation is Own for each vehicle owned by a household. The designation is either LowCarSvc or HighCarSvc for each record corresponding to difference between driving age persons and owned vehicles. It is LowCarSvc if the household is in a Bzone having a low level of car service and HighCarSvc if the Bzone car service level is high.
 
-AssignVehicleAge
-----------------
+## 6.5. AssignVehicleAge
+[Documentation](https://github.com/gregorbj/VisionEval/blob/master/sources/modules/VEHouseholdVehicles/inst/module_docs/AssignVehicleAge.md)
 
 ### What the Module Does
 
@@ -1365,8 +1349,8 @@ AssignVehicleAge
 
 -   The calculated probabilities are used as sampling distributions to determine the age of each household vehicle as a function of the vehicle type and the household income.
 
-CalculateVehicleOwnCost
------------------------
+## 6.6. CalculateVehicleOwnCost
+[Documentation](https://github.com/gregorbj/VisionEval/blob/master/sources/modules/VEHouseholdVehicles/inst/module_docs/CalculateVehicleOwnCost.md)
 
 ### What the Module Does
 
@@ -1412,8 +1396,6 @@ CalculateVehicleOwnCost
 
     -   In Metropolitan Area (3 points) - Households in metropolitan areas are more likely to use.
 
-###
-
 ### How the Module Works
 
 -   The vehicle ownership cost is calculated as follows:
@@ -1434,10 +1416,8 @@ CalculateVehicleOwnCost
 
 -   The module also identifies which households will be assigned PAYD insurance given user inputs on the proportion of households having PAYD insurance. The module identifies which households qualify for PAYD insurance based on whether any of their vehicles are 1996 model year vehicles or later. The vehicle and household characteristics (identified above) are evaluated and points assigned. The total points are calculated for each households. Random sampling is used to choose a number of households to equal the input proportion where the probability that each household is chosen is a function of the ratio of the household weight to the maximum household weight for households residing in the Azone.
 
-----
-
-AdjustVehicleOwnership
-----------------------
+## 6.7. AdjustVehicleOwnership
+[Documentation](https://github.com/gregorbj/VisionEval/blob/master/sources/modules/VEHouseholdVehicles/inst/module_docs/AdjustVehicleOwnership.md)
 
 ### What the Module Does
 
@@ -1461,8 +1441,7 @@ AdjustVehicleOwnership
 
 -   For vehicles where it is determined that car services will substitute for a household vehicle, then the vehicle status is changed from 'Own' to 'HighCarSvc' and the ownership and insurance costs are changed as well. The household's vehicle totals are updated as well.
 
-VEHouseholdTravel Package
-=========================
+# 7. VEHouseholdTravel Package
 
 Modules in this package:
 
@@ -1476,12 +1455,14 @@ Modules in this package:
 
 -   Adjust household DVMT to reflect the effects of travel demand management policies and SOV travel diversion
 
-CalculateHouseholdDvmt Module
------------------------------
+# 7.1. CalculateHouseholdDvmt Module
+[Documentation](https://github.com/gregorbj/VisionEval/blob/master/sources/modules/VEHouseholdTravel/inst/module_docs/CalculateHouseholdDvmt.md)
 
 ### What the Module Does
 
 -   This module models household average daily vehicle miles traveled as a function of household characteristics, vehicle ownership, and attributes of the neighborhood and metropolitan area where the household resides. It also calculates household DVMT percentiles which are used by other modules to calculate whether a household is like to an an electric vehicle (EV) and to calculate the proportions of plug-in hybrid electric vehicles (PHEV) DVMT powered by electricity.
+
+-   **NOTE**: *This module estimates household vehicle travel regardless of where is occurs (i.e. outside the model region as well as inside the model region). The calculations of DVMT on roadways within urbanized areas, for the purpose of calculating congestion and its effects, are carried out by the CalculateRoadDvmt module in the VETravelPerformance package. Household vehicle travel includes travel using car services.*
 
 ### User Inputs
 
@@ -1541,10 +1522,8 @@ CalculateHouseholdDvmt Module
 
 -   Finally, the module sums up the total DVMT of households by location type for each Marea.
 
-----
-
-CalculateAltModeTrips Module
-----------------------------
+## 7.2. CalculateAltModeTrips Module
+[Documentation](https://github.com/gregorbj/VisionEval/blob/master/sources/modules/VEHouseholdTravel/inst/module_docs/CalculateAltModeTrips.md)
 
 ### What the Module Does
 
@@ -1608,14 +1587,14 @@ CalculateAltModeTrips Module
 
 -   This module is run after all household DVMT adjustments are made due to cost, travel demand management, and light-weight vehicle (e.g. bike, scooter) diversion, so that alternative mode travel reflects the result of those influences. The alternative mode trip models are run and the results are saved.
 
-----
-
-CalculateVehicleTrips Module
-----------------------------
+## 7.3. CalculateVehicleTrips Module
+[Documentation](https://github.com/gregorbj/VisionEval/blob/master/sources/modules/VEHouseholdTravel/inst/module_docs/CalculateVehicleTrips.md)
 
 ### What the Module Does
 
 -   This module calculates average daily vehicle trips for households consistent with the household DVMT. An average trip length model is applied to estimate average length of household trips reflecting the characteristics of the household and the place where they live. The average trip length is divided into the average household DVMT to get an estimate of average number of daily vehicle trips.
+
+-   **NOTE**: *This module estimates household vehicle travel regardless of where is occurs (i.e. outside the model region as well as inside the model region). The calculations of DVMT on roadways within urbanized areas, for the purpose of calculating congestion and its effects, are carried out by the CalculateRoadDvmt module in the VETravelPerformance package. Household vehicle travel includes travel using car services.*
 
 ### User Inputs
 
@@ -1657,10 +1636,8 @@ CalculateVehicleTrips Module
 
 -   The module applies the estimated metropolitan and non-metropolitan average vehicle trip length models to calculate the average vehicle trip length for each household. The metropolitan model is applied to all household located in the urbanized area. The non-metropolitan model is applied to other households. The average number of vehicle trips is calculated for each household by dividing the household DVMT by the average trip length.
 
-----
-
-DivertSovTravel Module
-----------------------
+## 7.4. DivertSovTravel Module
+[Documentation](https://github.com/gregorbj/VisionEval/blob/master/sources/modules/VEHouseholdTravel/inst/module_docs/DivertSovTravel.md)
 
 ### What the Module Does
 
@@ -1740,8 +1717,8 @@ Where:
 
 -   The average SOV trip length model is applied to calculate the average SOV trip length for each household. This and the DVMT diversion are save in the household table of the datastore.
 
-ApplyDvmtReductions Module
---------------------------
+## 7.5. ApplyDvmtReductions Module
+[Documentation](https://github.com/gregorbj/VisionEval/blob/master/sources/modules/VEHouseholdTravel/inst/module_docs/ApplyDvmtReductions.md)
 
 ### What the Module Does
 
@@ -1759,11 +1736,10 @@ ApplyDvmtReductions Module
 
 -   The module loads from the datastore the proportional reductions in household DVMT calculated by the AssignDemandManagement module and DivertSovTravel module. It converts the proportional reductions to proportions of DVMT (i.e. 1 - proportional reduction), multiplies them, and multiplies by household DVMT to arrive at a revised household DVMT which is saved to the datastore. It computes the added 'bike' trips that would occur due to the diversion by calculating the diverted SOV travel and dividing by the average SOV trip length.
 
-VEPowertrainsAndFuels Package
-=============================
+# 8. VEPowertrainsAndFuels Package
 
-LoadDefaultValues
------------------
+## 8.1. LoadDefaultValues
+[Documentation](https://github.com/gregorbj/VisionEval/blob/master/sources/modules/VEPowertrainsAndFuels/inst/module_docs/LoadDefaultValues.md)
 
 ### What the Script Does
 
@@ -1817,8 +1793,8 @@ The following files are included in the inst/extdata directory of the package. E
 
 -   This is NOT a module that is run in a model.
 
-Initialize Module
------------------
+## 8.2 Initialize Module
+[Documentation](https://github.com/gregorbj/VisionEval/blob/master/sources/modules/VEPowertrainsAndFuels/inst/module_docs/Initialize.md)
 
 ### What the Module Does
 
@@ -1946,69 +1922,20 @@ Initialize Module
 
 -   If one or more of the powertrain or fuel proportions datasets are present, the module evaluates each of the proportions datasets to make sure that totals for a vehicle type add up to 1. If any total diverges by more than 1%, then the module returns an error message. If any total is not exactly 1 but is off by 1% or less, then the module adjusts the proportions to exactly equal 1 and returns a warning message which the framework writes to the log file for the model run.
 
-====
-
-CalculateCarbonIntensity Module
--------------------------------
+## 8.3. CalculateCarbonIntensity Module
+[Documentation](https://github.com/gregorbj/VisionEval/blob/master/sources/modules/VEPowertrainsAndFuels/inst/module_docs/CalculateCarbonIntensity.md)
 
 ### What the Module Does
 
 This module calculates the average carbon intensity of fuels (grams CO2e per megajoule) by transportation mode and vehicle type. The transportation modes and vehicle types are:
 
-|
-
-**Mode**
-
- |
-
-**Vehicle Types**
-
- |
-|
-
-Household
-
- |
-
-automobile, light truck
-
- |
-|
-
-Car Service
-
- |
-
-automobile, light truck
-
- |
-|
-
-Commercial Service
-
- |
-
-automobile, light truck
-
- |
-|
-
-Heavy Truck
-
- |
-
-heavy truck
-
- |
-|
-
-Public Transit
-
- |
-
-van, bus, rail
-
- |
+|Mode               |Vehicle Types           |
+|-------------------|------------------------|
+|Household          |automobile, light truck |
+|Car Service        |automobile, light truck |
+|Commercial Service |automobile, light truck |
+|Heavy Truck        |heavy truck             |
+|Public Transit     |van, bus, rail          |
 
 Average fuel carbon intensities for public transit vehicles are calculated by Marea. The average fuel carbon intensities for the other mode vehicles are calculated for the entire model region. The module also calculates the average carbon intensity of electricity at the Azone level.
 
@@ -2024,8 +1951,8 @@ Average fuel carbon intensities for public transit vehicles are calculated by Ma
 
 -   If carbon intensities are provided as user inputs, those carbon intensities are used. If carbon intensity values are not provided, the module calculates the values using fuels information including the fuel type proportions, the biofuel mix proportions, and the fuel carbon intensity values. The fuel mix proportions are multiplied by the biofuel mix proportions to arrive a the proportions of fuel by all categories. These proportions are used as weights to calculate that average carbon intensity from the fuel carbon intensity values.
 
-AssignHhVehiclePowertrain Module
---------------------------------
+## 8.4. AssignHhVehiclePowertrain Module
+[Documentation](https://github.com/gregorbj/VisionEval/blob/master/sources/modules/VEPowertrainsAndFuels/inst/module_docs/AssignHhVehiclePowertrain.md)
 
 ### What the Module Does
 
@@ -2069,13 +1996,10 @@ This module assigns a powertrain type to each household vehicle. The powertrain 
 
 -   Carbon dioxide equivalent emissions per mile from fuel are calculated by converting the gallons per mile (GPM) which are in gasoline gallon equivalents to megajoules per mile and multiplying by the average carbon intensity for the vehicle type. Carbon dioxide equivalent emissions per mile from electricity are calculated similarly by converting kilowatts to megajoules.
 
-###
+# 9. VETravelPerformance Package
 
-VETravelPerformance Package
-===========================
-
-LoadDefaultRoadDvmtValues
--------------------------
+## 9.1. LoadDefaultRoadDvmtValues
+[Documentation](https://github.com/gregorbj/VisionEval/blob/master/sources/modules/VETravelPerformance/inst/module_docs/LoadDefaultRoadDvmtValues.md)
 
 ### What the Script Does
 
@@ -2157,10 +2081,8 @@ The elements of each of these attributes correspond to the rows in the matrix.
 
 -   This is NOT a module that is run in a model.
 
-----
-
-Initialize Module
------------------
+## 9.2. Initialize Module
+[Documentation](https://github.com/gregorbj/VisionEval/blob/master/sources/modules/VETravelPerformance/inst/module_docs/Initialize.md)
 
 ### What the Module Does
 
@@ -2278,8 +2200,8 @@ Initialize Module
 
 -   The marea_congestion_charges.csv is checked to determine whether congestion charges increase with congestion level (if they are not 0). If higher charges are found at lower levels than at higher levels, warnings are written to the log identifying the issue.
 
-CalculateRoadDvmt Module
-------------------------
+## 9.3. CalculateRoadDvmt Module
+[Documentation](https://github.com/gregorbj/VisionEval/blob/master/sources/modules/VETravelPerformance/inst/module_docs/CalculateRoadDvmt.md)
 
 ### What the Module Does
 
@@ -2321,8 +2243,8 @@ CalculateRoadDvmt Module
 
 -   Urbanized area roadway DVMT by vehicle type (LDV, heavy truck, bus) is allocated to road classes (freeway, arterial, other) using the modeled urbanized area DVMT and the road class splits by vehicle type calculated by the Initialize module.
 
-CalculateRoadPerformance Module
--------------------------------
+## 9.4. CalculateRoadPerformance Module
+[Documentation](https://github.com/gregorbj/VisionEval/blob/master/sources/modules/VETravelPerformance/inst/module_docs/CalculateRoadPerformance.md)
 
 ### What the Module Does
 
@@ -2412,13 +2334,10 @@ A linear model is estimated to calculate the value of lambda that is representat
 
     -   **Calculate performance measures**: The module computes several performance measures for each marea. These include average speed by vehicle type, total vehicle hours of delay by vehicle type, and average congestion charge per vehicle mile. These performance measures are module outputs that are written to the datastore. Additional module outputs are freeway LDV DVMT and arterial LDV DVMT for each marea, and the lambda adjustment factors. In addition, the module outputs proportions of freeway and arterial DVMT by congestion level and freeway and arterials speeds by congestion level. Those data are used by the 'CalculateMpgMpkwhAdjustments' module to calculate the effects of urban area congestion on fuel economy and electric vehicle efficiency.
 
-----
+## 9.5. CalculateMpgMpkwhAdjustments Module
+[Documentation](https://github.com/gregorbj/VisionEval/blob/master/sources/modules/VETravelPerformance/inst/module_docs/CalculateMpgMpkwhAdjustments.md)
 
-CalculateMpgMpkwhAdjustments Module
------------------------------------
-
-What the Module Does
---------------------
+### What the Module Does
 
 -   This module calculates adjustments to fuel economy and electric energy efficiency (for plug-in vehicles) resulting from traffic congestion, speed smoothing (i.e. active traffic management which reduces speed variation), and eco-driving. Eco-driving is the practice of driving in ways that increase fuel economy and reduce carbon emissions.
 
@@ -2496,8 +2415,8 @@ What the Module Does
 
         -   The average achieveable FE benefits for eco-driving on urban roads by marea and vehicle type are calculated as a DVMT weighted average of the FE benefits by congestion level and road class for the marea and vehicle type. The average achieveable FE benefits for eco-driving on non-urban roads is calculated from the FE benefits on uncongested roads by road class and the DVMT by road class.
 
-AdjustHhVehicleMpgMpkwh Module
-------------------------------
+## 9.6 AdjustHhVehicleMpgMpkwh Module
+[Documentation](https://github.com/gregorbj/VisionEval/blob/master/sources/modules/VETravelPerformance/inst/module_docs/AdjustHhVehicleMpgMpkwh.md)
 
 ### What the Module Does
 
@@ -2531,10 +2450,8 @@ The module adjusts the average MPG and MPKWH of household vehicles, including th
 
 -   **Adjust related vehicle fuel, energy, and emissions values**: The GPM (gallons per mile) values are updated by calculating the reciprocal of the updated MPG values. The ratio of the updated GPM value to the previous GPM value is used to scale the fuel emissions rate (FuelCO2ePM). Likewise the KWHPM (kilowatt-hours per mile) values are updated in the same way and so is the electricity emissions rate (ElecCO2ePM).
 
-----
-
-CalculateVehicleOperatingCost Module
-------------------------------------
+## 9.7. CalculateVehicleOperatingCost Module
+[Documentation](https://github.com/gregorbj/VisionEval/blob/master/sources/modules/VETravelPerformance/inst/module_docs/CalculateVehicleOperatingCost.md)
 
 ### What the Module Does
 
@@ -2672,10 +2589,8 @@ Following are the steps for calculating vehicle costs, allocating household DVMT
 
     -   Average carbon emissions rate (grams CO2e/mile): this is a performance measure
 
-----
-
-BudgetHouseholdDvmt Module
---------------------------
+## 9.8. BudgetHouseholdDvmt Module
+[Documentation](https://github.com/gregorbj/VisionEval/blob/master/sources/modules/VETravelPerformance/inst/module_docs/BudgetHouseholdDvmt.md)
 
 ### What the Module Does
 
@@ -2721,10 +2636,8 @@ The module calculates the household operating cost budget and adjusts household 
 
 -   The 'CalculateVehicleTrips' and 'CalculateAltModeTrips' modules are run to calculate the number of household vehicle trips and alternative mode trips (walk, bike, transit) to be consistent with the adjusted DVMT.
 
-----
-
-BalanceRoadCostsAndRevenues Module
-----------------------------------
+## 9.9. BalanceRoadCostsAndRevenues Module
+[Documentation](https://github.com/gregorbj/VisionEval/blob/master/sources/modules/VETravelPerformance/inst/module_docs/BalanceRoadCostsAndRevenues.md)
 
 ### What the Module Does
 
@@ -2770,10 +2683,8 @@ The module calculates the additional cost per vehicle mile of household travel r
 
 -   The difference between the total cost per vehicle mile and the average road taxes collected per vehicle mile is the extra VMT tax ('ExtraVmtTax'). If road tax collections exceed costs, the value of the extra VMT tax is set equal to 0.
 
-----
-
-CalculateComEnergyAndEmissions Module
--------------------------------------
+## 9.10. CalculateComEnergyAndEmissions Module
+[Documentation](https://github.com/gregorbj/VisionEval/blob/master/sources/modules/VETravelPerformance/inst/module_docs/CalculateComEnergyAndEmissions.md)
 
 ### What the Module Does
 
@@ -2813,8 +2724,8 @@ This module calculates the energy consumption and carbon emissions production fr
 
 -   Calculate heavy truck energy consumption and CO2e production
 
-CalculatePtranEnergyAndEmissions Module
----------------------------------------
+## 9.11. CalculatePtranEnergyAndEmissions Module
+[Documentation](https://github.com/gregorbj/VisionEval/blob/master/sources/modules/VETravelPerformance/inst/module_docs/CalculatePtranEnergyAndEmissions.md)
 
 ### What the Module Does
 
@@ -2846,8 +2757,7 @@ This module calculates the energy consumption and carbon emissions production pu
 
     -   Calculate the average emissions per mile by marea for the vehicle type from the total emissions by marea for the vehicle type and the DVMT for the vehicle type by marea.
 
-Calibration and Validation
-==========================
+# 10. Calibration and Validation
 
 There are several options for making adjustments to VE-RSPM models to calibrate modules and validate overall outputs. These adjustments vary in difficulty ranging from self calibration on the one end to modifying model estimation code on the other. Importantly, since all of the code and data are made available, the advanced user has many options for modifying the model to meet calibration and validation targets. From easiest to most difficult the options for making adjustments are:
 
@@ -2861,8 +2771,7 @@ There are several options for making adjustments to VE-RSPM models to calibrate 
 
 In previous work with the GreenSTEP model, the main model validation targets have been household income, vehicle ownership, vehicle miles of travel, and fuel consumption. Since VE-RSPM includes worker and driver models that were not included in the GreenSTEP model, these could be additional validation targets. Following are descriptions of options for modifying VE packages and the modules contained within to calibrate various submodels and match validation targets.
 
-VESimHouseholds Package
------------------------
+## 10.1. VESimHouseholds Package
 
 The VESimHouseholds package processes PUMS data which are used to estimate submodels implemented by the *CreateHouseholds*, *PredictWorkers*, and *PredictIncome* modules in this package and the *PredictHousing* module in the VELandUse package. The user is encouraged to replace the PUMS files in the *inst/extdata* folder of the source package with data for the state or metropolitan area that the model is being built for. The modified source package would then be built (installed) to incorporate the regional data into the model. Note that the *PredictHousing* module in the VELandUse package also uses these PUMS data so that package would also need to be installed from sources in order for the module to reflect the regional PUMS data.
 
@@ -2878,8 +2787,7 @@ The azone_relative_employment.csv input file allows users to adjust the relative
 
 The *PredictIncome* module models household income as a function of workers by age group and average per capita income. The adjustments to relative employment rate described above will therefore affect the distribution of incomes among households. The user can also make adjustments with the *azone_per_cap_inc.csv* input file.
 
-VELandUse Package
------------------
+## 10.2. VELandUse Package
 
 ### PredictHousing Module
 
@@ -2889,8 +2797,7 @@ The housing choice model (single family vs. multifamily) is estimated from the P
 
 The *bzone_urban-mixed-use_prop.csv* module enables users to adjust the proportion of households in each Bzone that are identified as residing in an urban mixed-use neighborhood. If the value is a proportion between 0 and 1 and not "NA", the model with automatically adjust allocations to match the proportion. This capability can be used to fine tune land use characteristics to better match observed differences in travel among neighborhoods. However, since the definition of "urban mixed-use" neighborhood is derived from the Claritas data in the NHTS which is an imprecise representation, making adjustments is highly judgemental.
 
-VEHouseholdVehicles Package
----------------------------
+## 10.3. VEHouseholdVehicles Package
 
 ### AssignDrivers Module
 
@@ -2904,8 +2811,7 @@ This module is self-calibrating. The constant of the binomial choice model (ligh
 
 This module is self-calibrating. Vehicle age distributions are adjusted so that the average vehicle age of vehicles owned by households in each Azone matches the Azone averages in the *azone_hh_veh_mean_age.csv* input file.
 
-VEHouseholdTravel Package
--------------------------
+## 10.4. VEHouseholdTravel Package
 
 Modules in this packages offer few easy ways to make adjustments to match observed values for household travel. However, adjustments identified above in other modules (e.g. driver licensing rates) can substantially affect modeled household DVMT.
 
@@ -2915,8 +2821,7 @@ It should be noted that care should be taken in choosing the validation targets 
 
 In Azones where there is a lot of bicycle travel that significantly affects household DVMT, input values in the *azone_prop_sov_dvmt_diverted.csv* file can be used to adjust the amount of household SOV travel that is diverted to bicycling and thus reduce the amount of household DVMT to better match observed values.
 
-VEPowertrainsAndFuels Package
------------------------------
+## 10.5. VEPowertrainsAndFuels Package
 
 The default data inputs in this package substantially affect modeled fuel consumption and vehicle emissions rates. These default inputs are contained in the *inst/extdata* folder of the source package. If modeled DVMT matches validation data but fuel consumption does not (e.g. light-duty vehicle fuel consumption reported in Highway Statistics), the values in the *ldv_powertrain_characteristics.csv* for current and past years can be adjusted to achieve a match. Fuel consumption may not match for several reasons such as:
 
@@ -2928,8 +2833,7 @@ Note that the package needs to be built (installed) from the source package afte
 
 If validation data are available for commercial service vehicles, heavy trucks, and public transit vehicles, changes may be made to the respective powertrain characteristics files for those vehicle types to match observed values. In addition, users can use optional input files to make adjustments.
 
-VETravelPerformance Package
----------------------------
+## 10.6. VETravelPerformance Package
 
 ### CalculateRoadDvmt Module
 
