@@ -380,12 +380,14 @@ VERSPMResults <- function(L){
     NWorkers <- L$Global$Model$NWorkers
     NWorkers <- min(max(availableCores()-1, 1), NWorkers)
     plan(multiprocess, workers = NWorkers, gc=TRUE)
-    
-    # Make sure that child processes inherit the libraries from master
-    libs <- .libPaths() # Set .libPaths(libs) in call to child process
+    message("Executing with ", NWorkers, " processors\n")
   } else {
     plan(sequential)
+    message("Executing with sequential processing\n")
   }
+
+  # Make sure that child processes inherit the libraries from master
+  libs <- .libPaths() # Set .libPaths(libs) in call to child process
   
   Results_env <- new.env()
   for(sc_path in ScenariosPath_ar){
@@ -394,10 +396,10 @@ VERSPMResults <- function(L){
                                                    Data=NA,
                                                    Units=NA)
     Results_env[[basename(sc_path)]] %<-% tryCatch({
-      
+
       # Ensure libraries from master process are inherited
       .libPaths(libs)
-      
+
       ScResults <- getScenarioResults(
         ScenarioPath = sc_path,
         Output = L$Global$Tables$Name,
