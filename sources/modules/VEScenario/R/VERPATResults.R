@@ -269,20 +269,24 @@ VERPATResults <- function(L){
     NWorkers <- L$Global$Model$NWorkers
     NWorkers <- min(max(availableCores()-1, 1), NWorkers)
     plan(multiprocess, workers = NWorkers, gc=TRUE)
-    # Make sure that child processes inherit the libraries from master
-    libs <- .libPaths() # Set .libPaths(libs) in call to child process
+    message("Executing with ", NWorkers, " processors\n")
   } else {
     plan(sequential)
+    message("Executing with sequential processing\n")
   }
+
+  # Make sure that child processes inherit the libraries from master
+  libs <- .libPaths() # Set .libPaths(libs) in call to child process
   
   Results_env <- new.env()
   for(sc_path in ScenariosPath_ar){
+    message('Getting results for ', basename(sc_path), '\n')
     Results_env[[basename(sc_path)]] <- data.table(Scenario=basename(sc_path),
                                                    Table=NA,
                                                    Data=NA,
                                                    Units=NA)
     Results_env[[basename(sc_path)]] %<-% tryCatch({
-      
+
       # Ensure libraries from master process are inherited
       .libPaths(libs)
       ScResults <- getScenarioResults(
@@ -312,6 +316,7 @@ VERPATResults <- function(L){
   setnames(Levels_dt,colnames(Levels_dt),LevelNames_ar)
   ScenTab_dt <- cbind(ScenTab_dt,Levels_dt)
   ScenTab_dt <- ScenTab_dt[FinalResults_dt,on=.(Scenario)]
+  message('Summarizing results across scenarios\n')
   ScenTab_dt <- ScenTab_dt[, {
     Bzone <- Data[Table=="Bzone"][[1]]
     Marea <- Data[Table=="Marea"][[1]]
@@ -372,16 +377,19 @@ VERPATResults <- function(L){
   JSON <- toJSON(ScenTab_dt)
   JSON <- paste("var data = ", JSON, ";", sep="")
   File <- file(file.path(ModelPath, L$Global$Model$ScenarioOutputFolder, "verpat.js"), "w")
+  message('Writing results to ', File, '\n')
   writeLines(JSON, con=File)
   close(File)
 
   # Write the output configuration file
   JSON <- paste("var outputconfig = ", VERPATOutputConfig$VERPAT, ";", sep="")
   File <- file(file.path(ModelPath, L$Global$Model$ScenarioOutputFolder, "output-cfg.js"), "w")
+  message('Writing output configuration to', File, '\n')
   writeLines(JSON, con=File)
   close(File)
 
   # Write scenario progress report
+  message('Writing scenario progress report\n')
   write.csv(Scenarios_df, file.path(ModelPath,
                                     L$Global$Model$ScenarioOutputFolder,
                                     "ScenarioProgressReport.csv"),
